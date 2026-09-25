@@ -1,7 +1,8 @@
 = pcre2(3)
 :doctype: manpage
 :manname: pcre2
-:manpurpose: Perl-compatible regular expressions (revised API)
+:manpurpose: Perl-compatible regular expressions (PCRE2 API)
+:description: Introductory page
 :manvolnum: 3
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
@@ -34,7 +35,7 @@ supports 32-bit applications, versions of PCRE2 that are compiled in both
 64-bit and 32-bit modes may be needed.
 
 The original work to extend PCRE to 16-bit and 32-bit code units was done by
-Zoltan Herczeg and Christian Persch, respectively. In all three cases, strings
+Zoltán Herczeg and Christian Persch, respectively. In all three cases, strings
 can be interpreted either as one character per code unit, or as UTF-encoded
 Unicode, with support for Unicode general category properties. Unicode support
 is optional at build time (but is the default). However, processing strings as
@@ -42,12 +43,12 @@ UTF code units must be enabled explicitly at run time. The version of Unicode
 in use can be discovered by running
 
 [source,shell]
-....
+----
 pcre2test -C
-....
+----
 
 The three libraries contain identical sets of functions, with names ending in
-_8, _16, or _32, respectively (for example, func:pcre2_compile_8()). However,
+`_8`, `_16`, or `_32`, respectively (for example, func:pcre2_compile_8()). However,
 by defining const:PCRE2_CODE_UNIT_WIDTH to be 8, 16, or 32, a program that uses just
 one code unit width can be written using generic names such as
 func:pcre2_compile(), and the documentation is written assuming that this is
@@ -70,8 +71,7 @@ xref:pcre2syntax.adoc[`pcre2syntax`]
 page.
 
 Some features of PCRE2 can be included, excluded, or changed when the library
-is built. The
-xref:pcre2_config.adoc[func:pcre2_config()]
+is built. The func:pcre2_config()
 function makes it possible for a client to discover which features are
 available. The features themselves are described in the
 xref:pcre2build.adoc[`pcre2build`]
@@ -85,7 +85,7 @@ files in the source distribution.
 The libraries contains a number of undocumented internal functions and data
 tables that are used by more than one of the exported external functions, but
 which are not intended for use by external callers. Their names all begin with
-"_pcre2", which hopefully will not provoke any name clashes. In some
+[.c]``_pcre2``, which hopefully will not provoke any name clashes. In some
 environments, it is possible to control which external symbols are exported
 when a shared library is built, and in these cases the undocumented symbols are
 not exported.
@@ -95,7 +95,7 @@ not exported.
 If you are using PCRE2 in a non-UTF application that permits users to supply
 arbitrary patterns for compilation, you should be aware of a feature that
 allows users to turn on UTF support from within a pattern. For example, an
-8-bit pattern that begins with [.regex]`(*UTF)` turns on UTF-8 mode, which interprets
+8-bit pattern that begins with [.regex]`+(*UTF)+` turns on UTF-8 mode, which interprets
 patterns and subjects as strings of UTF-8 code units instead of individual
 8-bit characters. This causes both the pattern and any data against which it is
 matched to be checked for UTF-8 validity. If the data string is very long, such
@@ -109,7 +109,7 @@ func:pcre2_compile(). This causes a compile time error if the pattern contains
 a UTF-setting sequence.
 
 The use of Unicode properties for character types such as [.regex]`\d` can also be
-enabled from within the pattern, by specifying [.regex]`(*UCP)`. This feature can be
+enabled from within the pattern, by specifying [.regex]`+(*UCP)+`. This feature can be
 disallowed by setting the const:PCRE2_NEVER_UCP option.
 
 If your application is one that supports UTF, be aware that validity checking
@@ -191,9 +191,10 @@ pcre2unicode::
 In the "man" and HTML formats, there is also a short page for each C library
 function, listing its arguments and results.
 
+[discrete]
 == Authors
 
-The current maintainers of PCRE2 are Nicholas Wilson and Zoltan Herczeg.
+The current maintainers of PCRE2 are Nicholas Wilson and Zoltán Herczeg.
 
 PCRE2 was written by Philip Hazel, of the University Computing Service,
 Cambridge, England. Many others have also contributed.
@@ -202,7 +203,8 @@ To contact the maintainers, please use the GitHub issues tracker or PCRE2
 mailing list, as described at the project page:
 https://github.com/PCRE2Project/pcre2
 
+[discrete]
 == Revision
 
 Last updated: 22 February 2025 +
-Copyright (c) 1997-2021 University of Cambridge.
+Copyright (C) 1997-2021 University of Cambridge.

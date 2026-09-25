@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2callout
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 26 February 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -63,12 +63,12 @@ is described in the
 documentation; the rest of this document is concerned with callouts during
 pattern matching.
 .sp
-Within a regular expression, \f(CR(?C<arg>)\fP indicates a point at which the external
+Within a regular expression, \f(CR(?C\fP\fIarg\fP\f(CR)\fP indicates a point at which the external
 function is to be called. Different callout points can be identified by putting
 a number less than 256 after the letter C. The default value is zero.
 Alternatively, the argument may be a delimited string. The starting delimiter
-must be one of ` \*(Aq " ^ % # $ { and the ending delimiter is the same as the
-start, except for {, where the ending delimiter is }. If the ending delimiter
+must be one of \f(CR\*(Aq\fP, \f(CR"\fP, \f(CR^\fP, \f(CR%\fP, \f(CR#\fP, \f(CR$\fP, \f(CR{\fP and the ending delimiter is the same as the
+start, except for \f(CR{\fP, where the ending delimiter is \f(CR}\fP. If the ending delimiter
 is needed within the string, it must be doubled. For example, this pattern has
 two callout points:
 .sp
@@ -131,7 +131,7 @@ condition. Such a callout may also be inserted explicitly, for example:
 .ss \n[.ss]
 .nf
 .fam C
-(?(?C9)(?=a)ab|de)  (?(?C%text%)(?!=d)ab|de)
+(?(?C9)(?=a)ab|de)\&  (?(?C%text%)(?!=d)ab|de)
 .fam
 .fi
 .ss \n[.ss] 0
@@ -141,7 +141,7 @@ independent groups).
 .sp
 Callouts can be useful for tracking the progress of pattern matching. The
 \f(CRpcre2test\fP
-program has a pattern qualifier (/auto_callout) that sets automatic callouts.
+program has a pattern qualifier (\f(CRauto_callout\fP) that sets automatic callouts.
 When any callouts are present, the output from \f(CRpcre2test\fP indicates how
 the pattern is being matched. This is useful information when you are trying to
 optimize the performance of a particular pattern.
@@ -156,14 +156,14 @@ At compile time, PCRE2 "auto\-possessifies" repeated items when it knows that
 what follows cannot be part of the repeat. For example, \f(CRa+[bc]\fP is compiled as
 if it were \f(CRa++[bc]\fP. The \f(CRpcre2test\fP output when this pattern is compiled
 with \fBPCRE2_ANCHORED\fP and \fBPCRE2_AUTO_CALLOUT\fP and then applied to the string
-"aaaa" is:
+\f(CRaaaa\fP is:
 .sp
 .ss \n[.ss]
 .nf
 .fam C
 \-\-\->aaaa
- +0 ^        a+
- +2 ^   ^    [bc]
+ +0 ^\&        a+
+ +2 ^\&   ^\&    [bc]
 No match
 .fam
 .fi
@@ -179,11 +179,11 @@ the pattern with \f(CR(*NO_AUTO_POSSESS)\fP. In this case, the output changes to
 .nf
 .fam C
 \-\-\->aaaa
- +0 ^        a+
- +2 ^   ^    [bc]
- +2 ^  ^     [bc]
- +2 ^ ^      [bc]
- +2 ^^       [bc]
+ +0 ^\&        a+
+ +2 ^\&   ^\&    [bc]
+ +2 ^\&  ^\&     [bc]
+ +2 ^ ^\&      [bc]
+ +2 ^^\&       [bc]
 No match
 .fam
 .fi
@@ -206,16 +206,16 @@ disabled if the pattern contains \f(CR(*PRUNE)\fP or \f(CR(*SKIP)\fP. However, t
 callouts does not affect it.
 .sp
 For example, if the pattern \f(CR.*\(rsd\fP is compiled with \fBPCRE2_AUTO_CALLOUT\fP and
-applied to the string "aa", the \f(CRpcre2test\fP output is:
+applied to the string \f(CRaa\fP, the \f(CRpcre2test\fP output is:
 .sp
 .ss \n[.ss]
 .nf
 .fam C
 \-\-\->aa
- +0 ^      .*
- +2 ^ ^    \(rsd
- +2 ^^     \(rsd
- +2 ^      \(rsd
+ +0 ^\&      .*
+ +2 ^ ^\&    \(rsd
+ +2 ^^\&     \(rsd
+ +2 ^\&      \(rsd
 No match
 .fam
 .fi
@@ -230,20 +230,20 @@ pattern with \f(CR(*NO_DOTSTAR_ANCHOR)\fP. In this case, the output changes to:
 .nf
 .fam C
 \-\-\->aa
- +0 ^      .*
- +2 ^ ^    \(rsd
- +2 ^^     \(rsd
- +2 ^      \(rsd
- +0  ^     .*
- +2  ^^    \(rsd
- +2  ^     \(rsd
+ +0 ^\&      .*
+ +2 ^ ^\&    \(rsd
+ +2 ^^\&     \(rsd
+ +2 ^\&      \(rsd
+ +0\&  ^\&     .*
+ +2\&  ^^\&    \(rsd
+ +2\&  ^\&     \(rsd
 No match
 .fam
 .fi
 .ss \n[.ss] 0
 .sp
 This shows more match attempts, starting at the second subject character.
-Another optimization, described in the next section, means that there is no
+Another optimization, described in the section Other optimizations, means that there is no
 subsequent attempt to match with an empty subject.
 .SS "Other optimizations"
 .sp
@@ -258,9 +258,9 @@ ab(?C4)cd
 .fi
 .ss \n[.ss] 0
 .sp
-PCRE2 knows that any matching string must contain the letter "d". If the
-subject string is "abyz", the lack of "d" means that matching doesn\(cqt ever
-start, and the callout is never reached. However, with "abyd", though the
+PCRE2 knows that any matching string must contain the letter \f(CRd\fP. If the
+subject string is \f(CRabyz\fP, the lack of \f(CRd\fP means that matching doesn\(cqt ever
+start, and the callout is never reached. However, with \f(CRabyd\fP, though the
 result is still no match, the callout is obeyed.
 .sp
 For most patterns PCRE2 also knows the minimum length of a matching string, and
@@ -277,7 +277,7 @@ callouts such as the example above are obeyed.
 During matching, when PCRE2 reaches a callout point, if an external function is
 provided in the match context, it is called. This applies to both normal,
 DFA, and JIT matching. The first argument to the callout function is a pointer
-to a \fBpcre2_callout\fP block. The second argument is the void \f(CR*\fP callout data
+to a \fBpcre2_callout\fP block. The second argument is the \f(CRvoid *\fP callout data
 that was supplied when the callout was set up by calling
 pcre2_set_callout() (see the
 \f(CRpcre2api\fP
@@ -287,22 +287,22 @@ necessarily in this order:
 .ss \n[.ss]
 .nf
 .fam C
-\fBuint32_t\fP      version;
-\fBuint32_t\fP      callout_number;
-\fBuint32_t\fP      capture_top;
-\fBuint32_t\fP      capture_last;
-\fBuint32_t\fP      callout_flags;
-\fBPCRE2_SIZE\fP   *offset_vector;
-\fBPCRE2_SPTR\fP    mark;
-\fBPCRE2_SPTR\fP    subject;
-\fBPCRE2_SIZE\fP    subject_length;
-\fBPCRE2_SIZE\fP    start_match;
-\fBPCRE2_SIZE\fP    current_position;
-\fBPCRE2_SIZE\fP    pattern_position;
-\fBPCRE2_SIZE\fP    next_item_length;
-\fBPCRE2_SIZE\fP    callout_string_offset;
-\fBPCRE2_SIZE\fP    callout_string_length;
-\fBPCRE2_SPTR\fP    callout_string;
+\fBuint32_t\fP\&    version;
+\fBuint32_t\fP\&    callout_number;
+\fBuint32_t\fP\&    capture_top;
+\fBuint32_t\fP\&    capture_last;
+\fBuint32_t\fP\&    callout_flags;
+\fBPCRE2_SIZE\fP *offset_vector;
+\fBPCRE2_SPTR\fP\&  mark;
+\fBPCRE2_SPTR\fP\&  subject;
+\fBPCRE2_SIZE\fP\&  subject_length;
+\fBPCRE2_SIZE\fP\&  start_match;
+\fBPCRE2_SIZE\fP\&  current_position;
+\fBPCRE2_SIZE\fP\&  pattern_position;
+\fBPCRE2_SIZE\fP\&  next_item_length;
+\fBPCRE2_SIZE\fP\&  callout_string_offset;
+\fBPCRE2_SIZE\fP\&  callout_string_length;
+\fBPCRE2_SPTR\fP\&  callout_string;
 .fam
 .fi
 .ss \n[.ss] 0
@@ -316,7 +316,7 @@ increase in future if more fields are added, but the intention is never to
 remove any of the existing fields.
 .SS "Fields for numerical callouts"
 .sp
-For a numerical callout, \fIcallout_string\fP is NULL, and \fIcallout_number\fP
+For a numerical callout, \fIcallout_string\fP is \fBNULL\fP, and \fIcallout_number\fP
 contains the number of the callout, in the range 0\-255. This is the number
 that follows \f(CR(?C\fP for callouts that part of the pattern; it is 255 for
 automatically generated callouts.
@@ -358,13 +358,13 @@ substring, and the \fIcapture_top\fP field contains one more than the number of
 the highest numbered captured substring so far. If no substrings have yet been
 captured, the value of \fIcapture_last\fP is 0 and the value of
 \fIcapture_top\fP is 1. The values of these fields do not always differ by one;
-for example, when the callout in the pattern \f(CRa)(b(?C2)\fP is taken,
+for example, when the callout in the pattern \f(CR((a)(b))(?C2)\fP is taken,
 \fIcapture_last\fP is 1 but \fIcapture_top\fP is 4.
 .sp
 The contents of \f(CRovector[2]\fP to \f(CRovector[capture_top*2\-1]\fP can be inspected in
 order to extract substrings that have been matched so far, in the same way as
-extracting substrings after a match has completed. The values in ovector[0] and
-ovector[1] are always \fBPCRE2_UNSET\fP because the match is by definition not
+extracting substrings after a match has completed. The values in \f(CRovector[0]\fP and
+\f(CRovector[1]\fP are always \fBPCRE2_UNSET\fP because the match is by definition not
 complete. Substrings that have not been captured but whose numbers are less
 than \fIcapture_top\fP also have both of their ovector slots set to
 \fBPCRE2_UNSET\fP.
@@ -397,7 +397,7 @@ The \fInext_item_length\fP field contains the length of the next item to be
 processed in the pattern string. When the callout is at the end of the pattern,
 the length is zero. When the callout precedes an opening parenthesis, the
 length includes meta characters that follow the parenthesis. For example, in a
-callout before an assertion such as (?=ab) the length is 3. For an alternation
+callout before an assertion such as \f(CR(?=ab)\fP the length is 3. For an alternation
 bar or a closing parenthesis, the length is one, unless a closing parenthesis
 is followed by a quantifier, in which case its length is included. (This
 changed in release 10.23. In earlier releases, before an opening parenthesis
@@ -412,9 +412,9 @@ information.
 .sp
 In callouts from pcre2_match() the \fImark\fP field contains a pointer to
 the zero\-terminated name of the most recently passed \f(CR(*MARK)\fP, \f(CR(*PRUNE)\fP, or
-\f(CR(*THEN)\fP item in the match, or \f(CRNULL\fP if no such items have been passed. Instances
+\f(CR(*THEN)\fP item in the match, or \fBNULL\fP if no such items have been passed. Instances
 of \f(CR(*PRUNE)\fP or \f(CR(*THEN)\fP without a name do not obliterate a previous \f(CR(*MARK)\fP. In
-callouts from the DFA matching function this field always contains NULL.
+callouts from the DFA matching function this field always contains \fBNULL\fP.
 .sp
 The \fIcallout_flags\fP field is always zero in callouts from
 pcre2_dfa_match() or when JIT is being used. When pcre2_match()
@@ -422,19 +422,12 @@ without JIT is used, the following bits may be set:
 .sp
 .RS 4
 .PD 0
-.TP 24
+.TP 25
 \fBPCRE2_CALLOUT_STARTMATCH\fP
 .ad l
 This is set for the first callout after the start of matching for each new
 starting position in the subject.
-.PD
-.RE
-.PP
-.ad l
-.sp
-.RS 4
-.PD 0
-.TP 24
+.TP 25
 \fBPCRE2_CALLOUT_BACKTRACK\fP
 .ad l
 This is set if there has been a matching backtrack since the previous callout,
@@ -449,13 +442,13 @@ Both bits are set when a backtrack has caused a "bumpalong" to a new starting
 position in the subject. Output from \f(CRpcre2test\fP does not indicate the
 presence of these bits unless the \f(CRcallout_extra\fP modifier is set.
 .sp
-The information in the \f(CRcallout_flags\fP field is provided so that
+The information in the \fIcallout_flags\fP field is provided so that
 applications can track and tell their users how matching with backtracking is
 done. This can be useful when trying to optimize patterns, or just to
 understand how PCRE2 works. There is no support in pcre2_dfa_match()
 because there is no backtracking in DFA matching, and there is no support in
 JIT because JIT is all about maximimizing matching performance. In both these
-cases the \f(CRcallout_flags\fP field is always zero.
+cases the \fIcallout_flags\fP field is always zero.
 .SH "RETURN VALUES FROM CALLOUTS"
 .sp
 The external callout function returns an integer to PCRE2. If the value is
@@ -465,7 +458,7 @@ goes ahead, just as if a lookahead assertion had failed. If the value is less
 than zero, the match is abandoned, and the matching function returns the
 negative value.
 .sp
-Negative values should normally be chosen from the set of \f(CRPCRE2_ERROR_xxx\fP
+Negative values should normally be chosen from the set of \f(CRPCRE2_ERROR_\fP\fIxxx\fP
 values. In particular, \fBPCRE2_ERROR_NOMATCH\fP forces a standard "no match"
 failure. The error number \fBPCRE2_ERROR_CALLOUT\fP is reserved for use by callout
 functions; it will never be used by PCRE2 itself.
@@ -493,40 +486,20 @@ a pointer to a callout enumeration block, and its second argument is the
 \fIuser_data\fP value that was passed to pcre2_callout_enumerate(). The
 data block contains the following fields:
 .sp
-.RS 4
-.PD 0
-.TP 22
-\fIversion\fP
-.ad l
-Block version number
-.TP 22
-\fIpattern_position\fP
-.ad l
-Offset to next item in pattern
-.TP 22
-\fInext_item_length\fP
-.ad l
-Length of next item in pattern
-.TP 22
-\fIcallout_number\fP
-.ad l
-Number for numbered callouts
-.TP 22
-\fIcallout_string_offset\fP
-.ad l
-Offset to string within pattern
-.TP 22
-\fIcallout_string_length\fP
-.ad l
-Length of callout string
-.TP 22
-\fIcallout_string\fP
-.ad l
-Points to callout string or is \f(CRNULL\fP
-.PD
-.RE
-.PP
-.ad l
+.ss \n[.ss]
+.nf
+.fam C
+\fBuint32_t\fP\&   version;\&               /* Block version number */
+\fBPCRE2_SIZE\fP pattern_position;\&      /* Offset to next item in pattern */
+\fBPCRE2_SIZE\fP next_item_length;\&      /* Length of next item in pattern */
+\fBuint32_t\fP\&   callout_number;\&        /* Number for numbered callouts */
+\fBPCRE2_SIZE\fP callout_string_offset; /* Offset to string within pattern */
+\fBPCRE2_SIZE\fP callout_string_length; /* Length of callout string */
+\fBPCRE2_SPTR\fP callout_string;\&        /* Points to callout string or is
+                                     NULL */
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 The version number is currently 0. It will increase if new fields are ever
 added to the block. The remaining fields are the same as their namesakes in the
@@ -537,25 +510,22 @@ above.
 Note that the value of \fIpattern_position\fP is unique for each callout.
 However, if a callout occurs inside a group that is quantified with a non\-zero
 minimum or a fixed maximum, the group is replicated inside the compiled
-pattern. For example, a pattern such as /(a){2}/ is compiled as if it were
-/(a)(a)/. This means that the callout will be enumerated more than once, but
+pattern. For example, a pattern such as \f(CR(a){2}\fP is compiled as if it were
+\f(CR(a)(a)\fP. This means that the callout will be enumerated more than once, but
 with the same value for \fIpattern_position\fP in each case.
 .sp
 The callback function should normally return zero. If it returns a non\-zero
 value, scanning the pattern stops, and that value is returned from
 pcre2_callout_enumerate().
-.SH "AUTHOR"
+.SS "Author"
 .sp
-.ti +2
 Philip Hazel
 .br
-.ti +2
 Retired from University Computing Service
 .br
-.ti +2
 Cambridge, England.
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 26 February 2025
 .br
-Copyright (c) 1997\-2024 University of Cambridge.
+Copyright \(co 1997\-2024 University of Cambridge.

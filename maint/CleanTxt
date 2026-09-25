@@ -1,5 +1,7 @@
 #! /usr/bin/perl -w
 
+use open ':std', ':encoding(UTF-8)';
+
 # Script to take the output of nroff -man and remove all the backspacing and
 # the page footers and the screen commands etc so that it is more usefully
 # readable online. In fact, in the latest nroff, intermediate footers don't

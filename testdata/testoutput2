@@ -7718,6 +7718,12 @@ No match
     a\x85b
 No match
 
+/^a.b/newline=any
+    a\x0bb
+No match
+    a\x0cb
+No match
+
 /^a.b/newline=nul
     a\nb
  0: a\x0ab
@@ -19243,6 +19249,39 @@ Failed: error -51: NULL argument passed with non-zero length
 /X+/replace=[20]
     >XX<\=null_replacement
  1: ><
+
+# A NULL output buffer is permitted when the buffer length is zero. This is the
+# natural way to make a sizing call with substitute_overflow_length.
+
+/a/substitute_overflow_length
+    xay\=replace=[0]b,null_substitute_buffer
+Failed: error -48: no more memory: 4 code units are needed
+    xay\=replace=[0]b,null_substitute_buffer,offset=1
+Failed: error -48: no more memory: 4 code units are needed
+    xyz\=replace=[0]b,null_substitute_buffer
+Failed: error -48: no more memory: 4 code units are needed
+    \=replace=[0]b,null_substitute_buffer
+Failed: error -48: no more memory: 1 code units are needed
+    \=replace=[0]b,null_substitute_buffer,null_subject
+Failed: error -48: no more memory: 1 code units are needed
+    aaa\=replace=[0]bb,null_substitute_buffer,global
+Failed: error -48: no more memory: 7 code units are needed
+    ay\=replace=[0],null_substitute_buffer,substitute_literal,substitute_replacement_only
+Failed: error -48: no more memory: 1 code units are needed
+    ay\=replace=[0]\Uzz,null_substitute_buffer,substitute_extended
+Failed: error -48: no more memory: 4 code units are needed
+
+/a/
+\= Expect no more memory, without a length
+    xay\=replace=[0]b,null_substitute_buffer
+Failed: error -48: no more memory
+\= Expect PCRE2_ERROR_NULL (NULL output buffer with a non-zero length)
+    xay\=replace=[10]b,null_substitute_buffer
+Failed: error -51: NULL argument passed with non-zero length
+    xay\=replace=b,null_substitute_buffer
+Failed: error -51: NULL argument passed with non-zero length
+    xay\=replace=[10]b,null_substitute_buffer,substitute_overflow_length
+Failed: error -51: NULL argument passed with non-zero length
 
 # --------- 
 

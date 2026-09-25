@@ -20,10 +20,10 @@ PCRE2_SPTR pcre2_get_mark(pcre2_match_data *match_data);
 == Description
 
 After a call of func:pcre2_match() that was passed the match block that is
-this function's argument, this function returns a pointer to the last [.regex]`(*MARK)`,
-[.regex]`(*PRUNE)`, or [.regex]`(*THEN)` name that was encountered during the matching process. The
+this function's argument, this function returns a pointer to the last [.regex]`+(*MARK)+`,
+[.regex]`+(*PRUNE)+`, or [.regex]`+(*THEN)+` name that was encountered during the matching process. The
 name is zero-terminated, and is within the compiled pattern. The length of the
-name is in the preceding code unit. If no name is available, [.c]`NULL` is returned.
+name is in the preceding code unit. If no name is available, const:NULL is returned.
 
 After a successful match, the name that is returned is the last one on the
 matching path. After a failed match or a partial match, the last encountered

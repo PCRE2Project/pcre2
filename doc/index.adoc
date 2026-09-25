@@ -1,0 +1,345 @@
+= Perl-compatible Regular Expressions (PCRE2 API)
+:doctype: article
+:title: PCRE2 documentation
+
+The HTML documentation for PCRE2 consists of a number of pages that are listed
+below in alphabetical order. If you are new to PCRE2, please read the first one
+first.
+
+[cols="2,3",stripes=even]
+|===
+|xref:pcre2.adoc[pcre2]
+|Introductory page
+
+|xref:pcre2-config.adoc[pcre2-config]
+|Information about the installation configuration
+
+|xref:pcre2api.adoc[pcre2api]
+|PCRE2's native API
+
+|xref:pcre2build.adoc[pcre2build]
+|Building PCRE2
+
+|xref:pcre2callout.adoc[pcre2callout]
+|The callout facility
+
+|xref:pcre2compat.adoc[pcre2compat]
+|Compatibility with Perl
+
+|xref:pcre2convert.adoc[pcre2convert]
+|Experimental foreign pattern conversion functions
+
+|xref:pcre2demo.adoc[pcre2demo]
+|A demonstration C program that uses the PCRE2 library
+
+|xref:pcre2grep.adoc[pcre2grep]
+|The `pcre2grep` command
+
+|xref:pcre2jit.adoc[pcre2jit]
+|Discussion of the just-in-time optimization support
+
+|xref:pcre2limits.adoc[pcre2limits]
+|Details of size and other limits
+
+|xref:pcre2matching.adoc[pcre2matching]
+|Discussion of the two matching algorithms
+
+|xref:pcre2partial.adoc[pcre2partial]
+|Using PCRE2 for partial matching
+
+|xref:pcre2pattern.adoc[pcre2pattern]
+|Specification of the regular expressions supported by PCRE2
+
+|xref:pcre2perform.adoc[pcre2perform]
+|Some comments on performance
+
+|xref:pcre2posix.adoc[pcre2posix]
+|The POSIX API to the PCRE2 8-bit library
+
+|xref:pcre2sample.adoc[pcre2sample]
+|Discussion of the pcre2demo program
+
+|xref:pcre2serialize.adoc[pcre2serialize]
+|Serializing functions for saving precompiled patterns
+
+|xref:pcre2syntax.adoc[pcre2syntax]
+|Syntax quick-reference summary
+
+|xref:pcre2test.adoc[pcre2test]
+|The `pcre2test` command for testing PCRE2
+
+|xref:pcre2unicode.adoc[pcre2unicode]
+|Discussion of Unicode and UTF-8/UTF-16/UTF-32 support
+
+|===
+
+There are also individual pages that summarize the interface for each function
+in the library.
+
+[cols="2,3",stripes=even]
+|===
+|xref:pcre2_callout_enumerate.adoc[pcre2_callout_enumerate]
+|Enumerate callouts in a compiled pattern
+
+|xref:pcre2_code_copy.adoc[pcre2_code_copy]
+|Copy a compiled pattern
+
+|xref:pcre2_code_copy_with_tables.adoc[pcre2_code_copy_with_tables]
+|Copy a compiled pattern and its character tables
+
+|xref:pcre2_code_free.adoc[pcre2_code_free]
+|Free a compiled pattern
+
+|xref:pcre2_compile.adoc[pcre2_compile]
+|Compile a regular expression pattern
+
+|xref:pcre2_compile_context_copy.adoc[pcre2_compile_context_copy]
+|Copy a compile context
+
+|xref:pcre2_compile_context_create.adoc[pcre2_compile_context_create]
+|Create a compile context
+
+|xref:pcre2_compile_context_free.adoc[pcre2_compile_context_free]
+|Free a compile context
+
+|xref:pcre2_config.adoc[pcre2_config]
+|Show build-time related configuration options
+
+|xref:pcre2_convert_context_copy.adoc[pcre2_convert_context_copy]
+|Copy a convert context
+
+|xref:pcre2_convert_context_create.adoc[pcre2_convert_context_create]
+|Create a convert context
+
+|xref:pcre2_convert_context_free.adoc[pcre2_convert_context_free]
+|Free a convert context
+
+|xref:pcre2_converted_pattern_free.adoc[pcre2_converted_pattern_free]
+|Free converted foreign pattern
+
+|xref:pcre2_dfa_match.adoc[pcre2_dfa_match]
+|Match a compiled pattern to a subject string using the alternative matching algorithm (DFA algorithm; not Perl compatible)
+
+|xref:pcre2_general_context_copy.adoc[pcre2_general_context_copy]
+|Copy a general context
+
+|xref:pcre2_general_context_create.adoc[pcre2_general_context_create]
+|Create a general context
+
+|xref:pcre2_general_context_free.adoc[pcre2_general_context_free]
+|Free a general context
+
+|xref:pcre2_get_bsr.adoc[pcre2_get_bsr]
+|Get the \R convention
+
+|xref:pcre2_get_depth_limit.adoc[pcre2_get_depth_limit]
+|Get the match backtracking depth limit
+
+|xref:pcre2_get_error_message.adoc[pcre2_get_error_message]
+|Get textual error message for error number
+
+|xref:pcre2_get_heap_limit.adoc[pcre2_get_heap_limit]
+|Get the match backtracking heap limit
+
+|xref:pcre2_get_mark.adoc[pcre2_get_mark]
+|Get a (*MARK) name
+
+|xref:pcre2_get_match_data_heapframes_size.adoc[pcre2_get_match_data_heapframes_size]
+|Get the size of match data heapframes
+
+|xref:pcre2_get_match_data_size.adoc[pcre2_get_match_data_size]
+|Get the size of a match data block
+
+|xref:pcre2_get_match_limit.adoc[pcre2_get_match_limit]
+|Get the match limit
+
+|xref:pcre2_get_max_pattern_length.adoc[pcre2_get_max_pattern_length]
+|Get the maximum length of a pattern
+
+|xref:pcre2_get_newline.adoc[pcre2_get_newline]
+|Get the newline convention
+
+|xref:pcre2_get_offset_limit.adoc[pcre2_get_offset_limit]
+|Get the offset limit
+
+|xref:pcre2_get_ovector_count.adoc[pcre2_get_ovector_count]
+|Get the ovector count
+
+|xref:pcre2_get_ovector_pointer.adoc[pcre2_get_ovector_pointer]
+|Get a pointer to the ovector
+
+|xref:pcre2_get_parens_nest_limit.adoc[pcre2_get_parens_nest_limit]
+|Get the parentheses nesting limit
+
+|xref:pcre2_get_startchar.adoc[pcre2_get_startchar]
+|Get the starting character offset
+
+|xref:pcre2_get_subject.adoc[pcre2_get_subject]
+|Get a match subject pointer
+
+|xref:pcre2_jit_compile.adoc[pcre2_jit_compile]
+|Process a compiled pattern with the JIT compiler
+
+|xref:pcre2_jit_free_unused_memory.adoc[pcre2_jit_free_unused_memory]
+|Free unused JIT memory
+
+|xref:pcre2_jit_match.adoc[pcre2_jit_match]
+|Fast path interface to JIT matching
+
+|xref:pcre2_jit_stack_assign.adoc[pcre2_jit_stack_assign]
+|Assign stack for JIT matching
+
+|xref:pcre2_jit_stack_create.adoc[pcre2_jit_stack_create]
+|Create a stack for JIT matching
+
+|xref:pcre2_jit_stack_free.adoc[pcre2_jit_stack_free]
+|Free a JIT matching stack
+
+|xref:pcre2_maketables.adoc[pcre2_maketables]
+|Build character tables in current locale
+
+|xref:pcre2_maketables_free.adoc[pcre2_maketables_free]
+|Free character tables
+
+|xref:pcre2_match.adoc[pcre2_match]
+|Match a compiled pattern to a subject string (Perl compatible)
+
+|xref:pcre2_match_context_copy.adoc[pcre2_match_context_copy]
+|Copy a match context
+
+|xref:pcre2_match_context_create.adoc[pcre2_match_context_create]
+|Create a match context
+
+|xref:pcre2_match_context_free.adoc[pcre2_match_context_free]
+|Free a match context
+
+|xref:pcre2_match_data_create.adoc[pcre2_match_data_create]
+|Create a match data block
+
+|xref:pcre2_match_data_create_from_pattern.adoc[pcre2_match_data_create_from_pattern]
+|Create a match data block getting size from pattern
+
+|xref:pcre2_match_data_free.adoc[pcre2_match_data_free]
+|Free a match data block
+
+|xref:pcre2_next_match.adoc[pcre2_next_match]
+|Get the match parameters for the next match
+
+|xref:pcre2_pattern_convert.adoc[pcre2_pattern_convert]
+|Foreign pattern converter
+
+|xref:pcre2_pattern_info.adoc[pcre2_pattern_info]
+|Extract information about a pattern
+
+|xref:pcre2_serialize_decode.adoc[pcre2_serialize_decode]
+|Decode serialized compiled patterns
+
+|xref:pcre2_serialize_encode.adoc[pcre2_serialize_encode]
+|Serialize compiled patterns for save/restore
+
+|xref:pcre2_serialize_free.adoc[pcre2_serialize_free]
+|Free serialized compiled patterns
+
+|xref:pcre2_serialize_get_number_of_codes.adoc[pcre2_serialize_get_number_of_codes]
+|Get number of serialized compiled patterns
+
+|xref:pcre2_set_bsr.adoc[pcre2_set_bsr]
+|Set \R convention
+
+|xref:pcre2_set_callout.adoc[pcre2_set_callout]
+|Set up a callout function
+
+|xref:pcre2_set_character_tables.adoc[pcre2_set_character_tables]
+|Set character tables
+
+|xref:pcre2_set_compile_extra_options.adoc[pcre2_set_compile_extra_options]
+|Set compile time extra options
+
+|xref:pcre2_set_compile_recursion_guard.adoc[pcre2_set_compile_recursion_guard]
+|Set up a compile recursion guard function
+
+|xref:pcre2_set_depth_limit.adoc[pcre2_set_depth_limit]
+|Set the match backtracking depth limit
+
+|xref:pcre2_set_glob_escape.adoc[pcre2_set_glob_escape]
+|Set glob escape character
+
+|xref:pcre2_set_glob_separator.adoc[pcre2_set_glob_separator]
+|Set glob separator character
+
+|xref:pcre2_set_heap_limit.adoc[pcre2_set_heap_limit]
+|Set the match backtracking heap limit
+
+|xref:pcre2_set_match_limit.adoc[pcre2_set_match_limit]
+|Set the match limit
+
+|xref:pcre2_set_max_pattern_compiled_length.adoc[pcre2_set_max_pattern_compiled_length]
+|Set the maximum length of a compiled pattern
+
+|xref:pcre2_set_max_pattern_length.adoc[pcre2_set_max_pattern_length]
+|Set the maximum length of a pattern
+
+|xref:pcre2_set_max_varlookbehind.adoc[pcre2_set_max_varlookbehind]
+|Set the maximum match length for a variable-length lookbehind
+
+|xref:pcre2_set_newline.adoc[pcre2_set_newline]
+|Set the newline convention
+
+|xref:pcre2_set_offset_limit.adoc[pcre2_set_offset_limit]
+|Set the offset limit
+
+|xref:pcre2_set_optimize.adoc[pcre2_set_optimize]
+|Set an optimization directive
+
+|xref:pcre2_set_parens_nest_limit.adoc[pcre2_set_parens_nest_limit]
+|Set the parentheses nesting limit
+
+|xref:pcre2_set_recursion_limit.adoc[pcre2_set_recursion_limit]
+|Obsolete function; use pcre2_set_depth_limit
+
+|xref:pcre2_set_recursion_memory_management.adoc[pcre2_set_recursion_memory_management]
+|Obsolete function that does nothing
+
+|xref:pcre2_set_substitute_callout.adoc[pcre2_set_substitute_callout]
+|Set a substitution callout function
+
+|xref:pcre2_set_substitute_case_callout.adoc[pcre2_set_substitute_case_callout]
+|Set a substitution case callout function
+
+|xref:pcre2_substitute.adoc[pcre2_substitute]
+|Replace matched substrings
+
+|xref:pcre2_substring_copy_byname.adoc[pcre2_substring_copy_byname]
+|Extract named substring into given buffer
+
+|xref:pcre2_substring_copy_bynumber.adoc[pcre2_substring_copy_bynumber]
+|Extract numbered substring into given buffer
+
+|xref:pcre2_substring_free.adoc[pcre2_substring_free]
+|Free extracted substring
+
+|xref:pcre2_substring_get_byname.adoc[pcre2_substring_get_byname]
+|Extract named substring into new memory
+
+|xref:pcre2_substring_get_bynumber.adoc[pcre2_substring_get_bynumber]
+|Extract numbered substring into new memory
+
+|xref:pcre2_substring_length_byname.adoc[pcre2_substring_length_byname]
+|Find length of named substring
+
+|xref:pcre2_substring_length_bynumber.adoc[pcre2_substring_length_bynumber]
+|Find length of numbered substring
+
+|xref:pcre2_substring_list_free.adoc[pcre2_substring_list_free]
+|Free list of extracted substrings
+
+|xref:pcre2_substring_list_get.adoc[pcre2_substring_list_get]
+|Extract all substrings into new memory
+
+|xref:pcre2_substring_nametable_scan.adoc[pcre2_substring_nametable_scan]
+|Find table entries for given string name
+
+|xref:pcre2_substring_number_from_name.adoc[pcre2_substring_number_from_name]
+|Convert captured string name to number
+
+|===

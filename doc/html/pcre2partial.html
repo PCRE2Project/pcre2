@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="description" content="Using PCRE2 for partial matching">
 <title>pcre2partial(3)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +117,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +219,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -433,9 +435,25 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 </head>
-<body class="manpage">
+<body class="manpage toc2 toc-right">
 <div id="header">
 <h1>pcre2partial(3) Manual Page</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_partial_matching_in_pcre2">Partial matching in PCRE2</a></li>
+<li><a href="#_requirements_for_a_partial_match">Requirements for a partial match</a></li>
+<li><a href="#_partial_matching_using_pcre2_match">Partial matching using <code class="function">pcre2_match()</code></a>
+<ul class="sectlevel2">
+<li><a href="#_how_a_partial_match_is_processed_by_pcre2_match">How a partial match is processed by <code class="function">pcre2_match()</code></a></li>
+<li><a href="#_example_of_partial_matching_using_pcre2test">Example of partial matching using pcre2test</a></li>
+</ul>
+</li>
+<li><a href="#_multi_segment_matching_with_pcre2_match">Multi-segment matching with <code class="function">pcre2_match()</code></a></li>
+<li><a href="#_partial_matching_using_pcre2_dfa_match">Partial matching using <code class="function">pcre2_dfa_match()</code></a></li>
+<li><a href="#_multi_segment_matching_with_pcre2_dfa_match">Multi-segment matching with <code class="function">pcre2_dfa_match()</code></a></li>
+</ul>
+</div>
 <h2>Name</h2>
 <div class="sectionbody">
 <p>pcre2partial - PCRE2 partial matching</p>
@@ -475,16 +493,16 @@ function. If both options are set, <code class="constant">PCRE2_PARTIAL_HARD</co
 as setting a partial match option for the matching function, you must also call
 <code class="function">pcre2_jit_compile()</code> with one or both of these options:</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-text" data-lang="text">PCRE2_JIT_PARTIAL_HARD
-PCRE2_JIT_PARTIAL_SOFT</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="dlist options">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_JIT_PARTIAL_HARD</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_JIT_PARTIAL_SOFT</code></dt>
+<dd>
 <p><code class="constant">PCRE2_JIT_COMPLETE</code> should also be set if you are going to run non-partial
 matches on the same pattern. Separate code is compiled for each mode. If the
 appropriate JIT mode has not been compiled, interpretive matching code is used.</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>Setting a partial matching option disables two of PCRE2&#8217;s standard
@@ -507,12 +525,12 @@ complete the match, or the addition of more characters might change what is
 matched.</p>
 </div>
 <div class="paragraph">
-<p>Example 1: if the pattern is <code class="regex">abc</code> and the subject is "ab", more characters are
+<p>Example 1: if the pattern is <code class="regex">abc</code> and the subject is <code class="subject">ab</code>, more characters are
 definitely needed to complete a match. In this case both hard and soft matching
 options yield a partial match.</p>
 </div>
 <div class="paragraph">
-<p>Example 2: if the pattern is <code class="regex">ab+</code> and the subject is "ab", a complete match
+<p>Example 2: if the pattern is <code class="regex">ab+</code> and the subject is <code class="subject">ab</code>, a complete match
 can be found, but the addition of more characters might change what is
 matched. In this case, only <code class="constant">PCRE2_PARTIAL_HARD</code> returns a partial match;
 <code class="constant">PCRE2_PARTIAL_SOFT</code> returns the complete match.</p>
@@ -523,19 +541,21 @@ pattern item is <code class="regex">\z</code>, <code class="regex">\Z</code>, <c
 Otherwise, for both options, the next pattern item must be one that inspects a
 character, and at least one of the following must be true:</p>
 </div>
-<div class="paragraph">
-<p>(1) At least one character has already been inspected. An inspected character
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>At least one character has already been inspected. An inspected character
 need not form part of the final matched string; lookbehind assertions and the
 <code class="regex">\K</code> escape sequence provide ways of inspecting characters before the start of a
 matched string.</p>
-</div>
-<div class="paragraph">
-<p>(2) The pattern contains one or more lookbehind assertions. This condition
+</li>
+<li>
+<p>The pattern contains one or more lookbehind assertions. This condition
 exists in case there is a lookbehind that inspects characters before the start
 of the match.</p>
-</div>
-<div class="paragraph">
-<p>(3) There is a special case when the whole pattern can match an empty string.
+</li>
+<li>
+<p>There is a special case when the whole pattern can match an empty string.
 When the starting point is at the end of the subject, the empty string match is
 a possibility, and if <code class="constant">PCRE2_PARTIAL_SOFT</code> is set and neither of the above
 conditions is true, it is returned. However, because adding more characters
@@ -543,6 +563,8 @@ might result in a non-empty match, <code class="constant">PCRE2_PARTIAL_HARD</co
 which in this case means "there is going to be a match at this point, but until
 some more characters are added, we do not know if it will be an empty string or
 something longer".</p>
+</li>
+</ol>
 </div>
 </div>
 </div>
@@ -578,14 +600,14 @@ for a partial match. Consider this pattern:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">/abc\K123/</code></pre>
+<pre class="highlight"><code class="language-regex" data-lang="regex">abc\K123</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>If it is matched against "456abc123xyz" the result is a complete match, and the
-ovector defines the matched string as "123", because <code class="regex">\K</code> resets the "start of
+<p>If it is matched against <code class="subject">456abc123xyz</code> the result is a complete match, and the
+ovector defines the matched string as <code class="subject">123</code>, because <code class="regex">\K</code> resets the "start of
 match" point. However, if a partial match is requested and the subject string
-is "456abc12", a partial match is found for the string "abc12", because all
+is <code class="subject">456abc12</code>, a partial match is found for the string <code class="subject">abc12</code>, because all
 these characters are needed for a subsequent re-match with additional
 characters.</p>
 </div>
@@ -595,15 +617,15 @@ the data that is returned. Consider this pattern:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">/123\w+X|dogY/</code></pre>
+<pre class="highlight"><code class="language-regex" data-lang="regex">123\w+X|dogY</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>If this is matched against the subject string "abc123dog", both alternatives
+<p>If this is matched against the subject string <code class="subject">abc123dog</code>, both alternatives
 fail to match, but the end of the subject is reached during matching, so
 <code class="constant">PCRE2_ERROR_PARTIAL</code> is returned. The offsets are set to 3 and 9, identifying
-"123dog" as the first partial match. (In this example, there are two partial
-matches, because "dog" on its own partially matches the second alternative.)</p>
+<code class="subject">123dog</code> as the first partial match. (In this example, there are two partial
+matches, because <code class="subject">dog</code> on its own partially matches the second alternative.)</p>
 </div>
 <div class="sect2">
 <h3 id="_how_a_partial_match_is_processed_by_pcre2_match">How a partial match is processed by <code class="function">pcre2_match()</code></h3>
@@ -635,19 +657,19 @@ pattern such as:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">/dog(sbody)?/</code></pre>
+<pre class="highlight"><code class="language-regex" data-lang="regex">dog(sbody)?</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This matches either "dog" or "dogsbody", greedily (that is, it prefers the
-longer string if possible). If it is matched against the string "dog" with
-<code class="constant">PCRE2_PARTIAL_SOFT</code>, it yields a complete match for "dog". However, if
+<p>This matches either <code class="subject">dog</code> or <code class="subject">dogsbody</code>, greedily (that is, it prefers the
+longer string if possible). If it is matched against the string <code class="subject">dog</code> with
+<code class="constant">PCRE2_PARTIAL_SOFT</code>, it yields a complete match for <code class="subject">dog</code>. However, if
 <code class="constant">PCRE2_PARTIAL_HARD</code> is set, the result is <code class="constant">PCRE2_ERROR_PARTIAL</code>. On the other
 hand, if the pattern is made ungreedy the result is different:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">/dog(sbody)??/</code></pre>
+<pre class="highlight"><code class="language-regex" data-lang="regex">dog(sbody)??</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -655,14 +677,18 @@ hand, if the pattern is made ungreedy the result is different:</p>
 and matching never continues after finding a complete match. It might be easier
 to follow this explanation by thinking of the two patterns like this:</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">/dog(sbody)?/    is the same as  /dogsbody|dog/
-/dog(sbody)??/   is the same as  /dog|dogsbody/</code></pre>
-</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code class="regex">dog(sbody)?</code>    is the same as  <code class="regex">dogsbody|dog</code></p>
+</li>
+<li>
+<p><code class="regex">dog(sbody)??</code>   is the same as  <code class="regex">dog|dogsbody</code></p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p>The second pattern will never match "dogsbody", because it will always find the
+<p>The second pattern will never match <code class="subject">dogsbody</code>, because it will always find the
 shorter match first.</p>
 </div>
 </div>
@@ -762,7 +788,7 @@ contain any lookbehinds, it is sufficient to retain only the partially matched
 substring. However, if the pattern contains a lookbehind assertion, characters
 that precede the start of the partial match may have been inspected during the
 matching process. When <code>pcre2test</code> displays a partial match, it indicates
-these characters with '&lt;' if the <code>allusedtext</code> modifier is set:</p>
+these characters with <code>&lt;</code> if the <code>allusedtext</code> modifier is set:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -788,7 +814,7 @@ lookbehind in a pattern, but this can be misleading if there are nested
 lookbehinds. The value returned by calling <code class="function">pcre2_pattern_info()</code> with the
 <code class="constant">PCRE2_INFO_MAXLOOKBEHIND</code> option is the maximum number of characters (not code
 units) that any individual lookbehind moves back when it is processed. A
-pattern such as <code class="regex">(?&#8656;(?&lt;!b)a)</code> has a maximum lookbehind value of one, but
+pattern such as <code class="regex">(?&lt;=(?&lt;!b)a)</code> has a maximum lookbehind value of one, but
 inspects two characters before its starting point.</p>
 </div>
 <div class="paragraph">
@@ -817,17 +843,17 @@ partial match was found is set as the first matching string.</p>
 <div class="paragraph">
 <p>Because the DFA function always searches for all possible matches, and there is
 no difference between greedy and ungreedy repetition, its behaviour is
-different from <code class="function">pcre2_match()</code>. Consider the string "dog" matched
+different from <code class="function">pcre2_match()</code>. Consider the string <code class="subject">dog</code> matched
 against this ungreedy pattern:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">/dog(sbody)??/</code></pre>
+<pre class="highlight"><code class="language-regex" data-lang="regex">dog(sbody)??</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>Whereas the standard function stops as soon as it finds the complete match for
-"dog", the DFA function also finds the partial match for "dogsbody", and so
+<code class="subject">dog</code>, the DFA function also finds the partial match for <code class="subject">dogsbody</code>, and so
 returns that when <code class="constant">PCRE2_PARTIAL_HARD</code> is set.</p>
 </div>
 </div>
@@ -855,8 +881,8 @@ data&gt; n05\=dfa,dfa_restart
 </div>
 </div>
 <div class="paragraph">
-<p>The first call has "23ja" as the subject, and requests partial matching; the
-second call has "n05" as the subject for the continued (restarted) match.
+<p>The first call has <code class="subject">23ja</code> as the subject, and requests partial matching; the
+second call has <code class="subject">n05</code> as the subject for the continued (restarted) match.
 Notice that when the match is complete, only the last part is shown; PCRE2 does
 not retain the previously partially-matched string. It is up to the calling
 program to do that if it needs to. This means that, for an unanchored pattern,
@@ -870,10 +896,10 @@ match attempt. For example, consider this pattern:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>If the first part of the subject is "ABC123", a partial match of the first
+<p>If the first part of the subject is <code class="subject">ABC123</code>, a partial match of the first
 alternative is found at offset 3. There is no partial match for the second
 alternative, because such a match does not start at the same point in the
-subject string. Attempting to continue with the string "7890" does not yield a
+subject string. Attempting to continue with the string <code class="subject">7890</code> does not yield a
 match because only those alternatives that match at one point in the subject
 are remembered. Depending on the application, this may or may not be what you
 want.</p>
@@ -884,7 +910,7 @@ doing it is to retain some or all of the segment and try a new complete match,
 as described for <code class="function">pcre2_match()</code> above. Another possibility is to work with
 two buffers. If a partial match at offset <em>n</em> in the first buffer is
 followed by "no match" when <code class="constant">PCRE2_DFA_RESTART</code> is used on the second buffer, you
-can then try a new match starting at offset <em>n&#43;1</em> in the first buffer.</p>
+can then try a new match starting at offset <em>n</em>+1 in the first buffer.</p>
 </div>
 <div class="paragraph">
 <p>Therefore, <code class="constant">PCRE2_DFA_RESTART</code> does not remove the need to keep earlier subject
@@ -900,26 +926,16 @@ intended to produce the same result as searching the whole subject, it is
 usually simpler to avoid <code class="constant">PCRE2_DFA_RESTART</code> and run a fresh match, using either
 matching function, over the retained text.</p>
 </div>
+<h2 id="_author" class="discrete">Author</h2>
+<div class="paragraph">
+<p>Philip Hazel<br>
+Retired from University Computing Service<br>
+Cambridge, England.</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_author">Author</h2>
-<div class="sectionbody">
-<div class="literalblock">
-<div class="content">
-<pre>Philip Hazel
-Retired from University Computing Service
-Cambridge, England.</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_revision">Revision</h2>
-<div class="sectionbody">
+<h2 id="_revision" class="discrete">Revision</h2>
 <div class="paragraph">
 <p>Last updated: 16 August 2026<br>
-Copyright (c) 1997-2019 University of Cambridge.</p>
+Copyright &#169; 1997-2019 University of Cambridge.</p>
 </div>
 </div>
 </div>

@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="description" content="Discussion of Unicode and UTF-8/UTF-16/UTF-32 support">
 <title>pcre2unicode(3)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +117,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +219,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -433,9 +435,33 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 </head>
-<body class="manpage">
+<body class="manpage toc2 toc-right">
 <div id="header">
 <h1>pcre2unicode(3) Manual Page</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_unicode_and_utf_support">Unicode and UTF support</a></li>
+<li><a href="#_unicode_property_support">Unicode property support</a></li>
+<li><a href="#_wide_characters_and_utf_modes">Wide characters and UTF modes</a></li>
+<li><a href="#_unicode_case_equivalence">Unicode case-equivalence</a></li>
+<li><a href="#script-runs">Script runs</a>
+<ul class="sectlevel2">
+<li><a href="#basic-script-run-rules">Basic script run rules</a></li>
+<li><a href="#_the_chinese_han_script">The Chinese Han script</a></li>
+<li><a href="#_decimal_digits">Decimal digits</a></li>
+</ul>
+</li>
+<li><a href="#_validity_of_utf_strings">Validity of UTF strings</a>
+<ul class="sectlevel2">
+<li><a href="#utf8-string-errors">Errors in UTF-8 strings</a></li>
+<li><a href="#_errors_in_utf_16_strings">Errors in UTF-16 strings</a></li>
+<li><a href="#_errors_in_utf_32_strings">Errors in UTF-32 strings</a></li>
+</ul>
+</li>
+<li><a href="#_matching_in_invalid_utf_strings">Matching in invalid UTF strings</a></li>
+</ul>
+</div>
 <h2>Name</h2>
 <div class="sectionbody">
 <p>pcre2unicode - PCRE2 Unicode support</p>
@@ -457,7 +483,7 @@ treats each code unit in a string as one character.</p>
 <p>There are two ways of telling PCRE2 to switch to UTF mode, where characters may
 consist of more than one code unit and the range of values is constrained. The
 program can call
-<a href="pcre2_compile.html"><code class="function">pcre2_compile()</code></a>
+<code class="function">pcre2_compile()</code>
 with the <code class="constant">PCRE2_UTF</code> option, or the pattern may start with the sequence <code class="regex">(*UTF)</code>.
 However, the latter facility can be locked out by the <code class="constant">PCRE2_NEVER_UTF</code> option.
 That is, the programmer can prevent the supplier of the pattern from switching
@@ -484,9 +510,9 @@ handled, as documented below.</p>
 <code class="regex">\P{..}</code>, and <code class="regex">\X</code> can be used. This is not dependent on the <code class="constant">PCRE2_UTF</code> setting.
 The Unicode properties that can be tested are a subset of those that Perl
 supports. Currently they are limited to the general category properties such as
-Lu for an upper case letter or Nd for a decimal number, the derived properties
-Any and Lc (synonym L&amp;), the Unicode script names such as Arabic or Han,
-Bidi_Class, Bidi_Control, and a few binary properties.</p>
+<code class="regex">Lu</code> for an upper case letter or <code class="regex">Nd</code> for a decimal number, the derived properties
+<code class="regex">Any</code> and <code class="regex">Lc</code> (synonym <code class="regex">L&amp;</code>), the Unicode script names such as <code class="regex">Arabic</code> or <code class="regex">Han</code>,
+<code class="regex">Bidi_Class</code>, <code class="regex">Bidi_Control</code>, and a few binary properties.</p>
 </div>
 <div class="paragraph">
 <p>The full lists are given in the
@@ -496,7 +522,7 @@ and
 documentation. In general, only the short names for properties are supported.
 For example, <code class="regex">\p{L}</code> matches a letter. Its longer synonym, <code class="regex">\p{Letter}</code>, is not
 supported. Furthermore, in Perl, many properties may optionally be prefixed by
-"Is", for compatibility with Perl 5.6. PCRE2 does not support this.</p>
+<code class="regex">Is</code>, for compatibility with Perl 5.6. PCRE2 does not support this.</p>
 </div>
 </div>
 </div>
@@ -507,10 +533,10 @@ supported. Furthermore, in Perl, many properties may optionally be prefixed by
 <p>Code points less than 256 can be specified in patterns by either braced or
 unbraced hexadecimal escape sequences (for example, <code class="regex">\x{b3}</code> or <code class="regex">\xb3</code>). Larger
 values have to use braced sequences. Unbraced octal code points up to <code class="regex">\777</code> are
-also recognized; larger ones can be coded using <code class="regex">\o{&#8230;&#8203;}</code>.</p>
+also recognized; larger ones can be coded using <code class="regex">\o{...}</code>.</p>
 </div>
 <div class="paragraph">
-<p>The escape sequence <code class="regex">\N{U+&lt;hex digits&gt;}</code> is recognized as another way of
+<p>The escape sequence <code class="regex">\N{U&#43;<em>hex digits</em>}</code> is recognized as another way of
 specifying a Unicode character by code point in a UTF mode. It is not allowed
 in non-UTF mode.</p>
 </div>
@@ -594,52 +620,60 @@ counterparts can be disabled by setting the <code class="constant">PCRE2_EXTRA_C
 option. When this is set, all characters in a case equivalence must either be
 ASCII or non-ASCII; there can be no mixing.</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>Without <code class="constant">PCRE2_EXTRA_CASELESS_RESTRICT</code>:
-  'k' = 'K' = U+212A (Kelvin sign)
-  's' = 'S' = U+017F (long S)
-With <code class="constant">PCRE2_EXTRA_CASELESS_RESTRICT</code>:
-  'k' = 'K'
-  U+212A (Kelvin sign)  only case-equivalent to itself
-  's' = 'S'
-  U+017F (long S)       only case-equivalent to itself</pre>
-</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Without <code class="constant">PCRE2_EXTRA_CASELESS_RESTRICT</code></dt>
+<dd>
+<p>'k' = 'K' = <code class="character">U+212A</code> (Kelvin sign)<br>
+'s' = 'S' = <code class="character">U+017F</code> (long S)</p>
+</dd>
+<dt class="hdlist1">With <code class="constant">PCRE2_EXTRA_CASELESS_RESTRICT</code></dt>
+<dd>
+<p>'k' = 'K'<br>
+<code class="character">U+212A</code> (Kelvin sign)&#8201;&#8212;&#8201;only case-equivalent to itself<br>
+'s' = 'S'<br>
+<code class="character">U+017F</code> (long S)&#8201;&#8212;&#8201;only case-equivalent to itself</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>One language family, Turkish and Azeri, has its own case-insensitivity rules,
 which can be selected by setting <code class="constant">PCRE2_EXTRA_TURKISH_CASING</code>. This alters the
-behaviour of the 'i', 'I', <code>U+0130</code> (capital I with dot above), and <code>U+0131</code>
+behaviour of the 'i', 'I', <code class="character">U+0130</code> (capital I with dot above), and <code class="character">U+0131</code>
 (small dotless i) characters.</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>Without <code class="constant">PCRE2_EXTRA_TURKISH_CASING</code>:
-  'i' = 'I'
-  U+0130 (capital I with dot above)  only case-equivalent to itself
-  U+0131 (small dotless i)           only case-equivalent to itself
-With <code class="constant">PCRE2_EXTRA_TURKISH_CASING</code>:
-  'i' = U+0130 (capital I with dot above)
-  U+0131 (small dotless i) = 'I'</pre>
-</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Without <code class="constant">PCRE2_EXTRA_TURKISH_CASING</code></dt>
+<dd>
+<p>'i' = 'I'<br>
+<code class="character">U+0130</code> (capital I with dot above) &#8201;&#8212;&#8201;only case-equivalent to itself<br>
+<code class="character">U+0131</code> (small dotless i)&#8201;&#8212;&#8201;only case-equivalent to itself</p>
+</dd>
+<dt class="hdlist1">With <code class="constant">PCRE2_EXTRA_TURKISH_CASING</code></dt>
+<dd>
+<p>'i' = <code class="character">U+0130</code> (capital I with dot above)<br>
+<code class="character">U+0131</code> (small dotless i) = 'I'</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>It is not allowed to specify both <code class="constant">PCRE2_EXTRA_CASELESS_RESTRICT</code> and
 <code class="constant">PCRE2_EXTRA_TURKISH_CASING</code> together.</p>
 </div>
 <div class="paragraph">
-<p>From release 10.45 the Unicode letter properties Lu (upper case), Ll (lower
-case), and Lt (title case) are all treated as Lc (cased letter) when caseless
+<p>From release 10.45 the Unicode letter properties <code class="regex">Lu</code> (upper case), <code class="regex">Ll</code> (lower
+case), and <code class="regex">Lt</code> (title case) are all treated as <code class="regex">Lc</code> (cased letter) when caseless
 matching is set by the <code class="constant">PCRE2_CASELESS</code> option or <code class="regex">(?i)</code> within the pattern.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_script_runs">Script runs</h2>
+<h2 id="script-runs">Script runs</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The pattern constructs <code class="regex">(*script_run:&#8230;&#8203;)</code> and <code class="regex">(*atomic_script_run:&#8230;&#8203;)</code>, with
-synonyms <code class="regex">(*sr:&#8230;&#8203;)</code> and <code class="regex">(*asr:&#8230;&#8203;)</code>, verify that the string matched within the
+<p>The pattern constructs <code class="regex">(*script_run:...)</code> and <code class="regex">(*atomic_script_run:...)</code>, with
+synonyms <code class="regex">(*sr:...)</code> and <code class="regex">(*asr:...)</code>, verify that the string matched within the
 parentheses is a script run. In concept, a script run is a sequence of
 characters that are all from the same Unicode script. However, because some
 scripts are commonly used together, and because some diacritical and other
@@ -653,7 +687,7 @@ are also three special values:</p>
 <div class="paragraph">
 <p>"Unknown" is used for code points that have not been assigned, and also for the
 surrogate code points. In the PCRE2 32-bit library, characters whose code
-points are greater than the Unicode maximum (<code>U+10FFFF</code>), which are accessible
+points are greater than the Unicode maximum (<code class="character">U+10FFFF</code>), which are accessible
 only in non-UTF mode, are assigned the Unknown script.</p>
 </div>
 <div class="paragraph">
@@ -668,23 +702,23 @@ that they modify.</p>
 </div>
 <div class="paragraph">
 <p>Some Inherited characters are used with many scripts, but many of them are only
-normally used with a small number of scripts. For example, <code>U+102E0</code> (Coptic
+normally used with a small number of scripts. For example, <code class="character">U+102E0</code> (Coptic
 Epact thousands mark) is used only with Arabic and Coptic. In order to make it
 possible to check this, a Unicode property called Script Extension exists. Its
 value is a list of scripts that apply to the character. For the majority of
 characters, the list contains just one script, the same one as the Script
-property. However, for characters such as <code>U+102E0</code> more than one Script is
+property. However, for characters such as <code class="character">U+102E0</code> more than one Script is
 listed. There are also some Common characters that have a single, non-Common
 script in their Script Extension list.</p>
 </div>
 <div class="paragraph">
-<p>The next section describes the basic rules for deciding whether a given string
+<p>The section <a href="#basic-script-run-rules">Basic script run rules</a> describes the basic rules for deciding whether a given string
 of characters is a script run. Note, however, that there are some special cases
 involving the Chinese Han script, and an additional constraint for decimal
 digits. These are covered in subsequent sections.</p>
 </div>
 <div class="sect2">
-<h3 id="_basic_script_run_rules">Basic script run rules</h3>
+<h3 id="basic-script-run-rules">Basic script run rules</h3>
 <div class="paragraph">
 <p>A string that is less than two characters long is a script run. This is the
 only case in which an Unknown character can be part of a script run. Longer
@@ -700,20 +734,24 @@ their Script Extension lists. In set-theoretic terminology, the intersection of
 all the sets of scripts must not be empty.</p>
 </div>
 <div class="paragraph">
-<p>A simple example is an Internet name such as "google.com". The letters are all
+<p>A simple example is an Internet name such as <code class="subject">google.com</code>. The letters are all
 in the Latin script, and the dot is Common, so this string is a script run.
-However, the Cyrillic letter "o" looks exactly the same as the Latin "o"; a
-string that looks the same, but with Cyrillic "o"s is not a script run.</p>
+However, the Cyrillic letter <code class="subject">o</code> looks exactly the same as the Latin <code class="subject">o</code>; a
+string that looks the same, but with Cyrillic <code class="subject">o</code>s is not a script run.</p>
 </div>
 <div class="paragraph">
 <p>More interesting examples involve characters with more than one script in their
 Script Extension. Consider the following characters:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>U+060C  Arabic comma
-U+06D4  Arabic full stop</pre>
-</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code class="character">U+060C</code>, Arabic comma</p>
+</li>
+<li>
+<p><code class="character">U+06D4</code>, Arabic full stop</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>The first has the Script Extension list Arabic, Hanifi Rohingya, Syriac, and
@@ -774,7 +812,8 @@ only valid UTF code unit sequences.</p>
 is undefined and your program may crash or loop indefinitely or give incorrect
 results. There is, however, one mode of matching that can handle invalid UTF
 subject strings. This is enabled by passing <code class="constant">PCRE2_MATCH_INVALID_UTF</code> to
-<code class="function">pcre2_compile()</code> and is discussed below in the next section. The rest of
+<code class="function">pcre2_compile()</code> and is discussed below in the section
+<a href="#utf8-string-errors">Errors in UTF-8 strings</a>. The rest of
 this section covers the case when <code class="constant">PCRE2_MATCH_INVALID_UTF</code> is not set.</p>
 </div>
 <div class="paragraph">
@@ -803,14 +842,14 @@ one-character lookbehinds.</p>
 </div>
 <div class="paragraph">
 <p>In addition to checking the format of the string, there is a check to ensure
-that all code points lie in the range <code>U+0</code> to <code>U+10FFFF</code>, excluding the surrogate
+that all code points lie in the range <code class="character">U+0</code> to <code class="character">U+10FFFF</code>, excluding the surrogate
 area. The so-called "non-character" code points are not excluded because
 Unicode corrigendum #9 makes it clear that they should not be.</p>
 </div>
 <div class="paragraph">
 <p>Characters in the "Surrogate Area" of Unicode are reserved for use by UTF-16,
 where they are used in pairs to encode code points with values greater than
-<code class="c">0xFFFF</code>. The code points that are encoded by UTF-16 pairs are available
+<code class="character">0xFFFF</code>. The code points that are encoded by UTF-16 pairs are available
 independently in the UTF-8 and UTF-32 encodings. (In other words, the whole
 surrogate thing is a fudge for UTF-16 which unfortunately messes up UTF-8 and
 UTF-32.)</p>
@@ -824,57 +863,62 @@ option. However, this is possible only in UTF-8 and UTF-32 modes, because these
 values are not representable in UTF-16.</p>
 </div>
 <div class="sect2">
-<h3 id="_errors_in_utf_8_strings">Errors in UTF-8 strings</h3>
+<h3 id="utf8-string-errors">Errors in UTF-8 strings</h3>
 <div class="paragraph">
 <p>The following negative error codes are given for invalid UTF-8 strings:</p>
 </div>
-<div class="paragraph errors">
-<p><code class="constant">PCRE2_ERROR_UTF8_ERR1</code>, <code class="constant">PCRE2_ERROR_UTF8_ERR2</code>, <code class="constant">PCRE2_ERROR_UTF8_ERR3</code>, <code class="constant">PCRE2_ERROR_UTF8_ERR4</code>,
-<code class="constant">PCRE2_ERROR_UTF8_ERR5</code>::
-  The string ends with a truncated UTF-8 character; the code specifies how many
-  bytes are missing (1 to 5). Although RFC 3629 restricts UTF-8 characters to be
-  no longer than 4 bytes, the encoding scheme (originally defined by RFC 2279)
-  allows for up to 6 bytes, and this is checked first; hence the possibility of
-  4 or 5 missing bytes.</p>
-</div>
-<div class="paragraph">
-<p><code class="constant">PCRE2_ERROR_UTF8_ERR6</code>, <code class="constant">PCRE2_ERROR_UTF8_ERR7</code>, <code class="constant">PCRE2_ERROR_UTF8_ERR8</code>, <code class="constant">PCRE2_ERROR_UTF8_ERR9</code>,
-<code class="constant">PCRE2_ERROR_UTF8_ERR10</code>::
-  The two most significant bits of the 2nd, 3rd, 4th, 5th, or 6th byte of the
-  character do not have the binary value <code class="c">0b10</code> (that is, either the most
-  significant bit is 0, or the next bit is 1).</p>
-</div>
-<div class="paragraph">
-<p><code class="constant">PCRE2_ERROR_UTF8_ERR11</code>,
-<code class="constant">PCRE2_ERROR_UTF8_ERR12</code>::
-  A character that is valid by the RFC 2279 rules is either 5 or 6 bytes long;
-  these code points are excluded by RFC 3629.</p>
-</div>
-<div class="dlist">
+<div class="dlist errors">
 <dl>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR1</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR2</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR3</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR4</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR5</code></dt>
+<dd>
+<p>The string ends with a truncated UTF-8 character; the code specifies how many
+bytes are missing (1 to 5). Although RFC 3629 restricts UTF-8 characters to be
+no longer than 4 bytes, the encoding scheme (originally defined by RFC 2279)
+allows for up to 6 bytes, and this is checked first; hence the possibility of
+4 or 5 missing bytes.</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR6</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR7</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR8</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR9</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR10</code></dt>
+<dd>
+<p>The two most significant bits of the 2nd, 3rd, 4th, 5th, or 6th byte of the
+character do not have the binary value <code class="c">0b10</code> (that is, either the most
+significant bit is 0, or the next bit is 1).</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR11</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR12</code></dt>
+<dd>
+<p>A character that is valid by the RFC 2279 rules is either 5 or 6 bytes long;
+these code points are excluded by RFC 3629.</p>
+</dd>
 <dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR13</code></dt>
 <dd>
-<p>A 4-byte character has a value greater than <code class="c">0x10ffff</code>; these code points are
+<p>A 4-byte character has a value greater than <code class="character">0x10ffff</code>; these code points are
 excluded by RFC 3629.</p>
 </dd>
 <dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR14</code></dt>
 <dd>
-<p>A 3-byte character has a value in the range <code class="c">0xd800</code> to <code class="c">0xdfff</code>; this range of
+<p>A 3-byte character has a value in the range <code class="character">0xd800</code> to <code class="character">0xdfff</code>; this range of
 code points are reserved by RFC 3629 for use with UTF-16, and so are excluded
 from UTF-8.</p>
 </dd>
-</dl>
-</div>
-<div class="paragraph">
-<p><code class="constant">PCRE2_ERROR_UTF8_ERR15</code>, <code class="constant">PCRE2_ERROR_UTF8_ERR16</code>, <code class="constant">PCRE2_ERROR_UTF8_ERR17</code>, <code class="constant">PCRE2_ERROR_UTF8_ERR18</code>,
-<code class="constant">PCRE2_ERROR_UTF8_ERR19</code>::
-  A 2-, 3-, 4-, 5-, or 6-byte character is "overlong", that is, it codes for a
-  value that can be represented by fewer bytes, which is invalid. For example,
-  the two bytes <code class="c">0xc0</code>, <code class="c">0xae</code> give the value <code class="c">0x2e</code>, whose correct coding uses just
-  one byte.</p>
-</div>
-<div class="dlist">
-<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR15</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR16</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR17</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR18</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR19</code></dt>
+<dd>
+<p>A 2-, 3-, 4-, 5-, or 6-byte character is "overlong", that is, it codes for a
+value that can be represented by fewer bytes, which is invalid. For example,
+the two bytes <code class="character">0xc0</code>, <code class="character">0xae</code> give the value <code class="character">0x2e</code>, whose correct coding uses just
+one byte.</p>
+</dd>
 <dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR20</code></dt>
 <dd>
 <p>The two most significant bits of the first byte of a character have the binary
@@ -884,7 +928,7 @@ character.</p>
 </dd>
 <dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR21</code></dt>
 <dd>
-<p>The first byte of a character has the value <code class="c">0xfe</code> or <code class="c">0xff</code>. These values can
+<p>The first byte of a character has the value <code class="character">0xfe</code> or <code class="character">0xff</code>. These values can
 never occur in a valid UTF-8 string.</p>
 </dd>
 </dl>
@@ -921,11 +965,11 @@ never occur in a valid UTF-8 string.</p>
 <dl>
 <dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF32_ERR1</code></dt>
 <dd>
-<p>Surrogate character (<code class="c">0xd800</code> to <code class="c">0xdfff</code>)</p>
+<p>Surrogate character (<code class="character">0xd800</code> to <code class="character">0xdfff</code>)</p>
 </dd>
 <dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF32_ERR2</code></dt>
 <dd>
-<p>Code point is greater than <code class="c">0x10ffff</code></p>
+<p>Code point is greater than <code class="character">0x10ffff</code></p>
 </dd>
 </dl>
 </div>
@@ -985,7 +1029,7 @@ UTF character, or the end of the subject.</p>
 <div class="paragraph">
 <p>At internal fragment boundaries, <code class="regex">\b</code> and <code class="regex">\B</code> behave in the same way as at the
 beginning and end of the subject. For example, a sequence such as <code class="regex">\bWORD\b</code>
-would match an instance of WORD that is surrounded by invalid UTF code units.</p>
+would match an instance of <code class="subject">WORD</code> that is surrounded by invalid UTF code units.</p>
 </div>
 <div class="paragraph">
 <p>Using <code class="constant">PCRE2_MATCH_INVALID_UTF</code>, an application can run matches on arbitrary
@@ -994,30 +1038,20 @@ can be useful when searching for UTF text in executable or other binary files.</
 </div>
 <div class="paragraph">
 <p>Note, however, that the 16-bit and 32-bit PCRE2 libraries process strings as
-sequences of <code class="c">uint16_t</code> or <code class="c">uint32_t</code> code points. They cannot find valid UTF
+sequences of <code class="type">uint16_t</code> or <code class="type">uint32_t</code> code points. They cannot find valid UTF
 sequences within an arbitrary string of bytes unless such sequences are
 suitably aligned.</p>
 </div>
+<h2 id="_author" class="discrete">Author</h2>
+<div class="paragraph">
+<p>Philip Hazel<br>
+Retired from University Computing Service<br>
+Cambridge, England.</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_author">Author</h2>
-<div class="sectionbody">
-<div class="literalblock">
-<div class="content">
-<pre>Philip Hazel
-Retired from University Computing Service
-Cambridge, England.</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_revision">Revision</h2>
-<div class="sectionbody">
+<h2 id="_revision" class="discrete">Revision</h2>
 <div class="paragraph">
 <p>Last updated: 27 November 2024<br>
-Copyright (c) 1997-2024 University of Cambridge.</p>
+Copyright &#169; 1997-2024 University of Cambridge.</p>
 </div>
 </div>
 </div>

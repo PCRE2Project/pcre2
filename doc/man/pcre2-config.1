@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2-config
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 22 February 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -55,7 +55,7 @@ encountered, the "usage" information is output.
 \f(CR\-\-prefix\fP
 .ad l
 Writes the directory prefix used in the PCRE2 installation for
-architecture\-independent files (\fI/usr\fP on many systems, \fI/usr/local\fP on
+architecture\-independent files (\f(CR/usr\fP on many systems, \f(CR/usr/local\fP on
 some systems) to the standard output.
 .TP 15
 \f(CR\-\-exec\-prefix\fP
@@ -87,7 +87,7 @@ with the 32\-bit PCRE2 library (\f(CR\-lpcre2\-32\fP on many systems).
 \f(CR\-\-libs\-posix\fP
 .ad l
 Writes to the standard output the command line options required to link with
-PCRE2\(cqs POSIX API wrapper library (\f(CR\-lpcre2\-posix\fP \f(CR\-lpcre2\-8\fP on many
+PCRE2\(cqs POSIX API wrapper library (\f(CR\-lpcre2\-posix \-lpcre2\-8\fP on many
 systems).
 .TP 15
 \f(CR\-\-cflags\fP
@@ -107,11 +107,11 @@ files that use PCRE2\(cqs POSIX API wrapper library (this may include some
 .ad l
 .SH "SEE ALSO"
 .sp
-\f(CRpcre2(3)\fP
-.SH "AUTHOR"
+\f(CRpcre2\fP.
+.SS "Author"
 .sp
 This manual page was originally written by Mark Baker for the Debian GNU/Linux
 system. It has been subsequently revised as a generic PCRE2 man page.
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 22 February 2025

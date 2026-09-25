@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_config
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 03 September 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -48,11 +48,11 @@ arguments are as follows:
 .sp
 .RS 4
 .PD 0
-.TP 6
+.TP 7
 \fIwhat\fP
 .ad l
 A code specifying what information is required
-.TP 6
+.TP 7
 \fIwhere\fP
 .ad l
 Points to where to put the information
@@ -61,93 +61,177 @@ Points to where to put the information
 .PP
 .ad l
 .sp
-If \fIwhere\fP is \f(CRNULL\fP, the function returns the amount of memory needed for
+If \fIwhere\fP is \fBNULL\fP, the function returns the amount of memory needed for
 the requested information. When the information is a string, the value is in
 code units; for other types of data it is in bytes.
 .sp
-If \fIwhere\fP is not \f(CRNULL\fP, for \fBPCRE2_CONFIG_JITTARGET\fP,
+If \fIwhere\fP is not \fBNULL\fP, for \fBPCRE2_CONFIG_JITTARGET\fP,
 \fBPCRE2_CONFIG_UNICODE_VERSION\fP, and \fBPCRE2_CONFIG_VERSION\fP it must point to a
 buffer that is large enough to hold the string. For all other codes it must
-point to a \f(CRuint32_t\fP integer variable. The available codes are:
+point to a \fBuint32_t\fP integer variable. The available codes are:
 .sp
 .RS 4
-.PD 0
-.TP 24
+.PD
+.TP 26
 \fBPCRE2_CONFIG_BSR\fP
 .ad l
 Indicates what \f(CR\(rsR\fP matches by default:
+.RS 26
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 \fBPCRE2_BSR_UNICODE\fP
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 \fBPCRE2_BSR_ANYCRLF\fP
-.TP 24
+.RE
+.RE
+.TP 26
 \fBPCRE2_CONFIG_COMPILED_WIDTHS\fP
 .ad l
-Which of \f(CR8/16/32\fP support was compiled
-.TP 24
+Which of 8/16/32 support was compiled
+.TP 26
 \fBPCRE2_CONFIG_DEPTHLIMIT\fP
 .ad l
 Default backtracking depth limit
-.TP 24
+.TP 26
 \fBPCRE2_CONFIG_EFFECTIVE_LINKSIZE\fP
 .ad l
 How many bytes are used for link size
-.TP 24
+.TP 26
 \fBPCRE2_CONFIG_HEAPLIMIT\fP
 .ad l
 Default heap memory limit
-.TP 24
+.TP 26
 \fBPCRE2_CONFIG_JIT\fP
 .ad l
 Availability of just\-in\-time compiler
-support (\f(CR1=yes 0=no\fP)
-.TP 24
+support (1=yes 0=no)
+.TP 26
 \fBPCRE2_CONFIG_JITTARGET\fP
 .ad l
 Information (a string) about the target
 architecture for the JIT compiler
-.TP 24
+.TP 26
 \fBPCRE2_CONFIG_LINKSIZE\fP
 .ad l
-Configured internal link size (\f(CR2\fP, \f(CR3\fP, \f(CR4\fP)
-.TP 24
+Configured internal link size (2, 3, 4)
+.TP 26
 \fBPCRE2_CONFIG_MATCHLIMIT\fP
 .ad l
 Default internal resource limit
-.TP 24
+.TP 26
 \fBPCRE2_CONFIG_NEVER_BACKSLASH_C\fP
 .ad l
 Whether or not \f(CR\(rsC\fP is disabled
-.TP 24
+.TP 26
 \fBPCRE2_CONFIG_NEWLINE\fP
 .ad l
 Code for the default newline sequence:
+.RS 26
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 \fBPCRE2_NEWLINE_CR\fP
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 \fBPCRE2_NEWLINE_LF\fP
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 \fBPCRE2_NEWLINE_CRLF\fP
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 \fBPCRE2_NEWLINE_ANY\fP
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 \fBPCRE2_NEWLINE_ANYCRLF\fP
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 \fBPCRE2_NEWLINE_NUL\fP
-.TP 24
+.RE
+.RE
+.TP 26
 \fBPCRE2_CONFIG_PARENSLIMIT\fP
 .ad l
 Default parentheses nesting limit
-.TP 24
+.TP 26
 \fBPCRE2_CONFIG_RECURSIONLIMIT\fP
 .ad l
 Obsolete: use \fBPCRE2_CONFIG_DEPTHLIMIT\fP
-.TP 24
+.TP 26
 \fBPCRE2_CONFIG_STACKRECURSE\fP
 .ad l
-Obsolete: always returns \f(CR0\fP
-.TP 24
+Obsolete: always returns 0
+.TP 26
 \fBPCRE2_CONFIG_UNICODE\fP
 .ad l
 Availability of Unicode support
-(\f(CR1=yes 0=no\fP)
-.TP 24
+(1=yes 0=no)
+.TP 26
 \fBPCRE2_CONFIG_UNICODE_VERSION\fP
 .ad l
 The Unicode version (a string)
-.TP 24
+.TP 26
 \fBPCRE2_CONFIG_VERSION\fP
 .ad l
 The PCRE2 version (a string)

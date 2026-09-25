@@ -2,7 +2,7 @@ PCRE2TEST(1)                         PCRE2                        PCRE2TEST(1)
 
 
 NAME
-       pcre2test - a program for testing Perl-compatible regular expressions.
+       pcre2test - a program for testing Perl-compatible regular expressions
 
 
 SYNOPSIS
@@ -30,7 +30,7 @@ SYNOPSIS
        be of use except when testing the libraries.
 
 
-PCRE2'S 8-BIT, 16-BIT AND 32-BIT LIBRARIES
+PCRE2’S 8-BIT, 16-BIT AND 32-BIT LIBRARIES
        Different versions of the PCRE2 library can be built to support
        character strings that are encoded in 8-bit, 16-bit, or 32-bit code
        units. One, two, or all three of these libraries may be simultaneously
@@ -49,12 +49,12 @@ PCRE2'S 8-BIT, 16-BIT AND 32-BIT LIBRARIES
 
 INPUT ENCODING
        Input to pcre2test is processed line by line, either by calling the C
-       library's fgets() function, or via the libreadline or libedit library.
-       In some Windows environments character 26 (hex 1A) causes an immediate
+       library’s fgets() function, or via the libreadline or libedit library.
+       In some Windows environments character 26 (0x1A) causes an immediate
        end of file, and no further data is read, so this character should be
        avoided unless you really want that action.
 
-       The input is processed using C's string functions, so must not contain
+       The input is processed using C’s string functions, so must not contain
        binary zeros, even though in Unix-like environments, fgets() treats any
        bytes other than newline as data characters. An error is generated if a
        binary zero is encountered. By default subject lines are processed for
@@ -85,207 +85,240 @@ INPUT ENCODING
        greater than 0x7fffffff, but such values can be handled by the 32-bit
        library. When testing this library in non-UTF mode with utf8_input set,
        if any character is preceded by the byte 0xff (which is an invalid byte
-       in UTF-8) 0x80000000 is added to the character's value. For subject
+       in UTF-8) 0x80000000 is added to the character’s value. For subject
        strings, using an escape sequence is preferable.
 
 
 COMMAND LINE OPTIONS
-           -8                      If the 8-bit library has been built, this
-                                   option causes it to be used (this is the
-                                   default). If the 8-bit library has not been
-                                   built, this option causes an error.
-           -16                     If the 16-bit library has been built, this
-                                   option causes it to be used. If the 8-bit
-                                   library has not been built, this is the
-                                   default. If the 16-bit library has not been
-                                   built, this option causes an error.
-           -32                     If the 32-bit library has been built, this
-                                   option causes it to be used. If no other
-                                   library has been built, this is the
-                                   default. If the 32-bit library has not been
-                                   built, this option causes an error.
-           -ac                     Behave as if each pattern has the
-                                   auto_callout modifier, that is, insert
-                                   automatic callouts into every pattern that
-                                   is compiled.
-           -AC                     As for -ac, but in addition behave as if
-                                   each subject line has the callout_extra
-                                   modifier, that is, show additional
-                                   information from callouts.
-           -b                      Behave as if each pattern has the
-                                   fullbincode modifier; the full internal
-                                   binary form of the pattern is output after
-                                   compilation.
-           -C                      Output the version number of the PCRE2
-                                   library, and all available information
-                                   about the optional features that are
-                                   included, and then exit with zero exit
-                                   code. All other options are ignored. If
-                                   both -C and -LM are present, whichever is
-                                   first is recognized.
-           -C option               Output information about a specific
-                                   build-time option, then exit. This
-                                   functionality is intended for use in
-                                   scripts such as RunTest. The following
-                                   options output the value and set the exit
-                                   code as indicated:
+           -8                     If the 8-bit library has been built, this
+                                  option causes it to be used (this is the
+                                  default). If the 8-bit library has not been
+                                  built, this option causes an error.
 
-                                     linksize   the configured internal link
-                                   size (2, 3, or 4)
-                                                  exit code is set to the link
-                                   size
-                                     newline    the default newline setting:
-                                                  CR, LF, CRLF, ANYCRLF, ANY,
-                                   or NUL
-                                                  exit code is always 0
-                                     bsr        the default setting for what
-                                   \R matches:
-                                                  ANYCRLF or ANY
-                                                  exit code is always 0
+           -16                    If the 16-bit library has been built, this
+                                  option causes it to be used. If the 8-bit
+                                  library has not been built, this is the
+                                  default. If the 16-bit library has not been
+                                  built, this option causes an error.
 
-                                   The following options output 1 for true or
-                                   0 for false, and set the exit code to the
-                                   same value:
+           -32                    If the 32-bit library has been built, this
+                                  option causes it to be used. If no other
+                                  library has been built, this is the default.
+                                  If the 32-bit library has not been built,
+                                  this option causes an error.
 
-                                     backslash-C  \C is supported (not locked
-                                   out)
-                                     ebcdic       compiled for an EBCDIC
-                                   environment
-                                     ebcdic-io    if PCRE2 is compiled for
-                                   EBCDIC, whether pcre2test's input and
+           -ac                    Behave as if each pattern has the
+                                  auto_callout modifier, that is, insert
+                                  automatic callouts into every pattern that
+                                  is compiled.
+
+           -AC                    As for -ac, but in addition behave as if
+                                  each subject line has the callout_extra
+                                  modifier, that is, show additional
+                                  information from callouts.
+
+           -b                     Behave as if each pattern has the
+                                  fullbincode modifier; the full internal
+                                  binary form of the pattern is output after
+                                  compilation.
+
+           -C                     Output the version number of the PCRE2
+                                  library, and all available information about
+                                  the optional features that are included, and
+                                  then exit with zero exit code. All other
+                                  options are ignored. If both -C and -LM are
+                                  present, whichever is first is recognized.
+
+           -C option              Output information about a specific
+                                  build-time option, then exit. This
+                                  functionality is intended for use in scripts
+                                  such as RunTest. The following options
+                                  output the value and set the exit code as
+                                  indicated:
+
+                                      linksize  Output the configured internal
+                                                link size (2, 3, or 4). The
+                                                exit code is set to the link
+                                                size.
+                                      newline   Output the default newline
+                                                setting: CR, LF, CRLF,
+                                                ANYCRLF, ANY, or NUL. The exit
+                                                code is always 0.
+                                      bsr       Output the default setting for
+                                                what \R matches: ANYCRLF or
+                                                ANY. The exit code is always
+                                                0.
+
+                                  The following options output 1 for true or 0
+                                  for false, and set the exit code to the same
+                                  value:
+
+                                      backslash-C   \C is supported (not
+                                                    locked out)
+                                      ebcdic        compiled for an EBCDIC
+                                                    environment
+                                      ebcdic-io     if PCRE2 is compiled for
+                                                    EBCDIC, whether
+                                                    pcre2test's input and
                                                     output is EBCDIC or ASCII
-                                     ebcdic-nl25  if PCRE2 is compiled for
-                                   EBCDIC, whether NL (= LF) is 0x25
-                                                    (otherwise it is 0x15, the
-                                   default)
-                                     jit          just-in-time support is
-                                   available
-                                     pcre2-16     the 16-bit library was built
-                                     pcre2-32     the 32-bit library was built
-                                     pcre2-8      the 8-bit library was built
-                                     unicode      Unicode support is available
+                                      ebcdic-nl25   if PCRE2 is compiled for
+                                                    EBCDIC, whether NL (= LF)
+                                                    is 0x25 (otherwise it is
+                                                    0x15, the default)
+                                      jit           just-in-time support is
+                                                    available
+                                      pcre2-16      the 16-bit library was
+                                                    built
+                                      pcre2-32      the 32-bit library was
+                                                    built
+                                      pcre2-8       the 8-bit library was
+                                                    built
+                                      unicode       Unicode support is
+                                                    available
 
-                                   Note that the availability of JIT support
-                                   in the library does not guarantee that it
-                                   can actually be used because in some
-                                   environments it is unable to allocate
-                                   executable memory. The option "jitusable"
-                                   gives more detailed information. It returns
-                                   one of the following values:
+                                  Note that the availability of JIT support in
+                                  the library does not guarantee that it can
+                                  actually be used because in some
+                                  environments it is unable to allocate
+                                  executable memory. The option "jitusable"
+                                  gives more detailed information. It returns
+                                  one of the following values:
 
-                                     0  JIT is available and usable
-                                     1  JIT is available but cannot allocate
-                                   executable memory
-                                     2  JIT is not available
-                                     3  Unexpected return from test call to
-                                   pcre2_jit_compile()
+                                      0      JIT is available and usable
+                                      1      JIT is available but cannot
+                                             allocate executable memory
+                                      2      JIT is not available
+                                      3      Unexpected return from test call
+                                             to pcre2_jit_compile()
 
-                                   If an unknown option is given, an error
-                                   message is output; the exit code is 0.
+                                  If an unknown option is given, an error
+                                  message is output; the exit code is 0.
+
            --colo[u]r[=<always,auto,never>]
-                                   With auto, the output is coloured if the
-                                   output is to a terminal. Force or suppress
-                                   output of ANSI colour escapes with always
-                                   (or no specifier provided) and never
-                                   respectively. If no colour option is
-                                   provided, the default is auto, unless the
-                                   NO_COLOR environment variable is defined
-                                   and non-empty.
-           -d                      Behave as if each pattern has the debug
-                                   modifier; the internal form and information
-                                   about the compiled pattern is output after
-                                   compilation; -d is equivalent to -b -i.
-           -dfa                    Behave as if each subject line has the dfa
-                                   modifier; matching is done using the
-                                   pcre2_dfa_match() function instead of the
-                                   default pcre2_match().
-           -E                      Run in "preprocess only" mode (similar to
-                                   "gcc -E"). The "#if ... #endif" commands
-                                   are processed, and all other lines are
-                                   printed verbatim.
+                                  With auto, the output is coloured if the
+                                  output is to a terminal. Force or suppress
+                                  output of ANSI colour escapes with always
+                                  (or no specifier provided) and never
+                                  respectively. If no colour option is
+                                  provided, the default is auto, unless the
+                                  NO_COLOR environment variable is defined and
+                                  non-empty.
+
+           -d                     Behave as if each pattern has the debug
+                                  modifier; the internal form and information
+                                  about the compiled pattern is output after
+                                  compilation; -d is equivalent to -b -i.
+
+           -dfa                   Behave as if each subject line has the dfa
+                                  modifier; matching is done using the
+                                  pcre2_dfa_match() function instead of the
+                                  default pcre2_match().
+
+           -E                     Run in "preprocess only" mode (similar to
+                                  gcc -E). The #if ... #endif commands are
+                                  processed, and all other lines are printed
+                                  verbatim.
+
            -error number[,number,...]
-                                   Call pcre2_get_error_message() for each of
-                                   the error numbers in the comma-separated
-                                   list, display the resulting messages on the
-                                   standard output, then exit with zero exit
-                                   code. The numbers may be positive or
-                                   negative. This is a convenience facility
-                                   for PCRE2 maintainers.
-           -help                   Output a brief summary these options and
-                                   then exit.
-           -i                      Behave as if each pattern has the info
-                                   modifier; information about the compiled
-                                   pattern is given after compilation.
-           -jit                    Behave as if each pattern line has the jit
-                                   modifier; after successful compilation,
-                                   each pattern is passed to the just-in-time
-                                   compiler, if available.
-           -jitfast                Behave as if each pattern line has the
-                                   jitfast modifier; after successful
-                                   compilation, each pattern is passed to the
-                                   just-in-time compiler, if available, and
-                                   each subject line is passed directly to the
-                                   JIT matcher via its "fast path".
-           -jitverify              Behave as if each pattern line has the
-                                   jitverify modifier; after successful
-                                   compilation, each pattern is passed to the
-                                   just-in-time compiler, if available, and
-                                   the use of JIT for matching is verified.
-           -LM                     List modifiers: write a list of available
-                                   pattern and subject modifiers to the
-                                   standard output, then exit with zero exit
-                                   code. All other options are ignored. If
-                                   both -C and any -Lx options are present,
-                                   whichever is first is recognized.
-           -LP                     List properties: write a list of recognized
-                                   Unicode properties to the standard output,
-                                   then exit with zero exit code. All other
-                                   options are ignored. If both -C and any -Lx
-                                   options are present, whichever is first is
-                                   recognized.
-           -LS                     List scripts: write a list of recognized
-                                   Unicode script names to the standard
-                                   output, then exit with zero exit code. All
-                                   other options are ignored. If both -C and
-                                   any -Lx options are present, whichever is
-                                   first is recognized.
-           -malloc                 Exercise malloc() failures, by first
-                                   counting the number of calls made to malloc
-                                   during pattern compilation and matching,
-                                   then re-running the compilation and
-                                   matching that many times, exercising a
-                                   failure of each malloc() call.
-           -pattern modifier-list  Behave as if each pattern line contains the
-                                   given modifiers.
-           -q                      Do not output the version number of
-                                   pcre2test at the start of execution.
-           -S size                 On Unix-like systems, set the size of the
-                                   run-time stack to size mebibytes (units of
-                                   1024*1024 bytes).
-           -subject modifier-list  Behave as if each subject line contains the
-                                   given modifiers.
-           -t                      Run each compile and match many times with
-                                   a timer, and output the resulting times per
-                                   compile or match. When JIT is used,
-                                   separate times are given for the initial
-                                   compile and the JIT compile. You can
-                                   control the number of iterations that are
-                                   used for timing by following -t with a
-                                   number (as a separate item on the command
-                                   line). For example, "-t 1000" iterates 1000
-                                   times. The default is to iterate 500,000
-                                   times.
-           -tm                     This is like -t except that it times only
-                                   the matching phase, not the compile phase.
-           -T -TM                  These behave like -t and -tm, but in
-                                   addition, at the end of a run, the total
-                                   times for all compiles and matches are
-                                   output.
-           -unittest               Run a fixed set of additional tests of the
-                                   PCRE2 API which are not driven by the test
-                                   input files, and then exit.
-           -version                Output the PCRE2 version number and then
-                                   exit.
+                                  Call pcre2_get_error_message() for each of
+                                  the error numbers in the comma-separated
+                                  list, display the resulting messages on the
+                                  standard output, then exit with zero exit
+                                  code. The numbers may be positive or
+                                  negative. This is a convenience facility for
+                                  PCRE2 maintainers.
+
+           -help                  Output a brief summary these options and
+                                  then exit.
+
+           -i                     Behave as if each pattern has the info
+                                  modifier; information about the compiled
+                                  pattern is given after compilation.
+
+           -jit                   Behave as if each pattern line has the jit
+                                  modifier; after successful compilation, each
+                                  pattern is passed to the just-in-time
+                                  compiler, if available.
+
+           -jitfast               Behave as if each pattern line has the
+                                  jitfast modifier; after successful
+                                  compilation, each pattern is passed to the
+                                  just-in-time compiler, if available, and
+                                  each subject line is passed directly to the
+                                  JIT matcher via its "fast path".
+
+           -jitverify             Behave as if each pattern line has the
+                                  jitverify modifier; after successful
+                                  compilation, each pattern is passed to the
+                                  just-in-time compiler, if available, and the
+                                  use of JIT for matching is verified.
+
+           -LM                    List modifiers: write a list of available
+                                  pattern and subject modifiers to the
+                                  standard output, then exit with zero exit
+                                  code. All other options are ignored. If both
+                                  -C and any -Lx options are present,
+                                  whichever is first is recognized.
+
+           -LP                    List properties: write a list of recognized
+                                  Unicode properties to the standard output,
+                                  then exit with zero exit code. All other
+                                  options are ignored. If both -C and any -Lx
+                                  options are present, whichever is first is
+                                  recognized.
+
+           -LS                    List scripts: write a list of recognized
+                                  Unicode script names to the standard output,
+                                  then exit with zero exit code. All other
+                                  options are ignored. If both -C and any -Lx
+                                  options are present, whichever is first is
+                                  recognized.
+
+           -malloc                Exercise malloc() failures, by first
+                                  counting the number of calls made to malloc
+                                  during pattern compilation and matching,
+                                  then re-running the compilation and matching
+                                  that many times, exercising a failure of
+                                  each malloc() call.
+
+           -pattern modifier-list Behave as if each pattern line contains the
+                                  given modifiers.
+
+           -q                     Do not output the version number of
+                                  pcre2test at the start of execution.
+
+           -S size                On Unix-like systems, set the size of the
+                                  run-time stack to size mebibytes (units of
+                                  1024*1024 bytes).
+
+           -subject modifier-list Behave as if each subject line contains the
+                                  given modifiers.
+
+           -t                     Run each compile and match many times with a
+                                  timer, and output the resulting times per
+                                  compile or match. When JIT is used, separate
+                                  times are given for the initial compile and
+                                  the JIT compile. You can control the number
+                                  of iterations that are used for timing by
+                                  following -t with a number (as a separate
+                                  item on the command line). For example, "-t
+                                  1000" iterates 1000 times. The default is to
+                                  iterate 500,000 times.
+
+           -tm                    This is like -t except that it times only
+                                  the matching phase, not the compile phase.
+
+           -T, -TM                These behave like -t and -tm, but in
+                                  addition, at the end of a run, the total
+                                  times for all compiles and matches are
+                                  output.
+
+           -unittest              Run a fixed set of additional tests of the
+                                  PCRE2 API which are not driven by the test
+                                  input files, and then exit.
+
+           -version               Output the PCRE2 version number and then
+                                  exit.
 
 
 DESCRIPTION
@@ -336,7 +369,7 @@ COMMAND LINES
        an exclamation mark, the line is treated as a comment, and ignored.
        Otherwise, the following commands are recognized:
 
-         #forbid_utf
+       #forbid_utf
 
        Subsequent patterns automatically have the PCRE2_NEVER_UTF and
        PCRE2_NEVER_UCP options set, which locks out the use of the PCRE2_UTF
@@ -354,19 +387,19 @@ COMMAND LINES
        unset, and the automatic options are not displayed in pattern
        information, to avoid cluttering up test output.
 
-         #load <filename>
+       #load <filename>
 
        This command is used to load a set of precompiled patterns from a file,
-       as described in the section entitled "Saving and restoring compiled
-       patterns" below.
+       as described in the section SAVING AND RESTORING COMPILED PATTERNS
+       below.
 
-         #loadtables <filename>
+       #loadtables <filename>
 
        This command is used to load a set of binary character tables that can
        be accessed by the tables=3 qualifier. Such tables can be created by
        the pcre2_dftables program with the -b option.
 
-         #newline_default [<newline-list>]
+       #newline_default [<newline-list>]
 
        When PCRE2 is built, a default newline convention can be specified.
        This determines which characters and/or character pairs are recognized
@@ -381,7 +414,7 @@ COMMAND LINES
        acceptable as the default. The types must be one of CR, LF, CRLF,
        ANYCRLF, ANY, or NUL (in upper or lower case), for example:
 
-         #newline_default LF Any anyCRLF
+       #newline_default LF Any anyCRLF
 
        If the default newline is in the list, this command has no effect.
        Otherwise, except when testing the POSIX API, a newline modifier that
@@ -396,12 +429,12 @@ COMMAND LINES
        posix_nosub modifier is used when #newline_default would set a default
        for the non-POSIX API.
 
-         #pattern <modifier-list>
+       #pattern <modifier-list>
 
        This command sets a default modifier list that applies to all
        subsequent patterns. Modifiers on a pattern can change these settings.
 
-         #perltest
+       #perltest
 
        This line is used in test files that can also be processed by
        perltest.sh to confirm that Perl gives the same results as PCRE2.
@@ -418,35 +451,34 @@ COMMAND LINES
        wrong delimiter. For more details of the perltest.sh script see the
        comments it contains.
 
-         #pop [<modifiers>]
-         #popcopy [<modifiers>]
+       #pop [<modifiers>]
+       #popcopy [<modifiers>]
 
        These commands are used to manipulate the stack of compiled patterns,
-       as described in the section entitled "Saving and restoring compiled
-       patterns" below.
+       as described in the section SAVING AND RESTORING COMPILED PATTERNS
+       below.
 
-         #save <filename>
+       #save <filename>
 
        This command is used to save a set of compiled patterns to a file, as
-       described in the section entitled "Saving and restoring compiled
-       patterns" below.
+       described in the section SAVING AND RESTORING COMPILED PATTERNS below.
 
-         #subject <modifier-list>
+       #subject <modifier-list>
 
        This command sets a default modifier list that applies to all
        subsequent subject lines. Modifiers on a subject line can change these
        settings.
 
-         #if CONDITION
-         ...
-         #endif
+       #if CONDITION
+       ...
+       #endif
 
        If CONDITION is true, then the command is printed, and its contents are
        processed as normal, including printing the commandlines to the output.
        If CONDITION is false, then all lines between the "#if" and "#endif"
        are skipped and not printed. The CONDITION can be any of the conditions
        which are tested by the "-C" commandline option and which set
-       pcre2test's exit code to a boolean value. The CONDITION may also be
+       pcre2test’s exit code to a boolean value. The CONDITION may also be
        preceded by "!".
 
 
@@ -469,7 +501,7 @@ MODIFIER SYNTAX
        long modifier name, it is interpreted as a sequence of these
        abbreviations. For example:
 
-         /abc/ig,newline=cr,jit=3
+       /abc/ig,newline=cr,jit=3
 
        This is a pattern line whose modifier list starts with two one-letter
        modifiers (/i and /g). The lower-case abbreviated modifiers are the
@@ -480,31 +512,31 @@ PATTERN SYNTAX
        A pattern line must start with one of the following characters (common
        symbols, excluding pattern meta-characters):
 
-         / ! " ' ` - = _ : ; , % & @ ~
+       / ! " ' ` - = _ : ; , % & @ ~
 
-       This is interpreted as the pattern's delimiter. A regular expression
+       This is interpreted as the pattern’s delimiter. A regular expression
        may be continued over several input lines, in which case the newline
        characters are included within it. It is possible to include the
        delimiter as a literal within the pattern by escaping it with a
        backslash, for example
 
-         /abc\/def/
+       /abc\/def/
 
        If you do this, the escape and the delimiter form part of the pattern,
        but since the delimiters are all non-alphanumeric, the inclusion of the
-       backslash does not affect the pattern's interpretation. Note, however,
+       backslash does not affect the pattern’s interpretation. Note, however,
        that this trick does not work within \Q...\E literal bracketing because
        the backslash will itself be interpreted as a literal. If the
        terminating delimiter is immediately followed by a backslash, for
        example,
 
-         /abc/\
+       /abc/\
 
        a backslash is added to the end of the pattern. This is done to provide
        a way of testing the error condition that arises if a pattern finishes
        with a backslash, because
 
-         /abc\/
+       /abc\/
 
        is interpreted as the first line of a pattern that starts with "abc/",
        causing pcre2test to read the next line as a continuation of the
@@ -520,25 +552,27 @@ SUBJECT LINE SYNTAX
        modifier was set for the pattern. The following provide a means of
        encoding non-printing characters in a visible way:
 
-         \a          alarm (BEL, \x07)
-         \b          backspace (\x08)
-         \e          escape (\x27)
-         \f          form feed (\x0c)
-         \n          newline (\x0a)
-         \N{U+hh...} unicode character (any number of hex digits)
-         \r          carriage return (\x0d)
-         \t          tab (\x09)
-         \v          vertical tab (\x0b)
-         \ddd        octal number (up to 3 octal digits); represent a single
-                       code point unless larger than 255 with the 8-bit
-       library
-         \o{dd...}   octal number (any number of octal digits} representing a
-                       character in UTF mode or a code point
-         \xhh        hexadecimal byte (up to 2 hex digits)
-         \x{hh...}   hexadecimal number (up to 8 hex digits) representing a
-                       character in UTF mode or a code point
+           \a               alarm (BEL, 0x07)
+           \b               backspace (0x08)
+           \e               escape (0x27)
+           \f               form feed (0x0c)
+           \n               newline (0x0a)
+           \N{U+hh...}      unicode character (any number of hex digits)
+           \r               carriage return (0x0d)
+           \t               tab (0x09)
+           \v               vertical tab (0x0b)
+           \ddd             octal number (up to 3 octal digits); represent a
+                            single code point unless larger than 255 with the
+                            8-bit library
+           \o{dd...}        octal number (any number of octal digits)
+                            representing a character in UTF mode or a code
+                            point
+           \xhh             hexadecimal byte (up to 2 hex digits)
+           \x{hh...}        hexadecimal number (up to 8 hex digits)
+                            representing a character in UTF mode or a code
+                            point
 
-       Invoking \N{U+hh...} or \x{hh...} doesn't require the use of the utf
+       Invoking \N{U+hh...} or \x{hh...} doesn’t require the use of the utf
        modifier on the pattern. It is always recognized. There may be any
        number of hexadecimal digits inside the braces; invalid values provoke
        error messages but when using \N{U+hh...} with some invalid unicode
@@ -565,12 +599,12 @@ SUBJECT LINE SYNTAX
        There is a special backslash sequence that specifies replication of one
        or more characters:
 
-         \[<characters>]{<count>}
+       \[<characters>]{<count>}
 
        This makes it possible to test long strings without having to provide
        them as part of the file. For example:
 
-         \[abc]{4}
+       \[abc]{4}
 
        is converted to "abcabcabcabc". This feature does not support nesting.
        To include a closing square bracket in the characters, code it as \x5D.
@@ -578,14 +612,14 @@ SUBJECT LINE SYNTAX
        A backslash followed by an equals sign marks the end of the subject
        string and the start of a modifier list. For example:
 
-         abc\=notbol,notempty
+       abc\=notbol,notempty
 
        If the subject string is empty and \= is followed by white space, the
        line is treated as a comment line, and is not used for matching. For
        example:
 
-         \= This is a comment.
-         abc\= This is an invalid modifier list.
+       \= This is a comment.
+       abc\= This is an invalid modifier list.
 
        A backslash followed by any other non-alphanumeric character just
        escapes that character. A backslash followed by anything else causes an
@@ -603,7 +637,7 @@ SUBJECT LINE SYNTAX
 PATTERN MODIFIERS
        There are several types of modifier that can appear in pattern lines.
        Except where noted below, they may also be used in #pattern commands. A
-       pattern's modifier list can add to or override default modifiers that
+       pattern’s modifier list can add to or override default modifiers that
        were set by a previous #pattern command.
 
    Setting compilation options
@@ -680,9 +714,9 @@ PATTERN MODIFIERS
            optimization_full  enable all optional optimizations
            optimization_none  disable all optional optimizations
            auto_possess       auto-possessify variable quantifiers
-           auto_possess_off   don't auto-possessify variable quantifiers
+           auto_possess_off   don’t auto-possessify variable quantifiers
            dotstar_anchor     anchor patterns starting with .*
-           dotstar_anchor_off don't anchor patterns starting with .*
+           dotstar_anchor_off don’t anchor patterns starting with .*
            start_optimize     enable pre-scan of subject string
            start_optimize_off disable pre-scan of subject string
 
@@ -694,42 +728,43 @@ PATTERN MODIFIERS
        information about the pattern. There are single-letter abbreviations
        for some that are heavily used in the test files.
 
-         /B  bincode                   show binary code without lengths
-             bsr=[anycrlf|unicode]     specify \R handling
-             callout_info              show callout information
-             convert=<options>         request foreign pattern conversion
-             convert_glob_escape=c     set glob escape character
-             convert_glob_separator=c  set glob separator character
-             convert_length            set convert buffer length
-             debug                     same as info,fullbincode
-             expand                    expand repetition syntax in pattern
-             framesize                 show matching frame size
-             fullbincode               show binary code with lengths
-         /I  info                      show info about compiled pattern
-             hex                       unquoted characters are hexadecimal
-             jit[=<number>]            use JIT
-             jitfast                   use JIT fast path
-             jitverify                 verify JIT use
-             locale=<name>             use this locale
-             max_pattern_compiled      ) set maximum compiled pattern
-                        _length=<n>    )   length (bytes)
-             max_pattern_length=<n>    set maximum pattern length (code units)
-             max_varlookbehind=<n>     set maximum variable lookbehind length
-             memory                    show memory used
-             newline=<type>            set newline type
-             null_context              compile with a NULL context
-             null_pattern              pass pattern as NULL
-             parens_nest_limit=<n>     set maximum parentheses depth
-             posix                     use the POSIX API
-             posix_nosub               use the POSIX API with REG_NOSUB
-             push                      push compiled pattern onto the stack
-             pushcopy                  push a copy onto the stack
-             pushtablescopy            push a copy with tables onto the stack
-             stackguard=<number>       test the stackguard feature
-             subject_literal           treat all subject lines as literal
-             tables=[0|1|2|3]          select internal tables
-             use_length                do not zero-terminate the pattern
-             utf8_input                treat input as UTF-8
+           /B bincode                show binary code without lengths
+           bsr=[anycrlf|unicode]     specify \R handling
+           callout_info              show callout information
+           convert=<options>         request foreign pattern conversion
+           convert_glob_escape=c     set glob escape character
+           convert_glob_separator=c  set glob separator character
+           convert_length            set convert buffer length
+           debug                     same as info,fullbincode
+           expand                    expand repetition syntax in pattern
+           framesize                 show matching frame size
+           fullbincode               show binary code with lengths
+           /I info                   show info about compiled pattern
+           hex                       unquoted characters are hexadecimal
+           jit[=<number>]            use JIT
+           jitfast                   use JIT fast path
+           jitverify                 verify JIT use
+           locale=<name>             use this locale
+           max_pattern_compiled_length=<n>
+                                     set maximum compiled pattern length
+                                     (bytes)
+           max_pattern_length=<n>    set maximum pattern length (code units)
+           max_varlookbehind=<n>     set maximum variable lookbehind length
+           memory                    show memory used
+           newline=<type>            set newline type
+           null_context              compile with a NULL context
+           null_pattern              pass pattern as NULL
+           parens_nest_limit=<n>     set maximum parentheses depth
+           posix                     use the POSIX API
+           posix_nosub               use the POSIX API with REG_NOSUB
+           push                      push compiled pattern onto the stack
+           pushcopy                  push a copy onto the stack
+           pushtablescopy            push a copy with tables onto the stack
+           stackguard=<number>       test the stackguard feature
+           subject_literal           treat all subject lines as literal
+           tables=[0|1|2|3]          select internal tables
+           use_length                do not zero-terminate the pattern
+           utf8_input                treat input as UTF-8
 
        The effects of these modifiers are described in the following sections.
 
@@ -764,20 +799,20 @@ PATTERN MODIFIERS
        information is obtained from the pcre2_pattern_info() function. Here
        are some typical examples:
 
-           re> /(?i)(^a|^b)/m,info
-         Capture group count = 1
-         Compile options: multiline
-         Overall options: caseless multiline
-         First code unit at start or follows newline
-         Subject length lower bound = 1
+         re> /(?i)(^a|^b)/m,info
+       Capture group count = 1
+       Compile options: multiline
+       Overall options: caseless multiline
+       First code unit at start or follows newline
+       Subject length lower bound = 1
 
-           re> /(?i)abc/info
-         Capture group count = 0
-         Compile options: <none>
-         Overall options: caseless
-         First code unit = 'a' (caseless)
-         Last code unit = 'c' (caseless)
-         Subject length lower bound = 3
+         re> /(?i)abc/info
+       Capture group count = 0
+       Compile options: <none>
+       Overall options: caseless
+       First code unit = 'a' (caseless)
+       Last code unit = 'c' (caseless)
+       Subject length lower bound = 3
 
        "Compile options" are those specified by modifiers; "overall options"
        have added options that are taken or deduced from the pattern. If both
@@ -802,13 +837,13 @@ PATTERN MODIFIERS
        information that is requested. For each callout, either its number or
        string is given, followed by the item that follows it in the pattern.
 
-   Passing a null context
+   Passing a NULL context
        Normally, pcre2test passes a context block to pcre2_compile(). If the
        null_context modifier is set, however, NULL is passed. This is for
        testing that pcre2_compile() behaves correctly in this case (it uses
        default values).
 
-   Passing a null pattern
+   Passing a NULL pattern
        The null_pattern modifier is for testing the behaviour of
        pcre2_compile() when the pattern argument is NULL. The length value
        passed is the default PCRE2_ZERO_TERMINATED unless use_length is set.
@@ -822,19 +857,19 @@ PATTERN MODIFIERS
        non-printing characters. White space is permitted between pairs of
        digits. For example, this pattern contains three characters:
 
-         /ab 32 59/hex
+       /ab 32 59/hex
 
        Parts of such a pattern are taken literally if quoted. This pattern
        contains nine characters, only two of which are specified in
        hexadecimal:
 
-         /ab "literal" 32/hex
+       /ab "literal" 32/hex
 
        Either single or double quotes may be used. There is no way of
        including the delimiter within a substring. The hex and expand
        modifiers are mutually exclusive.
 
-   Specifying the pattern's length
+   Specifying the pattern’s length
        By default, patterns are passed to the compiling functions as
        zero-terminated strings but can be passed by length instead of being
        zero-terminated. The use_length modifier causes this to happen. Using a
@@ -844,7 +879,7 @@ PATTERN MODIFIERS
 
        If hex or use_length is used with the POSIX wrapper API (see "Using the
        POSIX wrapper API" below), the REG_PEND extension is used to pass the
-       pattern's length.
+       pattern’s length.
 
    Specifying a maximum for variable lookbehinds
        Variable lookbehind assertions are supported only if, for each one,
@@ -870,7 +905,7 @@ PATTERN MODIFIERS
        lines above. If the expand modifier is present on a pattern, parts of
        the pattern that have the form
 
-         \[<characters>]{<count>}
+       \[<characters>]{<count>}
 
        are expanded before the pattern is passed to pcre2_compile(). For
        example, \[AB]{6000} is expanded to "ABAB..." 6000 times. This
@@ -903,19 +938,19 @@ PATTERN MODIFIERS
        7. The three bits that make up the number specify which of the three
        JIT operating modes are to be compiled:
 
-         1  compile JIT code for non-partial matching
-         2  compile JIT code for soft partial matching
-         4  compile JIT code for hard partial matching
+           1      compile JIT code for non-partial matching
+           2      compile JIT code for soft partial matching
+           4      compile JIT code for hard partial matching
 
        The possible values for the jit modifier are therefore:
 
-         0  disable JIT
-         1  normal matching only
-         2  soft partial matching only
-         3  normal and soft partial matching
-         4  hard partial matching only
-         6  soft and hard partial matching only
-         7  all three modes
+           0      disable JIT
+           1      normal matching only
+           2      soft partial matching only
+           3      normal and soft partial matching
+           4      hard partial matching only
+           6      soft and hard partial matching only
+           7      all three modes
 
        If no number is given, 7 is assumed. The phrase "partial matching"
        means a call to pcre2_match() with either the PCRE2_PARTIAL_SOFT or the
@@ -948,7 +983,7 @@ PATTERN MODIFIERS
    Setting a locale
        The locale modifier must specify the name of a locale, for example:
 
-         /pattern/locale=fr_FR
+       /pattern/locale=fr_FR
 
        The given locale is set, pcre2_maketables() is called to build a set of
        character tables for the locale, and this is then passed to
@@ -965,9 +1000,9 @@ PATTERN MODIFIERS
        pattern is subsequently passed to the JIT compiler, the size of the JIT
        compiled code is also output. Here is an example:
 
-           re> /a(b)c/jit,memory
-         Memory allocation (code space): 21
-         Memory allocation (JIT code): 1910
+         re> /a(b)c/jit,memory
+       Memory allocation (code space): 21
+       Memory allocation (JIT code): 1910
 
    Limiting nested parentheses
        The parens_nest_limit modifier sets a limit on the depth of nested
@@ -997,18 +1032,21 @@ PATTERN MODIFIERS
        documentation. The following pattern modifiers set options for the
        regcomp() function:
 
-         caseless           REG_ICASE
-         multiline          REG_NEWLINE
-         dotall             REG_DOTALL     )
-         ungreedy           REG_UNGREEDY   ) These options are not part of
-         ucp                REG_UCP        )   the POSIX standard
-         utf                REG_UTF8       )
+           caseless   REG_ICASE
+           multiline  REG_NEWLINE
+           dotall     REG_DOTALL
+           ungreedy   REG_UNGREEDY
+           ucp        REG_UCP
+           utf        REG_UTF8
+
+       The four options REG_DOTALL, REG_UNGREEDY, REG_UCP, and REG_UTF8 are
+       not part of the POSIX standard.
 
        The regerror_buffsize modifier specifies a size for the error buffer
        that is passed to regerror() in the event of a compilation error. For
        example:
 
-         /abc/posix,regerror_buffsize=20
+       /abc/posix,regerror_buffsize=20
 
        This provides a means of testing the behaviour of regerror() when the
        buffer is too small for the error message. If this modifier has not
@@ -1019,8 +1057,8 @@ PATTERN MODIFIERS
        or cause an error.
 
        The pattern is passed to regcomp() as a zero-terminated string by
-       default, but if the use_length or hex modifiers are set, the
-       const:REG_PEND extension is used to pass it by length.
+       default, but if the use_length or hex modifiers are set, the REG_PEND
+       extension is used to pass it by length.
 
    Testing the stack guard feature
        The stackguard modifier is used to test the use of
@@ -1040,11 +1078,11 @@ PATTERN MODIFIERS
        behaviour with different character tables. The digit specifies the
        tables as follows:
 
-         0   do not pass any special character tables
-         1   the default ASCII tables, as distributed in
-               pcre2_chartables.c.dist
-         2   a set of tables defining ISO 8859 characters
-         3   a set of tables loaded by the #loadtables command
+           0      do not pass any special character tables
+           1      the default ASCII tables, as distributed in
+                  pcre2_chartables.c.dist
+           2      a set of tables defining ISO 8859 characters
+           3      a set of tables loaded by the #loadtables command
 
        In tables 2, some characters whose codes are greater than 128 are
        identified as letters, digits, spaces, etc. Tables 3 can be used only
@@ -1054,38 +1092,37 @@ PATTERN MODIFIERS
    Setting certain match controls
        The following modifiers are really subject modifiers, and are described
        under "Subject Modifiers" below. However, they may be included in a
-       pattern's modifier list, in which case they are applied to every
+       pattern’s modifier list, in which case they are applied to every
        subject line that is processed with that pattern. These modifiers do
        not affect the compilation process.
 
-           aftertext               show text after match
-           allaftertext            show text after captures
-           allcaptures             show all captures
-           allvector               show the entire ovector
-           allusedtext             show all consulted text
-           altglobal               alternative global matching
-           /g  global              global matching
-           heapframes_size         show match data heapframes size
-           jitstack=<n>            set size of JIT stack
-           mark                    show mark values
+           aftertext                 show text after match
+           allaftertext              show text after captures
+           allcaptures               show all captures
+           allvector                 show the entire ovector
+           allusedtext               show all consulted text
+           altglobal                 alternative global matching
+           /g  global                global matching
+           heapframes_size           show match data heapframes size
+           jitstack=<n>              set size of JIT stack
+           mark                      show mark values
            null_substitute_match_data
-                                   substitute with NULL match data
-           replace=<str>           specify a replacement string
-           startchar               show starting character when relevant
-           substitute_callout      use substitution callouts
-           substitute_case_callout use substitution case callouts
-           substitute_extended     use PCRE2_SUBSTITUTE_EXTENDED
-           substitute_literal      use PCRE2_SUBSTITUTE_LITERAL
-           substitute_matched      use PCRE2_SUBSTITUTE_MATCHED
+                                     substitute with NULL match data
+           replace=<str>             specify a replacement string
+           startchar                 show starting character when relevant
+           substitute_callout        use substitution callouts
+           substitute_case_callout   use substitution case callouts
+           substitute_extended       use PCRE2_SUBSTITUTE_EXTENDED
+           substitute_literal        use PCRE2_SUBSTITUTE_LITERAL
+           substitute_matched        use PCRE2_SUBSTITUTE_MATCHED
            substitute_overflow_length
-                                   use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+                                     use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
            substitute_replacement_only
-                                   use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
-           substitute_skip=<n>     skip substitution <n>
-           substitute_stop=<n>     skip substitution <n> and following
-           substitute_unknown_unset
-                                   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
-           substitute_unset_empty  use PCRE2_SUBSTITUTE_UNSET_EMPTY
+                                     use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
+           substitute_skip=<n>       skip substitution <n>
+           substitute_stop=<n>       skip substitution <n> and following
+           substitute_unknown_unset  use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+           substitute_unset_empty    use PCRE2_SUBSTITUTE_UNSET_EMPTY
 
        These modifiers may not appear in a #pattern command. If you want them
        as defaults, set them in a #subject command.
@@ -1102,16 +1139,16 @@ PATTERN MODIFIERS
        pushed onto a stack of compiled patterns, and pcre2test expects the
        next line to contain a new pattern (or a command) instead of a subject
        line. This facility is used when saving compiled patterns to a file, as
-       described in the section entitled "Saving and restoring compiled
-       patterns" below. If pushcopy is used instead of push, a copy of the
-       compiled pattern is stacked, leaving the original as current, ready to
-       match the following input lines. This provides a way of testing the
-       pcre2_code_copy() function. The push and pushcopy  modifiers are
-       incompatible with compilation modifiers such as global that act at
-       match time. Any that are specified are ignored (for the stacked copy),
-       with a warning message, except for replace, which causes an error. Note
-       that jitverify, which is allowed, does not carry through to any
-       subsequent matching that uses a stacked pattern.
+       described in the section SAVING AND RESTORING COMPILED PATTERNS below.
+       If pushcopy is used instead of push, a copy of the compiled pattern is
+       stacked, leaving the original as current, ready to match the following
+       input lines. This provides a way of testing the pcre2_code_copy()
+       function. The push and pushcopy  modifiers are incompatible with
+       compilation modifiers such as global that act at match time. Any that
+       are specified are ignored (for the stacked copy), with a warning
+       message, except for replace, which causes an error. Note that
+       jitverify, which is allowed, does not carry through to any subsequent
+       matching that uses a stacked pattern.
 
    Testing foreign pattern conversion
        The experimental foreign pattern conversion functions in PCRE2 can be
@@ -1153,21 +1190,20 @@ SUBJECT MODIFIERS
        The following modifiers set options for pcre2_match() or
        pcre2_dfa_match(). See pcre2api for a description of their effects.
 
-           anchored                set PCRE2_ANCHORED
-           copy_matched_subject    set PCRE2_COPY_MATCHED_SUBJECT
-           endanchored             set PCRE2_ENDANCHORED
-           dfa_restart             set PCRE2_DFA_RESTART
-           dfa_shortest            set PCRE2_DFA_SHORTEST
-           disable_recurseloop_check
-                                   set PCRE2_DISABLE_RECURSELOOP_CHECK
-           no_jit                  set PCRE2_NO_JIT
-           no_utf_check            set PCRE2_NO_UTF_CHECK
-           notbol                  set PCRE2_NOTBOL
-           notempty                set PCRE2_NOTEMPTY
-           notempty_atstart        set PCRE2_NOTEMPTY_ATSTART
-           noteol                  set PCRE2_NOTEOL
-           partial_hard (or ph)    set PCRE2_PARTIAL_HARD
-           partial_soft (or ps)    set PCRE2_PARTIAL_SOFT
+           anchored                  set PCRE2_ANCHORED
+           copy_matched_subject      set PCRE2_COPY_MATCHED_SUBJECT
+           endanchored               set PCRE2_ENDANCHORED
+           dfa_restart               set PCRE2_DFA_RESTART
+           dfa_shortest              set PCRE2_DFA_SHORTEST
+           disable_recurseloop_check set PCRE2_DISABLE_RECURSELOOP_CHECK
+           no_jit                    set PCRE2_NO_JIT
+           no_utf_check              set PCRE2_NO_UTF_CHECK
+           notbol                    set PCRE2_NOTBOL
+           notempty                  set PCRE2_NOTEMPTY
+           notempty_atstart          set PCRE2_NOTEMPTY_ATSTART
+           noteol                    set PCRE2_NOTEOL
+           partial_hard (or ph)      set PCRE2_PARTIAL_HARD
+           partial_soft (or ps)      set PCRE2_PARTIAL_SOFT
 
        The partial matching modifiers are provided with abbreviations because
        they appear frequently in tests.
@@ -1183,19 +1219,15 @@ SUBJECT MODIFIERS
        wrapper. It is ignored (with a warning) if used for non-POSIX matching.
 
            posix_startend=<n>[:<m>]
-                                   This causes the subject string to be passed
-                                   to regexec() using the REG_STARTEND option,
-                                   which uses offsets to specify which part of
-                                   the string is searched. If only one number
-                                   is given, the end offset is passed as the
-                                   end of the subject string. For more detail
-                                   of REG_STARTEND, see the pcre2posix
-                                   documentation. If the subject string
-                                   contains binary zeros (coded as escapes
-                                   such as \x{00} because pcre2test does not
-                                   support actual binary zeros in its input),
-                                   you must use posix_startend to specify its
-                                   length.
+                  This causes the subject string to be passed to regexec()
+                  using the REG_STARTEND option, which uses offsets to specify
+                  which part of the string is searched. If only one number is
+                  given, the end offset is passed as the end of the subject
+                  string. For more detail of REG_STARTEND, see the pcre2posix
+                  documentation. If the subject string contains binary zeros
+                  (coded as escapes such as \x{00} because pcre2test does not
+                  support actual binary zeros in its input), you must use
+                  posix_startend to specify its length.
 
    Setting match controls
        The following modifiers affect the matching process or request
@@ -1204,63 +1236,62 @@ SUBJECT MODIFIERS
        is matched against that pattern, but can be overridden by modifiers on
        the subject.
 
-           aftertext               show text after match
-           allaftertext            show text after captures
-           allcaptures             show all captures
-           allusedtext             show all consulted text (non-JIT only)
-           allvector               show the entire ovector
-           altglobal               alternative global matching
-           callout_capture         show captures at callout time
-           callout_data=<n>        set a value to pass via callouts
-           callout_error=<n>[:<m>] control callout error
-           callout_extra           show extra callout information
-           callout_fail=<n>[:<m>]  control callout failure
-           callout_no_where        do not show position of a callout
-           callout_none            do not supply a callout function
-           copy=<number or name>   copy captured substring
-           depth_limit=<n>         set a depth limit
-           dfa                     use pcre2_dfa_match()
-           find_limits             find heap, match and depth limits
-           find_limits_noheap      find match and depth limits
-           get=<number or name>    extract captured substring
-           getall                  extract all captured substrings
-           /g  global              global matching
-           heapframes_size         show match data heapframes size
-           heap_limit=<n>          set a limit on heap memory (Kbytes)
-           jitstack=<n>            set size of JIT stack
-           mark                    show mark values
-           match_limit=<n>         set a match limit
-           memory                  show heap memory usage
-           null_context            match with a NULL context
-           null_replacement        substitute with NULL replacement
-           null_subject            match with NULL subject
+           aftertext                 show text after match
+           allaftertext              show text after captures
+           allcaptures               show all captures
+           allusedtext               show all consulted text (non-JIT only)
+           allvector                 show the entire ovector
+           altglobal                 alternative global matching
+           callout_capture           show captures at callout time
+           callout_data=<n>          set a value to pass via callouts
+           callout_error=<n>[:<m>]   control callout error
+           callout_extra             show extra callout information
+           callout_fail=<n>[:<m>]    control callout failure
+           callout_no_where          do not show position of a callout
+           callout_none              do not supply a callout function
+           copy=<number or name>     copy captured substring
+           depth_limit=<n>           set a depth limit
+           dfa                       use pcre2_dfa_match()
+           find_limits               find heap, match and depth limits
+           find_limits_noheap        find match and depth limits
+           get=<number or name>      extract captured substring
+           getall                    extract all captured substrings
+           /g  global                global matching
+           heapframes_size           show match data heapframes size
+           heap_limit=<n>            set a limit on heap memory (Kbytes)
+           jitstack=<n>              set size of JIT stack
+           mark                      show mark values
+           match_limit=<n>           set a match limit
+           memory                    show heap memory usage
+           null_context              match with a NULL context
+           null_replacement          substitute with NULL replacement
+           null_subject              match with NULL subject
+           null_substitute_buffer    substitute with a NULL output buffer
            null_substitute_match_data
-                                   substitute with NULL match data
-           offset=<n>              set starting offset
-           offset_limit=<n>        set offset limit
-           ovector=<n>             set size of output vector
-           recursion_limit=<n>     obsolete synonym for depth_limit
-           replace=<str>           specify a replacement string
-           startchar               show startchar when relevant
-           startoffset=<n>         same as offset=<n>
-           substitute_callout      use substitution callouts
-           substitute_case_callout use substitution case callouts
-           substitute_extended     use PCRE2_SUBSTITUTE_EXTENDED
-           substitute_literal      use PCRE2_SUBSTITUTE_LITERAL
-           substitute_matched      use PCRE2_SUBSTITUTE_MATCHED
+                                     substitute with NULL match data
+           offset=<n>                set starting offset
+           offset_limit=<n>          set offset limit
+           ovector=<n>               set size of output vector
+           recursion_limit=<n>       obsolete synonym for depth_limit
+           replace=<str>             specify a replacement string
+           startchar                 show startchar when relevant
+           startoffset=<n>           same as offset=<n>
+           substitute_callout        use substitution callouts
+           substitute_case_callout   use substitution case callouts
+           substitute_extended       use PCRE2_SUBSTITUTE_EXTENDED
+           substitute_literal        use PCRE2_SUBSTITUTE_LITERAL
+           substitute_matched        use PCRE2_SUBSTITUTE_MATCHED
            substitute_overflow_length
-                                   use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+                                     use PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
            substitute_replacement_only
-                                   use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
-           substitute_skip=<n>     skip substitution number n
-           substitute_stop=<n>     skip substitution number n and greater
-           substitute_subject=<str>
-                                   specify a different subject for
-                                   substitution
-           substitute_unknown_unset
-                                   use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
-           substitute_unset_empty  use PCRE2_SUBSTITUTE_UNSET_EMPTY
-           zero_terminate          pass the subject as zero-terminated
+                                     use PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
+           substitute_skip=<n>       skip substitution number n
+           substitute_stop=<n>       skip substitution number n and greater
+           substitute_subject=<str>  specify a different subject for
+                                     substitution
+           substitute_unknown_unset  use PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+           substitute_unset_empty    use PCRE2_SUBSTITUTE_UNSET_EMPTY
+           zero_terminate            pass the subject as zero-terminated
 
        The effects of these modifiers are described in the following sections.
        When matching via the POSIX wrapper API, the aftertext, allaftertext,
@@ -1289,13 +1320,13 @@ SUBJECT MODIFIERS
        in the output by '<' or '>' characters underneath them. Here is an
        example:
 
-           re> /(?<=pqr)abc(?=xyz)/
-         data> 123pqrabcxyz456\=allusedtext
-          0: pqrabcxyz
-             <<<   >>>
-         data> 123pqrabcxy\=ph,allusedtext
-         Partial match: pqrabcxy
-                        <<<
+         re> /(?<=pqr)abc(?=xyz)/
+       data> 123pqrabcxyz456\=allusedtext
+        0: pqrabcxyz
+           <<   >>
+       data> 123pqrabcxy\=ph,allusedtext
+       Partial match: pqrabcxy
+                      <<<
 
        The first, complete match shows that the matched string is "abc", with
        the preceding and following strings "pqr" and "xyz" having been
@@ -1310,10 +1341,10 @@ SUBJECT MODIFIERS
        point, with circumflex characters under the earlier characters. For
        example:
 
-           re> /abc\Kxyz/
-         data> abcxyz\=startchar
-          0: abcxyz
-             ^^^
+         re> /abc\Kxyz/
+       data> abcxyz\=startchar
+        0: abcxyz
+           ^^^
 
        Unlike allusedtext, the startchar modifier can be used with JIT.
        However, these two modifiers are mutually exclusive.
@@ -1347,9 +1378,9 @@ SUBJECT MODIFIERS
        A callout function is supplied when pcre2test calls the library
        matching functions, unless callout_none is specified. Its behaviour can
        be controlled by various modifiers listed above whose names begin with
-       callout_. Details are given in the section entitled "Callouts" below.
-       Testing callouts from pcre2_substitute() is described separately in
-       "Testing the substitution function" below.
+       callout_. Details are given in the section CALLOUTS below. Testing
+       callouts from pcre2_substitute() is described separately in "Testing
+       the substitution function" below.
 
    Finding all matches in a string
        Searching for all possible matches within a subject can be requested by
@@ -1374,7 +1405,7 @@ SUBJECT MODIFIERS
        They can be given more than once, and each can specify a capture group
        name or number, for example:
 
-          abcd\=copy=1,copy=3,get=G1
+        abcd\=copy=1,copy=3,get=G1
 
        If the #subject command is used to set default copy and/or get lists,
        these can be unset by specifying a negative number to cancel all
@@ -1414,14 +1445,16 @@ SUBJECT MODIFIERS
        The following modifiers set options (in additional to the normal match
        options) for pcre2_substitute():
 
-         global                      PCRE2_SUBSTITUTE_GLOBAL
-         substitute_extended         PCRE2_SUBSTITUTE_EXTENDED
-         substitute_literal          PCRE2_SUBSTITUTE_LITERAL
-         substitute_matched          PCRE2_SUBSTITUTE_MATCHED
-         substitute_overflow_length  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
-         substitute_replacement_only PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
-         substitute_unknown_unset    PCRE2_SUBSTITUTE_UNKNOWN_UNSET
-         substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY
+           global                   PCRE2_SUBSTITUTE_GLOBAL
+           substitute_extended      PCRE2_SUBSTITUTE_EXTENDED
+           substitute_literal       PCRE2_SUBSTITUTE_LITERAL
+           substitute_matched       PCRE2_SUBSTITUTE_MATCHED
+           substitute_overflow_length
+                                    PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
+           substitute_replacement_only
+                                    PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
+           substitute_unknown_unset PCRE2_SUBSTITUTE_UNKNOWN_UNSET
+           substitute_unset_empty   PCRE2_SUBSTITUTE_UNSET_EMPTY
 
        See the pcre2api documentation for details of these options.
 
@@ -1429,11 +1462,11 @@ SUBJECT MODIFIERS
        preceded by the number of replacements. This may be zero if there were
        no matches. Here is a simple example of a substitution test:
 
-         /abc/replace=xxx
-             =abc=abc=
-          1: =xxx=abc=
-             =abc=abc=\=global
-          2: =xxx=xxx=
+       /abc/replace=xxx
+           =abc=abc=
+        1: =xxx=abc=
+           =abc=abc=\=global
+        2: =xxx=xxx=
 
        Subject and replacement strings should be kept relatively short (fewer
        than 256 characters) for substitution tests, as fixed-size buffers are
@@ -1443,11 +1476,11 @@ SUBJECT MODIFIERS
        replacement string starting at the next character. Here is an example
        that tests the edge case:
 
-         /abc/
-             123abc123\=replace=[10]XYZ
-          1: 123XYZ123
-             123abc123\=replace=[9]XYZ
-         Failed: error -48: no more memory
+       /abc/
+           123abc123\=replace=[10]XYZ
+        1: 123XYZ123
+           123abc123\=replace=[9]XYZ
+       Failed: error -48: no more memory
 
        The default action of pcre2_substitute() is to return
        PCRE2_ERROR_NOMEMORY when the output buffer is too small. However, if
@@ -1459,9 +1492,9 @@ SUBJECT MODIFIERS
        includes space for the trailing zero) as part of the error message. For
        example:
 
-         /abc/substitute_overflow_length
-             123abc123\=replace=[9]XYZ
-         Failed: error -48: no more memory: 10 code units are needed
+       /abc/substitute_overflow_length
+           123abc123\=replace=[9]XYZ
+       Failed: error -48: no more memory: 10 code units are needed
 
        A replacement string is ignored with POSIX and DFA matching. Specifying
        partial matching provokes an error return ("bad option value") from
@@ -1480,11 +1513,11 @@ SUBJECT MODIFIERS
        the callout function is called (after each substitution), details of
        the input and output strings are output. For example:
 
-         /abc/g,replace=<$0>,substitute_callout
-             abcdefabcpqr
-          1(1) Old 0 3 "abc" New 0 5 "<abc>"
-          2(1) Old 6 9 "abc" New 8 13 "<abc>"
-          2: <abc>def<abc>pqr
+       /abc/g,replace=<$0>,substitute_callout
+           abcdefabcpqr
+        1(1) Old 0 3 "abc" New 0 5 "<abc>"
+        2(1) Old 6 9 "abc" New 8 13 "<abc>"
+        2: <abc>def<abc>pqr
 
        The first number on each callout line is the count of matches. The
        parenthesized number is the number of pairs that are set in the ovector
@@ -1501,14 +1534,14 @@ SUBJECT MODIFIERS
        and -1 causes no further matching to take place. If either of them are
        set, substitute_callout is assumed. For example:
 
-         /abc/g,replace=<$0>,substitute_skip=1
-             abcdefabcpqr
-          1(1) Old 0 3 "abc" New 0 5 "<abc> SKIPPED"
-          2(1) Old 6 9 "abc" New 6 11 "<abc>"
-          2: abcdef<abc>pqr
-             abcdefabcpqr\=substitute_stop=1
-          1(1) Old 0 3 "abc" New 0 5 "<abc> STOPPED"
-          1: abcdefabcpqr
+       /abc/g,replace=<$0>,substitute_skip=1
+           abcdefabcpqr
+        1(1) Old 0 3 "abc" New 0 5 "<abc> SKIPPED"
+        2(1) Old 6 9 "abc" New 6 11 "<abc>"
+        2: abcdef<abc>pqr
+           abcdefabcpqr\=substitute_stop=1
+        1(1) Old 0 3 "abc" New 0 5 "<abc> STOPPED"
+        1: abcdefabcpqr
 
        If both are set for the same number, stop takes precedence. Only a
        single skip or stop is supported, which is sufficient for testing that
@@ -1558,10 +1591,10 @@ SUBJECT MODIFIERS
        reduce the value of an in-pattern limit; they cannot increase it.
 
        For non-DFA matching, the minimum depth_limit number is a measure of
-       how much nested backtracking happens (that is, how deeply the pattern's
-       tree is searched). In the case of DFA matching, depth_limit controls
-       the depth of recursive calls of the internal function that is used for
-       handling pattern recursion, lookaround assertions, and atomic groups.
+       how much nested backtracking happens (that is, how deeply the pattern’s
+       tree is In the case of DFA matching, depth_limit controls the depth of
+       recursive calls of the internal function that is used for handling
+       pattern recursion, lookaround assertions, and atomic groups.
 
        For non-DFA matching, the match_limit number is a measure of the amount
        of backtracking that takes place, and learning the minimum value can be
@@ -1577,12 +1610,12 @@ SUBJECT MODIFIERS
        kibibytes (units of 1024 bytes), limits the amount of heap memory used
        for matching.
 
-   Showing mark names
+   Showing MARK names
        The mark modifier causes the names from backtracking control verbs that
        are returned from calls to pcre2_match() to be displayed. If a mark is
        returned for a match, non-match, or partial match, pcre2test shows it.
-       For a match, it is on a line by itself, tagged with "MK:". Otherwise,
-       it is added to the non-match message.
+       For a match, it is on a line by itself, tagged with MK:. Otherwise, it
+       is added to the non-match message.
 
    Showing memory usage
        The memory modifier causes pcre2test to log the sizes of all heap
@@ -1647,7 +1680,7 @@ SUBJECT MODIFIERS
        When testing pcre2_substitute(), this modifier also has the effect of
        passing the replacement string as zero-terminated.
 
-   Passing a null context, subject, or replacement
+   Passing a NULL context, subject, replacement, or substitute buffer
        Normally, pcre2test passes a context block to pcre2_match(),
        pcre2_dfa_match(), pcre2_jit_match() or pcre2_substitute(). If the
        null_context modifier is set, however, NULL is passed. This is for
@@ -1656,9 +1689,13 @@ SUBJECT MODIFIERS
        with the find_limits, find_limits_noheap, or substitute_callout
        modifiers.
 
-       Similarly, for testing purposes, if the null_subject or
-       null_replacement modifier is set, the subject or replacement string
-       pointers are passed as NULL, respectively, to the relevant functions.
+       Similarly, for testing purposes, if the null_subject, or
+       null_replacement, or null_substitute_buffer modifiers are set, then the
+       subject, or replacement string, or substitute output buffer pointers
+       are passed as NULL, respectively, to the relevant functions. For
+       null_substitute_buffer, the paired argument for the passed-in buffer
+       length is set by starting the replacement string with "[NUM]" as
+       described in "Testing the substitution function" above.
 
 
 THE ALTERNATIVE MATCHING FUNCTION
@@ -1693,15 +1730,15 @@ DEFAULT OUTPUT FROM pcre2test
        check, the code unit offset of the start of the failing character is
        also output. Here is an example of an interactive pcre2test run.
 
-         $ pcre2test
-         PCRE2 version 10.22 2016-07-29
+       $ pcre2test
+       PCRE2 version 10.22 2016-07-29
 
-           re> /^abc(\d+)/
-         data> abc123
-          0: abc123
-          1: 123
-         data> xyz
-         No match
+         re> /^abc(\d+)/
+       data> abc123
+        0: abc123
+        1: 123
+       data> xyz
+       No match
 
        Unset capturing substrings that are not followed by one that is set are
        not shown by pcre2test unless the allcaptures modifier is specified. In
@@ -1710,14 +1747,14 @@ DEFAULT OUTPUT FROM pcre2test
        An "internal" unset substring is shown as "<unset>", as for the second
        data line.
 
-           re> /(a)|(b)/
-         data> a
-          0: a
-          1: a
-         data> b
-          0: b
-          1: <unset>
-          2: b
+         re> /(a)|(b)/
+       data> a
+        0: a
+        1: a
+       data> b
+        0: b
+        1: <unset>
+        2: b
 
        If the strings contain any non-printing characters, they are output as
        \xhh escapes if the value is less than 256 and UTF mode is not set.
@@ -1726,30 +1763,30 @@ DEFAULT OUTPUT FROM pcre2test
        set, the output for substring 0 is followed by the rest of the subject
        string, identified by "0+" like this:
 
-           re> /cat/aftertext
-         data> cataract
-          0: cat
-          0+ aract
+         re> /cat/aftertext
+       data> cataract
+        0: cat
+        0+ aract
 
        If global matching is requested, the results of successive matching
        attempts are output in sequence, like this:
 
-           re> /\Bi(\w\w)/g
-         data> Mississippi
-          0: iss
-          1: ss
-          0: iss
-          1: ss
-          0: ipp
-          1: pp
+         re> /\Bi(\w\w)/g
+       data> Mississippi
+        0: iss
+        1: ss
+        0: iss
+        1: ss
+        0: ipp
+        1: pp
 
        "No match" is output only if the first match attempt fails. Here is an
        example of a failure message (the offset 4 that is specified by the
        offset modifier is past the end of the subject string):
 
-           re> /xyz/
-         data> xyz\=offset=4
-         Error -24 (bad offset value)
+         re> /xyz/
+       data> xyz\=offset=4
+       Error -24 (bad offset value)
 
        Note that whereas patterns can be continued over several lines (a plain
        ">" prompt is used for continuations), subject lines may not. However
@@ -1762,11 +1799,11 @@ OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION
        output consists of a list of all the matches that start at the first
        point in the subject where there is at least one match. For example:
 
-           re> /(tang|tangerine|tan)/
-         data> yellow tangerine\=dfa
-          0: tangerine
-          1: tang
-          2: tan
+         re> /(tang|tangerine|tan)/
+       data> yellow tangerine\=dfa
+        0: tangerine
+        1: tang
+        2: tan
 
        Using the normal matching function on this data finds only "tang". The
        longest matching string is always given first (and numbered zero).
@@ -1780,14 +1817,14 @@ OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION
        If global matching is requested, the search for further matches resumes
        at the end of the longest match. For example:
 
-           re> /(tang|tangerine|tan)/g
-         data> yellow tangerine and tangy sultana\=dfa
-          0: tangerine
-          1: tang
-          2: tan
-          0: tang
-          1: tan
-          0: tan
+         re> /(tang|tangerine|tan)/g
+       data> yellow tangerine and tangy sultana\=dfa
+        0: tangerine
+        1: tang
+        2: tan
+        0: tang
+        1: tan
+        0: tan
 
        The alternative matching function does not support substring capture,
        so the modifiers that are concerned with captured substrings are not
@@ -1800,11 +1837,11 @@ RESTARTING AFTER A PARTIAL MATCH
        matched the pattern, you can restart the match with additional subject
        data by means of the dfa_restart modifier. For example:
 
-           re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
-         data> 23ja\=ps,dfa
-         Partial match: 23ja
-         data> n05\=dfa,dfa_restart
-          0: n05
+         re> /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
+       data> 23ja\=ps,dfa
+       Partial match: 23ja
+       data> n05\=dfa,dfa_restart
+        0: n05
 
        For further information about partial matching, see the pcre2partial
        documentation.
@@ -1822,8 +1859,8 @@ CALLOUTS
        and current positions in the subject text at the callout time, and the
        next pattern item to be tested. For example:
 
-         --->pqrabcdef
-           0    ^  ^     \d
+       --->pqrabcdef
+         0    ^  ^     \d
 
        This output indicates that callout number 0 occurred for a match
        attempt starting at the fourth character of the subject string, when
@@ -1837,29 +1874,29 @@ CALLOUTS
        showing the callout number, the offset in the pattern, preceded by a
        plus, is output. For example:
 
-           re> /\d?[A-E]\*/auto_callout
-         data> E*
-         --->E*
-          +0 ^      \d?
-          +3 ^      [A-E]
-          +8 ^^     \*
-         +10 ^ ^
-          0: E*
+         re> /\d?[A-E]\*/auto_callout
+       data> E*
+       --->E*
+        +0 ^      \d?
+        +3 ^      [A-E]
+        +8 ^^     \*
+       +10 ^ ^
+        0: E*
 
        If a pattern contains (*MARK) items, an additional line is output
        whenever a change of latest mark is passed to the callout function. For
        example:
 
-           re> /a(*MARK:X)bc/auto_callout
-         data> abc
-         --->abc
-          +0 ^       a
-          +1 ^^      (*MARK:X)
-         +10 ^^      b
-         Latest Mark: X
-         +11 ^ ^     c
-         +12 ^  ^
-          0: abc
+         re> /a(*MARK:X)bc/auto_callout
+       data> abc
+       --->abc
+        +0 ^       a
+        +1 ^^      (*MARK:X)
+       +10 ^^      b
+       Latest Mark: X
+       +11 ^ ^     c
+       +12 ^  ^
+        0: abc
 
        The mark changes between matching "a" and "b", but stays the same for
        the rest of the match, so nothing more is output. If, as a result of
@@ -1873,15 +1910,15 @@ CALLOUTS
        before the reflection of the subject string, and the subject string is
        reflected for each callout. For example:
 
-           re> /^ab(?C'first')cd(?C"second")ef/
-         data> abcdefg
-         Callout (7): 'first'
-         --->abcdefg
-             ^ ^         c
-         Callout (20): "second"
-         --->abcdefg
-             ^   ^       e
-          0: abcdef
+         re> /^ab(?C’first')cd(?C"second")ef/
+       data> abcdefg
+       Callout (7): 'first'
+       --->abcdefg
+           ^ ^         c
+       Callout (20): "second"
+       --->abcdefg
+           ^   ^       e
+        0: abcdef
 
    Callout modifiers
        The callout function in pcre2test returns zero (carry on matching) by
@@ -1906,39 +1943,39 @@ CALLOUTS
        "Backtrack" is output, followed by "No other matching paths" if the
        backtrack ended the previous match attempt. For example:
 
-          re> /(a+)b/auto_callout,no_start_optimize,no_auto_possess
-         data> aac\=callout_extra
-         New match attempt
-         --->aac
-          +0 ^       (
-          +1 ^       a+
-          +3 ^ ^     )
-          +4 ^ ^     b
-         Backtrack
-         --->aac
-          +3 ^^      )
-          +4 ^^      b
-         Backtrack
-         No other matching paths
-         New match attempt
-         --->aac
-          +0  ^      (
-          +1  ^      a+
-          +3  ^^     )
-          +4  ^^     b
-         Backtrack
-         No other matching paths
-         New match attempt
-         --->aac
-          +0   ^     (
-          +1   ^     a+
-         Backtrack
-         No other matching paths
-         New match attempt
-         --->aac
-          +0    ^    (
-          +1    ^    a+
-         No match
+        re> /(a+)b/auto_callout,no_start_optimize,no_auto_possess
+       data> aac\=callout_extra
+       New match attempt
+       --->aac
+        +0 ^       (
+        +1 ^       a+
+        +3 ^ ^     )
+        +4 ^ ^     b
+       Backtrack
+       --->aac
+        +3 ^^      )
+        +4 ^^      b
+       Backtrack
+       No other matching paths
+       New match attempt
+       --->aac
+        +0  ^      (
+        +1  ^      a+
+        +3  ^^     )
+        +4  ^^     b
+       Backtrack
+       No other matching paths
+       New match attempt
+       --->aac
+        +0   ^     (
+        +1   ^     a+
+       Backtrack
+       No other matching paths
+       New match attempt
+       --->aac
+        +0    ^    (
+        +1    ^    a+
+       No match
 
        Notice that various optimizations must be turned off if you want all
        possible matching paths to be scanned. If no_start_optimize is not
@@ -2020,13 +2057,13 @@ SAVING AND RESTORING COMPILED PATTERNS
 
        The command
 
-         #save <filename>
+       #save <filename>
 
        causes all the stacked patterns to be serialized and the result written
        to the named file. Afterwards, all the stacked patterns are freed. The
        command
 
-         #load <filename>
+       #load <filename>
 
        reads the data in the file, and then arranges for it to be
        de-serialized, with the resulting compiled patterns added to the
@@ -2040,15 +2077,15 @@ SAVING AND RESTORING COMPILED PATTERNS
        however permitted. Here is an example that saves and reloads two
        patterns.
 
-         /abc/push
-         /xyz/push
-         #save tempfile
-         #load tempfile
-         #pop info
-         xyz
+       /abc/push
+       /xyz/push
+       #save tempfile
+       #load tempfile
+       #pop info
+       xyz
 
-         #pop jit,bincode
-         abc
+       #pop jit,bincode
+       abc
 
        If jitverify is used with #pop, it does not automatically imply jit,
        which is different behaviour from when it is used on a pattern.
@@ -2059,19 +2096,17 @@ SAVING AND RESTORING COMPILED PATTERNS
 
 
 SEE ALSO
-       pcre2(3), pcre2api(3), pcre2callout(3), pcre2jit, pcre2matching(3),
-       pcre2partial(d), pcre2pattern(3), pcre2serialize(3).
+       pcre2, pcre2api, pcre2callout, pcre2jit, pcre2matching, pcre2partial,
+       pcre2pattern, pcre2serialize.
 
+   Author
+       Philip Hazel
+       Retired from University Computing Service
+       Cambridge, England.
 
-AUTHOR
-         Philip Hazel
-         Retired from University Computing Service
-         Cambridge, England.
-
-
-REVISION
+   Revision
        Last updated: 22 August 2026
-       Copyright (c) 1997-2024 University of Cambridge.
+       Copyright © 1997-2024 University of Cambridge.
 
 
 PCRE2 10.49-DEV                 22 August 2026                    PCRE2TEST(1)

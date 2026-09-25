@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2perform
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 06 December 2022
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -104,7 +104,7 @@ pattern is not always exactly equivalent, because any captures within
 subroutine calls are lost when the subroutine completes. If this is not a
 problem, this kind of rewriting will allow you to process patterns that PCRE2
 cannot otherwise handle. The matching performance of the two different versions
-of the pattern are roughly the same. (This applies from release 10.30 \- things
+of the pattern are roughly the same. (This applies from release 10.30 \(em things
 were different in earlier releases.)
 .SH "STACK AND HEAP USAGE AT RUN TIME"
 .sp
@@ -192,13 +192,13 @@ following one of them instead of from the very start. For example, the pattern
 .fi
 .ss \n[.ss] 0
 .sp
-matches the subject "first\(rsnand second" (where \(rsn stands for a newline
+matches the subject \f(CRfirst\(rsnand second\fP (where \(rsn stands for a newline
 character), with the match starting at the seventh character. In order to do
 this, PCRE2 has to retry the match starting after every newline in the subject.
 .sp
 If you are using such a pattern with subject strings that do not contain
 newlines, the best performance is obtained by setting \fBPCRE2_DOTALL\fP, or starting
-the pattern with \f(CR^.\fB\fP or \f(CR^.\fP?\fP to indicate explicit anchoring. That saves PCRE2
+the pattern with \f(CR^.*\fP or \f(CR^.*?\fP to indicate explicit anchoring. That saves PCRE2
 from having to scan along the subject looking for a newline to restart at.
 .sp
 Beware of patterns that contain nested indefinite repeats. These can take a
@@ -213,7 +213,7 @@ pattern fragment
 .fi
 .ss \n[.ss] 0
 .sp
-This can match "aaaa" in 16 different ways, and this number increases very
+This can match \f(CRaaaa\fP in 16 different ways, and this number increases very
 rapidly as the string gets longer. (The \f(CR*\fP repeat can match 0, 1, 2, 3, or 4
 times, and for each of those cases other than 0 or 4, the \f(CR+\fP repeats can match
 different numbers of times.) When the remainder of the pattern is such that the
@@ -232,7 +232,7 @@ An optimization catches some of the more simple cases such as
 .ss \n[.ss] 0
 .sp
 where a literal character follows. Before embarking on the standard matching
-procedure, PCRE2 checks that there is a "b" later in the subject string, and if
+procedure, PCRE2 checks that there is a \f(CRb\fP later in the subject string, and if
 there is not, it fails the match immediately. However, when there is no
 following literal this optimization cannot be used. You can see the difference
 by comparing the behaviour of
@@ -246,7 +246,7 @@ by comparing the behaviour of
 .ss \n[.ss] 0
 .sp
 with the pattern above. The former gives a failure almost instantly when
-applied to a whole line of "a" characters, whereas the latter takes an
+applied to a whole line of \f(CRa\fP characters, whereas the latter takes an
 appreciable time with strings longer than about 20 characters.
 .sp
 In many cases, the solution to this kind of performance issue is to use an
@@ -261,10 +261,10 @@ requirements as well. As another example, consider this pattern:
 .fi
 .ss \n[.ss] 0
 .sp
-It matches from wherever it starts until it encounters "<inet" or the end of
+It matches from wherever it starts until it encounters \f(CR<inet\fP or the end of
 the data, and is the kind of pattern that might be used when processing an XML
 file. Each iteration of the outer parentheses matches either one character that
-is not "<" or a "<" that is not followed by "inet". However, each time a
+is not \f(CR<\fP or a \f(CR<\fP that is not followed by \f(CRinet\fP. However, each time a
 parenthesis is processed, a backtracking position is passed, so this
 formulation uses a memory frame for each matched character. For a long string,
 a lot of memory is required. Consider now this rewritten pattern, which matches
@@ -278,17 +278,17 @@ exactly the same strings:
 .fi
 .ss \n[.ss] 0
 .sp
-This runs much faster, because sequences of characters that do not contain "<"
+This runs much faster, because sequences of characters that do not contain \f(CR<\fP
 are "swallowed" in one item inside the parentheses, and a possessive quantifier
-is used to stop any backtracking into the runs of non\-"<" characters. This
+is used to stop any backtracking into the runs of non\-\f(CR<\fP characters. This
 version also uses a lot less memory because entry to a new set of parentheses
-happens only when a "<" character that is not followed by "inet" is encountered
+happens only when a \f(CR<\fP character that is not followed by \f(CRinet\fP is encountered
 (and we assume this is relatively rare).
 .sp
 This example shows that one way of optimizing performance when matching long
 subject strings is to write repeated parenthesized subpatterns to match more
 than one character whenever possible.
-.SS "Setting resource limits"
+.SH "SETTING RESOURCE LIMITS"
 .sp
 You can set limits on the amount of processing that takes place when matching,
 and on the amount of heap memory that is used. The default values of the limits
@@ -296,27 +296,24 @@ are very large, and unlikely ever to operate. They can be changed when PCRE2 is
 built, and they can also be set when pcre2_match() or
 pcre2_dfa_match() is called. For details of these interfaces, see the
 \f(CRpcre2build\fP
-documentation and the section entitled
-"The match context"
+documentation and the section
+The match context
 in the
 \f(CRpcre2api\fP
 documentation.
 .sp
-The \f(CRpcre2test\fP test program has a modifier called "find_limits" which, if
+The \f(CRpcre2test\fP test program has a modifier called \f(CRfind_limits\fP which, if
 applied to a subject line, causes it to find the smallest limits that allow a
 pattern to match. This is done by repeatedly matching with different limits.
-.SH "AUTHOR"
+.SS "Author"
 .sp
-.ti +2
 Philip Hazel
 .br
-.ti +2
 Retired from University Computing Service
 .br
-.ti +2
 Cambridge, England.
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 06 December 2022
 .br
-Copyright (c) 1997\-2022 University of Cambridge.
+Copyright \(co 1997\-2022 University of Cambridge.

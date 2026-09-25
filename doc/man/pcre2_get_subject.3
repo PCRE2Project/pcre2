@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_get_subject
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 22 September 2026
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -52,10 +52,11 @@ is exactly the same length as the subject that was passed to the matching
 function and is additionally zero\-terminated. The copy is freed when the match
 data block is reused for another match or is freed. If there is any match error
 other than \fBPCRE2_ERROR_NOMATCH\fP or \fBPCRE2_ERROR_PARTIAL\fP,
-pcre2_get_subject() may return \f(CRNULL\fP.
+pcre2_get_subject() may return \fBNULL\fP.
 .sp
-If the \fIlengthptr\fP argument is not \f(CRNULL\fP, it receives the length of the
-string which is returned (the subject string may contain embedded NUL characters).
+If the \fIlengthptr\fP argument is not \fBNULL\fP, it receives the length in code
+units of the string which is returned, excluding the terminating zero (the
+subject string may contain embedded NUL characters).
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

@@ -19,7 +19,7 @@ void pcre2_code_free(pcre2_code *code);
 
 == Description
 
-If arg:code is [.c]`NULL`, this function does nothing. Otherwise, arg:code must
+If arg:code is const:NULL, this function does nothing. Otherwise, arg:code must
 point to a compiled pattern. This function frees its memory, including any
 memory used by the JIT compiler. If the compiled pattern was created by a call
 to func:pcre2_code_copy_with_tables(), the memory for the character tables is

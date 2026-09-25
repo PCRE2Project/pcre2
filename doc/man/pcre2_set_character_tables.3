@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_set_character_tables
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 15 April 2020
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -45,7 +45,7 @@ pcre2_set_character_tables \- set character tables
 .sp
 This function sets a pointer to custom character tables within a compile
 context. The second argument must point to a set of PCRE2 character tables or
-be \f(CRNULL\fP to request the default tables. The result is always zero. Character
+be \fBNULL\fP to request the default tables. The result is always zero. Character
 tables can be created by calling pcre2_maketables() or by running the
 \f(CRpcre2_dftables\fP maintenance command in binary mode (see the
 \f(CRpcre2build\fP

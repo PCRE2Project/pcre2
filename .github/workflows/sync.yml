@@ -38,7 +38,14 @@ jobs:
       - name: Install Asciidoctor and Rouge
         run: |
           sudo apt update
-          sudo apt install -y asciidoctor ruby-rouge
+          sudo apt install -y ruby ruby-dev
+          gem install --user-install asciidoctor rouge
+          export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
+          export PATH="$GEM_HOME/bin:$PATH"
+          echo "Ruby version: $(ruby -v)"
+          echo "Asciidoctor version: $(asciidoctor --version)"
+          echo "Rouge version: $(rouge --version)"
+          echo "$GEM_HOME/bin" >> "$GITHUB_PATH"
 
       - name: UpdateDates
         if: |

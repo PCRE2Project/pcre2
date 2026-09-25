@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="description" content="Discussion of the just-in-time optimization support">
 <title>pcre2jit(3)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +117,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +219,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -433,9 +435,26 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 </head>
-<body class="manpage">
+<body class="manpage toc2 toc-right">
 <div id="header">
 <h1>pcre2jit(3) Manual Page</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_pcre2_just_in_time_compiler_support">PCRE2 just-in-time compiler support</a></li>
+<li><a href="#_availability_of_jit_support">Availability of JIT support</a></li>
+<li><a href="#_simple_use_of_jit">Simple use of JIT</a></li>
+<li><a href="#_matching_subjects_containing_invalid_utf">Matching subjects containing invalid UTF</a></li>
+<li><a href="#_unsupported_options_and_pattern_items">Unsupported options and pattern items</a></li>
+<li><a href="#_return_values_from_jit_matching">Return values from JIT matching</a></li>
+<li><a href="#_controlling_the_jit_stack">Controlling the JIT stack</a></li>
+<li><a href="#_jit_stack_faq">JIT stack FAQ</a></li>
+<li><a href="#_freeing_jit_speculative_memory">Freeing JIT speculative memory</a></li>
+<li><a href="#_example_code">Example code</a></li>
+<li><a href="#_jit_fast_path_api">JIT fast path API</a></li>
+<li><a href="#_see_also">See also</a></li>
+</ul>
+</div>
 <h2>Name</h2>
 <div class="sectionbody">
 <p>pcre2jit - PCRE2 just-in-time compilation support</p>
@@ -459,7 +478,7 @@ one-off matches. JIT support is available for all of the 8-bit, 16-bit and
 <div class="paragraph">
 <p>JIT support applies only to the traditional Perl-compatible matching function.
 It does not apply when the DFA matching function is being used. The code for
-JIT support was written by Zoltan Herczeg.</p>
+JIT support was written by Zoltán Herczeg.</p>
 </div>
 </div>
 </div>
@@ -467,26 +486,44 @@ JIT support was written by Zoltan Herczeg.</p>
 <h2 id="_availability_of_jit_support">Availability of JIT support</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>JIT support is an optional feature of PCRE2. The "configure" option
---enable-jit (or equivalent CMake option) must be set when PCRE2 is built if
+<p>JIT support is an optional feature of PCRE2. The <code>configure</code> option
+<code>--enable-jit</code> (or equivalent CMake option) must be set when PCRE2 is built if
 you want to use JIT. The support is limited to the following hardware
 platforms:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>ARM 32-bit (v7, and Thumb2)
-ARM 64-bit
-DEC Alpha 64-bit
-IBM s390x 64 bit
-Intel x86 32-bit and 64-bit
-LoongArch 64 bit
-MIPS 32-bit and 64-bit
-Power PC 32-bit and 64-bit
-RISC-V 32-bit and 64-bit</pre>
-</div>
+<div class="ulist">
+<ul>
+<li>
+<p>ARM 32-bit (v7, and Thumb2)</p>
+</li>
+<li>
+<p>ARM 64-bit</p>
+</li>
+<li>
+<p>DEC Alpha 64-bit</p>
+</li>
+<li>
+<p>IBM s390x 64 bit</p>
+</li>
+<li>
+<p>Intel x86 32-bit and 64-bit</p>
+</li>
+<li>
+<p>LoongArch 64 bit</p>
+</li>
+<li>
+<p>MIPS 32-bit and 64-bit</p>
+</li>
+<li>
+<p>Power PC 32-bit and 64-bit</p>
+</li>
+<li>
+<p>RISC-V 32-bit and 64-bit</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p>If --enable-jit is set on an unsupported platform, compilation fails.</p>
+<p>If <code>--enable-jit</code> is set on an unsupported platform when building PCRE2, compilation fails.</p>
 </div>
 <div class="paragraph">
 <p>A client program can tell if JIT support has been compiled by calling
@@ -507,7 +544,7 @@ be used.</p>
 it returns zero if JIT is available and has a working allocator. Otherwise it
 returns <code class="constant">PCRE2_ERROR_NOMEMORY</code> if JIT is available but cannot allocate executable
 memory, or <code class="constant">PCRE2_ERROR_JIT_UNSUPPORTED</code> if JIT support is not compiled. The
-code argument is ignored, so it can be a NULL value.</p>
+<code class="parameter">code</code> argument is ignored, so it can be a <code class="constant">NULL</code> value.</p>
 </div>
 <div class="paragraph">
 <p>A simple program does not need to check availability in order to use JIT when
@@ -691,12 +728,12 @@ below.</p>
 <div class="paragraph">
 <p>The <code class="function">pcre2_jit_stack_create()</code> function creates a JIT stack. Its arguments
 are a starting size, a maximum size, and a general context (for memory
-allocation functions, or NULL for standard memory allocation). It returns a
-pointer to an opaque structure of type <code class="type">pcre2_jit_stack</code>, or NULL if there
+allocation functions, or <code class="constant">NULL</code> for standard memory allocation). It returns a
+pointer to an opaque structure of type <code class="type">pcre2_jit_stack</code>, or <code class="constant">NULL</code> if there
 is an error. The <code class="function">pcre2_jit_stack_free()</code> function is used to free a stack
-that is no longer needed. If its argument is NULL, this function returns
+that is no longer needed. If its argument is <code class="constant">NULL</code>, this function returns
 immediately, without doing anything. (For the technically minded: the address
-space is allocated by mmap or VirtualAlloc.) A maximum stack size of 512KiB to
+space is allocated by <code class="c">mmap()</code> or <code class="c">VirtualAlloc()</code>.) A maximum stack size of 512KiB to
 1MiB should be more than enough for any pattern.</p>
 </div>
 <div class="paragraph">
@@ -705,40 +742,38 @@ should use. Its arguments are as follows:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-c" data-lang="c">pcre2_match_context  *mcontext
-pcre2_jit_callback    callback
+<pre class="highlight"><code class="language-c" data-lang="c">pcre2_match_context  *mcontext,
+pcre2_jit_callback    callback,
 void                 *data</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>The first argument is a pointer to a match context. When this is subsequently
 passed to a matching function, its information determines which JIT stack is
-used. If this argument is NULL, the function returns immediately, without doing
+used. If this argument is <code class="constant">NULL</code>, the function returns immediately, without doing
 anything. There are three cases for the values of the other two options:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>(1) If <em>callback</em> is NULL and <em>data</em> is NULL, an internal 32KiB block
-    on the machine stack is used. This is the default when a match
-    context is created.</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>(2) If <em>callback</em> is NULL and <em>data</em> is not NULL, <em>data</em> must be
-    a pointer to a valid JIT stack, the result of calling
-  <code class="function">pcre2_jit_stack_create()</code>.</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>(3) If <em>callback</em> is not NULL, it must point to a function that is
-    called with <em>data</em> as an argument at the start of matching, in
-    order to set up a JIT stack. If the return from the callback
-    function is NULL, the internal 32KiB stack is used; otherwise the
-    return value must be a valid JIT stack, the result of calling
-    <code class="function">pcre2_jit_stack_create()</code>.</pre>
-</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If <code class="parameter">callback</code> is <code class="constant">NULL</code> and <code class="parameter">data</code> is <code class="constant">NULL</code>, an internal 32KiB block
+on the machine stack is used. This is the default when a match
+context is created.</p>
+</li>
+<li>
+<p>If <code class="parameter">callback</code> is <code class="constant">NULL</code> and <code class="parameter">data</code> is not <code class="constant">NULL</code>, <code class="parameter">data</code> must be
+a pointer to a valid JIT stack, the result of calling
+<code class="function">pcre2_jit_stack_create()</code>.</p>
+</li>
+<li>
+<p>If <code class="parameter">callback</code> is not <code class="constant">NULL</code>, it must point to a function that is
+called with <code class="parameter">data</code> as an argument at the start of matching, in
+order to set up a JIT stack. If the return from the callback
+function is <code class="constant">NULL</code>, the internal 32KiB stack is used; otherwise the
+return value must be a valid JIT stack, the result of calling
+<code class="function">pcre2_jit_stack_create()</code>.</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>A callback function is obeyed whenever JIT code is about to be run; it is not
@@ -756,13 +791,13 @@ for currently suspended match(es).</p>
 </div>
 <div class="paragraph">
 <p>In a multithread application, if you do not specify a JIT stack, or if you
-assign or pass back NULL from a callback, that is thread-safe, because each
+assign or pass back <code class="constant">NULL</code> from a callback, that is thread-safe, because each
 thread has its own machine stack. However, if you assign or pass back a
-non-NULL JIT stack, this must be a different stack for each thread so that the
+non-<code class="constant">NULL</code> JIT stack, this must be a different stack for each thread so that the
 application is thread-safe.</p>
 </div>
 <div class="paragraph">
-<p>Strictly speaking, even more is allowed. You can assign the same non-NULL stack
+<p>Strictly speaking, even more is allowed. You can assign the same non-<code class="constant">NULL</code> stack
 to a match context that is used by any number of patterns, as long as they are
 not used for matching by multiple threads at the same time. For example, you
 could use the same stack in all compiled patterns, with a global mutex in the
@@ -775,20 +810,14 @@ non-default JIT stacks might operate:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-c" data-lang="c">During thread initialization
-  thread_local_var = pcre2_jit_stack_create(...)</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-c" data-lang="c">During thread exit
-  pcre2_jit_stack_free(thread_local_var)</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-c" data-lang="c">Use a one-line callback function
-  return thread_local_var</code></pre>
+<pre class="highlight"><code class="language-c" data-lang="c">// During thread initialization
+thread_local_var = pcre2_jit_stack_create(...);
+
+// During thread exit
+pcre2_jit_stack_free(thread_local_var);
+
+// Use a one-line callback function
+return thread_local_var;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -799,9 +828,10 @@ non-default JIT stacks might operate:</p>
 <div class="sect1">
 <h2 id="_jit_stack_faq">JIT stack FAQ</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>(1) Why do we need JIT stacks?</p>
-</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Why do we need JIT stacks?</strong></p>
 <div class="paragraph">
 <p>PCRE2 (and JIT) is a recursive, depth-first engine, so it needs a stack where
 the local data of the current node is pushed before checking its child nodes.
@@ -810,9 +840,9 @@ stack chain needs to be updated every time if we extend the stack on PowerPC.
 Although it is possible, its updating time overhead decreases performance. So
 we do the recursion in memory.</p>
 </div>
-<div class="paragraph">
-<p>(2) Why don&#8217;t we simply allocate blocks of memory with <code>malloc()</code>?</p>
-</div>
+</li>
+<li>
+<p><strong>Why don&#8217;t we simply allocate blocks of memory with <code class="c">malloc()</code>?</strong></p>
 <div class="paragraph">
 <p>Modern operating systems have a nice feature: they can reserve an address space
 instead of allocating memory. We can safely allocate memory pages inside this
@@ -821,9 +851,9 @@ important because of pointers). Thus we can allocate 1MiB address space, and
 use only a single memory page (usually 4KiB) if that is enough. However, we can
 still grow up to 1MiB anytime if needed.</p>
 </div>
-<div class="paragraph">
-<p>(3) Who "owns" a JIT stack?</p>
-</div>
+</li>
+<li>
+<p><strong>Who "owns" a JIT stack?</strong></p>
 <div class="paragraph">
 <p>The owner of the stack is the user program, not the JIT studied pattern or
 anything else. The user program must ensure that if a stack is being used by
@@ -833,9 +863,9 @@ threads (to avoid overwriting the same memory area). The best practice for
 multithreaded programs is to allocate a stack for each thread, and return this
 stack through the JIT callback function.</p>
 </div>
-<div class="paragraph">
-<p>(4) When should a JIT stack be freed?</p>
-</div>
+</li>
+<li>
+<p><strong>When should a JIT stack be freed?</strong></p>
 <div class="paragraph">
 <p>You can free a JIT stack at any time, as long as it will not be used by
 <code class="function">pcre2_match()</code> again. When you assign the stack to a match context, only a
@@ -847,21 +877,21 @@ currently used by <code class="function">pcre2_match()</code> in another thread)
 the stack in a context at any time when it is not in use. You should free the
 previous stack before assigning a replacement.</p>
 </div>
-<div class="paragraph">
-<p>(5) Should I allocate/free a stack every time before/after calling
-<code class="function">pcre2_match()</code>?</p>
-</div>
+</li>
+<li>
+<p><strong>Should I allocate/free a stack every time before/after calling
+<code class="function">pcre2_match()</code>?</strong></p>
 <div class="paragraph">
 <p>No, because this is too costly in terms of resources. However, you could
 implement some clever idea which release the stack if it is not used in let&#8217;s
 say two minutes. The JIT callback can help to achieve this without keeping a
 list of patterns.</p>
 </div>
-<div class="paragraph">
-<p>(6) OK, the stack is for long term memory allocation. But what happens if a
+</li>
+<li>
+<p><strong>OK, the stack is for long term memory allocation. But what happens if a
 pattern causes stack overflow with a stack of 1MiB? Is that 1MiB kept until the
-stack is freed?</p>
-</div>
+stack is freed?</strong></p>
 <div class="paragraph">
 <p>Especially on embedded systems, it might be a good idea to release memory
 sometimes without freeing the stack. There is no API for this at the moment.
@@ -869,13 +899,16 @@ Probably a function call which returns with the currently allocated memory for
 any stack and another which allows releasing memory (shrinking the stack) would
 be a good idea if someone needs this.</p>
 </div>
-<div class="paragraph">
-<p>(7) This is too much of a headache. Isn&#8217;t there any better solution for JIT
-stack handling?</p>
-</div>
+</li>
+<li>
+<p><strong>This is too much of a headache. Isn&#8217;t there any better solution for JIT
+stack handling?</strong></p>
 <div class="paragraph">
 <p>No, thanks to Windows. If POSIX threads were used everywhere, we could throw
 out this complicated API.</p>
+</div>
+</li>
+</ol>
 </div>
 </div>
 </div>
@@ -893,7 +926,7 @@ expects new allocations, and keeps some free memory around to improve
 allocation speed. However, in low memory conditions, it might be better to free
 all possible memory. You can cause this to happen by calling
 <code class="function">pcre2_jit_free_unused_memory()</code>. Its argument is a general context, for custom
-memory management, or NULL for standard memory management.</p>
+memory management, or <code class="constant">NULL</code> for standard memory management.</p>
 </div>
 </div>
 </div>
@@ -911,25 +944,19 @@ calls.</p>
 pcre2_code *re;
 pcre2_match_data *match_data;
 pcre2_match_context *mcontext;
-pcre2_jit_stack *jit_stack;</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-c" data-lang="c">re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0,
-  &amp;errornumber, &amp;erroffset, NULL);
+pcre2_jit_stack *jit_stack;
+
+re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0,
+                   &amp;errornumber, &amp;erroffset, NULL);
 rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
 mcontext = pcre2_match_context_create(NULL);
 jit_stack = pcre2_jit_stack_create(32*1024, 512*1024, NULL);
 pcre2_jit_stack_assign(mcontext, NULL, jit_stack);
 match_data = pcre2_match_data_create(re, 10);
 rc = pcre2_match(re, subject, length, 0, 0, match_data, mcontext);
-/* Process result */</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-c" data-lang="c">pcre2_code_free(re);
+/* Process result */
+
+pcre2_code_free(re);
 pcre2_match_data_free(match_data);
 pcre2_match_context_free(mcontext);
 pcre2_jit_stack_free(jit_stack);</code></pre>
@@ -963,7 +990,7 @@ that was not compiled.</p>
 <div class="paragraph">
 <p>When you call <code class="function">pcre2_match()</code>, as well as testing for invalid options, a
 number of other sanity checks are performed on the arguments. For example, if
-the subject pointer is NULL but the length is non-zero, an immediate error is
+the subject pointer is <code class="constant">NULL</code> but the length is non-zero, an immediate error is
 given. Also, unless <code class="constant">PCRE2_NO_UTF_CHECK</code> is set, a UTF subject string is tested
 for validity. In the interests of speed, these checks do not happen on the JIT
 fast path. If invalid UTF data is passed when <code class="constant">PCRE2_MATCH_INVALID_UTF</code> was not
@@ -982,28 +1009,18 @@ speedups of more than 10%.</p>
 <h2 id="_see_also">See also</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>pcre2api</code>(3), <code>pcre2unicode</code>(3)</p>
+<p><a href="pcre2api.html"><code>pcre2api</code></a>, <a href="pcre2unicode.html"><code>pcre2unicode</code></a>.</p>
 </div>
+<h2 id="_author" class="discrete">Author</h2>
+<div class="paragraph">
+<p>Philip Hazel (FAQ by Zoltán Herczeg)<br>
+Retired from University Computing Service<br>
+Cambridge, England.</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_author">Author</h2>
-<div class="sectionbody">
-<div class="literalblock">
-<div class="content">
-<pre>Philip Hazel (FAQ by Zoltan Herczeg)
-Retired from University Computing Service
-Cambridge, England.</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_revision">Revision</h2>
-<div class="sectionbody">
+<h2 id="_revision" class="discrete">Revision</h2>
 <div class="paragraph">
 <p>Last updated: 08 August 2026<br>
-Copyright (c) 1997-2024 University of Cambridge.</p>
+Copyright &#169; 1997-2024 University of Cambridge.</p>
 </div>
 </div>
 </div>

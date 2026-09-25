@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_get_mark
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 13 January 2018
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -46,7 +46,7 @@ After a call of pcre2_match() that was passed the match block that is
 this function\(cqs argument, this function returns a pointer to the last \f(CR(*MARK)\fP,
 \f(CR(*PRUNE)\fP, or \f(CR(*THEN)\fP name that was encountered during the matching process. The
 name is zero\-terminated, and is within the compiled pattern. The length of the
-name is in the preceding code unit. If no name is available, \f(CRNULL\fP is returned.
+name is in the preceding code unit. If no name is available, \fBNULL\fP is returned.
 .sp
 After a successful match, the name that is returned is the last one on the
 matching path. After a failed match or a partial match, the last encountered

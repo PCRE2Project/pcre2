@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_substring_list_get
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 21 October 2014
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -66,15 +66,15 @@ Where to put a pointer to the list
 .TP 11
 \fIlengthsptr\fP
 .ad l
-Where to put a pointer to the lengths, or \f(CRNULL\fP
+Where to put a pointer to the lengths, or \fBNULL\fP
 .PD
 .RE
 .PP
 .ad l
 .sp
 A pointer to a list of pointers is put in the variable whose address is in
-\fIlistptr\fP. The list is terminated by a \f(CRNULL\fP pointer. If \fIlengthsptr\fP is
-not \f(CRNULL\fP, a matching list of lengths is created, and its address is placed in
+\fIlistptr\fP. The list is terminated by a \fBNULL\fP pointer. If \fIlengthsptr\fP is
+not \fBNULL\fP, a matching list of lengths is created, and its address is placed in
 \fIlengthsptr\fP. The yield of the function is zero on success or
 \fBPCRE2_ERROR_NOMEMORY\fP if sufficient memory could not be obtained.
 .sp

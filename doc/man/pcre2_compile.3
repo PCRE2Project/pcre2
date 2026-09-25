@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_compile
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 30 October 2024
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -73,14 +73,14 @@ Where to put an error offset
 .TP 12
 \fIccontext\fP
 .ad l
-Pointer to a compile context or \f(CRNULL\fP
+Pointer to a compile context or \fBNULL\fP
 .PD
 .RE
 .PP
 .ad l
 .sp
 The length of the pattern and any error offset that is returned are in code
-units, not characters. A \f(CRNULL\fP pattern with zero length is treated as an empty
+units, not characters. A \fBNULL\fP pattern with zero length is treated as an empty
 string. A compile context is needed only if you want to provide custom memory
 allocation functions, or to provide an external function for system stack size
 checking (see pcre2_set_compile_recursion_guard()), or to change one or
@@ -94,7 +94,7 @@ more of these parameters:
 .  sp -1
 .  IP \(bu 2.3
 .\}
-What \f(CR\(rsR\fP matches (Unicode newlines, or \f(CRCR\fP, \f(CRLF\fP, \f(CRCRLF\fP only)
+What \f(CR\(rsR\fP matches (Unicode newlines, or CR, LF, CRLF only);
 .RE
 .sp
 .RS 4
@@ -105,7 +105,7 @@ What \f(CR\(rsR\fP matches (Unicode newlines, or \f(CRCR\fP, \f(CRLF\fP, \f(CRCR
 .  sp -1
 .  IP \(bu 2.3
 .\}
-PCRE2\(cqs character tables
+PCRE2\(cqs character tables;
 .RE
 .sp
 .RS 4
@@ -116,7 +116,7 @@ PCRE2\(cqs character tables
 .  sp -1
 .  IP \(bu 2.3
 .\}
-The newline character sequence
+The newline character sequence;
 .RE
 .sp
 .RS 4
@@ -127,7 +127,7 @@ The newline character sequence
 .  sp -1
 .  IP \(bu 2.3
 .\}
-The compile time nested parentheses limit
+The compile time nested parentheses limit;
 .RE
 .sp
 .RS 4
@@ -138,7 +138,7 @@ The compile time nested parentheses limit
 .  sp -1
 .  IP \(bu 2.3
 .\}
-The maximum pattern length (in code units) that is allowed
+The maximum pattern length (in code units) that is allowed;
 .RE
 .sp
 .RS 4
@@ -149,132 +149,132 @@ The maximum pattern length (in code units) that is allowed
 .  sp -1
 .  IP \(bu 2.3
 .\}
-The additional options bits
+The additional options bits.
 .RE
 .sp
 The primary option bits are:
 .sp
 .RS 4
 .PD 0
-.TP 24
+.TP 26
 \fBPCRE2_ANCHORED\fP
 .ad l
 Force pattern anchoring
-.TP 24
+.TP 26
 \fBPCRE2_ALLOW_EMPTY_CLASS\fP
 .ad l
 Allow empty classes
-.TP 24
+.TP 26
 \fBPCRE2_ALT_BSUX\fP
 .ad l
 Alternative handling of \f(CR\(rsu\fP, \f(CR\(rsU\fP, and \f(CR\(rsx\fP
-.TP 24
+.TP 26
 \fBPCRE2_ALT_CIRCUMFLEX\fP
 .ad l
 Alternative handling of \f(CR^\fP in multiline mode
-.TP 24
+.TP 26
 \fBPCRE2_ALT_EXTENDED_CLASS\fP
 .ad l
 Alternative extended character class syntax
-.TP 24
+.TP 26
 \fBPCRE2_ALT_VERBNAMES\fP
 .ad l
 Process backslashes in verb names
-.TP 24
+.TP 26
 \fBPCRE2_AUTO_CALLOUT\fP
 .ad l
 Compile automatic callouts
-.TP 24
+.TP 26
 \fBPCRE2_CASELESS\fP
 .ad l
 Do caseless matching
-.TP 24
+.TP 26
 \fBPCRE2_DOLLAR_ENDONLY\fP
 .ad l
 \f(CR$\fP not to match newline at end
-.TP 24
+.TP 26
 \fBPCRE2_DOTALL\fP
 .ad l
-\f(CR.\fP matches anything including \f(CRNL\fP
-.TP 24
+\f(CR.\fP matches anything including NL
+.TP 26
 \fBPCRE2_DUPNAMES\fP
 .ad l
 Allow duplicate names for subpatterns
-.TP 24
+.TP 26
 \fBPCRE2_ENDANCHORED\fP
 .ad l
 Pattern can match only at end of subject
-.TP 24
+.TP 26
 \fBPCRE2_EXTENDED\fP
 .ad l
 Ignore white space and \f(CR#\fP comments
-.TP 24
+.TP 26
 \fBPCRE2_FIRSTLINE\fP
 .ad l
 Force matching to be before newline
-.TP 24
+.TP 26
 \fBPCRE2_LITERAL\fP
 .ad l
 Pattern characters are all literal
-.TP 24
+.TP 26
 \fBPCRE2_MATCH_INVALID_UTF\fP
 .ad l
 Enable support for matching invalid UTF
-.TP 24
+.TP 26
 \fBPCRE2_MATCH_UNSET_BACKREF\fP
 .ad l
 Match unset backreferences
-.TP 24
+.TP 26
 \fBPCRE2_MULTILINE\fP
 .ad l
 \f(CR^\fP and \f(CR$\fP match newlines within data
-.TP 24
+.TP 26
 \fBPCRE2_NEVER_BACKSLASH_C\fP
 .ad l
 Lock out the use of \f(CR\(rsC\fP in patterns
-.TP 24
+.TP 26
 \fBPCRE2_NEVER_UCP\fP
 .ad l
 Lock out \fBPCRE2_UCP\fP, e.g. via \f(CR(*UCP)\fP
-.TP 24
+.TP 26
 \fBPCRE2_NEVER_UTF\fP
 .ad l
 Lock out \fBPCRE2_UTF\fP, e.g. via \f(CR(*UTF)\fP
-.TP 24
+.TP 26
 \fBPCRE2_NO_AUTO_CAPTURE\fP
 .ad l
 Disable numbered capturing paren\-
 theses (named ones available)
-.TP 24
+.TP 26
 \fBPCRE2_NO_AUTO_POSSESS\fP
 .ad l
 Disable auto\-possessification
-.TP 24
+.TP 26
 \fBPCRE2_NO_DOTSTAR_ANCHOR\fP
 .ad l
 Disable automatic anchoring for \f(CR.*\fP
-.TP 24
+.TP 26
 \fBPCRE2_NO_START_OPTIMIZE\fP
 .ad l
 Disable match\-time start optimizations
-.TP 24
+.TP 26
 \fBPCRE2_NO_UTF_CHECK\fP
 .ad l
 Do not check the pattern for UTF validity
 (only relevant if \fBPCRE2_UTF\fP is set)
-.TP 24
+.TP 26
 \fBPCRE2_UCP\fP
 .ad l
 Use Unicode properties for \f(CR\(rsd\fP, \f(CR\(rsw\fP, etc.
-.TP 24
+.TP 26
 \fBPCRE2_UNGREEDY\fP
 .ad l
 Invert greediness of quantifiers
-.TP 24
+.TP 26
 \fBPCRE2_USE_OFFSET_LIMIT\fP
 .ad l
 Enable offset limit for unanchored matching
-.TP 24
+.TP 26
 \fBPCRE2_UTF\fP
 .ad l
 Treat pattern and subjects as UTF strings
@@ -287,12 +287,12 @@ PCRE2 must be built with Unicode support (the default) in order to use
 \fBPCRE2_UTF\fP, \fBPCRE2_UCP\fP and related options.
 .sp
 Additional options may be set in the compile context via the
-\f(CRpcre2_set_compile_extra_options\fP
+pcre2_set_compile_extra_options()
 function.
 .sp
-If either of \fIerrorptr\fP or \fIerroroffset\fP is \f(CRNULL\fP, the function returns
-\f(CRNULL\fP immediately. Otherwise, the yield of this function is a pointer to a
-private data structure that contains the compiled pattern, or \f(CRNULL\fP if an error
+If either of \fIerrorptr\fP or \fIerroroffset\fP is \fBNULL\fP, the function returns
+\fBNULL\fP immediately. Otherwise, the yield of this function is a pointer to a
+private data structure that contains the compiled pattern, or \fBNULL\fP if an error
 was detected. In the error case, a text error message can be obtained by
 passing the value returned via the \fIerrorptr\fP argument to the
 pcre2_get_error_message() function. The offset (in code units) where the

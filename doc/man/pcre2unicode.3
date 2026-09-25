@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2unicode
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 27 November 2024
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -61,9 +61,9 @@ When PCRE2 is built with Unicode support, the escape sequences \f(CR\(rsp{..}\fP
 \f(CR\(rsP{..}\fP, and \f(CR\(rsX\fP can be used. This is not dependent on the \fBPCRE2_UTF\fP setting.
 The Unicode properties that can be tested are a subset of those that Perl
 supports. Currently they are limited to the general category properties such as
-Lu for an upper case letter or Nd for a decimal number, the derived properties
-Any and Lc (synonym L&), the Unicode script names such as Arabic or Han,
-Bidi_Class, Bidi_Control, and a few binary properties.
+\f(CRLu\fP for an upper case letter or \f(CRNd\fP for a decimal number, the derived properties
+\f(CRAny\fP and \f(CRLc\fP (synonym \f(CRL&\fP), the Unicode script names such as \f(CRArabic\fP or \f(CRHan\fP,
+\f(CRBidi_Class\fP, \f(CRBidi_Control\fP, and a few binary properties.
 .sp
 The full lists are given in the
 \f(CRpcre2pattern\fP
@@ -72,7 +72,7 @@ and
 documentation. In general, only the short names for properties are supported.
 For example, \f(CR\(rsp{L}\fP matches a letter. Its longer synonym, \f(CR\(rsp{Letter}\fP, is not
 supported. Furthermore, in Perl, many properties may optionally be prefixed by
-"Is", for compatibility with Perl 5.6. PCRE2 does not support this.
+\f(CRIs\fP, for compatibility with Perl 5.6. PCRE2 does not support this.
 .SH "WIDE CHARACTERS AND UTF MODES"
 .sp
 Code points less than 256 can be specified in patterns by either braced or
@@ -80,7 +80,7 @@ unbraced hexadecimal escape sequences (for example, \f(CR\(rsx{b3}\fP or \f(CR\(
 values have to use braced sequences. Unbraced octal code points up to \f(CR\(rs777\fP are
 also recognized; larger ones can be coded using \f(CR\(rso{...}\fP.
 .sp
-The escape sequence \f(CR\(rsN{U+<hex digits>}\fP is recognized as another way of
+The escape sequence \f(CR\(rsN{U+\fP\fIhex digits\fP\f(CR}\fP is recognized as another way of
 specifying a Unicode character by code point in a UTF mode. It is not allowed
 in non\-UTF mode.
 .sp
@@ -150,61 +150,60 @@ counterparts can be disabled by setting the \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP
 option. When this is set, all characters in a case equivalence must either be
 ASCII or non\-ASCII; there can be no mixing.
 .sp
-.ti +2
-Without \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP:
+.RS 4
+.PD 0
+.TP 7
+Without \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP
+.ad l
+\*(Aqk\*(Aq = \*(AqK\*(Aq = \f(CRU+212A\fP (Kelvin sign)
 .br
-.ti +2
-  \*(Aqk\*(Aq = \*(AqK\*(Aq = U+212A (Kelvin sign)
+\*(Aqs\*(Aq = \*(AqS\*(Aq = \f(CRU+017F\fP (long S)
+.TP 7
+With \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP
+.ad l
+\*(Aqk\*(Aq = \*(AqK\*(Aq
 .br
-.ti +2
-  \*(Aqs\*(Aq = \*(AqS\*(Aq = U+017F (long S)
+\f(CRU+212A\fP (Kelvin sign) \(em only case\-equivalent to itself
 .br
-.ti +2
-With \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP:
+\*(Aqs\*(Aq = \*(AqS\*(Aq
 .br
-.ti +2
-  \*(Aqk\*(Aq = \*(AqK\*(Aq
-.br
-.ti +2
-  U+212A (Kelvin sign)  only case\-equivalent to itself
-.br
-.ti +2
-  \*(Aqs\*(Aq = \*(AqS\*(Aq
-.br
-.ti +2
-  U+017F (long S)       only case\-equivalent to itself
+\f(CRU+017F\fP (long S) \(em only case\-equivalent to itself
+.PD
+.RE
+.PP
+.ad l
 .sp
 One language family, Turkish and Azeri, has its own case\-insensitivity rules,
 which can be selected by setting \fBPCRE2_EXTRA_TURKISH_CASING\fP. This alters the
 behaviour of the \*(Aqi\*(Aq, \*(AqI\*(Aq, \f(CRU+0130\fP (capital I with dot above), and \f(CRU+0131\fP
 (small dotless i) characters.
 .sp
-.ti +2
-Without \fBPCRE2_EXTRA_TURKISH_CASING\fP:
+.RS 4
+.PD 0
+.TP 7
+Without \fBPCRE2_EXTRA_TURKISH_CASING\fP
+.ad l
+\*(Aqi\*(Aq = \*(AqI\*(Aq
 .br
-.ti +2
-  \*(Aqi\*(Aq = \*(AqI\*(Aq
+\f(CRU+0130\fP (capital I with dot above)  \(em only case\-equivalent to itself
 .br
-.ti +2
-  U+0130 (capital I with dot above)  only case\-equivalent to itself
+\f(CRU+0131\fP (small dotless i) \(em only case\-equivalent to itself
+.TP 7
+With \fBPCRE2_EXTRA_TURKISH_CASING\fP
+.ad l
+\*(Aqi\*(Aq = \f(CRU+0130\fP (capital I with dot above)
 .br
-.ti +2
-  U+0131 (small dotless i)           only case\-equivalent to itself
-.br
-.ti +2
-With \fBPCRE2_EXTRA_TURKISH_CASING\fP:
-.br
-.ti +2
-  \*(Aqi\*(Aq = U+0130 (capital I with dot above)
-.br
-.ti +2
-  U+0131 (small dotless i) = \*(AqI\*(Aq
+\f(CRU+0131\fP (small dotless i) = \*(AqI\*(Aq
+.PD
+.RE
+.PP
+.ad l
 .sp
 It is not allowed to specify both \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP and
 \fBPCRE2_EXTRA_TURKISH_CASING\fP together.
 .sp
-From release 10.45 the Unicode letter properties Lu (upper case), Ll (lower
-case), and Lt (title case) are all treated as Lc (cased letter) when caseless
+From release 10.45 the Unicode letter properties \f(CRLu\fP (upper case), \f(CRLl\fP (lower
+case), and \f(CRLt\fP (title case) are all treated as \f(CRLc\fP (cased letter) when caseless
 matching is set by the \fBPCRE2_CASELESS\fP option or \f(CR(?i)\fP within the pattern.
 .SH "SCRIPT RUNS"
 .sp
@@ -242,7 +241,7 @@ property. However, for characters such as \f(CRU+102E0\fP more than one Script i
 listed. There are also some Common characters that have a single, non\-Common
 script in their Script Extension list.
 .sp
-The next section describes the basic rules for deciding whether a given string
+The section Basic script run rules describes the basic rules for deciding whether a given string
 of characters is a script run. Note, however, that there are some special cases
 involving the Chinese Han script, and an additional constraint for decimal
 digits. These are covered in subsequent sections.
@@ -260,19 +259,35 @@ remaining characters in a script run must have at least one script in common in
 their Script Extension lists. In set\-theoretic terminology, the intersection of
 all the sets of scripts must not be empty.
 .sp
-A simple example is an Internet name such as "google.com". The letters are all
+A simple example is an Internet name such as \f(CRgoogle.com\fP. The letters are all
 in the Latin script, and the dot is Common, so this string is a script run.
-However, the Cyrillic letter "o" looks exactly the same as the Latin "o"; a
-string that looks the same, but with Cyrillic "o"s is not a script run.
+However, the Cyrillic letter \f(CRo\fP looks exactly the same as the Latin \f(CRo\fP; a
+string that looks the same, but with Cyrillic \f(CRo\fPs is not a script run.
 .sp
 More interesting examples involve characters with more than one script in their
 Script Extension. Consider the following characters:
 .sp
-.ti +2
-U+060C  Arabic comma
-.br
-.ti +2
-U+06D4  Arabic full stop
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\f(CRU+060C\fP, Arabic comma
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\f(CRU+06D4\fP, Arabic full stop
+.RE
 .sp
 The first has the Script Extension list Arabic, Hanifi Rohingya, Syriac, and
 Thaana; the second has just Arabic and Hanifi Rohingya. Both of them could
@@ -319,7 +334,8 @@ If you pass an invalid UTF string when \fBPCRE2_NO_UTF_CHECK\fP is set, the resu
 is undefined and your program may crash or loop indefinitely or give incorrect
 results. There is, however, one mode of matching that can handle invalid UTF
 subject strings. This is enabled by passing \fBPCRE2_MATCH_INVALID_UTF\fP to
-pcre2_compile() and is discussed below in the next section. The rest of
+pcre2_compile() and is discussed below in the section
+Errors in UTF\-8 strings. The rest of
 this section covers the case when \fBPCRE2_MATCH_INVALID_UTF\fP is not set.
 .sp
 Passing \fBPCRE2_NO_UTF_CHECK\fP to pcre2_compile() just disables the UTF check
@@ -365,56 +381,59 @@ values are not representable in UTF\-16.
 .sp
 The following negative error codes are given for invalid UTF\-8 strings:
 .sp
-\fBPCRE2_ERROR_UTF8_ERR1\fP, \fBPCRE2_ERROR_UTF8_ERR2\fP, \fBPCRE2_ERROR_UTF8_ERR3\fP, \fBPCRE2_ERROR_UTF8_ERR4\fP,
-\fBPCRE2_ERROR_UTF8_ERR5\fP::
+.RS 4
+.PD 0
+.TP 7
+\fBPCRE2_ERROR_UTF8_ERR1\fP, \fBPCRE2_ERROR_UTF8_ERR2\fP, \fBPCRE2_ERROR_UTF8_ERR3\fP, \fBPCRE2_ERROR_UTF8_ERR4\fP, \fBPCRE2_ERROR_UTF8_ERR5\fP
+.ad l
 The string ends with a truncated UTF\-8 character; the code specifies how many
 bytes are missing (1 to 5). Although RFC 3629 restricts UTF\-8 characters to be
 no longer than 4 bytes, the encoding scheme (originally defined by RFC 2279)
 allows for up to 6 bytes, and this is checked first; hence the possibility of
 4 or 5 missing bytes.
-.sp
-\fBPCRE2_ERROR_UTF8_ERR6\fP, \fBPCRE2_ERROR_UTF8_ERR7\fP, \fBPCRE2_ERROR_UTF8_ERR8\fP, \fBPCRE2_ERROR_UTF8_ERR9\fP,
-\fBPCRE2_ERROR_UTF8_ERR10\fP::
+.TP 7
+\fBPCRE2_ERROR_UTF8_ERR6\fP, \fBPCRE2_ERROR_UTF8_ERR7\fP, \fBPCRE2_ERROR_UTF8_ERR8\fP, \fBPCRE2_ERROR_UTF8_ERR9\fP, \fBPCRE2_ERROR_UTF8_ERR10\fP
+.ad l
 The two most significant bits of the 2nd, 3rd, 4th, 5th, or 6th byte of the
 character do not have the binary value \f(CR0b10\fP (that is, either the most
 significant bit is 0, or the next bit is 1).
-.sp
-\fBPCRE2_ERROR_UTF8_ERR11\fP,
-\fBPCRE2_ERROR_UTF8_ERR12\fP::
+.TP 7
+\fBPCRE2_ERROR_UTF8_ERR11\fP, \fBPCRE2_ERROR_UTF8_ERR12\fP
+.ad l
 A character that is valid by the RFC 2279 rules is either 5 or 6 bytes long;
 these code points are excluded by RFC 3629.
-.TP 23
+.TP 7
 \fBPCRE2_ERROR_UTF8_ERR13\fP
 .ad l
 A 4\-byte character has a value greater than \f(CR0x10ffff\fP; these code points are
 excluded by RFC 3629.
-.TP 23
+.TP 7
 \fBPCRE2_ERROR_UTF8_ERR14\fP
 .ad l
 A 3\-byte character has a value in the range \f(CR0xd800\fP to \f(CR0xdfff\fP; this range of
 code points are reserved by RFC 3629 for use with UTF\-16, and so are excluded
 from UTF\-8.
-.PP
+.TP 7
+\fBPCRE2_ERROR_UTF8_ERR15\fP, \fBPCRE2_ERROR_UTF8_ERR16\fP, \fBPCRE2_ERROR_UTF8_ERR17\fP, \fBPCRE2_ERROR_UTF8_ERR18\fP, \fBPCRE2_ERROR_UTF8_ERR19\fP
 .ad l
-.sp
-\fBPCRE2_ERROR_UTF8_ERR15\fP, \fBPCRE2_ERROR_UTF8_ERR16\fP, \fBPCRE2_ERROR_UTF8_ERR17\fP, \fBPCRE2_ERROR_UTF8_ERR18\fP,
-\fBPCRE2_ERROR_UTF8_ERR19\fP::
 A 2\-, 3\-, 4\-, 5\-, or 6\-byte character is "overlong", that is, it codes for a
 value that can be represented by fewer bytes, which is invalid. For example,
 the two bytes \f(CR0xc0\fP, \f(CR0xae\fP give the value \f(CR0x2e\fP, whose correct coding uses just
 one byte.
-.TP 23
+.TP 7
 \fBPCRE2_ERROR_UTF8_ERR20\fP
 .ad l
 The two most significant bits of the first byte of a character have the binary
 value \f(CR0b10\fP (that is, the most significant bit is 1 and the second is 0). Such a
 byte can only validly occur as the second or subsequent byte of a multi\-byte
 character.
-.TP 23
+.TP 7
 \fBPCRE2_ERROR_UTF8_ERR21\fP
 .ad l
 The first byte of a character has the value \f(CR0xfe\fP or \f(CR0xff\fP. These values can
 never occur in a valid UTF\-8 string.
+.PD
+.RE
 .PP
 .ad l
 .SS "Errors in UTF\-16 strings"
@@ -501,28 +520,25 @@ UTF character, or the end of the subject.
 .sp
 At internal fragment boundaries, \f(CR\(rsb\fP and \f(CR\(rsB\fP behave in the same way as at the
 beginning and end of the subject. For example, a sequence such as \f(CR\(rsbWORD\(rsb\fP
-would match an instance of WORD that is surrounded by invalid UTF code units.
+would match an instance of \f(CRWORD\fP that is surrounded by invalid UTF code units.
 .sp
 Using \fBPCRE2_MATCH_INVALID_UTF\fP, an application can run matches on arbitrary
 data, knowing that any matched strings that are returned are valid UTF. This
 can be useful when searching for UTF text in executable or other binary files.
 .sp
 Note, however, that the 16\-bit and 32\-bit PCRE2 libraries process strings as
-sequences of \f(CRuint16_t\fP or \f(CRuint32_t\fP code points. They cannot find valid UTF
+sequences of \fBuint16_t\fP or \fBuint32_t\fP code points. They cannot find valid UTF
 sequences within an arbitrary string of bytes unless such sequences are
 suitably aligned.
-.SH "AUTHOR"
+.SS "Author"
 .sp
-.ti +2
 Philip Hazel
 .br
-.ti +2
 Retired from University Computing Service
 .br
-.ti +2
 Cambridge, England.
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 27 November 2024
 .br
-Copyright (c) 1997\-2024 University of Cambridge.
+Copyright \(co 1997\-2024 University of Cambridge.

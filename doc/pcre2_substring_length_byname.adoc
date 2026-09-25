@@ -30,9 +30,9 @@ arg:match_data::
 arg:stringname::
     The substring name
 arg:sizeptr::
-    Where to return the length, or [.c]`NULL`
+    Where to return the length, or const:NULL
 
-The third argument may be [.c]`NULL` if all you want to know is whether or not a
+The third argument may be const:NULL if all you want to know is whether or not a
 substring is set. The yield is zero on success, or a negative error code
 otherwise.
 

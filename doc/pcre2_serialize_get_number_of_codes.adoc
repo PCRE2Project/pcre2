@@ -31,7 +31,7 @@ const:PCRE2_ERROR_BADMAGIC::
 const:PCRE2_ERROR_BADMODE::
 	mismatch of variable unit size or PCRE version
 const:PCRE2_ERROR_NULL::
-	the argument is [.c]`NULL`
+	the argument is const:NULL
 
 const:PCRE2_ERROR_BADMAGIC may mean that the data is corrupt, or that it was compiled
 on a system with different endianness.

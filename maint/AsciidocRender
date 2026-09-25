@@ -2,7 +2,16 @@
 
 # Render one PCRE2 AsciiDoc source as both a manpage and an HTML document.
 
-if [ $# != 3 ] ; then
+if [ $# = 1 ] ; then
+  input=$1
+  manvolnum=`grep manvolnum "$input" | cut -f2 -d' '`
+  man_output="$(dirname "$input")/man/$(basename "${input%.adoc}").${manvolnum}"
+  html_output="$(dirname "$input")/html/$(basename "${input%.adoc}").html"
+elif [ $# = 3 ] ; then
+  input=$1
+  man_output=$2
+  html_output=$3
+else
   echo "Usage: $0 input.adoc output.1-or-3 output.html" >&2
   exit 1
 fi
@@ -17,11 +26,8 @@ if ! ruby -r rouge -e '' 2>/dev/null ; then
   exit 1
 fi
 
-input=$1
-man_output=$2
-html_output=$3
 script_dir=$(cd "$(dirname "$0")" && pwd)
 
 mkdir -p "$(dirname "$man_output")" "$(dirname "$html_output")"
-asciidoctor --failure-level WARN --require "$script_dir/AsciidocConverterPcre2.rb" --backend manpage --out-file "$man_output" "$input"
-asciidoctor --failure-level WARN --require "$script_dir/AsciidocConverterPcre2.rb" --backend html5 --attribute nofooter --out-file "$html_output" "$input"
+asciidoctor --failure-level WARN -v --require "$script_dir/AsciidocConverterPcre2.rb" --backend manpage --out-file "$man_output" "$input"
+asciidoctor --failure-level WARN -v --require "$script_dir/AsciidocConverterPcre2.rb" --backend html5 --attribute nofooter --out-file "$html_output" "$input"

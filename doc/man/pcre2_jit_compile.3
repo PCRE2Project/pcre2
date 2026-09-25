@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_jit_compile
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 22 August 2024
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -51,7 +51,7 @@ documentation.
 .sp
 The availability of JIT support can be tested by calling
 pcre2_jit_compile() with a single option \fBPCRE2_JIT_TEST_ALLOC\fP (the
-\fIcode\fP argument is ignored, so a \f(CRNULL\fP value is accepted). Such a call
+\fIcode\fP argument is ignored, so a \fBNULL\fP value is accepted). Such a call
 returns zero if JIT is available and has a working allocator. Otherwise
 it returns \fBPCRE2_ERROR_NOMEMORY\fP if JIT is available but cannot allocate
 executable memory, or \fBPCRE2_ERROR_JIT_UNSUPPORTED\fP if JIT support is not

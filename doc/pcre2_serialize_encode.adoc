@@ -41,7 +41,7 @@ arg:serialized_bytes::
 arg:serialized_size::
     set to the number of bytes in the byte stream
 arg:gcontext::
-    pointer to a general context or [.c]`NULL`
+    pointer to a general context or const:NULL
 
 The context argument is used to obtain memory for the byte stream. When the
 serialized data is no longer needed, it must be freed by calling
@@ -58,7 +58,7 @@ const:PCRE2_ERROR_MEMORY::
 const:PCRE2_ERROR_MIXEDTABLES::
     the patterns do not all use the same tables
 const:PCRE2_ERROR_NULL::
-    an argument other than arg:gcontext is [.c]`NULL`
+    an argument other than arg:gcontext is const:NULL
 
 const:PCRE2_ERROR_BADMAGIC means either that a pattern's code has been corrupted, or
 that a slot in the vector does not point to a compiled pattern.

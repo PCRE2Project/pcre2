@@ -36,6 +36,8 @@ for variable, configure_name in cmake_versions.items():
 
 print('Updating AsciiDoc sources')
 for filename in glob.glob('doc/*.adoc'):
+    if filename == 'doc/index.adoc':
+        continue
     update_adoc_version(filename)
 
 # MODULE.bazel

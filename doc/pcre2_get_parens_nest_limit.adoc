@@ -22,7 +22,7 @@ int pcre2_get_parens_nest_limit(pcre2_compile_context *ccontext,
 
 This function gets, from a compile context, the maximum depth of nested
 parentheses in a pattern. The result is zero for success or const:PCRE2_ERROR_NULL if
-either argument is [.c]`NULL`.
+either argument is const:NULL.
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

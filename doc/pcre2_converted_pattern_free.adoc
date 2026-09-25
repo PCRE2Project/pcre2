@@ -22,7 +22,7 @@ void pcre2_converted_pattern_free(PCRE2_UCHAR *converted);
 This function is part of an experimental set of pattern conversion functions.
 It frees the memory occupied by a converted pattern that was obtained by
 calling func:pcre2_pattern_convert() with arguments that caused it to place
-the converted pattern into newly obtained heap memory. If the argument is [.c]`NULL`,
+the converted pattern into newly obtained heap memory. If the argument is const:NULL,
 the function returns immediately without doing anything.
 
 The pattern conversion functions are described in the

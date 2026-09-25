@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2syntax
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 14 October 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -41,14 +41,20 @@ The full description of the latter is in the
 documentation.
 .SH "QUOTING"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsx         where x is non\-alphanumeric is a literal x
-\(rsQ...\(rsE    treat enclosed characters as literal
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 8
+\f(CR\(rs\fP\fIx\fP
+.ad l
+where \fIx\fP is non\-alphanumeric, matches a literal \fIx\fP
+.TP 8
+\f(CR\(rsQ...\(rsE\fP
+.ad l
+treat enclosed characters as literal
+.PD
+.RE
+.PP
+.ad l
 .sp
 Note that white space inside \f(CR\(rsQ...\(rsE\fP is always treated as literal, even if
 \fBPCRE2_EXTENDED\fP is set, causing most other white space to be ignored. Note also
@@ -59,7 +65,7 @@ documentation for details.
 .sp
 With one exception, wherever brace characters \f(CR{\fP and \f(CR}\fP are required to enclose
 data for constructions such as \f(CR\(rsg{2}\fP or \f(CR\(rsk{name}\fP, space and/or horizontal tab
-characters that follow { or precede } are allowed and are ignored. In the case
+characters that follow \f(CR{\fP or precede \f(CR}\fP are allowed and are ignored. In the case
 of quantifiers, they may also appear before or after the comma. The exception
 is \f(CR\(rsu{...}\fP which is not Perl\-compatible and is recognized only when
 \fBPCRE2_EXTRA_ALT_BSUX\fP is set. This is an ECMAScript compatibility feature, and
@@ -69,93 +75,191 @@ follows ECMAScript\(cqs behaviour.
 This table applies to ASCII and Unicode environments. An unrecognized escape
 sequence causes an error.
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsa         alarm, that is, the BEL character (hex 07)
-\(rscx        "control\-x", where x is a non\-control ASCII character
-\(rse         escape (hex 1B)
-\(rsf         form feed (hex 0C)
-\(rsn         newline (hex 0A)
-\(rsr         carriage return (hex 0D)
-\(rst         tab (hex 09)
-\(rs0dd       character with octal code 0dd
-\(rsddd       character with octal code ddd, or backreference
-\(rso{ddd..}  character with octal code ddd..
-\(rsN{U+hh..} character with Unicode code point hh.. (Unicode mode only)
-\(rsxhh       character with hex code hh
-\(rsx{hh..}   character with hex code hh..
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 21
+\f(CR\(rsa\fP
+.ad l
+alarm, that is, the BEL character (\f(CR0x07\fP)
+.TP 21
+\f(CR\(rsc\fP\fIx\fP
+.ad l
+"control\-\fIx\fP", where \fIx\fP is a non\-control ASCII character
+.TP 21
+\f(CR\(rse\fP
+.ad l
+escape (\f(CR0x1B\fP)
+.TP 21
+\f(CR\(rsf\fP
+.ad l
+form feed (\f(CR0x0C\fP)
+.TP 21
+\f(CR\(rsn\fP
+.ad l
+newline (\f(CR0x0A\fP)
+.TP 21
+\f(CR\(rsr\fP
+.ad l
+carriage return (\f(CR0x0D\fP)
+.TP 21
+\f(CR\(rst\fP
+.ad l
+tab (\f(CR0x09\fP)
+.TP 21
+\f(CR\(rs0\fP\fIdd\fP
+.ad l
+character with octal code 0\fIdd\fP
+.TP 21
+\f(CR\(rs\fP\fIddd\fP
+.ad l
+character with octal code \fIddd\fP, or backreference
+.TP 21
+\f(CR\(rso{\fP\fIddd...\fP\f(CR}\fP
+.ad l
+character with octal code \fIddd...\fP
+.TP 21
+\f(CR\(rsN{U+\fP\fIhh...\fP\f(CR}\fP
+.ad l
+character with Unicode code point \fIhh...\fP (Unicode mode only)
+.TP 21
+\f(CR\(rsx\fP\fIhh\fP
+.ad l
+character with hex code \fIhh\fP
+.TP 21
+\f(CR\(rsx{\fP\fIhh...\fP\f(CR}\fP
+.ad l
+character with hex code \fIhh...\fP
+.PD
+.RE
+.PP
+.ad l
 .sp
-\f(CR\(rsN{U+hh..}\fP is synonymous with \f(CR\(rsx{hh..}\fP but is not supported in environments
-that use EBCDIC code (mainly IBM mainframes). Note that \(rsN not followed by an
+\f(CR\(rsN{U+\fP\fIhh...\fP\f(CR}\fP is synonymous with \f(CR\(rsx{\fP\fIhh...\fP\f(CR}\fP but is not supported in environments
+that use EBCDIC code (mainly IBM mainframes). Note that \f(CR\(rsN\fP not followed by an
 opening curly bracket has a different meaning (see below).
 .sp
 If \fBPCRE2_ALT_BSUX\fP or \fBPCRE2_EXTRA_ALT_BSUX\fP is set ("ALT_BSUX mode"), the
 following are also recognized:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsU         the character "U"
-\(rsuhhhh     character with hex code hhhh
-\(rsu{hh..}   character with hex code hh.. but only for EXTRA_ALT_BSUX
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 14
+\f(CR\(rsU\fP
+.ad l
+the character "U"
+.TP 14
+\f(CR\(rsu\fP\fIhhhh\fP
+.ad l
+character with hex code \fIhhhh\fP
+.TP 14
+\f(CR\(rsu{\fP\fIhh...\fP\f(CR}\fP
+.ad l
+character with hex code \fIhh...\fP but only for EXTRA_ALT_BSUX
+.PD
+.RE
+.PP
+.ad l
 .sp
 When \f(CR\(rsx\fP is not followed by \f(CR{\fP, one or two hexadecimal digits are read,
 but in ALT_BSUX mode \f(CR\(rsx\fP must be followed by two hexadecimal digits to be
-recognized as a hexadecimal escape; otherwise it matches a literal "x".
+recognized as a hexadecimal escape; otherwise it matches a literal \f(CRx\fP.
 Likewise, if \f(CR\(rsu\fP (in ALT_BSUX mode) is not followed by four hexadecimal digits
 or (in EXTRA_ALT_BSUX mode) a sequence of hex digits in curly brackets, it
-matches a literal "u".
+matches a literal \f(CRu\fP.
 .sp
-Note that \f(CR\(rs0dd\fP is always an octal code. The treatment of backslash followed by
+Note that \f(CR\(rs0\fP\fIdd\fP is always an octal code. The treatment of backslash followed by
 a non\-zero digit is complicated; for details see the section
-"Non\-printing characters"
+Non\-printing characters
 in the
 \f(CRpcre2pattern\fP
 documentation, where details of escape processing in EBCDIC environments are
 also given.
 .SH "CHARACTER TYPES"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\&.          any character except newline;
-             in dotall mode, any character whatsoever
-\(rsC         one code unit, even in UTF mode (best avoided)
-\(rsd         a decimal digit
-\(rsD         a character that is not a decimal digit
-\(rsh         a horizontal white space character
-\(rsH         a character that is not a horizontal white space character
-\(rsN         a character that is not a newline
-\(rsp{_xx_}     a character with the _xx_ property
-\(rsP{_xx_}     a character without the _xx_ property
-\(rsR         a newline sequence
-\(rss         a white space character
-\(rsS         a character that is not a white space character
-\(rsv         a vertical white space character
-\(rsV         a character that is not a vertical white space character
-\(rsw         a "word" character
-\(rsW         a "non\-word" character
-\(rsX         a Unicode extended grapheme cluster
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 11
+\f(CR.\fP
+.ad l
+any character except newline; in dotall mode, any character whatsoever
+.TP 11
+\f(CR\(rsC\fP
+.ad l
+one code unit, even in UTF mode (best avoided)
+.TP 11
+\f(CR\(rsd\fP
+.ad l
+a decimal digit
+.TP 11
+\f(CR\(rsD\fP
+.ad l
+a character that is not a decimal digit
+.TP 11
+\f(CR\(rsh\fP
+.ad l
+a horizontal white space character
+.TP 11
+\f(CR\(rsH\fP
+.ad l
+a character that is not a horizontal white space character
+.TP 11
+\f(CR\(rsN\fP
+.ad l
+a character that is not a newline
+.TP 11
+\f(CR\(rsp{\fP\fIxx\fP\f(CR}\fP
+.ad l
+a character with the \fIxx\fP property
+.TP 11
+\f(CR\(rsP{\fP\fIxx\fP\f(CR}\fP
+.ad l
+a character without the \fIxx\fP property
+.TP 11
+\f(CR\(rsR\fP
+.ad l
+a newline sequence
+.TP 11
+\f(CR\(rss\fP
+.ad l
+a white space character
+.TP 11
+\f(CR\(rsS\fP
+.ad l
+a character that is not a white space character
+.TP 11
+\f(CR\(rsv\fP
+.ad l
+a vertical white space character
+.TP 11
+\f(CR\(rsV\fP
+.ad l
+a character that is not a vertical white space character
+.TP 11
+\f(CR\(rsw\fP
+.ad l
+a "word" character
+.TP 11
+\f(CR\(rsW\fP
+.ad l
+a "non\-word" character
+.TP 11
+\f(CR\(rsX\fP
+.ad l
+a Unicode extended grapheme cluster
+.PD
+.RE
+.PP
+.ad l
 .sp
 \f(CR\(rsC\fP is dangerous because it may leave the current matching point in the middle
-of a UTF\-8 or UTF\-16 character. The application can lock out the use of \(rsC by
+of a UTF\-8 or UTF\-16 character. The application can lock out the use of \f(CR\(rsC\fP by
 setting the \fBPCRE2_NEVER_BACKSLASH_C\fP option. It is also possible to build PCRE2
 with the use of \f(CR\(rsC\fP permanently disabled.
 .sp
 By default, \f(CR\(rsd\fP, \f(CR\(rss\fP, and \f(CR\(rsw\fP match only ASCII characters, even in UTF\-8 mode
 or in the 16\-bit and 32\-bit libraries. However, if locale\-specific matching is
-happening, \(rss and \(rsw may also match characters with code points in the range
-128\-255. If the \fBPCRE2_UCP\fP option is set, the behaviour of these escape
+happening, \f(CR\(rss\fP and \f(CR\(rsw\fP may also match characters with code points in the range
+128\(em255. If the \fBPCRE2_UCP\fP option is set, the behaviour of these escape
 sequences is changed to use Unicode properties and they match many more
 characters, but there are some option settings that can restrict individual
 sequences to matching only ASCII characters.
@@ -166,110 +270,200 @@ Unicode\(cqs "loose matching" rules. For example, \f(CR\(rsp{Bidi_Class=al}\fP i
 as \f(CR\(rsp{ bidi class = AL }\fP.
 .SH "GENERAL CATEGORY PROPERTIES FOR \f(CR\(rsp\fP AND \f(CR\(rsP\fP"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-C          Other
-Cc         Control
-Cf         Format
-Cn         Unassigned
-Co         Private use
-Cs         Surrogate
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CRC\fP
+.ad l
+Other
+.TP 7
+\f(CRCc\fP
+.ad l
+Control
+.TP 7
+\f(CRCf\fP
+.ad l
+Format
+.TP 7
+\f(CRCn\fP
+.ad l
+Unassigned
+.TP 7
+\f(CRCo\fP
+.ad l
+Private use
+.TP 7
+\f(CRCs\fP
+.ad l
+Surrogate
+.TP 7
+\f(CRL\fP
+.ad l
+Letter
+.TP 7
+\f(CRLc\fP
+.ad l
+Cased letter, the union of \f(CRLl\fP, \f(CRLu\fP, and \f(CRLt\fP
+.TP 7
+\f(CRL&\fP
+.ad l
+Synonym of \f(CRLc\fP
+.TP 7
+\f(CRLl\fP
+.ad l
+Lower case letter
+.TP 7
+\f(CRLm\fP
+.ad l
+Modifier letter
+.TP 7
+\f(CRLo\fP
+.ad l
+Other letter
+.TP 7
+\f(CRLt\fP
+.ad l
+Title case letter
+.TP 7
+\f(CRLu\fP
+.ad l
+Upper case letter
+.TP 7
+\f(CRM\fP
+.ad l
+Mark
+.TP 7
+\f(CRMc\fP
+.ad l
+Spacing mark
+.TP 7
+\f(CRMe\fP
+.ad l
+Enclosing mark
+.TP 7
+\f(CRMn\fP
+.ad l
+Non\-spacing mark
+.TP 7
+\f(CRN\fP
+.ad l
+Number
+.TP 7
+\f(CRNd\fP
+.ad l
+Decimal number
+.TP 7
+\f(CRNl\fP
+.ad l
+Letter number
+.TP 7
+\f(CRNo\fP
+.ad l
+Other number
+.TP 7
+\f(CRP\fP
+.ad l
+Punctuation
+.TP 7
+\f(CRPc\fP
+.ad l
+Connector punctuation
+.TP 7
+\f(CRPd\fP
+.ad l
+Dash punctuation
+.TP 7
+\f(CRPe\fP
+.ad l
+Close punctuation
+.TP 7
+\f(CRPf\fP
+.ad l
+Final punctuation
+.TP 7
+\f(CRPi\fP
+.ad l
+Initial punctuation
+.TP 7
+\f(CRPo\fP
+.ad l
+Other punctuation
+.TP 7
+\f(CRPs\fP
+.ad l
+Open punctuation
+.TP 7
+\f(CRS\fP
+.ad l
+Symbol
+.TP 7
+\f(CRSc\fP
+.ad l
+Currency symbol
+.TP 7
+\f(CRSk\fP
+.ad l
+Modifier symbol
+.TP 7
+\f(CRSm\fP
+.ad l
+Mathematical symbol
+.TP 7
+\f(CRSo\fP
+.ad l
+Other symbol
+.TP 7
+\f(CRZ\fP
+.ad l
+Separator
+.TP 7
+\f(CRZl\fP
+.ad l
+Line separator
+.TP 7
+\f(CRZp\fP
+.ad l
+Paragraph separator
+.TP 7
+\f(CRZs\fP
+.ad l
+Space separator
+.PD
+.RE
+.PP
+.ad l
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-L          Letter
-Lc         Cased letter, the union of Ll, Lu, and Lt
-L&         Synonym of Lc
-Ll         Lower case letter
-Lm         Modifier letter
-Lo         Other letter
-Lt         Title case letter
-Lu         Upper case letter
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-M          Mark
-Mc         Spacing mark
-Me         Enclosing mark
-Mn         Non\-spacing mark
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-N          Number
-Nd         Decimal number
-Nl         Letter number
-No         Other number
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-P          Punctuation
-Pc         Connector punctuation
-Pd         Dash punctuation
-Pe         Close punctuation
-Pf         Final punctuation
-Pi         Initial punctuation
-Po         Other punctuation
-Ps         Open punctuation
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-S          Symbol
-Sc         Currency symbol
-Sk         Modifier symbol
-Sm         Mathematical symbol
-So         Other symbol
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-Z          Separator
-Zl         Line separator
-Zp         Paragraph separator
-Zs         Space separator
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-From release 10.45, when caseless matching is set, Ll, Lu, and Lt are all
-equivalent to Lc.
+From release 10.45, when caseless matching is set, \f(CRLl\fP, \f(CRLu\fP, and
+\f(CRLt\fP are all equivalent to \f(CRLc\fP.
 .SH "PCRE2 SPECIAL CATEGORY PROPERTIES FOR \f(CR\(rsp\fP AND \f(CR\(rsP\fP"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-Xan        Alphanumeric: union of properties L and N
-Xps        POSIX space: property Z or tab, NL, VT, FF, CR
-Xsp        Perl space: property Z or tab, NL, VT, FF, CR
-Xuc        Universally\-named character: one that can be
-             represented by a Universal Character Name
-Xwd        Perl word: property Xan or underscore
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CRXan\fP
+.ad l
+Alphanumeric: union of properties \f(CRL\fP and \f(CRN\fP
+.TP 7
+\f(CRXps\fP
+.ad l
+POSIX space: property \f(CRZ\fP or tab, NL, VT, FF, CR
+.TP 7
+\f(CRXsp\fP
+.ad l
+Perl space: property \f(CRZ\fP or tab, NL, VT, FF, CR
+.TP 7
+\f(CRXuc\fP
+.ad l
+Universally\-named character: one that can be represented by a
+Universal Character Name
+.TP 7
+\f(CRXwd\fP
+.ad l
+Perl word: property \f(CRXan\fP or underscore
+.PD
+.RE
+.PP
+.ad l
 .sp
 Perl and POSIX space are now the same. Perl added VT to its space character set
 at release 5.18.
@@ -299,82 +493,216 @@ pcre2test \-LS
 .fam
 .fi
 .ss \n[.ss] 0
-.SH "THE BIDI_CLASS PROPERTY FOR \f(CR\(rsp\fP AND \f(CR\(rsP\fP"
+.SH "THE \f(CRBidi_Class\fP PROPERTY FOR \f(CR\(rsp\fP AND \f(CR\(rsP\fP"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsp{Bidi_Class:<class>}   matches a character with the given class
-\(rsp{BC:<class>}           matches a character with the given class
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 21
+\f(CR\(rsp{Bidi_Class:\fP\fIclass\fP\f(CR}\fP
+.ad l
+Matches a character with the given class
+.TP 21
+\f(CR\(rsp{BC:\fP\fIclass\fP\f(CR}\fP
+.ad l
+Matches a character with the given class
+.PD
+.RE
+.PP
+.ad l
 .sp
 The recognized classes are:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-AL          Arabic letter
-AN          Arabic number
-B           paragraph separator
-BN          boundary neutral
-CS          common separator
-EN          European number
-ES          European separator
-ET          European terminator
-FSI         first strong isolate
-L           left\-to\-right
-LRE         left\-to\-right embedding
-LRI         left\-to\-right isolate
-LRO         left\-to\-right override
-NSM         non\-spacing mark
-ON          other neutral
-PDF         pop directional format
-PDI         pop directional isolate
-R           right\-to\-left
-RLE         right\-to\-left embedding
-RLI         right\-to\-left isolate
-RLO         right\-to\-left override
-S           segment separator
-WS          white space
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CRAL\fP
+.ad l
+Arabic letter
+.TP 7
+\f(CRAN\fP
+.ad l
+Arabic number
+.TP 7
+\f(CRB\fP
+.ad l
+Paragraph separator
+.TP 7
+\f(CRBN\fP
+.ad l
+Boundary neutral
+.TP 7
+\f(CRCS\fP
+.ad l
+Common separator
+.TP 7
+\f(CREN\fP
+.ad l
+European number
+.TP 7
+\f(CRES\fP
+.ad l
+European separator
+.TP 7
+\f(CRET\fP
+.ad l
+European terminator
+.TP 7
+\f(CRFSI\fP
+.ad l
+First strong isolate
+.TP 7
+\f(CRL\fP
+.ad l
+Left\-to\-right
+.TP 7
+\f(CRLRE\fP
+.ad l
+Left\-to\-right embedding
+.TP 7
+\f(CRLRI\fP
+.ad l
+Left\-to\-right isolate
+.TP 7
+\f(CRLRO\fP
+.ad l
+Left\-to\-right override
+.TP 7
+\f(CRNSM\fP
+.ad l
+Non\-spacing mark
+.TP 7
+\f(CRON\fP
+.ad l
+Other neutral
+.TP 7
+\f(CRPDF\fP
+.ad l
+Pop directional format
+.TP 7
+\f(CRPDI\fP
+.ad l
+Pop directional isolate
+.TP 7
+\f(CRR\fP
+.ad l
+Right\-to\-left
+.TP 7
+\f(CRRLE\fP
+.ad l
+Right\-to\-left embedding
+.TP 7
+\f(CRRLI\fP
+.ad l
+Right\-to\-left isolate
+.TP 7
+\f(CRRLO\fP
+.ad l
+Right\-to\-left override
+.TP 7
+\f(CRS\fP
+.ad l
+Segment separator
+.TP 7
+\f(CRWS\fP
+.ad l
+White space
+.PD
+.RE
+.PP
+.ad l
 .SH "CHARACTER CLASSES"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-[...]       positive character class
-[^...]      negative character class
-[x\-y]       range (can be used for hex characters)
-[[:xxx:]]   positive POSIX named set
-[[:^xxx:]]  negative POSIX named set
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 11
+\f(CR[...]\fP
+.ad l
+Positive character class
+.TP 11
+\f(CR[^...]\fP
+.ad l
+Negative character class
+.TP 11
+\f(CR[x\-y]\fP
+.ad l
+Range (can be used for hexadecimal characters)
+.TP 11
+\f(CR[[:\fP\fIxxx\fP\f(CR:]]\fP
+.ad l
+Positive POSIX named set
+.TP 11
+\f(CR[[:^\fP\fIxxx\fP\f(CR:]]\fP
+.ad l
+Negative POSIX named set
+.PD
+.RE
+.PP
+.ad l
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-alnum       alphanumeric
-alpha       alphabetic
-ascii       0\-127
-blank       space or tab
-cntrl       control character
-digit       decimal digit
-graph       printing, excluding space
-lower       lower case letter
-print       printing, including space
-punct       printing, excluding alphanumeric
-space       white space
-upper       upper case letter
-word        same as \(rsw
-xdigit      hexadecimal digit
-.fam
-.fi
-.ss \n[.ss] 0
+The recognized POSIX named sets are:
+.sp
+.RS 4
+.PD 0
+.TP 7
+\f(CRalnum\fP
+.ad l
+Alphanumeric
+.TP 7
+\f(CRalpha\fP
+.ad l
+Alphabetic
+.TP 7
+\f(CRascii\fP
+.ad l
+0\(em127
+.TP 7
+\f(CRblank\fP
+.ad l
+Space or tab
+.TP 7
+\f(CRcntrl\fP
+.ad l
+Control character
+.TP 7
+\f(CRdigit\fP
+.ad l
+Decimal digit
+.TP 7
+\f(CRgraph\fP
+.ad l
+Printing, excluding space
+.TP 7
+\f(CRlower\fP
+.ad l
+Lower case letter
+.TP 7
+\f(CRprint\fP
+.ad l
+Printing, including space
+.TP 7
+\f(CRpunct\fP
+.ad l
+Printing, excluding alphanumeric
+.TP 7
+\f(CRspace\fP
+.ad l
+White space
+.TP 7
+\f(CRupper\fP
+.ad l
+Upper case letter
+.TP 7
+\f(CRword\fP
+.ad l
+Same as \f(CR\(rsw\fP
+.TP 7
+\f(CRxdigit\fP
+.ad l
+Hexadecimal digit
+.PD
+.RE
+.PP
+.ad l
 .sp
 In PCRE2, POSIX character set names recognize only ASCII characters by default,
 but some of them use Unicode properties if \fBPCRE2_UCP\fP is set. You can use
@@ -383,240 +711,474 @@ but some of them use Unicode properties if \fBPCRE2_UCP\fP is set. You can use
 When \fBPCRE2_ALT_EXTENDED_CLASS\fP is set, UTS#18 extended character classes may be
 used, allowing nested character classes, combined using set operators.
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-[x&&[^y]]   UTS#18 extended character class
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-x||y        set union (OR)
-x&&y        set intersection (AND)
-x\-\-y        set difference (AND NOT)
-x~~y        set symmetric difference (XOR)
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 18
+\f(CR[x&&[^y]]\fP
+.ad l
+UTS#18 extended character class
+.TP 18
+\f(CRx||y\fP
+.ad l
+Set union (OR)
+.TP 18
+\f(CRx&&y\fP
+.ad l
+Set intersection (AND)
+.TP 18
+\f(CRx\-\-y\fP
+.ad l
+Set difference (AND NOT)
+.TP 18
+\f(CRx~~y\fP
+.ad l
+Set symmetric difference (XOR)
+.PD
+.RE
+.PP
+.ad l
 .SH "PERL EXTENDED CHARACTER CLASSES"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(?[...])                Perl extended character class
-(?[\(rsp{Thai} & \(rsp{Nd}])  operators; white space ignored
-(?[(x \- y) & z])        parentheses for grouping
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 25
+\f(CR(?[...])\fP
+.ad l
+Perl extended character class
+.TP 25
+\f(CR(?[\(rsp{Thai} & \(rsp{Nd}])\fP
+.ad l
+Operators; white space ignored
+.TP 25
+\f(CR(?[(\fP\fIX\fP\f(CR \- \fP\fIY\fP\f(CR) & \fP\fIZ\fP\f(CR])\fP
+.ad l
+Parentheses for grouping
+.TP 25
+\f(CR(?[ [^3] & \(rsp{Nd} ])\fP
+.ad l
+\f(CR[ ... ]\fP is a nested ordinary class
+.TP 25
+\f(CR(?[ [:alpha:] \- [z] ])\fP
+.ad l
+POSIX set is allowed outside \f(CR[ ... ]\fP but character literal must be enclosed
+.TP 25
+\f(CR(?[ \(rsd \- [3] ])\fP
+.ad l
+Backslash\-escaped set is allowed outside \f(CR[ ... ]\fP
+.TP 25
+\f(CR(?[ !\(rsn & [:ascii:] ])\fP
+.ad l
+Backslash\-escaped character is allowed outside
+\f(CR[ ... ]\fP; all other characters or ranges must be enclosed in \f(CR[ ... ]\fP
+.TP 25
+\f(CRx|y\fP, \f(CRx+y\fP
+.ad l
+Set union (OR)
+.TP 25
+\f(CRx&y\fP
+.ad l
+Set intersection (AND)
+.TP 25
+\f(CRx\-y\fP
+.ad l
+Set difference (AND NOT)
+.TP 25
+\f(CRx^y\fP
+.ad l
+Set symmetric difference (XOR)
+.TP 25
+\f(CR!x\fP
+.ad l
+Set complement (NOT)
+.PD
+.RE
+.PP
+.ad l
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(?[ [^3] & \(rsp{Nd} ])    [...] is a nested ordinary class
-(?[ [:alpha:] \- [z] ])  POSIX set is allowed outside [...]
-(?[ \(rsd \- [3] ])         backslash\-escaped set is allowed outside [...]
-(?[ !\(rsn & [:ascii:] ])  backslash\-escaped character is allowed outside [...]
-                    all other characters or ranges must be enclosed in [...]
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-x|y, x+y                set union (OR)
-x&y                     set intersection (AND)
-x\-y                     set difference (AND NOT)
-x^y                     set symmetric difference (XOR)
-!x                      set complement (NOT)
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-Inside a Perl extended character class, [...] switches mode to be interpreted
-as an ordinary character class. Outside of a nested [...], the only items
+Inside a Perl extended character class, \f(CR[...]\fP switches mode to be interpreted
+as an ordinary character class. Outside of a nested \f(CR[...]\fP, the only items
 permitted are backslash\-escapes, POSIX sets, operators, and parentheses. Inside
-a nested ordinary class, ^ has its usual meaning (inverts the class when used
-as the first character); outside of a nested class, ^ is the XOR operator.
+a nested ordinary class, \f(CR^\fP has its usual meaning (inverts the class when used
+as the first character); outside of a nested class, \f(CR^\fP is the XOR operator.
 .SH "QUANTIFIERS"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-?           0 or 1, greedy
-?+          0 or 1, possessive
-??          0 or 1, lazy
-*           0 or more, greedy
-*+          0 or more, possessive
-*?          0 or more, lazy
-+           1 or more, greedy
-++          1 or more, possessive
-+?          1 or more, lazy
-{n}         exactly n
-{n,m}       at least n, no more than m, greedy
-{n,m}+      at least n, no more than m, possessive
-{n,m}?      at least n, no more than m, lazy
-{n,}        n or more, greedy
-{n,}+       n or more, possessive
-{n,}?       n or more, lazy
-{,m}        zero up to m, greedy
-{,m}+       zero up to m, possessive
-{,m}?       zero up to m, lazy
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR?\fP
+.ad l
+0 or 1, greedy
+.TP 7
+\f(CR?+\fP
+.ad l
+0 or 1, possessive
+.TP 7
+\f(CR??\fP
+.ad l
+0 or 1, lazy
+.TP 7
+\f(CR*\fP
+.ad l
+0 or more, greedy
+.TP 7
+\f(CR*+\fP
+.ad l
+0 or more, possessive
+.TP 7
+\f(CR*?\fP
+.ad l
+0 or more, lazy
+.TP 7
+\f(CR+\fP
+.ad l
+1 or more, greedy
+.TP 7
+\f(CR++\fP
+.ad l
+1 or more, possessive
+.TP 7
+\f(CR+?\fP
+.ad l
+1 or more, lazy
+.TP 7
+\f(CR{\fP\fIn\fP\f(CR}\fP
+.ad l
+Exactly \fIn\fP
+.TP 7
+\f(CR{\fP\fIn\fP\f(CR,\fP\fIm\fP\f(CR}\fP
+.ad l
+At least \fIn\fP, no more than \fIm\fP, greedy
+.TP 7
+\f(CR{\fP\fIn\fP\f(CR,\fP\fIm\fP\f(CR}+\fP
+.ad l
+At least \fIn\fP, no more than \fIm\fP, possessive
+.TP 7
+\f(CR{\fP\fIn\fP\f(CR,\fP\fIm\fP\f(CR}?\fP
+.ad l
+At least \fIn\fP, no more than \fIm\fP, lazy
+.TP 7
+\f(CR{\fP\fIn\fP\f(CR,}\fP
+.ad l
+\fIn\fP or more, greedy
+.TP 7
+\f(CR{\fP\fIn\fP\f(CR,}+\fP
+.ad l
+\fIn\fP or more, possessive
+.TP 7
+\f(CR{\fP\fIn\fP\f(CR,}?\fP
+.ad l
+\fIn\fP or more, lazy
+.TP 7
+\f(CR{,\fP\fIm\fP\f(CR}\fP
+.ad l
+Zero up to \fIm\fP, greedy
+.TP 7
+\f(CR{,\fP\fIm\fP\f(CR}+\fP
+.ad l
+Zero up to \fIm\fP, possessive
+.TP 7
+\f(CR{,\fP\fIm\fP\f(CR}?\fP
+.ad l
+Zero up to \fIm\fP, lazy
+.PD
+.RE
+.PP
+.ad l
 .SH "ANCHORS AND SIMPLE ASSERTIONS"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsb          word boundary
-\(rsB          not a word boundary
-^           start of subject
-              also after an internal newline in multiline mode
-              (after any newline if PCRE2_ALT_CIRCUMFLEX is set)
-\(rsA          start of subject
-$           end of subject
-              also before newline at end of subject
-              also before internal newline in multiline mode
-\(rsZ          end of subject
-              also before newline at end of subject
-\(rsz          end of subject
-\(rsG          first matching position in subject
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR\(rsb\fP
+.ad l
+Word boundary
+.TP 7
+\f(CR\(rsB\fP
+.ad l
+Not a word boundary
+.TP 7
+\f(CR^\fP
+.ad l
+Start of subject; also after an internal newline in multiline mode
+(after any newline if \fBPCRE2_ALT_CIRCUMFLEX\fP is set)
+.TP 7
+\f(CR\(rsA\fP
+.ad l
+Start of subject
+.TP 7
+\f(CR$\fP
+.ad l
+End of subject; also before newline at end of subject and before
+an internal newline in multiline mode
+.TP 7
+\f(CR\(rsZ\fP
+.ad l
+End of subject; also before newline at end of subject
+.TP 7
+\f(CR\(rsz\fP
+.ad l
+End of subject
+.TP 7
+\f(CR\(rsG\fP
+.ad l
+First matching position in subject
+.PD
+.RE
+.PP
+.ad l
 .SH "REPORTED MATCH POINT SETTING"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsK          set reported start of match
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR\(rsK\fP
+.ad l
+Set reported start of match
+.PD
+.RE
+.PP
+.ad l
 .sp
-From release 10.38 \(rsK is not permitted by default in lookaround assertions,
+From release 10.38, \f(CR\(rsK\fP is not permitted by default in lookaround assertions,
 for compatibility with Perl. However, if the \fBPCRE2_EXTRA_ALLOW_LOOKAROUND_BSK\fP
 option is set, the previous behaviour is re\-enabled. When this option is set,
-\(rsK is honoured in positive assertions, but ignored in negative ones.
+\f(CR\(rsK\fP is honoured in positive assertions, but ignored in negative ones.
 .SH "ALTERNATION"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-expr|expr|expr...
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 18
+\fIexpr\fP\f(CR|\fP\fIexpr\fP\f(CR|\fP\fIexpr\fP\f(CR...\fP
+.ad l
+Alternative expressions
+.PD
+.RE
+.PP
+.ad l
 .SH "CAPTURING"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(...)           capture group
-(?<name>...)    named capture group (Perl)
-(?\*(Aqname\*(Aq...)    named capture group (Perl)
-(?P<name>...)   named capture group (Python)
-(?:...)         non\-capture group
-(?|...)         non\-capture group; reset group numbers for
-                 capture groups in each alternative
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 20
+\f(CR(...)\fP
+.ad l
+Capture group
+.TP 20
+\f(CR(?<\fP\fIname\fP\f(CR>...)\fP
+.ad l
+Named capture group (Perl)
+.TP 20
+\f(CR(?\*(Aq\fP\fIname\fP\f(CR\*(Aq...)\fP
+.ad l
+Named capture group (Perl)
+.TP 20
+\f(CR(?P<\fP\fIname\fP\f(CR>...)\fP
+.ad l
+Named capture group (Python)
+.TP 20
+\f(CR(?:...)\fP
+.ad l
+Non\-capture group
+.TP 20
+\f(CR(?|...)\fP
+.ad l
+Non\-capture group; reset group numbers for capture groups
+in each alternative
+.PD
+.RE
+.PP
+.ad l
 .sp
 In non\-UTF modes, names may contain underscores and ASCII letters and digits;
 in UTF modes, any Unicode letters and Unicode decimal digits are permitted. In
 both cases, a name must not start with a digit.
 .SH "ATOMIC GROUPS"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(?>...)         atomic non\-capture group
-(*atomic:...)   atomic non\-capture group
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 14
+\f(CR(?>...)\fP
+.ad l
+Atomic non\-capture group
+.TP 14
+\f(CR(*atomic:...)\fP
+.ad l
+Atomic non\-capture group
+.PD
+.RE
+.PP
+.ad l
 .SH "COMMENT"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(?#....)        comment (not nestable)
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 8
+\f(CR(?#...)\fP
+.ad l
+Comment (not nestable)
+.PD
+.RE
+.PP
+.ad l
 .SH "OPTION SETTING"
 .sp
 Changes of these options within a group are automatically cancelled at the end
 of the group.
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(?a)            all ASCII options
-(?aD)           restrict \(rsd to ASCII in UCP mode
-(?aS)           restrict \(rss to ASCII in UCP mode
-(?aW)           restrict \(rsw to ASCII in UCP mode
-(?aP)           restrict all POSIX classes to ASCII in UCP mode
-(?aT)           restrict POSIX digit classes to ASCII in UCP mode
-(?i)            caseless
-(?J)            allow duplicate named groups
-(?m)            multiline
-(?n)            no auto capture
-(?r)            restrict caseless to either ASCII or non\-ASCII
-(?s)            single line (dotall)
-(?U)            default ungreedy (lazy)
-(?x)            ignore white space except in classes or \(rsQ...\(rsE
-(?xx)           as (?x) but also ignore space and tab in classes
-(?\-...)         unset the given option(s)
-(?^)            unset imnrsx options
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 8
+\f(CR(?a)\fP
+.ad l
+All ASCII options
+.TP 8
+\f(CR(?aD)\fP
+.ad l
+Restrict \f(CR\(rsd\fP to ASCII in UCP mode
+.TP 8
+\f(CR(?aS)\fP
+.ad l
+Restrict \f(CR\(rss\fP to ASCII in UCP mode
+.TP 8
+\f(CR(?aW)\fP
+.ad l
+Restrict \f(CR\(rsw\fP to ASCII in UCP mode
+.TP 8
+\f(CR(?aP)\fP
+.ad l
+Restrict all POSIX classes to ASCII in UCP mode
+.TP 8
+\f(CR(?aT)\fP
+.ad l
+Restrict POSIX digit classes to ASCII in UCP mode
+.TP 8
+\f(CR(?i)\fP
+.ad l
+Caseless
+.TP 8
+\f(CR(?J)\fP
+.ad l
+Allow duplicate named groups
+.TP 8
+\f(CR(?m)\fP
+.ad l
+Multiline
+.TP 8
+\f(CR(?n)\fP
+.ad l
+No auto capture
+.TP 8
+\f(CR(?r)\fP
+.ad l
+Restrict caseless to either ASCII or non\-ASCII
+.TP 8
+\f(CR(?s)\fP
+.ad l
+Single line (dotall)
+.TP 8
+\f(CR(?U)\fP
+.ad l
+Default ungreedy (lazy)
+.TP 8
+\f(CR(?x)\fP
+.ad l
+Ignore white space except in classes or \f(CR\(rsQ...\(rsE\fP
+.TP 8
+\f(CR(?xx)\fP
+.ad l
+As \f(CR(?x)\fP, but also ignore space and tab in classes
+.TP 8
+\f(CR(?\-...)\fP
+.ad l
+Unset the given option(s)
+.TP 8
+\f(CR(?^)\fP
+.ad l
+Unset \f(CRimnrsx\fP options
+.PD
+.RE
+.PP
+.ad l
 .sp
-(?aP) implies (?aT) as well, though this has no additional effect. However, it
-means that (?\-aP) also implies (?\-aT) and disables all ASCII restrictions for
+\f(CR(?aP)\fP implies \f(CR(?aT)\fP as well, though this has no additional effect. However, it
+means that \f(CR(?\-aP)\fP also implies \f(CR(?\-aT)\fP and disables all ASCII restrictions for
 POSIX classes.
 .sp
-Unsetting x or xx unsets both. Several options may be set at once, and a
-mixture of setting and unsetting such as (?i\-x) is allowed, but there may be
-only one hyphen. Setting (but no unsetting) is allowed after (?^ for example
-(?^in). An option setting may appear at the start of a non\-capture group, for
-example (?i:...).
+Unsetting \f(CRx\fP or \f(CRxx\fP unsets both. Several options may be set at once, and a
+mixture of setting and unsetting such as \f(CR(?i\-x)\fP is allowed, but there may be
+only one hyphen. Setting (but no unsetting) is allowed after \f(CR(?^\fP, for example
+\f(CR(?^in)\fP. An option setting may appear at the start of a non\-capture group, for
+example \f(CR(?i:...)\fP.
 .sp
 The following are recognized only at the very start of a pattern or after one
-of the newline or \(rsR sequences or options with similar syntax. More than one
+of the newline or \f(CR\(rsR\fP sequences or options with similar syntax. More than one
 of them may appear. For the first three, d is a decimal number.
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*LIMIT_DEPTH=d)     set the backtracking limit to d
-(*LIMIT_HEAP=d)      set the heap size limit to d * 1024 bytes
-(*LIMIT_MATCH=d)     set the match limit to d
-(*CASELESS_RESTRICT) set PCRE2_EXTRA_CASELESS_RESTRICT when matching
-(*NOTEMPTY)          set PCRE2_NOTEMPTY when matching
-(*NOTEMPTY_ATSTART)  set PCRE2_NOTEMPTY_ATSTART when matching
-(*NO_AUTO_POSSESS)   no auto\-possessification (PCRE2_NO_AUTO_POSSESS)
-(*NO_DOTSTAR_ANCHOR) no .* anchoring (PCRE2_NO_DOTSTAR_ANCHOR)
-(*NO_JIT)            disable JIT optimization
-(*NO_START_OPT)      no start\-match optimization (PCRE2_NO_START_OPTIMIZE)
-(*TURKISH_CASING)    set PCRE2_EXTRA_TURKISH_CASING when matching
-(*UTF)               set appropriate UTF mode for the library in use
-(*UCP)               set PCRE2_UCP (use Unicode properties for \(rsd etc)
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 21
+\f(CR(*LIMIT_DEPTH=\fP\fId\fP\f(CR)\fP
+.ad l
+Set the backtracking limit to \fId\fP
+.TP 21
+\f(CR(*LIMIT_HEAP=\fP\fId\fP\f(CR)\fP
+.ad l
+Set the heap size limit to \fId\fP * 1024 bytes
+.TP 21
+\f(CR(*LIMIT_MATCH=\fP\fId\fP\f(CR)\fP
+.ad l
+Set the match limit to \fId\fP
+.TP 21
+\f(CR(*CASELESS_RESTRICT)\fP
+.ad l
+Set \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP when matching
+.TP 21
+\f(CR(*NOTEMPTY)\fP
+.ad l
+Set \fBPCRE2_NOTEMPTY\fP when matching
+.TP 21
+\f(CR(*NOTEMPTY_ATSTART)\fP
+.ad l
+Set \fBPCRE2_NOTEMPTY_ATSTART\fP when matching
+.TP 21
+\f(CR(*NO_AUTO_POSSESS)\fP
+.ad l
+No auto\-possessification
+(\fBPCRE2_NO_AUTO_POSSESS\fP)
+.TP 21
+\f(CR(*NO_DOTSTAR_ANCHOR)\fP
+.ad l
+No \f(CR.*\fP anchoring
+(\fBPCRE2_NO_DOTSTAR_ANCHOR\fP)
+.TP 21
+\f(CR(*NO_JIT)\fP
+.ad l
+Disable JIT optimization
+.TP 21
+\f(CR(*NO_START_OPT)\fP
+.ad l
+No start\-match optimization
+(\fBPCRE2_NO_START_OPTIMIZE\fP)
+.TP 21
+\f(CR(*TURKISH_CASING)\fP
+.ad l
+Set \fBPCRE2_EXTRA_TURKISH_CASING\fP when matching
+.TP 21
+\f(CR(*UTF)\fP
+.ad l
+Set appropriate UTF mode for the library in use
+.TP 21
+\f(CR(*UCP)\fP
+.ad l
+Set \fBPCRE2_UCP\fP (use Unicode properties for \f(CR\(rsd\fP, etc.)
+.PD
+.RE
+.PP
+.ad l
 .sp
-Note that LIMIT_DEPTH, LIMIT_HEAP, and LIMIT_MATCH can only reduce the value of
+Note that \f(CRLIMIT_DEPTH\fP, \f(CRLIMIT_HEAP\fP, and \f(CRLIMIT_MATCH\fP can only reduce the value of
 the limits set by the caller of pcre2_match() or pcre2_dfa_match(),
-not increase them. LIMIT_RECURSION is an obsolete synonym for LIMIT_DEPTH. The
+not increase them. \f(CRLIMIT_RECURSION\fP is an obsolete synonym for \f(CRLIMIT_DEPTH\fP. The
 application can lock out the use of \f(CR(*UTF)\fP and \f(CR(*UCP)\fP by setting the
 \fBPCRE2_NEVER_UTF\fP or \fBPCRE2_NEVER_UCP\fP options, respectively, at compile time.
 .SH "NEWLINE CONVENTION"
@@ -624,72 +1186,79 @@ application can lock out the use of \f(CR(*UTF)\fP and \f(CR(*UCP)\fP by setting
 These are recognized only at the very start of the pattern or after option
 settings with a similar syntax.
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*CR)           carriage return only
-(*LF)           linefeed only
-(*CRLF)         carriage return followed by linefeed
-(*ANYCRLF)      all three of the above
-(*ANY)          any Unicode newline sequence
-(*NUL)          the NUL character (binary zero)
-.fam
-.fi
-.ss \n[.ss] 0
-.SH "WHAT \(rsR MATCHES"
+.RS 4
+.PD 0
+.TP 11
+\f(CR(*CR)\fP
+.ad l
+Carriage return only
+.TP 11
+\f(CR(*LF)\fP
+.ad l
+Linefeed only
+.TP 11
+\f(CR(*CRLF)\fP
+.ad l
+Carriage return followed by linefeed
+.TP 11
+\f(CR(*ANYCRLF)\fP
+.ad l
+All three of the above
+.TP 11
+\f(CR(*ANY)\fP
+.ad l
+Any Unicode newline sequence
+.TP 11
+\f(CR(*NUL)\fP
+.ad l
+The NUL character (binary zero)
+.PD
+.RE
+.PP
+.ad l
+.SH "WHAT \f(CR\(rsR\fP MATCHES"
 .sp
 These are recognized only at the very start of the pattern or after option
 setting with a similar syntax.
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*BSR_ANYCRLF)  CR, LF, or CRLF
-(*BSR_UNICODE)  any Unicode newline sequence
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 15
+\f(CR(*BSR_ANYCRLF)\fP
+.ad l
+CR, LF, or CRLF
+.TP 15
+\f(CR(*BSR_UNICODE)\fP
+.ad l
+Any Unicode newline sequence
+.PD
+.RE
+.PP
+.ad l
 .SH "LOOKAHEAD AND LOOKBEHIND ASSERTIONS"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(?=...)                     )
-(*pla:...)                  ) positive lookahead
-(*positive_lookahead:...)   )
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-(?!...)                     )
-(*nla:...)                  ) negative lookahead
-(*negative_lookahead:...)   )
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-(?<=...)                    )
-(*plb:...)                  ) positive lookbehind
-(*positive_lookbehind:...)  )
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-(?<!...)                    )
-(*nlb:...)                  ) negative lookbehind
-(*negative_lookbehind:...)  )
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR(?=...)\fP, \f(CR(*pla:...)\fP, \f(CR(*positive_lookahead:...)\fP
+.ad l
+Positive lookahead
+.TP 7
+\f(CR(?!...)\fP, \f(CR(*nla:...)\fP, \f(CR(*negative_lookahead:...)\fP
+.ad l
+Negative lookahead
+.TP 7
+\f(CR(?<=...)\fP, \f(CR(*plb:...)\fP, \f(CR(*positive_lookbehind:...)\fP
+.ad l
+Positive lookbehind
+.TP 7
+\f(CR(?<!...)\fP, \f(CR(*nlb:...)\fP, \f(CR(*negative_lookbehind:...)\fP
+.ad l
+Negative lookbehind
+.PD
+.RE
+.PP
+.ad l
 .sp
 Each top\-level branch of a lookbehind must have a limit for the number of
 characters it matches. If any branch can match a variable number of characters,
@@ -701,259 +1270,476 @@ the limit for each branch is 65535 characters.
 .sp
 These assertions are specific to PCRE2 and are not Perl\-compatible.
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(?*...)                                )
-(*napla:...)                           ) synonyms
-(*non_atomic_positive_lookahead:...)   )
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-(?<*...)                               )
-(*naplb:...)                           ) synonyms
-(*non_atomic_positive_lookbehind:...)  )
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR(?*...)\fP, \f(CR(*napla:...)\fP, \f(CR(*non_atomic_positive_lookahead:...)\fP
+.ad l
+Synonyms for non\-atomic
+positive lookahead
+.TP 7
+\f(CR(?<*...)\fP, \f(CR(*naplb:...)\fP, \f(CR(*non_atomic_positive_lookbehind:...)\fP
+.ad l
+Synonyms for non\-atomic
+positive lookbehind
+.PD
+.RE
+.PP
+.ad l
 .SH "SUBSTRING SCAN ASSERTION"
 .sp
 This feature is not Perl\-compatible.
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*scan_substring:(grouplist)...)  scan captured substring
-(*scs:(grouplist)...)             scan captured substring
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR(*scan_substring:(\fP\fIgrouplist\fP\f(CR)...)\fP
+.ad l
+Scan captured substring
+.TP 7
+\f(CR(*scs:(\fP\fIgrouplist\fP\f(CR)...)\fP
+.ad l
+Scan captured substring
+.PD
+.RE
+.PP
+.ad l
 .sp
-The comma\-separated list "grouplist" may identify groups in any of the
+The comma\-separated list \fIgrouplist\fP may identify groups in any of the
 following ways:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-n       absolute reference
-+n      relative reference
-\-n      relative reference
-<name>  name
-\*(Aqname\*(Aq  name
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 13
+\fIn\fP
+.ad l
+Absolute reference
+.TP 13
+\f(CR+\fP\fIn\fP
+.ad l
+Relative reference
+.TP 13
+\f(CR\-\fP\fIn\fP
+.ad l
+Relative reference
+.TP 13
+\f(CR<\fP\fIname\fP\f(CR>\fP
+.ad l
+Name
+.TP 13
+\f(CR\*(Aq\fP\fIname\fP\f(CR\*(Aq\fP
+.ad l
+Name
+.PD
+.RE
+.PP
+.ad l
 .SH "SCRIPT RUNS"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*script_run:...)           ) script run, can be backtracked into
-(*sr:...)                   )
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-(*atomic_script_run:...)    ) atomic script run
-(*asr:...)                  )
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR(*script_run:...)\fP, \f(CR(*sr:...)\fP
+.ad l
+Script run; can be
+backtracked into
+.TP 7
+\f(CR(*atomic_script_run:...)\fP, \f(CR(*asr:...)\fP
+.ad l
+Atomic script run
+.PD
+.RE
+.PP
+.ad l
 .SH "BACKREFERENCES"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsn              reference by number (can be ambiguous)
-\(rsgn             reference by number
-\(rsg{n}           reference by number
-\(rsg+n            relative reference by number (PCRE2 extension)
-\(rsg\-n            relative reference by number
-\(rsg{+n}          relative reference by number (PCRE2 extension)
-\(rsg{\-n}          relative reference by number
-\(rsk<name>        reference by name (Perl)
-\(rsk\*(Aqname\*(Aq        reference by name (Perl)
-\(rsg{name}        reference by name (Perl)
-\(rsk{name}        reference by name (.NET)
-(?P=name)       reference by name (Python)
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 15
+\f(CR\(rs\fP\fIn\fP
+.ad l
+Reference by number (can be ambiguous)
+.TP 15
+\f(CR\(rsg\fP\fIn\fP
+.ad l
+Reference by number
+.TP 15
+\f(CR\(rsg{\fP\fIn\fP\f(CR}\fP
+.ad l
+Reference by number
+.TP 15
+\f(CR\(rsg+\fP\fIn\fP
+.ad l
+Relative reference by number (PCRE2 extension)
+.TP 15
+\f(CR\(rsg\-\fP\fIn\fP
+.ad l
+Relative reference by number
+.TP 15
+\f(CR\(rsg{+\fP\fIn\fP\f(CR}\fP
+.ad l
+Relative reference by number (PCRE2 extension)
+.TP 15
+\f(CR\(rsg{\-\fP\fIn\fP\f(CR}\fP
+.ad l
+Relative reference by number
+.TP 15
+\f(CR\(rsk<\fP\fIname\fP\f(CR>\fP
+.ad l
+Reference by name (Perl)
+.TP 15
+\f(CR\(rsk\*(Aq\fP\fIname\fP\f(CR\*(Aq\fP
+.ad l
+Reference by name (Perl)
+.TP 15
+\f(CR\(rsg{\fP\fIname\fP\f(CR}\fP
+.ad l
+Reference by name (Perl)
+.TP 15
+\f(CR\(rsk{\fP\fIname\fP\f(CR}\fP
+.ad l
+Reference by name (.NET)
+.TP 15
+\f(CR(?P=\fP\fIname\fP\f(CR)\fP
+.ad l
+Reference by name (Python)
+.PD
+.RE
+.PP
+.ad l
 .SH "SUBROUTINE REFERENCES (POSSIBLY RECURSIVE)"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(?R)            recurse whole pattern
-(?n)            call subroutine by absolute number
-(?+n)           call subroutine by relative number
-(?\-n)           call subroutine by relative number
-(?&name)        call subroutine by name (Perl)
-(?P>name)       call subroutine by name (Python)
-\(rsg<name>        call subroutine by name (Oniguruma)
-\(rsg\*(Aqname\*(Aq        call subroutine by name (Oniguruma)
-\(rsg<n>           call subroutine by absolute number (Oniguruma)
-\(rsg\*(Aqn\*(Aq           call subroutine by absolute number (Oniguruma)
-\(rsg<+n>          call subroutine by relative number (PCRE2 extension)
-\(rsg\*(Aq+n\*(Aq          call subroutine by relative number (PCRE2 extension)
-\(rsg<\-n>          call subroutine by relative number (PCRE2 extension)
-\(rsg\*(Aq\-n\*(Aq          call subroutine by relative number (PCRE2 extension)
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 15
+\f(CR(?R)\fP
+.ad l
+Recurse whole pattern
+.TP 15
+\f(CR(?\fP\fIn\fP\f(CR)\fP
+.ad l
+Call subroutine by absolute number
+.TP 15
+\f(CR(?+\fP\fIn\fP\f(CR)\fP
+.ad l
+Call subroutine by relative number
+.TP 15
+\f(CR(?\-\fP\fIn\fP\f(CR)\fP
+.ad l
+Call subroutine by relative number
+.TP 15
+\f(CR(?&\fP\fIname\fP\f(CR)\fP
+.ad l
+Call subroutine by name (Perl)
+.TP 15
+\f(CR(?P>\fP\fIname\fP\f(CR)\fP
+.ad l
+Call subroutine by name (Python)
+.TP 15
+\f(CR\(rsg<\fP\fIname\fP\f(CR>\fP
+.ad l
+Call subroutine by name (Oniguruma)
+.TP 15
+\f(CR\(rsg\*(Aq\fP\fIname\fP\f(CR\*(Aq\fP
+.ad l
+Call subroutine by name (Oniguruma)
+.TP 15
+\f(CR\(rsg<\fP\fIn\fP\f(CR>\fP
+.ad l
+Call subroutine by absolute number (Oniguruma)
+.TP 15
+\f(CR\(rsg\*(Aq\fP\fIn\fP\f(CR\*(Aq\fP
+.ad l
+Call subroutine by absolute number (Oniguruma)
+.TP 15
+\f(CR\(rsg<+\fP\fIn\fP\f(CR>\fP
+.ad l
+Call subroutine by relative number (PCRE2 extension)
+.TP 15
+\f(CR\(rsg\*(Aq+\fP\fIn\fP\f(CR\*(Aq\fP
+.ad l
+Call subroutine by relative number (PCRE2 extension)
+.TP 15
+\f(CR\(rsg<\-\fP\fIn\fP\f(CR>\fP
+.ad l
+Call subroutine by relative number (PCRE2 extension)
+.TP 15
+\f(CR\(rsg\*(Aq\-\fP\fIn\fP\f(CR\*(Aq\fP
+.ad l
+Call subroutine by relative number (PCRE2 extension)
+.PD
+.RE
+.PP
+.ad l
 .sp
-The variants using parentheses (?...) may also specify a list of capture groups
+The variants using parentheses \f(CR(?...)\fP may also specify a list of capture groups
 to return, which shall be retained in the calling subexpression if set during
 the recursion (this feature is not supported by Perl).
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(?R(grouplist))       recurse whole pattern, returning capture groups
-                        (PCRE2 extension)
-(?n(grouplist))       )
-(?+n(grouplist))      ) call subroutine, returning capture groups
-(?\-n(grouplist))      )   (PCRE2 extension)
-(?&name(grouplist))   )
-(?P>name(grouplist))  )
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR(?R(\fP\fIgrouplist\fP\f(CR))\fP
+.ad l
+Recurse whole pattern, returning capture groups
+(PCRE2 extension)
+.TP 7
+\f(CR(?\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?+\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?\-\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?&\fP\fIname\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?P>\fP\fIname\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
+.ad l
+Call subroutine, returning capture groups
+(PCRE2 extension)
+.PD
+.RE
+.PP
+.ad l
 .sp
-The comma\-separated list "grouplist" uses the same syntax as
-\f(CR(*scan_substring:(grouplist)...)\fP, and may identify groups in any of the
+The comma\-separated list \fIgrouplist\fP uses the same syntax as
+\f(CR(*scan_substring:(\fP\fIgrouplist\fP\f(CR)...)\fP, and may identify groups in any of the
 following ways:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-n       absolute reference
-+n      relative reference
-\-n      relative reference
-<name>  name
-\*(Aqname\*(Aq  name
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 13
+\fIn\fP
+.ad l
+Absolute reference
+.TP 13
+\f(CR+\fP\fIn\fP
+.ad l
+Relative reference
+.TP 13
+\f(CR\-\fP\fIn\fP
+.ad l
+Relative reference
+.TP 13
+\f(CR<\fP\fIname\fP\f(CR>\fP
+.ad l
+Name
+.TP 13
+\f(CR\*(Aq\fP\fIname\fP\f(CR\*(Aq\fP
+.ad l
+Name
+.PD
+.RE
+.PP
+.ad l
 .SH "CONDITIONAL PATTERNS"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(?(condition)yes\-pattern)
-(?(condition)yes\-pattern|no\-pattern)
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR(?(\fP\fIcondition\fP\f(CR)\fP\fIyes\-pattern\fP\f(CR)\fP
+.ad l
+Conditional pattern without an alternative
+.TP 7
+\f(CR(?(\fP\fIcondition\fP\f(CR)\fP\fIyes\-pattern\fP\f(CR|\fP\fIno\-pattern\fP\f(CR)\fP
+.ad l
+Conditional pattern with an alternative
+.PD
+.RE
+.PP
+.ad l
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(?(n)                absolute reference condition
-(?(+n)               relative reference condition (PCRE2 extension)
-(?(\-n)               relative reference condition (PCRE2 extension)
-(?(<name>)           named reference condition (Perl)
-(?(\*(Aqname\*(Aq)           named reference condition (Perl)
-(?(name)             named reference condition (PCRE2, deprecated)
-(?(R)                overall recursion condition
-(?(Rn)               specific numbered group recursion condition
-(?(R&name)           specific named group recursion condition
-(?(DEFINE)           define groups for reference
-(?(VERSION[>]=n[.m]) test PCRE2 version
-(?(assert)           assertion condition
-.fam
-.fi
-.ss \n[.ss] 0
+The forms for the \fIcondition\fP are:
 .sp
-Note the ambiguity of (?\(rg and (?(Rn) which might be named reference
+.RS 4
+.PD 0
+.TP 24
+\f(CR(?(\fP\fIn\fP\f(CR)\fP
+.ad l
+Absolute reference condition
+.TP 24
+\f(CR(?(+\fP\fIn\fP\f(CR)\fP
+.ad l
+Relative reference condition (PCRE2 extension)
+.TP 24
+\f(CR(?(\-\fP\fIn\fP\f(CR)\fP
+.ad l
+Relative reference condition (PCRE2 extension)
+.TP 24
+\f(CR(?(<\fP\fIname\fP\f(CR>)\fP
+.ad l
+Named reference condition (Perl)
+.TP 24
+\f(CR(?(\*(Aq\fP\fIname\fP\f(CR\*(Aq)\fP
+.ad l
+Named reference condition (Perl)
+.TP 24
+\f(CR(?(\fP\fIname\fP\f(CR)\fP
+.ad l
+Named reference condition (PCRE2, deprecated)
+.TP 24
+\f(CR(?(R)\fP
+.ad l
+Overall recursion condition
+.TP 24
+\f(CR(?(R\fP\fIn\fP\f(CR)\fP
+.ad l
+Specific numbered group recursion condition
+.TP 24
+\f(CR(?(R&\fP\fIname\fP\f(CR)\fP
+.ad l
+Specific named group recursion condition
+.TP 24
+\f(CR(?(DEFINE)\fP
+.ad l
+Define groups for reference
+.TP 24
+\f(CR(?(VERSION\fP\fI[\fP\f(CR>\fP\fI]\fP\f(CR=\fP\fIn\fP\fI[\fP\f(CR.\fP\fIm\fP\fI]\fP\f(CR)\fP
+.ad l
+Test PCRE2 version
+.TP 24
+\f(CR(?(\fP\fIassert\fP\f(CR)\fP
+.ad l
+Assertion condition
+.PD
+.RE
+.PP
+.ad l
+.sp
+Note the ambiguity of \f(CR(?(R)\fP and \f(CR(?(R\fP\fIn\fP\f(CR)\fP which might be named reference
 conditions or recursion tests. Such a condition is interpreted as a reference
 condition if the relevant named group exists.
 .sp
-The parts within brackets for the VERSION conditional syntax could be ommited.
+The parts within brackets for the VERSION conditional syntax can be ommited.
 The fractional part of the version number defaults to 0 in that case.
 .SH "BACKTRACKING CONTROL"
 .sp
-All backtracking control verbs may be in the form \f(CR(*VERB:NAME)\fP. For \f(CR(*MARK)\fP the
+All backtracking control verbs may be in the form \f(CR(*VERB:\fP\fINAME\fP\f(CR)\fP. For \f(CR(*MARK)\fP the
 name is mandatory, for the others it is optional. \f(CR(*SKIP)\fP changes its behaviour
-if :NAME is present. The others just set a name for passing back to the caller,
+if \f(CR:\fP\fINAME\fP is present. The others just set a name for passing back to the caller,
 but this is not a name that \f(CR(*SKIP)\fP can see. The following act immediately they
 are reached:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*ACCEPT)       force successful match
-(*FAIL)         force backtrack; synonym (*F)
-(*MARK:NAME)    set name to be passed back; synonym (*:NAME)
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 13
+\f(CR(*ACCEPT)\fP
+.ad l
+Force successful match
+.TP 13
+\f(CR(*FAIL)\fP
+.ad l
+Force backtrack; synonym \f(CR(*F)\fP
+.TP 13
+\f(CR(*MARK:\fP\fINAME\fP\f(CR)\fP
+.ad l
+Set name to be passed back; synonym \f(CR(*:\fP\fINAME\fP\f(CR)\fP
+.PD
+.RE
+.PP
+.ad l
 .sp
 The following act only when a subsequent match failure causes a backtrack to
 reach them. They all force a match failure, but they differ in what happens
 afterwards. Those that advance the start\-of\-match point do so only if the
 pattern is not anchored.
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*COMMIT)       overall failure, no advance of starting point
-(*PRUNE)        advance to next starting character
-(*SKIP)         advance to current matching position
-(*SKIP:NAME)    advance to position corresponding to an earlier
-                (*MARK:NAME); if not found, the (*SKIP) is ignored
-(*THEN)         local failure, backtrack to next alternation
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 13
+\f(CR(*COMMIT)\fP
+.ad l
+Overall failure, no advance of starting point
+.TP 13
+\f(CR(*PRUNE)\fP
+.ad l
+Advance to next starting character
+.TP 13
+\f(CR(*SKIP)\fP
+.ad l
+Advance to current matching position
+.TP 13
+\f(CR(*SKIP:\fP\fINAME\fP\f(CR)\fP
+.ad l
+Advance to position corresponding to an earlier
+\f(CR(*MARK:\fP\fINAME\fP\f(CR)\fP; if not found, the \f(CR(*SKIP)\fP is ignored
+.TP 13
+\f(CR(*THEN)\fP
+.ad l
+Local failure, backtrack to next alternation
+.PD
+.RE
+.PP
+.ad l
 .sp
 The effect of one of these verbs in a group called as a subroutine is confined
 to the subroutine call.
 .SH "CALLOUTS"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(?C)            callout (assumed number 0)
-(?Cn)           callout with numerical data n
-(?C"text")      callout with string data
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 11
+\f(CR(?C)\fP
+.ad l
+Callout (assumed number 0)
+.TP 11
+\f(CR(?C\fP\fIn\fP\f(CR)\fP
+.ad l
+Callout with numerical data \fIn\fP
+.TP 11
+\f(CR(?C"\fP\fItext\fP\f(CR")\fP
+.ad l
+Callout with string data
+.PD
+.RE
+.PP
+.ad l
 .sp
-The allowed string delimiters are ` \*(Aq " ^ % # $ (which are the same for the
-start and the end), and the starting delimiter { matched with the ending
-delimiter }. To encode the ending delimiter within the string, double it.
+The allowed string delimiters are \f(CR\*(Aq\fP, \f(CR"\fP, \f(CR^\fP,
+\f(CR%\fP, \f(CR#\fP, and \f(CR$\fP (which are the same for the start
+and the end), and the starting delimiter \f(CR{\fP matched with the ending
+delimiter \f(CR}\fP. To encode the ending delimiter within the string, double it.
 .SH "REPLACEMENT STRINGS"
 .sp
 If the \fBPCRE2_SUBSTITUTE_LITERAL\fP option is set, a replacement string for
 pcre2_substitute() is not interpreted. Otherwise, by default, the only
 special character is the dollar character in one of the following forms:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-$$                  insert a dollar character
-$n or ${n}          insert the contents of group _n_
-$<name>             insert the contents of named group
-$0 or $&            insert the entire matched substring
-$`                  insert the substring that precedes the match
-$\*(Aq                  insert the substring that follows the match
-$_                  insert the entire input string
-$+                  insert the highest\-numbered capture group which matched
-$*MARK or ${*MARK}  insert a control verb name
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 19
+\f(CR$$\fP
+.ad l
+Insert a dollar character
+.TP 19
+\f(CR$\fP\fIn\fP or \f(CR${\fP\fIn\fP\f(CR}\fP
+.ad l
+Insert the contents of group \fIn\fP
+.TP 19
+\f(CR$<\fP\fIname\fP\f(CR>\fP
+.ad l
+Insert the contents of named group
+.TP 19
+\f(CR$0\fP or \f(CR$&\fP
+.ad l
+Insert the entire matched substring
+.TP 19
+\f(CR$`\fP
+.ad l
+Insert the substring that precedes the match
+.TP 19
+\f(CR$\*(Aq\fP
+.ad l
+Insert the substring that follows the match
+.TP 19
+\f(CR$_\fP
+.ad l
+Insert the entire input string
+.TP 19
+\f(CR$+\fP
+.ad l
+Insert the highest\-numbered capture group which matched
+.TP 19
+\f(CR$*MARK\fP or \f(CR${*MARK}\fP
+.ad l
+Insert a control verb name
+.PD
+.RE
+.PP
+.ad l
 .sp
-For ${n}, n can be a name or a number. If \fBPCRE2_SUBSTITUTE_EXTENDED\fP is set,
+For \f(CR${\fP\fIn\fP\f(CR}\fP, \fIn\fP can be a name or a number. If \fBPCRE2_SUBSTITUTE_EXTENDED\fP is set,
 there is additional interpretation:
 .sp
 .RS 4
@@ -966,36 +1752,53 @@ there is additional interpretation:
 .\}
 Backslash is an escape character, and the forms described in "ESCAPED
 CHARACTERS" above are recognized. Also:
-.RE
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsQ...\(rsE can be used to suppress interpretation
-\(rsl      force the next character to lower case
-\(rsu      force the next character to upper case
-\(rsL      force subsequent characters to lower case
-\(rsU      force subsequent characters to upper case
-\(rsu\(rsL    force next character to upper case, then all lower
-\(rsl\(rsU    force next character to lower case, then all upper
-\(rsE      end \(rsL or \(rsU case forcing
-\(rsb      backspace character (note: as in character class in pattern)
-\(rsv      vertical tab character (note: not the same as in a pattern)
-.fam
-.fi
-.ss \n[.ss] 0
 .sp
 .RS 4
-.ie n \{\
-\h'-04' 1.\h'+01'\c
-.\}
-.el \{\
-.  sp -1
-.  IP " 1." 4.2
-.\}
-The Python form \(rsg<n>, where the angle brackets are part of the syntax and
-\fIn\fP is either a group name or a number, is recognized as an alternative way
-of inserting the contents of a group, for example \(rsg<3>.
+.PD 0
+.TP 8
+\f(CR\(rsQ...\(rsE\fP
+.ad l
+Suppress interpretation
+.TP 8
+\f(CR\(rsl\fP
+.ad l
+Force the next character to lower case
+.TP 8
+\f(CR\(rsu\fP
+.ad l
+Force the next character to upper case
+.TP 8
+\f(CR\(rsL\fP
+.ad l
+Force subsequent characters to lower case
+.TP 8
+\f(CR\(rsU\fP
+.ad l
+Force subsequent characters to upper case
+.TP 8
+\f(CR\(rsu\(rsL\fP
+.ad l
+Force next character to upper case, then all lower
+.TP 8
+\f(CR\(rsl\(rsU\fP
+.ad l
+Force next character to lower case, then all upper
+.TP 8
+\f(CR\(rsE\fP
+.ad l
+End \f(CR\(rsL\fP or \f(CR\(rsU\fP case forcing
+.TP 8
+\f(CR\(rsb\fP
+.ad l
+Backspace character (note: as in character class in pattern)
+.TP 8
+\f(CR\(rsv\fP
+.ad l
+Vertical tab character (note: not the same as in a pattern)
+.PD
+.RE
+.PP
+.ad l
 .RE
 .sp
 .RS 4
@@ -1006,36 +1809,52 @@ of inserting the contents of a group, for example \(rsg<3>.
 .  sp -1
 .  IP " 2." 4.2
 .\}
-Capture substitution supports the following additional forms:
+The Python form \f(CR\(rsg<\fP\fIn\fP\f(CR>\fP, where the angle brackets are part of the syntax and
+\fIn\fP is either a group name or a number, is recognized as an alternative way
+of inserting the contents of a group, for example \f(CR\(rsg<3>\fP.
 .RE
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-${n:\-string}             default for unset group
-${n:+string1:string2}    values for set/unset group
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.ie n \{\
+\h'-04' 3.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 3." 4.2
+.\}
+Capture substitution supports the following additional forms:
+.sp
+.RS 4
+.PD 0
+.TP 22
+\f(CR${\fP\fIn\fP\f(CR:\-\fP\fIstring\fP\f(CR}\fP
+.ad l
+Default for unset group
+.TP 22
+\f(CR${\fP\fIn\fP\f(CR:+\fP\fIstring1\fP\f(CR:\fP\fIstring2\fP\f(CR}\fP
+.ad l
+Values for set/unset group
+.PD
+.RE
+.PP
+.ad l
 .sp
 The substitution strings themselves are expanded. Backslash can be used to
 escape colons and closing curly brackets.
+.RE
 .SH "SEE ALSO"
 .sp
-\f(CRpcre2pattern\fP(3), \f(CRpcre2api\fP(3), \f(CRpcre2callout\fP(3),
-\f(CRpcre2matching\fP(3), \f(CRpcre2\fP(3).
-.SH "AUTHOR"
+\f(CRpcre2pattern\fP, \f(CRpcre2api\fP, \f(CRpcre2callout\fP,
+\f(CRpcre2matching\fP, \f(CRpcre2\fP.
+.SS "Author"
 .sp
-.ti +2
 Philip Hazel
 .br
-.ti +2
 Retired from University Computing Service
 .br
-.ti +2
 Cambridge, England.
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 14 October 2025
 .br
-Copyright (c) 1997\-2024 University of Cambridge.
+Copyright \(co 1997\-2024 University of Cambridge.

@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2pattern
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 25 October 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -64,8 +64,7 @@ the EBCDIC code, which is the case for some IBM mainframe operating systems. In
 the sections below, character code values are ASCII or Unicode; in an EBCDIC
 environment these characters may have different code values, and there are no
 code points greater than 255. Differences in behaviour when PCRE2 is running in
-an EBCDIC environment are described in the section
-"EBCDIC environments"
+an EBCDIC environment are described in the section EBCDIC ENVIRONMENTS
 below, which you can ignore unless you really are in an EBCDIC environment.
 .SH "SPECIAL START\-OF\-PATTERN ITEMS"
 .sp
@@ -98,12 +97,12 @@ appearance in a pattern causes an error.
 .sp
 Another special sequence that may appear at the start of a pattern is \f(CR(*UCP)\fP.
 This has the same effect as setting the \fBPCRE2_UCP\fP option: it causes sequences
-such as \(rsd and \(rsw to use Unicode properties to determine character types,
+such as \f(CR\(rsd\fP and \f(CR\(rsw\fP to use Unicode properties to determine character types,
 instead of recognizing only characters with codes less than 256 via a lookup
 table. If also causes upper/lower casing operations to use Unicode properties
 for characters with code points greater than 127, even when UTF is not set.
-These behaviours can be changed within the pattern; see the section entitled
-"Internal Option Setting"
+These behaviours can be changed within the pattern; see the section
+INTERNAL OPTION SETTING
 below.
 .sp
 Some applications that allow their users to supply patterns may wish to
@@ -136,11 +135,11 @@ quickly reaching "no match" results. For more details, see the
 documentation.
 .SS "Disabling automatic anchoring"
 .sp
-If a pattern starts with \f(CR(\fBNO_DOTSTAR_ANCHOR)\fP, it has the same effect as
+If a pattern starts with \f(CR(*NO_DOTSTAR_ANCHOR)\fP, it has the same effect as
 setting the \fBPCRE2_NO_DOTSTAR_ANCHOR\fP option, or
 calling pcre2_set_optimize() with a \fBPCRE2_DOTSTAR_ANCHOR_OFF\fP directive.
 This disables optimizations that apply to patterns whose top\-level branches
-all start with \f(CR.\fP\fP (match any number of arbitrary characters). For more details,
+all start with \f(CR.*\fP (match any number of arbitrary characters). For more details,
 see the
 \f(CRpcre2api\fP
 documentation.
@@ -167,14 +166,14 @@ can also be set by items at the start of the pattern of the form
 .ss \n[.ss]
 .nf
 .fam C
-(*LIMIT_HEAP=d)
-(*LIMIT_MATCH=d)
-(*LIMIT_DEPTH=d)
+(*LIMIT_HEAP=\fId\fP)
+(*LIMIT_MATCH=\fId\fP)
+(*LIMIT_DEPTH=\fId\fP)
 .fam
 .fi
 .ss \n[.ss] 0
 .sp
-where d is any number of decimal digits. However, the value of the setting must
+where \fId\fP is any number of decimal digits. However, the value of the setting must
 be less than the value set (or defaulted) by the caller of pcre2_match()
 for it to have any effect. In other words, the pattern writer can lower the
 limits set by the programmer, but not raise them. If there is more than one
@@ -207,18 +206,36 @@ pcre2_compile().
 It is also possible to specify a newline convention by starting a pattern
 string with one of the following sequences:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*CR)        carriage return
-(*LF)        linefeed
-(*CRLF)      carriage return, followed by linefeed
-(*ANYCRLF)   any of the three above
-(*ANY)       all Unicode newline sequences
-(*NUL)       the NUL character (binary zero)
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 11
+\f(CR(*CR)\fP
+.ad l
+Carriage return
+.TP 11
+\f(CR(*LF)\fP
+.ad l
+Linefeed
+.TP 11
+\f(CR(*CRLF)\fP
+.ad l
+Carriage return, followed by linefeed
+.TP 11
+\f(CR(*ANYCRLF)\fP
+.ad l
+Any of the three above
+.TP 11
+\f(CR(*ANY)\fP
+.ad l
+All Unicode newline sequences
+.TP 11
+\f(CR(*NUL)\fP
+.ad l
+The NUL character (binary zero)
+.PD
+.RE
+.PP
+.ad l
 .sp
 These override the default and the options given to the compiling function. For
 example, on a Unix system where LF is the default newline sequence, the pattern
@@ -231,7 +248,7 @@ example, on a Unix system where LF is the default newline sequence, the pattern
 .fi
 .ss \n[.ss] 0
 .sp
-changes the convention to CR. That pattern matches "a\(rsnb" because LF is no
+changes the convention to CR. That pattern matches \f(CRa\(rsnb\fP because LF is no
 longer a newline. If more than one of these settings is present, the last one
 is used.
 .sp
@@ -240,9 +257,9 @@ true. It also affects the interpretation of the dot metacharacter when
 \fBPCRE2_DOTALL\fP is not set, and the behaviour of \f(CR\(rsN\fP when not followed by an
 opening brace. However, it does not affect what the \f(CR\(rsR\fP escape sequence
 matches. By default, this is any Unicode newline sequence, for Perl
-compatibility. However, this can be changed; see the next section and the
-description of \f(CR\(rsR\fP in the section entitled
-"Newline sequences"
+compatibility. However, this can be changed; see the section
+Specifying what \f(CR\(rsR\fP matches and the
+description of \f(CR\(rsR\fP in the section Newline sequences
 below. A change of \f(CR\(rsR\fP setting can be combined with a change of newline
 convention.
 .SS "Specifying what \f(CR\(rsR\fP matches"
@@ -267,13 +284,13 @@ The quick brown fox
 .ss \n[.ss] 0
 .sp
 matches a portion of a subject string that is identical to itself. When
-caseless matching is specified (the \fBPCRE2_CASELESS\fP option or (?i) within the
+caseless matching is specified (the \fBPCRE2_CASELESS\fP option or \f(CR(?i)\fP within the
 pattern), letters are matched independently of case. Note that there are two
 ASCII characters, K and S, that, in addition to their lower case ASCII
 equivalents, are case\-equivalent with Unicode \f(CRU+212A\fP (Kelvin sign) and \f(CRU+017F\fP
 (long S) respectively when either \fBPCRE2_UTF\fP or \fBPCRE2_UCP\fP is set, unless the
 \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP option is in force (either passed to
-pcre2_compile() or set by \f(CR(*CASELESS_RESTRICT)\fP or (?r) within the
+pcre2_compile() or set by \f(CR(*CASELESS_RESTRICT)\fP or \f(CR(?r)\fP within the
 pattern). If the \fBPCRE2_EXTRA_TURKISH_CASING\fP option is in force (either passed
 to pcre2_compile() or set by \f(CR(*TURKISH_CASING)\fP within the pattern), then
 the \*(Aqi\*(Aq letters are matched according to Turkish and Azeri languages.
@@ -288,30 +305,66 @@ anywhere in the pattern except within square brackets, and those that are
 recognized within square brackets. Outside square brackets, the metacharacters
 are as follows:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rs      general escape character with several uses
-^      assert start of string (or line, in multiline mode)
-$      assert end of string (or line, in multiline mode)
-\&.      match any character except newline (by default)
-[      start character class definition
-|      start of alternative branch
-(      start group or control verb
-)      end group or control verb
-*      0 or more quantifier
-+      1 or more quantifier; also "possessive quantifier"
-?      0 or 1 quantifier; also quantifier minimizer
-{      potential start of min/max quantifier
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR\(rs\fP
+.ad l
+general escape character with several uses
+.TP 7
+\f(CR^\fP
+.ad l
+assert start of string (or line, in multiline mode)
+.TP 7
+\f(CR$\fP
+.ad l
+assert end of string (or line, in multiline mode)
+.TP 7
+\f(CR.\fP
+.ad l
+match any character except newline (by default)
+.TP 7
+\f(CR[\fP
+.ad l
+start character class definition
+.TP 7
+\f(CR|\fP
+.ad l
+start of alternative branch
+.TP 7
+\f(CR(\fP
+.ad l
+start group or control verb
+.TP 7
+\f(CR)\fP
+.ad l
+end group or control verb
+.TP 7
+\f(CR*\fP
+.ad l
+0 or more quantifier
+.TP 7
+\f(CR+\fP
+.ad l
+1 or more quantifier; also "possessive quantifier"
+.TP 7
+\f(CR?\fP
+.ad l
+0 or 1 quantifier; also quantifier minimizer
+.TP 7
+\f(CR{\fP
+.ad l
+potential start of min/max quantifier
+.PD
+.RE
+.PP
+.ad l
 .sp
-Brace characters { and } are also used to enclose data for constructions such
-as \f(CR\(rsg{2}\fP or \f(CR\(rsk{name}\fP. In almost all uses of braces, space and/or horizontal
-tab characters that follow { or precede } are allowed and are ignored. In the
+Brace characters \f(CR{\fP and \f(CR}\fP are also used to enclose data for constructions such
+as \f(CR\(rsg{2}\fP or \f(CR\(rsk{\fP\fIname\fP\f(CR}\fP. In almost all uses of braces, space and/or horizontal
+tab characters that follow \f(CR{\fP or precede \f(CR}\fP are allowed and are ignored. In the
 case of quantifiers, they may also appear before or after the comma. The
-exception to this is \(rsu{...} which is an ECMAScript compatibility feature
+exception to this is \f(CR\(rsu{...}\fP which is an ECMAScript compatibility feature
 that is recognized only when the \fBPCRE2_EXTRA_ALT_BSUX\fP option is set. ECMAScript
 does not ignore such white space; it causes the item to be interpreted as
 literal.
@@ -319,29 +372,43 @@ literal.
 Part of a pattern that is in square brackets is called a "character class". In
 a character class the only metacharacters are:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rs      general escape character
-^      negate the class, but only if the first character
-\-      indicates character range
-[      POSIX character class (if followed by POSIX syntax)
-]      terminates the character class
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR\(rs\fP
+.ad l
+general escape character
+.TP 7
+\f(CR^\fP
+.ad l
+negate the class, but only if the first character
+.TP 7
+\f(CR\-\fP
+.ad l
+indicates character range
+.TP 7
+\f(CR[\fP
+.ad l
+POSIX character class (if followed by POSIX syntax)
+.TP 7
+\f(CR]\fP
+.ad l
+terminates the character class
+.PD
+.RE
+.PP
+.ad l
 .sp
 If a pattern is compiled with the \fBPCRE2_EXTENDED\fP option, most white space in
-the pattern, other than in a character class, within a \(rsQ...\(rsE sequence, or
-between a # outside a character class and the next newline, inclusive, is
+the pattern, other than in a character class, within a \f(CR\(rsQ...\(rsE\fP sequence, or
+between a \f(CR#\fP outside a character class and the next newline, inclusive, is
 ignored. An escaping backslash can be used to include a white space or a #
 character as part of the pattern. If the \fBPCRE2_EXTENDED_MORE\fP option is set, the
 same applies, but in addition unescaped space and horizontal tab characters are
 ignored inside a character class. Note: only these two characters are ignored,
 not the full set of pattern white space characters that are ignored outside a
 character class. Option settings can be changed within a pattern; see the
-section entitled
-"Internal Option Setting"
+section INTERNAL OPTION SETTING
 below.
 .sp
 The following sections describe the use of each of the metacharacters.
@@ -352,11 +419,11 @@ character that is not a digit or a letter, it takes away any special meaning
 that character may have. This use of backslash as an escape character applies
 both inside and outside character classes.
 .sp
-For example, if you want to match a \f(CR\fB\fP character, you must write \f(CR\(rs\fP\fP in the
+For example, if you want to match a \f(CR*\fP character, you must write \f(CR\(rs*\fP in the
 pattern. This escaping action applies whether or not the following character
 would otherwise be interpreted as a metacharacter, so it is always safe to
 precede a non\-alphanumeric with backslash to specify that it stands for itself.
-In particular, if you want to match a backslash, you write \(rs\(rs.
+In particular, if you want to match a backslash, you write \f(CR\(rs\(rs\fP.
 .sp
 Only ASCII digits and letters have any special meaning after a backslash. All
 other characters (in particular, those whose code points are greater than 127)
@@ -371,41 +438,87 @@ interpolation. Also, Perl does "double\-quotish backslash interpolation" on any
 backslashes between \f(CR\(rsQ\fP and \f(CR\(rsE\fP which, its documentation says, "may lead to
 confusing results". PCRE2 treats a backslash between \f(CR\(rsQ\fP and \f(CR\(rsE\fP just like any
 other character. Note the following examples:
+.TS
+allbox tab(:);
+ltB ltB ltB.
+T{
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-Pattern            PCRE2 matches   Perl matches
-.fam
-.fi
-.ss \n[.ss] 0
+Pattern
+T}:T{
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsQabc$xyz\(rsE        abc$xyz        abc followed by the
-                                    contents of $xyz
-\(rsQabc\(rs$xyz\(rsE       abc\(rs$xyz       abc\(rs$xyz
-\(rsQabc\(rsE\(rs$\(rsQxyz\(rsE   abc$xyz        abc$xyz
-\(rsQA\(rsB\(rsE            A\(rsB            A\(rsB
-\(rsQ\(rs\(rsE              \(rs              \(rs\(rsE
-.fam
-.fi
-.ss \n[.ss] 0
+PCRE2 matches
+T}:T{
 .sp
-The \(rsQ...\(rsE sequence is recognized both inside and outside character classes.
-An isolated \(rsE that is not preceded by \(rsQ is ignored. If \(rsQ is not followed
-by \(rsE later in the pattern, the literal interpretation continues to the end of
-the pattern (that is, \(rsE is assumed at the end). If the isolated \(rsQ is inside
+Perl matches
+T}
+.T&
+lt lt lt.
+T{
+.sp
+\f(CR\(rsQabc$xyz\(rsE\fP
+T}:T{
+.sp
+\f(CRabc$xyz\fP
+T}:T{
+.sp
+\f(CRabc\fP followed by the contents of \f(CR$xyz\fP
+T}
+T{
+.sp
+\f(CR\(rsQabc\(rs$xyz\(rsE\fP
+T}:T{
+.sp
+\f(CRabc\(rs$xyz\fP
+T}:T{
+.sp
+\f(CRabc\(rs$xyz\fP
+T}
+T{
+.sp
+\f(CR\(rsQabc\(rsE\(rs$\(rsQxyz\(rsE\fP
+T}:T{
+.sp
+\f(CRabc$xyz\fP
+T}:T{
+.sp
+\f(CRabc$xyz\fP
+T}
+T{
+.sp
+\f(CR\(rsQA\(rsB\(rsE\fP
+T}:T{
+.sp
+\f(CRA\(rsB\fP
+T}:T{
+.sp
+\f(CRA\(rsB\fP
+T}
+T{
+.sp
+\f(CR\(rsQ\(rs\(rsE\fP
+T}:T{
+.sp
+\f(CR\(rs\fP
+T}:T{
+.sp
+\f(CR\(rs\(rsE\fP
+T}
+.TE
+.sp
+.sp
+The \f(CR\(rsQ...\(rsE\fP sequence is recognized both inside and outside character classes.
+An isolated \f(CR\(rsE\fP that is not preceded by \f(CR\(rsQ\fP is ignored. If \f(CR\(rsQ\fP is not followed
+by \f(CR\(rsE\fP later in the pattern, the literal interpretation continues to the end of
+the pattern (that is, \f(CR\(rsE\fP is assumed at the end). If the isolated \f(CR\(rsQ\fP is inside
 a character class, this causes an error, because the character class is then
 not terminated by a closing square bracket.
 .sp
-Another difference from Perl is that any appearance of \(rsQ or \(rsE inside what
+Another difference from Perl is that any appearance of \f(CR\(rsQ\fP or \f(CR\(rsE\fP inside what
 might otherwise be a quantifier causes PCRE2 not to recognize the sequence as a
 quantifier. Perl recognizes a quantifier if (redundantly) either of the numbers
-is inside \(rsQ...\(rsE, but not if the separating comma is. When not recognized as
+is inside \f(CR\(rsQ...\(rsE\fP, but not if the separating comma is. When not recognized as
 a quantifier a sequence such as \f(CR{\(rsQ1\(rsE,2}\fP is treated as the literal string
-"{1,2}".
+\f(CR{1,2}\fP.
 .SS "Non\-printing characters"
 .sp
 A second use of backslash provides a way of encoding non\-printing characters
@@ -415,53 +528,92 @@ text editing, it is often easier to use one of the following escape sequences
 instead of the binary character it represents. In an ASCII or Unicode
 environment, these escapes are as follows:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsa          alarm, that is, the BEL character (hex 07)
-\(rscx         "control\-x", where x is a non\-control ASCII character
-\(rse          escape (hex 1B)
-\(rsf          form feed (hex 0C)
-\(rsn          linefeed (hex 0A)
-\(rsr          carriage return (hex 0D) (but see below)
-\(rst          tab (hex 09)
-\(rs0dd        character with octal code 0dd
-\(rsddd        character with octal code ddd, or back reference
-\(rso{ddd..}   character with octal code ddd..
-\(rsxhh        character with hex code hh
-\(rsx{hhh..}   character with hex code hhh..
-\(rsN{U+hhh..} character with Unicode hex code point hhh..
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 21
+\f(CR\(rsa\fP
+.ad l
+alarm, that is, the BEL character (\f(CR0x07\fP)
+.TP 21
+\f(CR\(rsc\fP\fIx\fP
+.ad l
+"control\-\fIx\fP", where \fIx\fP is a non\-control ASCII character
+.TP 21
+\f(CR\(rse\fP
+.ad l
+escape (\f(CR0x1B\fP)
+.TP 21
+\f(CR\(rsf\fP
+.ad l
+form feed (\f(CR0x0C\fP)
+.TP 21
+\f(CR\(rsn\fP
+.ad l
+linefeed (\f(CR0x0A\fP)
+.TP 21
+\f(CR\(rsr\fP
+.ad l
+carriage return (\f(CR0x0D\fP) (but see below)
+.TP 21
+\f(CR\(rst\fP
+.ad l
+tab (\f(CR0x09\fP)
+.TP 21
+\f(CR\(rs0\fP\fIdd\fP
+.ad l
+character with octal code 0\fIdd\fP
+.TP 21
+\f(CR\(rs\fP\fIddd\fP
+.ad l
+character with octal code \fIddd\fP, or back reference
+.TP 21
+\f(CR\(rso{\fP\fIddd..\fP\f(CR}\fP
+.ad l
+character with octal code \fIddd..\fP
+.TP 21
+\f(CR\(rsx\fP\fIhh\fP
+.ad l
+character with hex code \fIhh\fP
+.TP 21
+\f(CR\(rsx{\fP\fIhhh..\fP\f(CR}\fP
+.ad l
+character with hex code \fIhhh..\fP
+.TP 21
+\f(CR\(rsN{U+\fP\fIhhh..\fP\f(CR}\fP
+.ad l
+character with Unicode hex code point \fIhhh..\fP
+.PD
+.RE
+.PP
+.ad l
 .sp
 A description of how back references work is given
 later,
 following the discussion of
 parenthesized groups.
 .sp
-By default, after \(rsx that is not followed by {, one or two hexadecimal
+By default, after \f(CR\(rsx\fP that is not followed by {, one or two hexadecimal
 digits are read (letters can be in upper or lower case). If the character that
-follows \(rsx is neither { nor a hexadecimal digit, an error occurs. This is
+follows \f(CR\(rsx\fP is neither { nor a hexadecimal digit, an error occurs. This is
 different from Perl\(cqs default behaviour, which generates a NUL character, but
 is in line with the behaviour of Perl\(cqs \*(Aqstrict\*(Aq mode in re.
 .sp
-Any number of hexadecimal digits may appear between \(rsx{ and }. If a character
-other than a hexadecimal digit appears between \(rsx{ and }, or if there is no
-terminating }, an error occurs.
+Any number of hexadecimal digits may appear between \f(CR\(rsx{\fP and \f(CR}\fP. If a character
+other than a hexadecimal digit appears between \f(CR\(rsx{\fP and \f(CR}\fP, or if there is no
+terminating \f(CR}\fP, an error occurs.
 .sp
 Characters whose code points are less than 256 can be defined by either of the
 two syntaxes for \f(CR\(rsx\fP or by an octal sequence. There is no difference in the way
 they are handled. For example, \f(CR\(rsxdc\fP is exactly the same as \f(CR\(rsx{dc}\fP or \f(CR\(rs334\fP.
 However, using the braced versions does make such sequences easier to read.
 .sp
-Support is available for some ECMAScript (aka JavaScript) escape sequences via
+Support is available for some ECMAScript (JavaScript) escape sequences via
 two compile\-time options. If \fBPCRE2_ALT_BSUX\fP is set, the sequence \f(CR\(rsx\fP followed
-by { is not recognized. Only if \f(CR\(rsx\fP is followed by two hexadecimal digits is it
-recognized as a character escape. Otherwise it is interpreted as a literal "x"
+by \f(CR{\fP is not recognized. Only if \f(CR\(rsx\fP is followed by two hexadecimal digits is it
+recognized as a character escape. Otherwise it is interpreted as a literal \f(CRx\fP
 character. In this mode, support for code points greater than 256 is provided
 by \f(CR\(rsu\fP, which must be followed by four hexadecimal digits; otherwise it is
-interpreted as a literal "u" character.
+interpreted as a literal \f(CRu\fP character.
 .sp
 \fBPCRE2_EXTRA_ALT_BSUX\fP has the same effect as \fBPCRE2_ALT_BSUX\fP and, in addition,
 \f(CR\(rsu{hhh..}\fP is recognized as the character specified by hexadecimal code point.
@@ -469,46 +621,45 @@ There may be any number of hexadecimal digits, but unlike other places that
 also use curly brackets, spaces are not allowed and would result in the string
 being interpreted as a literal. This syntax is from ECMAScript 6.
 .sp
-The \f(CR\(rsN{U+hhh..}\fP escape sequence is recognized only when PCRE2 is operating in
-UTF mode. Perl also uses \(rsN{name} to specify characters by Unicode name; PCRE2
-does not support this. Note that when \(rsN is not followed by an opening brace
+The \f(CR\(rsN{U+\fP\fIhhh...\fP\f(CR}\fP escape sequence is recognized only when PCRE2 is operating in
+UTF mode. Perl also uses \f(CR\(rsN{\fP\fIname\fP\f(CR}\fP to specify characters by Unicode name; PCRE2
+does not support this. Note that when \f(CR\(rsN\fP is not followed by an opening brace
 (curly bracket) it has an entirely different meaning, matching any character
 that is not a newline.
 .sp
-There are some legacy applications where the escape sequence \(rsr is expected to
-match a newline. If the \fBPCRE2_EXTRA_ESCAPED_CR_IS_LF\fP option is set, \(rsr in a
-pattern is converted to \(rsn so that it matches a LF (linefeed) instead of a CR
+There are some legacy applications where the escape sequence \f(CR\(rsr\fP is expected to
+match a newline. If the \fBPCRE2_EXTRA_ESCAPED_CR_IS_LF\fP option is set, \f(CR\(rsr\fP in a
+pattern is converted to \f(CR\(rsn\fP so that it matches a LF (linefeed) instead of a CR
 (carriage return) character.
 .sp
-An error occurs if \(rsc is not followed by a character whose ASCII code point
-is in the range 32 to 126. The precise effect of \(rscx is as follows: if x is a
+An error occurs if \f(CR\(rsc\fP is not followed by a character whose ASCII code point
+is in the range 32 to 126. The precise effect of \f(CR\(rsc\fP\fIx\fP is as follows: if \fIx\fP is a
 lower case letter, it is converted to upper case. Then bit 6 of the character
-(hex 40) is inverted. Thus \(rscA to \(rscZ become hex 01 to hex 1A (A is 41, Z is
-5A), but \(rsc{ becomes hex 3B ({ is 7B), and \(rsc; becomes hex 7B (; is 3B). If
-the code unit following \(rsc has a code point less than 32 or greater than 126,
+(\f(CR0x40\fP) is inverted. Thus \f(CR\(rscA\fP to \f(CR\(rscZ\fP become \f(CR0x01\fP to \f(CR0x1A\fP (A is 41, Z is
+5A), but \f(CR\(rsc{\fP becomes \f(CR0x3B\fP ({ is 7B), and \f(CR\(rsc;\fP becomes \f(CR0x7B\fP (; is 3B). If
+the code unit following \f(CR\(rsc\fP has a code point less than 32 or greater than 126,
 a compile\-time error occurs.
 .sp
 For differences in the way some escapes behave in EBCDIC environments,
-see section
-"EBCDIC environments"
+see section EBCDIC ENVIRONMENTS
 below.
 .SS "Octal escapes and back references"
 .sp
-The escape \(rso must be followed by a sequence of octal digits, enclosed in
+The escape \f(CR\(rso\fP must be followed by a sequence of octal digits, enclosed in
 braces. An error occurs if this is not the case. This escape provides a way of
 specifying character code points as octal numbers greater than 0777, and it
 also allows octal numbers and backreferences to be unambiguously distinguished.
 .sp
-If braces are not used, after \(rs0 up to two further octal digits are read.
+If braces are not used, after \f(CR\(rs0\fP up to two further octal digits are read.
 However, if the \fBPCRE2_EXTRA_NO_BS0\fP option is set, at least one more octal digit
-must follow \(rs0 (use \(rs00 to generate a NUL character). Make sure you supply
+must follow \f(CR\(rs0\fP (use \f(CR\(rs00\fP to generate a NUL character). Make sure you supply
 two digits after the initial zero if the pattern character that follows is
 itself an octal digit.
 .sp
 Inside a character class, when a backslash is followed by any octal digit, up
 to three octal digits are read to generate a code point. Any subsequent digits
-stand for themselves. The sequences \(rs8 and \(rs9 are treated as the literal
-characters "8" and "9".
+stand for themselves. The sequences \f(CR\(rs8\fP and \f(CR\(rs9\fP are treated as the literal
+characters \f(CR8\fP and \f(CR9\fP.
 .sp
 Outside a character class, Perl\(cqs handling of a backslash followed by a digit
 other than 0 is complicated by ambiguity, and Perl has changed over time,
@@ -516,9 +667,10 @@ causing PCRE2 also to change. From PCRE2 release 10.45 there is an option
 called \fBPCRE2_EXTRA_PYTHON_OCTAL\fP that causes PCRE2 to use Python\(cqs unambiguous
 rules. The next two subsections describe the two sets of rules.
 .sp
-For greater clarity and unambiguity, it is best to avoid following \(rs by a
-digit greater than zero. Instead, use \(rso{...} or \(rsx{...} to specify numerical
-character code points, and \(rsg{...} to specify backreferences.
+For greater clarity and unambiguity, it is best to avoid following backslash by a
+digit greater than zero. Instead, use \f(CR\(rso{...}\fP or \f(CR\(rsx{...}\fP
+to specify numerical
+character code points, and \f(CR\(rsg{...}\fP to specify backreferences.
 .SS "Perl rules for non\-class backslash 1\-9"
 .sp
 All the digits that follow the backslash are read as a decimal number. If the
@@ -527,25 +679,48 @@ that many previous capture groups in the expression, the entire sequence is
 taken as a back reference. Otherwise, up to three octal digits are read to form
 a character code. For example:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rs040   is another way of writing an ASCII space
-\(rs40    is the same, provided there are fewer than 40
-          previous capture groups
-\(rs7     is always a backreference
-\(rs11    might be a backreference, or another way of
-          writing a tab
-\(rs011   is always a tab
-\(rs0113  is a tab followed by the character "3"
-\(rs113   might be a backreference, otherwise the
-          character with octal code 113
-\(rs377   might be a backreference, otherwise
-          the value 255 (decimal)
-\(rs81    is always a backreference
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR\(rs040\fP
+.ad l
+is another way of writing an ASCII space
+.TP 7
+\f(CR\(rs40\fP
+.ad l
+is the same, provided there are fewer than 40 previous capture groups
+.TP 7
+\f(CR\(rs7\fP
+.ad l
+is always a backreference
+.TP 7
+\f(CR\(rs11\fP
+.ad l
+might be a backreference, or another way of writing a tab
+.TP 7
+\f(CR\(rs011\fP
+.ad l
+is always a tab
+.TP 7
+\f(CR\(rs0113\fP
+.ad l
+is a tab followed by the character "3"
+.TP 7
+\f(CR\(rs113\fP
+.ad l
+might be a backreference, otherwise the character with octal code 113
+.TP 7
+\f(CR\(rs377\fP
+.ad l
+might be a backreference, otherwise the value 255 (decimal)
+.TP 7
+\f(CR\(rs81\fP
+.ad l
+is always a backreference
+.PD
+.RE
+.PP
+.ad l
 .sp
 Note that octal values of 100 or greater that are specified using this syntax
 must not be introduced by a leading zero, because no more than three octal
@@ -554,10 +729,10 @@ digits are ever read.
 .sp
 If there are at least three octal digits after the backslash, exactly three are
 read as an octal code point number, but the value must be no greater than
-\(rs377, even in modes where higher code point values are supported. Any
+377, even in modes where higher code point values are supported. Any
 subsequent digits stand for themselves. If there are fewer than three octal
 digits, the sequence is taken as a decimal back reference. Thus, for example,
-\(rs12 is always a back reference, independent of how many captures there are in
+\f(CR\(rs12\fP is always a back reference, independent of how many captures there are in
 the pattern. An error is generated for a reference to a non\-existent capturing
 group.
 .SS "Constraints on character values"
@@ -565,18 +740,30 @@ group.
 Characters that are specified using octal or hexadecimal numbers are
 limited to certain values, as follows:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-8\-bit non\-UTF mode    no greater than 0xff
-16\-bit non\-UTF mode   no greater than 0xffff
-32\-bit non\-UTF mode   no greater than 0xffffffff
-All UTF modes         no greater than 0x10ffff and a valid code point
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 20
+8\-bit non\-UTF mode
+.ad l
+No greater than \f(CR0xff\fP
+.TP 20
+16\-bit non\-UTF mode
+.ad l
+No greater than \f(CR0xffff\fP
+.TP 20
+32\-bit non\-UTF mode
+.ad l
+No greater than \f(CR0xffffffff\fP
+.TP 20
+All UTF modes
+.ad l
+No greater than \f(CR0x10ffff\fP and a valid code point
+.PD
+.RE
+.PP
+.ad l
 .sp
-Invalid Unicode code points are all those in the range 0xd800 to 0xdfff (the
+Invalid Unicode code points are all those in the range \f(CR0xd800\fP to \f(CR0xdfff\fP (the
 so\-called "surrogate" code points). The check for these can be disabled by the
 caller of pcre2_compile() by setting the option
 \fBPCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES\fP. However, this is possible only in UTF\-8
@@ -584,11 +771,11 @@ and UTF\-32 modes, because these values are not representable in UTF\-16.
 .SS "Escape sequences in character classes"
 .sp
 All the sequences that define a single character value can be used both inside
-and outside character classes. In addition, inside a character class, \(rsb is
-interpreted as the backspace character (hex 08).
+and outside character classes. In addition, inside a character class, \f(CR\(rsb\fP is
+interpreted as the backspace character (\f(CR0x08\fP).
 .sp
-When not followed by an opening brace, \(rsN is not allowed in a character class.
-\(rsB, \(rsR, and \(rsX are not special inside a character class. Like other
+When not followed by an opening brace, \f(CR\(rsN\fP is not allowed in a character class.
+\f(CR\(rsB\fP, \f(CR\(rsR\fP, and \f(CR\(rsX\fP are not special inside a character class. Like other
 unrecognized alphabetic escape sequences, they cause an error. Outside a
 character class, these sequences have different meanings.
 .SS "Unsupported escape sequences"
@@ -596,24 +783,24 @@ character class, these sequences have different meanings.
 In Perl, the sequences \f(CR\(rsF\fP, \f(CR\(rsl\fP, \f(CR\(rsL\fP, \f(CR\(rsu\fP, and \f(CR\(rsU\fP are recognized by its string
 handler and used to modify the case of following characters. By default, PCRE2
 does not support these escape sequences in patterns. However, if either of the
-\fBPCRE2_ALT_BSUX\fP or \fBPCRE2_EXTRA_ALT_BSUX\fP options is set, \f(CR\(rsU\fP matches a "U"
+\fBPCRE2_ALT_BSUX\fP or \fBPCRE2_EXTRA_ALT_BSUX\fP options is set, \f(CR\(rsU\fP matches a \f(CRU\fP
 character, and \f(CR\(rsu\fP can be used to define a character by code point, as
 described above.
 .SS "Absolute and relative backreferences"
 .sp
-The sequence \(rsg followed by a signed or unsigned number, optionally enclosed
+The sequence \f(CR\(rsg\fP followed by a signed or unsigned number, optionally enclosed
 in braces, is an absolute or relative backreference. A named backreference
-can be coded as \(rsg{name}. Backreferences are discussed
+can be coded as \f(CR\(rsg{\fP\fIname\fP\f(CR}\fP. Backreferences are discussed
 later,
 following the discussion of
 parenthesized groups.
 .SS "Absolute and relative subroutine calls"
 .sp
-For compatibility with Oniguruma, the non\-Perl syntax \(rsg followed by a name or
+For compatibility with Oniguruma, the non\-Perl syntax \f(CR\(rsg\fP followed by a name or
 a number enclosed either in angle brackets or single quotes, is an alternative
 syntax for referencing a capture group as a subroutine. Details are discussed
 later.
-Note that \(rsg{...} (Perl syntax) and \(rsg<...> (Oniguruma syntax) are \fInot\fP
+Note that \f(CR\(rsg{...}\fP (Perl syntax) and \f(CR\(rsg<...>\fP (Oniguruma syntax) are \fInot\fP
 synonymous. The former is a backreference; the latter is a
 subroutine
 call.
@@ -621,31 +808,63 @@ call.
 .sp
 Another use of backslash is for specifying generic character types:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsd     any decimal digit
-\(rsD     any character that is not a decimal digit
-\(rsh     any horizontal white space character
-\(rsH     any character that is not a horizontal white space character
-\(rsN     any character that is not a newline
-\(rss     any white space character
-\(rsS     any character that is not a white space character
-\(rsv     any vertical white space character
-\(rsV     any character that is not a vertical white space character
-\(rsw     any "word" character
-\(rsW     any "non\-word" character
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR\(rsd\fP
+.ad l
+Any decimal digit.
+.TP 7
+\f(CR\(rsD\fP
+.ad l
+Any character that is not a decimal digit.
+.TP 7
+\f(CR\(rsh\fP
+.ad l
+Any horizontal white space character.
+.TP 7
+\f(CR\(rsH\fP
+.ad l
+Any character that is not a horizontal white space character.
+.TP 7
+\f(CR\(rsN\fP
+.ad l
+Any character that is not a newline.
+.TP 7
+\f(CR\(rss\fP
+.ad l
+Any white space character.
+.TP 7
+\f(CR\(rsS\fP
+.ad l
+Any character that is not a white space character.
+.TP 7
+\f(CR\(rsv\fP
+.ad l
+Any vertical white space character.
+.TP 7
+\f(CR\(rsV\fP
+.ad l
+Any character that is not a vertical white space character.
+.TP 7
+\f(CR\(rsw\fP
+.ad l
+Any "word" character.
+.TP 7
+\f(CR\(rsW\fP
+.ad l
+Any "non\-word" character.
+.PD
+.RE
+.PP
+.ad l
 .sp
-The \(rsN escape sequence has the same meaning as
-the "." metacharacter
+The \f(CR\(rsN\fP escape sequence has the same meaning as
+the \f(CR.\fP metacharacter
 when \fBPCRE2_DOTALL\fP is not set, but setting \fBPCRE2_DOTALL\fP does not change the
-meaning of \(rsN. Note that when \(rsN is followed by an opening brace it has a
-different meaning. See the section entitled
-"Non\-printing characters"
-above for details. Perl also uses \(rsN{name} to specify characters by Unicode
+meaning of \f(CR\(rsN\fP. Note that when \f(CR\(rsN\fP is followed by an opening brace it has a
+different meaning. See the section Non\-printing characters
+above for details. Perl also uses \f(CR\(rsN{\fP\fIname\fP\f(CR}\fP to specify characters by Unicode
 name; PCRE2 does not support this.
 .sp
 Each pair of lower and upper case escape sequences partitions the complete set
@@ -655,10 +874,10 @@ classes. They each match one character of the appropriate type. If the current
 matching point is at the end of the subject string, all of them fail, because
 there is no character to match.
 .sp
-The default \(rss characters are HT (9), LF (10), VT (11), FF (12), CR (13), and
+The default \f(CR\(rss\fP characters are HT (9), LF (10), VT (11), FF (12), CR (13), and
 space (32), which are defined as white space in the "C" locale. This list may
 vary if locale\-specific matching is taking place. For example, in some locales
-the "non\-breaking space" character (\(rsxA0) is recognized as white space, and in
+the "non\-breaking space" character (\f(CR0xA0\fP) is recognized as white space, and in
 others the VT character is not.
 .sp
 A "word" character is an underscore or any character that is a letter or digit.
@@ -670,29 +889,38 @@ in the
 \f(CRpcre2api\fP
 page). For example, in a French locale such as "fr_FR" in Unix\-like systems,
 or "french" in Windows, some character codes greater than 127 are used for
-accented letters, and these are then matched by \(rsw. The use of locales with
+accented letters, and these are then matched by \f(CR\(rsw\fP. The use of locales with
 Unicode is discouraged.
 .sp
-By default, characters whose code points are greater than 127 never match \(rsd,
-\(rss, or \(rsw, and always match \(rsD, \(rsS, and \(rsW, although this may be different
-for characters in the range 128\-255 when locale\-specific matching is happening.
+By default, characters whose code points are greater than 127 never match \f(CR\(rsd\fP,
+\f(CR\(rss\fP, or \f(CR\(rsw\fP, and always match \f(CR\(rsD\fP, \f(CR\(rsS\fP, and \f(CR\(rsW\fP, although this may be different
+for characters in the range 128\(em255 when locale\-specific matching is happening.
 These escape sequences retain their original meanings from before Unicode
 support was available, mainly for efficiency reasons. If the \fBPCRE2_UCP\fP option
 is set, the behaviour is changed so that Unicode properties are used to
 determine character types, as follows:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsd  any character that matches \(rsp{Nd} (decimal digit)
-\(rss  any character that matches \(rsp{Z} or \(rsh or \(rsv
-\(rsw  any character that matches \(rsp{L}, \(rsp{N}, \(rsp{Mn}, or \(rsp{Pc}
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR\(rsd\fP
+.ad l
+Any character that matches \f(CR\(rsp{Nd}\fP (decimal digit).
+.TP 7
+\f(CR\(rss\fP
+.ad l
+Any character that matches \f(CR\(rsp{Z}\fP, \f(CR\(rsh\fP, or \f(CR\(rsv\fP.
+.TP 7
+\f(CR\(rsw\fP
+.ad l
+Any character that matches \f(CR\(rsp{L}\fP, \f(CR\(rsp{N}\fP, \f(CR\(rsp{Mn}\fP, or \f(CR\(rsp{Pc}\fP.
+.PD
+.RE
+.PP
+.ad l
 .sp
-The addition of \(rsp{Mn} (non\-spacing mark) and the replacement of an explicit
-test for underscore with a test for \(rsp{Pc} (connector punctuation) happened in
+The addition of \f(CR\(rsp{Mn}\fP (non\-spacing mark) and the replacement of an explicit
+test for underscore with a test for \f(CR\(rsp{Pc}\fP (connector punctuation) happened in
 PCRE2 release 10.43. This brings PCRE2 into line with Perl.
 .sp
 The upper case escapes match the inverse sets of characters. Note that \f(CR\(rsd\fP
@@ -707,58 +935,136 @@ the options \fBPCRE2_EXTRA_ASCII_BSD\fP, \fBPCRE2_EXTRA_ASCII_BSS\fP, and
 a pattern by means of an internal option setting
 (see below).
 .sp
-The sequences \(rsh, \(rsH, \(rsv, and \(rsV, in contrast to the other sequences, which
+The sequences \f(CR\(rsh\fP, \f(CR\(rsH\fP, \f(CR\(rsv\fP, and \f(CR\(rsV\fP, in contrast to the other sequences, which
 match only ASCII characters by default, always match a specific list of code
 points, whether or not \fBPCRE2_UCP\fP is set. The horizontal space characters are:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-U+0009     Horizontal tab (HT)
-U+0020     Space
-U+00A0     Non\-break space
-U+1680     Ogham space mark
-U+180E     Mongolian vowel separator
-U+2000     En quad
-U+2001     Em quad
-U+2002     En space
-U+2003     Em space
-U+2004     Three\-per\-em space
-U+2005     Four\-per\-em space
-U+2006     Six\-per\-em space
-U+2007     Figure space
-U+2008     Punctuation space
-U+2009     Thin space
-U+200A     Hair space
-U+202F     Narrow no\-break space
-U+205F     Medium mathematical space
-U+3000     Ideographic space
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CRU+0009\fP
+.ad l
+Horizontal tab (HT)
+.TP 7
+\f(CRU+0020\fP
+.ad l
+Space
+.TP 7
+\f(CRU+00A0\fP
+.ad l
+Non\-break space
+.TP 7
+\f(CRU+1680\fP
+.ad l
+Ogham space mark
+.TP 7
+\f(CRU+180E\fP
+.ad l
+Mongolian vowel separator
+.TP 7
+\f(CRU+2000\fP
+.ad l
+En quad
+.TP 7
+\f(CRU+2001\fP
+.ad l
+Em quad
+.TP 7
+\f(CRU+2002\fP
+.ad l
+En space
+.TP 7
+\f(CRU+2003\fP
+.ad l
+Em space
+.TP 7
+\f(CRU+2004\fP
+.ad l
+Three\-per\-em space
+.TP 7
+\f(CRU+2005\fP
+.ad l
+Four\-per\-em space
+.TP 7
+\f(CRU+2006\fP
+.ad l
+Six\-per\-em space
+.TP 7
+\f(CRU+2007\fP
+.ad l
+Figure space
+.TP 7
+\f(CRU+2008\fP
+.ad l
+Punctuation space
+.TP 7
+\f(CRU+2009\fP
+.ad l
+Thin space
+.TP 7
+\f(CRU+200A\fP
+.ad l
+Hair space
+.TP 7
+\f(CRU+202F\fP
+.ad l
+Narrow no\-break space
+.TP 7
+\f(CRU+205F\fP
+.ad l
+Medium mathematical space
+.TP 7
+\f(CRU+3000\fP
+.ad l
+Ideographic space
+.PD
+.RE
+.PP
+.ad l
 .sp
 The vertical space characters are:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-U+000A     Linefeed (LF)
-U+000B     Vertical tab (VT)
-U+000C     Form feed (FF)
-U+000D     Carriage return (CR)
-U+0085     Next line (NEL)
-U+2028     Line separator
-U+2029     Paragraph separator
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CRU+000A\fP
+.ad l
+Linefeed (LF)
+.TP 7
+\f(CRU+000B\fP
+.ad l
+Vertical tab (VT)
+.TP 7
+\f(CRU+000C\fP
+.ad l
+Form feed (FF)
+.TP 7
+\f(CRU+000D\fP
+.ad l
+Carriage return (CR)
+.TP 7
+\f(CRU+0085\fP
+.ad l
+Next line (NEL)
+.TP 7
+\f(CRU+2028\fP
+.ad l
+Line separator
+.TP 7
+\f(CRU+2029\fP
+.ad l
+Paragraph separator
+.PD
+.RE
+.PP
+.ad l
 .sp
 In 8\-bit, non\-UTF\-8 mode, only the characters with code points less than 256
 are relevant.
 .SS "Newline sequences"
 .sp
-Outside a character class, by default, the escape sequence \(rsR matches any
-Unicode newline sequence. In 8\-bit non\-UTF\-8 mode \(rsR is equivalent to the
+Outside a character class, by default, the escape sequence \f(CR\(rsR\fP matches any
+Unicode newline sequence. In 8\-bit non\-UTF\-8 mode \f(CR\(rsR\fP is equivalent to the
 following:
 .sp
 .ss \n[.ss]
@@ -781,7 +1087,7 @@ In other modes, two additional characters whose code points are greater than 255
 are added: LS (line separator, \f(CRU+2028\fP) and PS (paragraph separator, \f(CRU+2029\fP).
 Unicode support is not needed for these characters to be recognized.
 .sp
-It is possible to restrict \(rsR to match only CR, LF, or CRLF (instead of the
+It is possible to restrict \f(CR\(rsR\fP to match only CR, LF, or CRLF (instead of the
 complete set of Unicode line endings) by setting the option \fBPCRE2_BSR_ANYCRLF\fP
 at compile time. (BSR is an abbreviation for "backslash R".) This can be made
 the default when PCRE2 is built; if this is the case, the other behaviour can
@@ -789,14 +1095,20 @@ be requested via the \fBPCRE2_BSR_UNICODE\fP option. It is also possible to spec
 these settings by starting a pattern string with one of the following
 sequences:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*BSR_ANYCRLF)   CR, LF, or CRLF only
-(*BSR_UNICODE)   any Unicode newline sequence
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 15
+\f(CR(*BSR_ANYCRLF)\fP
+.ad l
+CR, LF, or CRLF only.
+.TP 15
+\f(CR(*BSR_UNICODE)\fP
+.ad l
+Any Unicode newline sequence.
+.PD
+.RE
+.PP
+.ad l
 .sp
 These override the default and the options given to the compiling function.
 Note that these special settings, which are not Perl\-compatible, are recognized
@@ -813,7 +1125,7 @@ with a change of newline convention; for example, a pattern can start with:
 .ss \n[.ss] 0
 .sp
 They can also be combined with the \f(CR(*UTF)\fP or \f(CR(*UCP)\fP special sequences. Inside a
-character class, \(rsR is treated as an unrecognized escape sequence, and causes
+character class, \f(CR\(rsR\fP is treated as an unrecognized escape sequence, and causes
 an error.
 .SS "Unicode character properties"
 .sp
@@ -822,30 +1134,39 @@ sequences that match characters with specific properties are available. They
 can be used in any mode, though in 8\-bit and 16\-bit non\-UTF modes these
 sequences are of course limited to testing characters whose code points are
 less than \f(CRU+0100\fP or \f(CRU+10000\fP, respectively. In 32\-bit non\-UTF mode, code points
-greater than 0x10ffff (the Unicode limit) may be encountered. These are all
+greater than \f(CR0x10ffff\fP (the Unicode limit) may be encountered. These are all
 treated as being in the Unknown script and with an unassigned type.
 .sp
 Matching characters by Unicode property is not fast, because PCRE2 has to do a
 multistage table lookup in order to find a character\(cqs property. That is why
-the traditional escape sequences such as \(rsd and \(rsw do not use Unicode
+the traditional escape sequences such as \f(CR\(rsd\fP and \f(CR\(rsw\fP do not use Unicode
 properties in PCRE2 by default, though you can make them do so by setting the
 \fBPCRE2_UCP\fP option or by starting the pattern with \f(CR(*UCP)\fP.
 .sp
 The extra escape sequences that provide property support are:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsp{_xx_}   a character with the _xx_ property
-\(rsP{_xx_}   a character without the _xx_ property
-\(rsX       a Unicode extended grapheme cluster
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 13
+\f(CR\(rsp{\fP\fIxx\fP\f(CR}\fP
+.ad l
+a character with the \fIxx\fP property
+.TP 13
+\f(CR\(rsP{\fP\fIxx\fP\f(CR}\fP
+.ad l
+a character without the \fIxx\fP property
+.TP 13
+\f(CR\(rsX\fP
+.ad l
+a Unicode extended grapheme cluster
+.PD
+.RE
+.PP
+.ad l
 .sp
 For compatibility with Perl, negation can be specified by including a
-circumflex between the opening brace and the property. For example, \(rsp{^Lu} is
-the same as \(rsP{Lu}.
+circumflex between the opening brace and the property. For example, \f(CR\(rsp{^Lu}\fP is
+the same as \f(CR\(rsP{Lu}\fP.
 .sp
 In accordance with Unicode\(cqs "loose matching" rules, ASCII white space
 characters, hyphens, and underscores are ignored in the properties represented
@@ -855,7 +1176,7 @@ tab, linefeed, vertical tab, formfeed, or carriage return.
 Some properties are specified as a name only; others as a name and a value,
 separated by a colon or an equals sign. The names and values consist of ASCII
 letters and digits (with one Perl\-specific exception, see below). They are not
-case sensitive. Note, however, that the escapes themselves, \(rsp and \(rsP,
+case sensitive. Note, however, that the escapes themselves, \f(CR\(rsp\fP and \f(CR\(rsP\fP,
 \fIare\fP case sensitive. There are abbreviations for many names. The following
 examples are all equivalent:
 .sp
@@ -876,24 +1197,24 @@ There is support for Unicode script names, Unicode general category properties,
 binary (yes/no) properties, and some special PCRE2 properties (described
 below).
 Certain other Perl properties such as "InMusicalSymbols" are not supported by
-PCRE2. Note that \(rsP{Any} does not match any characters, so always causes a
+PCRE2. Note that \f(CR\(rsP{Any}\fP does not match any characters, so always causes a
 match failure.
-.SS "Script properties for \(rsp and \(rsP"
+.SS "Script properties for \f(CR\(rsp\fP and \f(CR\(rsP\fP"
 .sp
 There are three different syntax forms for matching a script. Each Unicode
 character has a basic script and, optionally, a list of other scripts ("Script
 Extensions") with which it is commonly used. Using the Adlam script as an
-example, \(rsp{sc:Adlam} matches characters whose basic script is Adlam, whereas
-\(rsp{scx:Adlam} matches, in addition, characters that have Adlam in their
+example, \f(CR\(rsp{sc:Adlam}\fP matches characters whose basic script is Adlam, whereas
+\f(CR\(rsp{scx:Adlam}\fP matches, in addition, characters that have Adlam in their
 extensions list. The full names "script" and "script extensions" for the
 property types are recognized and, as for all property specifications, an
 equals sign is an alternative to the colon. If a script name is given without a
-property type, for example, \(rsp{Adlam}, it is treated as \(rsp{scx:Adlam}. Perl
+property type, for example, \f(CR\(rsp{Adlam}\fP, it is treated as \f(CR\(rsp{scx:Adlam}\fP. Perl
 changed to this interpretation at release 5.26 and PCRE2 changed at release
 10.40.
 .sp
 Unassigned characters (and in non\-UTF 32\-bit mode, characters with code points
-greater than 0x10FFFF) are assigned the "Unknown" script. Others that are not
+greater than \f(CR0x10FFFF\fP) are assigned the "Unknown" script. Others that are not
 part of an identified script are lumped together as "Common". The current list
 of recognized script names and their 4\-character abbreviations can be obtained
 by running this command:
@@ -905,10 +1226,10 @@ pcre2test \-LS
 .fam
 .fi
 .ss \n[.ss] 0
-.SS "The general category property for \(rsp and \(rsP"
+.SS "The general category property for \f(CR\(rsp\fP and \f(CR\(rsP\fP"
 .sp
 Each character has exactly one Unicode general category property, specified by
-a two\-letter abbreviation. If only one letter is specified with \(rsp or \(rsP, it
+a two\-letter abbreviation. If only one letter is specified with \f(CR\(rsp\fP or \f(CR\(rsP\fP, it
 includes all the general category properties that start with that letter. In
 this case, in the absence of negation, the curly brackets in the escape
 sequence are optional; these two examples have the same effect:
@@ -924,102 +1245,174 @@ sequence are optional; these two examples have the same effect:
 .sp
 The following general category property codes are supported:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-C     Other
-Cc    Control
-Cf    Format
-Cn    Unassigned
-Co    Private use
-Cs    Surrogate
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CRC\fP
+.ad l
+Other
+.TP 7
+\f(CRCc\fP
+.ad l
+Control
+.TP 7
+\f(CRCf\fP
+.ad l
+Format
+.TP 7
+\f(CRCn\fP
+.ad l
+Unassigned
+.TP 7
+\f(CRCo\fP
+.ad l
+Private use
+.TP 7
+\f(CRCs\fP
+.ad l
+Surrogate
+.TP 7
+\f(CRL\fP
+.ad l
+Letter
+.TP 7
+\f(CRLc\fP
+.ad l
+Cased letter
+.TP 7
+\f(CRLl\fP
+.ad l
+Lower case letter
+.TP 7
+\f(CRLm\fP
+.ad l
+Modifier letter
+.TP 7
+\f(CRLo\fP
+.ad l
+Other letter
+.TP 7
+\f(CRLt\fP
+.ad l
+Title case letter
+.TP 7
+\f(CRLu\fP
+.ad l
+Upper case letter
+.TP 7
+\f(CRM\fP
+.ad l
+Mark
+.TP 7
+\f(CRMc\fP
+.ad l
+Spacing mark
+.TP 7
+\f(CRMe\fP
+.ad l
+Enclosing mark
+.TP 7
+\f(CRMn\fP
+.ad l
+Non\-spacing mark
+.TP 7
+\f(CRN\fP
+.ad l
+Number
+.TP 7
+\f(CRNd\fP
+.ad l
+Decimal number
+.TP 7
+\f(CRNl\fP
+.ad l
+Letter number
+.TP 7
+\f(CRNo\fP
+.ad l
+Other number
+.TP 7
+\f(CRP\fP
+.ad l
+Punctuation
+.TP 7
+\f(CRPc\fP
+.ad l
+Connector punctuation
+.TP 7
+\f(CRPd\fP
+.ad l
+Dash punctuation
+.TP 7
+\f(CRPe\fP
+.ad l
+Close punctuation
+.TP 7
+\f(CRPf\fP
+.ad l
+Final punctuation
+.TP 7
+\f(CRPi\fP
+.ad l
+Initial punctuation
+.TP 7
+\f(CRPo\fP
+.ad l
+Other punctuation
+.TP 7
+\f(CRPs\fP
+.ad l
+Open punctuation
+.TP 7
+\f(CRS\fP
+.ad l
+Symbol
+.TP 7
+\f(CRSc\fP
+.ad l
+Currency symbol
+.TP 7
+\f(CRSk\fP
+.ad l
+Modifier symbol
+.TP 7
+\f(CRSm\fP
+.ad l
+Mathematical symbol
+.TP 7
+\f(CRSo\fP
+.ad l
+Other symbol
+.TP 7
+\f(CRZ\fP
+.ad l
+Separator
+.TP 7
+\f(CRZl\fP
+.ad l
+Line separator
+.TP 7
+\f(CRZp\fP
+.ad l
+Paragraph separator
+.TP 7
+\f(CRZs\fP
+.ad l
+Space separator
+.PD
+.RE
+.PP
+.ad l
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-L     Letter
-Lc    Cased letter
-Ll    Lower case letter
-Lm    Modifier letter
-Lo    Other letter
-Lt    Title case letter
-Lu    Upper case letter
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-M     Mark
-Mc    Spacing mark
-Me    Enclosing mark
-Mn    Non\-spacing mark
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-N     Number
-Nd    Decimal number
-Nl    Letter number
-No    Other number
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-P     Punctuation
-Pc    Connector punctuation
-Pd    Dash punctuation
-Pe    Close punctuation
-Pf    Final punctuation
-Pi    Initial punctuation
-Po    Other punctuation
-Ps    Open punctuation
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-S     Symbol
-Sc    Currency symbol
-Sk    Modifier symbol
-Sm    Mathematical symbol
-So    Other symbol
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-Z     Separator
-Zl    Line separator
-Zp    Paragraph separator
-Zs    Space separator
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-Perl originally used the name L& for the Lc property. This is still supported
+Perl originally used the name \f(CRL&\fP for the \f(CRLc\fP property. This is still supported
 by Perl, but discouraged. PCRE2 also still supports it. This property matches
-any character that has the Lu, Ll, or Lt property, in other words, any letter
+any character that has the \f(CRLu\fP, \f(CRLl\fP, or \f(CRLt\fP property, in other words, any letter
 that is not classified as a modifier or "other". From release 10.45 of PCRE2
-the properties Lu, Ll, and Lt are all treated as Lc when case\-independent
-matching is set by the \fBPCRE2_CASELESS\fP option or (?i) within the pattern. The
+the properties \f(CRLu\fP, \f(CRLl\fP, and \f(CRLt\fP are all treated as \f(CRLc\fP when case\-independent
+matching is set by the \fBPCRE2_CASELESS\fP option or \f(CR(?i)\fP within the pattern. The
 other properties are not affected by caseless matching.
 .sp
-The Cs (Surrogate) property applies only to characters whose code points are in
+The \f(CRCs\fP (Surrogate) property applies only to characters whose code points are in
 the range \f(CRU+D800\fP to \f(CRU+DFFF\fP. These characters are no different to any other
 character when PCRE2 is not in UTF mode (using the 16\-bit or 32\-bit library).
 However, they are not valid in Unicode strings and so cannot be tested by PCRE2
@@ -1028,18 +1421,18 @@ discussion of \fBPCRE2_NO_UTF_CHECK\fP in the
 \f(CRpcre2api\fP
 page).
 .sp
-The long synonyms for property names that Perl supports (such as \(rsp{Letter})
+The long synonyms for property names that Perl supports (such as \f(CR\(rsp{Letter}\fP)
 are not supported by PCRE2, nor is it permitted to prefix any of these
 properties with "Is".
 .sp
 No character that is in the Unicode table has the Cn (unassigned) property.
 Instead, this property is assumed for any code point that is not in the
 Unicode table.
-.SS "Binary (yes/no) properties for \(rsp and \(rsP"
+.SS "Binary (yes/no) properties for \f(CR\(rsp\fP and \f(CR\(rsP\fP"
 .sp
 Unicode defines a number of binary properties, that is, properties whose only
 values are true or false. You can obtain a list of those that are recognized by
-\(rsp and \(rsP, along with their abbreviations, by running this command:
+\f(CR\(rsp\fP and \f(CR\(rsP\fP, along with their abbreviations, by running this command:
 .sp
 .ss \n[.ss]
 .nf
@@ -1048,55 +1441,130 @@ pcre2test \-LP
 .fam
 .fi
 .ss \n[.ss] 0
-.SS "The Bidi_Class property for \(rsp and \(rsP"
+.SS "The Bidi_Class property for \f(CR\(rsp\fP and \f(CR\(rsP\fP"
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsp{Bidi_Class:<class>}   matches a character with the given class
-\(rsp{BC:<class>}           matches a character with the given class
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 21
+\f(CR\(rsp{Bidi_Class:\fP\fIclass\fP\f(CR}\fP
+.ad l
+Matches a character with the given class.
+.TP 21
+\f(CR\(rsp{BC:\fP\fIclass\fP\f(CR}\fP
+.ad l
+Matches a character with the given class.
+.PD
+.RE
+.PP
+.ad l
 .sp
 The recognized classes are:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-AL          Arabic letter
-AN          Arabic number
-B           paragraph separator
-BN          boundary neutral
-CS          common separator
-EN          European number
-ES          European separator
-ET          European terminator
-FSI         first strong isolate
-L           left\-to\-right
-LRE         left\-to\-right embedding
-LRI         left\-to\-right isolate
-LRO         left\-to\-right override
-NSM         non\-spacing mark
-ON          other neutral
-PDF         pop directional format
-PDI         pop directional isolate
-R           right\-to\-left
-RLE         right\-to\-left embedding
-RLI         right\-to\-left isolate
-RLO         right\-to\-left override
-S           segment separator
-WS          white space
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CRAL\fP
+.ad l
+Arabic letter
+.TP 7
+\f(CRAN\fP
+.ad l
+Arabic number
+.TP 7
+\f(CRB\fP
+.ad l
+Paragraph separator
+.TP 7
+\f(CRBN\fP
+.ad l
+Boundary neutral
+.TP 7
+\f(CRCS\fP
+.ad l
+Common separator
+.TP 7
+\f(CREN\fP
+.ad l
+European number
+.TP 7
+\f(CRES\fP
+.ad l
+European separator
+.TP 7
+\f(CRET\fP
+.ad l
+European terminator
+.TP 7
+\f(CRFSI\fP
+.ad l
+First strong isolate
+.TP 7
+\f(CRL\fP
+.ad l
+Left\-to\-right
+.TP 7
+\f(CRLRE\fP
+.ad l
+Left\-to\-right embedding
+.TP 7
+\f(CRLRI\fP
+.ad l
+Left\-to\-right isolate
+.TP 7
+\f(CRLRO\fP
+.ad l
+Left\-to\-right override
+.TP 7
+\f(CRNSM\fP
+.ad l
+Non\-spacing mark
+.TP 7
+\f(CRON\fP
+.ad l
+Other neutral
+.TP 7
+\f(CRPDF\fP
+.ad l
+Pop directional format
+.TP 7
+\f(CRPDI\fP
+.ad l
+Pop directional isolate
+.TP 7
+\f(CRR\fP
+.ad l
+Right\-to\-left
+.TP 7
+\f(CRRLE\fP
+.ad l
+Right\-to\-left embedding
+.TP 7
+\f(CRRLI\fP
+.ad l
+Right\-to\-left isolate
+.TP 7
+\f(CRRLO\fP
+.ad l
+Right\-to\-left override
+.TP 7
+\f(CRS\fP
+.ad l
+Segment separator
+.TP 7
+\f(CRWS\fP
+.ad l
+White space
+.PD
+.RE
+.PP
+.ad l
 .sp
 As in all property specifications, an equals sign may be used instead of a
 colon and the class names are case\-insensitive. Only the short names listed
 above are recognized; PCRE2 does not at present support any long alternatives.
 .SS "Extended grapheme clusters"
 .sp
-The \(rsX escape matches any number of Unicode characters that form an "extended
+The \f(CR\(rsX\fP escape matches any number of Unicode characters that form an "extended
 grapheme cluster", and treats the sequence as an atomic group
 (see below).
 Unicode supports various kinds of composite character by giving each character
@@ -1107,7 +1575,7 @@ abandoned the use of some previous properties that had been used for emojis.
 Instead it introduced various emoji\-specific properties. PCRE2 uses only the
 Extended Pictographic property.
 .sp
-\(rsX always matches at least one character. Then it decides whether to add
+\f(CR\(rsX\fP always matches at least one character. Then it decides whether to add
 additional characters according to the following rules for ending a cluster:
 .sp
 .RS 4
@@ -1211,41 +1679,53 @@ Otherwise, end the cluster.
 .SS "PCRE2\(cqs additional properties"
 .sp
 As well as the standard Unicode properties described above, PCRE2 supports four
-more that make it possible to convert traditional escape sequences such as \(rsw
-and \(rss to use Unicode properties. PCRE2 uses these non\-standard, non\-Perl
+more that make it possible to convert traditional escape sequences such as \f(CR\(rsw\fP
+and \f(CR\(rss\fP to use Unicode properties. PCRE2 uses these non\-standard, non\-Perl
 properties internally when \fBPCRE2_UCP\fP is set. However, they may also be used
 explicitly. These properties are:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-Xan   Any alphanumeric character
-Xps   Any POSIX space character
-Xsp   Any Perl space character
-Xwd   Any Perl "word" character
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CRXan\fP
+.ad l
+Any alphanumeric character
+.TP 7
+\f(CRXps\fP
+.ad l
+Any POSIX space character
+.TP 7
+\f(CRXsp\fP
+.ad l
+Any Perl space character
+.TP 7
+\f(CRXwd\fP
+.ad l
+Any Perl "word" character
+.PD
+.RE
+.PP
+.ad l
 .sp
-Xan matches characters that have either the L (letter) or the N (number)
-property. Xps matches the characters tab, linefeed, vertical tab, form feed, or
-carriage return, and any other character that has the Z (separator) property
-(this includes the space character). Xsp is the same as Xps; in PCRE1 it used
-to exclude vertical tab, for Perl compatibility, but Perl changed. Xwd matches
-the same characters as Xan, plus those that match Mn (non\-spacing mark) or Pc
+\f(CRXan\fP matches characters that have either the \f(CRL\fP (letter) or the \f(CRN\fP (number)
+property. \f(CRXps\fP matches the characters tab, linefeed, vertical tab, form feed, or
+carriage return, and any other character that has the \f(CRZ\fP (separator) property
+(this includes the space character). \f(CRXsp\fP is the same as \f(CRXps\fP; in PCRE1 it used
+to exclude vertical tab, for Perl compatibility, but Perl changed. \f(CRXwd\fP matches
+the same characters as \f(CRXan\fP, plus those that match \f(CRMn\fP (non\-spacing mark) or \f(CRPc\fP
 (connector punctuation, which includes underscore).
 .sp
-There is another non\-standard property, Xuc, which matches any character that
-can be represented by a Universal Character Name in \f(CRC++\fP and other programming
+There is another non\-standard property, \f(CRXuc\fP, which matches any character that
+can be represented by a Universal Character Name in C++ and other programming
 languages. These are the characters $, @, ` (grave accent), and all characters
 with Unicode code points greater than or equal to \f(CRU+00A0\fP, except for the
 surrogates \f(CRU+D800\fP to \f(CRU+DFFF\fP. Note that most base (ASCII) characters are
-excluded. (Universal Character Names are of the form \(rsuHHHH or \(rsUHHHHHHHH
-where H is a hexadecimal digit. Note that the Xuc property does not match these
+excluded. (Universal Character Names are of the form \f(CR\(rsu\fP\fIHHHH\fP or \f(CR\(rsU\fP\fIHHHHHHHH\fP
+where H is a hexadecimal digit. Note that the \f(CRXuc\fP property does not match these
 sequences but the characters that they represent.)
 .SS "Resetting the match start"
 .sp
-In normal use, the escape sequence \(rsK causes any previously matched characters
+In normal use, the escape sequence \f(CR\(rsK\fP causes any previously matched characters
 not to be included in the final matched sequence that is returned. For example,
 the pattern:
 .sp
@@ -1257,7 +1737,7 @@ foo\(rsKbar
 .fi
 .ss \n[.ss] 0
 .sp
-matches "foobar", but reports that it has matched "bar". \(rsK does not interact
+matches \f(CRfoobar\fP, but reports that it has matched \f(CRbar\fP. \f(CR\(rsK\fP does not interact
 with anchoring in any way. The pattern:
 .sp
 .ss \n[.ss]
@@ -1268,13 +1748,13 @@ with anchoring in any way. The pattern:
 .fi
 .ss \n[.ss] 0
 .sp
-matches only when the subject begins with "foobar" (in single line mode),
-though it again reports the matched string as "bar". This feature is similar to
+matches only when the subject begins with \f(CRfoobar\fP (in single line mode),
+though it again reports the matched string as \f(CRbar\fP. This feature is similar to
 a lookbehind assertion
 (described below),
-but the part of the pattern that precedes \(rsK is not constrained to match a
+but the part of the pattern that precedes \f(CR\(rsK\fP is not constrained to match a
 limited number of characters, as is required for a lookbehind assertion. The
-use of \(rsK does not interfere with the setting of
+use of \f(CR\(rsK\fP does not interfere with the setting of
 captured substrings.
 For example, when the pattern
 .sp
@@ -1286,16 +1766,16 @@ For example, when the pattern
 .fi
 .ss \n[.ss] 0
 .sp
-matches "foobar", the first substring is still set to "foo".
+matches \f(CRfoobar\fP, the first substring is still set to \f(CRfoo\fP.
 .sp
-From version 5.32.0 Perl forbids the use of \(rsK in lookaround assertions. From
+From version 5.32.0 Perl forbids the use of \f(CR\(rsK\fP in lookaround assertions. From
 release 10.38 PCRE2 also forbids this by default. However, the
 \fBPCRE2_EXTRA_ALLOW_LOOKAROUND_BSK\fP option can be used when calling
 pcre2_compile() to re\-enable the previous behaviour. When this option is
-set, \(rsK is acted upon when it occurs inside positive assertions, but is
+set, \f(CR\(rsK\fP is acted upon when it occurs inside positive assertions, but is
 ignored in negative assertions. Note that when a pattern such as \f(CR(?=ab\(rsK)\fP
 matches, the reported start of the match can be greater than the end of the
-match. Using \(rsK in a lookbehind assertion at the start of a pattern can also
+match. Using \f(CR\(rsK\fP in a lookbehind assertion at the start of a pattern can also
 lead to odd effects. For example, consider this pattern:
 .sp
 .ss \n[.ss]
@@ -1306,8 +1786,8 @@ lead to odd effects. For example, consider this pattern:
 .fi
 .ss \n[.ss] 0
 .sp
-If the subject is "foobar", a call to pcre2_match() with a starting
-offset of 3 succeeds and reports the matching string as "foobar", that is, the
+If the subject is \f(CRfoobar\fP, a call to pcre2_match() with a starting
+offset of 3 succeeds and reports the matching string as \f(CRfoobar\fP, that is, the
 start of the reported match is earlier than where the match started.
 .SS "Simple assertions"
 .sp
@@ -1318,21 +1798,38 @@ groups for more complicated assertions is described
 below.
 The backslashed assertions are:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-\(rsb     matches at a word boundary
-\(rsB     matches when not at a word boundary
-\(rsA     matches at the start of the subject
-\(rsZ     matches at the end of the subject
-        also matches before a newline at the end of the subject
-\(rsz     matches only at the end of the subject
-\(rsG     matches at the first matching position in the subject
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR\(rsb\fP
+.ad l
+Matches at a word boundary.
+.TP 7
+\f(CR\(rsB\fP
+.ad l
+Matches when not at a word boundary.
+.TP 7
+\f(CR\(rsA\fP
+.ad l
+Matches at the start of the subject.
+.TP 7
+\f(CR\(rsZ\fP
+.ad l
+Matches at the end of the subject; also matches before a newline at the end of the subject.
+.TP 7
+\f(CR\(rsz\fP
+.ad l
+Matches only at the end of the subject.
+.TP 7
+\f(CR\(rsG\fP
+.ad l
+Matches at the first matching position in the subject.
+.PD
+.RE
+.PP
+.ad l
 .sp
-Inside a character class, \(rsb has a different meaning; it matches the backspace
+Inside a character class, \f(CR\(rsb\fP has a different meaning; it matches the backspace
 character. If any other of these assertions appears in a character class, an
 "invalid escape sequence" error is generated.
 .sp
@@ -1344,14 +1841,14 @@ Unicode support, the meanings of \f(CR\(rsw\fP and \f(CR\(rsW\fP can be changed 
 \fBPCRE2_UCP\fP option. When this is done, it also affects \f(CR\(rsb\fP and \f(CR\(rsB\fP. Neither PCRE2
 nor Perl has a separate "start of word" or "end of word" metasequence. However,
 whatever follows \f(CR\(rsb\fP normally determines which it is. For example, the fragment
-\f(CR\(rsba\fP matches "a" at the start of a word.
+\f(CR\(rsba\fP matches \f(CRa\fP at the start of a word.
 .sp
 The \f(CR\(rsA\fP, \f(CR\(rsZ\fP, and \f(CR\(rsz\fP assertions differ from the traditional circumflex and
-dollar (described in the next section) in that they only ever match at the very
+dollar (described in the section CIRCUMFLEX AND DOLLAR) in that they only ever match at the very
 start and end of the subject string, whatever options are set. Thus, they are
 independent of multiline mode. These three assertions are not affected by the
 \fBPCRE2_NOTBOL\fP or \fBPCRE2_NOTEOL\fP options, which affect only the behaviour of the
-circumflex and dollar metacharacters. However, if the \fIstartoffset\fP
+circumflex and dollar metacharacters. However, if the \fIstart_offset\fP
 argument of pcre2_match() is non\-zero, indicating that matching is to
 start at a point other than the beginning of the subject, \f(CR\(rsA\fP can never match.
 The difference between \f(CR\(rsZ\fP and \f(CR\(rsz\fP is that \f(CR\(rsZ\fP matches before a newline at the
@@ -1359,9 +1856,9 @@ end of the string as well as at the very end, whereas \f(CR\(rsz\fP matches only
 end.
 .sp
 The \f(CR\(rsG\fP assertion is true only when the current matching position is at the
-start point of the matching process, as specified by the \fIstartoffset\fP
+start point of the matching process, as specified by the \fIstart_offset\fP
 argument of pcre2_match(). It differs from \f(CR\(rsA\fP when the value of
-\fIstartoffset\fP is non\-zero. By calling pcre2_match() multiple times
+\fIstart_offset\fP is non\-zero. By calling pcre2_match() multiple times
 with appropriate arguments, you can mimic Perl\(cqs /g option, and it is in this
 kind of implementation where \f(CR\(rsG\fP can be useful.
 .sp
@@ -1386,7 +1883,7 @@ recognized as newlines.
 .sp
 Outside a character class, in the default matching mode, the circumflex
 character is an assertion that is true only if the current matching point is at
-the start of the subject string. If the \fIstartoffset\fP argument of
+the start of the subject string. If the \fIstart_offset\fP argument of
 pcre2_match() is non\-zero, or if \fBPCRE2_NOTBOL\fP is set, circumflex can
 never match if the \fBPCRE2_MULTILINE\fP option is unset. Inside a character class,
 circumflex has an entirely different meaning
@@ -1420,11 +1917,11 @@ of the subject string. It does not match after a newline that ends the string,
 for compatibility with Perl. However, this can be changed by setting the
 \fBPCRE2_ALT_CIRCUMFLEX\fP option.
 .sp
-For example, the pattern \f(CR/^abc$/\fP matches the subject string "def\(rsnabc" (where
-\(rsn represents a newline) in multiline mode, but not otherwise. Consequently,
+For example, the pattern \f(CR^abc$\fP matches the subject string \f(CRdef\(rsnabc\fP (where
+\f(CR\(rsn\fP represents a newline) in multiline mode, but not otherwise. Consequently,
 patterns that are anchored in single line mode because all branches start with
 ^ are not anchored in multiline mode, and a match for circumflex is possible
-when the \fIstartoffset\fP argument of pcre2_match() is non\-zero. The
+when the \fIstart_offset\fP argument of pcre2_match() is non\-zero. The
 \fBPCRE2_DOLLAR_ENDONLY\fP option is ignored if \fBPCRE2_MULTILINE\fP is set.
 .sp
 When the newline convention (see
@@ -1432,14 +1929,14 @@ When the newline convention (see
 below) recognizes the two\-character sequence CRLF as a newline, this is
 preferred, even if the single characters CR and LF are also recognized as
 newlines. For example, if the newline convention is "any", a multiline mode
-circumflex matches before "xyz" in the string "abc\(rsr\(rsnxyz" rather than after
+circumflex matches before \f(CRxyz\fP in the string \f(CRabc\(rsr\(rsnxyz\fP rather than after
 CR, even though CR on its own is a valid newline. (It also matches at the very
 start of the string, of course.)
 .sp
 Note that the sequences \f(CR\(rsA\fP, \f(CR\(rsZ\fP, and \f(CR\(rsz\fP can be used to match the start and
 end of the subject in both modes, and if all branches of a pattern start with
 \f(CR\(rsA\fP it is always anchored, whether or not \fBPCRE2_MULTILINE\fP is set.
-.SH "FULL STOP (PERIOD, DOT) AND \(rsN"
+.SH "FULL STOP (PERIOD, DOT) AND \f(CR\(rsn\fP"
 .sp
 Outside a character class, a dot in the pattern matches any one character in
 the subject string except (by default) a character that signifies the end of a
@@ -1463,14 +1960,13 @@ The handling of dot is entirely independent of the handling of circumflex and
 dollar, the only relationship being that they both involve newlines. Dot has no
 special meaning in a character class.
 .sp
-The escape sequence \(rsN when not followed by an opening brace behaves like a
+The escape sequence \f(CR\(rsN\fP when not followed by an opening brace behaves like a
 dot, except that it is not affected by the \fBPCRE2_DOTALL\fP option. In other words,
 it matches any character except one that signifies the end of a line.
 .sp
-When \(rsN is followed by an opening brace it has a different meaning. See the
-section entitled
-"Non\-printing characters"
-above for details. Perl also uses \(rsN{name} to specify characters by Unicode
+When \f(CR\(rsN\fP is followed by an opening brace it has a different meaning. See the
+section Non\-printing characters
+above for details. Perl also uses \f(CR\(rsN{\fP\fIname\fP\f(CR}\fP to specify characters by Unicode
 name; PCRE2 does not support this.
 .SH "MATCHING A SINGLE CODE UNIT"
 .sp
@@ -1481,18 +1977,18 @@ byte; in the 16\-bit library it is a 16\-bit unit; in the 32\-bit library it is 
 feature is provided in Perl in order to match individual bytes in UTF\-8 mode,
 but it is unclear how it can usefully be used.
 .sp
-Because \(rsC breaks up characters into individual code units, matching one unit
-with \(rsC in UTF\-8 or UTF\-16 mode means that the rest of the string may start
+Because \f(CR\(rsC\fP breaks up characters into individual code units, matching one unit
+with \f(CR\(rsC\fP in UTF\-8 or UTF\-16 mode means that the rest of the string may start
 with a malformed UTF character. This has undefined results, because PCRE2
 assumes that it is matching character by character in a valid UTF string (by
 default it checks the subject string\(cqs validity at the start of processing
 unless the \fBPCRE2_NO_UTF_CHECK\fP or \fBPCRE2_MATCH_INVALID_UTF\fP option is used).
 .sp
-An application can lock out the use of \(rsC by setting the
+An application can lock out the use of \f(CR\(rsC\fP by setting the
 \fBPCRE2_NEVER_BACKSLASH_C\fP option when compiling a pattern. It is also possible to
-build PCRE2 with the use of \(rsC permanently disabled.
+build PCRE2 with the use of \f(CR\(rsC\fP permanently disabled.
 .sp
-PCRE2 does not allow \(rsC to appear in lookbehind assertions
+PCRE2 does not allow \f(CR\(rsC\fP to appear in lookbehind assertions
 (described below)
 in UTF\-8 or UTF\-16 modes, because this would make it impossible to calculate
 the length of the lookbehind. Neither the alternative matching function
@@ -1500,11 +1996,11 @@ pcre2_dfa_match() nor the JIT optimizer support \f(CR\(rsC\fP in these UTF modes
 The former gives a match\-time error; the latter fails to optimize and so the
 match is always run using the interpreter.
 .sp
-In the 32\-bit library, however, \(rsC is always supported (when not explicitly
+In the 32\-bit library, however, \f(CR\(rsC\fP is always supported (when not explicitly
 locked out) because it always matches a single code unit, whether or not UTF\-32
 is specified.
 .sp
-In general, the \(rsC escape sequence is best avoided. However, one way of using
+In general, the \f(CR\(rsC\fP escape sequence is best avoided. However, one way of using
 it that avoids the problem of malformed UTF\-8 or UTF\-16 characters is to use a
 lookahead to check the length of the next character, as in this pattern, which
 could be used with a UTF\-8 string (ignore white space and line breaks):
@@ -1520,13 +2016,13 @@ could be used with a UTF\-8 string (ignore white space and line breaks):
 .fi
 .ss \n[.ss] 0
 .sp
-In this example, a group that starts with (?| resets the capturing parentheses
+In this example, a group that starts with \f(CR(?|\fP resets the capturing parentheses
 numbers in each alternative (see
 "Duplicate Group Numbers"
 below). The assertions at the start of each branch check the next UTF\-8
 character for values whose encoding uses 1, 2, 3, or 4 bytes, respectively. The
 character\(cqs individual bytes are then captured by the appropriate number of
-\(rsC groups.
+\f(CR\(rsC\fP groups.
 .SH "SQUARE BRACKETS AND CHARACTER CLASSES"
 .sp
 An opening square bracket introduces a character class, terminated by a closing
@@ -1544,49 +2040,49 @@ subject character must not be in the set defined by the class. If a circumflex
 is actually required as a member of the class, ensure it is not the first
 character, or escape it with a backslash.
 .sp
-For example, the character class [aeiou] matches any lower case English vowel,
-whereas [^aeiou] matches all other characters. Note that a circumflex is just a
+For example, the character class \f(CR[aeiou]\fP matches any lower case English vowel,
+whereas \f(CR[^aeiou]\fP matches all other characters. Note that a circumflex is just a
 convenient notation for specifying the characters that are in the class by
 enumerating those that are not. A class that starts with a circumflex is not an
 assertion; it still consumes a character from the subject string, and therefore
 it fails to match if the current pointer is at the end of the string.
 .sp
-Characters in a class may be specified by their code points using \(rso, \(rsx, or
-\f(CR\(rsN{U+hh..}\fP in the usual way. When caseless matching is set, any letters in a
+Characters in a class may be specified by their code points using \f(CR\(rso\fP, \f(CR\(rsx\fP, or
+\f(CR\(rsN{U+\fP\fIhh...\fP\f(CR}\fP in the usual way. When caseless matching is set, any letters in a
 class represent both their upper case and lower case versions, so for example,
-a caseless [aeiou] matches "A" as well as "a", and a caseless [^aeiou] does not
-match "A", whereas a caseful version would. Note that there are two ASCII
+a caseless \f(CR[aeiou]\fP matches \f(CRA\fP as well as \f(CRa\fP, and a caseless \f(CR[^aeiou]\fP does not
+match \f(CRA\fP, whereas a caseful version would. Note that there are two ASCII
 characters, K and S, that, in addition to their lower case ASCII equivalents,
 are case\-equivalent with Unicode \f(CRU+212A\fP (Kelvin sign) and \f(CRU+017F\fP (long S)
 respectively when either \fBPCRE2_UTF\fP or \fBPCRE2_UCP\fP is set. If you do not want
 these ASCII/non\-ASCII case equivalences, you can suppress them by setting
 \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP, either as an option in a compile context, or by
-including \f(CR(*CASELESS_RESTRICT)\fP or (?r) within a pattern.
+including \f(CR(*CASELESS_RESTRICT)\fP or \f(CR(?r)\fP within a pattern.
 .sp
 Characters that might indicate line breaks are never treated in any special way
 when matching character classes, whatever line\-ending sequence is in use, and
 whatever setting of the \fBPCRE2_DOTALL\fP and \fBPCRE2_MULTILINE\fP options is used. A
-class such as [^a] always matches one of these characters.
+class such as \f(CR[^a]\fP always matches one of these characters.
 .sp
-The generic character type escape sequences \(rsd, \(rsD, \(rsh, \(rsH, \(rsp, \(rsP, \(rss,
-\(rsS, \(rsv, \(rsV, \(rsw, and \(rsW may appear in a character class, and add the
-characters that they match to the class. For example, [\(rsdABCDEF] matches any
+The generic character type escape sequences \f(CR\(rsd\fP, \f(CR\(rsD\fP, \f(CR\(rsh\fP, \f(CR\(rsH\fP, \f(CR\(rsp\fP, \f(CR\(rsP\fP, \f(CR\(rss\fP,
+\f(CR\(rsS\fP, \f(CR\(rsv\fP, \f(CR\(rsV\fP, \f(CR\(rsw\fP, and \f(CR\(rsW\fP may appear in a character class, and add the
+characters that they match to the class. For example, \f(CR[\(rsdABCDEF]\fP matches any
 hexadecimal digit. In UTF modes, the \fBPCRE2_UCP\fP option affects the meanings of
-\(rsd, \(rss, \(rsw and their upper case partners, just as it does when they appear
-outside a character class, as described in the section entitled
-"Generic character types"
-above. The escape sequence \(rsb has a different meaning inside a character
-class; it matches the backspace character. The sequences \(rsB, \(rsR, and \(rsX are
+\f(CR\(rsd\fP, \f(CR\(rss\fP, \f(CR\(rsw\fP and their upper case partners, just as it does when they appear
+outside a character class, as described in the section
+Generic character types
+above. The escape sequence \f(CR\(rsb\fP has a different meaning inside a character
+class; it matches the backspace character. The sequences \f(CR\(rsB\fP, \f(CR\(rsR\fP, and \f(CR\(rsX\fP are
 not special inside a character class. Like any other unrecognized escape
-sequences, they cause an error. The same is true for \(rsN when not followed by
+sequences, they cause an error. The same is true for \f(CR\(rsN\fP when not followed by
 an opening brace.
 .sp
 The minus (hyphen) character can be used to specify a range of characters in a
-character class. For example, [d\-m] matches any letter between d and m,
+character class. For example, \f(CR[d\-m]\fP matches any letter between d and m,
 inclusive. If a minus character is required in a class, it must be escaped with
 a backslash or appear in a position where it cannot be interpreted as
 indicating a range, typically as the first or last character in the class,
-or immediately after a range. For example, [b\-d\-z] matches letters in the range
+or immediately after a range. For example, \f(CR[b\-d\-z]\fP matches letters in the range
 b to d, a hyphen character, or z.
 .sp
 There is some special treatment for alphabetic ranges in EBCDIC environments;
@@ -1595,40 +2091,40 @@ see the section
 below.
 .sp
 Perl treats a hyphen as a literal if it appears before or after a POSIX class
-(see below) or before or after a character type escape such as \(rsd or \(rsH.
+(see below) or before or after a character type escape such as \f(CR\(rsd\fP or \f(CR\(rsH\fP.
 However, unless the hyphen is the last character in the class, Perl outputs a
 warning in its warning mode, as this is most likely a user error. As PCRE2 has
 no facility for warning, an error is given in these cases.
 .sp
-It is not possible to have the literal character "]" as the end character of a
-range. A pattern such as [W\-]46] is interpreted as a class of two characters
-("W" and "\-") followed by a literal string "46]", so it would match "W46]" or
-"\-46]". However, if the "]" is escaped with a backslash it is interpreted as
-the end of a range, so [W\-\(rs]46] is interpreted as a class containing a range
-and two other characters. The octal or hexadecimal representation of "]" can
+It is not possible to have the literal character \f(CR]\fP as the end character of a
+range. A pattern such as \f(CR[W\-]46]\fP is interpreted as a class of two characters
+(\f(CRW\fP and \f(CR\-\fP) followed by a literal string \f(CR46]\fP, so it would match \f(CRW46]\fP or
+\f(CR\-46]\fP. However, if the \f(CR]\fP is escaped with a backslash it is interpreted as
+the end of a range, so \f(CR[W\-\(rs]46]\fP is interpreted as a class containing a range
+and two other characters. The octal or hexadecimal representation of \f(CR]\fP can
 also be used to end a range.
 .sp
 Ranges normally include all code points between the start and end characters,
 inclusive. They can also be used for code points specified numerically, for
-example [\(rs000\-\(rs037]. Ranges can include any characters that are valid for the
+example \f(CR[\(rs000\-\(rs037]\fP. Ranges can include any characters that are valid for the
 current mode. In any UTF mode, the so\-called "surrogate" characters (those
-whose code points lie between 0xd800 and 0xdfff inclusive) may not be specified
+whose code points lie between \f(CR0xd800\fP and \f(CR0xdfff\fP inclusive) may not be specified
 explicitly by default (the \fBPCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES\fP option disables
-this check). However, ranges such as [\(rsx{d7ff}\-\(rsx{e000}], which include the
+this check). However, ranges such as \f(CR[\(rsx{d7ff}\-\(rsx{e000}]\fP, which include the
 surrogates, are always permitted.
 .sp
 If a range that includes letters is used when caseless matching is set, it
-matches the letters in either case. For example, [W\-c] is equivalent to
-[][\(rs\(rs^_`wxyzabc], matched caselessly, and in a non\-UTF mode, if character
-tables for a French locale are in use, [\(rsxc8\-\(rsxcb] matches accented E
+matches the letters in either case. For example, \f(CR[W\-c]\fP is equivalent to
+\f(CR[][\(rs\(rs^_`wxyzabc]\fP, matched caselessly, and in a non\-UTF mode, if character
+tables for a French locale are in use, \f(CR[\(rsxc8\-\(rsxcb]\fP matches accented E
 characters in both cases.
 .sp
 A circumflex can conveniently be used with the upper case character types to
 specify a more restricted set of characters than the matching lower case type.
-For example, the class [^\(rsW_] matches any letter or digit, but not underscore,
-whereas [\(rsw] includes underscore. A positive character class should be read as
-"something OR something OR ..." and a negative class as "NOT something AND NOT
-something AND NOT ...".
+For example, the class \f(CR[^\(rsW_]\fP matches any letter or digit, but not underscore,
+whereas \f(CR[\(rsw]\fP includes underscore. A positive character class should be read as
+"something OR something OR .\|.\|." and a negative class as "NOT something AND NOT
+something AND NOT .\|.\|.".
 .sp
 The metacharacters that are recognized in character classes are backslash,
 hyphen (when it can be interpreted as specifying a range), circumflex
@@ -1642,95 +2138,96 @@ below. Escaping any non\-alphanumeric character in a class turns it into a
 literal, whether or not it would otherwise be a metacharacter.
 .SH "PERL EXTENDED CHARACTER CLASSES"
 .sp
-From release 10.45 PCRE2 supports Perl\(cqs (?[...]) extended character class
+From release 10.45 PCRE2 supports Perl\(cqs \f(CR(?[...])\fP extended character class
 syntax. This can be used to perform set operations such as intersection on
 character classes.
 .sp
-The syntax permitted within (?[...]) is quite different to ordinary character
+The syntax permitted within \f(CR(?[...])\fP is quite different to ordinary character
 classes. Inside the extended class, there is an expression syntax consisting of
-"atoms", operators, and ordinary parentheses "()" used for grouping. Such
-classes always have the Perl /xx modifier (PCRE2 option \fBPCRE2_EXTENDED_MORE\fP)
+"atoms", operators, and ordinary parentheses \f(CR()\fP used for grouping. Such
+classes always have the Perl \f(CR/xx\fP modifier (PCRE2 option \fBPCRE2_EXTENDED_MORE\fP)
 turned on within them. This means that literal space and tab characters are
 ignored everywhere in the class.
 .sp
 The allowed atoms are individual characters specified by escape sequences such
-as \(rsn or \(rsx{123}, character types such as \(rsd, POSIX classes such as
-[:alpha:], and nested ordinary (non\-extended) character classes. For example,
-in (?[\(rsd & [...]]) the nested class [...] follows the usual rules for ordinary
+as \f(CR\(rsn\fP or \f(CR\(rsx{123}\fP, character types such as \f(CR\(rsd\fP, POSIX classes such as
+\f(CR[:alpha:]\fP, and nested ordinary (non\-extended) character classes. For example,
+in \f(CR(?[\(rsd & [...]])\fP the nested class \f(CR[...]\fP follows the usual rules for ordinary
 character classes, in which parentheses are not metacharacters, and character
 literals and ranges are permitted.
 .sp
 Character literals and ranges may not appear outside a nested ordinary
 character class because they are not atoms in the extended syntax. The extended
-syntax does not introduce any additional escape sequences, so (?[\(rsy]) is an
-unknown escape, as it would be in [\(rsy].
+syntax does not introduce any additional escape sequences, so \f(CR(?[\(rsy])\fP is an
+unknown escape, as it would be in \f(CR[\(rsy]\fP.
 .sp
-In the extended syntax, ^ does not negate a class (except within an
+In the extended syntax, \f(CR^\fP does not negate a class (except within an
 ordinary class nested inside an extended class); it is instead a binary
 operator.
 .sp
-The binary operators are "&" (intersection), "|" or \f(CR+\fP (union), "\-"
-(subtraction) and "^" (symmetric difference). These are left\-associative and
-"&" has higher (tighter) precedence, while the others have equal lower
-precedence. The one prefix unary operator is "!" (complement), with highest
+The binary operators are \f(CR&\fP (intersection), \f(CR|\fP or \f(CR+\fP (union), \f(CR\-\fP
+(subtraction) and \f(CR^\fP (symmetric difference). These are left\-associative and
+\f(CR&\fP has higher (tighter) precedence, while the others have equal lower precedence.
+The one prefix unary operator is \f(CR!\fP (complement), with highest
 precedence.
 .SH "UTS#18 EXTENDED CHARACTER CLASSES"
 .sp
-The \fBPCRE2_ALT_EXTENDED_CLASS\fP option enables an alternative to Perl\(cqs (?[...])
-syntax, allowing instead extended class behaviour inside ordinary [...]
-character classes. This altered syntax for [...] classes is loosely described
+The \fBPCRE2_ALT_EXTENDED_CLASS\fP option enables an alternative to Perl\(cqs \f(CR(?[...])\fP
+syntax, allowing instead extended class behaviour inside ordinary \f(CR[...]\fP
+character classes. This altered syntax for \f(CR[...]\fP classes is loosely described
 by the Unicode standard UTS#18. The \fBPCRE2_ALT_EXTENDED_CLASS\fP option does not
-prevent use of (?[...]) classes; it just changes the meaning of all
-[...] classes that are not nested inside a Perl (?[...]) class.
+prevent use of \f(CR(?[...])\fP classes; it just changes the meaning of all
+\f(CR[...]\fP classes that are not nested inside a Perl \f(CR(?[...])\fP class.
 .sp
-Firstly, in ordinary Perl [...] syntax, an expression such as "[a[]" is a
-character class with two literal characters "a" and "[", but in UTS#18 extended
+Firstly, in ordinary Perl \f(CR[...]\fP syntax, an expression such as \f(CR[a[]\fP is a
+character class with two literal characters \f(CRa\fP and \f(CR[\fP, but in UTS#18 extended
 classes the "[" character becomes an additional metacharacter within classes,
-denoting the start of a nested class, so a literal "[" must be escaped as "\(rs[".
+denoting the start of a nested class, so a literal \f(CR[\fP must be escaped as \f(CR\(rs[\fP.
 .sp
-Secondly, within the UTS#18 extended syntax, there are operators "||", "&&",
-"\-\-" and "~~" which denote character class union, intersection, subtraction,
+Secondly, within the UTS#18 extended syntax, there are operators \f(CR||\fP, \f(CR&&\fP,
+\f(CR\-\-\fP and \f(CR~~\fP which denote character class union, intersection, subtraction,
 and symmetric difference respectively. In standard Perl syntax, these would
-simply be needlessly\-repeated literals (except for "\-\-" which could be the
+simply be needlessly\-repeated literals (except for \f(CR\-\-\fP which could be the
 start or end of a range). In UTS#18 extended classes these operators can be used
-in constructs such as [\(rsp{L}\-\-[QW]] for "Unicode letters, other than Q and W".
-A literal "\-" at the start or end of a range must be escaped, so while "[\-\-1]"
-in Perl syntax is the range from hyphen to "1", it must be escaped as "[\(rs\-\-1]"
+in constructs such as \f(CR[\(rsp{L}\-\-[QW]]\fP for "Unicode letters, other than Q and W".
+A literal \f(CR\-\fP at the start or end of a range must be escaped, so while
+\f(CR[\-\-1]\fP in Perl syntax is the range from hyphen to 1, it must be
+escaped as \f(CR[\(rs\-\-1]\fP
 in UTS#18 extended classes.
 .sp
-Unlike Perl\(cqs (?[...]) extended classes, the \fBPCRE2_EXTENDED_MORE\fP option to
+Unlike Perl\(cqs \f(CR(?[...])\fP extended classes, the \fBPCRE2_EXTENDED_MORE\fP option to
 ignore space and tab characters is not automatically enabled for UTS#18
 extended classes, but it is honoured if set.
 .sp
 Extended UTS#18 classes can be nested, and nested classes are themselves
 extended classes (unlike Perl, where nested classes must be simple classes).
-For example, [\(rsp{L}&&[\(rsp{Thai}||\(rsp{Greek}]] matches any letter that is in
+For example, \f(CR[\(rsp{L}&&[\(rsp{Thai}||\(rsp{Greek}]]\fP matches any letter that is in
 the Thai or Greek scripts. Note that this means that no special grouping
-characters (such as the parentheses used in Perl\(cqs (?[...]) class syntax) are
+characters (such as the parentheses used in Perl\(cqs \f(CR(?[...])\fP class syntax) are
 needed.
 .sp
 Individual class items (literal characters, literal ranges, properties such as
-\(rsd or \(rsp{...}, and nested classes) can be combined by juxtaposition or by an
+\f(CR\(rsd\fP or \f(CR\(rsp{...}\fP, and nested classes) can be combined by juxtaposition or by an
 operator. Juxtaposition is the implicit union operator, and binds more tightly
 than any explicit operator. Thus a sequence of literals and/or ranges behaves
-as if it is enclosed in square brackets. For example, [A\-Z0\-9&&[^E8]] is the
-same as [[A\-Z0\-9]&&[^E8]], which matches any upper case alphanumeric character
+as if it is enclosed in square brackets. For example, \f(CR[A\-Z0\-9&&[^E8]]\fP is the
+same as \f(CR[[A\-Z0\-9]&&[^E8]]\fP, which matches any upper case alphanumeric character
 except "E" or "8".
 .sp
 Precedence between the explicit operators is not defined, so mixing operators
-is a syntax error. For example, \f(CR[A&&B\(emC]\fP is an error, but
-\f(CR[A&&[B\(emC]]\fP is valid.
+is a syntax error. For example, \f(CR[A&&B\-\-C]\fP is an error, but
+\f(CR[A&&[B\-\-C]]\fP is valid.
 .sp
 This is an emerging syntax which is being adopted gradually across the regex
-ecosystem: for example JavaScript adopted the "/v" flag in ECMAScript 2024;
-Python\(cqs "re" module reserves the syntax for future use with a FutureWarning
-for unescaped use of "[" as a literal within character classes. Due to UTS#18
+ecosystem: for example JavaScript adopted the \f(CR/v\fP flag in ECMAScript 2024;
+Python\(cqs \f(CRre\fP module reserves the syntax for future use with a FutureWarning
+for unescaped use of \f(CR[\fP as a literal within character classes. Due to UTS#18
 providing insufficient guidance, engines interpret the syntax differently.
-Rust\(cqs "regex" crate and Python\(cqs "regex" PyPi module both implement UTS#18
-extended classes, but with slight incompatibilities ([A||B&&C] is parsed as
-[A||[B&&C]] in Python\(cqs "regex" but as [[A||B]&&C] in Rust\(cqs "regex").
+Rust\(cqs \f(CRregex\fP crate and Python\(cqs \f(CRregex\fP PyPi module both implement UTS#18
+extended classes, but with slight incompatibilities (\f(CR[A||B&&C]\fP is parsed as
+\f(CR[A||[B&&C]]\fP in Python\(cqs \f(CRregex\fP but as \f(CR[[A||B]&&C]\fP in Rust\(cqs \f(CRregex\fP).
 .sp
-PCRE2\(cqs syntax adds syntax restrictions similar to ECMASCript\(cqs /v flag, so
+PCRE2\(cqs syntax adds syntax restrictions similar to ECMAScript\(cqs \f(CR/v\fP flag, so
 that all the UTS#18 extended classes accepted as valid by PCRE2 have the
 property that they are interpreted either with the same behaviour, or as
 invalid, by all other major engines. Please file an issue if you are aware of
@@ -1738,7 +2235,7 @@ cross\-engine differences in behaviour between PCRE2 and another major engine.
 .SH "POSIX CHARACTER CLASSES"
 .sp
 Perl supports the POSIX notation for character classes. This uses names
-enclosed by [: and :] within the enclosing square brackets. PCRE2 also supports
+enclosed by \f(CR[:\fP and \f(CR:]\fP within the enclosing square brackets. PCRE2 also supports
 this notation, in both ordinary and extended classes. For example,
 .sp
 .ss \n[.ss]
@@ -1749,34 +2246,76 @@ this notation, in both ordinary and extended classes. For example,
 .fi
 .ss \n[.ss] 0
 .sp
-matches "0", "1", any alphabetic character, or "%". The supported class names
+matches \f(CR0\fP, \f(CR1\fP, any alphabetic character, or \f(CR%\fP. The supported class names
 are:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-alnum    letters and digits
-alpha    letters
-ascii    character codes 0 \- 127
-blank    space or tab only
-cntrl    control characters
-digit    decimal digits (same as \(rsd)
-graph    printing characters, excluding space
-lower    lower case letters
-print    printing characters, including space
-punct    printing characters, excluding letters and digits and space
-space    white space (the same as \(rss from PCRE2 8.34)
-upper    upper case letters
-word     "word" characters (same as \(rsw)
-xdigit   hexadecimal digits
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 11
+\f(CR[:alnum:]\fP
+.ad l
+Letters and digits.
+.TP 11
+\f(CR[:alpha:]\fP
+.ad l
+Letters.
+.TP 11
+\f(CR[:ascii:]\fP
+.ad l
+Character codes 0\(em127.
+.TP 11
+\f(CR[:blank:]\fP
+.ad l
+Space or tab only.
+.TP 11
+\f(CR[:cntrl:]\fP
+.ad l
+Control characters.
+.TP 11
+\f(CR[:digit:]\fP
+.ad l
+Decimal digits (same as \f(CR\(rsd\fP).
+.TP 11
+\f(CR[:graph:]\fP
+.ad l
+Printing characters, excluding space.
+.TP 11
+\f(CR[:lower:]\fP
+.ad l
+Lower case letters.
+.TP 11
+\f(CR[:print:]\fP
+.ad l
+Printing characters, including space.
+.TP 11
+\f(CR[:punct:]\fP
+.ad l
+Printing characters, excluding letters, digits, and space.
+.TP 11
+\f(CR[:space:]\fP
+.ad l
+White space (the same as \f(CR\(rss\fP from PCRE2 8.34).
+.TP 11
+\f(CR[:upper:]\fP
+.ad l
+Upper case letters.
+.TP 11
+\f(CR[:word:]\fP
+.ad l
+"Word" characters (same as \f(CR\(rsw\fP).
+.TP 11
+\f(CR[:xdigit:]\fP
+.ad l
+Hexadecimal digits.
+.PD
+.RE
+.PP
+.ad l
 .sp
 The default "space" characters are HT (9), LF (10), VT (11), FF (12), CR (13),
 and space (32). If locale\-specific matching is taking place, the list of space
 characters may be different; there may be fewer or more of them. "Space" and
-\(rss match the same set of characters, as do "word" and \(rsw.
+\f(CR\(rss\fP match the same set of characters, as do "word" and \f(CR\(rsw\fP.
 .sp
 The name "word" is a Perl extension, and "blank" is a GNU extension from Perl
 5.8. Another Perl extension is negation, which is indicated by a ^ character
@@ -1790,68 +2329,113 @@ after the colon. For example,
 .fi
 .ss \n[.ss] 0
 .sp
-matches "1", "2", or any non\-digit. PCRE2 (and Perl) also recognize the POSIX
-syntax [.ch.] and [=ch=] where "ch" is a "collating element", but these are not
+matches \f(CR1\fP, \f(CR2\fP, or any non\-digit. PCRE2 (and Perl) also recognize the POSIX
+syntax \f(CR[.ch.]\fP and \f(CR[=ch=]\fP where \f(CRch\fP is a "collating element", but these are not
 supported, and an error is given if they are encountered.
 .sp
 By default, characters with values greater than 127 do not match any of the
 POSIX character classes, although this may be different for characters in the
-range 128\-255 when locale\-specific matching is happening. However, in UCP mode,
+range 128\(em255 when locale\-specific matching is happening. However, in UCP mode,
 unless certain options are set (see below), some of the classes are changed so
 that Unicode character properties are used. This is achieved by replacing
 POSIX classes with other sequences, as follows:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-[:alnum:]  becomes  \(rsp{Xan}
-[:alpha:]  becomes  \(rsp{L}
-[:blank:]  becomes  \(rsh
-[:cntrl:]  becomes  \(rsp{Cc}
-[:digit:]  becomes  \(rsp{Nd}
-[:lower:]  becomes  \(rsp{Ll}
-[:space:]  becomes  \(rsp{Xps}
-[:upper:]  becomes  \(rsp{Lu}
-[:word:]   becomes  \(rsp{Xwd}
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 10
+\f(CR[:alnum:]\fP
+.ad l
+Becomes \f(CR\(rsp{Xan}\fP
+.TP 10
+\f(CR[:alpha:]\fP
+.ad l
+Becomes \f(CR\(rsp{L}\fP
+.TP 10
+\f(CR[:blank:]\fP
+.ad l
+Becomes \f(CR\(rsh\fP
+.TP 10
+\f(CR[:cntrl:]\fP
+.ad l
+Becomes \f(CR\(rsp{Cc}\fP
+.TP 10
+\f(CR[:digit:]\fP
+.ad l
+Becomes \f(CR\(rsp{Nd}\fP
+.TP 10
+\f(CR[:lower:]\fP
+.ad l
+Becomes \f(CR\(rsp{Ll}\fP
+.TP 10
+\f(CR[:space:]\fP
+.ad l
+Becomes \f(CR\(rsp{Xps}\fP
+.TP 10
+\f(CR[:upper:]\fP
+.ad l
+Becomes \f(CR\(rsp{Lu}\fP
+.TP 10
+\f(CR[:word:]\fP
+.ad l
+Becomes \f(CR\(rsp{Xwd}\fP
+.PD
+.RE
+.PP
+.ad l
 .sp
-Negated versions, such as [:^alpha:] use \(rsP instead of \(rsp. Four other POSIX
+Negated versions, such as \f(CR[:^alpha:]\fP use \f(CR\(rsP\fP instead of \f(CR\(rsp\fP.
+.sp
+Four other POSIX
 classes are handled specially in UCP mode:
+.sp
+.RS 4
+.PD
 .TP 11
-[:graph:]
+\f(CR[:graph:]\fP
 .ad l
 This matches characters that have glyphs that mark the page when printed. In
 Unicode property terms, it matches all characters with the L, M, N, P, S, or Cf
 properties, except for:
+.RS 11
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-U+061C           Arabic Letter Mark
-U+180E           Mongolian Vowel Separator
-U+2066 \- U+2069  Various "isolate"s
-.fam
-.fi
-.ss \n[.ss] 0
-.TP 11
-[:print:]
+.RS 4
+.PD 0
+.TP 7
+\f(CRU+061C\fP
 .ad l
-This matches the same characters as [:graph:] plus space characters that are
+Arabic Letter Mark
+.TP 7
+\f(CRU+180E\fP
+.ad l
+Mongolian Vowel Separator
+.TP 7
+\f(CRU+2066\fP \(em \f(CRU+2069\fP
+.ad l
+Various "isolates"
+.PD
+.RE
+.PP
+.ad l
+.RE
+.TP 11
+\f(CR[:print:]\fP
+.ad l
+This matches the same characters as \f(CR[:graph:]\fP plus space characters that are
 not controls, that is, characters with the Zs property.
 .TP 11
-[:punct:]
+\f(CR[:punct:]\fP
 .ad l
 This matches all characters that have the Unicode P (punctuation) property,
 plus those characters with code points less than 256 that have the S (Symbol)
 property.
 .TP 11
-[:xdigit:]
+\f(CR[:xdigit:]\fP
 .ad l
 In addition to the ASCII hexadecimal digits, this also matches the "fullwidth"
 versions of those characters, whose Unicode code points start at \f(CRU+FF10\fP. This
 is a change that was made in PCRE2 release 10.43 for Perl compatibility.
+.PD
+.RE
 .PP
 .ad l
 .sp
@@ -1860,29 +2444,35 @@ with code points less than 256.
 .sp
 There are two options that can be used to restrict the POSIX classes to ASCII
 characters when \fBPCRE2_UCP\fP is set. The option \fBPCRE2_EXTRA_ASCII_DIGIT\fP affects
-just [:digit:] and [:xdigit:]. Within a pattern, this can be set and unset by
-(?aT) and (?\-aT). The \fBPCRE2_EXTRA_ASCII_POSIX\fP option disables UCP processing
-for all POSIX classes, including [:digit:] and [:xdigit:]. Within a pattern,
-(?aP) and (?\-aP) set and unset both these options for consistency.
+just \f(CR[:digit:]\fP and \f(CR[:xdigit:]\fP. Within a pattern, this can be set and unset by
+\f(CR(?aT)\fP and \f(CR(?\-aT)\fP. The \fBPCRE2_EXTRA_ASCII_POSIX\fP option disables UCP processing
+for all POSIX classes, including \f(CR[:digit:]\fP and \f(CR[:xdigit:]\fP. Within a pattern,
+\f(CR(?aP)\fP and \f(CR(?\-aP)\fP set and unset both these options for consistency.
 .SH "COMPATIBILITY FEATURE FOR WORD BOUNDARIES"
 .sp
 In the POSIX.2 compliant library that was included in 4.4BSD Unix, the ugly
 syntax [[:<:]] and [[:>:]] is used for matching "start of word" and "end of
 word". PCRE2 treats these items as follows:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-[[:<:]]  is converted to  \(rsb(?=\(rsw)
-[[:>:]]  is converted to  \(rsb(?<=\(rsw)
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 11
+\f(CR[[:<:]]\fP
+.ad l
+Is converted to \f(CR\(rsb(?=\(rsw)\fP.
+.TP 11
+\f(CR[[:>:]]\fP
+.ad l
+Is converted to \f(CR\(rsb(?<=\(rsw)\fP.
+.PD
+.RE
+.PP
+.ad l
 .sp
 Only these exact character sequences are recognized. A sequence such as
 [a[:<:]b] provokes error for an unrecognized POSIX class name. This support is
 not compatible with Perl. It is provided to help migrations from other
-environments, and is best not used in any new patterns. Note that \(rsb matches
+environments, and is best not used in any new patterns. Note that \f(CR\(rsb\fP matches
 at the start and the end of a word (see
 "Simple assertions"
 above), and in a Perl\-style pattern the preceding or following character
@@ -1890,7 +2480,7 @@ normally shows which is wanted, without the need for the assertions that are
 used above in order to give exactly the POSIX behaviour. Note also that the
 \fBPCRE2_UCP\fP option changes the meaning of \f(CR\(rsw\fP (and therefore \f(CR\(rsb\fP) by default, so
 it also affects these POSIX sequences.
-.SH "VERTICAL BAR"
+.SH "VERTICAL BAR (PIPE)"
 .sp
 Vertical bar characters are used to separate alternative patterns. For example,
 the pattern
@@ -1903,7 +2493,7 @@ gilbert|sullivan
 .fi
 .ss \n[.ss] 0
 .sp
-matches either "gilbert" or "sullivan". Any number of alternatives may appear,
+matches either \f(CRgilbert\fP or \f(CRsullivan\fP. Any number of alternatives may appear,
 and an empty alternative is permitted (matching the empty string). The matching
 process tries each alternative in turn, from left to right, and the first one
 that succeeds is used. If the alternatives are within a group
@@ -1913,63 +2503,105 @@ alternative in the group.
 .SH "INTERNAL OPTION SETTING"
 .sp
 The settings of several options can be changed within a pattern by a sequence
-of letters enclosed between "(?" and ")". The following are Perl\-compatible,
+of letters enclosed between \f(CR(?\fP and \f(CR)\fP. The following are Perl\-compatible,
 and are described in detail in the
 \f(CRpcre2api\fP
 documentation. The option letters are:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-i  for PCRE2_CASELESS
-m  for PCRE2_MULTILINE
-n  for PCRE2_NO_AUTO_CAPTURE
-s  for PCRE2_DOTALL
-x  for PCRE2_EXTENDED
-xx for PCRE2_EXTENDED_MORE
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CRi\fP
+.ad l
+For \fBPCRE2_CASELESS\fP
+.TP 7
+\f(CRm\fP
+.ad l
+For \fBPCRE2_MULTILINE\fP
+.TP 7
+\f(CRn\fP
+.ad l
+For \fBPCRE2_NO_AUTO_CAPTURE\fP
+.TP 7
+\f(CRs\fP
+.ad l
+For \fBPCRE2_DOTALL\fP
+.TP 7
+\f(CRx\fP
+.ad l
+For \fBPCRE2_EXTENDED\fP
+.TP 7
+\f(CRxx\fP
+.ad l
+For \fBPCRE2_EXTENDED_MORE\fP
+.PD
+.RE
+.PP
+.ad l
 .sp
-For example, (?im) sets caseless, multiline matching. It is also possible to
+For example, \f(CR(?im)\fP sets caseless, multiline matching. It is also possible to
 unset these options by preceding the relevant letters with a hyphen, for
-example (?\-im). The two "extended" options are not independent; unsetting
+example \f(CR(?\-im)\fP. The two "extended" options are not independent; unsetting
 either one cancels the effects of both of them.
 .sp
-A combined setting and unsetting such as (?im\-sx), which sets \fBPCRE2_CASELESS\fP
+A combined setting and unsetting such as \f(CR(?im\-sx)\fP, which sets \fBPCRE2_CASELESS\fP
 and \fBPCRE2_MULTILINE\fP while unsetting \fBPCRE2_DOTALL\fP and \fBPCRE2_EXTENDED\fP, is also
 permitted. Only one hyphen may appear in the options string. If a letter
 appears both before and after the hyphen, the option is unset. An empty options
-setting "(?)" is allowed. Needless to say, it has no effect.
+setting \f(CR(?)\fP is allowed. Needless to say, it has no effect.
 .sp
-If the first character following (? is a circumflex, it causes all of the above
+If the first character following \f(CR(?\fP is a circumflex, it causes all of the above
 options to be unset. Letters may follow the circumflex to cause some options to
 be re\-instated, but a hyphen may not appear.
 .sp
 Some PCRE2\-specific options can be changed by the same mechanism using these
 pairs or individual letters:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-aD for PCRE2_EXTRA_ASCII_BSD
-aS for PCRE2_EXTRA_ASCII_BSS
-aW for PCRE2_EXTRA_ASCII_BSW
-aP for PCRE2_EXTRA_ASCII_POSIX and PCRE2_EXTRA_ASCII_DIGIT
-aT for PCRE2_EXTRA_ASCII_DIGIT
-r  for PCRE2_EXTRA_CASELESS_RESTRICT
-J  for PCRE2_DUPNAMES
-U  for PCRE2_UNGREEDY
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CRaD\fP
+.ad l
+For \fBPCRE2_EXTRA_ASCII_BSD\fP
+.TP 7
+\f(CRaS\fP
+.ad l
+For \fBPCRE2_EXTRA_ASCII_BSS\fP
+.TP 7
+\f(CRaW\fP
+.ad l
+For \fBPCRE2_EXTRA_ASCII_BSW\fP
+.TP 7
+\f(CRaP\fP
+.ad l
+For \fBPCRE2_EXTRA_ASCII_POSIX\fP and \fBPCRE2_EXTRA_ASCII_DIGIT\fP
+.TP 7
+\f(CRaT\fP
+.ad l
+For \fBPCRE2_EXTRA_ASCII_DIGIT\fP
+.TP 7
+\f(CRr\fP
+.ad l
+For \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP
+.TP 7
+\f(CRJ\fP
+.ad l
+For \fBPCRE2_DUPNAMES\fP
+.TP 7
+\f(CRU\fP
+.ad l
+For \fBPCRE2_UNGREEDY\fP
+.PD
+.RE
+.PP
+.ad l
 .sp
-However, except for \*(Aqr\*(Aq, these are not unset by (?^), which is equivalent to
-(?\-imnrsx). If \*(Aqa\*(Aq is not followed by any of the upper case letters shown
+However, except for \f(CRr\fP, these are not unset by \f(CR(?^)\fP, which is equivalent to
+\f(CR(?\-imnrsx)\fP. If \f(CRa\fP is not followed by any of the upper case letters shown
 above, it sets (or unsets) all the ASCII options.
 .sp
 \fBPCRE2_EXTRA_ASCII_DIGIT\fP has no additional effect when \fBPCRE2_EXTRA_ASCII_POSIX\fP
-is set, but including it in (?aP) means that (?\-aP) suppresses all ASCII
+is set, but including it in \f(CR(?aP)\fP means that \f(CR(?\-aP)\fP suppresses all ASCII
 restrictions for POSIX classes.
 .sp
 When one of these option changes occurs at top level (that is, not inside group
@@ -1987,7 +2619,7 @@ example,
 .fi
 .ss \n[.ss] 0
 .sp
-matches abc and aBc and no other strings (assuming \fBPCRE2_CASELESS\fP is not set
+matches \f(CRabc\fP and \f(CRaBc\fP and no other strings (assuming \fBPCRE2_CASELESS\fP is not set
 externally). Any changes made in one alternative do carry on into subsequent
 branches within the same group. For example,
 .sp
@@ -1999,14 +2631,14 @@ branches within the same group. For example,
 .fi
 .ss \n[.ss] 0
 .sp
-matches "ab", "aB", "c", and "C", even though when matching "C" the first
+matches \f(CRab\fP, \f(CRaB\fP, \f(CRc\fP, and \f(CRC\fP, even though when matching \f(CRC\fP the first
 branch is abandoned before the option setting. This is because the effects of
 option settings happen at compile time. There would be some very weird
 behaviour otherwise.
 .sp
 As a convenient shorthand, if any option settings are required at the start of
-a non\-capturing group (see the next section), the option letters may
-appear between the "?" and the ":". Thus the two patterns
+a non\-capturing group (see the section GROUPS), the option letters may
+appear between the \f(CR?\fP and the \f(CR:\fP. Thus the two patterns
 .sp
 .ss \n[.ss]
 .nf
@@ -2017,19 +2649,33 @@ appear between the "?" and the ":". Thus the two patterns
 .fi
 .ss \n[.ss] 0
 .sp
-match exactly the same set of strings.
+match exactly the same set of strings. Because alternative branches are tried
+from left to right, and options are not reset until the end of the group is
+reached, an option setting in one branch does affect subsequent branches, so
+the above patterns match \f(CRSUNDAY\fP as well as \f(CRSaturday\fP.
+.if n .sp
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+.B Note
+.ps -1
+.br
 .sp
-\f(CRNote:\fP There are other PCRE2\-specific options, applying to the whole
+There are other PCRE2\-specific options, applying to the whole
 pattern, which can be set by the application when the compiling function is
 called. In addition, the pattern can contain special leading sequences such as
 \f(CR(*CRLF)\fP to override what the application has set or what has been defaulted.
-Details are given in the section entitled
-"Newline sequences"
+Details are given in the section Newline sequences
 above. There are also the \f(CR(*UTF)\fP and \f(CR(*UCP)\fP leading sequences that can be used
 to set UTF and Unicode property modes; they are equivalent to setting the
 \fBPCRE2_UTF\fP and \fBPCRE2_UCP\fP options, respectively. However, the application can set
 the \fBPCRE2_NEVER_UTF\fP or \fBPCRE2_NEVER_UCP\fP options, which lock out the use of the
 \f(CR(*UTF)\fP and \f(CR(*UCP)\fP sequences.
+.sp .5v
+.RE
 .SH "GROUPS"
 .sp
 Groups are delimited by parentheses (round brackets), which can be nested.
@@ -2044,7 +2690,6 @@ Turning part of a pattern into a group does two things:
 .  IP " 1." 4.2
 .\}
 It localizes a set of alternatives. For example, the pattern
-.RE
 .sp
 .ss \n[.ss]
 .nf
@@ -2054,26 +2699,26 @@ cat(aract|erpillar|)
 .fi
 .ss \n[.ss] 0
 .sp
-matches "cataract", "caterpillar", or "cat". Without the parentheses, it would
-match "cataract", "erpillar" or an empty string.
+matches \f(CRcataract\fP, \f(CRcaterpillar\fP, or \f(CRcat\fP. Without the parentheses, it would
+match \f(CRcataract\fP, \f(CRerpillar\fP or an empty string.
+.RE
 .sp
 .RS 4
 .ie n \{\
-\h'-04' 1.\h'+01'\c
+\h'-04' 2.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 1." 4.2
+.  IP " 2." 4.2
 .\}
 It creates a "capture group". This means that, when the whole pattern
 matches, the portion of the subject string that matched the group is passed
 back to the caller, separately from the portion that matched the whole pattern.
 (This applies only to the traditional matching function; the DFA matching
 function does not support capturing.)
-.RE
 .sp
 Opening parentheses are counted from left to right (starting from 1) to obtain
-numbers for capture groups. For example, if the string "the red king" is
+numbers for capture groups. For example, if the string \f(CRthe red king\fP is
 matched against the pattern
 .sp
 .ss \n[.ss]
@@ -2084,14 +2729,15 @@ the ((red|white) (king|queen))
 .fi
 .ss \n[.ss] 0
 .sp
-the captured substrings are "red king", "red", and "king", and are numbered 1,
+the captured substrings are \f(CRred king\fP, \f(CRred\fP, and \f(CRking\fP, and are numbered 1,
 2, and 3, respectively.
+.RE
 .sp
 The fact that plain parentheses fulfil two functions is not always helpful.
 There are often times when grouping is required without capturing. If an
 opening parenthesis is followed by a question mark and a colon, the group
 does not do any capturing, and is not counted when computing the number of any
-subsequent capture groups. For example, if the string "the white queen"
+subsequent capture groups. For example, if the string \f(CRthe white queen\fP
 is matched against the pattern
 .sp
 .ss \n[.ss]
@@ -2102,30 +2748,15 @@ the ((?:red|white) (king|queen))
 .fi
 .ss \n[.ss] 0
 .sp
-the captured substrings are "white queen" and "queen", and are numbered 1 and
-2. The maximum number of capture groups is 65535.
+the captured substrings are \f(CRwhite queen\fP and \f(CRqueen\fP, and are numbered 1 and 2. The maximum number of capture groups is 65535.
 .sp
 As a convenient shorthand, if any option settings are required at the start of
-a non\-capturing group, the option letters may appear between the "?" and the
-":". Thus the two patterns
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-(?i:saturday|sunday)
-(?:(?i)saturday|sunday)
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-match exactly the same set of strings. Because alternative branches are tried
-from left to right, and options are not reset until the end of the group is
-reached, an option setting in one branch does affect subsequent branches, so
-the above patterns match "SUNDAY" as well as "Saturday".
+a non\-capturing group, the option letters may appear between the \f(CR?\fP and the
+\f(CR:\fP (see the section GROUPS).
 .SH "DUPLICATE GROUP NUMBERS"
 .sp
 Perl 5.10 introduced a feature whereby each alternative in a group uses the
-same numbers for its capturing parentheses. Such a group starts with (?| and is
+same numbers for its capturing parentheses. Such a group starts with \f(CR(?|\fP and is
 itself a non\-capturing group. For example, consider this pattern:
 .sp
 .ss \n[.ss]
@@ -2136,11 +2767,11 @@ itself a non\-capturing group. For example, consider this pattern:
 .fi
 .ss \n[.ss] 0
 .sp
-Because the two alternatives are inside a (?| group, both sets of capturing
+Because the two alternatives are inside a \f(CR(?|\fP group, both sets of capturing
 parentheses are numbered one. Thus, when the pattern matches, you can look
 at captured substring number one, whichever alternative matched. This construct
 is useful when you want to capture part, but not all, of one of a number of
-alternatives. Inside a (?| group, parentheses are numbered as usual, but the
+alternatives. Inside a \f(CR(?|\fP group, parentheses are numbered as usual, but the
 number is reset at the start of each branch. The numbers of any capturing
 parentheses that follow the whole group start after the highest number used in
 any branch. The following example is taken from the Perl documentation. The
@@ -2149,37 +2780,37 @@ numbers underneath show in which buffer the captured content will be stored.
 .ss \n[.ss]
 .nf
 .fam C
-# before  \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-branch\-reset\-\-\-\-\-\-\-\-\-\-\- after
-/ ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
-# 1            2         2  3        2     3     4
+# before\&  \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-branch\-reset\-\-\-\-\-\-\-\-\-\-\- after
+/ ( a )\&  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
+# 1\&            2\&         2\&  3\&        2\&     3\&     4
 .fam
 .fi
 .ss \n[.ss] 0
 .sp
 A backreference to a capture group uses the most recent value that is set for
-the group. The following pattern matches "abcabc" or "defdef":
+the group. The following pattern matches \f(CRabcabc\fP or \f(CRdefdef\fP:
 .sp
 .ss \n[.ss]
 .nf
 .fam C
-/(?|(abc)|(def))\(rs1/
+(?|(abc)|(def))\(rs1
 .fam
 .fi
 .ss \n[.ss] 0
 .sp
 In contrast, a subroutine call to a capture group always refers to the
 first one in the pattern with the given number. The following pattern matches
-"abcabc" or "defabc":
+\f(CRabcabc\fP or \f(CRdefabc\fP:
 .sp
 .ss \n[.ss]
 .nf
 .fam C
-/(?|(abc)|(def))(?1)/
+(?|(abc)|(def))(?1)
 .fam
 .fi
 .ss \n[.ss] 0
 .sp
-A relative reference such as (?\-1) is no different: it is just a convenient way
+A relative reference such as \f(CR(?\-1)\fP is no different: it is just a convenient way
 of computing an absolute group number.
 .sp
 If a
@@ -2188,7 +2819,7 @@ for a group\(cqs having matched refers to a non\-unique number, the test is
 true if any group with that number has matched.
 .sp
 An alternative approach to using this "branch reset" feature is to use
-duplicate named groups, as described in the next section.
+duplicate named groups, as described in the section NAMED CAPTURE GROUPS.
 .SH "NAMED CAPTURE GROUPS"
 .sp
 Identifying capture groups by number is simple, but it can be very hard to keep
@@ -2198,22 +2829,28 @@ the naming of capture groups. This feature was not added to Perl until release
 5.10. Python had the feature earlier, and PCRE1 introduced it at release 4.0,
 using the Python syntax. PCRE2 supports both the Perl and the Python syntax.
 .sp
-In PCRE2, a capture group can be named in one of three ways: (?<name>...) or
-(?\*(Aqname\*(Aq...) as in Perl, or (?P<name>...) as in Python. Names may be up to
+In PCRE2, a capture group can be named in one of three ways: \f(CR(?<\fP\fIname\fP\f(CR>.\|.\|.)\fP or
+\f(CR(?\*(Aq\fP\fIname\fP\f(CR\*(Aq.\|.\|.)\fP as in Perl, or \f(CR(?P<\fP\fIname\fP\f(CR>.\|.\|.)\fP as in Python. Names may be up to
 128 code units long. When \fBPCRE2_UTF\fP is not set, they may contain only ASCII
 alphanumeric characters and underscores, but must start with a non\-digit. When
 \fBPCRE2_UTF\fP is set, the syntax of group names is extended to allow any Unicode
 letter or Unicode decimal digit. In other words, group names must match one of
 these patterns:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-^[_A\-Za\-z][_A\-Za\-z0\-9]*\(rsz   when PCRE2_UTF is not set
-^[_\(rsp{L}][_\(rsp{L}\(rsp{Nd}]*\(rsz  when PCRE2_UTF is set
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR^[_A\-Za\-z][_A\-Za\-z0\-9]*\(rsz\fP
+.ad l
+when \fBPCRE2_UTF\fP is not set
+.TP 7
+\f(CR^[\fP\fI\(rsp{L}][\fP\f(CR\(rsp{L}\(rsp{Nd}]*\(rsz\fP
+.ad l
+when \fBPCRE2_UTF\fP is set
+.PD
+.RE
+.PP
+.ad l
 .sp
 References to capture groups from other parts of the pattern, such as
 backreferences,
@@ -2229,8 +2866,8 @@ numbers. The PCRE2 API provides function calls for extracting the complete
 name\-to\-number translation table from a compiled pattern, as well as
 convenience functions for extracting captured substrings by name.
 .sp
-\f(CRWarning:\fP When more than one capture group has the same number, as
-described in the previous section, a name given to one of them applies to all
+Warning: When more than one capture group has the same number, as
+described in the section DUPLICATE GROUP NUMBERS, a name given to one of them applies to all
 of them. Perl allows identically numbered groups to have different names.
 Consider this pattern, where there are two capture groups, both numbered 1:
 .sp
@@ -2243,7 +2880,7 @@ Consider this pattern, where there are two capture groups, both numbered 1:
 .ss \n[.ss] 0
 .sp
 Perl allows this, with both names AA and BB as aliases of group 1. Thus, after
-a successful match, both names yield the same value (either "aa" or "bb").
+a successful match, both names yield the same value (either \f(CRaa\fP or \f(CRbb\fP).
 .sp
 In an attempt to reduce confusion, PCRE2 does not allow the same group number
 to be associated with more than one name. The example above provokes a
@@ -2259,7 +2896,7 @@ pattern:
 .ss \n[.ss] 0
 .sp
 Although the second group number 1 is not explicitly named, the name AA is
-still an alias for any group 1. Whether the pattern matches "aa" or "bb", a
+still an alias for any group 1. Whether the pattern matches \f(CRaa\fP or \f(CRbb\fP, a
 reference by name to group AA yields the matched string.
 .sp
 By default, a name must be unique within a pattern, except that duplicate names
@@ -2274,9 +2911,8 @@ are permitted for groups with the same number, for example:
 .ss \n[.ss] 0
 .sp
 The duplicate name constraint can be disabled by setting the \fBPCRE2_DUPNAMES\fP
-option at compile time, or by the use of (?J) within the pattern, as described
-in the section entitled
-"Internal Option Setting"
+option at compile time, or by the use of \f(CR(?J)\fP within the pattern, as described
+in the section INTERNAL OPTION SETTING
 above.
 .sp
 Duplicate names can be useful for patterns where only one instance of the named
@@ -2303,13 +2939,13 @@ convenience functions for extracting the data by name returns the substring for
 the first (and in this example, the only) group of that name that matched. This
 saves searching to find which numbered group it was. (An alternative way of
 solving this problem is to use a "branch reset" group, as described in the
-previous section.)
+section DUPLICATE GROUP NUMBERS.)
 .sp
 If you make a backreference to a non\-unique named group from elsewhere in the
 pattern, the groups to which the name refers are checked in the order in which
 they appear in the overall pattern. The first one that is set is used for the
-reference. For example, this pattern matches both "foofoo" and "barbar" but not
-"foobar" or "barfoo":
+reference. For example, this pattern matches both \f(CRfoofoo\fP and \f(CRbarbar\fP but not
+\f(CRfoobar\fP or \f(CRbarfoo\fP:
 .sp
 .ss \n[.ss]
 .nf
@@ -2338,22 +2974,115 @@ documentation.
 Repetition is specified by quantifiers, which may follow any one of these
 items:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 a literal data character
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 the dot metacharacter
-the \(rsC escape sequence
-the \(rsR escape sequence
-the \(rsX escape sequence
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+the \f(CR\(rsC\fP escape sequence
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+the \f(CR\(rsR\fP escape sequence
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+the \f(CR\(rsX\fP escape sequence
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 any escape sequence that matches a single character
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 a character class
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 a backreference
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 a parenthesized group (including lookaround assertions)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
 a subroutine call (recursive or otherwise)
-.fam
-.fi
-.ss \n[.ss] 0
+.RE
 .sp
 If a quantifier does not follow a repeatable item, an error occurs. The
 general repetition quantifier specifies a minimum and maximum number of
@@ -2369,7 +3098,7 @@ z{2,4}
 .fi
 .ss \n[.ss] 0
 .sp
-matches "zz", "zzz", or "zzzz". A closing brace on its own is not a special
+matches \f(CRzz\fP, \f(CRzzz\fP, or \f(CRzzzz\fP. A closing brace on its own is not a special
 character. If the second number is omitted, but the comma is present, there is
 no upper limit; if the second number and the comma are both omitted, the
 quantifier specifies an exact number of required matches. Thus
@@ -2395,13 +3124,7 @@ matches at least 3 successive vowels, but may match many more, whereas
 matches exactly 8 digits. If the first number is omitted, the lower limit is
 taken as zero; in this case the upper limit must be present.
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-X{,4} is interpreted as X{0,4}
-.fam
-.fi
-.ss \n[.ss] 0
+\f(CRX{,4}\fP is interpreted as \f(CRX{0,4}\fP.
 .sp
 This is a change in behaviour that happened in Perl 5.34.0 and PCRE2 10.43. In
 earlier versions such a sequence was not interpreted as a quantifier. Other
@@ -2409,38 +3132,47 @@ regular expression engines may behave either way.
 .sp
 If the characters that follow an opening brace do not match the syntax of a
 quantifier, the brace is taken as a literal character. In particular, this
-means that {,} is a literal string of three characters.
+means that \f(CR{,}\fP is a literal string of three characters.
 .sp
 Note that not every opening brace is potentially the start of a quantifier
-because braces are used in other items such as \f(CR\(rsN{U+345}\fP or \(rsk{name}.
+because braces are used in other items such as \f(CR\(rsN{U+345}\fP or \f(CR\(rsk{\fP\fIname\fP\f(CR}\fP.
 .sp
 In UTF modes, quantifiers apply to characters rather than to individual code
-units. Thus, for example, \(rsx{100}{2} matches two characters, each of
+units. Thus, for example, \f(CR\(rsx{100}{2}\fP matches two characters, each of
 which is represented by a two\-byte sequence in a UTF\-8 string. Similarly,
-\(rsX{3} matches three Unicode extended grapheme clusters, each of which may be
+\f(CR\(rsX{3}\fP matches three Unicode extended grapheme clusters, each of which may be
 several code units long (and they may be of different lengths).
 .sp
-The quantifier {0} is permitted, causing the expression to behave as if the
+The quantifier \f(CR{0}\fP is permitted, causing the expression to behave as if the
 previous item and the quantifier were not present. This may be useful for
 capture groups that are referenced as
 subroutines
-from elsewhere in the pattern (but see also the section entitled
-"Defining capture groups for use by reference only"
-below). Except for parenthesized groups, items that have a {0} quantifier are
+from elsewhere in the pattern (but see also the section
+Defining capture groups for use by reference only
+below). Except for parenthesized groups, items that have a \f(CR{0}\fP quantifier are
 omitted from the compiled pattern.
 .sp
 For convenience, the three most common quantifiers have single\-character
 abbreviations:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-*    is equivalent to {0,}
-+    is equivalent to {1,}
-?    is equivalent to {0,1}
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR*\fP
+.ad l
+Is equivalent to \f(CR{0,}\fP.
+.TP 7
+\f(CR+\fP
+.ad l
+Is equivalent to \f(CR{1,}\fP.
+.TP 7
+\f(CR?\fP
+.ad l
+Is equivalent to \f(CR{0,1}\fP.
+.PD
+.RE
+.PP
+.ad l
 .sp
 It is possible to construct infinite loops by following a group that can match
 no characters with a quantifier that has no upper limit, for example:
@@ -2463,8 +3195,8 @@ any of the iterations if a subsequent item fails to match.
 By default, quantifiers are "greedy", that is, they match as much as possible
 (up to the maximum number of permitted repetitions), without causing the rest
 of the pattern to fail. The classic example of where this gives problems is in
-trying to match comments in C programs. These appear between \f(CR/\fB\fP and \f(CR\fP/\fP and
-within the comment, individual \f(CR*\fP and / characters may appear. An attempt to
+trying to match comments in C programs. These appear between \f(CR/*\fP and \f(CR*/\fP and
+within the comment, individual \f(CR*\fP and \f(CR/\fP characters may appear. An attempt to
 match C comments by applying the pattern
 .sp
 .ss \n[.ss]
@@ -2480,7 +3212,7 @@ to the string
 .ss \n[.ss]
 .nf
 .fam C
-/* first comment */  not comment  /* second comment */
+/* first comment */\&  not comment\&  /* second comment */
 .fam
 .fi
 .ss \n[.ss] 0
@@ -2524,15 +3256,15 @@ is greater than 1 or with a limited maximum, more memory is required for the
 compiled pattern, in proportion to the size of the minimum or maximum.
 .sp
 If a pattern starts with \f(CR.*\fP or \f(CR.{0,}\fP and the \fBPCRE2_DOTALL\fP option (equivalent
-to Perl\(cqs /s) is set, thus allowing the dot to match newlines, the pattern is
+to Perl\(cqs \f(CR/s\fP) is set, thus allowing the dot to match newlines, the pattern is
 implicitly anchored, because whatever follows will be tried against every
 character position in the subject string, so there is no point in retrying the
 overall match at any position after the first. PCRE2 normally treats such a
-pattern as though it were preceded by \(rsA.
+pattern as though it were preceded by \f(CR\(rsA\fP.
 .sp
 In cases where it is known that the subject string contains no newlines, it is
 worth setting \fBPCRE2_DOTALL\fP in order to obtain this optimization, or
-alternatively, using ^ to indicate anchoring explicitly.
+alternatively, using \f(CR^\fP to indicate anchoring explicitly.
 .sp
 However, there are some cases where the optimization cannot be used. When \f(CR.*\fP
 is inside capturing parentheses that are the subject of a backreference
@@ -2547,7 +3279,7 @@ succeeds. Consider, for example:
 .fi
 .ss \n[.ss] 0
 .sp
-If the subject is "xyz123abc123" the match point is the fourth character. For
+If the subject is \f(CRxyz123abc123\fP the match point is the fourth character. For
 this reason, such a pattern is not implicitly anchored.
 .sp
 Another case where implicit anchoring is not applied is when the leading \f(CR.*\fP is
@@ -2562,7 +3294,7 @@ one succeeds. Consider this pattern:
 .fi
 .ss \n[.ss] 0
 .sp
-It matches "ab" in the subject "aab". The use of the backtracking control verbs
+It matches \f(CRab\fP in the subject \f(CRaab\fP. The use of the backtracking control verbs
 \f(CR(*PRUNE)\fP and \f(CR(*SKIP)\fP also disable this optimization. To do so explicitly,
 either pass the compile option \fBPCRE2_NO_DOTSTAR_ANCHOR\fP, or call
 pcre2_set_optimize() with a \fBPCRE2_DOTSTAR_ANCHOR_OFF\fP directive.
@@ -2578,8 +3310,8 @@ matched the final iteration. For example, after
 .fi
 .ss \n[.ss] 0
 .sp
-has matched "tweedledum tweedledee" the value of the captured substring is
-"tweedledee". However, if there are nested capture groups, the corresponding
+has matched \f(CRtweedledum tweedledee\fP the value of the captured substring is
+\f(CRtweedledee\fP. However, if there are nested capture groups, the corresponding
 captured values may have been set in previous iterations. For example, after
 .sp
 .ss \n[.ss]
@@ -2590,7 +3322,7 @@ captured values may have been set in previous iterations. For example, after
 .fi
 .ss \n[.ss] 0
 .sp
-matches "aba" the value of the second captured substring is "b".
+matches \f(CRaba\fP the value of the second captured substring is \f(CRb\fP.
 .SH "ATOMIC GROUPING AND POSSESSIVE QUANTIFIERS"
 .sp
 With both maximizing ("greedy") and minimizing ("ungreedy" or "lazy")
@@ -2601,24 +3333,17 @@ nature of the match, or to cause it fail earlier than it otherwise might, when
 the author of the pattern knows there is no point in carrying on.
 .sp
 Consider, for example, the pattern \f(CR\(rsd+foo\fP when applied to the subject line
+\f(CR123456bar\fP.
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-123456bar
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
-After matching all 6 digits and then failing to match "foo", the normal
+After matching all 6 digits and then failing to match \f(CRfoo\fP, the normal
 action of the matcher is to try again with only 5 digits matching the \f(CR\(rsd+\fP
 item, and then with 4, and so on, before ultimately failing. "Atomic grouping"
 (a term taken from Jeffrey Friedl\(cqs book) provides the means for specifying
 that once a group has matched, it is not to be re\-evaluated in this way.
 .sp
 If we use atomic grouping for the previous example, the matcher gives up
-immediately on failing to match "foo" the first time. The notation is a kind of
-special parenthesis, starting with (?> as in this example:
+immediately on failing to match \f(CRfoo\fP the first time. The notation is a kind of
+special parenthesis, starting with \f(CR(?>\fP as in this example:
 .sp
 .ss \n[.ss]
 .nf
@@ -2725,7 +3450,7 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 .sp
 it takes a long time before reporting failure. This is because the string can
 be divided between the internal \f(CR\(rsD+\fP repeat and the external \f(CR*\fP repeat in a
-large number of ways, and all have to be tried. (The example uses [!?] rather
+large number of ways, and all have to be tried. (The example uses \f(CR[!?]\fP rather
 than a single character at the end, because both PCRE2 and Perl have an
 optimization that allows for fast failure when a single character is used. They
 remember the last single character that is required for a match, and fail early
@@ -2756,18 +3481,18 @@ referenced need not be to the left of the reference for numbers less than 8. A
 involved and the group to the right has participated in an earlier iteration.
 .sp
 It is not possible to have a numerical "forward backreference" to a group whose
-number is 8 or more using this syntax because a sequence such as \(rs50 is
-interpreted as a character defined in octal. See the subsection entitled
-"Non\-printing characters"
+number is 8 or more using this syntax because a sequence such as \f(CR\(rs50\fP is
+interpreted as a character defined in octal. See the subsection
+Non\-printing characters
 above
 for further details of the handling of digits following a backslash. Other
 forms of backreferencing do not suffer from this restriction. In particular,
 there is no problem when named capture groups are used (see below).
 .sp
 Another way of avoiding the ambiguity inherent in the use of digits following a
-backslash is to use the \(rsg escape sequence. This escape must be followed by a
+backslash is to use the \f(CR\(rsg\fP escape sequence. This escape must be followed by a
 signed or unsigned number, optionally enclosed in braces. These examples are
-all identical:
+all identical ways of matching \f(CRring, ring\fP:
 .sp
 .ss \n[.ss]
 .nf
@@ -2791,11 +3516,11 @@ the reference. A signed number is a relative reference. Consider this example:
 .fi
 .ss \n[.ss] 0
 .sp
-The sequence \(rsg{\-1} is a reference to the capture group whose number is one
+The sequence \f(CR\(rsg{\-1}\fP is a reference to the capture group whose number is one
 less than the number of the next group to be started, so in this example (where
-the next group would be numbered 3) is it equivalent to \(rs2, and \(rsg{\-2} would
-be equivalent to \(rs1. Note that if this construct is inside a capture group,
-that group is included in the count, so in this example \(rsg{\-2} also refers to
+the next group would be numbered 3) is it equivalent to \f(CR\(rs2\fP, and \f(CR\(rsg{\-2}\fP would
+be equivalent to \f(CR\(rs1\fP. Note that if this construct is inside a capture group,
+that group is included in the count, so in this example \f(CR\(rsg{\-2}\fP also refers to
 group 1:
 .sp
 .ss \n[.ss]
@@ -2829,7 +3554,7 @@ below for a way of doing that). So the pattern
 .fi
 .ss \n[.ss] 0
 .sp
-matches "sense and sensibility" and "response and responsibility", but not
+matches \f(CRsense and sensibility\fP and \f(CRresponse and responsibility\fP, but not
 "sense and responsibility". If caseful matching is in force at the time of the
 backreference, the case of letters is relevant. For example,
 .sp
@@ -2841,13 +3566,13 @@ backreference, the case of letters is relevant. For example,
 .fi
 .ss \n[.ss] 0
 .sp
-matches "rah rah" and "RAH RAH", but not "RAH rah", even though the original
+matches \f(CRrah rah\fP and \f(CRRAH RAH\fP, but not \f(CRRAH rah\fP, even though the original
 capture group is matched caselessly.
 .sp
 There are several different ways of writing backreferences to named capture
-groups. The .NET syntax is \(rsk{name}, the Python syntax is (?=name), and the
-original Perl syntax is \(rsk<name> or \(rsk\(cqname\*(Aq. All of these are now supported
-by both Perl and PCRE2. Perl 5.10\(cqs unified backreference syntax, in which \(rsg
+groups. The .NET syntax is \f(CR\(rsk{\fP\fIname\fP\f(CR}\fP, the Python syntax is \f(CR(?=\fP\fIname\fP\f(CR)\fP, and the
+original Perl syntax is \f(CR\(rsk<\fP\fIname\fP\f(CR>\fP or \f(CR\(rsk\*(Aq\fP\fIname\fP\f(CR\*(Aq\fP. All of these are now supported
+by both Perl and PCRE2. Perl 5.10\(cqs unified backreference syntax, in which \f(CR\(rsg\fP
 can be used for both numeric and named references, is also supported by PCRE2.
 We could rewrite the above example in any of the following ways:
 .sp
@@ -2877,7 +3602,7 @@ default. For example, the pattern
 .fi
 .ss \n[.ss] 0
 .sp
-always fails if it starts to match "a" rather than "bc". However, if the
+always fails if it starts to match \f(CRa\fP rather than \f(CRbc\fP. However, if the
 \fBPCRE2_MATCH_UNSET_BACKREF\fP option is set at compile time, a backreference to an
 unset value matches an empty string.
 .sp
@@ -2885,7 +3610,7 @@ Because there may be many capture groups in a pattern, all digits following a
 backslash are taken as part of a potential backreference number. If the pattern
 continues with a digit character, some delimiter must be used to terminate the
 backreference. If the \fBPCRE2_EXTENDED\fP or \fBPCRE2_EXTENDED_MORE\fP option is set, this
-can be white space. Otherwise, the \(rsg{} syntax or an empty comment (see
+can be white space. Otherwise, the \f(CR\(rsg{}\fP syntax or an empty comment (see
 "Comments"
 below) can be used.
 .SS "Recursive backreferences"
@@ -2902,7 +3627,7 @@ references can be useful inside repeated groups. For example, the pattern
 .fi
 .ss \n[.ss] 0
 .sp
-matches any number of "a"s and also "aba", "ababbaa" etc. At each iteration of
+matches any number of \f(CRa\fP characters and also \f(CRaba\fP, \f(CRababbaa\fP, etc. At each iteration of
 the group, the backreference matches the character string corresponding to the
 previous iteration. In order for this to work, the pattern must be such that
 the first iteration does not need to match the backreference. This can be done
@@ -2917,8 +3642,8 @@ as normal.
 .SH "ASSERTIONS"
 .sp
 An assertion is a test that does not consume any characters. The test must
-succeed for the match to continue. The simple assertions coded as \(rsb, \(rsB,
-\(rsA, \(rsG, \(rsZ, \(rsz, ^ and $ are described
+succeed for the match to continue. The simple assertions coded as \f(CR\(rsb\fP, \f(CR\(rsB\fP,
+\f(CR\(rsA\fP, \f(CR\(rsG\fP, \f(CR\(rsZ\fP, \f(CR\(rsz\fP, \f(CR^\fP and \f(CR$\fP are described
 above.
 .sp
 More complicated assertions are coded as parenthesized groups. If matching such
@@ -2927,8 +3652,7 @@ in the subject string reset to what it was before the assertion was processed.
 .sp
 A special kind of assertion, called a "scan substring" assertion, matches a
 subpattern against a previously captured substring. This is described in the
-section entitled
-"Scan substring assertions"
+section SCAN SUBSTRING ASSERTIONS
 below. It is a PCRE2 extension, not compatible with Perl.
 .sp
 The other goup\-based assertions are of two kinds: those that look ahead of the
@@ -2939,8 +3663,8 @@ true) or negative (must not match for the assertion to be true).
 The Perl\-compatible lookaround assertions are atomic. If an assertion is true,
 but there is a subsequent matching failure, there is no backtracking into the
 assertion. However, there are some cases where non\-atomic assertions can be
-useful. PCRE2 has some support for these, described in the section entitled
-"Non\-atomic assertions"
+useful. PCRE2 has some support for these, described in the section
+NON\-ATOMIC ASSERTIONS
 below, but they are not Perl\-compatible.
 .sp
 A lookaround assertion may appear as the condition in a
@@ -2952,7 +3676,7 @@ Assertion groups are not capture groups. If an assertion contains capture
 groups within it, these are counted for the purposes of numbering the capture
 groups in the whole pattern. Within each branch of an assertion, locally
 captured substrings may be referenced in the usual way. For example, a sequence
-such as (.)\(rsg{\-1} can be used to check that two adjacent characters are the
+such as \f(CR(.)\(rsg{\-1}\fP can be used to check that two adjacent characters are the
 same.
 .sp
 When a branch within an assertion fails to match, any substrings that were
@@ -2978,32 +3702,44 @@ may occasionally be useful. However, an assertion that forms the condition for
 a conditional group may not be quantified. PCRE2 used to restrict the
 repetition of assertions, but from release 10.35 the only restriction is that
 an unlimited maximum repetition is changed to be one more than the minimum. For
-example, {3,} is treated as {3,4}.
+example, \f(CR{3,}\fP is treated as \f(CR{3,4}\fP.
 .SS "Alphabetic assertion names"
 .sp
-Traditionally, symbolic sequences such as (?= and (?\(lA have been used to
+Traditionally, symbolic sequences such as \f(CR(?=\fP and \f(CR(?<=\fP have been used to
 specify lookaround assertions. Perl 5.28 introduced some experimental
 alphabetic alternatives which might be easier to remember. They all start with
-\f(CR(*\fP instead of (? and must be written using lower case letters. PCRE2 supports
+\f(CR(*\fP instead of \f(CR(?\fP and must be written using lower case letters. PCRE2 supports
 the following synonyms:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*positive_lookahead:  or (*pla: is the same as (?=
-(*negative_lookahead:  or (*nla: is the same as (?!
-(*positive_lookbehind: or (*plb: is the same as (?<=
-(*negative_lookbehind: or (*nlb: is the same as (?<!
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR(*positive_lookahead:\fP, \f(CR(*pla:\fP
+.ad l
+Is the same as \f(CR(?=\fP.
+.TP 7
+\f(CR(*negative_lookahead:\fP, \f(CR(*nla:\fP
+.ad l
+Is the same as \f(CR(?!\fP.
+.TP 7
+\f(CR(*positive_lookbehind:\fP, \f(CR(*plb:\fP
+.ad l
+Is the same as \f(CR(?<=\fP.
+.TP 7
+\f(CR(*negative_lookbehind:\fP, \f(CR(*nlb:\fP
+.ad l
+Is the same as \f(CR(?<!\fP.
+.PD
+.RE
+.PP
+.ad l
 .sp
-For example, \f(CR(*pla:foo)\fP is the same assertion as (?=foo). In the following
+For example, \f(CR(*pla:\fP\fIfoo\fP\f(CR)\fP is the same assertion as \f(CR(?=\fP\fIfoo\fP\f(CR)\fP. In the following
 sections, the various assertions are described using the original symbolic
 forms.
 .SS "Lookahead assertions"
 .sp
-Lookahead assertions start with (?= for positive assertions and (?! for
+Lookahead assertions start with \f(CR(?=\fP for positive assertions and \f(CR(?!\fP for
 negative assertions. For example,
 .sp
 .ss \n[.ss]
@@ -3025,7 +3761,7 @@ foo(?!bar)
 .fi
 .ss \n[.ss] 0
 .sp
-matches any occurrence of "foo" that is not followed by "bar". Note that the
+matches any occurrence of \f(CRfoo\fP that is not followed by \f(CRbar\fP. Note that the
 apparently similar pattern
 .sp
 .ss \n[.ss]
@@ -3036,18 +3772,18 @@ apparently similar pattern
 .fi
 .ss \n[.ss] 0
 .sp
-does not find an occurrence of "bar" that is preceded by something other than
-"foo"; it finds any occurrence of "bar" whatsoever, because the assertion
-(?!foo) is always true when the next three characters are "bar". A
+does not find an occurrence of \f(CRbar\fP that is preceded by something other than
+\f(CRfoo\fP; it finds any occurrence of \f(CRbar\fP whatsoever, because the assertion
+\f(CR(?!foo)\fP is always true when the next three characters are \f(CRbar\fP. A
 lookbehind assertion is needed to achieve the other effect.
 .sp
 If you want to force a matching failure at some point in a pattern, the most
-convenient way to do it is with (?!) because an empty string always matches, so
+convenient way to do it is with \f(CR(?!)\fP because an empty string always matches, so
 an assertion that requires there not to be an empty string must always fail.
-The backtracking control verb \f(CR(*FAIL)\fP or \f(CR(*F)\fP is a synonym for (?!).
+The backtracking control verb \f(CR(*FAIL)\fP or \f(CR(*F)\fP is a synonym for \f(CR(?!)\fP.
 .SS "Lookbehind assertions"
 .sp
-Lookbehind assertions start with (?\(lA for positive assertions and (?<! for
+Lookbehind assertions start with \f(CR(?<=\fP for positive assertions and \f(CR(?<!\fP for
 negative assertions. For example,
 .sp
 .ss \n[.ss]
@@ -3058,7 +3794,7 @@ negative assertions. For example,
 .fi
 .ss \n[.ss] 0
 .sp
-does find an occurrence of "bar" that is not preceded by "foo". The contents of
+does find an occurrence of \f(CRbar\fP that is not preceded by \f(CRfoo\fP. The contents of
 a lookbehind assertion are restricted such that there must be a known maximum
 to the lengths of all the strings it matches. There are two cases:
 .sp
@@ -3091,19 +3827,19 @@ for example
 .sp
 The maximum matching length for any branch of the lookbehind is limited to a
 value set by the calling program (default 255 characters). Unlimited repetition
-(for example \f(CR\(rsd*\fP) is not supported. In some cases, the escape sequence \(rsK
+(for example \f(CR\(rsd*\fP) is not supported. In some cases, the escape sequence \f(CR\(rsK\fP
 (see above)
 can be used instead of a lookbehind assertion at the start of a pattern to get
 round the length limit restriction.
 .sp
-In UTF\-8 and UTF\-16 modes, PCRE2 does not allow the \(rsC escape (which matches a
+In UTF\-8 and UTF\-16 modes, PCRE2 does not allow the \f(CR\(rsC\fP escape (which matches a
 single code unit even in a UTF mode) to appear in lookbehind assertions,
 because it makes it impossible to calculate the length of the lookbehind. The
-\(rsX and \(rsR escapes, which can match different numbers of code units, are never
+\f(CR\(rsX\fP and \f(CR\(rsR\fP escapes, which can match different numbers of code units, are never
 permitted in lookbehinds.
 .sp
 "Subroutine"
-calls (see below) such as (?2) or (?&X) are permitted in lookbehinds, as long
+calls (see below) such as \f(CR(?2)\fP or \f(CR(?&X)\fP are permitted in lookbehinds, as long
 as the called capture group matches a limited\-length string. However,
 recursion,
 that is, a "subroutine" call into a group that is already active,
@@ -3111,7 +3847,7 @@ is not supported.
 .sp
 PCRE2 supports backreferences in lookbehinds, but only if certain conditions
 are met. The \fBPCRE2_MATCH_UNSET_BACKREF\fP option must not be set, there must be no
-use of (?| in the pattern (it creates duplicate group numbers), and if the
+use of \f(CR(?|\fP in the pattern (it creates duplicate group numbers), and if the
 backreference is by name, the name must be unique. Of course, the referenced
 group must itself match a limited length substring. The following pattern
 matches words containing at least two characters that begin and end with the
@@ -3138,7 +3874,7 @@ abcd$
 .ss \n[.ss] 0
 .sp
 when applied to a long string that does not match. Because matching proceeds
-from left to right, PCRE2 will look for each "a" in the subject and then see if
+from left to right, PCRE2 will look for each \f(CRa\fP in the subject and then see if
 what follows matches the rest of the pattern. If the pattern is specified as
 .sp
 .ss \n[.ss]
@@ -3150,8 +3886,8 @@ what follows matches the rest of the pattern. If the pattern is specified as
 .ss \n[.ss] 0
 .sp
 the initial \f(CR.*\fP matches the entire string at first, but when this fails (because
-there is no following "a"), it backtracks to match all but the last character,
-then all but the last two characters, and so on. Once again the search for "a"
+there is no following \f(CRa\fP), it backtracks to match all but the last character,
+then all but the last two characters, and so on. Once again the search for \f(CRa\fP
 covers the entire string, from right to left, so we are no better off. However,
 if the pattern is written as
 .sp
@@ -3180,13 +3916,13 @@ Several assertions (of any sort) may occur in succession. For example,
 .fi
 .ss \n[.ss] 0
 .sp
-matches "foo" preceded by three digits that are not "999". Notice that each of
+matches \f(CRfoo\fP preceded by three digits that are not \f(CR999\fP. Notice that each of
 the assertions is applied independently at the same point in the subject
 string. First there is a check that the previous three characters are all
-digits, and then there is a check that the same three characters are not "999".
-This pattern does \fInot\fP match "foo" preceded by six characters, the first
-of which are digits and the last three of which are not "999". For example, it
-doesn\(cqt match "123abcfoo". A pattern to do that is
+digits, and then there is a check that the same three characters are not \f(CR999\fP.
+This pattern does \fInot\fP match \f(CRfoo\fP preceded by six characters, the first
+of which are digits and the last three of which are not \f(CR999\fP. For example, it
+doesn\(cqt match \f(CR123abcfoo\fP. A pattern to do that is
 .sp
 .ss \n[.ss]
 .nf
@@ -3198,7 +3934,7 @@ doesn\(cqt match "123abcfoo". A pattern to do that is
 .sp
 This time the first assertion looks at the preceding six characters, checking
 that the first three are digits, and then the second assertion checks that the
-preceding three characters are not "999".
+preceding three characters are not \f(CR999\fP.
 .sp
 Assertions can be nested in any combination. For example,
 .sp
@@ -3210,8 +3946,8 @@ Assertions can be nested in any combination. For example,
 .fi
 .ss \n[.ss] 0
 .sp
-matches an occurrence of "baz" that is preceded by "bar" which in turn is not
-preceded by "foo", while
+matches an occurrence of \f(CRbaz\fP that is preceded by \f(CRbar\fP which in turn is not
+preceded by \f(CRfoo\fP, while
 .sp
 .ss \n[.ss]
 .nf
@@ -3221,8 +3957,8 @@ preceded by "foo", while
 .fi
 .ss \n[.ss] 0
 .sp
-is another pattern that matches "foo" preceded by three digits and any three
-characters that are not "999".
+is another pattern that matches \f(CRfoo\fP preceded by three digits and any three
+characters that are not \f(CR999\fP.
 .SH "NON\-ATOMIC ASSERTIONS"
 .sp
 Traditional lookaround assertions are atomic. That is, if an assertion is true,
@@ -3230,14 +3966,20 @@ but there is a subsequent matching failure, there is no backtracking into the
 assertion. However, there are some cases where non\-atomic positive assertions
 can be useful. PCRE2 provides these using the following syntax:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*non_atomic_positive_lookahead:  or (*napla: or (?*
-(*non_atomic_positive_lookbehind: or (*naplb: or (?<*
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR(*non_atomic_positive_lookahead:\fP, \f(CR(*napla:\fP, \f(CR(?*\fP
+.ad l
+Non\-atomic positive lookahead.
+.TP 7
+\f(CR(*non_atomic_positive_lookbehind:\fP, \f(CR(*naplb:\fP, \f(CR(?<*\fP
+.ad l
+Non\-atomic positive lookbehind.
+.PD
+.RE
+.PP
+.ad l
 .sp
 Consider the problem of finding the right\-most word in a string that also
 appears earlier in the string, that is, it must appear at least twice in total.
@@ -3251,9 +3993,9 @@ This pattern returns the required result as captured substring 1:
 .fi
 .ss \n[.ss] 0
 .sp
-For a subject such as "word1 word2 word3 word2 word3 word4" the result is
-"word3". How does it work? At the start, ^(?x) anchors the pattern and sets the
-"x" option, which causes white space (introduced for readability) to be
+For a subject such as \f(CRword1 word2 word3 word2 word3 word4\fP the result is
+\f(CRword3\fP. How does it work? At the start, \f(CR^(?x)\fP anchors the pattern and sets the
+\f(CRx\fP option, which causes white space (introduced for readability) to be
 ignored. Inside the assertion, the greedy \f(CR.*\fP at first consumes the entire
 string, but then has to backtrack until the rest of the assertion can match a
 word, which is captured by group 1. In other words, when the assertion first
@@ -3263,7 +4005,7 @@ The current matching point is then reset to the start of the subject, and the
 rest of the pattern match checks for two occurrences of the captured word,
 using an ungreedy \f(CR.*?\fP to scan from the left. If this succeeds, we are done, but
 if the last word in the string does not occur twice, this part of the pattern
-fails. If a traditional atomic lookahead (?= or \f(CR(*pla:\fP had been used, the
+fails. If a traditional atomic lookahead \f(CR(?=\fP or \f(CR(*pla:\fP had been used, the
 assertion could not be re\-entered, and the whole match would fail. The pattern
 would succeed only if the very last word in the subject was found twice.
 .sp
@@ -3322,13 +4064,13 @@ none of the groups it references have been set.
 The pattern match on the substring is always anchored, that is, it must match
 from the start of the substring. There is no "bumpalong" if it does not match
 at the start. The end of the subject is temporarily reset to be the end of the
-substring, so \(rsZ, \(rsz, and $ will match there. However, the start of the
-subject is \fInot\fP reset. This means that ^ matches only if the substring is
+substring, so \f(CR\(rsZ\fP, \f(CR\(rsz\fP, and \f(CR$\fP will match there. However, the start of the
+subject is \fInot\fP reset. This means that \f(CR^\fP matches only if the substring is
 actually at the start of the main subject, but it also means that lookbehind
 assertions into what precedes the substring are possible.
 .sp
 Here is a very simple example: find a word that contains the rare (in English)
-sequence of letters "rh" not at the start:
+sequence of letters \f(CRrh\fP not at the start:
 .sp
 .ss \n[.ss]
 .nf
@@ -3374,8 +4116,8 @@ In concept, a script run is a sequence of characters that are all from the same
 Unicode script such as Latin or Greek. However, because some scripts are
 commonly used together, and because some diacritical and other marks are used
 with multiple scripts, it is not that simple. There is a full description of
-the rules that PCRE2 uses in the section entitled
-"Script Runs"
+the rules that PCRE2 uses in the section
+Script runs
 in the
 \f(CRpcre2unicode\fP
 documentation.
@@ -3384,7 +4126,7 @@ If part of a pattern is enclosed between \f(CR(*script_run:\fP or \f(CR(*sr:\fP 
 parenthesis, it fails if the sequence of characters that it matches are not a
 script run. After a failure, normal backtracking occurs. Script runs can be
 used to detect spoofing attacks using characters that look the same, but are
-from different scripts. The string "paypal.com" is an infamous example, where
+from different scripts. The string \f(CRpaypal.com\fP is an infamous example, where
 the letters could be a mixture of Latin and Cyrillic. This pattern ensures that
 the matched characters in a sequence of non\-spaces that follow white space are
 a script run:
@@ -3426,13 +4168,16 @@ desirable. The script run can employ an atomic group to prevent this. Because
 this is a common requirement, a shorthand notation is provided by
 \f(CR(*atomic_script_run:\fP or \f(CR(*asr:\fP
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*asr:...) is the same as (*sr:(?>...))
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 11
+\f(CR(*asr:...)\fP
+.ad l
+Is the same as \f(CR(*sr:(?>...))\fP.
+.PD
+.RE
+.PP
+.ad l
 .sp
 Note that the atomic group is inside the script run. Putting it outside would
 not prevent backtracking into the script run pattern.
@@ -3443,7 +4188,7 @@ encountered. Script runs are not supported by the alternate matching function,
 pcre2_dfa_match() because they use the same mechanism as capturing
 parentheses.
 .sp
-\f(CRWarning:\fP The \f(CR(*ACCEPT)\fP control verb
+Warning: The \f(CR(*ACCEPT)\fP control verb
 (see below)
 should not be used within a script run group, because it causes an immediate
 exit from the group, bypassing the script run checking.
@@ -3457,8 +4202,8 @@ already been matched. The two possible forms of conditional group are:
 .ss \n[.ss]
 .nf
 .fam C
-(?(condition)yes\-pattern)
-(?(condition)yes\-pattern|no\-pattern)
+(?(\fIcondition\fP)\fIyes\-pattern\fP)
+(?(\fIcondition\fP)\fIyes\-pattern\fP|\fIno\-pattern\fP)
 .fam
 .fi
 .ss \n[.ss] 0
@@ -3491,7 +4236,7 @@ the condition is true if any of them have matched. An alternative notation,
 which is a PCRE2 extension, not supported by Perl, is to precede the digits
 with a plus or minus sign. In this case, the group number is relative rather
 than absolute. The most recently opened capture group (which could be enclosing
-this condition) can be referenced by (?(\-1), the next most recent by (?(\-2),
+this condition) can be referenced by \f(CR(?(\-1)\fP, the next most recent by \f(CR(?(\-2)\fP,
 and so on. Inside loops it can also make sense to refer to subsequent groups.
 The next capture group to be opened can be referenced as \f(CR(?(+1)\fP, and so on. The
 value zero in any of these forms is not used; it provokes a compile\-time error.
@@ -3503,7 +4248,7 @@ three parts for ease of discussion:
 .ss \n[.ss]
 .nf
 .fam C
-( \(rs( )?    [^()]+    (?(1) \(rs) )
+( \(rs( )?\&    [^()]+\&    (?(1) \(rs) )
 .fam
 .fi
 .ss \n[.ss] 0
@@ -3524,7 +4269,7 @@ reference:
 .ss \n[.ss]
 .nf
 .fam C
-\&...other stuff... ( \(rs( )?    [^()]+    (?(\-1) \(rs) ) ...
+\&...other stuff... ( \(rs( )?\&    [^()]+\&    (?(\-1) \(rs) ) ...
 .fam
 .fi
 .ss \n[.ss] 0
@@ -3532,17 +4277,17 @@ reference:
 This makes the fragment independent of the parentheses in the larger pattern.
 .SS "Checking for a used capture group by name"
 .sp
-Perl uses the syntax (?(<name>)...) or (?(\*(Aqname\*(Aq)...) to test for a used
+Perl uses the syntax \f(CR(?(<\fP\fIname\fP\f(CR>)...)\fP or \f(CR(?(\*(Aq\fP\fIname\fP\f(CR\*(Aq)...)\fP to test for a used
 capture group by name. For compatibility with earlier versions of PCRE1, which
-had this facility before Perl, the syntax (?(name)...) is also recognized.
+had this facility before Perl, the syntax \f(CR(?(\fP\fIname\fP\f(CR)...)\fP is also recognized.
 Note, however, that undelimited names consisting of the letter R followed by
-digits are ambiguous (see the following section). Rewriting the above example
+digits are ambiguous (see the section Checking for pattern recursion). Rewriting the above example
 to use a named group gives this:
 .sp
 .ss \n[.ss]
 .nf
 .fam C
-(?<OPEN> \(rs( )?    [^()]+    (?(<OPEN>) \(rs) )
+(?<OPEN> \(rs( )?\&    [^()]+\&    (?(<OPEN>) \(rs) )
 .fam
 .fi
 .ss \n[.ss] 0
@@ -3554,13 +4299,12 @@ matched.
 .sp
 "Recursion" in this sense refers to any subroutine\-like call from one part of
 the pattern to another, whether or not it is actually recursive. See the
-sections entitled
-"Recursive patterns"
+sections RECURSIVE PATTERNS
 and
-"Groups as subroutines"
+Groups as subroutines
 below for details of recursion and subroutine calls.
 .sp
-If a condition is the string \(rg, and there is no capture group with the name
+If a condition is the string \f(CR(R)\fP, and there is no capture group with the name
 R, the condition is true if matching is currently in a recursion or subroutine
 call to the whole pattern or any capture group. If digits follow the letter R,
 and there is no group with that name, the condition is true if the most recent
@@ -3578,14 +4322,14 @@ overall pattern. This is a contrived example that is equivalent to \f(CRa+b\fP:
 However, in both cases, if there is a capture group with a matching name, the
 condition tests for its being set, as described in the section above, instead
 of testing for recursion. For example, creating a group with the name R1 by
-adding (?<R1>) to the above pattern completely changes its meaning.
+adding \f(CR(?<R1>)\fP to the above pattern completely changes its meaning.
 .sp
 If a name preceded by ampersand follows the letter R, for example:
 .sp
 .ss \n[.ss]
 .nf
 .fam C
-(?(R&name)...)
+(?(R&\fIname\fP)...)
 .fam
 .fi
 .ss \n[.ss] 0
@@ -3601,14 +4345,14 @@ them is the most recent recursion.
 At "top level", all these recursion test conditions are false.
 .SS "Defining capture groups for use by reference only"
 .sp
-If the condition is the string (DEFINE), the condition is always false, even if
+If the condition is the string \f(CR(DEFINE)\fP, the condition is always false, even if
 there is a group with the name DEFINE. In this case, there may be only one
 alternative in the rest of the conditional group. It is always skipped if
 control reaches this point in the pattern; the idea of DEFINE is that it can be
 used to define subroutines that can be referenced from elsewhere. (The use of
 subroutines
 is described below.) For example, a pattern to match an IPv4 address such as
-"192.168.23.245" could be written like this (ignore white space and line
+\f(CR192.168.23.245\fP could be written like this (ignore white space and line
 breaks):
 .sp
 .ss \n[.ss]
@@ -3633,7 +4377,7 @@ pcre2_config() with appropriate arguments. Users of applications that do
 not have access to the underlying code cannot do this. A special "condition"
 called VERSION exists to allow such users to discover which version of PCRE2
 they are dealing with by using this condition to match a string such as
-"yesno". VERSION must be followed either by "=" or ">=" and a version number.
+\f(CRyesno\fP. VERSION must be followed either by \f(CR=\fP or \f(CR>=\fP and a version number.
 For example:
 .sp
 .ss \n[.ss]
@@ -3644,8 +4388,8 @@ For example:
 .fi
 .ss \n[.ss] 0
 .sp
-This pattern matches "yes" if the PCRE2 version is greater or equal to 10.4, or
-"no" otherwise. The fractional part of the version number could be ommited.
+This pattern matches \f(CRyes\fP if the PCRE2 version is greater or equal to 10.4, or
+\f(CRno\fP otherwise. The fractional part of the version number could be ommited.
 .SS "Assertion conditions"
 .sp
 If the condition is not in any of the above formats, it must be a parenthesized
@@ -3660,7 +4404,7 @@ the two alternatives on the second line:
 .nf
 .fam C
 (?(?=[^a\-z]*[a\-z])
-\(rsd{2}\-[a\-z]{3}\-\(rsd{2}  |  \(rsd{2}\-\(rsd{2}\-\(rsd{2} )
+\(rsd{2}\-[a\-z]{3}\-\(rsd{2}\&  |\&  \(rsd{2}\-\(rsd{2}\-\(rsd{2} )
 .fam
 .fi
 .ss \n[.ss] 0
@@ -3670,7 +4414,7 @@ sequence of non\-letters followed by a letter. In other words, it tests for the
 presence of at least one letter in the subject. If a letter is found, the
 subject is matched against the first alternative; otherwise it is matched
 against the second. This pattern matches strings in one of the two forms
-dd\-aaa\-dd or dd\-dd\-dd, where aaa are letters and dd are digits.
+\fIdd\fP\f(CR\-\fP\fIaaa\fP\f(CR\-\fP\fIdd\fP or \fIdd\fP\f(CR\-\fP\fIdd\fP\f(CR\-\fP\fIdd\fP, where \fIaaa\fP are letters and \fIdd\fP are digits.
 .sp
 When an assertion that is a condition contains capture groups, any
 capturing that occurs in a matching branch is retained afterwards, for both
@@ -3682,18 +4426,17 @@ for which captures are retained only for positive assertions that succeed.)
 There are two ways of including comments in patterns that are processed by
 PCRE2. In both cases, the start of the comment must not be in a character
 class, nor in the middle of any other sequence of related characters such as
-(?: or a group name or number or a Unicode property name. The characters that
+\f(CR(?:\fP or a group name or number or a Unicode property name. The characters that
 make up a comment play no part in the pattern matching.
 .sp
-The sequence (?# marks the start of a comment that continues up to the next
+The sequence \f(CR(?#\fP marks the start of a comment that continues up to the next
 closing parenthesis. Nested parentheses are not permitted. If the
 \fBPCRE2_EXTENDED\fP or \fBPCRE2_EXTENDED_MORE\fP option is set, an unescaped # character
 also introduces a comment, which in this case continues to immediately after
 the next newline character or character sequence in the pattern. Which
 characters are interpreted as newlines is controlled by an option passed to the
 compiling function or by a special sequence at the start of the pattern, as
-described in the section entitled
-"Newline conventions"
+described in the section Newline conventions
 above. Note that the end of this type of comment is a literal newline sequence
 in the pattern; escape sequences that happen to represent a newline do not
 count. For example, consider this pattern when \fBPCRE2_EXTENDED\fP is set, and the
@@ -3708,9 +4451,9 @@ abc #comment \(rsn still comment
 .ss \n[.ss] 0
 .sp
 On encountering the # character, pcre2_compile() skips along, looking for
-a newline in the pattern. The sequence \(rsn is still literal at this stage, so
+a newline in the pattern. The sequence \f(CR\(rsn\fP is still literal at this stage, so
 it does not terminate the comment. Only an actual character with the code value
-0x0a (the default newline) does so.
+\f(CR0x0a\fP (the default newline) does so.
 .SH "RECURSIVE PATTERNS"
 .sp
 Consider the problem of matching a string in parentheses, allowing for
@@ -3732,7 +4475,7 @@ $re = qr{\(rs( (?: (?>[^()]+) | (?p{$re}) )* \(rs)}x;
 .fi
 .ss \n[.ss] 0
 .sp
-The (?p{...}) item interpolates Perl code at run time, and in this case refers
+The \f(CR(?p{...})\fP item interpolates Perl code at run time, and in this case refers
 recursively to the pattern in which it appears.
 .sp
 Obviously, PCRE2 cannot support the interpolation of Perl code. Instead, it
@@ -3740,11 +4483,11 @@ supports special syntax for recursion of the entire pattern, and also for
 individual capture group recursion. After its introduction in PCRE1 and Python,
 this kind of recursion was subsequently introduced into Perl at release 5.10.
 .sp
-A special item that consists of (? followed by a number greater than zero and a
+A special item that consists of \f(CR(?\fP followed by a number greater than zero and a
 closing parenthesis is a recursive subroutine call of the capture group of the
 given number, provided that it occurs inside that group. (If not, it is a
 non\-recursive subroutine
-call, which is described in the next section.) The special item (?R) or (?0) is
+call, which is described in the section Groups as subroutines.) The special item \f(CR(?R)\fP or \f(CR(?0)\fP is
 a recursive call of the entire regular expression.
 .sp
 This PCRE2 pattern solves the nested parentheses problem (assume the
@@ -3779,8 +4522,8 @@ We have put the pattern into parentheses, and caused the recursion to refer to
 them instead of the whole pattern.
 .sp
 In a larger pattern, keeping track of parenthesis numbers can be tricky. This
-is made easier by the use of relative references. Instead of (?1) in the
-pattern above you can write (?\-2) to refer to the second most recently opened
+is made easier by the use of relative references. Instead of \f(CR(?1)\fP in the
+pattern above you can write \f(CR(?\-2)\fP to refer to the second most recently opened
 parentheses preceding the recursion. In other words, a negative number counts
 capturing parentheses leftwards from the point at which it is encountered.
 .sp
@@ -3797,21 +4540,21 @@ appropriate number. Consider, for example:
 .fi
 .ss \n[.ss] 0
 .sp
-The first two capture groups (a) and (b) are both numbered 1, and group (c)
-is number 2. When the reference (?\-2) is encountered, the second most recently
-opened parentheses has the number 1, but it is the first such group (the (a)
+The first two capture groups \f(CR(a)\fP and \f(CR(b)\fP are both numbered 1, and group \f(CR(c)\fP
+is number 2. When the reference \f(CR(?\-2)\fP is encountered, the second most recently
+opened parentheses has the number 1, but it is the first such group (the \f(CR(a)\fP
 group) to which the recursion refers. This would be the same if an absolute
-reference (?1) was used. In other words, relative references are just a
+reference \f(CR(?1)\fP was used. In other words, relative references are just a
 shorthand for computing a group number.
 .sp
 It is also possible to refer to subsequent capture groups, by writing
 references such as \f(CR(?+2)\fP. However, these cannot be recursive because the
 reference is not inside the parentheses that are referenced. They are always
 non\-recursive subroutine
-calls, as described in the next section.
+calls, as described in the section Groups as subroutines.
 .sp
 An alternative approach is to use named parentheses. The Perl syntax for this
-is (?&name); PCRE1\(cqs earlier syntax (?P>name) is also supported. We could
+is \f(CR(?&\fP\fIname\fP\f(CR)\fP; PCRE1\(cqs earlier syntax \f(CR(?P>\fP\fIname\fP\f(CR)\fP is also supported. We could
 rewrite the above example as follows:
 .sp
 .ss \n[.ss]
@@ -3857,12 +4600,12 @@ documentation). If the pattern above is matched against
 .fi
 .ss \n[.ss] 0
 .sp
-the value for the inner capturing parentheses (numbered 2) is "ef", which is
+the value for the inner capturing parentheses (numbered 2) is \f(CRef\fP, which is
 the last value taken on at the top level. If a capture group is not matched at
 the top level, its final captured value is unset, even if it was (temporarily)
 set at a deeper level during the matching process.
 .sp
-Do not confuse the (?R) item with the condition \(rg, which tests for recursion.
+Do not confuse the \f(CR(?R)\fP item with the condition \f(CR(R)\fP, which tests for recursion.
 Consider this pattern, which matches text in angle brackets, allowing for
 arbitrary nesting. Only digits are allowed in nested brackets (that is, when
 recursing), whereas any characters are permitted at the outer level.
@@ -3870,13 +4613,13 @@ recursing), whereas any characters are permitted at the outer level.
 .ss \n[.ss]
 .nf
 .fam C
-< (?: (?(R) \(rsd++  | [^<>]*+) | (?R)) * >
+< (?: (?(R) \(rsd++\&  | [^<>]*+) | (?R)) * >
 .fam
 .fi
 .ss \n[.ss] 0
 .sp
-In this pattern, (?\(rg is the start of a conditional group, with two different
-alternatives for the recursive and non\-recursive cases. The (?R) item is the
+In this pattern, \f(CR(?(R)\fP is the start of a conditional group, with two different
+alternatives for the recursive and non\-recursive cases. The \f(CR(?R)\fP item is the
 actual recursive call.
 .SS "Differences in recursion processing between PCRE2 and Perl"
 .sp
@@ -3920,15 +4663,16 @@ which can be done like this:
 .fi
 .ss \n[.ss] 0
 .sp
-If run with the \fBPCRE2_CASELESS\fP option, this pattern matches phrases such as "A
-man, a plan, a canal: Panama!". Note the use of the possessive quantifier \f(CR*+\fP to
+If run with the \fBPCRE2_CASELESS\fP option, this pattern matches phrases such as \f(CRA
+man, a plan, a canal: Panama!\fP. Note the use of the possessive quantifier \f(CR*+\fP to
 avoid backtracking into sequences of non\-word characters. Without this, PCRE2
 takes a great deal longer (ten times or more) to match typical phrases, and
 Perl takes so long that you think it has gone into a loop.
 .sp
 Another way in which PCRE2 and Perl used to differ in their recursion
 processing is in the handling of captured values. Formerly in Perl, when a
-group was called recursively or as a subroutine (see the next section), it
+group was called recursively or as a subroutine (see the section
+Groups as subroutines), it
 had no access to any values that were captured outside the recursion, whereas
 in PCRE2 these values can be referenced. Consider this pattern:
 .sp
@@ -3940,10 +4684,10 @@ in PCRE2 these values can be referenced. Consider this pattern:
 .fi
 .ss \n[.ss] 0
 .sp
-This pattern matches "bab". The first capturing parentheses match "b", then in
-the second group, when the backreference \(rs1 fails to match "b", the second
-alternative matches "a" and then recurses. In the recursion, \(rs1 does now match
-"b" and so the whole match succeeds. This match used to fail in Perl, but in
+This pattern matches \f(CRbab\fP. The first capturing parentheses match \f(CRb\fP, then in
+the second group, when the backreference \f(CR\(rs1\fP fails to match \f(CRb\fP, the second
+alternative matches \f(CRa\fP and then recurses. In the recursion, \f(CR\(rs1\fP does now match
+\f(CRb\fP and so the whole match succeeds. This match used to fail in Perl, but in
 later versions (I tried 5.024) it now works.
 .SS "Groups as subroutines"
 .sp
@@ -3974,8 +4718,8 @@ An earlier example pointed out that the pattern
 .fi
 .ss \n[.ss] 0
 .sp
-matches "sense and sensibility" and "response and responsibility", but not
-"sense and responsibility". If instead the pattern
+matches \f(CRsense and sensibility\fP and \f(CRresponse and responsibility\fP, but not
+\f(CRsense and responsibility\fP. If instead the pattern
 .sp
 .ss \n[.ss]
 .nf
@@ -3985,7 +4729,7 @@ matches "sense and sensibility" and "response and responsibility", but not
 .fi
 .ss \n[.ss] 0
 .sp
-is used, it does match "sense and responsibility" as well as the other two
+is used, it does match \f(CRsense and responsibility\fP as well as the other two
 strings. Another example is given in the discussion of DEFINE above.
 .sp
 Like recursions, subroutine calls used to be treated as atomic, but this
@@ -4005,13 +4749,13 @@ different calls. For example, consider this pattern:
 .fi
 .ss \n[.ss] 0
 .sp
-It matches "abcabc". It does not match "abcABC" because the change of
+It matches \f(CRabcabc\fP. It does not match \f(CRabcABC\fP because the change of
 processing option does not affect the called group.
 .sp
 The behaviour of
 backtracking control verbs
-in groups when called as subroutines is described in the section entitled
-"Backtracking verbs in subroutines"
+in groups when called as subroutines is described in the section
+Backtracking verbs in subroutines
 below.
 .SS "Recursion and subroutines with returned capture groups"
 .sp
@@ -4028,20 +4772,22 @@ be used as return values.
 Only the specific capture groups listed by the caller will be retained, using
 the following syntax:
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(?R(grouplist))       recurse whole pattern, returning capture groups
-(?n(grouplist))       )
-(?+n(grouplist))      )
-(?\-n(grouplist))      ) call subroutine, returning capture groups
-(?&name(grouplist))   )
-(?P>name(grouplist))  )
-.fam
-.fi
-.ss \n[.ss] 0
+.RS 4
+.PD 0
+.TP 7
+\f(CR(?R(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?+\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
+.ad l
+Recurse the whole pattern, returning capture groups.
+.TP 7
+\f(CR(?\-\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?&\fP\fIname\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?P>\fP\fIname\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
+.ad l
+Call a subroutine, returning capture groups.
+.PD
+.RE
+.PP
+.ad l
 .sp
-The list of capture groups "grouplist" is a comma\-separated list of (absolute
+The list of capture groups \fIgrouplist\fP is a comma\-separated list of (absolute
 or relative) group numbers, and group names enclosed in single quotes or angle
 brackets.
 .sp
@@ -4063,11 +4809,11 @@ groups it captures for use later:
 .fi
 .ss \n[.ss] 0
 .sp
-This feature is not available using the Oniguruma syntax \(rsg<...> or \(rsg\*(Aq...\*(Aq
+This feature is not available using the Oniguruma syntax \f(CR\(rsg<...>\fP or \f(CR\(rsg\*(Aq...\*(Aq\fP
 below.
 .SS "Oniguruma subroutine syntax"
 .sp
-For compatibility with Oniguruma, the non\-Perl syntax \(rsg followed by a name or
+For compatibility with Oniguruma, the non\-Perl syntax \f(CR\(rsg\fP followed by a name or
 a number enclosed either in angle brackets or single quotes, is an alternative
 syntax for calling a group as a subroutine, possibly recursively. Here are two
 of the examples used above, rewritten using this syntax:
@@ -4092,11 +4838,11 @@ plus or a minus sign it is taken as a relative reference. For example:
 .fi
 .ss \n[.ss] 0
 .sp
-Note that \(rsg{...} (Perl syntax) and \(rsg<...> (Oniguruma syntax) are \fInot\fP
+Note that \f(CR\(rsg{...}\fP (Perl syntax) and \f(CR\(rsg<...>\fP (Oniguruma syntax) are \fInot\fP
 synonymous. The former is a backreference; the latter is a subroutine call.
 .SH "CALLOUTS"
 .sp
-Perl has a feature whereby using the sequence (?{...}) causes arbitrary Perl
+Perl has a feature whereby using the sequence \f(CR(?{...})\fP causes arbitrary Perl
 code to be obeyed in the middle of matching a regular expression. This makes it
 possible, amongst other things, to extract different substrings that match the
 same pair of parentheses when there is a repetition.
@@ -4110,10 +4856,10 @@ entry point is set to NULL, callout points will be passed over silently during
 matching. To disallow callouts in the pattern syntax, you may use the
 \fBPCRE2_EXTRA_NEVER_CALLOUT\fP option.
 .sp
-Within a regular expression, (?C<arg>) indicates a point at which the external
+Within a regular expression, \f(CR(?C\fP\fIarg\fP\f(CR)\fP indicates a point at which the external
 function is to be called. There are two kinds of callout: those with a
-numerical argument and those with a string argument. (?C) on its own with no
-argument is treated as (?C0). A numerical argument allows the application to
+numerical argument and those with a string argument. \f(CR(?C)\fP on its own with no
+argument is treated as \f(CR(?C0)\fP. A numerical argument allows the application to
 distinguish between different callouts. String arguments were added for release
 10.20 to make it possible for script languages that use PCRE2 to embed short
 scripts within patterns in a similar way to Perl.
@@ -4165,8 +4911,8 @@ condition.
 .SS "Callouts with string arguments"
 .sp
 A delimited string may be used instead of a number as a callout argument. The
-starting delimiter must be one of ` \*(Aq " ^ % # $ { and the ending delimiter is
-the same as the start, except for {, where the ending delimiter is }. If the
+starting delimiter must be one of \f(CR`\fP, \f(CR\*(Aq\fP, \f(CR"\fP, \f(CR^\fP, \f(CR%\fP, \f(CR#\fP, \f(CR$\fP or \f(CR{\fP and the ending delimiter is
+the same as the start, except for \f(CR{\fP, where the ending delimiter is \f(CR}\fP. If the
 ending delimiter is needed within the string, it must be doubled. For
 example:
 .sp
@@ -4183,7 +4929,7 @@ The doubling is removed before the string is passed to the callout function.
 .sp
 There are a number of special "Backtracking Control Verbs" (to use Perl\(cqs
 terminology) that modify the behaviour of backtracking during matching. They
-are generally of the form \f(CR(*VERB)\fP or \f(CR(*VERB:NAME)\fP. Some verbs take either form,
+are generally of the form \f(CR(*VERB)\fP or \f(CR(*VERB:\fP\fINAME\fP\f(CR)\fP. Some verbs take either form,
 and may behave differently depending on whether or not a name argument is
 present. The names are not required to be unique within the pattern.
 .sp
@@ -4247,19 +4993,17 @@ PCRE2, turning them off can change the result of a match.
 .sp
 The following verbs act as soon as they are encountered.
 .sp
-.ss \n[.ss]
-.nf
-.fam C
- (*ACCEPT) or (*ACCEPT:NAME)
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
+.RS 4
+.PD
+.TP 7
+\f(CR(*ACCEPT)\fP or \f(CR(*ACCEPT:\fP\fINAME\fP\f(CR)\fP
+.ad l
 This verb causes the match to end successfully, skipping the remainder of the
 pattern. However, when it is inside a capture group that is called as a
 subroutine, only that group is ended successfully. Matching then continues
 at the outer level. If \f(CR(*ACCEPT)\fP in triggered in a positive assertion, the
 assertion succeeds; in a negative assertion, the assertion fails.
+.RS 7
 .sp
 If \f(CR(*ACCEPT)\fP is inside capturing parentheses, the data so far is captured. For
 example:
@@ -4272,7 +5016,7 @@ A((?:A|B(*ACCEPT)|C)D)
 .fi
 .ss \n[.ss] 0
 .sp
-This matches "AB", "AAD", or "ACD"; when it matches "AB", "B" is captured by
+This matches \f(CRAB\fP, \f(CRAAD\fP, or \f(CRACD\fP; when it matches \f(CRAB\fP, \f(CRB\fP is captured by
 the outer parentheses.
 .sp
 \f(CR(*ACCEPT)\fP is the only backtracking verb that is allowed to be quantified
@@ -4287,28 +5031,24 @@ backtrack happens. Consider, for example,
 .fi
 .ss \n[.ss] 0
 .sp
-where A, B, and C may be complex expressions. After matching "A", the matcher
-processes "BC"; if that fails, causing a backtrack, \f(CR(*ACCEPT)\fP is triggered and
+where A, B, and C may be complex expressions. After matching \f(CRA\fP, the matcher
+processes \f(CRBC\fP; if that fails, causing a backtrack, \f(CR(*ACCEPT)\fP is triggered and
 the match succeeds. In both cases, all but C is captured. Whereas \f(CR(*COMMIT)\fP
 (see below) means "fail on backtrack", a repeated \f(CR(*ACCEPT)\fP of this type means
 "succeed on backtrack".
 .sp
-\f(CRWarning:\fP \f(CR(*ACCEPT)\fP should not be used within a script run group, because
+Warning: \f(CR(*ACCEPT)\fP should not be used within a script run group, because
 it causes an immediate exit from the group, bypassing the script run checking.
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-(*FAIL) or (*FAIL:NAME)
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
+.RE
+.TP 7
+\f(CR(*FAIL)\fP or \f(CR(*FAIL:\fP\fINAME\fP\f(CR)\fP
+.ad l
 This verb causes a matching failure, forcing backtracking to occur. It may be
-abbreviated to \f(CR(*F)\fP. It is equivalent to (?!) but easier to read. The Perl
-documentation notes that it is probably useful only when combined with (?{}) or
-(??{}). Those are, of course, Perl features that are not present in PCRE2. The
+abbreviated to \f(CR(*F)\fP. It is equivalent to \f(CR(?!)\fP but easier to read. The Perl
+documentation notes that it is probably useful only when combined with \f(CR(?{})\fP or
+\f(CR(??{})\fP. Those are, of course, Perl features that are not present in PCRE2. The
 nearest equivalent is the callout feature, as for example in this pattern:
+.RS 7
 .sp
 .ss \n[.ss]
 .nf
@@ -4318,11 +5058,16 @@ a+(?C)(*FAIL)
 .fi
 .ss \n[.ss] 0
 .sp
-A match with the string "aaaa" always fails, but the callout is taken before
+A match with the string \f(CRaaaa\fP always fails, but the callout is taken before
 each backtrack happens (in this example, 10 times).
+.RE
+.PD
+.RE
+.PP
+.ad l
 .sp
-\f(CR(*ACCEPT:NAME)\fP and \f(CR(*FAIL:NAME)\fP behave the same as \f(CR(*MARK:NAME)(*ACCEPT)\fP and
-\f(CR(*MARK:NAME)(*FAIL)\fP, respectively, that is, a \f(CR(*MARK)\fP is recorded just before
+\f(CR(*ACCEPT:\fP\fINAME\fP\f(CR)\fP and \f(CR(*FAIL:\fP\fINAME\fP\f(CR)\fP behave the same as \f(CR(*MARK:\fP\fINAME\fP\f(CR)(*ACCEPT)\fP and
+\f(CR(*MARK:\fP\fINAME\fP\f(CR)(*FAIL)\fP, respectively, that is, a \f(CR(*MARK)\fP is recorded just before
 the verb acts.
 .SS "Recording which path was taken"
 .sp
@@ -4330,21 +5075,19 @@ There is one verb whose main purpose is to track how a match was arrived at,
 though it also has a secondary use in conjunction with advancing the match
 starting point (see \f(CR(*SKIP)\fP below).
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*MARK:NAME) or (*:NAME)
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
+.RS 4
+.PD
+.TP 25
+\f(CR(*MARK:\fP\fINAME\fP\f(CR)\fP or \f(CR(*:\fP\fINAME\fP\f(CR)\fP
+.ad l
 A name is always required with this verb. For all the other backtracking
-control verbs, a NAME argument is optional.
+control verbs, a \fINAME\fP argument is optional.
+.RS 25
 .sp
 When a match succeeds, the name of the last\-encountered mark name on the
-matching path is passed back to the caller as described in the section entitled
-"Other information about the match"
-in the
+matching path is passed back to the caller as described in the section
+Other information about a match
+in
 \f(CRpcre2api\fP
 documentation. This applies to all instances of \f(CR(*MARK)\fP and other verbs,
 including those inside assertions and atomic groups. However, there are
@@ -4352,7 +5095,7 @@ differences in those cases when \f(CR(*MARK)\fP is used in conjunction with \f(C
 described below.
 .sp
 The mark name that was last encountered on the matching path is passed back. A
-verb without a NAME argument is ignored for this purpose. Here is an example of
+verb without a \fINAME\fP argument is ignored for this purpose. Here is an example of
 \f(CRpcre2test\fP output, where the "mark" modifier requests the retrieval and
 outputting of \f(CR(*MARK)\fP data:
 .sp
@@ -4402,6 +5145,11 @@ probably either set the \fBPCRE2_NO_START_OPTIMIZE\fP option or call
 pcre2_set_optimize() with a \fBPCRE2_START_OPTIMIZE_OFF\fP directive
 (see above)
 to ensure that the match is always attempted.
+.RE
+.PD
+.RE
+.PP
+.ad l
 .SS "Verbs that act after backtracking"
 .sp
 The following verbs do nothing when they are encountered. Matching continues
@@ -4418,20 +5166,18 @@ reaches them. The behaviour described below is what happens when the verb is
 not in a subroutine or an assertion. Subsequent sections cover these special
 cases.
 .sp
-.ss \n[.ss]
-.nf
-.fam C
-(*COMMIT) or (*COMMIT:NAME)
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
+.RS 4
+.PD
+.TP 26
+\f(CR(*COMMIT)\fP or \f(CR(*COMMIT:\fP\fINAME\fP\f(CR)\fP
+.ad l
 This verb causes the whole match to fail outright if there is a later matching
 failure that causes backtracking to reach it. Even if the pattern is
 unanchored, no further attempts to find a match by advancing the starting point
 take place. If \f(CR(*COMMIT)\fP is the only backtracking verb that is encountered,
 once it has been passed pcre2_match() is committed to finding a match at
 the current starting point, or not at all. For example:
+.RS 26
 .sp
 .ss \n[.ss]
 .nf
@@ -4441,12 +5187,12 @@ a+(*COMMIT)b
 .fi
 .ss \n[.ss] 0
 .sp
-This matches "xxaab" but not "aacaab". It can be thought of as a kind of
+This matches \f(CRxxaab\fP but not \f(CRaacaab\fP. It can be thought of as a kind of
 dynamic anchor, or "I\(cqve started, so I must finish."
 .sp
-The behaviour of \f(CR(*COMMIT:NAME)\fP is not the same as \f(CR(*MARK:NAME)(*COMMIT)\fP. It is
-like \f(CR(*MARK:NAME)\fP in that the name is remembered for passing back to the
-caller. However, \f(CR(*SKIP:NAME)\fP searches only for names that are set with
+The behaviour of \f(CR(*COMMIT:\fP\fINAME\fP\f(CR)\fP is not the same as \f(CR(*MARK:\fP\fINAME\fP\f(CR)(*COMMIT)\fP. It is
+like \f(CR(*MARK:\fP\fINAME\fP\f(CR)\fP in that the name is remembered for passing back to the
+caller. However, \f(CR(*SKIP:\fP\fINAME\fP\f(CR)\fP searches only for names that are set with
 \f(CR(*MARK)\fP, ignoring those set by any of the other backtracking verbs.
 .sp
 If there is more than one backtracking verb in a pattern, a different one that
@@ -4471,21 +5217,16 @@ No match
 .fi
 .ss \n[.ss] 0
 .sp
-For the first pattern, PCRE2 knows that any match must start with "a", so the
-optimization skips along the subject to "a" before applying the pattern to the
+For the first pattern, PCRE2 knows that any match must start with \f(CRa\fP, so the
+optimization skips along the subject to \f(CRa\fP before applying the pattern to the
 first set of data. The match attempt then succeeds. The second pattern disables
 the optimization that skips along to the first character. The pattern is now
-applied starting at "x", and so the \f(CR(*COMMIT)\fP causes the match to fail without
+applied starting at \f(CRx\fP, and so the \f(CR(*COMMIT)\fP causes the match to fail without
 trying any other starting points.
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-(*PRUNE) or (*PRUNE:NAME)
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
+.RE
+.TP 26
+\f(CR(*PRUNE)\fP or \f(CR(*PRUNE:\fP\fINAME\fP\f(CR)\fP
+.ad l
 This verb causes the match to fail at the current starting position in the
 subject if there is a later matching failure that causes backtracking to reach
 it. If the pattern is unanchored, the normal "bumpalong" advance to the next
@@ -4496,25 +5237,22 @@ simple cases, the use of \f(CR(*PRUNE)\fP is just an alternative to an atomic gr
 possessive quantifier, but there are some uses of \f(CR(*PRUNE)\fP that cannot be
 expressed in any other way. In an anchored pattern \f(CR(*PRUNE)\fP has the same effect
 as \f(CR(*COMMIT)\fP.
+.RS 26
 .sp
-The behaviour of \f(CR(*PRUNE:NAME)\fP is not the same as \f(CR(*MARK:NAME)(*PRUNE)\fP. It is
-like \f(CR(*MARK:NAME)\fP in that the name is remembered for passing back to the
-caller. However, \f(CR(*SKIP:NAME)\fP searches only for names set with \f(CR(*MARK)\fP,
+The behaviour of \f(CR(*PRUNE:\fP\fINAME\fP\f(CR)\fP is not the same as \f(CR(*MARK:\fP\fINAME\fP\f(CR)(*PRUNE)\fP. It is
+like \f(CR(*MARK:\fP\fINAME\fP\f(CR)\fP in that the name is remembered for passing back to the
+caller. However, \f(CR(*SKIP:\fP\fINAME\fP\f(CR)\fP searches only for names set with \f(CR(*MARK)\fP,
 ignoring those set by other backtracking verbs.
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-(*SKIP)
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
+.RE
+.TP 26
+\f(CR(*SKIP)\fP
+.ad l
 This verb, when given without a name, is like \f(CR(*PRUNE)\fP, except that if the
 pattern is unanchored, the "bumpalong" advance is not to the next character,
 but to the position in the subject where \f(CR(*SKIP)\fP was encountered. \f(CR(*SKIP)\fP
 signifies that whatever text was matched leading up to it cannot be part of a
 successful match if there is a later mismatch. Consider:
+.RS 26
 .sp
 .ss \n[.ss]
 .nf
@@ -4524,9 +5262,9 @@ a+(*SKIP)b
 .fi
 .ss \n[.ss] 0
 .sp
-If the subject is "aaaac...", after the first match attempt fails (starting at
+If the subject is \f(CRaaaac.\|.\|.\fP, after the first match attempt fails (starting at
 the first character in the string), the starting point skips on to start the
-next attempt at "c". Note that a possessive quantifier does not have the same
+next attempt at \f(CRc\fP. Note that a possessive quantifier does not have the same
 effect as this example; although it would suppress backtracking during the
 first match attempt, the second attempt would start at the second character
 instead of skipping on to "c".
@@ -4535,21 +5273,17 @@ If \f(CR(*SKIP)\fP is used to specify a new starting position that is the same a
 starting position of the current match, or (by being inside a lookbehind)
 earlier, the position specified by \f(CR(*SKIP)\fP is ignored, and instead the normal
 "bumpalong" occurs.
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-(*SKIP:NAME)
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
+.RE
+.TP 26
+\f(CR(*SKIP:\fP\fINAME\fP\f(CR)\fP
+.ad l
 When \f(CR(*SKIP)\fP has an associated name, its behaviour is modified. When such a
 \f(CR(*SKIP)\fP is triggered, the previous path through the pattern is searched for the
 most recent \f(CR(*MARK)\fP that has the same name. If one is found, the "bumpalong"
 advance is to the subject position that corresponds to that \f(CR(*MARK)\fP instead of
 to where \f(CR(*SKIP)\fP was encountered. If no \f(CR(*MARK)\fP with a matching name is found,
 the \f(CR(*SKIP)\fP is ignored.
+.RS 26
 .sp
 The search for a \f(CR(*MARK)\fP name uses the normal backtracking mechanism, which
 means that it does not see \f(CR(*MARK)\fP settings that are inside atomic groups or
@@ -4578,29 +5312,27 @@ the second branch of the pattern to be tried at the first character position.
 In the second example, the \f(CR(*MARK)\fP setting is not in an atomic group. This
 allows \f(CR(*SKIP:X)\fP to find the \f(CR(*MARK)\fP when it backtracks, and this causes a new
 matching attempt to start at the second character. This time, the \f(CR(*MARK)\fP is
-never seen because "a" does not match "b", so the matcher immediately jumps to
+never seen because \f(CRa\fP does not match \f(CRb\fP, so the matcher immediately jumps to
 the second branch of the pattern.
 .sp
-Note that \f(CR(*SKIP:NAME)\fP searches only for names set by \f(CR(*MARK:NAME)\fP. It ignores
+Note that \f(CR(*SKIP:\fP\fINAME\fP\f(CR)\fP searches only for names set by \f(CR(*MARK:\fP\fINAME\fP\f(CR)\fP. It ignores
 names that are set by other backtracking verbs.
-.sp
-.ss \n[.ss]
-.nf
-.fam C
-(*THEN) or (*THEN:NAME)
-.fam
-.fi
-.ss \n[.ss] 0
-.sp
+.RE
+.TP 26
+\f(CR(*THEN)\fP or \f(CR(*THEN:\fP\fINAME\fP\f(CR)\fP
+.ad l
 This verb causes a skip to the next innermost alternative when backtracking
 reaches it. That is, it cancels any further backtracking within the current
 alternative. Its name comes from the observation that it can be used for a
 pattern\-based if\-then\-else block:
+.RS 26
 .sp
 .ss \n[.ss]
 .nf
 .fam C
-( COND1 (*THEN) FOO | COND2 (*THEN) BAR | COND3 (*THEN) BAZ ) ...
+( COND1 (*THEN) FOO |
+  COND2 (*THEN) BAR |
+  COND3 (*THEN) BAZ ) ...
 .fam
 .fi
 .ss \n[.ss] 0
@@ -4612,9 +5344,9 @@ succeeds and BAR fails, COND3 is tried. If subsequently BAZ fails, there are no
 more alternatives, so there is a backtrack to whatever came before the entire
 group. If \f(CR(*THEN)\fP is not inside an alternation, it acts like \f(CR(*PRUNE)\fP.
 .sp
-The behaviour of \f(CR(*THEN:NAME)\fP is not the same as \f(CR(*MARK:NAME)(*THEN)\fP. It is
-like \f(CR(*MARK:NAME)\fP in that the name is remembered for passing back to the
-caller. However, \f(CR(*SKIP:NAME)\fP searches only for names set with \f(CR(*MARK)\fP,
+The behaviour of \f(CR(*THEN:\fP\fINAME\fP\f(CR)\fP is not the same as \f(CR(*MARK:\fP\fINAME\fP\f(CR)(*THEN)\fP. It is
+like \f(CR(*MARK:\fP\fINAME\fP\f(CR)\fP in that the name is remembered for passing back to the
+caller. However, \f(CR(*SKIP:\fP\fINAME\fP\f(CR)\fP searches only for names set with \f(CR(*MARK)\fP,
 ignoring those set by other backtracking verbs.
 .sp
 A group that does not contain a | character is just a part of the enclosing
@@ -4660,13 +5392,18 @@ group has a different meaning. Ignoring white space, consider:
 .fi
 .ss \n[.ss] 0
 .sp
-If the subject is "ba", this pattern does not match. Because \f(CR.\fB?\fP is ungreedy,
-it initially matches zero characters. The condition (?=a) then fails, the
-character "b" is matched, but "c" is not. At this point, matching does not
-backtrack to \f(CR.\fP?\fP as might perhaps be expected from the presence of the |
+If the subject is \f(CRba\fP, this pattern does not match. Because \f(CR.*?\fP is ungreedy,
+it initially matches zero characters. The condition \f(CR(?=a)\fP then fails, the
+character \f(CRb\fP is matched, but \f(CRc\fP is not. At this point, matching does not
+backtrack to \f(CR.*?\fP as might perhaps be expected from the presence of the |
 character. The conditional group is part of the single alternative that
 comprises the whole pattern, and so the match fails. (If there was a backtrack
-into \f(CR.*?\fP, allowing it to match "b", the match would succeed.)
+into \f(CR.*?\fP, allowing it to match \f(CRb\fP, the match would succeed.)
+.RE
+.PD
+.RE
+.PP
+.ad l
 .sp
 The verbs just described provide four different "strengths" of control when
 subsequent matching fails. \f(CR(*THEN)\fP is the weakest, carrying on the match at the
@@ -4715,12 +5452,12 @@ repeated groups. For example, consider:
 .ss \n[.ss]
 .nf
 .fam C
-/(a(*COMMIT)b)+ac/
+(a(*COMMIT)b)+ac
 .fam
 .fi
 .ss \n[.ss] 0
 .sp
-If the subject is "abac", Perl matches unless its optimizations are disabled,
+If the subject is \f(CRabac\fP, Perl matches unless its optimizations are disabled,
 but PCRE2 always fails because the \f(CR(*COMMIT)\fP in the second repeat of the group
 acts.
 .SS "Backtracking verbs in assertions"
@@ -4745,13 +5482,12 @@ reach them. This means that, for the Perl\-compatible assertions, their effect
 is confined to the assertion, because Perl lookaround assertions are atomic. A
 backtrack that occurs after such an assertion is complete does not jump back
 into the assertion. Note in particular that a \f(CR(*MARK)\fP name that is set in an
-assertion is not "seen" by an instance of \f(CR(*SKIP:NAME)\fP later in the pattern.
+assertion is not "seen" by an instance of \f(CR(*SKIP:\fP\fINAME\fP\f(CR)\fP later in the pattern.
 .sp
 PCRE2 now supports non\-atomic positive assertions and also "scan substring"
-assertions, as described in the sections entitled
-"Non\-atomic assertions"
+assertions, as described in the sections NON\-ATOMIC ASSERTIONS
 and
-"Scan substring assertions"
+SCAN SUBSTRING ASSERTIONS
 above. These assertions must be standalone (not used as conditions). They are
 not Perl\-compatible. For these assertions, a later backtrack does jump back
 into the assertion, and therefore verbs such as \f(CR(*COMMIT)\fP can be triggered by
@@ -4794,51 +5530,48 @@ Differences in the way PCRE behaves when it is running in an EBCDIC environment
 are covered in this section.
 .SS "Escape sequences"
 .sp
-When PCRE2 is compiled in EBCDIC mode, \f(CR\(rsN{U+hhh..}\fP is not supported. \(rsa, \(rse,
-\(rsf, \(rsn, \(rsr, and \(rst generate the appropriate EBCDIC code values. The \(rsc
+When PCRE2 is compiled in EBCDIC mode, \f(CR\(rsN{U+\fP\fIhhh...\fP\f(CR}\fP is not supported. \f(CR\(rsa\fP, \f(CR\(rse\fP,
+\f(CR\(rsf\fP, \f(CR\(rsn\fP, \f(CR\(rsr\fP, and \f(CR\(rst\fP generate the appropriate EBCDIC code values. The \f(CR\(rsc\fP
 escape is processed as specified for Perl in the \f(CRperlebcdic\fP document. The
-only characters that are allowed after \(rsc are A\-Z, a\-z, or one of @, [, \(rs, ],
+only characters that are allowed after \f(CR\(rsc\fP are A\(emZ, a\(emz, or one of @, [, \(rs, ],
 ^, _, or ?. Any other character provokes a compile\-time error. The sequence
-\(rsc@ encodes character code 0; after \(rsc the letters (in either case) encode
-characters 1\-26 (hex 01 to hex 1A); [, \(rs, ], ^, and _ encode characters 27\-31
-(hex 1B to hex 1F), and \(rsc? becomes either 255 (hex FF) or 95 (hex 5F).
+\f(CR\(rsc@\fP encodes character code 0; after \f(CR\(rsc\fP the letters (in either case) encode
+characters 1\(em26 (\f(CR0x01\fP to \f(CR0x1A\fP); [, \(rs, ], ^, and _ encode characters 27\(em31
+(\f(CR0x1B\fP to \f(CR0x1F\fP), and \f(CR\(rsc?\fP becomes either 255 (\f(CR0xFF\fP) or 95 (\f(CR0x5F\fP).
 .sp
-Thus, apart from \(rsc?, these escapes generate the same character code values as
+Thus, apart from \f(CR\(rsc?\fP, these escapes generate the same character code values as
 they do in an ASCII or Unicode environment, though the meanings of the values
-mostly differ. For example, \(rscG always generates code value 7, which is BEL in
+mostly differ. For example, \f(CR\(rscG\fP always generates code value 7, which is BEL in
 ASCII but DEL in EBCDIC.
 .sp
-The sequence \(rsc? generates DEL (127, hex 7F) in an ASCII environment, but
+The sequence \f(CR\(rsc?\fP generates DEL (127, \f(CR0x7F\fP) in an ASCII environment, but
 because 127 is not a control character in EBCDIC, Perl makes it generate the
 APC character. Unfortunately, there are several variants of EBCDIC. In most of
-them the APC character has the value 255 (hex FF), but in the one Perl calls
-POSIX\-BC its value is 95 (hex 5F). If certain other characters have POSIX\-BC
-values, PCRE2 makes \(rsc? generate 95; otherwise it generates 255.
+them the APC character has the value 255 (\f(CR0xFF\fP), but in the one Perl calls
+POSIX\-BC its value is 95 (\f(CR0x5F\fP). If certain other characters have POSIX\-BC
+values, PCRE2 makes \f(CR\(rsc?\fP generate 95; otherwise it generates 255.
 .SS "Character classes"
 .sp
 In character classes there is a special case in EBCDIC environments for ranges
 whose end points are both specified as literal letters in the same case. For
 compatibility with Perl, EBCDIC code points within the range that are not
-letters are omitted. For example, [h\-k] matches only four characters, even
-though the EBCDIC codes for h and k are 0x88 and 0x92, a range of 11 code
+letters are omitted. For example, \f(CR[h\-k]\fP matches only four characters, even
+though the EBCDIC codes for h and k are \f(CR0x88\fP and \f(CR0x92\fP, a range of 11 code
 points. However, if the range is specified numerically, for example,
-[\(rsx88\-\(rsx92] or [h\-\(rsx92], all code points are included.
+\f(CR[\(rsx88\-\(rsx92]\fP or \f(CR[h\-\(rsx92]\fP, all code points are included.
 .SH "SEE ALSO"
 .sp
-\f(CRpcre2api\fP(3), \f(CRpcre2callout\fP(3), \f(CRpcre2matching\fP(3),
-\f(CRpcre2syntax\fP(3), \f(CRpcre2\fP(3).
-.SH "AUTHOR"
+\f(CRpcre2api\fP, \f(CRpcre2callout\fP, \f(CRpcre2matching\fP,
+\f(CRpcre2syntax\fP, \f(CRpcre2\fP.
+.SS "Author"
 .sp
-.ti +2
 Philip Hazel
 .br
-.ti +2
 Retired from University Computing Service
 .br
-.ti +2
 Cambridge, England.
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 25 October 2025
 .br
-Copyright (c) 1997\-2024 University of Cambridge.
+Copyright \(co 1997\-2024 University of Cambridge.

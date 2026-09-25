@@ -38,21 +38,17 @@ arg:callout_data::
 The [.c]`callback()` function is passed a pointer to a data block containing
 the following fields (not necessarily in this order):
 
-[.members]
-[.c]`uint32_t` arg:version::
-      Block version number
-[.c]`uint32_t` arg:callout_number::
-      Number for numbered callouts
-type:PCRE2_SIZE arg:pattern_position::
-      Offset to next item in pattern
-type:PCRE2_SIZE arg:next_item_length::
-      Length of next item in pattern
-type:PCRE2_SIZE arg:callout_string_offset::
-      Offset to string within pattern
-type:PCRE2_SIZE arg:callout_string_length::
-      Length of callout string
-type:PCRE2_SPTR arg:callout_string::
-      Points to callout string or is [.c]`NULL`
+[source,c]
+----
+uint32_t version;                 /* Block version number */
+uint32_t callout_number;          /* Number for numbered callouts */
+PCRE2_SIZE pattern_position;      /* Offset to next item in pattern */
+PCRE2_SIZE next_item_length;      /* Length of next item in pattern */
+PCRE2_SIZE callout_string_offset; /* Offset to string within pattern */
+PCRE2_SIZE callout_string_length; /* Length of callout string */
+PCRE2_SPTR callout_string;        /* Points to callout string or is
+                                     NULL */
+----
 
 The second argument passed to the [.c]`callback()` function is the callout data
 that was passed to func:pcre2_callout_enumerate(). The [.c]`callback()`

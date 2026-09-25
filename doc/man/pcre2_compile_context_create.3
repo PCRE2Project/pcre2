@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_compile_context_create
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 25 October 2014
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -44,8 +44,8 @@ pcre2_compile_context_create \- create a compile context
 .SH "DESCRIPTION"
 .sp
 This function creates and initializes a new compile context. If its argument is
-\f(CRNULL\fP, \f(CRmalloc()\fP is used to get the necessary memory; otherwise the memory
-allocation function within the general context is used. The result is \f(CRNULL\fP if
+\fBNULL\fP, \f(CRmalloc()\fP is used to get the necessary memory; otherwise the memory
+allocation function within the general context is used. The result is \fBNULL\fP if
 the memory could not be obtained.
 .sp
 There is a complete description of the PCRE2 native API in the

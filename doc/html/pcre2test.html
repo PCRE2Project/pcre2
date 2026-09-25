@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="description" content="The `pcre2test` command for testing PCRE2">
 <title>pcre2test(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +117,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +219,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -433,12 +435,99 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 </head>
-<body class="manpage">
+<body class="manpage toc2 toc-right">
 <div id="header">
 <h1>pcre2test(1) Manual Page</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_synopsis">Synopsis</a></li>
+<li><a href="#_pcre2s_8_bit_16_bit_and_32_bit_libraries">PCRE2&#8217;s 8-bit, 16-bit and 32-bit libraries</a></li>
+<li><a href="#_input_encoding">Input encoding</a>
+<ul class="sectlevel2">
+<li><a href="#_input_for_the_16_bit_and_32_bit_libraries">Input for the 16-bit and 32-bit libraries</a></li>
+</ul>
+</li>
+<li><a href="#_command_line_options">Command line options</a></li>
+<li><a href="#_description">Description</a></li>
+<li><a href="#_command_lines">Command lines</a></li>
+<li><a href="#_modifier_syntax">Modifier syntax</a></li>
+<li><a href="#_pattern_syntax">Pattern syntax</a></li>
+<li><a href="#_subject_line_syntax">Subject line syntax</a></li>
+<li><a href="#_pattern_modifiers">Pattern modifiers</a>
+<ul class="sectlevel2">
+<li><a href="#_setting_compilation_options">Setting compilation options</a></li>
+<li><a href="#_setting_compilation_controls">Setting compilation controls</a></li>
+<li><a href="#_newline_and_r_handling">Newline and \R handling</a></li>
+<li><a href="#_information_about_a_pattern">Information about a pattern</a></li>
+<li><a href="#_passing_a_null_context">Passing a <code class="constant">NULL</code> context</a></li>
+<li><a href="#_passing_a_null_pattern">Passing a <code class="constant">NULL</code> pattern</a></li>
+<li><a href="#_specifying_pattern_characters_in_hexadecimal">Specifying pattern characters in hexadecimal</a></li>
+<li><a href="#_specifying_the_patterns_length">Specifying the pattern&#8217;s length</a></li>
+<li><a href="#_specifying_a_maximum_for_variable_lookbehinds">Specifying a maximum for variable lookbehinds</a></li>
+<li><a href="#_specifying_wide_characters_in_16_bit_and_32_bit_modes">Specifying wide characters in 16-bit and 32-bit modes</a></li>
+<li><a href="#_generating_long_repetitive_patterns">Generating long repetitive patterns</a></li>
+<li><a href="#_jit_compilation">JIT compilation</a></li>
+<li><a href="#_setting_a_locale">Setting a locale</a></li>
+<li><a href="#_showing_pattern_memory">Showing pattern memory</a></li>
+<li><a href="#_limiting_nested_parentheses">Limiting nested parentheses</a></li>
+<li><a href="#_limiting_the_pattern_length">Limiting the pattern length</a></li>
+<li><a href="#_limiting_the_size_of_a_compiled_pattern">Limiting the size of a compiled pattern</a></li>
+<li><a href="#_using_the_posix_wrapper_api">Using the POSIX wrapper API</a></li>
+<li><a href="#_testing_the_stack_guard_feature">Testing the stack guard feature</a></li>
+<li><a href="#_using_alternative_character_tables">Using alternative character tables</a></li>
+<li><a href="#_setting_certain_match_controls">Setting certain match controls</a></li>
+<li><a href="#_specifying_literal_subject_lines">Specifying literal subject lines</a></li>
+<li><a href="#_saving_a_compiled_pattern">Saving a compiled pattern</a></li>
+<li><a href="#_testing_foreign_pattern_conversion">Testing foreign pattern conversion</a></li>
+</ul>
+</li>
+<li><a href="#_subject_modifiers">Subject modifiers</a>
+<ul class="sectlevel2">
+<li><a href="#_setting_match_options">Setting match options</a></li>
+<li><a href="#_setting_match_controls">Setting match controls</a></li>
+<li><a href="#_showing_more_text">Showing more text</a></li>
+<li><a href="#_showing_the_value_of_all_capture_groups">Showing the value of all capture groups</a></li>
+<li><a href="#_showing_the_entire_ovector_for_all_outcomes">Showing the entire ovector, for all outcomes</a></li>
+<li><a href="#_testing_pattern_callouts">Testing pattern callouts</a></li>
+<li><a href="#_finding_all_matches_in_a_string">Finding all matches in a string</a></li>
+<li><a href="#_testing_substring_extraction_functions">Testing substring extraction functions</a></li>
+<li><a href="#_testing_the_substitution_function">Testing the substitution function</a></li>
+<li><a href="#_testing_substitute_callouts">Testing substitute callouts</a></li>
+<li><a href="#_testing_substitute_case_callouts">Testing substitute case callouts</a></li>
+<li><a href="#_setting_the_jit_stack_size">Setting the JIT stack size</a></li>
+<li><a href="#_setting_heap_match_and_depth_limits">Setting heap, match, and depth limits</a></li>
+<li><a href="#_finding_minimum_limits">Finding minimum limits</a></li>
+<li><a href="#_showing_mark_names">Showing MARK names</a></li>
+<li><a href="#_showing_memory_usage">Showing memory usage</a></li>
+<li><a href="#_showing_the_heap_frame_overall_vector_size">Showing the heap frame overall vector size</a></li>
+<li><a href="#_setting_a_starting_offset">Setting a starting offset</a></li>
+<li><a href="#_setting_an_offset_limit">Setting an offset limit</a></li>
+<li><a href="#_setting_the_size_of_the_output_vector">Setting the size of the output vector</a></li>
+<li><a href="#_passing_the_subject_as_zero_terminated">Passing the subject as zero-terminated</a></li>
+<li><a href="#_passing_a_null_context_subject_replacement_or_substitute_buffer">Passing a <code class="constant">NULL</code> context, subject, replacement, or substitute buffer</a></li>
+</ul>
+</li>
+<li><a href="#_the_alternative_matching_function">The alternative matching function</a></li>
+<li><a href="#_default_output_from_pcre2test">Default output from pcre2test</a></li>
+<li><a href="#_output_from_the_alternative_matching_function">Output from the alternative matching function</a></li>
+<li><a href="#_restarting_after_a_partial_match">Restarting after a partial match</a></li>
+<li><a href="#callouts">Callouts</a>
+<ul class="sectlevel2">
+<li><a href="#_callouts_with_numerical_arguments">Callouts with numerical arguments</a></li>
+<li><a href="#_callouts_with_string_arguments">Callouts with string arguments</a></li>
+<li><a href="#_callout_modifiers">Callout modifiers</a></li>
+<li><a href="#_return_values_from_callouts">Return values from callouts</a></li>
+</ul>
+</li>
+<li><a href="#_non_printing_characters">Non-printing characters</a></li>
+<li><a href="#saving-restoring-patterns">Saving and restoring compiled patterns</a></li>
+<li><a href="#_see_also">See also</a></li>
+</ul>
+</div>
 <h2>Name</h2>
 <div class="sectionbody">
-<p>pcre2test - a program for testing Perl-compatible regular expressions.</p>
+<p>pcre2test - a program for testing Perl-compatible regular expressions</p>
 </div>
 </div>
 <div id="content">
@@ -447,7 +536,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="listingblock synopsis">
 <div class="content">
-<pre class="nowrap"><code>pcre2test [options] [input file [output file]]</code></pre>
+<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2test [options] [input file [output file]]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -494,7 +583,7 @@ to 8-bit code units for output.</p>
 <div class="paragraph">
 <p>In the rest of this document, the names of library functions and structures
 are given in generic form, for example, <code class="function">pcre2_compile()</code>. The actual
-names used in the libraries have a suffix _8, _16, or _32, as appropriate.</p>
+names used in the libraries have a suffix <code>_8</code>, <code>_16</code>, or <code>_32</code>, as appropriate.</p>
 </div>
 </div>
 </div>
@@ -503,14 +592,14 @@ names used in the libraries have a suffix _8, _16, or _32, as appropriate.</p>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Input to <code>pcre2test</code> is processed line by line, either by calling the C
-library&#8217;s <code>fgets()</code> function, or via the <code>libreadline</code> or <code>libedit</code>
-library. In some Windows environments character 26 (hex 1A) causes an immediate
+library&#8217;s <code class="c">fgets()</code> function, or via the <code>libreadline</code> or <code>libedit</code>
+library. In some Windows environments character 26 (<code class="character">0x1A</code>) causes an immediate
 end of file, and no further data is read, so this character should be avoided
 unless you really want that action.</p>
 </div>
 <div class="paragraph">
 <p>The input is processed using C&#8217;s string functions, so must not contain binary
-zeros, even though in Unix-like environments, <code>fgets()</code> treats any bytes
+zeros, even though in Unix-like environments, <code class="c">fgets()</code> treats any bytes
 other than newline as data characters. An error is generated if a binary zero
 is encountered. By default subject lines are processed for backslash escapes,
 which makes it possible to include any data value in strings that are passed to
@@ -534,16 +623,16 @@ UTF-8 strings and translated to UTF-16 or UTF-32 as appropriate.</p>
 used. This is mutually exclusive with <code>utf</code>, and is allowed only in 16-bit
 or 32-bit mode. It causes the pattern and following subject lines to be treated
 as UTF-8 according to the original definition (RFC 2279), which allows for
-character values up to 0x7fffffff. Each character is placed in one 16-bit or
-32-bit code unit (in the 16-bit case, values greater than 0xffff cause an error
+character values up to <code class="character">0x7fffffff</code>. Each character is placed in one 16-bit or
+32-bit code unit (in the 16-bit case, values greater than <code class="character">0xffff</code> cause an error
 to occur).</p>
 </div>
 <div class="paragraph">
 <p>UTF-8 (in its original definition) is not capable of encoding values greater
-than 0x7fffffff, but such values can be handled by the 32-bit library. When
+than <code class="character">0x7fffffff</code>, but such values can be handled by the 32-bit library. When
 testing this library in non-UTF mode with <code>utf8_input</code> set, if any
-character is preceded by the byte 0xff (which is an invalid byte in UTF-8)
-0x80000000 is added to the character&#8217;s value. For subject strings, using an
+character is preceded by the byte <code class="character">0xff</code> (which is an invalid byte in UTF-8)
+<code class="character">0x80000000</code> is added to the character&#8217;s value. For subject strings, using an
 escape sequence is preferable.</p>
 </div>
 </div>
@@ -595,40 +684,83 @@ about the optional features that are included, and then exit with zero exit
 code. All other options are ignored. If both -C and -LM are present, whichever
 is first is recognized.</p>
 </dd>
-<dt class="hdlist1"><code>-C</code> <em>option</em></dt>
+<dt class="hdlist1"><code>-C <em>option</em></code></dt>
 <dd>
 <p>Output information about a specific build-time option, then exit. This
 functionality is intended for use in scripts such as <code>RunTest</code>. The
 following options output the value and set the exit code as indicated:</p>
-<div class="literalblock">
+<div class="openblock">
 <div class="content">
-<pre>linksize   the configured internal link size (2, 3, or 4)
-             exit code is set to the link size
-newline    the default newline setting:
-             CR, LF, CRLF, ANYCRLF, ANY, or NUL
-             exit code is always 0
-bsr        the default setting for what \R matches:
-             ANYCRLF or ANY
-             exit code is always 0</pre>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>linksize</code> </dt>
+<dd>
+<p>Output the configured internal link size (2, 3, or 4).
+The exit code is set to the link size.</p>
+</dd>
+<dt class="hdlist1"><code>newline</code>  </dt>
+<dd>
+<p>Output the default newline setting:
+CR, LF, CRLF, ANYCRLF, ANY, or NUL.
+The exit code is always 0.</p>
+</dd>
+<dt class="hdlist1"><code>bsr</code>      </dt>
+<dd>
+<p>Output the default setting for what <code class="regex">\R</code> matches:
+ANYCRLF or ANY. The exit code is always 0.</p>
+</dd>
+</dl>
+</div>
 </div>
 </div>
 <div class="paragraph">
 <p>The following options output 1 for true or 0 for false, and set the exit code
 to the same value:</p>
 </div>
-<div class="literalblock">
+<div class="openblock">
 <div class="content">
-<pre>backslash-C  \C is supported (not locked out)
-ebcdic       compiled for an EBCDIC environment
-ebcdic-io    if PCRE2 is compiled for EBCDIC, whether pcre2test's input and
-               output is EBCDIC or ASCII
-ebcdic-nl25  if PCRE2 is compiled for EBCDIC, whether NL (= LF) is 0x25
-               (otherwise it is 0x15, the default)
-jit          just-in-time support is available
-pcre2-16     the 16-bit library was built
-pcre2-32     the 32-bit library was built
-pcre2-8      the 8-bit library was built
-unicode      Unicode support is available</pre>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>backslash-C</code>  </dt>
+<dd>
+<p><code class="regex">\C</code> is supported (not locked out)</p>
+</dd>
+<dt class="hdlist1"><code>ebcdic</code>       </dt>
+<dd>
+<p>compiled for an EBCDIC environment</p>
+</dd>
+<dt class="hdlist1"><code>ebcdic-io</code>    </dt>
+<dd>
+<p>if PCRE2 is compiled for EBCDIC, whether <code>pcre2test</code>'s input and
+output is EBCDIC or ASCII</p>
+</dd>
+<dt class="hdlist1"><code>ebcdic-nl25</code>  </dt>
+<dd>
+<p>if PCRE2 is compiled for EBCDIC, whether NL (= LF) is <code class="character">0x25</code>
+(otherwise it is <code class="character">0x15</code>, the default)</p>
+</dd>
+<dt class="hdlist1"><code>jit</code>          </dt>
+<dd>
+<p>just-in-time support is available</p>
+</dd>
+<dt class="hdlist1"><code>pcre2-16</code>     </dt>
+<dd>
+<p>the 16-bit library was built</p>
+</dd>
+<dt class="hdlist1"><code>pcre2-32</code>     </dt>
+<dd>
+<p>the 32-bit library was built</p>
+</dd>
+<dt class="hdlist1"><code>pcre2-8</code>      </dt>
+<dd>
+<p>the 8-bit library was built</p>
+</dd>
+<dt class="hdlist1"><code>unicode</code>      </dt>
+<dd>
+<p>Unicode support is available</p>
+</dd>
+</dl>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -637,12 +769,28 @@ that it can actually be used because in some environments it is unable to
 allocate executable memory. The option "jitusable" gives more detailed
 information. It returns one of the following values:</p>
 </div>
-<div class="literalblock">
+<div class="openblock">
 <div class="content">
-<pre>0  JIT is available and usable
-1  JIT is available but cannot allocate executable memory
-2  JIT is not available
-3  Unexpected return from test call to <code class="function">pcre2_jit_compile()</code></pre>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">0</dt>
+<dd>
+<p>JIT is available and usable</p>
+</dd>
+<dt class="hdlist1">1</dt>
+<dd>
+<p>JIT is available but cannot allocate executable memory</p>
+</dd>
+<dt class="hdlist1">2</dt>
+<dd>
+<p>JIT is not available</p>
+</dd>
+<dt class="hdlist1">3</dt>
+<dd>
+<p>Unexpected return from test call to <code class="function">pcre2_jit_compile()</code></p>
+</dd>
+</dl>
+</div>
 </div>
 </div>
 <div class="paragraph">
@@ -671,10 +819,10 @@ using the <code class="function">pcre2_dfa_match()</code> function instead of th
 </dd>
 <dt class="hdlist1"><code>-E</code></dt>
 <dd>
-<p>Run in "preprocess only" mode (similar to "gcc -E"). The "#if &#8230;&#8203; #endif"
+<p>Run in "preprocess only" mode (similar to <code>gcc -E</code>). The <code>#if ... #endif</code>
 commands are processed, and all other lines are printed verbatim.</p>
 </dd>
-<dt class="hdlist1"><code>-error</code> <em>number[,number,&#8230;&#8203;]</em></dt>
+<dt class="hdlist1"><code>-error <em>number</em>[,<em>number</em>,...]</code></dt>
 <dd>
 <p>Call <code class="function">pcre2_get_error_message()</code> for each of the error numbers in the
 comma-separated list, display the resulting messages on the standard output,
@@ -728,11 +876,11 @@ output, then exit with zero exit code. All other options are ignored. If both
 </dd>
 <dt class="hdlist1"><code>-malloc</code></dt>
 <dd>
-<p>Exercise malloc() failures, by first counting the number of calls made to malloc
+<p>Exercise <code class="c">malloc()</code> failures, by first counting the number of calls made to malloc
 during pattern compilation and matching, then re-running the compilation and
 matching that many times, exercising a failure of each malloc() call.</p>
 </dd>
-<dt class="hdlist1"><code>-pattern</code> <em>modifier-list</em></dt>
+<dt class="hdlist1"><code>-pattern <em>modifier-list</em></code></dt>
 <dd>
 <p>Behave as if each pattern line contains the given modifiers.</p>
 </dd>
@@ -740,12 +888,12 @@ matching that many times, exercising a failure of each malloc() call.</p>
 <dd>
 <p>Do not output the version number of <code>pcre2test</code> at the start of execution.</p>
 </dd>
-<dt class="hdlist1"><code>-S</code> <em>size</em></dt>
+<dt class="hdlist1"><code>-S <em>size</em></code></dt>
 <dd>
 <p>On Unix-like systems, set the size of the run-time stack to <em>size</em>
 mebibytes (units of 1024*1024 bytes).</p>
 </dd>
-<dt class="hdlist1"><code>-subject</code> <em>modifier-list</em></dt>
+<dt class="hdlist1"><code>-subject <em>modifier-list</em></code></dt>
 <dd>
 <p>Behave as if each subject line contains the given modifiers.</p>
 </dd>
@@ -763,7 +911,7 @@ default is to iterate 500,000 times.</p>
 <p>This is like <code>-t</code> except that it times only the matching phase, not the
 compile phase.</p>
 </dd>
-<dt class="hdlist1"><code>-T</code> <code>-TM</code></dt>
+<dt class="hdlist1"><code>-T</code>, <code>-TM</code></dt>
 <dd>
 <p>These behave like <code>-t</code> and <code>-tm</code>, but in addition, at the end of a run,
 the total times for all compiles and matches are output.</p>
@@ -794,9 +942,9 @@ stdout.</p>
 <div class="paragraph">
 <p>When <code>pcre2test</code> is built, a configuration option can specify that it
 should be linked with the <code>libreadline</code> or <code>libedit</code> library. When this
-is done, if the input is from a terminal, it is read using the <code>readline()</code>
+is done, if the input is from a terminal, it is read using the <code class="c">readline()</code>
 function. This provides line-editing and history facilities. The output from
-the <code>-help</code> option states whether or not <code>readline()</code> will be used.</p>
+the <code>-help</code> option states whether or not <code class="c">readline()</code> will be used.</p>
 </div>
 <div class="paragraph">
 <p>The program handles any number of tests, each of which consists of a set of
@@ -868,7 +1016,7 @@ output.</p>
 </div>
 <div class="paragraph">
 <p>This command is used to load a set of precompiled patterns from a file, as
-described in the section entitled "Saving and restoring compiled patterns"
+described in the section <a href="#saving-restoring-patterns">Saving and restoring compiled patterns</a>
 below.</p>
 </div>
 <div class="literalblock">
@@ -958,7 +1106,7 @@ put in the wrong file or use the wrong delimiter. For more details of the
 </div>
 <div class="paragraph">
 <p>These commands are used to manipulate the stack of compiled patterns, as
-described in the section entitled "Saving and restoring compiled patterns"
+described in the section <a href="#saving-restoring-patterns">Saving and restoring compiled patterns</a>
 below.</p>
 </div>
 <div class="literalblock">
@@ -968,7 +1116,7 @@ below.</p>
 </div>
 <div class="paragraph">
 <p>This command is used to save a set of compiled patterns to a file, as described
-in the section entitled "Saving and restoring compiled patterns"
+in the section <a href="#saving-restoring-patterns">Saving and restoring compiled patterns</a>
 below.</p>
 </div>
 <div class="literalblock">
@@ -1056,7 +1204,7 @@ the pattern by escaping it with a backslash, for example</p>
 <p>If you do this, the escape and the delimiter form part of the pattern, but
 since the delimiters are all non-alphanumeric, the inclusion of the backslash
 does not affect the pattern&#8217;s interpretation. Note, however, that this trick
-does not work within \Q&#8230;&#8203;\E literal bracketing because the backslash will
+does not work within <code class="regex">\Q...\E</code> literal bracketing because the backslash will
 itself be interpreted as a literal. If the terminating delimiter is immediately
 followed by a backslash, for example,</p>
 </div>
@@ -1094,50 +1242,89 @@ space is removed, and the line is scanned for backslash escapes, unless the
 <code>subject_literal</code> modifier was set for the pattern. The following provide a
 means of encoding non-printing characters in a visible way:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>\a          alarm (BEL, \x07)
-\b          backspace (\x08)
-\e          escape (\x27)
-\f          form feed (\x0c)
-\n          newline (\x0a)
-\N{U+hh...} unicode character (any number of hex digits)
-\r          carriage return (\x0d)
-\t          tab (\x09)
-\v          vertical tab (\x0b)
-\ddd        octal number (up to 3 octal digits); represent a single
-              code point unless larger than 255 with the 8-bit library
-\o{dd...}   octal number (any number of octal digits} representing a
-              character in UTF mode or a code point
-\xhh        hexadecimal byte (up to 2 hex digits)
-\x{hh...}   hexadecimal number (up to 8 hex digits) representing a
-              character in UTF mode or a code point</pre>
-</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>\a</code>              </dt>
+<dd>
+<p>alarm (BEL, <code class="character">0x07</code>)</p>
+</dd>
+<dt class="hdlist1"><code>\b</code>              </dt>
+<dd>
+<p>backspace (<code class="character">0x08</code>)</p>
+</dd>
+<dt class="hdlist1"><code>\e</code>              </dt>
+<dd>
+<p>escape (<code class="character">0x27</code>)</p>
+</dd>
+<dt class="hdlist1"><code>\f</code>              </dt>
+<dd>
+<p>form feed (<code class="character">0x0c</code>)</p>
+</dd>
+<dt class="hdlist1"><code>\n</code>              </dt>
+<dd>
+<p>newline (<code class="character">0x0a</code>)</p>
+</dd>
+<dt class="hdlist1"><code>\N{U&#43;<em>hh...</em>}</code> </dt>
+<dd>
+<p>unicode character (any number of hex digits)</p>
+</dd>
+<dt class="hdlist1"><code>\r</code>              </dt>
+<dd>
+<p>carriage return (<code class="character">0x0d</code>)</p>
+</dd>
+<dt class="hdlist1"><code>\t</code>              </dt>
+<dd>
+<p>tab (<code class="character">0x09</code>)</p>
+</dd>
+<dt class="hdlist1"><code>\v</code>              </dt>
+<dd>
+<p>vertical tab (<code class="character">0x0b</code>)</p>
+</dd>
+<dt class="hdlist1"><code>\<em>ddd</em></code> </dt>
+<dd>
+<p>octal number (up to 3 octal digits); represent a single
+code point unless larger than 255 with the 8-bit library</p>
+</dd>
+<dt class="hdlist1"><code>\o{<em>dd...</em>}</code>  </dt>
+<dd>
+<p>octal number (any number of octal digits) representing a
+character in UTF mode or a code point</p>
+</dd>
+<dt class="hdlist1"><code>\x<em>hh</em></code>        </dt>
+<dd>
+<p>hexadecimal byte (up to 2 hex digits)</p>
+</dd>
+<dt class="hdlist1"><code>\x{<em>hh...</em>}</code>  </dt>
+<dd>
+<p>hexadecimal number (up to 8 hex digits) representing a
+character in UTF mode or a code point</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>Invoking <code>\N{U+hh&#8230;&#8203;}</code> or \x{hh&#8230;&#8203;} doesn&#8217;t require the use of the <code>utf</code>
+<p>Invoking <code>\N{U&#43;<em>hh...</em>}</code> or <code>\x{<em>hh...</em>}</code> doesn&#8217;t require the use of the <code>utf</code>
 modifier on the pattern. It is always recognized. There may be any number of
 hexadecimal digits inside the braces; invalid values provoke error messages
-but when using <code>\N{U+hh&#8230;&#8203;}</code> with some invalid unicode characters they will
+but when using <code>\N{U&#43;<em>hh...</em>}</code> with some invalid unicode characters they will
 be accepted with a warning instead.</p>
 </div>
 <div class="paragraph">
-<p>Note that even in UTF-8 mode, \xhh (and depending of how large, \ddd)
+<p>Note that even in UTF-8 mode, <code>\x<em>hh</em></code> (and depending of how large, <code>\<em>ddd</em></code>)
 describe one byte rather than one character; this makes it possible to
 construct invalid UTF-8 sequences for testing purposes. On the other hand,
-\x{hh&#8230;&#8203;} is interpreted as a UTF-8 character in UTF-8 mode, only generating
+<code>\x{<em>hh...</em>}</code> is interpreted as a UTF-8 character in UTF-8 mode, only generating
 more than one byte if the value is greater than 127. To avoid the ambiguity
-it is preferred to use <code>\N{U+hh&#8230;&#8203;}</code> when describing characters. When testing
-the 8-bit library not in UTF-8 mode, \x{hh} generates one byte for values
+it is preferred to use <code>\N{U&#43;<em>hh</em>...}</code> when describing characters. When testing
+the 8-bit library not in UTF-8 mode, <code>\x{<em>hh</em>}</code> generates one byte for values
 that could fit on it, and causes an error for greater values.</p>
 </div>
 <div class="paragraph">
-<p>When testing the 16-bit library, not in UTF-16 mode, all 4-digit \x{hhhh}
+<p>When testing the 16-bit library, not in UTF-16 mode, all 4-digit <code>\x{<em>hhhh</em>}</code>
 values are accepted. This makes it possible to construct invalid UTF-16
 sequences for testing purposes.</p>
 </div>
 <div class="paragraph">
-<p>When testing the 32-bit library, not in UTF-32 mode, all 4 to 8-digit \x{&#8230;&#8203;}
+<p>When testing the 32-bit library, not in UTF-32 mode, all 4 to 8-digit <code>\x{...}</code>
 values are accepted. This makes it possible to construct invalid UTF-32
 sequences for testing purposes.</p>
 </div>
@@ -1213,7 +1400,7 @@ by a previous <code>#pattern</code> command.</p>
 bits in the options argument of that function, but those whose names start with
 <code class="constant">PCRE2_EXTRA</code> are additional options that are set in the compile context.
 Some of these options have single-letter abbreviations. There is special
-handling for /x: if a second x is present, <code class="constant">PCRE2_EXTENDED</code> is converted into
+handling for <code class="regex">/x</code>: if a second x is present, <code class="constant">PCRE2_EXTENDED</code> is converted into
 <code class="constant">PCRE2_EXTENDED_MORE</code> as in Perl. A third appearance adds <code class="constant">PCRE2_EXTENDED</code> as well,
 though this makes no difference to the way <code class="function">pcre2_compile()</code> behaves. See
 <a href="pcre2api.html"><code>pcre2api</code></a>
@@ -1421,8 +1608,8 @@ for a description of the effects of these options.</p>
 </div>
 <div class="paragraph">
 <p>As well as turning on the <code class="constant">PCRE2_UTF</code> option, the <code>utf</code> modifier causes all
-non-printing characters in output strings to be printed using the \x{hh&#8230;&#8203;}
-notation. Otherwise, those less than 0x100 are output in hex without the curly
+non-printing characters in output strings to be printed using the <code class="regex">\x{<em>hh</em>...}</code>
+notation. Otherwise, those less than <code class="character">0x100</code> are output in hex without the curly
 brackets. Setting <code>utf</code> in 16-bit or 32-bit mode also causes pattern and
 subject strings to be translated to UTF-16 or UTF-32, respectively, before
 being passed to library functions.</p>
@@ -1480,45 +1667,149 @@ documentation for details on these optimizations.</p>
 about the pattern. There are single-letter abbreviations for some that are
 heavily used in the test files.</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>/B  bincode                   show binary code without lengths
-    bsr=[anycrlf|unicode]     specify \R handling
-    callout_info              show callout information
-    convert=&lt;options&gt;         request foreign pattern conversion
-    convert_glob_escape=c     set glob escape character
-    convert_glob_separator=c  set glob separator character
-    convert_length            set convert buffer length
-    debug                     same as info,fullbincode
-    expand                    expand repetition syntax in pattern
-    framesize                 show matching frame size
-    fullbincode               show binary code with lengths
-/I  info                      show info about compiled pattern
-    hex                       unquoted characters are hexadecimal
-    jit[=&lt;number&gt;]            use JIT
-    jitfast                   use JIT fast path
-    jitverify                 verify JIT use
-    locale=&lt;name&gt;             use this locale
-    max_pattern_compiled      ) set maximum compiled pattern
-               _length=&lt;n&gt;    )   length (bytes)
-    max_pattern_length=&lt;n&gt;    set maximum pattern length (code units)
-    max_varlookbehind=&lt;n&gt;     set maximum variable lookbehind length
-    memory                    show memory used
-    newline=&lt;type&gt;            set newline type
-    null_context              compile with a NULL context
-    null_pattern              pass pattern as NULL
-    parens_nest_limit=&lt;n&gt;     set maximum parentheses depth
-    posix                     use the POSIX API
-    posix_nosub               use the POSIX API with REG_NOSUB
-    push                      push compiled pattern onto the stack
-    pushcopy                  push a copy onto the stack
-    pushtablescopy            push a copy with tables onto the stack
-    stackguard=&lt;number&gt;       test the stackguard feature
-    subject_literal           treat all subject lines as literal
-    tables=[0|1|2|3]          select internal tables
-    use_length                do not zero-terminate the pattern
-    utf8_input                treat input as UTF-8</pre>
-</div>
+<div class="dlist options">
+<dl>
+<dt class="hdlist1"><code>/B bincode</code></dt>
+<dd>
+<p>show binary code without lengths</p>
+</dd>
+<dt class="hdlist1"><code>bsr=[anycrlf|unicode]</code></dt>
+<dd>
+<p>specify \R handling</p>
+</dd>
+<dt class="hdlist1"><code>callout_info</code></dt>
+<dd>
+<p>show callout information</p>
+</dd>
+<dt class="hdlist1"><code>convert=&lt;options&gt;</code></dt>
+<dd>
+<p>request foreign pattern conversion</p>
+</dd>
+<dt class="hdlist1"><code>convert_glob_escape=c</code></dt>
+<dd>
+<p>set glob escape character</p>
+</dd>
+<dt class="hdlist1"><code>convert_glob_separator=c</code></dt>
+<dd>
+<p>set glob separator character</p>
+</dd>
+<dt class="hdlist1"><code>convert_length</code></dt>
+<dd>
+<p>set convert buffer length</p>
+</dd>
+<dt class="hdlist1"><code>debug</code></dt>
+<dd>
+<p>same as <code>info,fullbincode</code></p>
+</dd>
+<dt class="hdlist1"><code>expand</code></dt>
+<dd>
+<p>expand repetition syntax in pattern</p>
+</dd>
+<dt class="hdlist1"><code>framesize</code></dt>
+<dd>
+<p>show matching frame size</p>
+</dd>
+<dt class="hdlist1"><code>fullbincode</code></dt>
+<dd>
+<p>show binary code with lengths</p>
+</dd>
+<dt class="hdlist1"><code>/I info</code></dt>
+<dd>
+<p>show info about compiled pattern</p>
+</dd>
+<dt class="hdlist1"><code>hex</code></dt>
+<dd>
+<p>unquoted characters are hexadecimal</p>
+</dd>
+<dt class="hdlist1"><code>jit[=&lt;number&gt;]</code></dt>
+<dd>
+<p>use JIT</p>
+</dd>
+<dt class="hdlist1"><code>jitfast</code></dt>
+<dd>
+<p>use JIT fast path</p>
+</dd>
+<dt class="hdlist1"><code>jitverify</code></dt>
+<dd>
+<p>verify JIT use</p>
+</dd>
+<dt class="hdlist1"><code>locale=&lt;name&gt;</code></dt>
+<dd>
+<p>use this locale</p>
+</dd>
+<dt class="hdlist1"><code>max_pattern_compiled_length=&lt;n&gt;</code></dt>
+<dd>
+<p>set maximum compiled pattern length (bytes)</p>
+</dd>
+<dt class="hdlist1"><code>max_pattern_length=&lt;n&gt;</code></dt>
+<dd>
+<p>set maximum pattern length (code units)</p>
+</dd>
+<dt class="hdlist1"><code>max_varlookbehind=&lt;n&gt;</code></dt>
+<dd>
+<p>set maximum variable lookbehind length</p>
+</dd>
+<dt class="hdlist1"><code>memory</code></dt>
+<dd>
+<p>show memory used</p>
+</dd>
+<dt class="hdlist1"><code>newline=&lt;type&gt;</code></dt>
+<dd>
+<p>set newline type</p>
+</dd>
+<dt class="hdlist1"><code>null_context</code></dt>
+<dd>
+<p>compile with a NULL context</p>
+</dd>
+<dt class="hdlist1"><code>null_pattern</code></dt>
+<dd>
+<p>pass pattern as NULL</p>
+</dd>
+<dt class="hdlist1"><code>parens_nest_limit=&lt;n&gt;</code></dt>
+<dd>
+<p>set maximum parentheses depth</p>
+</dd>
+<dt class="hdlist1"><code>posix</code></dt>
+<dd>
+<p>use the POSIX API</p>
+</dd>
+<dt class="hdlist1"><code>posix_nosub</code></dt>
+<dd>
+<p>use the POSIX API with <code class="c">REG_NOSUB</code></p>
+</dd>
+<dt class="hdlist1"><code>push</code></dt>
+<dd>
+<p>push compiled pattern onto the stack</p>
+</dd>
+<dt class="hdlist1"><code>pushcopy</code></dt>
+<dd>
+<p>push a copy onto the stack</p>
+</dd>
+<dt class="hdlist1"><code>pushtablescopy</code></dt>
+<dd>
+<p>push a copy with tables onto the stack</p>
+</dd>
+<dt class="hdlist1"><code>stackguard=&lt;number&gt;</code></dt>
+<dd>
+<p>test the stackguard feature</p>
+</dd>
+<dt class="hdlist1"><code>subject_literal</code></dt>
+<dd>
+<p>treat all subject lines as literal</p>
+</dd>
+<dt class="hdlist1"><code>tables=[0|1|2|3]</code></dt>
+<dd>
+<p>select internal tables</p>
+</dd>
+<dt class="hdlist1"><code>use_length</code></dt>
+<dd>
+<p>do not zero-terminate the pattern</p>
+</dd>
+<dt class="hdlist1"><code>utf8_input</code></dt>
+<dd>
+<p>treat input as UTF-8</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>The effects of these modifiers are described in the following sections.</p>
@@ -1610,19 +1901,19 @@ by the item that follows it in the pattern.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_passing_a_null_context">Passing a null context</h3>
+<h3 id="_passing_a_null_context">Passing a <code class="constant">NULL</code> context</h3>
 <div class="paragraph">
 <p>Normally, <code>pcre2test</code> passes a context block to <code class="function">pcre2_compile()</code>. If
-the <code>null_context</code> modifier is set, however, NULL is passed. This is for
+the <code>null_context</code> modifier is set, however, <code class="constant">NULL</code> is passed. This is for
 testing that <code class="function">pcre2_compile()</code> behaves correctly in this case (it uses
 default values).</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_passing_a_null_pattern">Passing a null pattern</h3>
+<h3 id="_passing_a_null_pattern">Passing a <code class="constant">NULL</code> pattern</h3>
 <div class="paragraph">
 <p>The <code>null_pattern</code> modifier is for testing the behaviour of
-<code class="function">pcre2_compile()</code> when the pattern argument is NULL. The length value
+<code class="function">pcre2_compile()</code> when the pattern argument is <code class="constant">NULL</code>. The length value
 passed is the default <code class="constant">PCRE2_ZERO_TERMINATED</code> unless <code>use_length</code> is set.
 Any length other than zero causes an error.</p>
 </div>
@@ -1750,26 +2041,56 @@ optionally be followed by an equals sign and a number in the range 0 to 7.
 The three bits that make up the number specify which of the three JIT operating
 modes are to be compiled:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>1  compile JIT code for non-partial matching
-2  compile JIT code for soft partial matching
-4  compile JIT code for hard partial matching</pre>
-</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">1</dt>
+<dd>
+<p>compile JIT code for non-partial matching</p>
+</dd>
+<dt class="hdlist1">2</dt>
+<dd>
+<p>compile JIT code for soft partial matching</p>
+</dd>
+<dt class="hdlist1">4</dt>
+<dd>
+<p>compile JIT code for hard partial matching</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>The possible values for the <code>jit</code> modifier are therefore:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>0  disable JIT
-1  normal matching only
-2  soft partial matching only
-3  normal and soft partial matching
-4  hard partial matching only
-6  soft and hard partial matching only
-7  all three modes</pre>
-</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">0</dt>
+<dd>
+<p>disable JIT</p>
+</dd>
+<dt class="hdlist1">1</dt>
+<dd>
+<p>normal matching only</p>
+</dd>
+<dt class="hdlist1">2</dt>
+<dd>
+<p>soft partial matching only</p>
+</dd>
+<dt class="hdlist1">3</dt>
+<dd>
+<p>normal and soft partial matching</p>
+</dd>
+<dt class="hdlist1">4</dt>
+<dd>
+<p>hard partial matching only</p>
+</dd>
+<dt class="hdlist1">6</dt>
+<dd>
+<p>soft and hard partial matching only</p>
+</dd>
+<dt class="hdlist1">7</dt>
+<dd>
+<p>all three modes</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>If no number is given, 7 is assumed. The phrase "partial matching" means a call
@@ -1876,25 +2197,47 @@ hold (essentially unlimited).</p>
 <p>The <code>posix</code> and <code>posix_nosub</code> modifiers cause <code>pcre2test</code> to call
 PCRE2 via the POSIX wrapper API rather than its native API. When
 <code>posix_nosub</code> is used, the POSIX option <code class="c">REG_NOSUB</code> is passed to
-<code>regcomp()</code>. The POSIX wrapper supports only the 8-bit library. Note that
+<code class="c">regcomp()</code>. The POSIX wrapper supports only the 8-bit library. Note that
 it does not imply POSIX matching semantics; for more detail see the
 <a href="pcre2posix.html"><code>pcre2posix</code></a>
 documentation. The following pattern modifiers set options for the
-<code>regcomp()</code> function:</p>
+<code class="c">regcomp()</code> function:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>caseless           REG_ICASE
-multiline          REG_NEWLINE
-dotall             REG_DOTALL     )
-ungreedy           REG_UNGREEDY   ) These options are not part of
-ucp                REG_UCP        )   the POSIX standard
-utf                REG_UTF8       )</pre>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>caseless</code>  </dt>
+<dd>
+<p><code class="constant">REG_ICASE</code></p>
+</dd>
+<dt class="hdlist1"><code>multiline</code> </dt>
+<dd>
+<p><code class="constant">REG_NEWLINE</code></p>
+</dd>
+<dt class="hdlist1"><code>dotall</code>    </dt>
+<dd>
+<p><code class="constant">REG_DOTALL</code></p>
+</dd>
+<dt class="hdlist1"><code>ungreedy</code>  </dt>
+<dd>
+<p><code class="constant">REG_UNGREEDY</code></p>
+</dd>
+<dt class="hdlist1"><code>ucp</code>       </dt>
+<dd>
+<p><code class="constant">REG_UCP</code></p>
+</dd>
+<dt class="hdlist1"><code>utf</code>       </dt>
+<dd>
+<p><code class="constant">REG_UTF8</code></p>
+</dd>
+</dl>
 </div>
+<div class="paragraph">
+<p>The four options <code class="constant">REG_DOTALL</code>, <code class="constant">REG_UNGREEDY</code>, <code class="constant">REG_UCP</code>, and <code class="constant">REG_UTF8</code> are not part of the
+POSIX standard.</p>
 </div>
 <div class="paragraph">
 <p>The <code>regerror_buffsize</code> modifier specifies a size for the error buffer that
-is passed to <code>regerror()</code> in the event of a compilation error. For example:</p>
+is passed to <code class="c">regerror()</code> in the event of a compilation error. For example:</p>
 </div>
 <div class="literalblock">
 <div class="content">
@@ -1902,7 +2245,7 @@ is passed to <code>regerror()</code> in the event of a compilation error. For ex
 </div>
 </div>
 <div class="paragraph">
-<p>This provides a means of testing the behaviour of <code>regerror()</code> when the
+<p>This provides a means of testing the behaviour of <code class="c">regerror()</code> when the
 buffer is too small for the error message. If this modifier has not been set, a
 large buffer is used.</p>
 </div>
@@ -1912,9 +2255,9 @@ below. All other modifiers are either ignored, with a warning message, or cause
 an error.</p>
 </div>
 <div class="paragraph">
-<p>The pattern is passed to <code>regcomp()</code> as a zero-terminated string by
+<p>The pattern is passed to <code class="c">regcomp()</code> as a zero-terminated string by
 default, but if the <code>use_length</code> or <code>hex</code> modifiers are set, the
-const:REG_PEND extension is used to pass it by length.</p>
+<code class="c">REG_PEND</code> extension is used to pass it by length.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1940,14 +2283,25 @@ be aborted.</p>
 to <code class="function">pcre2_compile()</code>. This is used in the PCRE2 tests to check behaviour
 with different character tables. The digit specifies the tables as follows:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>0   do not pass any special character tables
-1   the default ASCII tables, as distributed in
-      pcre2_chartables.c.dist
-2   a set of tables defining ISO 8859 characters
-3   a set of tables loaded by the #loadtables command</pre>
-</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">0</dt>
+<dd>
+<p>do not pass any special character tables</p>
+</dd>
+<dt class="hdlist1">1</dt>
+<dd>
+<p>the default ASCII tables, as distributed in <code>pcre2_chartables.c.dist</code></p>
+</dd>
+<dt class="hdlist1">2</dt>
+<dd>
+<p>a set of tables defining ISO 8859 characters</p>
+</dd>
+<dt class="hdlist1">3</dt>
+<dd>
+<p>a set of tables loaded by the <code>#loadtables</code> command</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>In tables 2, some characters whose codes are greater than 128 are identified as
@@ -2086,7 +2440,7 @@ that are set as defaults by a <code>#subject</code> command are recognized.</p>
 pushed onto a stack of compiled patterns, and <code>pcre2test</code> expects the next
 line to contain a new pattern (or a command) instead of a subject line. This
 facility is used when saving compiled patterns to a file, as described in the
-section entitled "Saving and restoring compiled patterns"
+section <a href="#saving-restoring-patterns">Saving and restoring compiled patterns</a>
 below.
 If <code>pushcopy</code> is used instead of <code>push</code>, a copy of the compiled
 pattern is stacked, leaving the original as current, ready to match the
@@ -2224,11 +2578,11 @@ for a description of their effects.</p>
 <dd>
 <p>set <code class="constant">PCRE2_NOTEOL</code></p>
 </dd>
-<dt class="hdlist1"><code>partial_hard (or ph)</code></dt>
+<dt class="hdlist1"><code>partial_hard</code> (or <code>ph</code>)</dt>
 <dd>
 <p>set <code class="constant">PCRE2_PARTIAL_HARD</code></p>
 </dd>
-<dt class="hdlist1"><code>partial_soft (or ps)</code></dt>
+<dt class="hdlist1"><code>partial_soft</code> (or <code>ps</code>)</dt>
 <dd>
 <p>set <code class="constant">PCRE2_PARTIAL_SOFT</code></p>
 </dd>
@@ -2243,7 +2597,7 @@ appear frequently in tests.</p>
 causing the POSIX wrapper API to be used, the only option-setting modifiers
 that have any effect are <code>notbol</code>, <code>notempty</code>, and <code>noteol</code>,
 causing <code class="c">REG_NOTBOL</code>, <code class="c">REG_NOTEMPTY</code>, and <code class="c">REG_NOTEOL</code>, respectively, to be passed to
-<code>regexec()</code>. The other modifiers are ignored, with a warning message.</p>
+<code class="c">regexec()</code>. The other modifiers are ignored, with a warning message.</p>
 </div>
 <div class="paragraph">
 <p>There is one additional modifier that can be used with the POSIX wrapper. It is
@@ -2253,10 +2607,10 @@ ignored (with a warning) if used for non-POSIX matching.</p>
 <dl>
 <dt class="hdlist1"><code>posix_startend=&lt;n&gt;[:&lt;m&gt;]</code></dt>
 <dd>
-<p>This causes the subject string to be passed to <code>regexec()</code> using the
-REG_STARTEND option, which uses offsets to specify which part of the string is
+<p>This causes the subject string to be passed to <code class="c">regexec()</code> using the
+<code class="c">REG_STARTEND</code> option, which uses offsets to specify which part of the string is
 searched. If only one number is given, the end offset is passed as the end of
-the subject string. For more detail of REG_STARTEND, see the
+the subject string. For more detail of <code class="c">REG_STARTEND</code>, see the
 <a href="pcre2posix.html"><code>pcre2posix</code></a>
 documentation. If the subject string contains binary zeros (coded as escapes
 such as \x{00} because <code>pcre2test</code> does not support actual binary zeros in
@@ -2394,6 +2748,10 @@ pattern, but can be overridden by modifiers on the subject.</p>
 <dt class="hdlist1"><code>null_subject</code></dt>
 <dd>
 <p>match with NULL subject</p>
+</dd>
+<dt class="hdlist1"><code>null_substitute_buffer</code></dt>
+<dd>
+<p>substitute with a NULL output buffer</p>
 </dd>
 <dt class="hdlist1"><code>null_substitute_match_data</code></dt>
 <dd>
@@ -2583,7 +2941,7 @@ ovector that is used depends on the number of matches that were found.</p>
 <p>A callout function is supplied when <code>pcre2test</code> calls the library matching
 functions, unless <code>callout_none</code> is specified. Its behaviour can be
 controlled by various modifiers listed above whose names begin with
-<code>callout_</code>. Details are given in the section entitled "Callouts"
+<code>callout_</code>. Details are given in the section <a href="#callouts">Callouts</a>
 below.
 Testing callouts from <code class="function">pcre2_substitute()</code> is described separately in
 "Testing the substitution function"
@@ -2597,7 +2955,7 @@ below.</p>
 <code>global</code> or <code>altglobal</code> modifier. After finding a match, the matching
 function is called again to search the remainder of the subject. The difference
 between <code>global</code> and <code>altglobal</code> is that the former uses the
-<em>start_offset</em> argument to <code class="function">pcre2_match()</code> or <code class="function">pcre2_dfa_match()</code>
+<code class="parameter">start_offset</code> argument to <code class="function">pcre2_match()</code> or <code class="function">pcre2_dfa_match()</code>
 to start searching at a new point within the entire string (which is what Perl
 does), whereas the latter passes over a shortened subject. This makes a
 difference to the matching process if the pattern begins with a lookbehind
@@ -2607,7 +2965,7 @@ assertion (including <code class="regex">\b</code> or <code class="regex">\B</co
 <p>If an empty string is matched, the next match is done with the
 <code class="constant">PCRE2_NOTEMPTY_ATSTART</code> flag set, in order to search for another, non-empty,
 match at the same point in the subject. This imitates the way Perl handles such
-cases when using the <code>/g</code> modifier or the <code>split()</code> function.</p>
+cases when using the <code class="regex">/g</code> modifier or the <code>split()</code> function.</p>
 </div>
 </div>
 <div class="sect2">
@@ -2667,17 +3025,41 @@ invalid UTF-8 string for testing purposes.</p>
 <p>The following modifiers set options (in additional to the normal match options)
 for <code class="function">pcre2_substitute()</code>:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>global                      PCRE2_SUBSTITUTE_GLOBAL
-substitute_extended         PCRE2_SUBSTITUTE_EXTENDED
-substitute_literal          PCRE2_SUBSTITUTE_LITERAL
-substitute_matched          PCRE2_SUBSTITUTE_MATCHED
-substitute_overflow_length  PCRE2_SUBSTITUTE_OVERFLOW_LENGTH
-substitute_replacement_only PCRE2_SUBSTITUTE_REPLACEMENT_ONLY
-substitute_unknown_unset    PCRE2_SUBSTITUTE_UNKNOWN_UNSET
-substitute_unset_empty      PCRE2_SUBSTITUTE_UNSET_EMPTY</pre>
-</div>
+<div class="dlist options">
+<dl>
+<dt class="hdlist1"><code>global</code></dt>
+<dd>
+<p><code class="constant">PCRE2_SUBSTITUTE_GLOBAL</code></p>
+</dd>
+<dt class="hdlist1"><code>substitute_extended</code></dt>
+<dd>
+<p><code class="constant">PCRE2_SUBSTITUTE_EXTENDED</code></p>
+</dd>
+<dt class="hdlist1"><code>substitute_literal</code></dt>
+<dd>
+<p><code class="constant">PCRE2_SUBSTITUTE_LITERAL</code></p>
+</dd>
+<dt class="hdlist1"><code>substitute_matched</code></dt>
+<dd>
+<p><code class="constant">PCRE2_SUBSTITUTE_MATCHED</code></p>
+</dd>
+<dt class="hdlist1"><code>substitute_overflow_length</code></dt>
+<dd>
+<p><code class="constant">PCRE2_SUBSTITUTE_OVERFLOW_LENGTH</code></p>
+</dd>
+<dt class="hdlist1"><code>substitute_replacement_only</code></dt>
+<dd>
+<p><code class="constant">PCRE2_SUBSTITUTE_REPLACEMENT_ONLY</code></p>
+</dd>
+<dt class="hdlist1"><code>substitute_unknown_unset</code></dt>
+<dd>
+<p><code class="constant">PCRE2_SUBSTITUTE_UNKNOWN_UNSET</code></p>
+</dd>
+<dt class="hdlist1"><code>substitute_unset_empty</code></dt>
+<dd>
+<p><code class="constant">PCRE2_SUBSTITUTE_UNSET_EMPTY</code></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>See the
@@ -2847,40 +3229,40 @@ automatically omitted.</p>
 </div>
 <div class="paragraph">
 <p>When using this modifier, the pattern should not contain any limit settings
-such as (<code class="regex">*LIMIT_MATCH=&#8230;&#8203;</code>) within it. If such a setting is present and is
+such as (<code class="regex">*LIMIT_MATCH=...</code>) within it. If such a setting is present and is
 lower than the minimum matching value, the minimum value cannot be found
 because <code class="function">pcre2_set_match_limit()</code> etc. are only able to reduce the value of
 an in-pattern limit; they cannot increase it.</p>
 </div>
 <div class="paragraph">
-<p>For non-DFA matching, the minimum <em>depth_limit</em> number is a measure of how
+<p>For non-DFA matching, the minimum <code>depth_limit</code> number is a measure of how
 much nested backtracking happens (that is, how deeply the pattern&#8217;s tree is
-searched). In the case of DFA matching, <em>depth_limit</em> controls the depth of
+In the case of DFA matching, <code>depth_limit</code> controls the depth of
 recursive calls of the internal function that is used for handling pattern
 recursion, lookaround assertions, and atomic groups.</p>
 </div>
 <div class="paragraph">
-<p>For non-DFA matching, the <em>match_limit</em> number is a measure of the amount
+<p>For non-DFA matching, the <code>match_limit</code> number is a measure of the amount
 of backtracking that takes place, and learning the minimum value can be
 instructive. For most simple matches, the number is quite small, but for
 patterns with very large numbers of matching possibilities, it can become large
 very quickly with increasing length of subject string. In the case of DFA
-matching, <em>match_limit</em> controls the total number of calls, both recursive
+matching, <code>match_limit</code> controls the total number of calls, both recursive
 and non-recursive, to the internal matching function, thus controlling the
 overall amount of computing resource that is used.</p>
 </div>
 <div class="paragraph">
-<p>For both kinds of matching, the <em>heap_limit</em> number, which is in kibibytes
+<p>For both kinds of matching, the <code>heap_limit</code> number, which is in kibibytes
 (units of 1024 bytes), limits the amount of heap memory used for matching.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_showing_mark_names">Showing mark names</h3>
+<h3 id="_showing_mark_names">Showing MARK names</h3>
 <div class="paragraph">
 <p>The <code>mark</code> modifier causes the names from backtracking control verbs that
 are returned from calls to <code class="function">pcre2_match()</code> to be displayed. If a mark is
 returned for a match, non-match, or partial match, <code>pcre2test</code> shows it.
-For a match, it is on a line by itself, tagged with "MK:". Otherwise, it
+For a match, it is on a line by itself, tagged with <code>MK:</code>. Otherwise, it
 is added to the non-match message.</p>
 </div>
 </div>
@@ -2942,7 +3324,7 @@ available for storing matching information. The default is 15.</p>
 </div>
 <div class="paragraph">
 <p>A value of zero is useful when testing the POSIX API because it causes
-<code>regexec()</code> to be called with a NULL capture vector. When not testing the
+<code class="c">regexec()</code> to be called with a <code class="constant">NULL</code> capture vector. When not testing the
 POSIX API, a value of zero is used to cause
 <code class="function">pcre2_match_data_create_from_pattern()</code> to be called, in order to create a
 new match block of exactly the right size for the pattern. (It is not possible
@@ -2965,20 +3347,24 @@ passing the replacement string as zero-terminated.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_passing_a_null_context_subject_or_replacement">Passing a null context, subject, or replacement</h3>
+<h3 id="_passing_a_null_context_subject_replacement_or_substitute_buffer">Passing a <code class="constant">NULL</code> context, subject, replacement, or substitute buffer</h3>
 <div class="paragraph">
 <p>Normally, <code>pcre2test</code> passes a context block to <code class="function">pcre2_match()</code>,
 <code class="function">pcre2_dfa_match()</code>, <code class="function">pcre2_jit_match()</code> or <code class="function">pcre2_substitute()</code>.
-If the <code>null_context</code> modifier is set, however, NULL is passed. This is for
+If the <code>null_context</code> modifier is set, however, <code class="constant">NULL</code> is passed. This is for
 testing that the matching and substitution functions behave correctly in this
 case (they use default values). This modifier cannot be used with the
 <code>find_limits</code>, <code>find_limits_noheap</code>, or <code>substitute_callout</code>
 modifiers.</p>
 </div>
 <div class="paragraph">
-<p>Similarly, for testing purposes, if the <code>null_subject</code> or
-<code>null_replacement</code> modifier is set, the subject or replacement string
-pointers are passed as NULL, respectively, to the relevant functions.</p>
+<p>Similarly, for testing purposes, if the <code>null_subject</code>,
+or <code>null_replacement</code>, or <code>null_substitute_buffer</code> modifiers are set, then the
+subject, or replacement string, or substitute output buffer pointers are passed
+as <code class="constant">NULL</code>, respectively, to the relevant functions. For <code>null_substitute_buffer</code>,
+the paired argument for the passed-in buffer length is set by starting the
+replacement string with "[NUM]" as described in "Testing the substitution
+function" above.</p>
 </div>
 </div>
 </div>
@@ -3064,7 +3450,7 @@ data&gt; b
 <div class="paragraph">
 <p>If the strings contain any non-printing characters, they are output as \xhh
 escapes if the value is less than 256 and UTF mode is not set. Otherwise they
-are output as \x{hh&#8230;&#8203;} escapes. See below for the definition of non-printing
+are output as <code>\x{<em>hh</em>...}</code> escapes. See below for the definition of non-printing
 characters. If the <code>aftertext</code> modifier is set, the output for substring 0
 is followed by the rest of the subject string, identified by "0+" like this:</p>
 </div>
@@ -3186,7 +3572,7 @@ documentation.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_callouts">Callouts</h2>
+<h2 id="callouts">Callouts</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>If the pattern contains any callout requests, <code>pcre2test</code>'s callout
@@ -3400,13 +3786,13 @@ therefore shown as hex escapes.</p>
 <p>When <code>pcre2test</code> is outputting text that is a matched part of a subject
 string, it behaves in the same way, unless a different locale has been set for
 the pattern (using the <code>locale</code> modifier). In this case, the
-<code>isprint()</code> function is used to distinguish printing and non-printing
+<code class="c">isprint()</code> function is used to distinguish printing and non-printing
 characters.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_saving_and_restoring_compiled_patterns">Saving and restoring compiled patterns</h2>
+<h2 id="saving-restoring-patterns">Saving and restoring compiled patterns</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>It is possible to save compiled patterns on disc or elsewhere, and reload them
@@ -3506,30 +3892,20 @@ on the stack.</p>
 <h2 id="_see_also">See also</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>pcre2</code>(3), <code>pcre2api</code>(3), <code>pcre2callout</code>(3),
-<code>pcre2jit</code>, <code>pcre2matching</code>(3), <code>pcre2partial</code>(d),
-<code>pcre2pattern</code>(3), <code>pcre2serialize</code>(3).</p>
+<p><a href="pcre2.html"><code>pcre2</code></a>, <a href="pcre2api.html"><code>pcre2api</code></a>, <a href="pcre2callout.html"><code>pcre2callout</code></a>,
+<a href="pcre2jit.html"><code>pcre2jit</code></a>, <a href="pcre2matching.html"><code>pcre2matching</code></a>, <a href="pcre2partial.html"><code>pcre2partial</code></a>,
+<a href="pcre2pattern.html"><code>pcre2pattern</code></a>, <a href="pcre2serialize.html"><code>pcre2serialize</code></a>.</p>
 </div>
+<h2 id="_author" class="discrete">Author</h2>
+<div class="paragraph">
+<p>Philip Hazel<br>
+Retired from University Computing Service<br>
+Cambridge, England.</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_author">Author</h2>
-<div class="sectionbody">
-<div class="literalblock">
-<div class="content">
-<pre>Philip Hazel
-Retired from University Computing Service
-Cambridge, England.</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_revision">Revision</h2>
-<div class="sectionbody">
+<h2 id="_revision" class="discrete">Revision</h2>
 <div class="paragraph">
 <p>Last updated: 22 August 2026<br>
-Copyright (c) 1997-2024 University of Cambridge.</p>
+Copyright &#169; 1997-2024 University of Cambridge.</p>
 </div>
 </div>
 </div>

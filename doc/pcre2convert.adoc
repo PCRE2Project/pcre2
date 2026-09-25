@@ -2,11 +2,13 @@
 :doctype: manpage
 :manname: pcre2convert
 :manpurpose: PCRE2 pattern conversion
+:description: Experimental foreign pattern conversion functions
 :manvolnum: 3
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
 :docdate: 14 November 2023
 :revdate: 14 November 2023
+:toc: right
 
 == Experimental pattern conversion functions
 
@@ -81,18 +83,18 @@ const:PCRE2_CONVERT_POSIX_EXTENDED::
 Details of the conversions are given below. The arg:buffer and arg:blength
 arguments define how the output is handled:
 
-If arg:buffer is NULL, the function just returns the length of the converted
+If arg:buffer is const:NULL, the function just returns the length of the converted
 pattern via arg:blength. This is one less than the length of buffer needed,
 because a terminating zero is always added to the output.
 
-If arg:buffer points to a NULL pointer, an output buffer is obtained using
+If arg:buffer points to a const:NULL pointer, an output buffer is obtained using
 the allocator in the context or [.c]`malloc()` if no context is supplied. A
 pointer to this buffer is placed in the variable to which arg:buffer points.
 When no longer needed the output buffer must be freed by calling
-func:pcre2_converted_pattern_free(). If this function is called with a NULL
+func:pcre2_converted_pattern_free(). If this function is called with a const:NULL
 argument, it returns immediately without doing anything.
 
-If arg:buffer points to a non-NULL pointer, arg:blength must be set to the
+If arg:buffer points to a non-const:NULL pointer, arg:blength must be set to the
 actual length of the buffer provided (in code units).
 
 In all cases, after successful conversion, the variable pointed to by
@@ -115,8 +117,8 @@ func:pcre2_get_error_message().
 
 Globs are used to match file names, and consequently have the concept of a
 "path separator", which defaults to backslash under Windows and forward slash
-otherwise. If const:PCRE2_CONVERT_GLOB is set, the wildcards [.regex]`*` and [.regex]`?` are not
-permitted to match separator characters, but the double-star [.regex]`**` feature
+otherwise. If const:PCRE2_CONVERT_GLOB is set, the wildcards [.regex]`+*+` and [.regex]`?` are not
+permitted to match separator characters, but the double-star ([.regex]`+**+`) feature
 (which does match separators) is supported.
 
 const:PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR matches globs with wildcards allowed to
@@ -132,9 +134,9 @@ const:PCRE2_CONVERT_POSIX_EXTENDED, respectively.
 In POSIX patterns, backslash is not special in a character class. Unmatched
 closing parentheses are treated as literals.
 
-In basic patterns, [.regex]`? + | {} ()` must be escaped to be recognized
+In basic patterns, [.regex]`?`, [.regex]`{plus}`, [.regex]`|`, [.regex]`+{}+`, and [.regex]`()` must be escaped to be recognized
 as metacharacters outside a character class. If the first character in the
-pattern is [.regex]`*` it is treated as a literal. [.regex]`^` is a metacharacter only at the start
+pattern is [.regex]`+*+` it is treated as a literal. [.regex]`+^+` is a metacharacter only at the start
 of a branch.
 
 In extended patterns, a backslash not in a character class always
@@ -149,16 +151,15 @@ to find the longest match, but that does not support backreferences (but then
 neither do POSIX extended patterns).
 ====
 
+[discrete]
 == Author
 
-[literal]
-----
-Philip Hazel
-Retired from University Computing Service
+Philip Hazel +
+Retired from University Computing Service +
 Cambridge, England.
-----
 
+[discrete]
 == Revision
 
 Last updated: 14 November 2023 +
-Copyright (c) 1997-2018 University of Cambridge.
+Copyright (C) 1997-2018 University of Cambridge.

@@ -2,11 +2,13 @@
 :doctype: manpage
 :manname: pcre2unicode
 :manpurpose: PCRE2 Unicode support
+:description: Discussion of Unicode and UTF-8/UTF-16/UTF-32 support
 :manvolnum: 3
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
 :docdate: 27 November 2024
 :revdate: 27 November 2024
+:toc: right
 
 == Unicode and UTF support
 
@@ -20,8 +22,8 @@ treats each code unit in a string as one character.
 There are two ways of telling PCRE2 to switch to UTF mode, where characters may
 consist of more than one code unit and the range of values is constrained. The
 program can call
-xref:pcre2_compile.adoc[func:pcre2_compile()]
-with the const:PCRE2_UTF option, or the pattern may start with the sequence [.regex]`(*UTF)`.
+func:pcre2_compile()
+with the const:PCRE2_UTF option, or the pattern may start with the sequence [.regex]`+(*UTF)+`.
 However, the latter facility can be locked out by the const:PCRE2_NEVER_UTF option.
 That is, the programmer can prevent the supplier of the pattern from switching
 to UTF mode.
@@ -37,31 +39,31 @@ handled, as documented below.
 
 == Unicode property support
 
-When PCRE2 is built with Unicode support, the escape sequences [.regex]`\p{..}`,
-[.regex]`\P{..}`, and [.regex]`\X` can be used. This is not dependent on the const:PCRE2_UTF setting.
+When PCRE2 is built with Unicode support, the escape sequences [.regex]`+\p{..}+`,
+[.regex]`+\P{..}+`, and [.regex]`\X` can be used. This is not dependent on the const:PCRE2_UTF setting.
 The Unicode properties that can be tested are a subset of those that Perl
 supports. Currently they are limited to the general category properties such as
-Lu for an upper case letter or Nd for a decimal number, the derived properties
-Any and Lc (synonym L&), the Unicode script names such as Arabic or Han,
-Bidi_Class, Bidi_Control, and a few binary properties.
+[.regex]`Lu` for an upper case letter or [.regex]`Nd` for a decimal number, the derived properties
+[.regex]`Any` and [.regex]`Lc` (synonym [.regex]`L&`), the Unicode script names such as [.regex]`Arabic` or [.regex]`Han`,
+[.regex]`Bidi_Class`, [.regex]`Bidi_Control`, and a few binary properties.
 
 The full lists are given in the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 and
 xref:pcre2syntax.adoc[`pcre2syntax`]
 documentation. In general, only the short names for properties are supported.
-For example, [.regex]`\p{L}` matches a letter. Its longer synonym, [.regex]`\p{Letter}`, is not
+For example, [.regex]`+\p{L}+` matches a letter. Its longer synonym, [.regex]`+\p{Letter}+`, is not
 supported. Furthermore, in Perl, many properties may optionally be prefixed by
-"Is", for compatibility with Perl 5.6. PCRE2 does not support this.
+[.regex]`Is`, for compatibility with Perl 5.6. PCRE2 does not support this.
 
 == Wide characters and UTF modes
 
 Code points less than 256 can be specified in patterns by either braced or
-unbraced hexadecimal escape sequences (for example, [.regex]`\x{b3}` or [.regex]`\xb3`). Larger
-values have to use braced sequences. Unbraced octal code points up to [.regex]`\777` are
-also recognized; larger ones can be coded using [.regex]`\o{...}`.
+unbraced hexadecimal escape sequences (for example, [.regex]`+\x{b3}+` or [.regex]`+\xb3+`). Larger
+values have to use braced sequences. Unbraced octal code points up to [.regex]`+\777+` are
+also recognized; larger ones can be coded using [.regex]`+\o{...}+`.
 
-The escape sequence [.regex]`\N{U+<hex digits>}` is recognized as another way of
+The escape sequence [.regex]`\N{U{plus}__hex digits__}` is recognized as another way of
 specifying a Unicode character by code point in a UTF mode. It is not allowed
 in non-UTF mode.
 
@@ -98,7 +100,7 @@ PCRE2 is built to include Unicode support, because to do otherwise would slow
 down matching in many common cases. Note that this also applies to [.regex]`\b`
 and [.regex]`\B`, because they are defined in terms of [.regex]`\w` and [.regex]`\W`. If you want
 to test for a wider sense of, say, "digit", you can use explicit Unicode
-property tests such as [.regex]`\p{Nd}`. Alternatively, if you set the const:PCRE2_UCP option,
+property tests such as [.regex]`+\p{Nd}+`. Alternatively, if you set the const:PCRE2_UCP option,
 the way that the character escapes work is changed so that Unicode properties
 are used to determine which characters match, though there are some options
 that suppress this for individual escapes. For details see the section on
@@ -132,45 +134,40 @@ counterparts can be disabled by setting the const:PCRE2_EXTRA_CASELESS_RESTRICT
 option. When this is set, all characters in a case equivalence must either be
 ASCII or non-ASCII; there can be no mixing.
 
-[literal,subs=normal]
-....
-Without const:PCRE2_EXTRA_CASELESS_RESTRICT:
-  'k' = 'K' = U+212A (Kelvin sign)
-  's' = 'S' = U+017F (long S)
-With const:PCRE2_EXTRA_CASELESS_RESTRICT:
-  'k' = 'K'
-  U+212A (Kelvin sign)  only case-equivalent to itself
-  's' = 'S'
-  U+017F (long S)       only case-equivalent to itself
-....
+Without const:PCRE2_EXTRA_CASELESS_RESTRICT::
+  'k' = 'K' = char:U+212A (Kelvin sign) +
+  's' = 'S' = char:U+017F (long S)
+With const:PCRE2_EXTRA_CASELESS_RESTRICT::
+  'k' = 'K' +
+  char:U+212A (Kelvin sign) -- only case-equivalent to itself +
+  's' = 'S' +
+  char:U+017F (long S) -- only case-equivalent to itself
 
 One language family, Turkish and Azeri, has its own case-insensitivity rules,
 which can be selected by setting const:PCRE2_EXTRA_TURKISH_CASING. This alters the
-behaviour of the 'i', 'I', `U+0130` (capital I with dot above), and `U+0131`
+behaviour of the 'i', 'I', char:U+0130 (capital I with dot above), and char:U+0131
 (small dotless i) characters.
 
-[literal,subs=normal]
-....
-Without const:PCRE2_EXTRA_TURKISH_CASING:
-  'i' = 'I'
-  U+0130 (capital I with dot above)  only case-equivalent to itself
-  U+0131 (small dotless i)           only case-equivalent to itself
-With const:PCRE2_EXTRA_TURKISH_CASING:
-  'i' = U+0130 (capital I with dot above)
-  U+0131 (small dotless i) = 'I'
-....
+Without const:PCRE2_EXTRA_TURKISH_CASING::
+  'i' = 'I' +
+  char:U+0130 (capital I with dot above)  -- only case-equivalent to itself +
+  char:U+0131 (small dotless i) -- only case-equivalent to itself
+With const:PCRE2_EXTRA_TURKISH_CASING::
+  'i' = char:U+0130 (capital I with dot above) +
+  char:U+0131 (small dotless i) = 'I'
 
 It is not allowed to specify both const:PCRE2_EXTRA_CASELESS_RESTRICT and
 const:PCRE2_EXTRA_TURKISH_CASING together.
 
-From release 10.45 the Unicode letter properties Lu (upper case), Ll (lower
-case), and Lt (title case) are all treated as Lc (cased letter) when caseless
-matching is set by the const:PCRE2_CASELESS option or [.regex]`(?i)` within the pattern.
+From release 10.45 the Unicode letter properties [.regex]`Lu` (upper case), [.regex]`Ll` (lower
+case), and [.regex]`Lt` (title case) are all treated as [.regex]`Lc` (cased letter) when caseless
+matching is set by the const:PCRE2_CASELESS option or [.regex]`+(?i)+` within the pattern.
 
+[[script-runs]]
 == Script runs
 
-The pattern constructs [.regex]`(*script_run:...)` and [.regex]`(*atomic_script_run:...)`, with
-synonyms [.regex]`(*sr:...)` and [.regex]`(*asr:...)`, verify that the string matched within the
+The pattern constructs [.regex]`+(*script_run:...)+` and [.regex]`+(*atomic_script_run:...)+`, with
+synonyms [.regex]`+(*sr:...)+` and [.regex]`+(*asr:...)+`, verify that the string matched within the
 parentheses is a script run. In concept, a script run is a sequence of
 characters that are all from the same Unicode script. However, because some
 scripts are commonly used together, and because some diacritical and other
@@ -182,7 +179,7 @@ are also three special values:
 
 "Unknown" is used for code points that have not been assigned, and also for the
 surrogate code points. In the PCRE2 32-bit library, characters whose code
-points are greater than the Unicode maximum (`U+10FFFF`), which are accessible
+points are greater than the Unicode maximum (char:U+10FFFF), which are accessible
 only in non-UTF mode, are assigned the Unknown script.
 
 "Common" is used for characters that are used with many scripts. These include
@@ -194,20 +191,21 @@ previous character. These are considered to take on the script of the character
 that they modify.
 
 Some Inherited characters are used with many scripts, but many of them are only
-normally used with a small number of scripts. For example, `U+102E0` (Coptic
+normally used with a small number of scripts. For example, char:U+102E0 (Coptic
 Epact thousands mark) is used only with Arabic and Coptic. In order to make it
 possible to check this, a Unicode property called Script Extension exists. Its
 value is a list of scripts that apply to the character. For the majority of
 characters, the list contains just one script, the same one as the Script
-property. However, for characters such as `U+102E0` more than one Script is
+property. However, for characters such as char:U+102E0 more than one Script is
 listed. There are also some Common characters that have a single, non-Common
 script in their Script Extension list.
 
-The next section describes the basic rules for deciding whether a given string
+The section <<basic-script-run-rules>> describes the basic rules for deciding whether a given string
 of characters is a script run. Note, however, that there are some special cases
 involving the Chinese Han script, and an additional constraint for decimal
 digits. These are covered in subsequent sections.
 
+[[basic-script-run-rules]]
 === Basic script run rules
 
 A string that is less than two characters long is a script run. This is the
@@ -222,19 +220,16 @@ remaining characters in a script run must have at least one script in common in
 their Script Extension lists. In set-theoretic terminology, the intersection of
 all the sets of scripts must not be empty.
 
-A simple example is an Internet name such as "google.com". The letters are all
+A simple example is an Internet name such as [.subject]`google.com`. The letters are all
 in the Latin script, and the dot is Common, so this string is a script run.
-However, the Cyrillic letter "o" looks exactly the same as the Latin "o"; a
-string that looks the same, but with Cyrillic "o"s is not a script run.
+However, the Cyrillic letter [.subject]`o` looks exactly the same as the Latin [.subject]`o`; a
+string that looks the same, but with Cyrillic [.subject]``o``s is not a script run.
 
 More interesting examples involve characters with more than one script in their
 Script Extension. Consider the following characters:
 
-[literal]
-....
-U+060C  Arabic comma
-U+06D4  Arabic full stop
-....
+* char:U+060C, Arabic comma
+* char:U+06D4, Arabic full stop
 
 The first has the Script Extension list Arabic, Hanifi Rohingya, Syriac, and
 Thaana; the second has just Arabic and Hanifi Rohingya. Both of them could
@@ -283,7 +278,8 @@ If you pass an invalid UTF string when const:PCRE2_NO_UTF_CHECK is set, the resu
 is undefined and your program may crash or loop indefinitely or give incorrect
 results. There is, however, one mode of matching that can handle invalid UTF
 subject strings. This is enabled by passing const:PCRE2_MATCH_INVALID_UTF to
-func:pcre2_compile() and is discussed below in the next section. The rest of
+func:pcre2_compile() and is discussed below in the section
+<<utf8-string-errors>>. The rest of
 this section covers the case when const:PCRE2_MATCH_INVALID_UTF is not set.
 
 Passing const:PCRE2_NO_UTF_CHECK to func:pcre2_compile() just disables the UTF check
@@ -308,30 +304,34 @@ characters before the starting offset. Note that the sequences [.regex]`\b` and 
 one-character lookbehinds.
 
 In addition to checking the format of the string, there is a check to ensure
-that all code points lie in the range `U+0` to `U+10FFFF`, excluding the surrogate
+that all code points lie in the range char:U+0 to char:U+10FFFF, excluding the surrogate
 area. The so-called "non-character" code points are not excluded because
 Unicode corrigendum #9 makes it clear that they should not be.
 
 Characters in the "Surrogate Area" of Unicode are reserved for use by UTF-16,
 where they are used in pairs to encode code points with values greater than
-[.c]`0xFFFF`. The code points that are encoded by UTF-16 pairs are available
+char:0xFFFF. The code points that are encoded by UTF-16 pairs are available
 independently in the UTF-8 and UTF-32 encodings. (In other words, the whole
 surrogate thing is a fudge for UTF-16 which unfortunately messes up UTF-8 and
 UTF-32.)
 
 Setting const:PCRE2_NO_UTF_CHECK at compile time does not disable the error that is
 given if an escape sequence for an invalid Unicode code point is encountered in
-the pattern. If you want to allow escape sequences such as [.regex]`\x{d800}` (a
+the pattern. If you want to allow escape sequences such as [.regex]`+\x{d800}+` (a
 surrogate code point) you can set the const:PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES extra
 option. However, this is possible only in UTF-8 and UTF-32 modes, because these
 values are not representable in UTF-16.
 
+[[utf8-string-errors]]
 === Errors in UTF-8 strings
 
 The following negative error codes are given for invalid UTF-8 strings:
 
 [.errors]
-const:PCRE2_ERROR_UTF8_ERR1, const:PCRE2_ERROR_UTF8_ERR2, const:PCRE2_ERROR_UTF8_ERR3, const:PCRE2_ERROR_UTF8_ERR4,
+const:PCRE2_ERROR_UTF8_ERR1::
+const:PCRE2_ERROR_UTF8_ERR2::
+const:PCRE2_ERROR_UTF8_ERR3::
+const:PCRE2_ERROR_UTF8_ERR4::
 const:PCRE2_ERROR_UTF8_ERR5::
   The string ends with a truncated UTF-8 character; the code specifies how many
   bytes are missing (1 to 5). Although RFC 3629 restricts UTF-8 characters to be
@@ -339,31 +339,37 @@ const:PCRE2_ERROR_UTF8_ERR5::
   allows for up to 6 bytes, and this is checked first; hence the possibility of
   4 or 5 missing bytes.
 
-const:PCRE2_ERROR_UTF8_ERR6, const:PCRE2_ERROR_UTF8_ERR7, const:PCRE2_ERROR_UTF8_ERR8, const:PCRE2_ERROR_UTF8_ERR9,
+const:PCRE2_ERROR_UTF8_ERR6::
+const:PCRE2_ERROR_UTF8_ERR7::
+const:PCRE2_ERROR_UTF8_ERR8::
+const:PCRE2_ERROR_UTF8_ERR9::
 const:PCRE2_ERROR_UTF8_ERR10::
   The two most significant bits of the 2nd, 3rd, 4th, 5th, or 6th byte of the
   character do not have the binary value [.c]`0b10` (that is, either the most
   significant bit is 0, or the next bit is 1).
 
-const:PCRE2_ERROR_UTF8_ERR11,
+const:PCRE2_ERROR_UTF8_ERR11::
 const:PCRE2_ERROR_UTF8_ERR12::
   A character that is valid by the RFC 2279 rules is either 5 or 6 bytes long;
   these code points are excluded by RFC 3629.
 
 const:PCRE2_ERROR_UTF8_ERR13::
-  A 4-byte character has a value greater than [.c]`0x10ffff`; these code points are
+  A 4-byte character has a value greater than char:0x10ffff; these code points are
   excluded by RFC 3629.
 
 const:PCRE2_ERROR_UTF8_ERR14::
-  A 3-byte character has a value in the range [.c]`0xd800` to [.c]`0xdfff`; this range of
+  A 3-byte character has a value in the range char:0xd800 to char:0xdfff; this range of
   code points are reserved by RFC 3629 for use with UTF-16, and so are excluded
   from UTF-8.
 
-const:PCRE2_ERROR_UTF8_ERR15, const:PCRE2_ERROR_UTF8_ERR16, const:PCRE2_ERROR_UTF8_ERR17, const:PCRE2_ERROR_UTF8_ERR18,
+const:PCRE2_ERROR_UTF8_ERR15::
+const:PCRE2_ERROR_UTF8_ERR16::
+const:PCRE2_ERROR_UTF8_ERR17::
+const:PCRE2_ERROR_UTF8_ERR18::
 const:PCRE2_ERROR_UTF8_ERR19::
   A 2-, 3-, 4-, 5-, or 6-byte character is "overlong", that is, it codes for a
   value that can be represented by fewer bytes, which is invalid. For example,
-  the two bytes [.c]`0xc0`, [.c]`0xae` give the value [.c]`0x2e`, whose correct coding uses just
+  the two bytes char:0xc0, char:0xae give the value char:0x2e, whose correct coding uses just
   one byte.
 
 const:PCRE2_ERROR_UTF8_ERR20::
@@ -373,7 +379,7 @@ const:PCRE2_ERROR_UTF8_ERR20::
   character.
 
 const:PCRE2_ERROR_UTF8_ERR21::
-  The first byte of a character has the value [.c]`0xfe` or [.c]`0xff`. These values can
+  The first byte of a character has the value char:0xfe or char:0xff. These values can
   never occur in a valid UTF-8 string.
 
 === Errors in UTF-16 strings
@@ -394,9 +400,9 @@ The following negative error codes are given for invalid UTF-32 strings:
 
 [.errors]
 const:PCRE2_ERROR_UTF32_ERR1::
-  Surrogate character ([.c]`0xd800` to [.c]`0xdfff`)
+  Surrogate character (char:0xd800 to char:0xdfff)
 const:PCRE2_ERROR_UTF32_ERR2::
-  Code point is greater than [.c]`0x10ffff`
+  Code point is greater than char:0x10ffff
 
 == Matching in invalid UTF strings
 
@@ -421,8 +427,8 @@ of the interpretive code in func:pcre2_match(). When const:PCRE2_MATCH_INVALID_U
 is set at compile time, const:PCRE2_NO_UTF_CHECK is ignored at match time.
 
 In this mode, an invalid code unit sequence in the subject never matches any
-pattern item. It does not match dot, it does not match [.regex]`\p{Any}`, it does not
-even match negative items such as [.regex]`[^X]`. A lookbehind assertion fails if it
+pattern item. It does not match dot, it does not match [.regex]`+\p{Any}+`, it does not
+even match negative items such as [.regex]`+[^X]+`. A lookbehind assertion fails if it
 encounters an invalid sequence while moving the current point backwards. In
 other words, an invalid UTF code unit sequence acts as a barrier which no match
 can cross.
@@ -441,28 +447,27 @@ UTF-sequence, that sequence is skipped, and the match starts at the next valid
 UTF character, or the end of the subject.
 
 At internal fragment boundaries, [.regex]`\b` and [.regex]`\B` behave in the same way as at the
-beginning and end of the subject. For example, a sequence such as [.regex]`\bWORD\b`
-would match an instance of WORD that is surrounded by invalid UTF code units.
+beginning and end of the subject. For example, a sequence such as [.regex]`+\bWORD\b+`
+would match an instance of [.subject]`WORD` that is surrounded by invalid UTF code units.
 
 Using const:PCRE2_MATCH_INVALID_UTF, an application can run matches on arbitrary
 data, knowing that any matched strings that are returned are valid UTF. This
 can be useful when searching for UTF text in executable or other binary files.
 
 Note, however, that the 16-bit and 32-bit PCRE2 libraries process strings as
-sequences of [.c]`uint16_t` or [.c]`uint32_t` code points. They cannot find valid UTF
+sequences of type:uint16_t or type:uint32_t code points. They cannot find valid UTF
 sequences within an arbitrary string of bytes unless such sequences are
 suitably aligned.
 
+[discrete]
 == Author
 
-[literal]
-----
-Philip Hazel
-Retired from University Computing Service
+Philip Hazel +
+Retired from University Computing Service +
 Cambridge, England.
-----
 
+[discrete]
 == Revision
 
 Last updated: 27 November 2024 +
-Copyright (c) 1997-2024 University of Cambridge.
+Copyright (C) 1997-2024 University of Cambridge.

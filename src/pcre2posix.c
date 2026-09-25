@@ -68,7 +68,9 @@ previously been set. */
 #endif
 
 #ifndef PCRE2POSIX_EXP_DECL
-#if defined(_WIN32) && defined(PCRE2POSIX_SHARED)
+#if !defined(PCRE2POSIX_SHARED)
+#define PCRE2POSIX_EXP_DECL extern
+#elif defined(_WIN32)
 #define PCRE2POSIX_EXP_DECL extern __declspec(dllexport)
 #else
 #define PCRE2POSIX_EXP_DECL extern PCRE2_EXPORT
@@ -76,7 +78,9 @@ previously been set. */
 #endif
 
 #ifndef PCRE2POSIX_EXP_DEFN
-#if defined(_WIN32) && defined(PCRE2POSIX_SHARED)
+#if !defined(PCRE2POSIX_SHARED)
+#define PCRE2POSIX_EXP_DEFN extern
+#elif defined(_WIN32)
 #define PCRE2POSIX_EXP_DEFN extern __declspec(dllexport)
 #else
 #define PCRE2POSIX_EXP_DEFN extern PCRE2_EXPORT

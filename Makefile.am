@@ -312,6 +312,7 @@ EXTRA_DIST += \
 # installed in the system.
 
 EXTRA_DIST += \
+  doc/index.adoc \
   doc/pcre2-config.adoc \
   doc/pcre2.adoc \
   doc/pcre2_callout_enumerate.adoc \

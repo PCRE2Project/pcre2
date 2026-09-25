@@ -36,7 +36,7 @@ arg:number_of_codes::
 arg:bytes::
     the serialized byte stream
 arg:gcontext::
-    pointer to a general context or [.c]`NULL`
+    pointer to a general context or const:NULL
 
 The arg:bytes argument must point to a block of data that was originally
 created by func:pcre2_serialize_encode(), though it may have been saved on
@@ -55,7 +55,7 @@ const:PCRE2_ERROR_BADMODE::
 const:PCRE2_ERROR_NOMEMORY::
     memory allocation failed
 const:PCRE2_ERROR_NULL::
-    arg:codes or arg:bytes is [.c]`NULL`
+    arg:codes or arg:bytes is const:NULL
 
 const:PCRE2_ERROR_BADMAGIC may mean that the data is corrupt, or that it was compiled
 on a system with different endianness.
