@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
 <title>pcre2_compile(3)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +116,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +139,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +161,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +218,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -445,9 +446,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 pcre2_code *pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen,
                           uint32_t options, int *errorptr,
@@ -464,89 +465,215 @@ pcre2_code *pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen,
 <p>This function compiles a regular expression pattern into an internal form. Its
 arguments are:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch"><em>pattern</em>       A string containing expression to be compiled<br>
-<em>length</em>        The length of the string or PCRE2_ZERO_TERMINATED<br>
-<em>options</em>       Primary option bits<br>
-<em>errorcode</em>     Where to put an error code<br>
-<em>erroffset</em>     Where to put an error offset<br>
-<em>ccontext</em>      Pointer to a compile context or NULL</p>
+<div class="dlist parameters">
+<dl>
+<dt class="hdlist1"><code class="parameter">pattern</code></dt>
+<dd>
+<p>A string containing expression to be compiled</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">patlen</code></dt>
+<dd>
+<p>The length of the string or <code class="constant">PCRE2_ZERO_TERMINATED</code></p>
+</dd>
+<dt class="hdlist1"><code class="parameter">options</code></dt>
+<dd>
+<p>Primary option bits</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">errorptr</code></dt>
+<dd>
+<p>Where to put an error code</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">erroroffset</code></dt>
+<dd>
+<p>Where to put an error offset</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">ccontext</code></dt>
+<dd>
+<p>Pointer to a compile context or <code class="constant">NULL</code></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>The length of the pattern and any error offset that is returned are in code
-units, not characters. A NULL pattern with zero length is treated as an empty
+units, not characters. A <code class="constant">NULL</code> pattern with zero length is treated as an empty
 string. A compile context is needed only if you want to provide custom memory
 allocation functions, or to provide an external function for system stack size
-checking (see <code>pcre2_set_compile_recursion_guard()</code>), or to change one or
+checking (see <code class="function">pcre2_set_compile_recursion_guard()</code>), or to change one or
 more of these parameters:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">What \R matches (Unicode newlines, or CR, LF, CRLF only);<br>
-PCRE2's character tables;<br>
-The newline character sequence;<br>
-The compile time nested parentheses limit;<br>
-The maximum pattern length (in code units) that is allowed;<br>
-The additional options bits.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>What <code class="regex">\R</code> matches (Unicode newlines, or CR, LF, CRLF only);</p>
+</li>
+<li>
+<p>PCRE2&#8217;s character tables;</p>
+</li>
+<li>
+<p>The newline character sequence;</p>
+</li>
+<li>
+<p>The compile time nested parentheses limit;</p>
+</li>
+<li>
+<p>The maximum pattern length (in code units) that is allowed;</p>
+</li>
+<li>
+<p>The additional options bits.</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>The primary option bits are:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ANCHORED           Force pattern anchoring<br>
-PCRE2_ALLOW_EMPTY_CLASS  Allow empty classes<br>
-PCRE2_ALT_BSUX           Alternative handling of \u, \U, and \x<br>
-PCRE2_ALT_CIRCUMFLEX     Alternative handling of ^ in multiline mode<br>
-PCRE2_ALT_EXTENDED_CLASS Alternative extended character class syntax<br>
-PCRE2_ALT_VERBNAMES      Process backslashes in verb names<br>
-PCRE2_AUTO_CALLOUT       Compile automatic callouts<br>
-PCRE2_CASELESS           Do caseless matching<br>
-PCRE2_DOLLAR_ENDONLY     $ not to match newline at end<br>
-PCRE2_DOTALL             . matches anything including NL<br>
-PCRE2_DUPNAMES           Allow duplicate names for subpatterns<br>
-PCRE2_ENDANCHORED        Pattern can match only at end of subject<br>
-PCRE2_EXTENDED           Ignore white space and # comments<br>
-PCRE2_FIRSTLINE          Force matching to be before newline<br>
-PCRE2_LITERAL            Pattern characters are all literal<br>
-PCRE2_MATCH_INVALID_UTF  Enable support for matching invalid UTF<br>
-PCRE2_MATCH_UNSET_BACKREF  Match unset backreferences<br>
-PCRE2_MULTILINE          ^ and $ match newlines within data<br>
-PCRE2_NEVER_BACKSLASH_C  Lock out the use of \C in patterns<br>
-PCRE2_NEVER_UCP          Lock out PCRE2_UCP, e.g. via (*UCP)<br>
-PCRE2_NEVER_UTF          Lock out PCRE2_UTF, e.g. via (*UTF)<br>
-PCRE2_NO_AUTO_CAPTURE    Disable numbered capturing paren-<br>
-                          theses (named ones available)<br>
-PCRE2_NO_AUTO_POSSESS    Disable auto-possessification<br>
-PCRE2_NO_DOTSTAR_ANCHOR  Disable automatic anchoring for .*<br>
-PCRE2_NO_START_OPTIMIZE  Disable match-time start optimizations<br>
-PCRE2_NO_UTF_CHECK       Do not check the pattern for UTF validity<br>
-                           (only relevant if PCRE2_UTF is set)<br>
-PCRE2_UCP                Use Unicode properties for \d, \w, etc.<br>
-PCRE2_UNGREEDY           Invert greediness of quantifiers<br>
-PCRE2_USE_OFFSET_LIMIT   Enable offset limit for unanchored matching<br>
-PCRE2_UTF                Treat pattern and subjects as UTF strings</p>
+<div class="dlist options">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_ANCHORED</code></dt>
+<dd>
+<p>Force pattern anchoring</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ALLOW_EMPTY_CLASS</code></dt>
+<dd>
+<p>Allow empty classes</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ALT_BSUX</code></dt>
+<dd>
+<p>Alternative handling of <code class="regex">\u</code>, <code class="regex">\U</code>, and <code class="regex">\x</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ALT_CIRCUMFLEX</code></dt>
+<dd>
+<p>Alternative handling of <code class="regex">^</code> in multiline mode</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ALT_EXTENDED_CLASS</code></dt>
+<dd>
+<p>Alternative extended character class syntax</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ALT_VERBNAMES</code></dt>
+<dd>
+<p>Process backslashes in verb names</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_AUTO_CALLOUT</code></dt>
+<dd>
+<p>Compile automatic callouts</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CASELESS</code></dt>
+<dd>
+<p>Do caseless matching</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_DOLLAR_ENDONLY</code></dt>
+<dd>
+<p><code class="regex">$</code> not to match newline at end</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_DOTALL</code></dt>
+<dd>
+<p><code class="regex">.</code> matches anything including NL</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_DUPNAMES</code></dt>
+<dd>
+<p>Allow duplicate names for subpatterns</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ENDANCHORED</code></dt>
+<dd>
+<p>Pattern can match only at end of subject</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_EXTENDED</code></dt>
+<dd>
+<p>Ignore white space and <code class="regex">#</code> comments</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_FIRSTLINE</code></dt>
+<dd>
+<p>Force matching to be before newline</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_LITERAL</code></dt>
+<dd>
+<p>Pattern characters are all literal</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_MATCH_INVALID_UTF</code></dt>
+<dd>
+<p>Enable support for matching invalid UTF</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_MATCH_UNSET_BACKREF</code></dt>
+<dd>
+<p>Match unset backreferences</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_MULTILINE</code></dt>
+<dd>
+<p><code class="regex">^</code> and <code class="regex">$</code> match newlines within data</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NEVER_BACKSLASH_C</code></dt>
+<dd>
+<p>Lock out the use of <code class="regex">\C</code> in patterns</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NEVER_UCP</code></dt>
+<dd>
+<p>Lock out <code class="constant">PCRE2_UCP</code>, e.g. via <code class="regex">(*UCP)</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NEVER_UTF</code></dt>
+<dd>
+<p>Lock out <code class="constant">PCRE2_UTF</code>, e.g. via <code class="regex">(*UTF)</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NO_AUTO_CAPTURE</code></dt>
+<dd>
+<p>Disable numbered capturing paren-
+theses (named ones available)</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NO_AUTO_POSSESS</code></dt>
+<dd>
+<p>Disable auto-possessification</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NO_DOTSTAR_ANCHOR</code></dt>
+<dd>
+<p>Disable automatic anchoring for <code class="regex">.*</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NO_START_OPTIMIZE</code></dt>
+<dd>
+<p>Disable match-time start optimizations</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NO_UTF_CHECK</code></dt>
+<dd>
+<p>Do not check the pattern for UTF validity
+(only relevant if <code class="constant">PCRE2_UTF</code> is set)</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_UCP</code></dt>
+<dd>
+<p>Use Unicode properties for <code class="regex">\d</code>, <code class="regex">\w</code>, etc.</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_UNGREEDY</code></dt>
+<dd>
+<p>Invert greediness of quantifiers</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_USE_OFFSET_LIMIT</code></dt>
+<dd>
+<p>Enable offset limit for unanchored matching</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_UTF</code></dt>
+<dd>
+<p>Treat pattern and subjects as UTF strings</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>PCRE2 must be built with Unicode support (the default) in order to use
-PCRE2_UTF, PCRE2_UCP and related options.</p>
+<code class="constant">PCRE2_UTF</code>, <code class="constant">PCRE2_UCP</code> and related options.</p>
 </div>
 <div class="paragraph">
 <p>Additional options may be set in the compile context via the
-<a href="pcre2_set_compile_extra_options.html"><code>pcre2_set_compile_extra_options</code></a>
+<code class="function">pcre2_set_compile_extra_options()</code>
 function.</p>
 </div>
 <div class="paragraph">
-<p>If either of <em>errorcode</em> or <em>erroroffset</em> is NULL, the function returns
-NULL immediately. Otherwise, the yield of this function is a pointer to a
-private data structure that contains the compiled pattern, or NULL if an error
+<p>If either of <code class="parameter">errorptr</code> or <code class="parameter">erroroffset</code> is <code class="constant">NULL</code>, the function returns
+<code class="constant">NULL</code> immediately. Otherwise, the yield of this function is a pointer to a
+private data structure that contains the compiled pattern, or <code class="constant">NULL</code> if an error
 was detected. In the error case, a text error message can be obtained by
-passing the value returned via the <em>errorcode</em> argument to the
-<code>pcre2_get_error_message()</code> function. The offset (in code units) where the
-error was encountered is returned via the <em>erroroffset</em> argument.</p>
+passing the value returned via the <code class="parameter">errorptr</code> argument to the
+<code class="function">pcre2_get_error_message()</code> function. The offset (in code units) where the
+error was encountered is returned via the <code class="parameter">erroroffset</code> argument.</p>
 </div>
 <div class="paragraph">
-<p>If there is no error, the value passed via <em>errorcode</em> returns the message
-"no error" if passed to <code>pcre2_get_error_message()</code>, and the value passed
-via <em>erroroffset</em> is zero.</p>
+<p>If there is no error, the value passed via <code class="parameter">errorptr</code> returns the message
+"no error" if passed to <code class="function">pcre2_get_error_message()</code>, and the value passed
+via <code class="parameter">erroroffset</code> is zero.</p>
 </div>
 <div class="paragraph">
 <p>There is a complete description of the PCRE2 native API, with more detail on

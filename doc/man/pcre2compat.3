@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2compat
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 02 June 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -36,250 +36,630 @@ and Perl handle regular expressions. The differences described here are with
 respect to Perl version 5.38.0, but as both Perl and PCRE2 are continually
 changing, the information may at times be out of date.
 .sp
-1. When PCRE2_DOTALL (equivalent to Perl's /s qualifier) is not set, the
-behaviour of the \*(Aq.\*(Aq metacharacter differs from Perl. In PCRE2, \*(Aq.\*(Aq matches the
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+When \fBPCRE2_DOTALL\fP (equivalent to Perl\(cqs \f(CR/s\fP qualifier) is not set, the
+behaviour of the \f(CR.\fP metacharacter differs from Perl. In PCRE2, \f(CR.\fP matches the
 next character unless it is the start of a newline sequence. This means that,
-if the newline setting is CR, CRLF, or NUL, \*(Aq.\*(Aq will match the code point LF
-(0x0A) in ASCII/Unicode environments, and NL (either 0x15 or 0x25) when using
-EBCDIC. In Perl, \*(Aq.\*(Aq appears never to match LF, even when 0x0A is not a newline
+if the newline setting is CR, CRLF, or NUL, \f(CR.\fP will match the code point LF
+(\f(CR0x0A\fP) in ASCII/Unicode environments, and NL (either \f(CR0x15\fP or \f(CR0x25\fP) when using
+EBCDIC. In Perl, \f(CR.\fP appears never to match LF, even when \f(CR0x0A\fP is not a newline
 indicator.
+.RE
 .sp
-2. PCRE2 has only a subset of Perl's Unicode support. Details of what it does
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+PCRE2 has only a subset of Perl\(cqs Unicode support. Details of what it does
 have are given in the
 \f(CRpcre2unicode\fP
 page.
+.RE
 .sp
-3. Like Perl, PCRE2 allows repeat quantifiers on parenthesized assertions, but
-they do not mean what you might think. For example, (?!a){3} does not assert
-that the next three characters are not "a". It just asserts that the next
-character is not "a" three times (in principle; PCRE2 optimizes this to run the
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Like Perl, PCRE2 allows repeat quantifiers on parenthesized assertions, but
+they do not mean what you might think. For example, \f(CR(?!a){3}\fP does not assert
+that the next three characters are not \f(CRa\fP. It just asserts that the next
+character is not \f(CRa\fP three times (in principle; PCRE2 optimizes this to run the
 assertion just once). Perl allows some repeat quantifiers on other assertions,
-for example, \(rsb* , but these do not seem to have any use. PCRE2 does not allow
+for example, \f(CR\(rsb*\fP , but these do not seem to have any use. PCRE2 does not allow
 any kind of quantifier on non\-lookaround assertions.
+.RE
 .sp
-4. If a braced quantifier such as {1,2} appears where there is nothing to
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+If a braced quantifier such as \f(CR{1,2}\fP appears where there is nothing to
 repeat (for example, at the start of a branch), PCRE2 raises an error whereas
 Perl treats the quantifier characters as literal. When a braced quantifier
-(...){min,max} has min > max, Perl treats it as an item which fails to match
+\f(CR(...){\fP\fImin\fP\f(CR,\fP\fImax\fP\f(CR}\fP has \fImin\fP > \fImax\fP, Perl treats it as an item which fails to match
 any portion of the subject (as no number of repetitions can meet the
 condition), and additionally issues a warning when in warning mode. PCRE2 has
 no warning features, so it gives an error in this case.
+.RE
 .sp
-5. Capture groups that occur inside negative lookaround assertions are counted,
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Capture groups that occur inside negative lookaround assertions are counted,
 but their entries in the offsets vector are set only when a negative assertion
 is a condition that has a matching branch (that is, the condition is false).
 Perl may set such capture groups in other circumstances.
+.RE
 .sp
-6. The following Perl escape sequences are not supported: \(rsF, \(rsl, \(rsL, \(rsu,
-\(rsU, and \(rsN when followed by a character name. \(rsN on its own, matching a
-non\-newline character, and \(rsN{U+dd..}, matching a Unicode code point, are
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+The following Perl escape sequences are not supported: \f(CR\(rsF\fP, \f(CR\(rsl\fP, \f(CR\(rsL\fP, \f(CR\(rsu\fP,
+\f(CR\(rsU\fP, and \f(CR\(rsN\fP when followed by a character name. \f(CR\(rsN\fP on its own, matching a
+non\-newline character, and \f(CR\(rsN{U+\fP\fIdd...\fP\f(CR}\fP, matching a Unicode code point, are
 supported. The escapes that modify the case of following letters are
-implemented by Perl's general string\-handling and are not part of its pattern
+implemented by Perl\(cqs general string\-handling and are not part of its pattern
 matching engine. If any of these are encountered by PCRE2, an error is
-generated by default. However, if either of the PCRE2_ALT_BSUX or
-PCRE2_EXTRA_ALT_BSUX options is set, \(rsU and \(rsu are interpreted as ECMAScript
+generated by default. However, if either of the \fBPCRE2_ALT_BSUX\fP or
+\fBPCRE2_EXTRA_ALT_BSUX\fP options is set, \f(CR\(rsU\fP and \f(CR\(rsu\fP are interpreted as ECMAScript
 interprets them.
+.RE
 .sp
-7. The Perl escape sequences \(rsp, \(rsP, and \(rsX are supported only if PCRE2 is
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+The Perl escape sequences \f(CR\(rsp\fP, \f(CR\(rsP\fP, and \f(CR\(rsX\fP are supported only if PCRE2 is
 built with Unicode support (the default). The properties that can be tested
-with \(rsp and \(rsP are limited to the general category properties such as Lu and
-Nd, the derived properties Any and Lc (synonym L&), script names such as Greek
-or Han, Bidi_Class, Bidi_Control, and a few binary properties. Both PCRE2 and
-Perl support the Cs (surrogate) property, but in PCRE2 its use is limited. See
+with \f(CR\(rsp\fP and \f(CR\(rsP\fP are limited to the general category properties such as
+\f(CRLu\fP and \f(CRNd\fP, the derived properties \f(CRAny\fP and \f(CRLc\fP
+(synonym \f(CRL&\fP), script names such as \f(CRGreek\fP or \f(CRHan\fP,
+\f(CRBidi_Class\fP, \f(CRBidi_Control\fP, and a few binary properties. Both PCRE2 and
+Perl support the \f(CRCs\fP (surrogate) property, but in PCRE2 its use is limited. See
 the
 \f(CRpcre2pattern\fP
 documentation for details. The long synonyms for property names that Perl
-supports (such as \(rsp{Letter}) are not supported by PCRE2, nor is it permitted
-to prefix any of these properties with "Is".
+supports (such as \f(CR\(rsp{Letter}\fP) are not supported by PCRE2, nor is it permitted
+to prefix any of these properties with \f(CRIs\fP.
+.RE
 .sp
-8. PCRE2 supports the \(rsQ...\(rsE escape for quoting substrings. Characters
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+PCRE2 supports the \f(CR\(rsQ...\(rsE\fP escape for quoting substrings. Characters
 in between are treated as literals. However, this is slightly different from
-Perl in that $ and @ are also handled as literals inside the quotes. In Perl,
+Perl in that \f(CR$\fP and \f(CR@\fP are also handled as literals inside the quotes. In Perl,
 they cause variable interpolation (PCRE2 does not have variables). Also, Perl
-does "double\-quotish backslash interpolation" on any backslashes between \(rsQ
-and \(rsE which, its documentation says, "may lead to confusing results". PCRE2
-treats a backslash between \(rsQ and \(rsE just like any other character. Note the
+does "double\-quotish backslash interpolation" on any backslashes between \f(CR\(rsQ\fP
+and \f(CR\(rsE\fP which, its documentation says, "may lead to confusing results". PCRE2
+treats a backslash between \f(CR\(rsQ\fP and \f(CR\(rsE\fP just like any other character. Note the
 following examples:
+.TS
+allbox tab(:);
+ltB ltB ltB.
+T{
 .sp
-.ti +2.5
-  Pattern            PCRE2 matches     Perl matches
+Pattern
+T}:T{
 .sp
-.ti +2.5
-  \(rsQabc$xyz\(rsE        abc$xyz           abc followed by the
-.br
-.ti +2.5
-                                         contents of $xyz
-.br
-.ti +2.5
-  \(rsQabc\(rs$xyz\(rsE       abc\(rs$xyz          abc\(rs$xyz
-.br
-.ti +2.5
-  \(rsQabc\(rsE\(rs$\(rsQxyz\(rsE   abc$xyz           abc$xyz
-.br
-.ti +2.5
-  \(rsQA\(rsB\(rsE            A\(rsB               A\(rsB
-.br
-.ti +2.5
-  \(rsQ\(rs\(rsE              \(rs                 \(rs\(rsE
+PCRE2 matches
+T}:T{
 .sp
-The \(rsQ...\(rsE sequence is recognized both inside and outside character classes
+Perl matches
+T}
+.T&
+lt lt lt.
+T{
+.sp
+\f(CR\(rsQabc$xyz\(rsE\fP
+T}:T{
+.sp
+\f(CRabc$xyz\fP
+T}:T{
+.sp
+\f(CRabc\fP followed by the contents of \f(CR$xyz\fP
+T}
+T{
+.sp
+\f(CR\(rsQabc\(rs$xyz\(rsE\fP
+T}:T{
+.sp
+\f(CRabc\(rs$xyz\fP
+T}:T{
+.sp
+\f(CRabc\(rs$xyz\fP
+T}
+T{
+.sp
+\f(CR\(rsQabc\(rsE\(rs$\(rsQxyz\(rsE\fP
+T}:T{
+.sp
+\f(CRabc$xyz\fP
+T}:T{
+.sp
+\f(CRabc$xyz\fP
+T}
+T{
+.sp
+\f(CR\(rsQA\(rsB\(rsE\fP
+T}:T{
+.sp
+\f(CRA\(rsB\fP
+T}:T{
+.sp
+\f(CRA\(rsB\fP
+T}
+T{
+.sp
+\f(CR\(rsQ\(rs\(rsE\fP
+T}:T{
+.sp
+\f(CR\(rs\fP
+T}:T{
+.sp
+\f(CR\(rs\(rsE\fP
+T}
+.TE
+.sp
+.sp
+The \f(CR\(rsQ...\(rsE\fP sequence is recognized both inside and outside character classes
 by both PCRE2 and Perl. Another difference from Perl is that any appearance of
-\(rsQ or \(rsE inside what might otherwise be a quantifier causes PCRE2 not to
+\f(CR\(rsQ\fP or \f(CR\(rsE\fP inside what might otherwise be a quantifier causes PCRE2 not to
 recognize the sequence as a quantifier. Perl recognizes a quantifier if
-(redundantly) either of the numbers is inside \(rsQ...\(rsE, but not if the
+(redundantly) either of the numbers is inside \f(CR\(rsQ...\(rsE\fP, but not if the
 separating comma is. When not recognized as a quantifier a sequence such as
-{\(rsQ1\(rsE,2} is treated as the literal string "{1,2}".
+\f(CR{\(rsQ1\(rsE,2}\fP is treated as the literal string \f(CR{1,2}\fP.
+.RE
 .sp
-9. Fairly obviously, PCRE2 does not support the (?{code}) and (??{code})
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Fairly obviously, PCRE2 does not support the \f(CR(?{\fP\fIcode\fP\f(CR})\fP and
+\f(CR(??{\fP\fIcode\fP\f(CR})\fP
 constructions. However, PCRE2 does have a "callout" feature, which allows an
 external function to be called during pattern matching. See the
 \f(CRpcre2callout\fP
 documentation for details.
+.RE
 .sp
-10. Subroutine calls (whether recursive or not) were treated as atomic groups
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Subroutine calls (whether recursive or not) were treated as atomic groups
 up to PCRE2 release 10.23, but from release 10.30 this changed, and
 backtracking into subroutine calls is now supported, as in Perl.
+.RE
 .sp
-11. In PCRE2, if any of the backtracking control verbs are used in a group that
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+In PCRE2, if any of the backtracking control verbs are used in a group that
 is called as a subroutine (whether or not recursively), their effect is
 confined to that group; it does not extend to the surrounding pattern. This is
-not always the case in Perl. In particular, if (*THEN) is present in a group
+not always the case in Perl. In particular, if \f(CR(*THEN)\fP is present in a group
 that is called as a subroutine, its action is limited to that group, even if
-the group does not contain any | characters. Note that such groups are
+the group does not contain any \f(CR|\fP characters. Note that such groups are
 processed as anchored at the point where they are tested. PCRE2 also confines
-all control verbs within atomic assertions, again including (*THEN) in
+all control verbs within atomic assertions, again including \f(CR(*THEN)\fP in
 assertions with only one branch.
+.RE
 .sp
-12. If a pattern contains more than one backtracking control verb, the first
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+If a pattern contains more than one backtracking control verb, the first
 one that is backtracked onto acts. For example, in the pattern
-A(*COMMIT)B(*PRUNE)C a failure in B triggers (*COMMIT), but a failure in C
-triggers (*PRUNE). Perl's behaviour is more complex; in many cases it is the
+\f(CRA(*COMMIT)B(*PRUNE)C\fP a failure in \f(CRB\fP triggers \f(CR(*COMMIT)\fP, but a failure in \f(CRC\fP
+triggers \f(CR(*PRUNE)\fP. Perl\(cqs behaviour is more complex; in many cases it is the
 same as PCRE2, but there are cases where it differs.
+.RE
 .sp
-13. There are some differences that are concerned with the settings of captured
-strings when part of a pattern is repeated. For example, matching "aba" against
-the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE2 it is set to
-"b".
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+There are some differences that are concerned with the settings of captured
+strings when part of a pattern is repeated. For example, matching \f(CRaba\fP against
+the pattern \f(CR^(a(b)?)+$\fP in Perl leaves \f(CR$2\fP unset, but in PCRE2 it is set to
+\f(CRb\fP.
+.RE
 .sp
-14. PCRE2's handling of duplicate capture group numbers and names is not as
-general as Perl's. This is a consequence of the fact the PCRE2 works internally
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+PCRE2\(cqs handling of duplicate capture group numbers and names is not as
+general as Perl\(cqs. This is a consequence of the fact the PCRE2 works internally
 just with numbers, using an external table to translate between numbers and
-names. In particular, a pattern such as (?|(?<a>A)|(?<b>B)), where the two
+names. In particular, a pattern such as \f(CR(?|(?<a>A)|(?<b>B))\fP, where the two
 capture groups have the same number but different names, is not supported, and
 causes an error at compile time. If it were allowed, it would not be possible
 to distinguish which group matched, because both names map to capture group
 number 1. To avoid this confusing situation, an error is given at compile time.
+.RE
 .sp
-15. Perl used to recognize comments in some places that PCRE2 does not, for
-example, between the ( and ? at the start of a group. If the /x modifier is
-set, Perl allowed white space between ( and ? though the latest Perls give an
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Perl used to recognize comments in some places that PCRE2 does not, for
+example, between the \f(CR(\fP and \f(CR?\fP at the start of a group. If the \f(CR/x\fP modifier is
+set, Perl allowed white space between \f(CR(\fP and \f(CR?\fP though the latest Perls give an
 error (for a while it was just deprecated). There may still be some cases where
 Perl behaves differently.
+.RE
 .sp
-16. Perl, when in warning mode, gives warnings for character classes such as
-[A\-\(rsd] or [a\-[:digit:]]. It then treats the hyphens as literals. PCRE2 has no
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Perl, when in warning mode, gives warnings for character classes such as
+\f(CR[A\-\(rsd]\fP or \f(CR[a\-[:digit:]]\fP. It then treats the hyphens as literals. PCRE2 has no
 warning features, so it gives an error in these cases because they are almost
 certainly user mistakes.
+.RE
 .sp
-17. In PCRE2, until release 10.45, the upper/lower case character properties Lu
-and Ll were not affected when case\-independent matching was specified. Perl has
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+In PCRE2, until release 10.45, the upper/lower case character properties
+\f(CRLu\fP and \f(CRLl\fP were not affected when case\-independent matching was specified. Perl has
 changed in this respect, and PCRE2 has now changed to match. When caseless
-matching is in force, Lu, Ll, and Lt (title case) are all treated as Lc (cased
-letter).
+matching is in force, \f(CRLu\fP, \f(CRLl\fP, and \f(CRLt\fP (title case)
+are all treated as \f(CRLc\fP (cased letter).
+.RE
 .sp
-18. From release 5.32.0, Perl locks out the use of \(rsK in lookaround
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+From release 5.32.0, Perl locks out the use of \f(CR\(rsK\fP in lookaround
 assertions. From release 10.38 PCRE2 does the same by default. However, there
 is an option for re\-enabling the previous behaviour. When this option is set,
-\(rsK is acted on when it occurs in positive assertions, but is ignored in
+\f(CR\(rsK\fP is acted on when it occurs in positive assertions, but is ignored in
 negative assertions.
+.RE
 .sp
-19. PCRE2 provides some extensions to the Perl regular expression facilities.
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+PCRE2 provides some extensions to the Perl regular expression facilities.
 Perl 5.10 included new features that were not in earlier versions of Perl, some
 of which (such as named parentheses) were in PCRE2 for some time before. This
 list is with respect to Perl 5.38:
 .sp
-(a) If PCRE2_DOLLAR_ENDONLY is set and PCRE2_MULTILINE is not set, the $
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 1." 4.2
+.\}
+If \fBPCRE2_DOLLAR_ENDONLY\fP is set and \fBPCRE2_MULTILINE\fP is not set, the \f(CR$\fP
 meta\-character matches only at the very end of the string.
+.RE
 .sp
-(b) A backslash followed by a letter with no special meaning is faulted. (Perl
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 2." 4.2
+.\}
+A backslash followed by a letter with no special meaning is faulted. (Perl
 can be made to issue a warning.)
+.RE
 .sp
-(c) If PCRE2_UNGREEDY is set, the greediness of the repetition quantifiers is
+.RS 4
+.ie n \{\
+\h'-04' 3.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 3." 4.2
+.\}
+If \fBPCRE2_UNGREEDY\fP is set, the greediness of the repetition quantifiers is
 inverted, that is, by default they are not greedy, but if followed by a
 question mark they are.
+.RE
 .sp
-(d) PCRE2_ANCHORED can be used at matching time to force a pattern to be tried
+.RS 4
+.ie n \{\
+\h'-04' 4.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 4." 4.2
+.\}
+\fBPCRE2_ANCHORED\fP can be used at matching time to force a pattern to be tried
 only at the first matching position in the subject string.
+.RE
 .sp
-(e) The PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART
+.RS 4
+.ie n \{\
+\h'-04' 5.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 5." 4.2
+.\}
+The \fBPCRE2_NOTBOL\fP, \fBPCRE2_NOTEOL\fP, \fBPCRE2_NOTEMPTY\fP and \fBPCRE2_NOTEMPTY_ATSTART\fP
 options have no Perl equivalents.
+.RE
 .sp
-(f) The \(rsR escape sequence can be restricted to match only CR, LF, or CRLF
-by the PCRE2_BSR_ANYCRLF option.
+.RS 4
+.ie n \{\
+\h'-04' 6.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 6." 4.2
+.\}
+The \f(CR\(rsR\fP escape sequence can be restricted to match only CR,
+LF, or CRLF
+by the \fBPCRE2_BSR_ANYCRLF\fP option.
+.RE
 .sp
-(g) The callout facility is PCRE2\-specific. Perl supports codeblocks and
+.RS 4
+.ie n \{\
+\h'-04' 7.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 7." 4.2
+.\}
+The callout facility is PCRE2\-specific. Perl supports codeblocks and
 variable interpolation, but not general hooks on every match.
+.RE
 .sp
-(h) The partial matching facility is PCRE2\-specific.
+.RS 4
+.ie n \{\
+\h'-04' 8.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 8." 4.2
+.\}
+The partial matching facility is PCRE2\-specific.
+.RE
 .sp
-(i) The alternative matching function (\f(CRpcre2_dfa_match()\fP) matches in a
+.RS 4
+.ie n \{\
+\h'-04' 9.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 9." 4.2
+.\}
+The alternative matching function (pcre2_dfa_match()) matches in a
 different way and is not Perl\-compatible.
+.RE
 .sp
-(j) PCRE2 recognizes some special sequences such as (*CR) or (*NO_JIT) at
+.RS 4
+.ie n \{\
+\h'-04' 10.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 10." 4.2
+.\}
+PCRE2 recognizes some special sequences such as \f(CR(*CR)\fP or \f(CR(*NO_JIT)\fP at
 the start of a pattern. These set overall options that cannot be changed within
 the pattern.
+.RE
 .sp
-(k) PCRE2 supports non\-atomic positive lookaround assertions. This is an
+.RS 4
+.ie n \{\
+\h'-04' 11.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 11." 4.2
+.\}
+PCRE2 supports non\-atomic positive lookaround assertions. This is an
 extension to the lookaround facilities. The default, Perl\-compatible
 lookarounds are atomic.
+.RE
 .sp
-(l) There are three syntactical items in patterns that can refer to a capturing
-group by number: back references such as \(rsg{2}, subroutine calls such as (?3),
-and condition references such as (?(4)...). PCRE2 supports relative group
-numbers such as +2 and \-4 in all three cases. Perl supports both plus and minus
+.RS 4
+.ie n \{\
+\h'-04' 12.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 12." 4.2
+.\}
+There are three syntactical items in patterns that can refer to a capturing
+group by number: back references such as \f(CR\(rsg{2}\fP, subroutine calls such as \f(CR(?3)\fP,
+and condition references such as \f(CR(?(4)...)\fP. PCRE2 supports relative group
+numbers such as \f(CR+2\fP and \f(CR\-4\fP in all three cases. Perl supports both plus and minus
 for subroutine calls, but only minus for back references, and no relative
 numbering at all for conditions.
+.RE
 .sp
-(m) The scan substring assertion (syntax (*scs:(n)...)) is a PCRE2 extension
+.RS 4
+.ie n \{\
+\h'-04' 13.\h'+01'\c
+.\}
+.el \{\
+.  sp -1
+.  IP " 13." 4.2
+.\}
+The scan substring assertion (syntax \f(CR(*scs:(\fP\fIn\fP\f(CR)...)\fP) is a PCRE2 extension
 that is not available in Perl.
+.RE
+.RE
 .sp
-20. Perl has different limits than PCRE2. See the
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Perl has different limits than PCRE2. See the
 \f(CRpcre2limits\fP
 documentation for details. Perl went with 5.10 from recursion to iteration
 keeping the intermediate matches on the heap, which is ~10% slower but does not
 fall into any stack\-overflow limit. PCRE2 made a similar change at release
 10.30, and also has many build\-time and run\-time customizable limits.
+.RE
 .sp
-21. Unlike Perl, PCRE2 doesn't have character set modifiers and specially no way
-to set characters by context just like Perl's "/d". A regular expression using
-PCRE2_UTF and PCRE2_UCP will use similar rules to Perl's "/u"; something closer
-to "/a" could be selected by adding other PCRE2_EXTRA_ASCII* options on top.
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Unlike Perl, PCRE2 doesn\(cqt have character set modifiers and specially no way
+to set characters by context just like Perl\(cqs \f(CR/d\fP. A regular expression using
+\fBPCRE2_UTF\fP and \fBPCRE2_UCP\fP will use similar rules to Perl\(cqs \f(CR/u\fP; something closer
+to \f(CR/a\fP could be selected by adding other \f(CRPCRE2_EXTRA_ASCII*\fP options on top.
+.RE
 .sp
-22. Some recursive patterns that Perl diagnoses as infinite recursions can be
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Some recursive patterns that Perl diagnoses as infinite recursions can be
 handled by PCRE2, either by the interpreter or the JIT. An example is
-/(?:|(?0)abcd)(?\(rg|\(rsz)/, which matches a sequence of any number of repeated
-"abcd" substrings at the end of the subject.
+\f(CR(?:|(?0)abcd)(?(R)|\(rsz)\fP, which matches a sequence of any number of repeated
+\f(CRabcd\fP substrings at the end of the subject.
+.RE
 .sp
-23. Both PCRE2 and Perl error when \(rsx{ escapes are invalid, but Perl tries to
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+Both PCRE2 and Perl error when \f(CR\(rsx{\fP escapes are invalid, but Perl tries to
 recover and prints a warning if the problem was that an invalid hexadecimal
-digit was found. Since PCRE2 doesn't have warnings it returns an error instead.
-Additionally, Perl accepts \(rsx{} and generates NUL unlike PCRE2.
+digit was found. Since PCRE2 doesn\(cqt have warnings it returns an error instead.
+Additionally, Perl accepts \f(CR\(rsx{}\fP and matches NUL unlike PCRE2.
+.RE
 .sp
-24. From release 10.45, PCRE2 gives an error if \(rsx is not followed by a
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+From release 10.45, PCRE2 gives an error if \f(CR\(rsx\fP is not followed by a
 hexadecimal digit or a curly bracket. It used to interpret this as the NUL
-character. Perl still generates NUL, but warns when in warning mode in most
+character. Perl still matches NUL, but warns when in warning mode in most
 cases.
-.SH "AUTHOR"
+.RE
+.SS "Author"
 .sp
-.nf
-.fam C
 Philip Hazel
+.br
 Retired from University Computing Service
+.br
 Cambridge, England.
-.fam
-.fi
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 02 June 2025
 .br
-Copyright (c) 1997\-2024 University of Cambridge.
+Copyright \(co 1997\-2024 University of Cambridge.

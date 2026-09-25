@@ -2,22 +2,24 @@
 :doctype: manpage
 :manname: pcre2convert
 :manpurpose: PCRE2 pattern conversion
+:description: Experimental foreign pattern conversion functions
 :manvolnum: 3
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
 :docdate: 14 November 2023
 :revdate: 14 November 2023
+:toc: right
 
-== Experimental Pattern Conversion Functions
+== Experimental pattern conversion functions
 
 This document describes a set of functions that can be used to convert
 "foreign" patterns into PCRE2 regular expressions. This facility is currently
 experimental, and may be changed in future releases. Two kinds of pattern,
 globs and POSIX patterns, are supported.
 
-== The Convert Context
+== The convert context
 
-[source]
+[source,c,role=prototype]
 ----
 pcre2_convert_context *pcre2_convert_context_create(
       pcre2_general_context *gcontext);
@@ -38,7 +40,7 @@ A convert context is used to hold parameters that affect the way that pattern
 conversion works. Like all PCRE2 contexts, you need to use a context only if
 you want to override the defaults. There are the usual create, copy, and free
 functions. If custom memory management functions are set in a general context
-that is passed to `pcre2_convert_context_create()`, they are used for all
+that is passed to func:pcre2_convert_context_create(), they are used for all
 memory management within the conversion functions.
 
 There are only two parameters in the convert context at present. Both apply
@@ -48,12 +50,12 @@ character, or to any punctuation character with a code point less than 256.
 The separator character defaults to backslash under Windows, otherwise forward
 slash. It can be set to forward slash, backslash, or dot.
 
-The two setting functions return zero on success, or PCRE2_ERROR_BADDATA if
+The two setting functions return zero on success, or const:PCRE2_ERROR_BADDATA if
 their second argument is invalid.
 
-== The Conversion Function
+== The conversion function
 
-[source]
+[source,c,role=prototype]
 ----
 int pcre2_pattern_convert(PCRE2_SPTR pattern, PCRE2_SIZE plength,
                           uint32_t options, PCRE2_UCHAR **buffptr,
@@ -63,101 +65,101 @@ int pcre2_pattern_convert(PCRE2_SPTR pattern, PCRE2_SIZE plength,
 void pcre2_converted_pattern_free(PCRE2_UCHAR *converted);
 ----
 
-The first two arguments of `pcre2_pattern_convert()` define the foreign
+The first two arguments of func:pcre2_pattern_convert() define the foreign
 pattern that is to be converted. The length may be given as
-PCRE2_ZERO_TERMINATED. The `options` argument defines how the pattern is to
-be processed. If the input is UTF, the PCRE2_CONVERT_UTF option should be set.
-PCRE2_CONVERT_NO_UTF_CHECK may also be set if you are sure the input is valid.
+const:PCRE2_ZERO_TERMINATED. The arg:options argument defines how the pattern is to
+be processed. If the input is UTF, the const:PCRE2_CONVERT_UTF option should be set.
+const:PCRE2_CONVERT_NO_UTF_CHECK may also be set if you are sure the input is valid.
 One or more of the glob options, or one of the following POSIX options must be
 set to define the type of conversion that is required:
 
-[literal]
-....
-PCRE2_CONVERT_GLOB
-PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR
-PCRE2_CONVERT_GLOB_NO_STARSTAR
-PCRE2_CONVERT_POSIX_BASIC
-PCRE2_CONVERT_POSIX_EXTENDED
-....
+[.options]
+const:PCRE2_CONVERT_GLOB::
+const:PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR::
+const:PCRE2_CONVERT_GLOB_NO_STARSTAR::
+const:PCRE2_CONVERT_POSIX_BASIC::
+const:PCRE2_CONVERT_POSIX_EXTENDED::
 
-Details of the conversions are given below. The `buffer` and `blength`
+Details of the conversions are given below. The arg:buffer and arg:blength
 arguments define how the output is handled:
 
-If `buffer` is NULL, the function just returns the length of the converted
-pattern via `blength`. This is one less than the length of buffer needed,
+If arg:buffer is const:NULL, the function just returns the length of the converted
+pattern via arg:blength. This is one less than the length of buffer needed,
 because a terminating zero is always added to the output.
 
-If `buffer` points to a NULL pointer, an output buffer is obtained using
-the allocator in the context or `malloc()` if no context is supplied. A
-pointer to this buffer is placed in the variable to which `buffer` points.
+If arg:buffer points to a const:NULL pointer, an output buffer is obtained using
+the allocator in the context or [.c]`malloc()` if no context is supplied. A
+pointer to this buffer is placed in the variable to which arg:buffer points.
 When no longer needed the output buffer must be freed by calling
-`pcre2_converted_pattern_free()`. If this function is called with a NULL
+func:pcre2_converted_pattern_free(). If this function is called with a const:NULL
 argument, it returns immediately without doing anything.
 
-If `buffer` points to a non-NULL pointer, `blength` must be set to the
+If arg:buffer points to a non-const:NULL pointer, arg:blength must be set to the
 actual length of the buffer provided (in code units).
 
 In all cases, after successful conversion, the variable pointed to by
-`blength` is updated to the length actually used (in code units), excluding
+arg:blength is updated to the length actually used (in code units), excluding
 the terminating zero that is always added.
 
-If an error occurs, the length (via `blength`) is set to the offset
+If an error occurs, the length (via arg:blength) is set to the offset
 within the input pattern where the error was detected. Only gross syntax errors
 are caught; there are plenty of errors that will get passed on for
-`pcre2_compile()` to discover.
+func:pcre2_compile() to discover.
 
-The return from `pcre2_pattern_convert()` is zero on success or a non-zero
+The return from func:pcre2_pattern_convert() is zero on success or a non-zero
 PCRE2 error code. Note that PCRE2 error codes may be positive or negative:
-`pcre2_compile()` uses mostly positive codes and `pcre2_match()`
-negative ones; `pcre2_convert()` uses existing codes of both kinds. A
+func:pcre2_compile() uses mostly positive codes and func:pcre2_match()
+negative ones; func:pcre2_convert() uses existing codes of both kinds. A
 textual error message can be obtained by calling
-`pcre2_get_error_message()`.
+func:pcre2_get_error_message().
 
-== Converting Globs
+== Converting globs
 
 Globs are used to match file names, and consequently have the concept of a
 "path separator", which defaults to backslash under Windows and forward slash
-otherwise. If PCRE2_CONVERT_GLOB is set, the wildcards pass:[*] and ? are not
-permitted to match separator characters, but the double-star (pass:[*]pass:[*]) feature
+otherwise. If const:PCRE2_CONVERT_GLOB is set, the wildcards [.regex]`+*+` and [.regex]`?` are not
+permitted to match separator characters, but the double-star ([.regex]`+**+`) feature
 (which does match separators) is supported.
 
-PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR matches globs with wildcards allowed to
-match separator characters. PCRE2_CONVERT_GLOB_NO_STARSTAR matches globs with
+const:PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR matches globs with wildcards allowed to
+match separator characters. const:PCRE2_CONVERT_GLOB_NO_STARSTAR matches globs with
 the double-star feature disabled. These options may be given together.
 
-== Converting Posix Patterns
+== Converting POSIX patterns
 
 POSIX defines two kinds of regular expression pattern: basic and extended.
-These can be processed by setting PCRE2_CONVERT_POSIX_BASIC or
-PCRE2_CONVERT_POSIX_EXTENDED, respectively.
+These can be processed by setting const:PCRE2_CONVERT_POSIX_BASIC or
+const:PCRE2_CONVERT_POSIX_EXTENDED, respectively.
 
 In POSIX patterns, backslash is not special in a character class. Unmatched
 closing parentheses are treated as literals.
 
-In basic patterns, ? pass:[+] | {} and () must be escaped to be recognized
+In basic patterns, [.regex]`?`, [.regex]`{plus}`, [.regex]`|`, [.regex]`+{}+`, and [.regex]`()` must be escaped to be recognized
 as metacharacters outside a character class. If the first character in the
-pattern is pass:[*] it is treated as a literal. ^ is a metacharacter only at the start
+pattern is [.regex]`+*+` it is treated as a literal. [.regex]`+^+` is a metacharacter only at the start
 of a branch.
 
 In extended patterns, a backslash not in a character class always
 makes the next character literal, whatever it is. There are no backreferences.
 
-Note: POSIX mandates that the longest possible match at the first matching
-position must be found. This is not what `pcre2_match()` does; it yields
-the first match that is found. An application can use `pcre2_dfa_match()`
+[NOTE]
+====
+POSIX mandates that the longest possible match at the first matching
+position must be found. This is not what func:pcre2_match() does; it yields
+the first match that is found. An application can use func:pcre2_dfa_match()
 to find the longest match, but that does not support backreferences (but then
 neither do POSIX extended patterns).
+====
 
+[discrete]
 == Author
 
-[source]
-----
-Philip Hazel
-Retired from University Computing Service
+Philip Hazel +
+Retired from University Computing Service +
 Cambridge, England.
-----
 
+[discrete]
 == Revision
 
 Last updated: 14 November 2023 +
-Copyright (c) 1997-2018 University of Cambridge.
+Copyright (C) 1997-2018 University of Cambridge.

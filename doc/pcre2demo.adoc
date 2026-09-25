@@ -2,6 +2,7 @@
 :doctype: manpage
 :manname: pcre2demo
 :manpurpose: a demonstration C program for PCRE2
+:description: A demonstration C program that uses the PCRE2 library
 :manvolnum: 3
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
@@ -10,7 +11,7 @@
 
 == Source Code
 
-[source,role=wide]
+[source,c,role=wide]
 ----
 /*************************************************
 *           PCRE2 DEMONSTRATION PROGRAM          *

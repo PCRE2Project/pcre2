@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2-config
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 22 February 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,6 +31,7 @@
 pcre2-config \- program to return PCRE2 configuration
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
 pcre2\-config [\-\-prefix] [\-\-exec\-prefix] [\-\-version]
@@ -38,6 +39,7 @@ pcre2\-config [\-\-prefix] [\-\-exec\-prefix] [\-\-version]
              [\-\-cflags] [\-\-cflags\-posix]
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 \f(CRpcre2\-config\fP returns the configuration of the installed PCRE2 libraries
@@ -46,55 +48,70 @@ apply only to the 8\-bit, 16\-bit, or 32\-bit libraries, respectively, and are n
 available for libraries that have not been built. If an unavailable option is
 encountered, the "usage" information is output.
 .SH "OPTIONS"
-.TP 10
+.sp
+.RS 4
+.PD 0
+.TP 15
 \f(CR\-\-prefix\fP
+.ad l
 Writes the directory prefix used in the PCRE2 installation for
-architecture\-independent files (\fI/usr\fP on many systems, \fI/usr/local\fP on
+architecture\-independent files (\f(CR/usr\fP on many systems, \f(CR/usr/local\fP on
 some systems) to the standard output.
-.TP 10
+.TP 15
 \f(CR\-\-exec\-prefix\fP
+.ad l
 Writes the directory prefix used in the PCRE2 installation for
 architecture\-dependent files (normally the same as \f(CR\-\-prefix\fP) to the
 standard output.
-.TP 10
+.TP 15
 \f(CR\-\-version\fP
+.ad l
 Writes the version number of the installed PCRE2 libraries to the standard
 output.
-.TP 10
+.TP 15
 \f(CR\-\-libs8\fP
+.ad l
 Writes to the standard output the command line options required to link
 with the 8\-bit PCRE2 library (\f(CR\-lpcre2\-8\fP on many systems).
-.TP 10
+.TP 15
 \f(CR\-\-libs16\fP
+.ad l
 Writes to the standard output the command line options required to link
 with the 16\-bit PCRE2 library (\f(CR\-lpcre2\-16\fP on many systems).
-.TP 10
+.TP 15
 \f(CR\-\-libs32\fP
+.ad l
 Writes to the standard output the command line options required to link
 with the 32\-bit PCRE2 library (\f(CR\-lpcre2\-32\fP on many systems).
-.TP 10
+.TP 15
 \f(CR\-\-libs\-posix\fP
+.ad l
 Writes to the standard output the command line options required to link with
-PCRE2's POSIX API wrapper library (\f(CR\-lpcre2\-posix\fP \f(CR\-lpcre2\-8\fP on many
+PCRE2\(cqs POSIX API wrapper library (\f(CR\-lpcre2\-posix \-lpcre2\-8\fP on many
 systems).
-.TP 10
+.TP 15
 \f(CR\-\-cflags\fP
+.ad l
 Writes to the standard output the command line options required to compile
 files that use PCRE2 (this may include some \f(CR\-I\fP options, but is blank on
 many systems).
-.TP 10
+.TP 15
 \f(CR\-\-cflags\-posix\fP
+.ad l
 Writes to the standard output the command line options required to compile
-files that use PCRE2's POSIX API wrapper library (this may include some
+files that use PCRE2\(cqs POSIX API wrapper library (this may include some
 \f(CR\-I\fP options, but is blank on many systems).
+.PD
+.RE
 .PP
+.ad l
 .SH "SEE ALSO"
 .sp
-\f(CRpcre2(3)\fP
-.SH "AUTHOR"
+\f(CRpcre2\fP.
+.SS "Author"
 .sp
 This manual page was originally written by Mark Baker for the Debian GNU/Linux
 system. It has been subsequently revised as a generic PCRE2 man page.
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 22 February 2025

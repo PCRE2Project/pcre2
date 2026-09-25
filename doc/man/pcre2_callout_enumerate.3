@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_callout_enumerate
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 23 March 2017
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,61 +31,67 @@
 pcre2_callout_enumerate \- enumerate callouts in a compiled pattern
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_callout_enumerate(
-      const pcre2_code *code,
-      int (*callback)(pcre2_callout_enumerate_block *callout_block,
-                      void *callout_data),
-      void *callout_data);
+\fBint\fP pcre2_callout_enumerate(
+      \fBconst\fP \fBpcre2_code\fP *\fIcode\fP,
+      \fBint\fP (*\fIcallback\fP)(\fBpcre2_callout_enumerate_block\fP *\fIcallout_block\fP,
+                      \fBvoid\fP *\fIcallout_data\fP),
+      \fBvoid\fP *\fIcallout_data\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
-This function scans a compiled regular expression and calls the \fIcallback()\fP
+This function scans a compiled regular expression and calls the \f(CRcallback()\fP
 function for each callout within the pattern. The yield of the function is zero
 for success and non\-zero otherwise. The arguments are:
 .sp
-.ti +2
-\fIcode\fP           Points to the compiled pattern
-.br
-.ti +2
-\fIcallback\fP       The callback function
-.br
-.ti +2
-\fIcallout_data\fP   User data that is passed to the callback
+.RS 4
+.PD 0
+.TP 13
+\fIcode\fP
+.ad l
+Points to the compiled pattern
+.TP 13
+\fIcallback\fP
+.ad l
+The callback function
+.TP 13
+\fIcallout_data\fP
+.ad l
+User data that is passed to the callback
+.PD
+.RE
+.PP
+.ad l
 .sp
-The \fIcallback()\fP function is passed a pointer to a data block containing
+The \f(CRcallback()\fP function is passed a pointer to a data block containing
 the following fields (not necessarily in this order):
 .sp
-.ti +2
-uint32_t   \fIversion\fP                Block version number
-.br
-.ti +2
-uint32_t   \fIcallout_number\fP         Number for numbered callouts
-.br
-.ti +2
-PCRE2_SIZE \fIpattern_position\fP       Offset to next item in pattern
-.br
-.ti +2
-PCRE2_SIZE \fInext_item_length\fP       Length of next item in pattern
-.br
-.ti +2
-PCRE2_SIZE \fIcallout_string_offset\fP  Offset to string within pattern
-.br
-.ti +2
-PCRE2_SIZE \fIcallout_string_length\fP  Length of callout string
-.br
-.ti +2
-PCRE2_SPTR \fIcallout_string\fP         Points to callout string or is NULL
+.ss \n[.ss]
+.nf
+.fam C
+\fBuint32_t\fP version;\&                 /* Block version number */
+\fBuint32_t\fP callout_number;\&          /* Number for numbered callouts */
+\fBPCRE2_SIZE\fP pattern_position;\&      /* Offset to next item in pattern */
+\fBPCRE2_SIZE\fP next_item_length;\&      /* Length of next item in pattern */
+\fBPCRE2_SIZE\fP callout_string_offset; /* Offset to string within pattern */
+\fBPCRE2_SIZE\fP callout_string_length; /* Length of callout string */
+\fBPCRE2_SPTR\fP callout_string;\&        /* Points to callout string or is
+                                     NULL */
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 The second argument passed to the \f(CRcallback()\fP function is the callout data
-that was passed to \f(CRpcre2_callout_enumerate()\fP. The \f(CRcallback()\fP
+that was passed to pcre2_callout_enumerate(). The \f(CRcallback()\fP
 function must return zero for success. Any other value causes the pattern scan
 to stop, with the value being passed back as the result of
-\f(CRpcre2_callout_enumerate()\fP.
+pcre2_callout_enumerate().
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

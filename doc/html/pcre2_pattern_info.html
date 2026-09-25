@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
 <title>pcre2_pattern_info(3)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +116,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +139,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +161,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +218,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -445,9 +446,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_pattern_info(const pcre2_code *code, uint32_t what,
                        void *where);</code></pre>
@@ -461,87 +462,252 @@ int pcre2_pattern_info(const pcre2_code *code, uint32_t what,
 <div class="paragraph">
 <p>This function returns information about a compiled pattern. Its arguments are:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch"><em>code</em>     Pointer to a compiled regular expression pattern<br>
-<em>what</em>     What information is required<br>
-<em>where</em>    Where to put the information</p>
+<div class="dlist parameters">
+<dl>
+<dt class="hdlist1"><code class="parameter">code</code></dt>
+<dd>
+<p>Pointer to a compiled regular expression pattern</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">what</code></dt>
+<dd>
+<p>What information is required</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">where</code></dt>
+<dd>
+<p>Where to put the information</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>The recognized values for the <em>what</em> argument, and the information they
+<p>The recognized values for the <code class="parameter">what</code> argument, and the information they
 request are as follows:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_INFO_ALLOPTIONS      Final options after compiling<br>
-PCRE2_INFO_ARGOPTIONS      Options passed to <code>pcre2_compile()</code><br>
-PCRE2_INFO_BACKREFMAX      Number of highest backreference<br>
-PCRE2_INFO_BSR             What \R matches:<br>
-                             PCRE2_BSR_UNICODE: Unicode line endings<br>
-                             PCRE2_BSR_ANYCRLF: CR, LF, or CRLF only<br>
-PCRE2_INFO_CAPTURECOUNT    Number of capturing subpatterns<br>
-PCRE2_INFO_DEPTHLIMIT      Backtracking depth limit if set,<br>
-                             otherwise PCRE2_ERROR_UNSET<br>
-PCRE2_INFO_EXTRAOPTIONS    Extra options that were passed in the<br>
-                             compile context<br>
-PCRE2_INFO_FIRSTBITMAP     Bitmap of first code units, or NULL<br>
-PCRE2_INFO_FIRSTCODETYPE   Type of start-of-match information<br>
-                             0 nothing set<br>
-                             1 first code unit is set<br>
-                             2 start of string or after newline<br>
-PCRE2_INFO_FIRSTCODEUNIT   First code unit when type is 1<br>
-PCRE2_INFO_FRAMESIZE       Size of backtracking frame<br>
-PCRE2_INFO_HASBACKSLASHC   Return 1 if pattern contains \C<br>
-PCRE2_INFO_HASCRORLF       Return 1 if explicit CR or LF matches<br>
-                             exist in the pattern<br>
-PCRE2_INFO_HEAPLIMIT       Heap memory limit if set,<br>
-                             otherwise PCRE2_ERROR_UNSET<br>
-PCRE2_INFO_JCHANGED        Return 1 if (?J) or (?-J) was used<br>
-PCRE2_INFO_JITSIZE         Size of JIT compiled code, or 0<br>
-PCRE2_INFO_LASTCODETYPE    Type of must-be-present information<br>
-                             0 nothing set<br>
-                             1 code unit is set<br>
-PCRE2_INFO_LASTCODEUNIT    Last code unit when type is 1<br>
-PCRE2_INFO_MATCHEMPTY      1 if the pattern can match an<br>
-                             empty string, 0 otherwise<br>
-PCRE2_INFO_MATCHLIMIT      Match limit if set,<br>
-                             otherwise PCRE2_ERROR_UNSET<br>
-PCRE2_INFO_MAXLOOKBEHIND   Length (in characters) of the longest<br>
-                             lookbehind assertion<br>
-PCRE2_INFO_MINLENGTH       Lower bound length of matching strings<br>
-PCRE2_INFO_NAMECOUNT       Number of named subpatterns<br>
-PCRE2_INFO_NAMEENTRYSIZE   Size of name table entries<br>
-PCRE2_INFO_NAMETABLE       Pointer to name table<br>
-PCRE2_CONFIG_NEWLINE       Code for the newline sequence:<br>
-                             PCRE2_NEWLINE_CR<br>
-                             PCRE2_NEWLINE_LF<br>
-                             PCRE2_NEWLINE_CRLF<br>
-                             PCRE2_NEWLINE_ANY<br>
-                             PCRE2_NEWLINE_ANYCRLF<br>
-                             PCRE2_NEWLINE_NUL<br>
-PCRE2_INFO_RECURSIONLIMIT  Obsolete synonym for PCRE2_INFO_DEPTHLIMIT<br>
-PCRE2_INFO_SIZE            Size of compiled pattern</p>
+<div class="dlist values">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_ALLOPTIONS</code></dt>
+<dd>
+<p>Final options after compiling</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_ARGOPTIONS</code></dt>
+<dd>
+<p>Options passed to <code class="function">pcre2_compile()</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_BACKREFMAX</code></dt>
+<dd>
+<p>Number of highest backreference</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_BSR</code></dt>
+<dd>
+<p>What <code class="regex">\R</code> matches:</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_BSR_UNICODE</code></dt>
+<dd>
+<p>Unicode line endings</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_BSR_ANYCRLF</code></dt>
+<dd>
+<p>CR, LF, or CRLF only</p>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_CAPTURECOUNT</code></dt>
+<dd>
+<p>Number of capturing subpatterns</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_DEPTHLIMIT</code></dt>
+<dd>
+<p>Backtracking depth limit if set,
+otherwise <code class="constant">PCRE2_ERROR_UNSET</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_EXTRAOPTIONS</code></dt>
+<dd>
+<p>Extra options that were passed in the
+compile context</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_FIRSTBITMAP</code></dt>
+<dd>
+<p>Bitmap of first code units, or <code class="constant">NULL</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_FIRSTCODETYPE</code></dt>
+<dd>
+<p>Type of start-of-match information</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">0</dt>
+<dd>
+<p>nothing set</p>
+</dd>
+<dt class="hdlist1">1</dt>
+<dd>
+<p>first code unit is set</p>
+</dd>
+<dt class="hdlist1">2</dt>
+<dd>
+<p>start of string or after newline</p>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_FIRSTCODEUNIT</code></dt>
+<dd>
+<p>First code unit when type is 1</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_FRAMESIZE</code></dt>
+<dd>
+<p>Size of backtracking frame</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_HASBACKSLASHC</code></dt>
+<dd>
+<p>Return 1 if pattern contains <code class="regex">\C</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_HASCRORLF</code></dt>
+<dd>
+<p>Return 1 if explicit CR or LF matches
+exist in the pattern</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_HEAPLIMIT</code></dt>
+<dd>
+<p>Heap memory limit if set,
+otherwise <code class="constant">PCRE2_ERROR_UNSET</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_JCHANGED</code></dt>
+<dd>
+<p>Return 1 if <code class="regex">(?J)</code> or <code class="regex">(?-J)</code> was used</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_JITSIZE</code></dt>
+<dd>
+<p>Size of JIT compiled code, or 0</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_LASTCODETYPE</code></dt>
+<dd>
+<p>Type of must-be-present information</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">0</dt>
+<dd>
+<p>nothing set</p>
+</dd>
+<dt class="hdlist1">1</dt>
+<dd>
+<p>code unit is set</p>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_LASTCODEUNIT</code></dt>
+<dd>
+<p>Last code unit when type is 1</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_MATCHEMPTY</code></dt>
+<dd>
+<p>1 if the pattern can match an
+empty string, 0 otherwise</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_MATCHLIMIT</code></dt>
+<dd>
+<p>Match limit if set,
+otherwise <code class="constant">PCRE2_ERROR_UNSET</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_MAXLOOKBEHIND</code></dt>
+<dd>
+<p>Length (in characters) of the longest
+lookbehind assertion</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_MINLENGTH</code></dt>
+<dd>
+<p>Lower bound length of matching strings</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_NAMECOUNT</code></dt>
+<dd>
+<p>Number of named subpatterns</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_NAMEENTRYSIZE</code></dt>
+<dd>
+<p>Size of name table entries</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_NAMETABLE</code></dt>
+<dd>
+<p>Pointer to name table</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_CONFIG_NEWLINE</code></dt>
+<dd>
+<p>Code for the newline sequence:</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_NEWLINE_CR</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_NEWLINE_LF</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_NEWLINE_CRLF</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_NEWLINE_ANY</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_NEWLINE_ANYCRLF</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_NEWLINE_NUL</code></dt>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_RECURSIONLIMIT</code></dt>
+<dd>
+<p>Obsolete synonym for <code class="constant">PCRE2_INFO_DEPTHLIMIT</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_SIZE</code></dt>
+<dd>
+<p>Size of compiled pattern</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>If <em>where</em> is NULL, the function returns the amount of memory needed for
-the requested information, in bytes. Otherwise, the <em>where</em> argument must
-point to an unsigned 32-bit integer (uint32_t variable), except for the
-following <em>what</em> values, when it must point to a variable of the type
+<p>If <code class="parameter">where</code> is <code class="constant">NULL</code>, the function returns the amount of memory needed for
+the requested information, in bytes. Otherwise, the <code class="parameter">where</code> argument must
+point to an unsigned 32-bit integer (<code class="type">uint32_t</code> variable), except for the
+following <code class="parameter">what</code> values, when it must point to a variable of the type
 shown:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_INFO_FIRSTBITMAP     const uint8_t *<br>
-PCRE2_INFO_JITSIZE         size_t<br>
-PCRE2_INFO_NAMETABLE       PCRE2_SPTR<br>
-PCRE2_INFO_SIZE            size_t</p>
+<div class="dlist values">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_FIRSTBITMAP</code></dt>
+<dd>
+<p><code class="c">const uint8_t *</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_JITSIZE</code></dt>
+<dd>
+<p><code class="type">size_t</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_NAMETABLE</code></dt>
+<dd>
+<p><code class="type">PCRE2_SPTR</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_INFO_SIZE</code></dt>
+<dd>
+<p><code class="type">size_t</code></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>The yield of the function is zero on success or:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ERROR_NULL           the argument <em>code</em> is NULL<br>
-PCRE2_ERROR_BADMAGIC       the "magic number" was not found<br>
-PCRE2_ERROR_BADOPTION      the value of <em>what</em> is invalid<br>
-PCRE2_ERROR_BADMODE        the pattern was compiled in the wrong mode<br>
-PCRE2_ERROR_UNSET          the requested information is not set</p>
+<div class="dlist errors">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_NULL</code></dt>
+<dd>
+<p>the argument <code class="parameter">code</code> is <code class="constant">NULL</code></p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_BADMAGIC</code></dt>
+<dd>
+<p>the "magic number" was not found</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_BADOPTION</code></dt>
+<dd>
+<p>the value of <code class="parameter">what</code> is invalid</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_BADMODE</code></dt>
+<dd>
+<p>the pattern was compiled in the wrong mode</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UNSET</code></dt>
+<dd>
+<p>the requested information is not set</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>There is a complete description of the PCRE2 native API in the

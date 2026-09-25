@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
 <title>pcre2_substitute(3)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +116,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +139,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +161,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +218,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -445,9 +446,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_synopsis">Synopsis</h2>
 <div class="sectionbody">
-<div class="listingblock synopsis">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="nowrap"><code>#include &lt;pcre2.h&gt;
+<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
 
 int pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject,
                      PCRE2_SIZE length, PCRE2_SIZE start_offset,
@@ -468,83 +469,180 @@ string, using a matching algorithm that is similar to Perl&#8217;s. It then make
 copy of the subject, substituting a replacement string for what was matched.
 Its arguments are:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch"><em>code</em>          Points to the compiled pattern<br>
-<em>subject</em>       Points to the subject string<br>
-<em>length</em>        Length of the subject string<br>
-<em>startoffset</em>   Offset in the subject at which to start matching<br>
-<em>options</em>       Option bits<br>
-<em>match_data</em>    Points to a match data block, or is NULL<br>
-<em>mcontext</em>      Points to a match context, or is NULL<br>
-<em>replacement</em>   Points to the replacement string<br>
-<em>rlength</em>       Length of the replacement string<br>
-<em>outputbuffer</em>  Points to the output buffer<br>
-<em>outlengthptr</em>  Points to the length of the output buffer</p>
+<div class="dlist parameters">
+<dl>
+<dt class="hdlist1"><code class="parameter">code</code></dt>
+<dd>
+<p>Points to the compiled pattern</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">subject</code></dt>
+<dd>
+<p>Points to the subject string</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">length</code></dt>
+<dd>
+<p>Length of the subject string</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">start_offset</code></dt>
+<dd>
+<p>Offset in the subject at which to start matching</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">options</code></dt>
+<dd>
+<p>Option bits</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">match_data</code></dt>
+<dd>
+<p>Points to a match data block, or is <code class="constant">NULL</code></p>
+</dd>
+<dt class="hdlist1"><code class="parameter">mcontext</code></dt>
+<dd>
+<p>Points to a match context, or is <code class="constant">NULL</code></p>
+</dd>
+<dt class="hdlist1"><code class="parameter">replacement</code></dt>
+<dd>
+<p>Points to the replacement string</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">rlength</code></dt>
+<dd>
+<p>Length of the replacement string</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">buffer</code></dt>
+<dd>
+<p>Points to the output buffer, or may be <code class="constant">NULL</code> if <code class="parameter">blength</code> is zero</p>
+</dd>
+<dt class="hdlist1"><code class="parameter">blength</code></dt>
+<dd>
+<p>Points to the length of the output buffer</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>A match data block is needed only if you want to inspect the data from the
-final match that is returned in that block or if PCRE2_SUBSTITUTE_MATCHED is
+final match that is returned in that block or if <code class="constant">PCRE2_SUBSTITUTE_MATCHED</code> is
 set. A match context is needed only if you want to:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">Set up a callout function<br>
-Set a matching offset limit<br>
-Change the backtracking match limit<br>
-Change the backtracking depth limit<br>
-Set custom memory management in the match context</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Set up a callout function</p>
+</li>
+<li>
+<p>Set a matching offset limit</p>
+</li>
+<li>
+<p>Change the backtracking match limit</p>
+</li>
+<li>
+<p>Change the backtracking depth limit</p>
+</li>
+<li>
+<p>Set custom memory management in the match context</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p>The <em>length</em>, <em>startoffset</em> and <em>rlength</em> values are code units,
+<p>The <code class="parameter">length</code>, <code class="parameter">start_offset</code> and <code class="parameter">rlength</code> values are code units,
 not characters, as is the contents of the variable pointed at by
-<em>outlengthptr</em>. This variable must contain the length of the output buffer
+<code class="parameter">blength</code>. This variable must contain the length of the output buffer
 when the function is called. If the function is successful, the value is
 changed to the length of the new string, excluding the trailing zero that is
 automatically added.</p>
 </div>
 <div class="paragraph">
-<p>The subject and replacement lengths can be given as PCRE2_ZERO_TERMINATED for
+<p>The subject and replacement lengths can be given as <code class="constant">PCRE2_ZERO_TERMINATED</code> for
 zero-terminated strings. The options are:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ANCHORED                     Match only at the first position<br>
-PCRE2_ENDANCHORED                  Match only at end of subject<br>
-PCRE2_NOTBOL                       Subject is not the beginning of a<br>
-                                    line<br>
-PCRE2_NOTEOL                       Subject is not the end of a line<br>
-PCRE2_NOTEMPTY                     An empty string is not a<br>
-                                    valid match<br>
-PCRE2_NOTEMPTY_ATSTART             An empty string at the start of<br>
-                                    the subject is not a valid match<br>
-PCRE2_NO_JIT                       Do not use JIT matching<br>
-PCRE2_NO_UTF_CHECK                 Do not check for UTF validity in<br>
-                                    the subject or replacement<br>
-                                    (only relevant if PCRE2_UTF was<br>
-                                    set at compile time)<br>
-PCRE2_SUBSTITUTE_EXTENDED          Do extended replacement processing<br>
-PCRE2_SUBSTITUTE_GLOBAL            Replace all occurrences in the<br>
-                                    subject<br>
-PCRE2_SUBSTITUTE_LITERAL           The replacement string is literal<br>
-PCRE2_SUBSTITUTE_MATCHED           Use pre-existing match data for<br>
-                                    first match<br>
-PCRE2_SUBSTITUTE_OVERFLOW_LENGTH   If overflow, compute needed length<br>
-PCRE2_SUBSTITUTE_REPLACEMENT_ONLY  Return only replacement string(s)<br>
-PCRE2_SUBSTITUTE_UNKNOWN_UNSET     Treat unknown group as unset<br>
-PCRE2_SUBSTITUTE_UNSET_EMPTY       Simple unset insert = empty string</p>
+<div class="dlist options">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_ANCHORED</code></dt>
+<dd>
+<p>Match only at the first position</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ENDANCHORED</code></dt>
+<dd>
+<p>Match only at end of subject</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NOTBOL</code></dt>
+<dd>
+<p>Subject is not the beginning of a
+line</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NOTEOL</code></dt>
+<dd>
+<p>Subject is not the end of a line</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NOTEMPTY</code></dt>
+<dd>
+<p>An empty string is not a
+valid match</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NOTEMPTY_ATSTART</code></dt>
+<dd>
+<p>An empty string at the start of
+the subject is not a valid match</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NO_JIT</code></dt>
+<dd>
+<p>Do not use JIT matching</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_NO_UTF_CHECK</code></dt>
+<dd>
+<p>Do not check for UTF validity in
+the subject or replacement
+(only relevant if <code class="constant">PCRE2_UTF</code> was
+set at compile time)</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_SUBSTITUTE_EXTENDED</code></dt>
+<dd>
+<p>Do extended replacement processing</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_SUBSTITUTE_GLOBAL</code></dt>
+<dd>
+<p>Replace all occurrences in the
+subject</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_SUBSTITUTE_LITERAL</code></dt>
+<dd>
+<p>The replacement string is literal</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_SUBSTITUTE_MATCHED</code></dt>
+<dd>
+<p>Use pre-existing match data for
+first match</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_SUBSTITUTE_OVERFLOW_LENGTH</code></dt>
+<dd>
+<p>If overflow, compute needed length</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_SUBSTITUTE_REPLACEMENT_ONLY</code></dt>
+<dd>
+<p>Return only replacement string(s)</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_SUBSTITUTE_UNKNOWN_UNSET</code></dt>
+<dd>
+<p>Treat unknown group as unset</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_SUBSTITUTE_UNSET_EMPTY</code></dt>
+<dd>
+<p>Simple unset insert = empty string</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>If PCRE2_SUBSTITUTE_LITERAL is set, PCRE2_SUBSTITUTE_EXTENDED,
-PCRE2_SUBSTITUTE_UNKNOWN_UNSET, and PCRE2_SUBSTITUTE_UNSET_EMPTY are ignored.</p>
+<p>If <code class="constant">PCRE2_SUBSTITUTE_LITERAL</code> is set, <code class="constant">PCRE2_SUBSTITUTE_EXTENDED</code>,
+<code class="constant">PCRE2_SUBSTITUTE_UNKNOWN_UNSET</code>, and <code class="constant">PCRE2_SUBSTITUTE_UNSET_EMPTY</code> are ignored.</p>
 </div>
 <div class="paragraph">
-<p>If PCRE2_SUBSTITUTE_MATCHED is set, <em>match_data</em> must be non-NULL; its
-contents must be the result of a call to <code>pcre2_match()</code> (or
-<code>pcre2_jit_match()</code>) using the same pattern, subject pointer, effective
+<p>If <code class="constant">PCRE2_SUBSTITUTE_MATCHED</code> is set, <code class="parameter">match_data</code> must be non-<code class="constant">NULL</code>; its
+contents must be the result of a call to <code class="function">pcre2_match()</code> (or
+<code class="function">pcre2_jit_match()</code>) using the same pattern, subject pointer, effective
 subject length, start offset, and match options.</p>
 </div>
 <div class="paragraph">
 <p>The function returns the number of substitutions, which may be zero if there
 are no matches. The result may be greater than one only when
-PCRE2_SUBSTITUTE_GLOBAL is set. In the event of an error, a negative error code
+<code class="constant">PCRE2_SUBSTITUTE_GLOBAL</code> is set. In the event of an error, a negative error code
 is returned.</p>
 </div>
 <div class="paragraph">

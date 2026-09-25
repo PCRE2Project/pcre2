@@ -10,8 +10,8 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int pcre2_set_recursion_memory_management(
@@ -19,7 +19,7 @@ int pcre2_set_recursion_memory_management(
       void *(*mymalloc)(size_t size, void *mydata),
       void (*myfree)(void *ptr, void *mydata),
       void *mydata);
-....
+----
 
 == Description
 

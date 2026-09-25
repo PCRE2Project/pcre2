@@ -10,21 +10,21 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *match_data);
-....
+----
 
 == Description
 
-After a successful call of `pcre2_match()` that was passed the match block
+After a successful call of func:pcre2_match() that was passed the match block
 that is this function's argument, this function returns the code unit offset of
 the character at which the successful match started. For a non-partial match,
-this can be different to the value of _ovector[0]_ if the pattern contains
-the \K escape sequence. After a partial match, however, this value is always
-the same as _ovector[0]_ because \K does not affect the result of a
+this can be different to the value of [.c]`+ovector[0]+` if the pattern contains
+the [.regex]`\K` escape sequence. After a partial match, however, this value is always
+the same as [.c]`+ovector[0]+` because [.regex]`\K` does not affect the result of a
 partial match.
 
 There is a complete description of the PCRE2 native API in the

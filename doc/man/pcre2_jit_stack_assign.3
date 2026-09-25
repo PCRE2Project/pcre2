@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_jit_stack_assign
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 13 August 2018
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,47 +31,59 @@
 pcre2_jit_stack_assign \- assign stack for JIT matching
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-void pcre2_jit_stack_assign(pcre2_match_context *mcontext,
-                            pcre2_jit_callback callback,
-                            void *callback_data);
+\fBvoid\fP pcre2_jit_stack_assign(\fBpcre2_match_context\fP *\fImcontext\fP,
+                            \fBpcre2_jit_callback\fP \fIcallback\fP,
+                            \fBvoid\fP *\fIcallback_data\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function provides control over the memory used by JIT as a run\-time stack
-when \f(CRpcre2_match()\fP or \f(CRpcre2_jit_match()\fP is called with a pattern
+when pcre2_match() or pcre2_jit_match() is called with a pattern
 that has been successfully processed by the JIT compiler. The information that
 determines which stack is used is put into a match context that is subsequently
 passed to a matching function. The arguments of this function are:
 .sp
-.ti +2
-mcontext       a pointer to a match context
-.br
-.ti +2
-callback       a callback function
-.br
-.ti +2
-callback_data  a JIT stack or a value to be passed to the callback
+.RS 4
+.PD 0
+.TP 14
+\fImcontext\fP
+.ad l
+a pointer to a match context
+.TP 14
+\fIcallback\fP
+.ad l
+a callback function
+.TP 14
+\fIcallback_data\fP
+.ad l
+a JIT stack or a value to be passed to the callback
+.PD
+.RE
+.PP
+.ad l
 .sp
-If \fImcontext\fP is NULL, the function returns immediately, without doing
+If \fImcontext\fP is \fBNULL\fP, the function returns immediately, without doing
 anything.
 .sp
-If \fIcallback\fP is NULL and \fIcallback_data\fP is NULL, an internal 32KiB
+If \fIcallback\fP is \fBNULL\fP and \fIcallback_data\fP is \fBNULL\fP, an internal 32KiB
 block on the machine stack is used.
 .sp
-If \fIcallback\fP is NULL and \fIcallback_data\fP is not NULL,
+If \fIcallback\fP is \fBNULL\fP and \fIcallback_data\fP is not \fBNULL\fP,
 \fIcallback_data\fP must be a valid JIT stack, the result of calling
-\f(CRpcre2_jit_stack_create()\fP.
+pcre2_jit_stack_create().
 .sp
-If \fIcallback\fP not NULL, it is called with \fIcallback_data\fP as an
+If \fIcallback\fP not \fBNULL\fP, it is called with \fIcallback_data\fP as an
 argument at the start of matching, in order to set up a JIT stack. If the
-result is NULL, the internal 32KiB stack is used; otherwise the return value
+result is \fBNULL\fP, the internal 32KiB stack is used; otherwise the return value
 must be a valid JIT stack, the result of calling
-\f(CRpcre2_jit_stack_create()\fP.
+pcre2_jit_stack_create().
 .sp
 You may safely use the same JIT stack for multiple patterns, as long as they
 are all matched in the same thread. In a multithread application, each thread

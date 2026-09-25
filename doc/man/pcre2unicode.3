@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2unicode
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 27 November 2024
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -41,15 +41,15 @@ treats each code unit in a string as one character.
 There are two ways of telling PCRE2 to switch to UTF mode, where characters may
 consist of more than one code unit and the range of values is constrained. The
 program can call
-\f(CRpcre2_compile()\fP
-with the PCRE2_UTF option, or the pattern may start with the sequence (*UTF).
-However, the latter facility can be locked out by the PCRE2_NEVER_UTF option.
+pcre2_compile()
+with the \fBPCRE2_UTF\fP option, or the pattern may start with the sequence \f(CR(*UTF)\fP.
+However, the latter facility can be locked out by the \fBPCRE2_NEVER_UTF\fP option.
 That is, the programmer can prevent the supplier of the pattern from switching
 to UTF mode.
 .sp
-Note that the PCRE2_MATCH_INVALID_UTF option (see
+Note that the \fBPCRE2_MATCH_INVALID_UTF\fP option (see
 below)
-forces PCRE2_UTF to be set.
+forces \fBPCRE2_UTF\fP to be set.
 .sp
 In UTF mode, both the pattern and any subject strings that are matched against
 it are treated as UTF strings instead of strings of individual one\-code\-unit
@@ -57,30 +57,30 @@ characters. There are also some other changes to the way characters are
 handled, as documented below.
 .SH "UNICODE PROPERTY SUPPORT"
 .sp
-When PCRE2 is built with Unicode support, the escape sequences \(rsp{..},
-\(rsP{..}, and \(rsX can be used. This is not dependent on the PCRE2_UTF setting.
+When PCRE2 is built with Unicode support, the escape sequences \f(CR\(rsp{..}\fP,
+\f(CR\(rsP{..}\fP, and \f(CR\(rsX\fP can be used. This is not dependent on the \fBPCRE2_UTF\fP setting.
 The Unicode properties that can be tested are a subset of those that Perl
 supports. Currently they are limited to the general category properties such as
-Lu for an upper case letter or Nd for a decimal number, the derived properties
-Any and Lc (synonym L&), the Unicode script names such as Arabic or Han,
-Bidi_Class, Bidi_Control, and a few binary properties.
+\f(CRLu\fP for an upper case letter or \f(CRNd\fP for a decimal number, the derived properties
+\f(CRAny\fP and \f(CRLc\fP (synonym \f(CRL&\fP), the Unicode script names such as \f(CRArabic\fP or \f(CRHan\fP,
+\f(CRBidi_Class\fP, \f(CRBidi_Control\fP, and a few binary properties.
 .sp
 The full lists are given in the
 \f(CRpcre2pattern\fP
 and
 \f(CRpcre2syntax\fP
 documentation. In general, only the short names for properties are supported.
-For example, \(rsp{L} matches a letter. Its longer synonym, \(rsp{Letter}, is not
+For example, \f(CR\(rsp{L}\fP matches a letter. Its longer synonym, \f(CR\(rsp{Letter}\fP, is not
 supported. Furthermore, in Perl, many properties may optionally be prefixed by
-"Is", for compatibility with Perl 5.6. PCRE2 does not support this.
+\f(CRIs\fP, for compatibility with Perl 5.6. PCRE2 does not support this.
 .SH "WIDE CHARACTERS AND UTF MODES"
 .sp
 Code points less than 256 can be specified in patterns by either braced or
-unbraced hexadecimal escape sequences (for example, \(rsx{b3} or \(rsxb3). Larger
-values have to use braced sequences. Unbraced octal code points up to \(rs777 are
-also recognized; larger ones can be coded using \(rso{...}.
+unbraced hexadecimal escape sequences (for example, \f(CR\(rsx{b3}\fP or \f(CR\(rsxb3\fP). Larger
+values have to use braced sequences. Unbraced octal code points up to \f(CR\(rs777\fP are
+also recognized; larger ones can be coded using \f(CR\(rso{...}\fP.
 .sp
-The escape sequence \(rsN{U+<hex digits>} is recognized as another way of
+The escape sequence \f(CR\(rsN{U+\fP\fIhex digits\fP\f(CR}\fP is recognized as another way of
 specifying a Unicode character by code point in a UTF mode. It is not allowed
 in non\-UTF mode.
 .sp
@@ -93,31 +93,31 @@ single code unit.
 In UTF mode, capture group names are not restricted to ASCII, and may contain
 any Unicode letters and decimal digits, as well as underscore.
 .sp
-The escape sequence \(rsC can be used to match a single code unit in UTF mode,
+The escape sequence \f(CR\(rsC\fP can be used to match a single code unit in UTF mode,
 but its use can lead to some strange effects because it breaks up multi\-unit
-characters (see the description of \(rsC in the
+characters (see the description of \f(CR\(rsC\fP in the
 \f(CRpcre2pattern\fP
 documentation). For this reason, there is a build\-time option that disables
-support for \(rsC completely. There is also a less draconian compile\-time option
-for locking out the use of \(rsC when a pattern is compiled.
+support for \f(CR\(rsC\fP completely. There is also a less draconian compile\-time option
+for locking out the use of \f(CR\(rsC\fP when a pattern is compiled.
 .sp
-The use of \(rsC is not supported by the alternative matching function
-\f(CRpcre2_dfa_match()\fP when in UTF\-8 or UTF\-16 mode, that is, when a character
-may consist of more than one code unit. The use of \(rsC in these modes provokes
-a match\-time error. Also, the JIT optimization does not support \(rsC in these
+The use of \f(CR\(rsC\fP is not supported by the alternative matching function
+pcre2_dfa_match() when in UTF\-8 or UTF\-16 mode, that is, when a character
+may consist of more than one code unit. The use of \f(CR\(rsC\fP in these modes provokes
+a match\-time error. Also, the JIT optimization does not support \f(CR\(rsC\fP in these
 modes. If JIT optimization is requested for a UTF\-8 or UTF\-16 pattern that
-contains \(rsC, it will not succeed, and so when \f(CRpcre2_match()\fP is called,
+contains \f(CR\(rsC\fP, it will not succeed, and so when pcre2_match() is called,
 the matching will be carried out by the interpretive function.
 .sp
-The character escapes \(rsb, \(rsB, \(rsd, \(rsD, \(rss, \(rsS, \(rsw, and \(rsW correctly test
+The character escapes \f(CR\(rsb\fP, \f(CR\(rsB\fP, \f(CR\(rsd\fP, \f(CR\(rsD\fP, \f(CR\(rss\fP, \f(CR\(rsS\fP, \f(CR\(rsw\fP, and \f(CR\(rsW\fP correctly test
 characters of any code value, but, by default, the characters that PCRE2
 recognizes as digits, spaces, or word characters remain the same set as in
 non\-UTF mode, all with code points less than 256. This remains true even when
 PCRE2 is built to include Unicode support, because to do otherwise would slow
-down matching in many common cases. Note that this also applies to \(rsb
-and \(rsB, because they are defined in terms of \(rsw and \(rsW. If you want
+down matching in many common cases. Note that this also applies to \f(CR\(rsb\fP
+and \f(CR\(rsB\fP, because they are defined in terms of \f(CR\(rsw\fP and \f(CR\(rsW\fP. If you want
 to test for a wider sense of, say, "digit", you can use explicit Unicode
-property tests such as \(rsp{Nd}. Alternatively, if you set the PCRE2_UCP option,
+property tests such as \f(CR\(rsp{Nd}\fP. Alternatively, if you set the \fBPCRE2_UCP\fP option,
 the way that the character escapes work is changed so that Unicode properties
 are used to determine which characters match, though there are some options
 that suppress this for individual escapes. For details see the section on
@@ -127,89 +127,88 @@ in the
 documentation.
 .sp
 Like the escapes, characters that match the POSIX named character classes are
-all low\-valued characters unless the PCRE2_UCP option is set, but there is an
+all low\-valued characters unless the \fBPCRE2_UCP\fP option is set, but there is an
 option to override this.
 .sp
 In contrast to the character escapes and character classes, the special
-horizontal and vertical white space escapes (\(rsh, \(rsH, \(rsv, and \(rsV) do match
-all the appropriate Unicode characters, whether or not PCRE2_UCP is set.
+horizontal and vertical white space escapes (\f(CR\(rsh\fP, \f(CR\(rsH\fP, \f(CR\(rsv\fP, and \f(CR\(rsV\fP) do match
+all the appropriate Unicode characters, whether or not \fBPCRE2_UCP\fP is set.
 .SH "UNICODE CASE\-EQUIVALENCE"
 .sp
-If either PCRE2_UTF or PCRE2_UCP is set, upper/lower case processing makes use
+If either \fBPCRE2_UTF\fP or \fBPCRE2_UCP\fP is set, upper/lower case processing makes use
 of Unicode properties except for characters whose code points are less than 128
 and that have at most two case\-equivalent values. For these, a direct table
 lookup is used for speed. A few Unicode characters such as Greek sigma have
 more than two code points that are case\-equivalent, and these are treated
-specially. Setting PCRE2_UCP without PCRE2_UTF allows Unicode\-style case
+specially. Setting \fBPCRE2_UCP\fP without \fBPCRE2_UTF\fP allows Unicode\-style case
 processing for non\-UTF character encodings such as UCS\-2.
 .sp
 There are two ASCII characters (S and K) that, in addition to their ASCII lower
 case equivalents, have a non\-ASCII one as well (long S and Kelvin sign).
 Recognition of these non\-ASCII characters as case\-equivalent to their ASCII
-counterparts can be disabled by setting the PCRE2_EXTRA_CASELESS_RESTRICT
+counterparts can be disabled by setting the \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP
 option. When this is set, all characters in a case equivalence must either be
 ASCII or non\-ASCII; there can be no mixing.
 .sp
-.ti +2
-Without PCRE2_EXTRA_CASELESS_RESTRICT:
+.RS 4
+.PD 0
+.TP 7
+Without \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP
+.ad l
+\*(Aqk\*(Aq = \*(AqK\*(Aq = \f(CRU+212A\fP (Kelvin sign)
 .br
-.ti +2
-  \*(Aqk\*(Aq = \*(AqK\*(Aq = U+212A (Kelvin sign)
+\*(Aqs\*(Aq = \*(AqS\*(Aq = \f(CRU+017F\fP (long S)
+.TP 7
+With \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP
+.ad l
+\*(Aqk\*(Aq = \*(AqK\*(Aq
 .br
-.ti +2
-  \*(Aqs\*(Aq = \*(AqS\*(Aq = U+017F (long S)
+\f(CRU+212A\fP (Kelvin sign) \(em only case\-equivalent to itself
 .br
-.ti +2
-With PCRE2_EXTRA_CASELESS_RESTRICT:
+\*(Aqs\*(Aq = \*(AqS\*(Aq
 .br
-.ti +2
-  \*(Aqk\*(Aq = \*(AqK\*(Aq
-.br
-.ti +2
-  U+212A (Kelvin sign)  only case\-equivalent to itself
-.br
-.ti +2
-  \*(Aqs\*(Aq = \*(AqS\*(Aq
-.br
-.ti +2
-  U+017F (long S)       only case\-equivalent to itself
+\f(CRU+017F\fP (long S) \(em only case\-equivalent to itself
+.PD
+.RE
+.PP
+.ad l
 .sp
 One language family, Turkish and Azeri, has its own case\-insensitivity rules,
-which can be selected by setting PCRE2_EXTRA_TURKISH_CASING. This alters the
-behaviour of the \*(Aqi\*(Aq, \*(AqI\*(Aq, U+0130 (capital I with dot above), and U+0131
+which can be selected by setting \fBPCRE2_EXTRA_TURKISH_CASING\fP. This alters the
+behaviour of the \*(Aqi\*(Aq, \*(AqI\*(Aq, \f(CRU+0130\fP (capital I with dot above), and \f(CRU+0131\fP
 (small dotless i) characters.
 .sp
-.ti +2
-Without PCRE2_EXTRA_TURKISH_CASING:
+.RS 4
+.PD 0
+.TP 7
+Without \fBPCRE2_EXTRA_TURKISH_CASING\fP
+.ad l
+\*(Aqi\*(Aq = \*(AqI\*(Aq
 .br
-.ti +2
-  \*(Aqi\*(Aq = \*(AqI\*(Aq
+\f(CRU+0130\fP (capital I with dot above)  \(em only case\-equivalent to itself
 .br
-.ti +2
-  U+0130 (capital I with dot above)  only case\-equivalent to itself
+\f(CRU+0131\fP (small dotless i) \(em only case\-equivalent to itself
+.TP 7
+With \fBPCRE2_EXTRA_TURKISH_CASING\fP
+.ad l
+\*(Aqi\*(Aq = \f(CRU+0130\fP (capital I with dot above)
 .br
-.ti +2
-  U+0131 (small dotless i)           only case\-equivalent to itself
-.br
-.ti +2
-With PCRE2_EXTRA_TURKISH_CASING:
-.br
-.ti +2
-  \*(Aqi\*(Aq = U+0130 (capital I with dot above)
-.br
-.ti +2
-  U+0131 (small dotless i) = \*(AqI\*(Aq
+\f(CRU+0131\fP (small dotless i) = \*(AqI\*(Aq
+.PD
+.RE
+.PP
+.ad l
 .sp
-It is not allowed to specify both PCRE2_EXTRA_CASELESS_RESTRICT and
-PCRE2_EXTRA_TURKISH_CASING together.
+It is not allowed to specify both \fBPCRE2_EXTRA_CASELESS_RESTRICT\fP and
+\fBPCRE2_EXTRA_TURKISH_CASING\fP together.
 .sp
-From release 10.45 the Unicode letter properties Lu (upper case), Ll (lower
-case), and Lt (title case) are all treated as Lc (cased letter) when caseless
-matching is set by the PCRE2_CASELESS option or (?i) within the pattern.
+From release 10.45 the Unicode letter properties \f(CRLu\fP (upper case), \f(CRLl\fP (lower
+case), and \f(CRLt\fP (title case) are all treated as \f(CRLc\fP (cased letter) when caseless
+matching is set by the \fBPCRE2_CASELESS\fP option or \f(CR(?i)\fP within the pattern.
 .SH "SCRIPT RUNS"
 .sp
-The pattern constructs (*script_run:...) and (*atomic_script_run:...), with
-synonyms (*sr:...) and (*asr:...), verify that the string matched within the
+The pattern constructs \f(CR(*script_run:...)\fP and \f(CR(*atomic_script_run:...)\fP, with
+synonyms \f(CR(*sr:...)\fP and \f(CR(*asr:...)\fP, verify that the string matched within the
 parentheses is a script run. In concept, a script run is a sequence of
 characters that are all from the same Unicode script. However, because some
 scripts are commonly used together, and because some diacritical and other
@@ -221,7 +220,7 @@ are also three special values:
 .sp
 "Unknown" is used for code points that have not been assigned, and also for the
 surrogate code points. In the PCRE2 32\-bit library, characters whose code
-points are greater than the Unicode maximum (U+10FFFF), which are accessible
+points are greater than the Unicode maximum (\f(CRU+10FFFF\fP), which are accessible
 only in non\-UTF mode, are assigned the Unknown script.
 .sp
 "Common" is used for characters that are used with many scripts. These include
@@ -233,16 +232,16 @@ previous character. These are considered to take on the script of the character
 that they modify.
 .sp
 Some Inherited characters are used with many scripts, but many of them are only
-normally used with a small number of scripts. For example, U+102E0 (Coptic
+normally used with a small number of scripts. For example, \f(CRU+102E0\fP (Coptic
 Epact thousands mark) is used only with Arabic and Coptic. In order to make it
 possible to check this, a Unicode property called Script Extension exists. Its
 value is a list of scripts that apply to the character. For the majority of
 characters, the list contains just one script, the same one as the Script
-property. However, for characters such as U+102E0 more than one Script is
+property. However, for characters such as \f(CRU+102E0\fP more than one Script is
 listed. There are also some Common characters that have a single, non\-Common
 script in their Script Extension list.
 .sp
-The next section describes the basic rules for deciding whether a given string
+The section Basic script run rules describes the basic rules for deciding whether a given string
 of characters is a script run. Note, however, that there are some special cases
 involving the Chinese Han script, and an additional constraint for decimal
 digits. These are covered in subsequent sections.
@@ -253,26 +252,42 @@ only case in which an Unknown character can be part of a script run. Longer
 strings are checked using only the Script Extensions property, not the basic
 Script property.
 .sp
-If a character's Script Extension property is the single value "Inherited", it
+If a character\(cqs Script Extension property is the single value "Inherited", it
 is always accepted as part of a script run. This is also true for the property
 "Common", subject to the checking of decimal digits described below. All the
 remaining characters in a script run must have at least one script in common in
 their Script Extension lists. In set\-theoretic terminology, the intersection of
 all the sets of scripts must not be empty.
 .sp
-A simple example is an Internet name such as "google.com". The letters are all
+A simple example is an Internet name such as \f(CRgoogle.com\fP. The letters are all
 in the Latin script, and the dot is Common, so this string is a script run.
-However, the Cyrillic letter "o" looks exactly the same as the Latin "o"; a
-string that looks the same, but with Cyrillic "o"s is not a script run.
+However, the Cyrillic letter \f(CRo\fP looks exactly the same as the Latin \f(CRo\fP; a
+string that looks the same, but with Cyrillic \f(CRo\fPs is not a script run.
 .sp
 More interesting examples involve characters with more than one script in their
 Script Extension. Consider the following characters:
 .sp
-.ti +2
-U+060C  Arabic comma
-.br
-.ti +2
-U+06D4  Arabic full stop
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\f(CRU+060C\fP, Arabic comma
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.  sp -1
+.  IP \(bu 2.3
+.\}
+\f(CRU+06D4\fP, Arabic full stop
+.RE
 .sp
 The first has the Script Extension list Arabic, Hanifi Rohingya, Syriac, and
 Thaana; the second has just Arabic and Hanifi Rohingya. Both of them could
@@ -287,7 +302,7 @@ and Han. These three combinations are treated as special cases when checking
 script runs and are, in effect, "virtual scripts". Thus, a script run may
 contain a mixture of Hiragana, Katakana, and Han, or a mixture of Hangul and
 Han, or a mixture of Bopomofo and Han, but not, for example, a mixture of
-Hangul and Bopomofo and Han. PCRE2 (like Perl) follows Unicode's Technical
+Hangul and Bopomofo and Han. PCRE2 (like Perl) follows Unicode\(cqs Technical
 Standard 39 ("Unicode Security Mechanisms", \c
 .URL "http://unicode.org/reports/tr39/" "" ")"
 in allowing such mixtures.
@@ -301,211 +316,191 @@ contains any decimal digits, they must all come from the same set of 10
 adjacent characters.
 .SH "VALIDITY OF UTF STRINGS"
 .sp
-When the PCRE2_UTF option is set, the strings passed as patterns and subjects
+When the \fBPCRE2_UTF\fP option is set, the strings passed as patterns and subjects
 are (by default) checked for validity on entry to the relevant functions. If an
 invalid UTF string is passed, a negative error code is returned. The code unit
 offset to the offending character can be extracted from the match data block by
-calling \f(CRpcre2_get_startchar()\fP, which is used for this purpose after a UTF
+calling pcre2_get_startchar(), which is used for this purpose after a UTF
 error.
 .sp
 In some situations, you may already know that your strings are valid, and
 therefore want to skip these checks in order to improve performance, for
 example in the case of a long subject string that is being scanned repeatedly.
-If you set the PCRE2_NO_UTF_CHECK option at compile time or at match time,
+If you set the \fBPCRE2_NO_UTF_CHECK\fP option at compile time or at match time,
 PCRE2 assumes that the pattern or subject it is given (respectively) contains
 only valid UTF code unit sequences.
 .sp
-If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is set, the result
+If you pass an invalid UTF string when \fBPCRE2_NO_UTF_CHECK\fP is set, the result
 is undefined and your program may crash or loop indefinitely or give incorrect
 results. There is, however, one mode of matching that can handle invalid UTF
-subject strings. This is enabled by passing PCRE2_MATCH_INVALID_UTF to
-\f(CRpcre2_compile()\fP and is discussed below in the next section. The rest of
-this section covers the case when PCRE2_MATCH_INVALID_UTF is not set.
+subject strings. This is enabled by passing \fBPCRE2_MATCH_INVALID_UTF\fP to
+pcre2_compile() and is discussed below in the section
+Errors in UTF\-8 strings. The rest of
+this section covers the case when \fBPCRE2_MATCH_INVALID_UTF\fP is not set.
 .sp
-Passing PCRE2_NO_UTF_CHECK to \f(CRpcre2_compile()\fP just disables the UTF check
+Passing \fBPCRE2_NO_UTF_CHECK\fP to pcre2_compile() just disables the UTF check
 for the pattern; it does not also apply to subject strings. If you want to
 disable the check for a subject string you must pass this same option to
-\f(CRpcre2_match()\fP or \f(CRpcre2_dfa_match()\fP.
+pcre2_match() or pcre2_dfa_match().
 .sp
 UTF\-16 and UTF\-32 strings can indicate their endianness by special code knows
 as a byte\-order mark (BOM). The PCRE2 functions do not handle this, expecting
 strings to be in host byte order.
 .sp
-Unless PCRE2_NO_UTF_CHECK is set, a UTF string is checked before any other
-processing takes place. In the case of \f(CRpcre2_match()\fP and
-\f(CRpcre2_dfa_match()\fP calls with a non\-zero starting offset, the check is
+Unless \fBPCRE2_NO_UTF_CHECK\fP is set, a UTF string is checked before any other
+processing takes place. In the case of pcre2_match() and
+pcre2_dfa_match() calls with a non\-zero starting offset, the check is
 applied only to that part of the subject that could be inspected during
 matching, and there is a check that the starting offset points to the first
 code unit of a character or to the end of the subject. If there are no
 lookbehind assertions in the pattern, the check starts at the starting offset.
 Otherwise, it starts at the length of the longest lookbehind before the
 starting offset, or at the start of the subject if there are not that many
-characters before the starting offset. Note that the sequences \(rsb and \(rsB are
+characters before the starting offset. Note that the sequences \f(CR\(rsb\fP and \f(CR\(rsB\fP are
 one\-character lookbehinds.
 .sp
 In addition to checking the format of the string, there is a check to ensure
-that all code points lie in the range U+0 to U+10FFFF, excluding the surrogate
+that all code points lie in the range \f(CRU+0\fP to \f(CRU+10FFFF\fP, excluding the surrogate
 area. The so\-called "non\-character" code points are not excluded because
 Unicode corrigendum #9 makes it clear that they should not be.
 .sp
 Characters in the "Surrogate Area" of Unicode are reserved for use by UTF\-16,
 where they are used in pairs to encode code points with values greater than
-0xFFFF. The code points that are encoded by UTF\-16 pairs are available
+\f(CR0xFFFF\fP. The code points that are encoded by UTF\-16 pairs are available
 independently in the UTF\-8 and UTF\-32 encodings. (In other words, the whole
 surrogate thing is a fudge for UTF\-16 which unfortunately messes up UTF\-8 and
 UTF\-32.)
 .sp
-Setting PCRE2_NO_UTF_CHECK at compile time does not disable the error that is
+Setting \fBPCRE2_NO_UTF_CHECK\fP at compile time does not disable the error that is
 given if an escape sequence for an invalid Unicode code point is encountered in
-the pattern. If you want to allow escape sequences such as \(rsx{d800} (a
-surrogate code point) you can set the PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES extra
+the pattern. If you want to allow escape sequences such as \f(CR\(rsx{d800}\fP (a
+surrogate code point) you can set the \fBPCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES\fP extra
 option. However, this is possible only in UTF\-8 and UTF\-32 modes, because these
 values are not representable in UTF\-16.
 .SS "Errors in UTF\-8 strings"
 .sp
 The following negative error codes are given for invalid UTF\-8 strings:
 .sp
-.ti +2
-PCRE2_ERROR_UTF8_ERR1
-.br
-.ti +2
-PCRE2_ERROR_UTF8_ERR2
-.br
-.ti +2
-PCRE2_ERROR_UTF8_ERR3
-.br
-.ti +2
-PCRE2_ERROR_UTF8_ERR4
-.br
-.ti +2
-PCRE2_ERROR_UTF8_ERR5
-.sp
+.RS 4
+.PD 0
+.TP 7
+\fBPCRE2_ERROR_UTF8_ERR1\fP, \fBPCRE2_ERROR_UTF8_ERR2\fP, \fBPCRE2_ERROR_UTF8_ERR3\fP, \fBPCRE2_ERROR_UTF8_ERR4\fP, \fBPCRE2_ERROR_UTF8_ERR5\fP
+.ad l
 The string ends with a truncated UTF\-8 character; the code specifies how many
 bytes are missing (1 to 5). Although RFC 3629 restricts UTF\-8 characters to be
 no longer than 4 bytes, the encoding scheme (originally defined by RFC 2279)
 allows for up to 6 bytes, and this is checked first; hence the possibility of
 4 or 5 missing bytes.
-.sp
-.ti +2
-PCRE2_ERROR_UTF8_ERR6
-.br
-.ti +2
-PCRE2_ERROR_UTF8_ERR7
-.br
-.ti +2
-PCRE2_ERROR_UTF8_ERR8
-.br
-.ti +2
-PCRE2_ERROR_UTF8_ERR9
-.br
-.ti +2
-PCRE2_ERROR_UTF8_ERR10
-.sp
+.TP 7
+\fBPCRE2_ERROR_UTF8_ERR6\fP, \fBPCRE2_ERROR_UTF8_ERR7\fP, \fBPCRE2_ERROR_UTF8_ERR8\fP, \fBPCRE2_ERROR_UTF8_ERR9\fP, \fBPCRE2_ERROR_UTF8_ERR10\fP
+.ad l
 The two most significant bits of the 2nd, 3rd, 4th, 5th, or 6th byte of the
-character do not have the binary value 0b10 (that is, either the most
+character do not have the binary value \f(CR0b10\fP (that is, either the most
 significant bit is 0, or the next bit is 1).
-.sp
-.ti +2
-PCRE2_ERROR_UTF8_ERR11
-.br
-.ti +2
-PCRE2_ERROR_UTF8_ERR12
-.sp
+.TP 7
+\fBPCRE2_ERROR_UTF8_ERR11\fP, \fBPCRE2_ERROR_UTF8_ERR12\fP
+.ad l
 A character that is valid by the RFC 2279 rules is either 5 or 6 bytes long;
 these code points are excluded by RFC 3629.
-.sp
-.ti +2
-PCRE2_ERROR_UTF8_ERR13
-.sp
-A 4\-byte character has a value greater than 0x10ffff; these code points are
+.TP 7
+\fBPCRE2_ERROR_UTF8_ERR13\fP
+.ad l
+A 4\-byte character has a value greater than \f(CR0x10ffff\fP; these code points are
 excluded by RFC 3629.
-.sp
-.ti +2
-PCRE2_ERROR_UTF8_ERR14
-.sp
-A 3\-byte character has a value in the range 0xd800 to 0xdfff; this range of
+.TP 7
+\fBPCRE2_ERROR_UTF8_ERR14\fP
+.ad l
+A 3\-byte character has a value in the range \f(CR0xd800\fP to \f(CR0xdfff\fP; this range of
 code points are reserved by RFC 3629 for use with UTF\-16, and so are excluded
 from UTF\-8.
-.sp
-.ti +2
-PCRE2_ERROR_UTF8_ERR15
-.br
-.ti +2
-PCRE2_ERROR_UTF8_ERR16
-.br
-.ti +2
-PCRE2_ERROR_UTF8_ERR17
-.br
-.ti +2
-PCRE2_ERROR_UTF8_ERR18
-.br
-.ti +2
-PCRE2_ERROR_UTF8_ERR19
-.sp
+.TP 7
+\fBPCRE2_ERROR_UTF8_ERR15\fP, \fBPCRE2_ERROR_UTF8_ERR16\fP, \fBPCRE2_ERROR_UTF8_ERR17\fP, \fBPCRE2_ERROR_UTF8_ERR18\fP, \fBPCRE2_ERROR_UTF8_ERR19\fP
+.ad l
 A 2\-, 3\-, 4\-, 5\-, or 6\-byte character is "overlong", that is, it codes for a
 value that can be represented by fewer bytes, which is invalid. For example,
-the two bytes 0xc0, 0xae give the value 0x2e, whose correct coding uses just
+the two bytes \f(CR0xc0\fP, \f(CR0xae\fP give the value \f(CR0x2e\fP, whose correct coding uses just
 one byte.
-.sp
-.ti +2
-PCRE2_ERROR_UTF8_ERR20
-.sp
+.TP 7
+\fBPCRE2_ERROR_UTF8_ERR20\fP
+.ad l
 The two most significant bits of the first byte of a character have the binary
-value 0b10 (that is, the most significant bit is 1 and the second is 0). Such a
+value \f(CR0b10\fP (that is, the most significant bit is 1 and the second is 0). Such a
 byte can only validly occur as the second or subsequent byte of a multi\-byte
 character.
-.sp
-.ti +2
-PCRE2_ERROR_UTF8_ERR21
-.sp
-The first byte of a character has the value 0xfe or 0xff. These values can
+.TP 7
+\fBPCRE2_ERROR_UTF8_ERR21\fP
+.ad l
+The first byte of a character has the value \f(CR0xfe\fP or \f(CR0xff\fP. These values can
 never occur in a valid UTF\-8 string.
+.PD
+.RE
+.PP
+.ad l
 .SS "Errors in UTF\-16 strings"
 .sp
 The following negative error codes are given for invalid UTF\-16 strings:
 .sp
-.ti +2
-PCRE2_ERROR_UTF16_ERR1  Missing low surrogate at end of string
-.br
-.ti +2
-PCRE2_ERROR_UTF16_ERR2  Invalid low surrogate follows high surrogate
-.br
-.ti +2
-PCRE2_ERROR_UTF16_ERR3  Isolated low surrogate
+.RS 4
+.PD 0
+.TP 23
+\fBPCRE2_ERROR_UTF16_ERR1\fP
+.ad l
+Missing low surrogate at end of string
+.TP 23
+\fBPCRE2_ERROR_UTF16_ERR2\fP
+.ad l
+Invalid low surrogate follows high surrogate
+.TP 23
+\fBPCRE2_ERROR_UTF16_ERR3\fP
+.ad l
+Isolated low surrogate
+.PD
+.RE
+.PP
+.ad l
 .SS "Errors in UTF\-32 strings"
 .sp
 The following negative error codes are given for invalid UTF\-32 strings:
 .sp
-.ti +2
-PCRE2_ERROR_UTF32_ERR1  Surrogate character (0xd800 to 0xdfff)
-.br
-.ti +2
-PCRE2_ERROR_UTF32_ERR2  Code point is greater than 0x10ffff
+.RS 4
+.PD 0
+.TP 23
+\fBPCRE2_ERROR_UTF32_ERR1\fP
+.ad l
+Surrogate character (\f(CR0xd800\fP to \f(CR0xdfff\fP)
+.TP 23
+\fBPCRE2_ERROR_UTF32_ERR2\fP
+.ad l
+Code point is greater than \f(CR0x10ffff\fP
+.PD
+.RE
+.PP
+.ad l
 .SH "MATCHING IN INVALID UTF STRINGS"
 .sp
 You can run pattern matches on subject strings that may contain invalid UTF
-sequences if you call \f(CRpcre2_compile()\fP with the PCRE2_MATCH_INVALID_UTF
-option. This is supported by \f(CRpcre2_match()\fP, including JIT matching, but
-not by \f(CRpcre2_dfa_match()\fP. When PCRE2_MATCH_INVALID_UTF is set, it forces
-PCRE2_UTF to be set as well. Note, however, that the pattern itself must be a
+sequences if you call pcre2_compile() with the \fBPCRE2_MATCH_INVALID_UTF\fP
+option. This is supported by pcre2_match(), including JIT matching, but
+not by pcre2_dfa_match(). When \fBPCRE2_MATCH_INVALID_UTF\fP is set, it forces
+\fBPCRE2_UTF\fP to be set as well. Note, however, that the pattern itself must be a
 valid UTF string.
 .sp
-If you do not set PCRE2_MATCH_INVALID_UTF when calling \f(CRpcre2_compile\fP, and
+If you do not set \fBPCRE2_MATCH_INVALID_UTF\fP when calling pcre2_compile(), and
 you are not certain that your subject strings are valid UTF sequences, you
-should not make use of the JIT "fast path" function \f(CRpcre2_jit_match()\fP
+should not make use of the JIT "fast path" function pcre2_jit_match()
 because it bypasses sanity checks, including the one for UTF validity. An
 invalid string may cause undefined behaviour, including looping, crashing, or
 giving the wrong answer.
 .sp
-Setting PCRE2_MATCH_INVALID_UTF does not affect what \f(CRpcre2_compile()\fP
-generates, but if \f(CRpcre2_jit_compile()\fP is subsequently called, it does
+Setting \fBPCRE2_MATCH_INVALID_UTF\fP does not affect what pcre2_compile()
+generates, but if pcre2_jit_compile() is subsequently called, it does
 generate different code. If JIT is not used, the option affects the behaviour
-of the interpretive code in \f(CRpcre2_match()\fP. When PCRE2_MATCH_INVALID_UTF
-is set at compile time, PCRE2_NO_UTF_CHECK is ignored at match time.
+of the interpretive code in pcre2_match(). When \fBPCRE2_MATCH_INVALID_UTF\fP
+is set at compile time, \fBPCRE2_NO_UTF_CHECK\fP is ignored at match time.
 .sp
 In this mode, an invalid code unit sequence in the subject never matches any
-pattern item. It does not match dot, it does not match \(rsp{Any}, it does not
-even match negative items such as [^X]. A lookbehind assertion fails if it
+pattern item. It does not match dot, it does not match \f(CR\(rsp{Any}\fP, it does not
+even match negative items such as \f(CR[^X]\fP. A lookbehind assertion fails if it
 encounters an invalid sequence while moving the current point backwards. In
 other words, an invalid UTF code unit sequence acts as a barrier which no match
 can cross.
@@ -519,33 +514,31 @@ are a few points to consider:
 The internal boundaries are not interpreted as the beginnings or ends of lines
 and so do not match circumflex or dollar characters in the pattern.
 .sp
-If \f(CRpcre2_match()\fP is called with an offset that points to an invalid
+If pcre2_match() is called with an offset that points to an invalid
 UTF\-sequence, that sequence is skipped, and the match starts at the next valid
 UTF character, or the end of the subject.
 .sp
-At internal fragment boundaries, \(rsb and \(rsB behave in the same way as at the
-beginning and end of the subject. For example, a sequence such as \(rsbWORD\(rsb
-would match an instance of WORD that is surrounded by invalid UTF code units.
+At internal fragment boundaries, \f(CR\(rsb\fP and \f(CR\(rsB\fP behave in the same way as at the
+beginning and end of the subject. For example, a sequence such as \f(CR\(rsbWORD\(rsb\fP
+would match an instance of \f(CRWORD\fP that is surrounded by invalid UTF code units.
 .sp
-Using PCRE2_MATCH_INVALID_UTF, an application can run matches on arbitrary
+Using \fBPCRE2_MATCH_INVALID_UTF\fP, an application can run matches on arbitrary
 data, knowing that any matched strings that are returned are valid UTF. This
 can be useful when searching for UTF text in executable or other binary files.
 .sp
 Note, however, that the 16\-bit and 32\-bit PCRE2 libraries process strings as
-sequences of uint16_t or uint32_t code points. They cannot find valid UTF
+sequences of \fBuint16_t\fP or \fBuint32_t\fP code points. They cannot find valid UTF
 sequences within an arbitrary string of bytes unless such sequences are
 suitably aligned.
-.SH "AUTHOR"
+.SS "Author"
 .sp
-.nf
-.fam C
 Philip Hazel
+.br
 Retired from University Computing Service
+.br
 Cambridge, England.
-.fam
-.fi
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 27 November 2024
 .br
-Copyright (c) 1997\-2024 University of Cambridge.
+Copyright \(co 1997\-2024 University of Cambridge.

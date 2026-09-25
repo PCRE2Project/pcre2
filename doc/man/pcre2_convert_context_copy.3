@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_convert_context_copy
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 12 July 2017
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,19 +31,21 @@
 pcre2_convert_context_copy \- copy a convert context
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-pcre2_convert_context *pcre2_convert_context_copy(
-      pcre2_convert_context *ccontext);
+\fBpcre2_convert_context\fP *pcre2_convert_context_copy(
+      \fBpcre2_convert_context\fP *\fIccontext\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function is part of an experimental set of pattern conversion functions.
 It makes a new copy of a convert context, using the memory allocation function
-that was used for the original context. The result is NULL if the memory cannot
+that was used for the original context. The result is \fBNULL\fP if the memory cannot
 be obtained.
 .sp
 The pattern conversion functions are described in the

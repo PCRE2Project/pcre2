@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_convert_context_create
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 12 July 2017
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,20 +31,22 @@
 pcre2_convert_context_create \- create a convert context
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-pcre2_convert_context *pcre2_convert_context_create(
-      pcre2_general_context *gcontext);
+\fBpcre2_convert_context\fP *pcre2_convert_context_create(
+      \fBpcre2_general_context\fP *\fIgcontext\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function is part of an experimental set of pattern conversion functions.
 It creates and initializes a new convert context. If its argument is
-NULL, \f(CRmalloc()\fP is used to get the necessary memory; otherwise the memory
-allocation function within the general context is used. The result is NULL if
+\fBNULL\fP, \f(CRmalloc()\fP is used to get the necessary memory; otherwise the memory
+allocation function within the general context is used. The result is \fBNULL\fP if
 the memory could not be obtained.
 .sp
 The pattern conversion functions are described in the

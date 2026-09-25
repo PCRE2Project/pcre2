@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_substring_get_bynumber
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 13 December 2014
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,50 +31,74 @@
 pcre2_substring_get_bynumber \- extract numbered substring into new memory
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_substring_get_bynumber(pcre2_match_data *match_data,
-                                 uint32_t stringnumber,
-                                 PCRE2_UCHAR **stringptr,
-                                 PCRE2_SIZE *sizeptr);
+\fBint\fP pcre2_substring_get_bynumber(\fBpcre2_match_data\fP *\fImatch_data\fP,
+                                 \fBuint32_t\fP \fIstringnumber\fP,
+                                 \fBPCRE2_UCHAR\fP **\fIstringptr\fP,
+                                 \fBPCRE2_SIZE\fP *\fIsizeptr\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This is a convenience function for extracting a captured substring by number
 into newly acquired memory. The arguments are:
 .sp
-.ti +2
-\fImatch_data\fP    The match data for the match
-.br
-.ti +2
-\fInumber\fP        Number of the required substring
-.br
-.ti +2
-\fIbufferptr\fP     Where to put the string pointer
-.br
-.ti +2
-\fIbufflen\fP       Where to put the string length
+.RS 4
+.PD 0
+.TP 13
+\fImatch_data\fP
+.ad l
+The match data for the match
+.TP 13
+\fIstringnumber\fP
+.ad l
+Number of the required substring
+.TP 13
+\fIstringptr\fP
+.ad l
+Where to put the string pointer
+.TP 13
+\fIsizeptr\fP
+.ad l
+Where to put the string length
+.PD
+.RE
+.PP
+.ad l
 .sp
 The memory in which the substring is placed is obtained by calling the same
 memory allocation function that was used for the match data block. The
-convenience function \f(CRpcre2_substring_free()\fP can be used to free it when
+convenience function pcre2_substring_free() can be used to free it when
 it is no longer needed. The yield of the function is zero for success or one of
 the following error numbers:
 .sp
-.ti +2
-PCRE2_ERROR_NOSUBSTRING   there are no groups of that number
-.br
-.ti +2
-PCRE2_ERROR_UNAVAILBLE    the ovector was too small for that group
-.br
-.ti +2
-PCRE2_ERROR_UNSET         the group did not participate in the match
-.br
-.ti +2
-PCRE2_ERROR_NOMEMORY      memory could not be obtained
+.RS 4
+.PD 0
+.TP 24
+\fBPCRE2_ERROR_NOSUBSTRING\fP
+.ad l
+there are no groups of that number
+.TP 24
+\fBPCRE2_ERROR_UNAVAILABLE\fP
+.ad l
+the ovector was too small for that group
+.TP 24
+\fBPCRE2_ERROR_UNSET\fP
+.ad l
+the group did not participate in the match
+.TP 24
+\fBPCRE2_ERROR_NOMEMORY\fP
+.ad l
+memory could not be obtained
+.PD
+.RE
+.PP
+.ad l
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

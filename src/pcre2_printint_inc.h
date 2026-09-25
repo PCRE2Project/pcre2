@@ -177,7 +177,7 @@ print_char(FILE *f, PCRE2_SPTR ptr, BOOL utf)
 #endif /* PCRE2_CODE_UNIT_WIDTH == 8 */
 
   /* UTF-16: rather than swallow a low surrogate, just stop if we hit a bad one.
-Print it with \X instead of \x as an indication. */
+  Print it with \X instead of \x as an indication. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 16
   if ((ptr[1] & 0xfc00) != 0xdc00)
@@ -192,8 +192,8 @@ Print it with \X instead of \x as an indication. */
 #endif /* PCRE2_CODE_UNIT_WIDTH == 16 */
 
   /* For UTF-32 we get here only for a malformed code unit, which should only
-occur if the sanity check has been turned off. Print it with \X instead of \x
-as an indication. */
+  occur if the sanity check has been turned off. Print it with \X instead of \x
+  as an indication. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 32
   fprintf(f, "\\X{%x}", c);

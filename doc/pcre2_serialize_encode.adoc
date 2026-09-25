@@ -10,8 +10,8 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int32_t pcre2_serialize_encode(const pcre2_code **codes,
@@ -19,7 +19,7 @@ int32_t pcre2_serialize_encode(const pcre2_code **codes,
                                uint8_t **serialized_bytes,
                                PCRE2_SIZE *serialized_size,
                                pcre2_general_context *gcontext);
-....
+----
 
 == Description
 
@@ -28,33 +28,39 @@ be saved on disc or elsewhere. Note that this is not an abstract format like
 Java or .NET. Conversion of the byte stream back into usable compiled patterns
 can only happen on a host that is running the same version of PCRE2, with the
 same code unit width, and the host must also have the same endianness, pointer
-width and PCRE2_SIZE type. The arguments for `pcre2_serialize_encode()`
+width and type:PCRE2_SIZE type. The arguments for func:pcre2_serialize_encode()
 are:
 
-[literal,subs=normal]
-....
-_codes_             pointer to a vector containing the list
-_number_of_codes_   number of slots in the vector
-_serialized_bytes_  set to point to the serialized byte stream
-_serialized_size_   set to the number of bytes in the byte stream
-_gcontext_          pointer to a general context or NULL
-....
+[.parameters]
+arg:codes::
+    pointer to a vector containing the list
+arg:number_of_codes::
+    number of slots in the vector
+arg:serialized_bytes::
+    set to point to the serialized byte stream
+arg:serialized_size::
+    set to the number of bytes in the byte stream
+arg:gcontext::
+    pointer to a general context or const:NULL
 
 The context argument is used to obtain memory for the byte stream. When the
 serialized data is no longer needed, it must be freed by calling
-`pcre2_serialize_free()`. The yield of the function is the number of
+func:pcre2_serialize_free(). The yield of the function is the number of
 serialized patterns, or one of the following negative error codes:
 
-[literal,subs=normal]
-....
-PCRE2_ERROR_BADDATA      _number_of_codes_ is zero or less
-PCRE2_ERROR_BADMAGIC     mismatch of id bytes in one of the patterns
-PCRE2_ERROR_MEMORY       memory allocation failed
-PCRE2_ERROR_MIXEDTABLES  the patterns do not all use the same tables
-PCRE2_ERROR_NULL         an argument other than _gcontext_ is NULL
-....
+[.errors]
+const:PCRE2_ERROR_BADDATA::
+    arg:number_of_codes is zero or less
+const:PCRE2_ERROR_BADMAGIC::
+    mismatch of id bytes in one of the patterns
+const:PCRE2_ERROR_MEMORY::
+    memory allocation failed
+const:PCRE2_ERROR_MIXEDTABLES::
+    the patterns do not all use the same tables
+const:PCRE2_ERROR_NULL::
+    an argument other than arg:gcontext is const:NULL
 
-PCRE2_ERROR_BADMAGIC means either that a pattern's code has been corrupted, or
+const:PCRE2_ERROR_BADMAGIC means either that a pattern's code has been corrupted, or
 that a slot in the vector does not point to a compiled pattern.
 
 There is a complete description of the PCRE2 native API in the

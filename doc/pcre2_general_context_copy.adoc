@@ -10,19 +10,19 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 pcre2_general_context *pcre2_general_context_copy(
       pcre2_general_context *gcontext);
-....
+----
 
 == Description
 
 This function makes a new copy of a general context, using the memory
 allocation functions in the context, if set, to get the necessary memory.
-Otherwise `malloc()` is used. The result is NULL if the memory cannot be
+Otherwise [.c]`malloc()` is used. The result is const:NULL if the memory cannot be
 obtained.
 
 There is a complete description of the PCRE2 native API in the

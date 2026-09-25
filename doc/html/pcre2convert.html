@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="description" content="Experimental foreign pattern conversion functions">
 <title>pcre2convert(3)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +117,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +219,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -433,9 +435,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 </head>
-<body class="manpage">
+<body class="manpage toc2 toc-right">
 <div id="header">
 <h1>pcre2convert(3) Manual Page</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_experimental_pattern_conversion_functions">Experimental pattern conversion functions</a></li>
+<li><a href="#_the_convert_context">The convert context</a></li>
+<li><a href="#_the_conversion_function">The conversion function</a></li>
+<li><a href="#_converting_globs">Converting globs</a></li>
+<li><a href="#_converting_posix_patterns">Converting POSIX patterns</a></li>
+</ul>
+</div>
 <h2>Name</h2>
 <div class="sectionbody">
 <p>pcre2convert - PCRE2 pattern conversion</p>
@@ -443,7 +455,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_experimental_pattern_conversion_functions">Experimental Pattern Conversion Functions</h2>
+<h2 id="_experimental_pattern_conversion_functions">Experimental pattern conversion functions</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This document describes a set of functions that can be used to convert
@@ -454,11 +466,11 @@ globs and POSIX patterns, are supported.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_convert_context">The Convert Context</h2>
+<h2 id="_the_convert_context">The convert context</h2>
 <div class="sectionbody">
-<div class="listingblock">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="highlight"><code>pcre2_convert_context *pcre2_convert_context_create(
+<pre class="highlight"><code class="language-c" data-lang="c">pcre2_convert_context *pcre2_convert_context_create(
       pcre2_general_context *gcontext);
 
 pcre2_convert_context *pcre2_convert_context_copy(
@@ -478,7 +490,7 @@ int pcre2_set_glob_separator(pcre2_convert_context *ccontext,
 conversion works. Like all PCRE2 contexts, you need to use a context only if
 you want to override the defaults. There are the usual create, copy, and free
 functions. If custom memory management functions are set in a general context
-that is passed to <code>pcre2_convert_context_create()</code>, they are used for all
+that is passed to <code class="function">pcre2_convert_context_create()</code>, they are used for all
 memory management within the conversion functions.</p>
 </div>
 <div class="paragraph">
@@ -490,17 +502,17 @@ The separator character defaults to backslash under Windows, otherwise forward
 slash. It can be set to forward slash, backslash, or dot.</p>
 </div>
 <div class="paragraph">
-<p>The two setting functions return zero on success, or PCRE2_ERROR_BADDATA if
+<p>The two setting functions return zero on success, or <code class="constant">PCRE2_ERROR_BADDATA</code> if
 their second argument is invalid.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_conversion_function">The Conversion Function</h2>
+<h2 id="_the_conversion_function">The conversion function</h2>
 <div class="sectionbody">
-<div class="listingblock">
+<div class="listingblock prototype">
 <div class="content">
-<pre class="highlight"><code>int pcre2_pattern_convert(PCRE2_SPTR pattern, PCRE2_SIZE plength,
+<pre class="highlight"><code class="language-c" data-lang="c">int pcre2_pattern_convert(PCRE2_SPTR pattern, PCRE2_SIZE plength,
                           uint32_t options, PCRE2_UCHAR **buffptr,
                           PCRE2_SIZE *bufflenptr,
                           pcre2_convert_context *ccontext);
@@ -509,129 +521,132 @@ void pcre2_converted_pattern_free(PCRE2_UCHAR *converted);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The first two arguments of <code>pcre2_pattern_convert()</code> define the foreign
+<p>The first two arguments of <code class="function">pcre2_pattern_convert()</code> define the foreign
 pattern that is to be converted. The length may be given as
-PCRE2_ZERO_TERMINATED. The <code>options</code> argument defines how the pattern is to
-be processed. If the input is UTF, the PCRE2_CONVERT_UTF option should be set.
-PCRE2_CONVERT_NO_UTF_CHECK may also be set if you are sure the input is valid.
+<code class="constant">PCRE2_ZERO_TERMINATED</code>. The <code class="parameter">options</code> argument defines how the pattern is to
+be processed. If the input is UTF, the <code class="constant">PCRE2_CONVERT_UTF</code> option should be set.
+<code class="constant">PCRE2_CONVERT_NO_UTF_CHECK</code> may also be set if you are sure the input is valid.
 One or more of the glob options, or one of the following POSIX options must be
 set to define the type of conversion that is required:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_CONVERT_GLOB<br>
-PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR<br>
-PCRE2_CONVERT_GLOB_NO_STARSTAR<br>
-PCRE2_CONVERT_POSIX_BASIC<br>
-PCRE2_CONVERT_POSIX_EXTENDED</p>
-</div>
-<div class="paragraph">
-<p>Details of the conversions are given below. The <code>buffer</code> and <code>blength</code>
+<div class="dlist options">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_CONVERT_GLOB</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_CONVERT_GLOB_NO_STARSTAR</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_CONVERT_POSIX_BASIC</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_CONVERT_POSIX_EXTENDED</code></dt>
+<dd>
+<p>Details of the conversions are given below. The <code class="parameter">buffer</code> and <code class="parameter">blength</code>
 arguments define how the output is handled:</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>If <code>buffer</code> is NULL, the function just returns the length of the converted
-pattern via <code>blength</code>. This is one less than the length of buffer needed,
+<p>If <code class="parameter">buffer</code> is <code class="constant">NULL</code>, the function just returns the length of the converted
+pattern via <code class="parameter">blength</code>. This is one less than the length of buffer needed,
 because a terminating zero is always added to the output.</p>
 </div>
 <div class="paragraph">
-<p>If <code>buffer</code> points to a NULL pointer, an output buffer is obtained using
-the allocator in the context or <code>malloc()</code> if no context is supplied. A
-pointer to this buffer is placed in the variable to which <code>buffer</code> points.
+<p>If <code class="parameter">buffer</code> points to a <code class="constant">NULL</code> pointer, an output buffer is obtained using
+the allocator in the context or <code class="c">malloc()</code> if no context is supplied. A
+pointer to this buffer is placed in the variable to which <code class="parameter">buffer</code> points.
 When no longer needed the output buffer must be freed by calling
-<code>pcre2_converted_pattern_free()</code>. If this function is called with a NULL
+<code class="function">pcre2_converted_pattern_free()</code>. If this function is called with a <code class="constant">NULL</code>
 argument, it returns immediately without doing anything.</p>
 </div>
 <div class="paragraph">
-<p>If <code>buffer</code> points to a non-NULL pointer, <code>blength</code> must be set to the
+<p>If <code class="parameter">buffer</code> points to a non-<code class="constant">NULL</code> pointer, <code class="parameter">blength</code> must be set to the
 actual length of the buffer provided (in code units).</p>
 </div>
 <div class="paragraph">
 <p>In all cases, after successful conversion, the variable pointed to by
-<code>blength</code> is updated to the length actually used (in code units), excluding
+<code class="parameter">blength</code> is updated to the length actually used (in code units), excluding
 the terminating zero that is always added.</p>
 </div>
 <div class="paragraph">
-<p>If an error occurs, the length (via <code>blength</code>) is set to the offset
+<p>If an error occurs, the length (via <code class="parameter">blength</code>) is set to the offset
 within the input pattern where the error was detected. Only gross syntax errors
 are caught; there are plenty of errors that will get passed on for
-<code>pcre2_compile()</code> to discover.</p>
+<code class="function">pcre2_compile()</code> to discover.</p>
 </div>
 <div class="paragraph">
-<p>The return from <code>pcre2_pattern_convert()</code> is zero on success or a non-zero
+<p>The return from <code class="function">pcre2_pattern_convert()</code> is zero on success or a non-zero
 PCRE2 error code. Note that PCRE2 error codes may be positive or negative:
-<code>pcre2_compile()</code> uses mostly positive codes and <code>pcre2_match()</code>
-negative ones; <code>pcre2_convert()</code> uses existing codes of both kinds. A
+<code class="function">pcre2_compile()</code> uses mostly positive codes and <code class="function">pcre2_match()</code>
+negative ones; <code class="function">pcre2_convert()</code> uses existing codes of both kinds. A
 textual error message can be obtained by calling
-<code>pcre2_get_error_message()</code>.</p>
+<code class="function">pcre2_get_error_message()</code>.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_converting_globs">Converting Globs</h2>
+<h2 id="_converting_globs">Converting globs</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Globs are used to match file names, and consequently have the concept of a
 "path separator", which defaults to backslash under Windows and forward slash
-otherwise. If PCRE2_CONVERT_GLOB is set, the wildcards * and ? are not
-permitted to match separator characters, but the double-star (**) feature
+otherwise. If <code class="constant">PCRE2_CONVERT_GLOB</code> is set, the wildcards <code class="regex">*</code> and <code class="regex">?</code> are not
+permitted to match separator characters, but the double-star (<code class="regex">**</code>) feature
 (which does match separators) is supported.</p>
 </div>
 <div class="paragraph">
-<p>PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR matches globs with wildcards allowed to
-match separator characters. PCRE2_CONVERT_GLOB_NO_STARSTAR matches globs with
+<p><code class="constant">PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR</code> matches globs with wildcards allowed to
+match separator characters. <code class="constant">PCRE2_CONVERT_GLOB_NO_STARSTAR</code> matches globs with
 the double-star feature disabled. These options may be given together.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_converting_posix_patterns">Converting Posix Patterns</h2>
+<h2 id="_converting_posix_patterns">Converting POSIX patterns</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>POSIX defines two kinds of regular expression pattern: basic and extended.
-These can be processed by setting PCRE2_CONVERT_POSIX_BASIC or
-PCRE2_CONVERT_POSIX_EXTENDED, respectively.</p>
+These can be processed by setting <code class="constant">PCRE2_CONVERT_POSIX_BASIC</code> or
+<code class="constant">PCRE2_CONVERT_POSIX_EXTENDED</code>, respectively.</p>
 </div>
 <div class="paragraph">
 <p>In POSIX patterns, backslash is not special in a character class. Unmatched
 closing parentheses are treated as literals.</p>
 </div>
 <div class="paragraph">
-<p>In basic patterns, ? + | {} and () must be escaped to be recognized
+<p>In basic patterns, <code class="regex">?</code>, <code class="regex">&#43;</code>, <code class="regex">|</code>, <code class="regex">{}</code>, and <code class="regex">()</code> must be escaped to be recognized
 as metacharacters outside a character class. If the first character in the
-pattern is * it is treated as a literal. ^ is a metacharacter only at the start
+pattern is <code class="regex">*</code> it is treated as a literal. <code class="regex">^</code> is a metacharacter only at the start
 of a branch.</p>
 </div>
 <div class="paragraph">
 <p>In extended patterns, a backslash not in a character class always
 makes the next character literal, whatever it is. There are no backreferences.</p>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
 <div class="paragraph">
-<p>Note: POSIX mandates that the longest possible match at the first matching
-position must be found. This is not what <code>pcre2_match()</code> does; it yields
-the first match that is found. An application can use <code>pcre2_dfa_match()</code>
+<p>POSIX mandates that the longest possible match at the first matching
+position must be found. This is not what <code class="function">pcre2_match()</code> does; it yields
+the first match that is found. An application can use <code class="function">pcre2_dfa_match()</code>
 to find the longest match, but that does not support backreferences (but then
 neither do POSIX extended patterns).</p>
 </div>
+</td>
+</tr>
+</table>
 </div>
+<h2 id="_author" class="discrete">Author</h2>
+<div class="paragraph">
+<p>Philip Hazel<br>
+Retired from University Computing Service<br>
+Cambridge, England.</p>
 </div>
-<div class="sect1">
-<h2 id="_author">Author</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>Philip Hazel
-Retired from University Computing Service
-Cambridge, England.</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_revision">Revision</h2>
-<div class="sectionbody">
+<h2 id="_revision" class="discrete">Revision</h2>
 <div class="paragraph">
 <p>Last updated: 14 November 2023<br>
-Copyright (c) 1997-2018 University of Cambridge.</p>
+Copyright &#169; 1997-2018 University of Cambridge.</p>
 </div>
 </div>
 </div>

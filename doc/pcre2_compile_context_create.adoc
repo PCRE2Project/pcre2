@@ -10,19 +10,19 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 pcre2_compile_context *pcre2_compile_context_create(
       pcre2_general_context *gcontext);
-....
+----
 
 == Description
 
 This function creates and initializes a new compile context. If its argument is
-NULL, `malloc()` is used to get the necessary memory; otherwise the memory
-allocation function within the general context is used. The result is NULL if
+const:NULL, [.c]`malloc()` is used to get the necessary memory; otherwise the memory
+allocation function within the general context is used. The result is const:NULL if
 the memory could not be obtained.
 
 There is a complete description of the PCRE2 native API in the

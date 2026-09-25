@@ -1,38 +1,40 @@
 = pcre2grep(1)
 :doctype: manpage
 :manname: pcre2grep
-:manpurpose: a grep with Perl-compatible regular expressions.
+:manpurpose: a grep with Perl-compatible regular expressions
+:description: The `pcre2grep` command
 :manvolnum: 1
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
 :docdate: 24 January 2025
 :revdate: 24 January 2025
+:toc: right
 
 == Synopsis
 
-[synopsis]
-....
+[source,shell,role=synopsis]
+----
 pcre2grep [options] [long options] [pattern] [path1 path2 ...]
-....
+----
 
 == Description
 
 `pcre2grep` searches files for character patterns, in the same way as other
 grep commands do, but it uses the PCRE2 regular expression library to support
 patterns that are compatible with the regular expressions of Perl 5. See
-xref:pcre2syntax.adoc[`pcre2syntax`(3)]
+xref:pcre2syntax.adoc[`pcre2syntax`]
 for a quick-reference summary of pattern syntax, or
-xref:pcre2pattern.adoc[`pcre2pattern`(3)]
+xref:pcre2pattern.adoc[`pcre2pattern`]
 for a full description of the syntax and semantics of the regular expressions
 that PCRE2 supports.
 
 Patterns, whether supplied on the command line or in a separate file, are given
 without delimiters. For example:
 
-[literal]
-....
+[source,shell]
+----
 pcre2grep Thursday /etc/motd
-....
+----
 
 If you attempt to use delimiters (for example, by surrounding a pattern with
 slashes, as is common in Perl scripts), they are interpreted as part of the
@@ -50,13 +52,13 @@ If no files are specified, `pcre2grep` reads the standard input. The
 standard input can also be referenced by a name consisting of a single hyphen.
 For example:
 
-[literal]
-....
+[source,shell]
+----
 pcre2grep some-pattern file1 - file3
-....
+----
 
 By default, input files are searched line by line, so pattern assertions about
-the beginning and end of a subject string (^, $, \A, \Z, and \z) match at
+the beginning and end of a subject string ([.regex]`+^+`, [.regex]`$`, [.regex]`\A`, [.regex]`\Z`, and [.regex]`\z`) match at
 the beginning and end of each line. When a line matches a pattern, it is copied
 to the standard output, and if there is more than one file, the file name is
 output at the start of each line, followed by a colon. However, there are
@@ -84,8 +86,8 @@ small, fewer than requested "before" and "after" lines may be output.
 When matching with a multiline pattern, the size of the buffer must be at least
 half of the maximum match expected or the pattern might fail to match.
 
-Patterns can be no longer than 8KiB or BUFSIZ bytes, whichever is the greater.
-BUFSIZ is defined in `<stdio.h>`. When there is more than one pattern
+Patterns can be no longer than 8KiB or const:BUFSIZ bytes, whichever is the greater.
+BUFSIZ is defined in `+<stdio.h>+`. When there is more than one pattern
 (specified by the use of `-e` and/or `-f`), each pattern is applied to
 each line in the order in which they are defined, except that all the `-e`
 patterns are tried before the `-f` patterns.
@@ -110,7 +112,7 @@ grep. In earlier releases, `pcre2grep` did not recognize matches from
 later patterns that were earlier in the subject.
 
 Patterns that can match an empty string are accepted, but empty string
-matches are never recognized. An example is the pattern "(super)?(man)?", in
+matches are never recognized. An example is the pattern [.regex]`+(super)?(man)?+`, in
 which all components are optional. This pattern finds all occurrences of both
 "super" and "man"; the output differs from matching with "super|man" when only
 the matching substrings are being shown.
@@ -119,7 +121,7 @@ If the `LC_ALL` or `LC_CTYPE` environment variable is set,
 `pcre2grep` uses the value to set a locale when calling the PCRE2 library.
 The `--locale` option can be used to override this.
 
-== Support For Compressed Files
+== Support for compressed files
 
 Compile-time options for `pcre2grep` can set it up to use `libz` or
 `libbz2` for reading compressed files whose names end in `.gz` or
@@ -131,7 +133,7 @@ a `.gz` or `.bz2` extension is not in fact compressed, it is read as a
 plain text file. When input is from a compressed .gz or .bz2 file, the
 `--line-buffered` option is ignored.
 
-== Binary Files
+== Binary files
 
 By default, a file that contains a binary zero byte within the first 1024 bytes
 is identified as a binary file, and is processed specially. However, if the
@@ -139,7 +141,7 @@ newline type is specified as NUL, that is, the line terminator is a binary
 zero, the test for a binary file is not applied. See the `--binary-files`
 option for a means of changing the way binary files are handled.
 
-== Binary Zeros In Patterns
+== Binary zeros in patterns
 
 Patterns passed from the command line are strings that are terminated by a
 binary zero, so cannot contain internal zeros. However, patterns that are read
@@ -152,62 +154,63 @@ example, both the `-H` and `-l` options affect the printing of file
 names. Whichever comes later in the command line will be the one that takes
 effect. Similarly, except where noted below, if an option is given twice, the
 later setting is used. Numerical values for options may be followed by K or M,
-to signify multiplication by 1024 or 1024pass:[*]1024 respectively.
+to signify multiplication by 1024 or `+1024*1024+` respectively.
 
+[.options,width=12]
 `--`::
 This terminates the list of options. It is useful if the next item on the
 command line starts with a hyphen but is not an option. This allows for the
 processing of patterns and file names that start with hyphens.
 
-`-A` _number_, `--after-context=number`::
+`-A _number_`, `--after-context=__number__`::
 Output up to _number_ lines of context after each matching line. Fewer
 lines are output if the next match or the end of the file is reached, or if the
 processing buffer size has been set too small. If file names and/or line
 numbers are being output, a hyphen separator is used instead of a colon for the
 context lines (the `-Z` option can be used to change the file name
-terminator to a zero byte). A line containing "--" is output between each group
+terminator to a zero byte). A line containing `--` is output between each group
 of lines, unless they are in fact contiguous in the input file. The value of
 _number_ is expected to be relatively small. When `-c` is used,
 `-A` is ignored.
 
 `-a`, `--text`::
 Treat binary files as text. This is equivalent to
-`--binary-files`=_text_.
+`--binary-files=text`.
 
 `--allow-lookaround-bsk`::
-PCRE2 now forbids the use of \K in lookarounds by default, in line with Perl.
-This option causes `pcre2grep` to set the PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+PCRE2 now forbids the use of [.regex]`\K` in lookarounds by default, in line with Perl.
+This option causes `pcre2grep` to set the const:PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
 option, which enables this somewhat dangerous usage.
 
-`-B` _number_, `--before-context=number`::
+`-B _number_`, `--before-context=__number__`::
 Output up to _number_ lines of context before each matching line. Fewer
 lines are output if the previous match or the start of the file is within
 _number_ lines, or if the processing buffer size has been set too small. If
 file names and/or line numbers are being output, a hyphen separator is used
 instead of a colon for the context lines (the `-Z` option can be used to
-change the file name terminator to a zero byte). A line containing "--" is
+change the file name terminator to a zero byte). A line containing `--` is
 output between each group of lines, unless they are in fact contiguous in the
 input file. The value of _number_ is expected to be relatively small. When
 `-c` is used, `-B` is ignored.
 
-`--binary-files=word`::
-Specify how binary files are to be processed. If the word is "binary" (the
+`--binary-files=_word_`::
+Specify how binary files are to be processed. If the word is `binary` (the
 default), pattern matching is performed on binary files, but the only output is
-"Binary file <name> matches" when a match succeeds. If the word is "text",
+`Binary file _name_ matches` when a match succeeds. If the word is `text`,
 which is equivalent to the `-a` or `--text` option, binary files are
 processed in the same way as any other file. In this case, when a match
 succeeds, the output may be binary garbage, which can have nasty effects if
-sent to a terminal. If the word is "without-match", which is equivalent to the
+sent to a terminal. If the word is `without-match`, which is equivalent to the
 `-I` option, binary files are not processed at all; they are assumed not to
 be of interest and are skipped without causing any output or affecting the
 return code.
 
-`--buffer-size=number`::
+`--buffer-size=_number_`::
 Set the parameter that controls how much memory is obtained at the start of
 processing for buffering files that are being scanned. See also
 `--max-buffer-size` below.
 
-`-C` _number_, `--context=number`::
+`-C _number_`, `--context=__number__`::
 Output _number_ lines of context both before and after each matching line.
 This is equivalent to setting both `-A` and `-B` to the same value.
 
@@ -228,16 +231,16 @@ are greater than zero are listed. When `-c` is used, the `-A`,
 `-B`, and `-C` options are ignored.
 
 `--colour`, `--color`::
-If this option is given without any data, it is equivalent to "--colour=auto".
+If this option is given without any data, it is equivalent to `--colour=auto`.
 If data is required, it must be given in the same shell item, separated by an
 equals sign.
 
-`--colour=value`, `--color=value`::
+`--colour=__value__`, `--color=__value__`::
 This option specifies under what circumstances the parts of a line that matched
 a pattern should be coloured in the output. It is ignored if
 `--file-offsets`, `--line-offsets`, or `--output` is set. By
 default, output is not coloured. The value for the `--colour` option (which
-is optional, see above) may be "never", "always", or "auto". In the latter
+is optional, see above) may be `never`, `always`, or `auto`. In the latter
 case, colouring happens only if the standard output is connected to a terminal.
 More resources are used when colouring is enabled, because `pcre2grep` has
 to search for all possible matches in a line, not just one, in order to colour
@@ -245,48 +248,48 @@ them all.
 
 +
 The colour that is used can be specified by setting one of the environment
-variables PCRE2GREP_COLOUR, PCRE2GREP_COLOR, PCREGREP_COLOUR, or
-PCREGREP_COLOR, which are checked in that order. If none of these are set,
-`pcre2grep` looks for GREP_COLORS or GREP_COLOR (in that order). The value
+variables `PCRE2GREP_COLOUR`, `PCRE2GREP_COLOR`, `PCREGREP_COLOUR`, or
+`PCREGREP_COLOR`, which are checked in that order. If none of these are set,
+`pcre2grep` looks for `GREP_COLORS` or `GREP_COLOR` (in that order). The value
 of the variable should be a string of two numbers, separated by a semicolon,
-except in the case of GREP_COLORS, which must start with "ms=" or "mt="
+except in the case of `GREP_COLORS`, which must start with `ms=` or `mt=`
 followed by two semicolon-separated colours, terminated by the end of the
-string or by a colon. If GREP_COLORS does not start with "ms=" or "mt=" it is
-ignored, and GREP_COLOR is checked.
+string or by a colon. If `GREP_COLORS` does not start with `ms=` or `mt=` it is
+ignored, and `GREP_COLOR` is checked.
 
 +
 If the string obtained from one of the above variables contains any characters
 other than semicolon or digits, the setting is ignored and the default colour
 is used. The string is copied directly into the control string for setting
 colour on a terminal, so it is your responsibility to ensure that the values
-make sense. If no relevant environment variable is set, the default is "1;31",
+make sense. If no relevant environment variable is set, the default is `1;31`,
 which gives red.
 
-`-D` _action_, `--devices=action`::
-If an input path is not a regular file or a directory, "action" specifies how
-it is to be processed. Valid values are "read" (the default) or "skip"
+`-D _action_`, `--devices=__action__`::
+If an input path is not a regular file or a directory, _action_ specifies how
+it is to be processed. Valid values are `read` (the default) or `skip`
 (silently skip the path).
 
-`-d` _action_, `--directories=action`::
-If an input path is a directory, "action" specifies how it is to be processed.
-Valid values are "read" (the default in non-Windows environments, for
-compatibility with GNU grep), "recurse" (equivalent to the `-r` option), or
-"skip" (silently skip the path, the default in Windows environments). In the
-"read" case, directories are read as if they were ordinary files. In some
+`-d _action_`, `--directories=__action__`::
+If an input path is a directory, _action_ specifies how it is to be processed.
+Valid values are `read` (the default in non-Windows environments, for
+compatibility with GNU grep), `recurse` (equivalent to the `-r` option), or
+`skip` (silently skip the path, the default in Windows environments). In the
+`read` case, directories are read as if they were ordinary files. In some
 operating systems the effect of reading a directory like this is an immediate
 end-of-file; in others it may provoke an error.
 
-`--depth-limit`=_number_::
+`--depth-limit=__number__`::
 See `--match-limit` below.
 
 `-E`, `--case-restrict`::
 When case distinctions are being ignored in Unicode mode, two ASCII letters (K
-and S) will by default match Unicode characters Upass:[+]212A (Kelvin sign) and Upass:[+]017F
+and S) will by default match Unicode characters char:U+212A (Kelvin sign) and char:U+017F
 (long S) respectively, as well as their lower case ASCII counterparts. When
 this option is set, case equivalences are restricted such that no ASCII
 character matches a non-ASCII character, and vice versa.
 
-`-e` _pattern_, `--regex=pattern`, `--regexp=pattern`::
+`-e _pattern_`, `--regex=__pattern__`, `--regexp=__pattern__`::
 Specify a pattern to be matched. This option can be used multiple times in
 order to specify several patterns. It can also be used as a way of specifying a
 single pattern that starts with a hyphen. When `-e` is used, no argument
@@ -299,7 +302,7 @@ If `-f` is used with `-e`, the command line patterns are matched first,
 followed by the patterns from the file(s), independent of the order in which
 these options are specified.
 
-`--exclude`=_pattern_::
+`--exclude=__pattern__`::
 Files (but not directories) whose names match the pattern are skipped without
 being processed. This applies to all files, whether listed on the command line,
 obtained from `--file-list`, or by scanning a directory. The pattern is a
@@ -310,14 +313,14 @@ to specify multiple patterns. If a file name matches both an `--include`
 and an `--exclude` pattern, it is excluded. There is no short form for this
 option.
 
-`--exclude-from=filename`::
+`--exclude-from=__filename__`::
 Treat each non-empty line of the file as the data for an `--exclude`
 option. What constitutes a newline when reading the file is the operating
 system's default. The `--newline` option has no effect on this option. This
 option may be given more than once in order to specify a number of files to
 read.
 
-`--exclude-dir`=_pattern_::
+`--exclude-dir=__pattern__`::
 Directories whose names match the pattern are skipped without being processed,
 whatever the setting of the `--recursive` option. This applies to all
 directories, whether listed on the command line, obtained from
@@ -340,10 +343,10 @@ option applies only to the patterns that are matched against the contents of
 files; it does not apply to patterns specified by any of the `--include` or
 `--exclude` options.
 
-`-f` _filename_, `--file=filename`::
+`-f _filename_`, `--file=__filename__`::
 Read patterns from the file, one per line. As is the case with patterns on the
 command line, no delimiters should be used. What constitutes a newline when
-reading the file is the operating system's default interpretation of \n. The
+reading the file is the operating system's default interpretation of [.c]`\n`. The
 `--newline` option has no effect on this option. Trailing white space is
 removed from each line, and blank lines are ignored unless the
 `--posix-pattern-file` option is also provided. An empty file contains no
@@ -353,18 +356,18 @@ may contain binary zeros, which are treated as ordinary character literals.
 +
 If this option is given more than once, all the specified files are read. A
 data line is output if any of the patterns match it. A file name can be given
-as "-" to refer to the standard input. When `-f` is used, patterns
+as `-` to refer to the standard input. When `-f` is used, patterns
 specified on the command line using `-e` may also be present; they are
 matched before the file's patterns. However, no pattern is taken from the
 command line; all arguments are treated as the names of paths to be searched.
 
-`--file-list`=_filename_::
+`--file-list=__filename__`::
 Read a list of files and/or directories that are to be scanned from the given
 file, one per line. What constitutes a newline when reading the file is the
 operating system's default. Trailing white space is removed from each line, and
 blank lines are ignored. These paths are processed before any that are listed
-on the command line. The file name can be given as "-" to refer to the standard
-input. If `--file` and `--file-list` are both specified as "-",
+on the command line. The file name can be given as `-` to refer to the standard
+input. If `--file` and `--file-list` are both specified as `-`,
 patterns are read first. This is useful only when the standard input is a
 terminal, from which further lines (the list of files) can be read after an
 end-of-file indication. If this option is given more than once, all the
@@ -378,7 +381,7 @@ mode, `--colour` has no effect, and no context is shown. That is, the
 match in a line, each of them is shown separately. This option is mutually
 exclusive with `--output`, `--line-offsets`, and `--only-matching`.
 
-`--group-separator`=_text_::
+`--group-separator=__text__`::
 Output this text string instead of two hyphens between groups of lines when
 `-A`, `-B`, or `-C` is in use. See also `--no-group-separator`.
 
@@ -400,7 +403,7 @@ separator is used. The `-Z` option can be used to change the terminator to
 a zero byte. If a line number is also being output, it follows the file name.
 This option overrides any previous `-H`, `-L`, or `-l` options.
 
-`--heap-limit`=_number_::
+`--heap-limit=__number__`::
 See `--match-limit` below.
 
 `--help`::
@@ -410,14 +413,14 @@ ignored.
 
 `-I`::
 Ignore binary files. This is equivalent to
-`--binary-files`=_without-match_.
+`--binary-files=without-match`.
 
 `-i`, `--ignore-case`::
 Ignore upper/lower case distinctions when pattern matching. This applies when
 matching path names for inclusion or exclusion as well as when matching lines
 in files.
 
-`--include`=_pattern_::
+`--include=__pattern__`::
 If any `--include` patterns are specified, the only files that are
 processed are those whose names match one of the patterns and do not match an
 `--exclude` pattern. This option does not affect directories, but it
@@ -429,13 +432,13 @@ this pattern. The option may be given any number of times. If a file name
 matches both an `--include` and an `--exclude` pattern, it is excluded.
 There is no short form for this option.
 
-`--include-from=filename`::
+`--include-from=__filename__`::
 Treat each non-empty line of the file as the data for an `--include`
 option. What constitutes a newline for this purpose is the operating system's
 default. The `--newline` option has no effect on this option. This option
 may be given any number of times; all the files are read.
 
-`--include-dir`=_pattern_::
+`--include-dir=__pattern__`::
 If any `--include-dir` patterns are specified, the only directories that
 are processed are those whose names match one of the patterns and do not match
 an `--exclude-dir` pattern. This applies to all directories, whether listed
@@ -465,9 +468,9 @@ with `-c` is a way of suppressing the listing of files with no matches that
 occurs with `-c` on its own. This option overrides any previous `-H`,
 `-h`, or `-L` options.
 
-`--label`=_name_::
+`--label=__name__`::
 This option supplies a name to be used for the standard input when file names
-are being output. If not supplied, "(standard input)" is used. There is no
+are being output. If not supplied, `(standard input)` is used. There is no
 short form for this option.
 
 `--lf`::
@@ -496,7 +499,7 @@ options are ignored. If there is more than one match in a line, each of them is
 shown separately. This option is mutually exclusive with `--output`,
 `--file-offsets`, and `--only-matching`.
 
-`--locale`=_locale-name_::
+`--locale=__locale-name__`::
 This option specifies a locale to be used for pattern matching. It overrides
 the value in the `LC_ALL` or `LC_CTYPE` environment variables. If no
 locale is specified, the PCRE2 library's default (usually the "C" locale) is
@@ -509,10 +512,10 @@ the end of the initial line and onto one or more subsequent lines.
 
 +
 Patterns used with `-M` may usefully contain literal newline characters and
-internal occurrences of ^ and $ characters, because in multiline mode these can
+internal occurrences of [.regex]`+^+` and [.regex]`$` characters, because in multiline mode these can
 match at internal newlines. Because `pcre2grep` is scanning multiple lines,
-the \Z and \z assertions match only at the end of the last line in the file.
-The \A assertion matches at the start of the first line of a match. This can
+the [.regex]`\Z` and [.regex]`\z` assertions match only at the end of the last line in the file.
+The [.regex]`\A` assertion matches at the start of the first line of a match. This can
 be any line in the file; it is not anchored to the first line.
 
 +
@@ -525,19 +528,19 @@ at the beginning of the line after the one in which the match ended.
 
 +
 The newline sequence that separates multiple lines must be matched as part of
-the pattern. For example, to find the phrase "regular expression" in a file
-where "regular" might be at the end of a line and "expression" at the start of
+the pattern. For example, to find the phrase [.subject]`regular expression` in a file
+where [.subject]`regular` might be at the end of a line and [.subject]`expression` at the start of
 the next line, you could use this command:
 
 +
-[literal]
-....
+[source,shell]
+----
 pcre2grep -M 'regular\s+expression' <file>
-....
+----
 
 +
-The \s escape sequence matches any white space character, including newlines,
-and is followed by pass:[+] so as to match trailing white space on the first line as
+The [.regex]`\s` escape sequence matches any white space character, including newlines,
+and is followed by [.regex]`+` so as to match trailing white space on the first line as
 well as possibly handling a two-character newline sequence.
 
 +
@@ -549,7 +552,7 @@ large processing buffer, this should not be a problem.
 The `-M` option does not work when input is read line by line (see
 `--line-buffered`.)
 
-`-m` _number_, `--max-count`=_number_::
+`-m _number_`, `--max-count=__number__`::
 Stop processing after finding _number_ matching lines, or non-matching
 lines if `-v` is also set. Any trailing context lines are output after the
 final match. In multiline mode, each multiline match counts as just one line
@@ -559,7 +562,7 @@ If `-c` is also set, the count that is output is never greater than
 _number_. This option has no effect if used with `-L`, `-l`, or
 `-q`, or when just checking for a match in a binary file.
 
-`--match-limit`=_number_::
+`--match-limit=__number__`::
 Processing some regular expression patterns may take a very long time to search
 for all possible matching strings. Others may require a very large amount of
 memory. There are three options that set resource limits for matching.
@@ -589,20 +592,20 @@ There are no short forms for these options. The default limits can be set
 when the PCRE2 library is compiled; if they are not specified, the defaults
 are very large and so effectively unlimited.
 
-`--max-buffer-size`=_number_::
+`--max-buffer-size=__number__`::
 This limits the expansion of the processing buffer, whose initial size can be
 set by `--buffer-size`. The maximum buffer size is silently forced to be no
 smaller than the starting buffer size.
 
-`-N` _newline-type_, `--newline`=_newline-type_::
+`-N _newline-type_`, `--newline=__newline-type__`::
 Six different conventions for indicating the ends of lines in scanned files are
 supported. For example:
 
 +
-[literal]
-....
+[source,shell]
+----
 pcre2grep -N CRLF 'some pattern' <file>
-....
+----
 
 +
 The newline type may be specified in upper, lower, or mixed case. If the
@@ -611,9 +614,9 @@ types are the single-character sequences CR (carriage return) and LF
 (linefeed), the two-character sequence CRLF, an "anycrlf" type, which
 recognizes any of the preceding three types, and an "any" type, for which any
 Unicode line ending sequence is assumed to end a line. The Unicode sequences
-are the three just mentioned, plus VT (vertical tab, Upass:[+]000B), FF (form feed,
-Upass:[+]000C), NEL (next line, Upass:[+]0085), LS (line separator, Upass:[+]2028), and PS
-(paragraph separator, Upass:[+]2029).
+are the three just mentioned, plus VT (vertical tab, char:U+000B), FF (form feed,
+char:U+000C), NEL (next line, char:U+0085), LS (line separator, char:U+2028), and PS
+(paragraph separator, char:U+2029).
 
 +
 When the PCRE2 library is built, a default line-ending sequence is specified.
@@ -648,7 +651,7 @@ was explicitly disabled at build time. This option can be used to disable the
 use of JIT at run time. It is provided for testing and working around problems.
 It should never be needed in normal use.
 
-`-O` _text_, `--output`=_text_::
+`-O _text_`, `--output=__text__`::
 When there is a match, instead of outputting the line that matched, output just
 the text specified in this option, followed by an operating-system standard
 newline. In this mode, `--colour` has no effect, and no context is shown.
@@ -664,29 +667,29 @@ contents of the matched part of the line and/or captured substrings into the
 text.
 
 +
-$<digits> or ${<digits>} is replaced by the captured substring of the given
-decimal number; $& (or the legacy $0) substitutes the whole match. If the
+[.repl]`$__digits__` or [.repl]`${__digits__}` is replaced by the captured substring of the given
+decimal number; [.repl]`$&` (or the legacy [.repl]`$0`) substitutes the whole match. If the
 number is greater than the number of capturing substrings, or if the capture
 is unset, the replacement is empty.
 
 +
-$a is replaced by bell; $b by backspace; $e by escape; $f by form feed; $n by
-newline; $r by carriage return; $t by tab; $v by vertical tab.
+[.repl]`$a` is replaced by bell; [.repl]`$b` by backspace; [.repl]`$e` by escape; [.repl]`$f` by form feed; [.repl]`$n` by
+newline; [.repl]`$r` by carriage return; [.repl]`$t` by tab; [.repl]`$v` by vertical tab.
 
 +
-$o<digits> or $o{<digits>} is replaced by the character whose code point is the
-given octal number. In the first form, up to three octal digits are processed.
+[.repl]`$o__digits__` or [.repl]`$o{__digits__}` is replaced by the character whose code point is
+the given octal number. In the first form, up to three octal digits are processed.
 When more digits are needed in Unicode mode to specify a wide character, the
 second form must be used.
 
 +
-$x<digits> or $x{<digits>} is replaced by the character represented by the
-given hexadecimal number. In the first form, up to two hexadecimal digits are
+[.repl]`$x__digits__` or [.repl]`$x{__digits__}` is replaced by the character represented by
+the given hexadecimal number. In the first form, up to two hexadecimal digits are
 processed. When more digits are needed in Unicode mode to specify a wide
 character, the second form must be used.
 
 +
-Any other character is substituted by itself. In particular, $$ is replaced by
+Any other character is substituted by itself. In particular, [.repl]`$$` is replaced by
 a single dollar.
 
 `-o`, `--only-matching`::
@@ -701,7 +704,7 @@ name or line number are being printed, in which case they are shown on an
 otherwise empty line. This option is mutually exclusive with `--output`,
 `--file-offsets` and `--line-offsets`.
 
-`-onumber`, `--only-matching`=_number_::
+`-o__number__`, `--only-matching=__number__`::
 Show only the part of the line that matched the capturing parentheses of the
 given number. Up to 50 capturing parentheses are supported by default. This
 limit can be changed via the `--om-capture` option. A pattern may contain
@@ -710,9 +713,9 @@ limit can be accessed by `-o`. An error occurs if the number specified by
 `-o` is greater than the limit.
 
 +
--o0 is the same as `-o` without a number. Because these options can be
+`-o0` is the same as `-o` without a number. Because these options can be
 given without an argument (see above), if an argument is present, it must be
-given in the same shell item, for example, -o3 or --only-matching=2. The
+given in the same shell item, for example, `-o3` or `--only-matching=2`. The
 comments given for the non-argument case above also apply to this option. If
 the specified capturing parentheses do not exist in the pattern, or were not
 set in the match, nothing is output unless the file name or line number are
@@ -721,35 +724,35 @@ being output.
 +
 If this option is given multiple times, multiple substrings are output for each
 match, in the order the options are given, and all on one line. For example,
--o3 -o1 -o3 causes the substrings matched by capturing parentheses 3 and 1 and
+`-o3 -o1 -o3` causes the substrings matched by capturing parentheses 3 and 1 and
 then 3 again to be output. By default, there is no separator (but see the next
 but one option).
 
-`--om-capture`=_number_::
+`--om-capture=__number__`::
 Set the number of capturing parentheses that can be accessed by `-o`. The
 default is 50.
 
-`--om-separator`=_text_::
+`--om-separator=__text__`::
 Specify a separating string for multiple occurrences of `-o`. The default
 is an empty string. Separating strings are never coloured.
 
 `-P`, `--no-ucp`::
 Starting from release 10.43, when UTF/Unicode mode is specified with `-u`
-or `-U`, the PCRE2_UCP option is used by default. This means that the
+or `-U`, the const:PCRE2_UCP option is used by default. This means that the
 POSIX classes in patterns match more than just ASCII characters. For example,
-[:digit:] matches any Unicode decimal digit. The `--no-ucp` option
-suppresses PCRE2_UCP, thus restricting the POSIX classes to ASCII characters,
+[.regex]`+[:digit:]+` matches any Unicode decimal digit. The `--no-ucp` option
+suppresses const:PCRE2_UCP, thus restricting the POSIX classes to ASCII characters,
 as was the case in earlier releases. Note that there are now more fine-grained
 option settings within patterns that affect individual classes. For example,
-when in UCP mode, the sequence (?aP) restricts [:word:] to ASCII letters, while
-allowing \w to match Unicode letters and digits.
+when in UCP mode, the sequence [.regex]`+(?aP)+` restricts [.regex]`+[:word:]+` to ASCII letters, while
+allowing [.regex]`\w` to match Unicode letters and digits.
 
 `--posix-pattern-file`::
 When patterns are provided with the `-f` option, do not trim trailing
 spaces or ignore empty lines in a similar way than other grep tools. To keep
 the behaviour consistent with older versions, if the pattern read was
 terminated with CRLF (as character literals) then both characters won't be
-included as part of it, so if you really need to have pattern ending in '\r',
+included as part of it, so if you really need to have pattern ending in [.regex]`\r`,
 use a escape sequence or provide it by a different method.
 
 `-q`, `--quiet`::
@@ -763,7 +766,7 @@ directory is read as a normal file; in some operating systems this gives an
 immediate end-of-file. This option is a shorthand for setting the `-d`
 option to "recurse".
 
-`--recursion-limit`=_number_::
+`--recursion-limit=__number__`::
 This is an obsolete synonym for `--depth-limit`. See `--match-limit`
 above for details.
 
@@ -779,7 +782,7 @@ lines (or non-matching lines if `-v` is used) in all the files. If `-t`
 is used with `-c`, a grand total is output except when the previous output
 is just one line. In other words, it is not output when just one file's count
 is listed. If file names are being output, the grand total is preceded by
-"TOTAL:". Otherwise, it appears as just another number. The `-t` option is
+`TOTAL:`. Otherwise, it appears as just another number. The `-t` option is
 ignored when used with `-L` (list files without matches), because the grand
 total would always be zero.
 
@@ -797,7 +800,7 @@ themselves, however, must still be valid UTF-8 strings. This facility allows
 valid UTF-8 strings to be sought within arbitrary byte sequences in executable
 or other binary files. For more details about matching in non-valid UTF-8
 strings, see the
-xref:pcre2unicode.adoc[`pcre2unicode`(3)]
+xref:pcre2unicode.adoc[`pcre2unicode`]
 documentation.
 
 `-V`, `--version`::
@@ -814,7 +817,7 @@ that are to be output, are ignored.
 `-w`, `--word-regex`, `--word-regexp`::
 Force the patterns only to match "words". That is, there must be a word
 boundary at the start and end of each matched string. This is equivalent to
-having "\b(?:" at the start of each pattern, and ")\b" at the end. This
+having [.regex]`+\b(?:+` at the start of each pattern, and [.regex]`+)\b+` at the end. This
 option applies only to the patterns that are matched against the contents of
 files; it does not apply to patterns specified by any of the `--include` or
 `--exclude` options.
@@ -822,8 +825,8 @@ files; it does not apply to patterns specified by any of the `--include` or
 `-x`, `--line-regex`, `--line-regexp`::
 Force the patterns to start matching only at the beginnings of lines, and in
 addition, require them to match entire lines. In multiline mode the match may
-be more than one line. This is equivalent to having "^(?:" at the start of each
-pattern and ")$" at the end. This option applies only to the patterns that are
+be more than one line. This is equivalent to having [.regex]`+^(?:+` at the start of each
+pattern and [.regex]`)$` at the end. This option applies only to the patterns that are
 matched against the contents of files; it does not apply to patterns specified
 by any of the `--include` or `--exclude` options.
 
@@ -833,7 +836,7 @@ character) instead of what would normally appear. This is useful when file
 names contain unusual characters such as colons, hyphens, or even newlines. The
 option does not apply to file names in error messages.
 
-== Environment Variables
+== Environment variables
 
 The environment variables `LC_ALL` and `LC_CTYPE` are examined, in that
 order, for a locale. The first one that is set is used. This can be overridden
@@ -857,17 +860,17 @@ single NL is used.
 
 The newline setting does not affect the way in which `pcre2grep` writes
 newlines in informational messages to the standard output and error streams.
-Under Windows, the standard output is set to be binary, so that "\r\n" at the
+Under Windows, the standard output is set to be binary, so that `\r\n` at the
 ends of output lines that are copied from the input is not converted to
-"\r\r\n" by the C I/O library. This means that any messages written to the
-standard output must end with "\r\n". For all other operating systems, and
-for all messages to the standard error stream, "\n" is used.
+`\r\r\n` by the C I/O library. This means that any messages written to the
+standard output must end with `\r\n`. For all other operating systems, and
+for all messages to the standard error stream, `\n` is used.
 
-== Options Compatibility With Gnu Grep
+== Options compatibility with GNU grep
 
 Many of the short and long forms of ``pcre2grep``'s options are the same as
-in the GNU `grep` program. Any long option of the form `--xxx-regexp`
-(GNU terminology) is also available as `--xxx-regex` (PCRE2 terminology).
+in the GNU `grep` program. Any long option of the form `--__xxx__-regexp`
+(GNU terminology) is also available as `--__xxx__-regex` (PCRE2 terminology).
 However, the `--case-restrict`, `--depth-limit`, `-E`,
 `--file-list`, `--file-offsets`, `--heap-limit`,
 `--include-dir`, `--lf`, `--line-offsets`, `--locale`, `--match-limit`,
@@ -884,17 +887,17 @@ the `-i` option applies. If both the `-c` and `-l` options are
 given, GNU grep lists only file names, without counts, but `pcre2grep`
 gives the counts as well.
 
-== Options With Data
+== Options with data
 
 There are four different ways in which an option with data can be specified.
 If a short form option is used, the data may follow immediately, or (with one
 exception) in the next command line item. For example:
 
-[literal]
-....
+[source,shell]
+----
 -f/some/file
 -f /some/file
-....
+----
 
 The exception is the `-o` option, which may appear with or without data.
 Because of this, if data is present, it must follow immediately in the same
@@ -904,15 +907,15 @@ If a long form option is used, the data may appear in the same command line
 item, separated by an equals character, or (with two exceptions) it may appear
 in the next command line item. For example:
 
-[literal]
-....
+[source,shell]
+----
 --file=/some/file
 --file /some/file
-....
+----
 
-Note, however, that if you want to supply a file name beginning with ~ as data
-in a shell command, and have the shell expand ~ to a home directory, you must
-separate the file name from the option, because the shell does not treat ~
+Note, however, that if you want to supply a file name beginning with `~` as data
+in a shell command, and have the shell expand `~` to a home directory, you must
+separate the file name from the option, because the shell does not treat `~`
 specially unless it is at the start of an item.
 
 The exceptions to the above are the `--colour` (or `--color`) and
@@ -920,7 +923,7 @@ The exceptions to the above are the `--colour` (or `--color`) and
 options does have data, it must be given in the first form, using an equals
 character. Otherwise `pcre2grep` will assume that it has no data.
 
-== Using Pcre2'S Callout Facility
+== Using PCRE2's callout facility
 
 `pcre2grep` has, by default, support for calling external programs or
 scripts or echoing specific strings during matching by making use of PCRE2's
@@ -931,7 +934,7 @@ completely disabled, callouts in patterns are forbidden by `pcre2grep`.
 If the facility is partially disabled, calling external programs is not
 supported, and callouts that request it are ignored.
 
-A callout in a PCRE2 pattern is of the form (?C<arg>) where the argument is
+A callout in a PCRE2 pattern is of the form [.regex]`(?C__arg__)` where the argument is
 either a number or a quoted string (see the
 xref:pcre2callout.adoc[`pcre2callout`]
 documentation for details). Numbered callouts are ignored by `pcre2grep`;
@@ -946,65 +949,61 @@ available, provided that callouts were not completely disabled when
 zero-terminated string, which means it should not contain any internal binary
 zeros. It is written to the output, having first been passed through the same
 escape processing as text from the `--output` (`-O`) option (see
-above). However, $0 or $& cannot be used to insert a matched substring because
-the match is still in progress. Instead, the single character '0' is inserted.
+above). However, [.repl]`$0` or [.repl]`$&` cannot be used to insert a matched substring because
+the match is still in progress. Instead, the single character `0` is inserted.
 Any syntax errors in the string (for example, a dollar not followed by another
 character) causes the callout to be ignored. No terminator is added to the
 output string, so if you want a newline, you must include it explicitly using
-the escape $n. For example:
+the escape [.repl]`$n`. For example:
 
-[literal]
-....
+[source,shell]
+----
 pcre2grep '(.)(..(.))(?C"|[$1] [$2] [$3]$n")' <some file>
-....
+----
 
 Matching continues normally after the string is output. If you want to see only
 the callout output but not any output from an actual match, you should end the
-pattern with (pass:[*]FAIL).
+pattern with [.regex]`+(*FAIL)+`.
 
 === Calling external programs or scripts
 
 This facility can be independently disabled when `pcre2grep` is built. It
-is supported for Windows, where a call to `_spawnvp()` is used, for VMS,
-where `lib$spawn()` is used, and for any Unix-like environment where
-`fork()` and `execv()` are available.
+is supported for Windows, where a call to [.c]`_spawnvp()` is used, for VMS,
+where [.c]`+lib$spawn()+` is used, and for any Unix-like environment where
+[.c]`fork()` and [.c]`execv()` are available.
 
 If the callout string does not start with a pipe (vertical bar) character, it
 is parsed into a list of substrings separated by pipe characters. The first
 substring must be an executable name, with the following substrings specifying
 arguments:
 
-[literal]
+[literal,subs=normal]
 ....
-executable_name|arg1|arg2|...
+_executable_name_|_arg1_|_arg2_|\...
 ....
 
 Any substring (including the executable name) may contain escape sequences
 started by a dollar character. These are the same as for the `--output`
-(`-O`) option documented above, except that $0 or $& cannot insert the
+(`-O`) option documented above, except that [.repl]`$0` or [.repl]`$&` cannot insert the
 matched string because the match is still in progress. Instead, the character
-'0' is inserted. If you need a literal dollar or pipe character in any
-substring, use $$ or $| respectively. Here is an example:
+`0` is inserted. If you need a literal dollar or pipe character in any
+substring, use [.repl]`$$` or [.repl]`$|` respectively. Here is an example:
 
-[literal]
-....
+[source,shell]
+----
 echo -e "abcde\n12345" | pcre2grep \
   '(?x)(.)(..(.))
   (?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4)")()' -
-....
+----
 
-[literal]
-....
-Output:
-....
-
-[literal,indent=2]
-....
+.Output
+[source,text]
+----
 Arg1: [a] [bcd] [d] Arg2: |a| ()
 abcde
 Arg1: [1] [234] [4] Arg2: |1| ()
 12345
-....
+----
 
 The parameters for the system call that is used to run the program or script
 are zero-terminated strings. This means that binary zero characters in the
@@ -1015,11 +1014,11 @@ If running the program fails for any reason (including the non-existence of the
 executable), a local matching failure occurs and the matcher backtracks in the
 normal way.
 
-== Matching Errors
+== Matching errors
 
 It is possible to supply a regular expression that takes a very long time to
 fail to match certain lines. Such patterns normally involve nested indefinite
-repeats, for example: (apass:[+])pass:[*]\d when matched against a line of a's with no final
+repeats, for example: [.regex]`(a{plus})*\d` when matched against a line of [.subject]``a``s with no final
 digit. The PCRE2 matching function has a resource limit that causes it to abort
 in these circumstances. If this happens, `pcre2grep` outputs an error
 message and the line that caused the problem to the standard error stream. If
@@ -1038,24 +1037,23 @@ matches were found in other files) or too many matching errors. Using the
 `-s` option to suppress error messages about inaccessible files does not
 affect the return code.
 
-When run under VMS, the return code is placed in the symbol PCRE2GREP_RC
-because VMS does not distinguish between exit(0) and exit(1).
+When run under VMS, the return code is placed in the symbol [.c]`PCRE2GREP_RC`
+because VMS does not distinguish between [.c]`exit(0)` and [.c]`exit(1)`.
 
-== See Also
+== See also
 
-`pcre2pattern`(3), `pcre2syntax`(3), `pcre2callout`(3),
-`pcre2unicode`(3).
+xref:pcre2pattern.adoc[`pcre2pattern`], xref:pcre2syntax.adoc[`pcre2syntax`], xref:pcre2callout.adoc[`pcre2callout`],
+xref:pcre2unicode.adoc[`pcre2unicode`].
 
+[discrete]
 == Author
 
-[source]
-----
-Philip Hazel
-Retired from University Computing Service
+Philip Hazel +
+Retired from University Computing Service +
 Cambridge, England.
-----
 
+[discrete]
 == Revision
 
 Last updated: 24 January 2025 +
-Copyright (c) 1997-2023 University of Cambridge.
+Copyright (C) 1997-2023 University of Cambridge.

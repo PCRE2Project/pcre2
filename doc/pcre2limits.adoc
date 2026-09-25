@@ -2,13 +2,15 @@
 :doctype: manpage
 :manname: pcre2limits
 :manpurpose: PCRE2 resource limits
+:description: Details of size and other limits
 :manvolnum: 3
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
 :docdate: 03 September 2025
 :revdate: 03 September 2025
+:toc: right
 
-== Size And Other Limitations
+== Size and other limitations
 
 There are some size limitations in PCRE2 but it is hoped that they will never
 in practice be relevant.
@@ -25,13 +27,13 @@ However, the speed of execution is slower. In the 32-bit library, the internal
 linkage size is always 4.
 
 The maximum length of a source pattern string is essentially unlimited; it is
-the largest number a PCRE2_SIZE variable can hold. However, the program that
-calls `pcre2_compile()` can specify a smaller limit.
+the largest number a type:PCRE2_SIZE variable can hold. However, the program that
+calls func:pcre2_compile() can specify a smaller limit.
 
 The maximum length (in code units) of a subject string is one less than the
-largest number a PCRE2_SIZE variable can hold. PCRE2_SIZE is an unsigned
-integer type, usually defined as size_t. Its maximum value (that is
-~(PCRE2_SIZE)0) is reserved as a special indicator for zero-terminated strings
+largest number a type:PCRE2_SIZE variable can hold. type:PCRE2_SIZE is an unsigned
+integer type, usually defined as type:size_t. Its maximum value (that is
+[.c]`+~(PCRE2_SIZE)0+`) is reserved as a special indicator for zero-terminated strings
 and unset offsets.
 
 All values in repeating quantifiers must be less than 65536.
@@ -48,7 +50,7 @@ more than 65535 capture groups, and there is a limit to the depth of nesting of
 parenthesized subpatterns of all kinds. This is imposed in order to limit the
 amount of system stack used at compile time. The default limit can be specified
 when PCRE2 is built; if not, the default is set to 250. An application can
-change this limit by calling pcre2_set_parens_nest_limit() to set the limit in
+change this limit by calling func:pcre2_set_parens_nest_limit() to set the limit in
 a compile context.
 
 The maximum length of the name for a named capture group as well as the number
@@ -57,7 +59,7 @@ defaults to
 128 code units, and the maximum number of such groups to
 10000.
 
-The maximum length of a name in a (pass:[*]MARK), (pass:[*]PRUNE), (pass:[*]SKIP), or (pass:[*]THEN) verb
+The maximum length of a name in a [.regex]`+(*MARK)+`, [.regex]`+(*PRUNE)+`, [.regex]`+(*SKIP)+`, or [.regex]`+(*THEN)+` verb
 is 255 code units for the 8-bit library and 65535 code units for the 16-bit and
 32-bit libraries.
 
@@ -68,16 +70,15 @@ The maximum amount of heap memory used for matching is controlled by the heap
 limit, which can be set in a pattern or in a match context. The default is a
 very large number, effectively unlimited.
 
+[discrete]
 == Author
 
-[source]
-----
-Philip Hazel
-Retired from University Computing Service
+Philip Hazel +
+Retired from University Computing Service +
 Cambridge, England.
-----
 
+[discrete]
 == Revision
 
 Last updated: 03 September 2025 +
-Copyright (c) 1997-2023 University of Cambridge.
+Copyright (C) 1997-2023 University of Cambridge.

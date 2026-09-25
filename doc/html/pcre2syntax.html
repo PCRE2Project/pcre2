@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="description" content="Syntax quick-reference summary">
 <title>pcre2syntax(3)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +117,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +219,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -433,9 +435,47 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 </head>
-<body class="manpage">
+<body class="manpage toc2 toc-right">
 <div id="header">
 <h1>pcre2syntax(3) Manual Page</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_pcre2_regular_expression_syntax_summary">PCRE2 regular expression syntax summary</a></li>
+<li><a href="#_quoting">Quoting</a></li>
+<li><a href="#_braced_items">Braced items</a></li>
+<li><a href="#_escaped_characters">Escaped characters</a></li>
+<li><a href="#_character_types">Character types</a></li>
+<li><a href="#_general_category_properties_for_p_and_p">General category properties for <code class="regex">\p</code> and <code class="regex">\P</code></a></li>
+<li><a href="#_pcre2_special_category_properties_for_p_and_p">PCRE2 special category properties for <code class="regex">\p</code> and <code class="regex">\P</code></a></li>
+<li><a href="#_binary_properties_for_p_and_p">Binary properties for <code class="regex">\p</code> and <code class="regex">\P</code></a></li>
+<li><a href="#_script_matching_with_p_and_p">Script matching with <code class="regex">\p</code> and <code class="regex">\P</code></a></li>
+<li><a href="#_the_bidi_class_property_for_p_and_p">The <code class="regex">Bidi_Class</code> property for <code class="regex">\p</code> and <code class="regex">\P</code></a></li>
+<li><a href="#_character_classes">Character classes</a></li>
+<li><a href="#_perl_extended_character_classes">Perl extended character classes</a></li>
+<li><a href="#_quantifiers">Quantifiers</a></li>
+<li><a href="#_anchors_and_simple_assertions">Anchors and simple assertions</a></li>
+<li><a href="#_reported_match_point_setting">Reported match point setting</a></li>
+<li><a href="#_alternation">Alternation</a></li>
+<li><a href="#_capturing">Capturing</a></li>
+<li><a href="#_atomic_groups">Atomic groups</a></li>
+<li><a href="#_comment">Comment</a></li>
+<li><a href="#_option_setting">Option setting</a></li>
+<li><a href="#_newline_convention">Newline convention</a></li>
+<li><a href="#_what_r_matches">What <code class="regex">\R</code> matches</a></li>
+<li><a href="#_lookahead_and_lookbehind_assertions">Lookahead and lookbehind assertions</a></li>
+<li><a href="#_non_atomic_lookaround_assertions">Non-atomic lookaround assertions</a></li>
+<li><a href="#_substring_scan_assertion">Substring scan assertion</a></li>
+<li><a href="#_script_runs">Script runs</a></li>
+<li><a href="#_backreferences">Backreferences</a></li>
+<li><a href="#_subroutine_references_possibly_recursive">Subroutine references (possibly recursive)</a></li>
+<li><a href="#_conditional_patterns">Conditional patterns</a></li>
+<li><a href="#_backtracking_control">Backtracking control</a></li>
+<li><a href="#_callouts">Callouts</a></li>
+<li><a href="#_replacement_strings">Replacement strings</a></li>
+<li><a href="#_see_also">See also</a></li>
+</ul>
+</div>
 <h2>Name</h2>
 <div class="sectionbody">
 <p>pcre2syntax - PCRE2 syntax quick reference</p>
@@ -443,7 +483,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_pcre2_regular_expression_syntax_summary">Pcre2 Regular Expression Syntax Summary</h2>
+<h2 id="_pcre2_regular_expression_syntax_summary">PCRE2 regular expression syntax summary</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The full syntax and semantics of the regular expression patterns that are
@@ -460,81 +500,141 @@ documentation.</p>
 <div class="sect1">
 <h2 id="_quoting">Quoting</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">\x         where x is non-alphanumeric is a literal x<br>
-\Q...\E    treat enclosed characters as literal</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">\<em>x</em></code></dt>
+<dd>
+<p>where <em>x</em> is non-alphanumeric, matches a literal <em>x</em></p>
+</dd>
+<dt class="hdlist1"><code class="regex">\Q...\E</code></dt>
+<dd>
+<p>treat enclosed characters as literal</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>Note that white space inside \Q&#8230;&#8203;\E is always treated as literal, even if
-PCRE2_EXTENDED is set, causing most other white space to be ignored. Note also
-that PCRE2&#8217;s handling of \Q&#8230;&#8203;\E has some differences from Perl&#8217;s. See the
+<p>Note that white space inside <code class="regex">\Q...\E</code> is always treated as literal, even if
+<code class="constant">PCRE2_EXTENDED</code> is set, causing most other white space to be ignored. Note also
+that PCRE2&#8217;s handling of <code class="regex">\Q...\E</code> has some differences from Perl&#8217;s. See the
 <a href="pcre2pattern.html"><code>pcre2pattern</code></a>
 documentation for details.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_braced_items">Braced Items</h2>
+<h2 id="_braced_items">Braced items</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>With one exception, wherever brace characters { and } are required to enclose
-data for constructions such as \g{2} or \k{name}, space and/or horizontal tab
-characters that follow { or precede } are allowed and are ignored. In the case
+<p>With one exception, wherever brace characters <code class="regex">{</code> and <code class="regex">}</code> are required to enclose
+data for constructions such as <code class="regex">\g{2}</code> or <code class="regex">\k{name}</code>, space and/or horizontal tab
+characters that follow <code class="regex">{</code> or precede <code class="regex">}</code> are allowed and are ignored. In the case
 of quantifiers, they may also appear before or after the comma. The exception
-is \u{&#8230;&#8203;} which is not Perl-compatible and is recognized only when
-PCRE2_EXTRA_ALT_BSUX is set. This is an ECMAScript compatibility feature, and
+is <code class="regex">\u{...}</code> which is not Perl-compatible and is recognized only when
+<code class="constant">PCRE2_EXTRA_ALT_BSUX</code> is set. This is an ECMAScript compatibility feature, and
 follows ECMAScript&#8217;s behaviour.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_escaped_characters">Escaped Characters</h2>
+<h2 id="_escaped_characters">Escaped characters</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This table applies to ASCII and Unicode environments. An unrecognized escape
 sequence causes an error.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">\a         alarm, that is, the BEL character (hex 07)<br>
-\cx        "control-x", where x is a non-control ASCII character<br>
-\e         escape (hex 1B)<br>
-\f         form feed (hex 0C)<br>
-\n         newline (hex 0A)<br>
-\r         carriage return (hex 0D)<br>
-\t         tab (hex 09)<br>
-\0dd       character with octal code 0dd<br>
-\ddd       character with octal code ddd, or backreference<br>
-\o{ddd..}  character with octal code ddd..<br>
-\N{U+hh..} character with Unicode code point hh.. (Unicode mode only)<br>
-\xhh       character with hex code hh<br>
-\x{hh..}   character with hex code hh..</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">\a</code>                  </dt>
+<dd>
+<p>alarm, that is, the BEL character (<code class="character">0x07</code>)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\c<em>x</em></code>             </dt>
+<dd>
+<p>"control-<em>x</em>", where <em>x</em> is a non-control ASCII character</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\e</code>                  </dt>
+<dd>
+<p>escape (<code class="character">0x1B</code>)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\f</code>                  </dt>
+<dd>
+<p>form feed (<code class="character">0x0C</code>)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\n</code>                  </dt>
+<dd>
+<p>newline (<code class="character">0x0A</code>)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\r</code>                  </dt>
+<dd>
+<p>carriage return (<code class="character">0x0D</code>)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\t</code>                  </dt>
+<dd>
+<p>tab (<code class="character">0x09</code>)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\0<em>dd</em></code>            </dt>
+<dd>
+<p>character with octal code 0<em>dd</em></p>
+</dd>
+<dt class="hdlist1"><code class="regex">\<em>ddd</em></code>  </dt>
+<dd>
+<p>character with octal code <em>ddd</em>, or backreference</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\o{<em>ddd...</em>}</code>       </dt>
+<dd>
+<p>character with octal code <em>ddd...</em></p>
+</dd>
+<dt class="hdlist1"><code class="regex">\N{U+<em>hh...</em>}</code>      </dt>
+<dd>
+<p>character with Unicode code point <em>hh...</em> (Unicode mode only)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\x<em>hh</em></code>            </dt>
+<dd>
+<p>character with hex code <em>hh</em></p>
+</dd>
+<dt class="hdlist1"><code class="regex">\x{<em>hh...</em>}</code>      </dt>
+<dd>
+<p>character with hex code <em>hh...</em></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>\N{U+hh..} is synonymous with \x{hh..} but is not supported in environments
-that use EBCDIC code (mainly IBM mainframes). Note that \N not followed by an
+<p><code class="regex">\N{U+<em>hh...</em>}</code> is synonymous with <code class="regex">\x{<em>hh...</em>}</code> but is not supported in environments
+that use EBCDIC code (mainly IBM mainframes). Note that <code class="regex">\N</code> not followed by an
 opening curly bracket has a different meaning (see below).</p>
 </div>
 <div class="paragraph">
-<p>If PCRE2_ALT_BSUX or PCRE2_EXTRA_ALT_BSUX is set ("ALT_BSUX mode"), the
+<p>If <code class="constant">PCRE2_ALT_BSUX</code> or <code class="constant">PCRE2_EXTRA_ALT_BSUX</code> is set ("ALT_BSUX mode"), the
 following are also recognized:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">\U         the character "U"<br>
-\uhhhh     character with hex code hhhh<br>
-\u{hh..}   character with hex code hh.. but only for EXTRA_ALT_BSUX</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">\U</code>           </dt>
+<dd>
+<p>the character "U"</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\u<em>hhhh</em></code>   </dt>
+<dd>
+<p>character with hex code <em>hhhh</em></p>
+</dd>
+<dt class="hdlist1"><code class="regex">\u{<em>hh...</em>}</code> </dt>
+<dd>
+<p>character with hex code <em>hh...</em> but only for EXTRA_ALT_BSUX</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>When \x is not followed by {, one or two hexadecimal digits are read,
-but in ALT_BSUX mode \x must be followed by two hexadecimal digits to be
-recognized as a hexadecimal escape; otherwise it matches a literal "x".
-Likewise, if \u (in ALT_BSUX mode) is not followed by four hexadecimal digits
+<p>When <code class="regex">\x</code> is not followed by <code class="regex">{</code>, one or two hexadecimal digits are read,
+but in ALT_BSUX mode <code class="regex">\x</code> must be followed by two hexadecimal digits to be
+recognized as a hexadecimal escape; otherwise it matches a literal <code class="subject">x</code>.
+Likewise, if <code class="regex">\u</code> (in ALT_BSUX mode) is not followed by four hexadecimal digits
 or (in EXTRA_ALT_BSUX mode) a sequence of hex digits in curly brackets, it
-matches a literal "u".</p>
+matches a literal <code class="subject">u</code>.</p>
 </div>
 <div class="paragraph">
-<p>Note that \0dd is always an octal code. The treatment of backslash followed by
+<p>Note that <code class="regex">\0<em>dd</em></code> is always an octal code. The treatment of backslash followed by
 a non-zero digit is complicated; for details see the section
-"Non-printing characters"
+<a href="pcre2pattern.html#non-printing-characters">Non-printing characters</a>
 in the
 <a href="pcre2pattern.html"><code>pcre2pattern</code></a>
 documentation, where details of escape processing in EBCDIC environments are
@@ -543,123 +643,299 @@ also given.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_character_types">Character Types</h2>
+<h2 id="_character_types">Character types</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">.          any character except newline;<br>
-             in dotall mode, any character whatsoever<br>
-\C         one code unit, even in UTF mode (best avoided)<br>
-\d         a decimal digit<br>
-\D         a character that is not a decimal digit<br>
-\h         a horizontal white space character<br>
-\H         a character that is not a horizontal white space character<br>
-\N         a character that is not a newline<br>
-\p{<em>xx</em>}     a character with the <em>xx</em> property<br>
-\P{<em>xx</em>}     a character without the <em>xx</em> property<br>
-\R         a newline sequence<br>
-\s         a white space character<br>
-\S         a character that is not a white space character<br>
-\v         a vertical white space character<br>
-\V         a character that is not a vertical white space character<br>
-\w         a "word" character<br>
-\W         a "non-word" character<br>
-\X         a Unicode extended grapheme cluster</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">.</code>         </dt>
+<dd>
+<p>any character except newline; in dotall mode, any character whatsoever</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\C</code>        </dt>
+<dd>
+<p>one code unit, even in UTF mode (best avoided)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\d</code>        </dt>
+<dd>
+<p>a decimal digit</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\D</code>        </dt>
+<dd>
+<p>a character that is not a decimal digit</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\h</code>        </dt>
+<dd>
+<p>a horizontal white space character</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\H</code>        </dt>
+<dd>
+<p>a character that is not a horizontal white space character</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\N</code>        </dt>
+<dd>
+<p>a character that is not a newline</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\p{<em>xx</em>}</code>  </dt>
+<dd>
+<p>a character with the <em>xx</em> property</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\P{<em>xx</em>}</code>  </dt>
+<dd>
+<p>a character without the <em>xx</em> property</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\R</code>        </dt>
+<dd>
+<p>a newline sequence</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\s</code>        </dt>
+<dd>
+<p>a white space character</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\S</code>        </dt>
+<dd>
+<p>a character that is not a white space character</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\v</code>        </dt>
+<dd>
+<p>a vertical white space character</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\V</code>        </dt>
+<dd>
+<p>a character that is not a vertical white space character</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\w</code>        </dt>
+<dd>
+<p>a "word" character</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\W</code>        </dt>
+<dd>
+<p>a "non-word" character</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\X</code>        </dt>
+<dd>
+<p>a Unicode extended grapheme cluster</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>\C is dangerous because it may leave the current matching point in the middle
-of a UTF-8 or UTF-16 character. The application can lock out the use of \C by
-setting the PCRE2_NEVER_BACKSLASH_C option. It is also possible to build PCRE2
-with the use of \C permanently disabled.</p>
+<p><code class="regex">\C</code> is dangerous because it may leave the current matching point in the middle
+of a UTF-8 or UTF-16 character. The application can lock out the use of <code class="regex">\C</code> by
+setting the <code class="constant">PCRE2_NEVER_BACKSLASH_C</code> option. It is also possible to build PCRE2
+with the use of <code class="regex">\C</code> permanently disabled.</p>
 </div>
 <div class="paragraph">
-<p>By default, \d, \s, and \w match only ASCII characters, even in UTF-8 mode
+<p>By default, <code class="regex">\d</code>, <code class="regex">\s</code>, and <code class="regex">\w</code> match only ASCII characters, even in UTF-8 mode
 or in the 16-bit and 32-bit libraries. However, if locale-specific matching is
-happening, \s and \w may also match characters with code points in the range
-128-255. If the PCRE2_UCP option is set, the behaviour of these escape
+happening, <code class="regex">\s</code> and <code class="regex">\w</code> may also match characters with code points in the range
+128&#8212;&#8203;255. If the <code class="constant">PCRE2_UCP</code> option is set, the behaviour of these escape
 sequences is changed to use Unicode properties and they match many more
 characters, but there are some option settings that can restrict individual
 sequences to matching only ASCII characters.</p>
 </div>
 <div class="paragraph">
-<p>Property descriptions in \p and \P are matched caselessly; hyphens,
+<p>Property descriptions in <code class="regex">\p</code> and <code class="regex">\P</code> are matched caselessly; hyphens,
 underscores, and ASCII white space characters are ignored, in accordance with
-Unicode&#8217;s "loose matching" rules. For example, \p{Bidi_Class=al} is the same
-as \p{ bidi class = AL }.</p>
+Unicode&#8217;s "loose matching" rules. For example, <code class="regex">\p{Bidi_Class=al}</code> is the same
+as <code class="regex">\p{ bidi class = AL }</code>.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_general_category_properties_for_p_and_p">GENERAL CATEGORY PROPERTIES FOR \p and \P</h2>
+<h2 id="_general_category_properties_for_p_and_p">General category properties for <code class="regex">\p</code> and <code class="regex">\P</code></h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">C          Other<br>
-Cc         Control<br>
-Cf         Format<br>
-Cn         Unassigned<br>
-Co         Private use<br>
-Cs         Surrogate</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">C</code></dt>
+<dd>
+<p>Other</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Cc</code></dt>
+<dd>
+<p>Control</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Cf</code></dt>
+<dd>
+<p>Format</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Cn</code></dt>
+<dd>
+<p>Unassigned</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Co</code></dt>
+<dd>
+<p>Private use</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Cs</code></dt>
+<dd>
+<p>Surrogate</p>
+</dd>
+<dt class="hdlist1"><code class="regex">L</code></dt>
+<dd>
+<p>Letter</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Lc</code></dt>
+<dd>
+<p>Cased letter, the union of <code class="regex">Ll</code>, <code class="regex">Lu</code>, and <code class="regex">Lt</code></p>
+</dd>
+<dt class="hdlist1"><code class="regex">L&amp;</code></dt>
+<dd>
+<p>Synonym of <code class="regex">Lc</code></p>
+</dd>
+<dt class="hdlist1"><code class="regex">Ll</code></dt>
+<dd>
+<p>Lower case letter</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Lm</code></dt>
+<dd>
+<p>Modifier letter</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Lo</code></dt>
+<dd>
+<p>Other letter</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Lt</code></dt>
+<dd>
+<p>Title case letter</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Lu</code></dt>
+<dd>
+<p>Upper case letter</p>
+</dd>
+<dt class="hdlist1"><code class="regex">M</code></dt>
+<dd>
+<p>Mark</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Mc</code></dt>
+<dd>
+<p>Spacing mark</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Me</code></dt>
+<dd>
+<p>Enclosing mark</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Mn</code></dt>
+<dd>
+<p>Non-spacing mark</p>
+</dd>
+<dt class="hdlist1"><code class="regex">N</code></dt>
+<dd>
+<p>Number</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Nd</code></dt>
+<dd>
+<p>Decimal number</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Nl</code></dt>
+<dd>
+<p>Letter number</p>
+</dd>
+<dt class="hdlist1"><code class="regex">No</code></dt>
+<dd>
+<p>Other number</p>
+</dd>
+<dt class="hdlist1"><code class="regex">P</code></dt>
+<dd>
+<p>Punctuation</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Pc</code></dt>
+<dd>
+<p>Connector punctuation</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Pd</code></dt>
+<dd>
+<p>Dash punctuation</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Pe</code></dt>
+<dd>
+<p>Close punctuation</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Pf</code></dt>
+<dd>
+<p>Final punctuation</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Pi</code></dt>
+<dd>
+<p>Initial punctuation</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Po</code></dt>
+<dd>
+<p>Other punctuation</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Ps</code></dt>
+<dd>
+<p>Open punctuation</p>
+</dd>
+<dt class="hdlist1"><code class="regex">S</code></dt>
+<dd>
+<p>Symbol</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Sc</code></dt>
+<dd>
+<p>Currency symbol</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Sk</code></dt>
+<dd>
+<p>Modifier symbol</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Sm</code></dt>
+<dd>
+<p>Mathematical symbol</p>
+</dd>
+<dt class="hdlist1"><code class="regex">So</code></dt>
+<dd>
+<p>Other symbol</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Z</code></dt>
+<dd>
+<p>Separator</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Zl</code></dt>
+<dd>
+<p>Line separator</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Zp</code></dt>
+<dd>
+<p>Paragraph separator</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Zs</code></dt>
+<dd>
+<p>Space separator</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-  <p style="margin-left: 2ch">L          Letter<br>
-Lc         Cased letter, the union of Ll, Lu, and Lt<br>
-L&amp;         Synonym of Lc<br>
-Ll         Lower case letter<br>
-Lm         Modifier letter<br>
-Lo         Other letter<br>
-Lt         Title case letter<br>
-Lu         Upper case letter</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">M          Mark<br>
-Mc         Spacing mark<br>
-Me         Enclosing mark<br>
-Mn         Non-spacing mark</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">N          Number<br>
-Nd         Decimal number<br>
-Nl         Letter number<br>
-No         Other number</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">P          Punctuation<br>
-Pc         Connector punctuation<br>
-Pd         Dash punctuation<br>
-Pe         Close punctuation<br>
-Pf         Final punctuation<br>
-Pi         Initial punctuation<br>
-Po         Other punctuation<br>
-Ps         Open punctuation</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">S          Symbol<br>
-Sc         Currency symbol<br>
-Sk         Modifier symbol<br>
-Sm         Mathematical symbol<br>
-So         Other symbol</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">Z          Separator<br>
-Zl         Line separator<br>
-Zp         Paragraph separator<br>
-Zs         Space separator</p>
-</div>
-<div class="paragraph">
-<p>From release 10.45, when caseless matching is set, Ll, Lu, and Lt are all
-equivalent to Lc.</p>
+<p>From release 10.45, when caseless matching is set, <code class="regex">Ll</code>, <code class="regex">Lu</code>, and
+<code class="regex">Lt</code> are all equivalent to <code class="regex">Lc</code>.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_pcre2_special_category_properties_for_p_and_p">PCRE2 SPECIAL CATEGORY PROPERTIES FOR \p and \P</h2>
+<h2 id="_pcre2_special_category_properties_for_p_and_p">PCRE2 special category properties for <code class="regex">\p</code> and <code class="regex">\P</code></h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">Xan        Alphanumeric: union of properties L and N<br>
-Xps        POSIX space: property Z or tab, NL, VT, FF, CR<br>
-Xsp        Perl space: property Z or tab, NL, VT, FF, CR<br>
-Xuc        Universally-named character: one that can be<br>
-             represented by a Universal Character Name<br>
-Xwd        Perl word: property Xan or underscore</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">Xan</code></dt>
+<dd>
+<p>Alphanumeric: union of properties <code class="regex">L</code> and <code class="regex">N</code></p>
+</dd>
+<dt class="hdlist1"><code class="regex">Xps</code></dt>
+<dd>
+<p>POSIX space: property <code class="regex">Z</code> or tab, NL, VT, FF, CR</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Xsp</code></dt>
+<dd>
+<p>Perl space: property <code class="regex">Z</code> or tab, NL, VT, FF, CR</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Xuc</code></dt>
+<dd>
+<p>Universally-named character: one that can be represented by a
+Universal Character Name</p>
+</dd>
+<dt class="hdlist1"><code class="regex">Xwd</code></dt>
+<dd>
+<p>Perl word: property <code class="regex">Xan</code> or underscore</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>Perl and POSIX space are now the same. Perl added VT to its space character set
@@ -668,224 +944,532 @@ at release 5.18.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_binary_properties_for_p_and_p">BINARY PROPERTIES FOR \p AND \P</h2>
+<h2 id="_binary_properties_for_p_and_p">Binary properties for <code class="regex">\p</code> and <code class="regex">\P</code></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Unicode defines a number of binary properties, that is, properties whose only
 values are true or false. You can obtain a list of those that are recognized by
-\p and \P, along with their abbreviations, by running this command:</p>
+<code class="regex">\p</code> and <code class="regex">\P</code>, along with their abbreviations, by running this command:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">pcre2test -LP</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2test -LP</code></pre>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_script_matching_with_p_and_p">SCRIPT MATCHING WITH \p AND \P</h2>
+<h2 id="_script_matching_with_p_and_p">Script matching with <code class="regex">\p</code> and <code class="regex">\P</code></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Many script names and their 4-letter abbreviations are recognized in
-\p{sc:&#8230;&#8203;} or \p{scx:&#8230;&#8203;} items, or on their own with \p (and also \P of
+<code class="regex">\p{sc:...}</code> or <code class="regex">\p{scx:...}</code> items, or on their own with <code class="regex">\p</code> (and also <code class="regex">\P</code> of
 course). You can obtain a list of these scripts by running this command:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">pcre2test -LS</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2test -LS</code></pre>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_bidi_class_property_for_p_and_p">THE BIDI_CLASS PROPERTY FOR \p AND \P</h2>
+<h2 id="_the_bidi_class_property_for_p_and_p">The <code class="regex">Bidi_Class</code> property for <code class="regex">\p</code> and <code class="regex">\P</code></h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">\p{Bidi_Class:&lt;class&gt;}   matches a character with the given class<br>
-\p{BC:&lt;class&gt;}           matches a character with the given class</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">\p{Bidi_Class:<em>class</em>}</code></dt>
+<dd>
+<p>Matches a character with the given class</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\p{BC:<em>class</em>}</code></dt>
+<dd>
+<p>Matches a character with the given class</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>The recognized classes are:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">AL          Arabic letter<br>
-AN          Arabic number<br>
-B           paragraph separator<br>
-BN          boundary neutral<br>
-CS          common separator<br>
-EN          European number<br>
-ES          European separator<br>
-ET          European terminator<br>
-FSI         first strong isolate<br>
-L           left-to-right<br>
-LRE         left-to-right embedding<br>
-LRI         left-to-right isolate<br>
-LRO         left-to-right override<br>
-NSM         non-spacing mark<br>
-ON          other neutral<br>
-PDF         pop directional format<br>
-PDI         pop directional isolate<br>
-R           right-to-left<br>
-RLE         right-to-left embedding<br>
-RLI         right-to-left isolate<br>
-RLO         right-to-left override<br>
-S           segment separator<br>
-WS          white space</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">AL</code></dt>
+<dd>
+<p>Arabic letter</p>
+</dd>
+<dt class="hdlist1"><code class="regex">AN</code></dt>
+<dd>
+<p>Arabic number</p>
+</dd>
+<dt class="hdlist1"><code class="regex">B</code></dt>
+<dd>
+<p>Paragraph separator</p>
+</dd>
+<dt class="hdlist1"><code class="regex">BN</code></dt>
+<dd>
+<p>Boundary neutral</p>
+</dd>
+<dt class="hdlist1"><code class="regex">CS</code></dt>
+<dd>
+<p>Common separator</p>
+</dd>
+<dt class="hdlist1"><code class="regex">EN</code></dt>
+<dd>
+<p>European number</p>
+</dd>
+<dt class="hdlist1"><code class="regex">ES</code></dt>
+<dd>
+<p>European separator</p>
+</dd>
+<dt class="hdlist1"><code class="regex">ET</code></dt>
+<dd>
+<p>European terminator</p>
+</dd>
+<dt class="hdlist1"><code class="regex">FSI</code></dt>
+<dd>
+<p>First strong isolate</p>
+</dd>
+<dt class="hdlist1"><code class="regex">L</code></dt>
+<dd>
+<p>Left-to-right</p>
+</dd>
+<dt class="hdlist1"><code class="regex">LRE</code></dt>
+<dd>
+<p>Left-to-right embedding</p>
+</dd>
+<dt class="hdlist1"><code class="regex">LRI</code></dt>
+<dd>
+<p>Left-to-right isolate</p>
+</dd>
+<dt class="hdlist1"><code class="regex">LRO</code></dt>
+<dd>
+<p>Left-to-right override</p>
+</dd>
+<dt class="hdlist1"><code class="regex">NSM</code></dt>
+<dd>
+<p>Non-spacing mark</p>
+</dd>
+<dt class="hdlist1"><code class="regex">ON</code></dt>
+<dd>
+<p>Other neutral</p>
+</dd>
+<dt class="hdlist1"><code class="regex">PDF</code></dt>
+<dd>
+<p>Pop directional format</p>
+</dd>
+<dt class="hdlist1"><code class="regex">PDI</code></dt>
+<dd>
+<p>Pop directional isolate</p>
+</dd>
+<dt class="hdlist1"><code class="regex">R</code></dt>
+<dd>
+<p>Right-to-left</p>
+</dd>
+<dt class="hdlist1"><code class="regex">RLE</code></dt>
+<dd>
+<p>Right-to-left embedding</p>
+</dd>
+<dt class="hdlist1"><code class="regex">RLI</code></dt>
+<dd>
+<p>Right-to-left isolate</p>
+</dd>
+<dt class="hdlist1"><code class="regex">RLO</code></dt>
+<dd>
+<p>Right-to-left override</p>
+</dd>
+<dt class="hdlist1"><code class="regex">S</code></dt>
+<dd>
+<p>Segment separator</p>
+</dd>
+<dt class="hdlist1"><code class="regex">WS</code></dt>
+<dd>
+<p>White space</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_character_classes">Character Classes</h2>
+<h2 id="_character_classes">Character classes</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">[...]       positive character class<br>
-[^...]      negative character class<br>
-[x-y]       range (can be used for hex characters)<br>
-[[:xxx:]]   positive POSIX named set<br>
-[[:^xxx:]]  negative POSIX named set</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">[...]</code></dt>
+<dd>
+<p>Positive character class</p>
+</dd>
+<dt class="hdlist1"><code class="regex">[^...]</code></dt>
+<dd>
+<p>Negative character class</p>
+</dd>
+<dt class="hdlist1"><code class="regex">[x-y]</code></dt>
+<dd>
+<p>Range (can be used for hexadecimal characters)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">[[:<em>xxx</em>:]]</code></dt>
+<dd>
+<p>Positive POSIX named set</p>
+</dd>
+<dt class="hdlist1"><code class="regex">[[:^<em>xxx</em>:]]</code></dt>
+<dd>
+<p>Negative POSIX named set</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-  <p style="margin-left: 2ch">alnum       alphanumeric<br>
-alpha       alphabetic<br>
-ascii       0-127<br>
-blank       space or tab<br>
-cntrl       control character<br>
-digit       decimal digit<br>
-graph       printing, excluding space<br>
-lower       lower case letter<br>
-print       printing, including space<br>
-punct       printing, excluding alphanumeric<br>
-space       white space<br>
-upper       upper case letter<br>
-word        same as \w<br>
-xdigit      hexadecimal digit</p>
+<p>The recognized POSIX named sets are:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">alnum</code></dt>
+<dd>
+<p>Alphanumeric</p>
+</dd>
+<dt class="hdlist1"><code class="regex">alpha</code></dt>
+<dd>
+<p>Alphabetic</p>
+</dd>
+<dt class="hdlist1"><code class="regex">ascii</code></dt>
+<dd>
+<p>0&#8212;&#8203;127</p>
+</dd>
+<dt class="hdlist1"><code class="regex">blank</code></dt>
+<dd>
+<p>Space or tab</p>
+</dd>
+<dt class="hdlist1"><code class="regex">cntrl</code></dt>
+<dd>
+<p>Control character</p>
+</dd>
+<dt class="hdlist1"><code class="regex">digit</code></dt>
+<dd>
+<p>Decimal digit</p>
+</dd>
+<dt class="hdlist1"><code class="regex">graph</code></dt>
+<dd>
+<p>Printing, excluding space</p>
+</dd>
+<dt class="hdlist1"><code class="regex">lower</code></dt>
+<dd>
+<p>Lower case letter</p>
+</dd>
+<dt class="hdlist1"><code class="regex">print</code></dt>
+<dd>
+<p>Printing, including space</p>
+</dd>
+<dt class="hdlist1"><code class="regex">punct</code></dt>
+<dd>
+<p>Printing, excluding alphanumeric</p>
+</dd>
+<dt class="hdlist1"><code class="regex">space</code></dt>
+<dd>
+<p>White space</p>
+</dd>
+<dt class="hdlist1"><code class="regex">upper</code></dt>
+<dd>
+<p>Upper case letter</p>
+</dd>
+<dt class="hdlist1"><code class="regex">word</code></dt>
+<dd>
+<p>Same as <code class="regex">\w</code></p>
+</dd>
+<dt class="hdlist1"><code class="regex">xdigit</code></dt>
+<dd>
+<p>Hexadecimal digit</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>In PCRE2, POSIX character set names recognize only ASCII characters by default,
-but some of them use Unicode properties if PCRE2_UCP is set. You can use
-\Q&#8230;&#8203;\E inside a character class.</p>
+but some of them use Unicode properties if <code class="constant">PCRE2_UCP</code> is set. You can use
+<code class="regex">\Q...\E</code> inside a character class.</p>
 </div>
 <div class="paragraph">
-<p>When PCRE2_ALT_EXTENDED_CLASS is set, UTS#18 extended character classes may be
+<p>When <code class="constant">PCRE2_ALT_EXTENDED_CLASS</code> is set, UTS#18 extended character classes may be
 used, allowing nested character classes, combined using set operators.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">[x&amp;&amp;[^y]]   UTS#18 extended character class</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">x||y        set union (OR)<br>
-x&amp;&amp;y        set intersection (AND)<br>
-x--y        set difference (AND NOT)<br>
-x~~y        set symmetric difference (XOR)</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">[x&amp;&amp;[^y]]</code></dt>
+<dd>
+<p>UTS#18 extended character class</p>
+</dd>
+<dt class="hdlist1"><code class="regex">x||y</code></dt>
+<dd>
+<p>Set union (OR)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">x&amp;&amp;y</code></dt>
+<dd>
+<p>Set intersection (AND)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">x--y</code></dt>
+<dd>
+<p>Set difference (AND NOT)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">x~~y</code></dt>
+<dd>
+<p>Set symmetric difference (XOR)</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_perl_extended_character_classes">Perl Extended Character Classes</h2>
+<h2 id="_perl_extended_character_classes">Perl extended character classes</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?[...])                Perl extended character class<br>
-(?[\p{Thai} &amp; \p{Nd}])  operators; white space ignored<br>
-(?[(x - y) &amp; z])        parentheses for grouping</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(?[...])</code></dt>
+<dd>
+<p>Perl extended character class</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?[\p{Thai} &amp; \p{Nd}])</code></dt>
+<dd>
+<p>Operators; white space ignored</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?[(<em>X</em> - <em>Y</em>) &amp; <em>Z</em>])</code></dt>
+<dd>
+<p>Parentheses for grouping</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?[ [^3] &amp; \p{Nd} ])</code></dt>
+<dd>
+<p><code class="regex">[ ... ]</code> is a nested ordinary class</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?[ [:alpha:] - [z] ])</code></dt>
+<dd>
+<p>POSIX set is allowed outside <code class="regex">[ ... ]</code> but character literal must be enclosed</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?[ \d - [3] ])</code></dt>
+<dd>
+<p>Backslash-escaped set is allowed outside <code class="regex">[ ... ]</code></p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?[ !\n &amp; [:ascii:] ])</code></dt>
+<dd>
+<p>Backslash-escaped character is allowed outside
+<code class="regex">[ ... ]</code>; all other characters or ranges must be enclosed in <code class="regex">[ ... ]</code></p>
+</dd>
+<dt class="hdlist1"><code class="regex">x|y</code>, <code class="regex">x+y</code></dt>
+<dd>
+<p>Set union (OR)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">x&amp;y</code></dt>
+<dd>
+<p>Set intersection (AND)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">x-y</code></dt>
+<dd>
+<p>Set difference (AND NOT)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">x^y</code></dt>
+<dd>
+<p>Set symmetric difference (XOR)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">!x</code></dt>
+<dd>
+<p>Set complement (NOT)</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-  <p style="margin-left: 2ch">(?[ [^3] &amp; \p{Nd} ])    [...] is a nested ordinary class<br>
-(?[ [:alpha:] - [z] ])  POSIX set is allowed outside [...]<br>
-(?[ \d - [3] ])         backslash-escaped set is allowed outside [...]<br>
-(?[ !\n &amp; [:ascii:] ])  backslash-escaped character is allowed outside [...]<br>
-                    all other characters or ranges must be enclosed in [...]</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">x|y, x+y                set union (OR)<br>
-x&amp;y                     set intersection (AND)<br>
-x-y                     set difference (AND NOT)<br>
-x^y                     set symmetric difference (XOR)<br>
-!x                      set complement (NOT)</p>
-</div>
-<div class="paragraph">
-<p>Inside a Perl extended character class, [&#8230;&#8203;] switches mode to be interpreted
-as an ordinary character class. Outside of a nested [&#8230;&#8203;], the only items
+<p>Inside a Perl extended character class, <code class="regex">[...]</code> switches mode to be interpreted
+as an ordinary character class. Outside of a nested <code class="regex">[...]</code>, the only items
 permitted are backslash-escapes, POSIX sets, operators, and parentheses. Inside
-a nested ordinary class, ^ has its usual meaning (inverts the class when used
-as the first character); outside of a nested class, ^ is the XOR operator.</p>
+a nested ordinary class, <code class="regex">^</code> has its usual meaning (inverts the class when used
+as the first character); outside of a nested class, <code class="regex">^</code> is the XOR operator.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_quantifiers">Quantifiers</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">?           0 or 1, greedy<br>
-?+          0 or 1, possessive<br>
-??          0 or 1, lazy<br>
-*           0 or more, greedy<br>
-*+          0 or more, possessive<br>
-*?          0 or more, lazy<br>
-+           1 or more, greedy<br>
-++          1 or more, possessive<br>
-+?          1 or more, lazy<br>
-{n}         exactly n<br>
-{n,m}       at least n, no more than m, greedy<br>
-{n,m}+      at least n, no more than m, possessive<br>
-{n,m}?      at least n, no more than m, lazy<br>
-{n,}        n or more, greedy<br>
-{n,}+       n or more, possessive<br>
-{n,}?       n or more, lazy<br>
-{,m}        zero up to m, greedy<br>
-{,m}+       zero up to m, possessive<br>
-{,m}?       zero up to m, lazy</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">?</code></dt>
+<dd>
+<p>0 or 1, greedy</p>
+</dd>
+<dt class="hdlist1"><code class="regex">?+</code></dt>
+<dd>
+<p>0 or 1, possessive</p>
+</dd>
+<dt class="hdlist1"><code class="regex">??</code></dt>
+<dd>
+<p>0 or 1, lazy</p>
+</dd>
+<dt class="hdlist1"><code class="regex">*</code></dt>
+<dd>
+<p>0 or more, greedy</p>
+</dd>
+<dt class="hdlist1"><code class="regex">*+</code></dt>
+<dd>
+<p>0 or more, possessive</p>
+</dd>
+<dt class="hdlist1"><code class="regex">*?</code></dt>
+<dd>
+<p>0 or more, lazy</p>
+</dd>
+<dt class="hdlist1"><code class="regex">+</code></dt>
+<dd>
+<p>1 or more, greedy</p>
+</dd>
+<dt class="hdlist1"><code class="regex">++</code></dt>
+<dd>
+<p>1 or more, possessive</p>
+</dd>
+<dt class="hdlist1"><code class="regex">+?</code></dt>
+<dd>
+<p>1 or more, lazy</p>
+</dd>
+<dt class="hdlist1"><code class="regex">{<em>n</em>}</code></dt>
+<dd>
+<p>Exactly <em>n</em></p>
+</dd>
+<dt class="hdlist1"><code class="regex">{<em>n</em>,<em>m</em>}</code></dt>
+<dd>
+<p>At least <em>n</em>, no more than <em>m</em>, greedy</p>
+</dd>
+<dt class="hdlist1"><code class="regex">{<em>n</em>,<em>m</em>}+</code></dt>
+<dd>
+<p>At least <em>n</em>, no more than <em>m</em>, possessive</p>
+</dd>
+<dt class="hdlist1"><code class="regex">{<em>n</em>,<em>m</em>}?</code></dt>
+<dd>
+<p>At least <em>n</em>, no more than <em>m</em>, lazy</p>
+</dd>
+<dt class="hdlist1"><code class="regex">{<em>n</em>,}</code></dt>
+<dd>
+<p><em>n</em> or more, greedy</p>
+</dd>
+<dt class="hdlist1"><code class="regex">{<em>n</em>,}+</code></dt>
+<dd>
+<p><em>n</em> or more, possessive</p>
+</dd>
+<dt class="hdlist1"><code class="regex">{<em>n</em>,}?</code></dt>
+<dd>
+<p><em>n</em> or more, lazy</p>
+</dd>
+<dt class="hdlist1"><code class="regex">{,<em>m</em>}</code></dt>
+<dd>
+<p>Zero up to <em>m</em>, greedy</p>
+</dd>
+<dt class="hdlist1"><code class="regex">{,<em>m</em>}+</code></dt>
+<dd>
+<p>Zero up to <em>m</em>, possessive</p>
+</dd>
+<dt class="hdlist1"><code class="regex">{,<em>m</em>}?</code></dt>
+<dd>
+<p>Zero up to <em>m</em>, lazy</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_anchors_and_simple_assertions">Anchors And Simple Assertions</h2>
+<h2 id="_anchors_and_simple_assertions">Anchors and simple assertions</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">\b          word boundary<br>
-\B          not a word boundary<br>
-^           start of subject<br>
-              also after an internal newline in multiline mode<br>
-              (after any newline if PCRE2_ALT_CIRCUMFLEX is set)<br>
-\A          start of subject<br>
-$           end of subject<br>
-              also before newline at end of subject<br>
-              also before internal newline in multiline mode<br>
-\Z          end of subject<br>
-              also before newline at end of subject<br>
-\z          end of subject<br>
-\G          first matching position in subject</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">\b</code></dt>
+<dd>
+<p>Word boundary</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\B</code></dt>
+<dd>
+<p>Not a word boundary</p>
+</dd>
+<dt class="hdlist1"><code class="regex">^</code></dt>
+<dd>
+<p>Start of subject; also after an internal newline in multiline mode
+(after any newline if <code class="constant">PCRE2_ALT_CIRCUMFLEX</code> is set)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\A</code></dt>
+<dd>
+<p>Start of subject</p>
+</dd>
+<dt class="hdlist1"><code class="regex">$</code></dt>
+<dd>
+<p>End of subject; also before newline at end of subject and before
+an internal newline in multiline mode</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\Z</code></dt>
+<dd>
+<p>End of subject; also before newline at end of subject</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\z</code></dt>
+<dd>
+<p>End of subject</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\G</code></dt>
+<dd>
+<p>First matching position in subject</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_reported_match_point_setting">Reported Match Point Setting</h2>
+<h2 id="_reported_match_point_setting">Reported match point setting</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">\K          set reported start of match</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">\K</code></dt>
+<dd>
+<p>Set reported start of match</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>From release 10.38 \K is not permitted by default in lookaround assertions,
-for compatibility with Perl. However, if the PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+<p>From release 10.38, <code class="regex">\K</code> is not permitted by default in lookaround assertions,
+for compatibility with Perl. However, if the <code class="constant">PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK</code>
 option is set, the previous behaviour is re-enabled. When this option is set,
-\K is honoured in positive assertions, but ignored in negative ones.</p>
+<code class="regex">\K</code> is honoured in positive assertions, but ignored in negative ones.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_alternation">Alternation</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">expr|expr|expr...</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex"><em>expr</em>|<em>expr</em>|<em>expr</em>...</code></dt>
+<dd>
+<p>Alternative expressions</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_capturing">Capturing</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">(...)           capture group<br>
-(?&lt;name&gt;...)    named capture group (Perl)<br>
-(?'name'...)    named capture group (Perl)<br>
-(?P&lt;name&gt;...)   named capture group (Python)<br>
-(?:...)         non-capture group<br>
-(?|...)         non-capture group; reset group numbers for<br>
-                 capture groups in each alternative</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(...)</code></dt>
+<dd>
+<p>Capture group</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?&lt;<em>name</em>&gt;...)</code></dt>
+<dd>
+<p>Named capture group (Perl)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?'<em>name</em>'...)</code></dt>
+<dd>
+<p>Named capture group (Perl)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?P&lt;<em>name</em>&gt;...)</code></dt>
+<dd>
+<p>Named capture group (Python)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?:...)</code></dt>
+<dd>
+<p>Non-capture group</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?|...)</code></dt>
+<dd>
+<p>Non-capture group; reset group numbers for capture groups
+in each alternative</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>In non-UTF modes, names may contain underscores and ASCII letters and digits;
@@ -895,318 +1479,672 @@ both cases, a name must not start with a digit.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_atomic_groups">Atomic Groups</h2>
+<h2 id="_atomic_groups">Atomic groups</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?&gt;...)         atomic non-capture group<br>
-(*atomic:...)   atomic non-capture group</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(?&gt;...)</code></dt>
+<dd>
+<p>Atomic non-capture group</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*atomic:...)</code></dt>
+<dd>
+<p>Atomic non-capture group</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_comment">Comment</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?#....)        comment (not nestable)</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(?#...)</code></dt>
+<dd>
+<p>Comment (not nestable)</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_option_setting">Option Setting</h2>
+<h2 id="_option_setting">Option setting</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Changes of these options within a group are automatically cancelled at the end
 of the group.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?a)            all ASCII options<br>
-(?aD)           restrict \d to ASCII in UCP mode<br>
-(?aS)           restrict \s to ASCII in UCP mode<br>
-(?aW)           restrict \w to ASCII in UCP mode<br>
-(?aP)           restrict all POSIX classes to ASCII in UCP mode<br>
-(?aT)           restrict POSIX digit classes to ASCII in UCP mode<br>
-(?i)            caseless<br>
-(?J)            allow duplicate named groups<br>
-(?m)            multiline<br>
-(?n)            no auto capture<br>
-(?r)            restrict caseless to either ASCII or non-ASCII<br>
-(?s)            single line (dotall)<br>
-(?U)            default ungreedy (lazy)<br>
-(?x)            ignore white space except in classes or \Q...\E<br>
-(?xx)           as (?x) but also ignore space and tab in classes<br>
-(?-...)         unset the given option(s)<br>
-(?^)            unset imnrsx options</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(?a)</code></dt>
+<dd>
+<p>All ASCII options</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?aD)</code></dt>
+<dd>
+<p>Restrict <code class="regex">\d</code> to ASCII in UCP mode</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?aS)</code></dt>
+<dd>
+<p>Restrict <code class="regex">\s</code> to ASCII in UCP mode</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?aW)</code></dt>
+<dd>
+<p>Restrict <code class="regex">\w</code> to ASCII in UCP mode</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?aP)</code></dt>
+<dd>
+<p>Restrict all POSIX classes to ASCII in UCP mode</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?aT)</code></dt>
+<dd>
+<p>Restrict POSIX digit classes to ASCII in UCP mode</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?i)</code></dt>
+<dd>
+<p>Caseless</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?J)</code></dt>
+<dd>
+<p>Allow duplicate named groups</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?m)</code></dt>
+<dd>
+<p>Multiline</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?n)</code></dt>
+<dd>
+<p>No auto capture</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?r)</code></dt>
+<dd>
+<p>Restrict caseless to either ASCII or non-ASCII</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?s)</code></dt>
+<dd>
+<p>Single line (dotall)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?U)</code></dt>
+<dd>
+<p>Default ungreedy (lazy)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?x)</code></dt>
+<dd>
+<p>Ignore white space except in classes or <code class="regex">\Q...\E</code></p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?xx)</code></dt>
+<dd>
+<p>As <code class="regex">(?x)</code>, but also ignore space and tab in classes</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?-...)</code></dt>
+<dd>
+<p>Unset the given option(s)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?^)</code></dt>
+<dd>
+<p>Unset <code class="regex">imnrsx</code> options</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>(?aP) implies (?aT) as well, though this has no additional effect. However, it
-means that (?-aP) also implies (?-aT) and disables all ASCII restrictions for
+<p><code class="regex">(?aP)</code> implies <code class="regex">(?aT)</code> as well, though this has no additional effect. However, it
+means that <code class="regex">(?-aP)</code> also implies <code class="regex">(?-aT)</code> and disables all ASCII restrictions for
 POSIX classes.</p>
 </div>
 <div class="paragraph">
-<p>Unsetting x or xx unsets both. Several options may be set at once, and a
-mixture of setting and unsetting such as (?i-x) is allowed, but there may be
-only one hyphen. Setting (but no unsetting) is allowed after (?^ for example
-(?^in). An option setting may appear at the start of a non-capture group, for
-example (?i:&#8230;&#8203;).</p>
+<p>Unsetting <code class="regex">x</code> or <code class="regex">xx</code> unsets both. Several options may be set at once, and a
+mixture of setting and unsetting such as <code class="regex">(?i-x)</code> is allowed, but there may be
+only one hyphen. Setting (but no unsetting) is allowed after <code class="regex">(?^</code>, for example
+<code class="regex">(?^in)</code>. An option setting may appear at the start of a non-capture group, for
+example <code class="regex">(?i:...)</code>.</p>
 </div>
 <div class="paragraph">
 <p>The following are recognized only at the very start of a pattern or after one
-of the newline or \R sequences or options with similar syntax. More than one
+of the newline or <code class="regex">\R</code> sequences or options with similar syntax. More than one
 of them may appear. For the first three, d is a decimal number.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(*LIMIT_DEPTH=d)     set the backtracking limit to d<br>
-(*LIMIT_HEAP=d)      set the heap size limit to d * 1024 bytes<br>
-(*LIMIT_MATCH=d)     set the match limit to d<br>
-(*CASELESS_RESTRICT) set PCRE2_EXTRA_CASELESS_RESTRICT when matching<br>
-(*NOTEMPTY)          set PCRE2_NOTEMPTY when matching<br>
-(*NOTEMPTY_ATSTART)  set PCRE2_NOTEMPTY_ATSTART when matching<br>
-(*NO_AUTO_POSSESS)   no auto-possessification (PCRE2_NO_AUTO_POSSESS)<br>
-(*NO_DOTSTAR_ANCHOR) no .* anchoring (PCRE2_NO_DOTSTAR_ANCHOR)<br>
-(*NO_JIT)            disable JIT optimization<br>
-(*NO_START_OPT)      no start-match optimization (PCRE2_NO_START_OPTIMIZE)<br>
-(*TURKISH_CASING)    set PCRE2_EXTRA_TURKISH_CASING when matching<br>
-(*UTF)               set appropriate UTF mode for the library in use<br>
-(*UCP)               set PCRE2_UCP (use Unicode properties for \d etc)</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(*LIMIT_DEPTH=<em>d</em>)</code></dt>
+<dd>
+<p>Set the backtracking limit to <em>d</em></p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*LIMIT_HEAP=<em>d</em>)</code></dt>
+<dd>
+<p>Set the heap size limit to <em>d</em> * 1024 bytes</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*LIMIT_MATCH=<em>d</em>)</code></dt>
+<dd>
+<p>Set the match limit to <em>d</em></p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*CASELESS_RESTRICT)</code></dt>
+<dd>
+<p>Set <code class="constant">PCRE2_EXTRA_CASELESS_RESTRICT</code> when matching</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*NOTEMPTY)</code></dt>
+<dd>
+<p>Set <code class="constant">PCRE2_NOTEMPTY</code> when matching</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*NOTEMPTY_ATSTART)</code></dt>
+<dd>
+<p>Set <code class="constant">PCRE2_NOTEMPTY_ATSTART</code> when matching</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*NO_AUTO_POSSESS)</code></dt>
+<dd>
+<p>No auto-possessification
+(<code class="constant">PCRE2_NO_AUTO_POSSESS</code>)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*NO_DOTSTAR_ANCHOR)</code></dt>
+<dd>
+<p>No <code class="regex">.*</code> anchoring
+(<code class="constant">PCRE2_NO_DOTSTAR_ANCHOR</code>)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*NO_JIT)</code></dt>
+<dd>
+<p>Disable JIT optimization</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*NO_START_OPT)</code></dt>
+<dd>
+<p>No start-match optimization
+(<code class="constant">PCRE2_NO_START_OPTIMIZE</code>)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*TURKISH_CASING)</code></dt>
+<dd>
+<p>Set <code class="constant">PCRE2_EXTRA_TURKISH_CASING</code> when matching</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*UTF)</code></dt>
+<dd>
+<p>Set appropriate UTF mode for the library in use</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*UCP)</code></dt>
+<dd>
+<p>Set <code class="constant">PCRE2_UCP</code> (use Unicode properties for <code class="regex">\d</code>, etc.)</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>Note that LIMIT_DEPTH, LIMIT_HEAP, and LIMIT_MATCH can only reduce the value of
-the limits set by the caller of <code>pcre2_match()</code> or <code>pcre2_dfa_match()</code>,
-not increase them. LIMIT_RECURSION is an obsolete synonym for LIMIT_DEPTH. The
-application can lock out the use of (*UTF) and (*UCP) by setting the
-PCRE2_NEVER_UTF or PCRE2_NEVER_UCP options, respectively, at compile time.</p>
+<p>Note that <code class="regex">LIMIT_DEPTH</code>, <code class="regex">LIMIT_HEAP</code>, and <code class="regex">LIMIT_MATCH</code> can only reduce the value of
+the limits set by the caller of <code class="function">pcre2_match()</code> or <code class="function">pcre2_dfa_match()</code>,
+not increase them. <code class="regex">LIMIT_RECURSION</code> is an obsolete synonym for <code class="regex">LIMIT_DEPTH</code>. The
+application can lock out the use of <code class="regex">(*UTF)</code> and <code class="regex">(*UCP)</code> by setting the
+<code class="constant">PCRE2_NEVER_UTF</code> or <code class="constant">PCRE2_NEVER_UCP</code> options, respectively, at compile time.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_newline_convention">Newline Convention</h2>
+<h2 id="_newline_convention">Newline convention</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>These are recognized only at the very start of the pattern or after option
 settings with a similar syntax.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(*CR)           carriage return only<br>
-(*LF)           linefeed only<br>
-(*CRLF)         carriage return followed by linefeed<br>
-(*ANYCRLF)      all three of the above<br>
-(*ANY)          any Unicode newline sequence<br>
-(*NUL)          the NUL character (binary zero)</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(*CR)</code></dt>
+<dd>
+<p>Carriage return only</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*LF)</code></dt>
+<dd>
+<p>Linefeed only</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*CRLF)</code></dt>
+<dd>
+<p>Carriage return followed by linefeed</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*ANYCRLF)</code></dt>
+<dd>
+<p>All three of the above</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*ANY)</code></dt>
+<dd>
+<p>Any Unicode newline sequence</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*NUL)</code></dt>
+<dd>
+<p>The NUL character (binary zero)</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_what_r_matches">What \R Matches</h2>
+<h2 id="_what_r_matches">What <code class="regex">\R</code> matches</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>These are recognized only at the very start of the pattern or after option
 setting with a similar syntax.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(*BSR_ANYCRLF)  CR, LF, or CRLF<br>
-(*BSR_UNICODE)  any Unicode newline sequence</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(*BSR_ANYCRLF)</code></dt>
+<dd>
+<p>CR, LF, or CRLF</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*BSR_UNICODE)</code></dt>
+<dd>
+<p>Any Unicode newline sequence</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_lookahead_and_lookbehind_assertions">Lookahead And Lookbehind Assertions</h2>
+<h2 id="_lookahead_and_lookbehind_assertions">Lookahead and lookbehind assertions</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?=...)                     )<br>
-(*pla:...)                  ) positive lookahead<br>
-(*positive_lookahead:...)   )</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?!...)                     )<br>
-(*nla:...)                  ) negative lookahead<br>
-(*negative_lookahead:...)   )</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?&lt;=...)                    )<br>
-(*plb:...)                  ) positive lookbehind<br>
-(*positive_lookbehind:...)  )</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?&lt;!...)                    )<br>
-(*nlb:...)                  ) negative lookbehind<br>
-(*negative_lookbehind:...)  )</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(?=...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*pla:...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*positive_lookahead:...)</code></dt>
+<dd>
+<p>Positive lookahead</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?!...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*nla:...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*negative_lookahead:...)</code></dt>
+<dd>
+<p>Negative lookahead</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?&lt;=...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*plb:...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*positive_lookbehind:...)</code></dt>
+<dd>
+<p>Positive lookbehind</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?&lt;!...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*nlb:...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*negative_lookbehind:...)</code></dt>
+<dd>
+<p>Negative lookbehind</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>Each top-level branch of a lookbehind must have a limit for the number of
 characters it matches. If any branch can match a variable number of characters,
 the maximum for each branch is limited to a value set by the caller of
-<code>pcre2_compile()</code> or defaulted. The default is set when PCRE2 is built
+<code class="function">pcre2_compile()</code> or defaulted. The default is set when PCRE2 is built
 (ultimate default 255). If every branch matches a fixed number of characters,
 the limit for each branch is 65535 characters.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_non_atomic_lookaround_assertions">Non-Atomic Lookaround Assertions</h2>
+<h2 id="_non_atomic_lookaround_assertions">Non-atomic lookaround assertions</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>These assertions are specific to PCRE2 and are not Perl-compatible.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?*...)                                )<br>
-(*napla:...)                           ) synonyms<br>
-(*non_atomic_positive_lookahead:...)   )</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?&lt;*...)                               )<br>
-(*naplb:...)                           ) synonyms<br>
-(*non_atomic_positive_lookbehind:...)  )</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(?*...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*napla:...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*non_atomic_positive_lookahead:...)</code></dt>
+<dd>
+<p>Synonyms for non-atomic
+positive lookahead</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?&lt;*...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*naplb:...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*non_atomic_positive_lookbehind:...)</code></dt>
+<dd>
+<p>Synonyms for non-atomic
+positive lookbehind</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_substring_scan_assertion">Substring Scan Assertion</h2>
+<h2 id="_substring_scan_assertion">Substring scan assertion</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This feature is not Perl-compatible.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(*scan_substring:(grouplist)...)  scan captured substring<br>
-(*scs:(grouplist)...)             scan captured substring</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(*scan_substring:(<em>grouplist</em>)...)</code></dt>
+<dd>
+<p>Scan captured substring</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*scs:(<em>grouplist</em>)...)</code></dt>
+<dd>
+<p>Scan captured substring</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>The comma-separated list "grouplist" may identify groups in any of the
+<p>The comma-separated list <em>grouplist</em> may identify groups in any of the
 following ways:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">n       absolute reference<br>
-+n      relative reference<br>
--n      relative reference<br>
-&lt;name&gt;  name<br>
-'name'  name</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex"><em>n</em></code></dt>
+<dd>
+<p>Absolute reference</p>
+</dd>
+<dt class="hdlist1"><code class="regex">&#43;<em>n</em></code></dt>
+<dd>
+<p>Relative reference</p>
+</dd>
+<dt class="hdlist1"><code class="regex">-<em>n</em></code></dt>
+<dd>
+<p>Relative reference</p>
+</dd>
+<dt class="hdlist1"><code class="regex">&lt;<em>name</em>&gt;</code></dt>
+<dd>
+<p>Name</p>
+</dd>
+<dt class="hdlist1"><code class="regex">'<em>name</em>'</code></dt>
+<dd>
+<p>Name</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_script_runs">Script Runs</h2>
+<h2 id="_script_runs">Script runs</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">(*script_run:...)           ) script run, can be backtracked into<br>
-(*sr:...)                   )</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(*atomic_script_run:...)    ) atomic script run<br>
-(*asr:...)                  )</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(*script_run:...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*sr:...)</code></dt>
+<dd>
+<p>Script run; can be
+backtracked into</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*atomic_script_run:...)</code></dt>
+<dt class="hdlist1"><code class="regex">(*asr:...)</code></dt>
+<dd>
+<p>Atomic script run</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_backreferences">Backreferences</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">\n              reference by number (can be ambiguous)<br>
-\gn             reference by number<br>
-\g{n}           reference by number<br>
-\g+n            relative reference by number (PCRE2 extension)<br>
-\g-n            relative reference by number<br>
-\g{+n}          relative reference by number (PCRE2 extension)<br>
-\g{-n}          relative reference by number<br>
-\k&lt;name&gt;        reference by name (Perl)<br>
-\k'name'        reference by name (Perl)<br>
-\g{name}        reference by name (Perl)<br>
-\k{name}        reference by name (.NET)<br>
-(?P=name)       reference by name (Python)</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">\<em>n</em></code></dt>
+<dd>
+<p>Reference by number (can be ambiguous)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g<em>n</em></code></dt>
+<dd>
+<p>Reference by number</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g{<em>n</em>}</code></dt>
+<dd>
+<p>Reference by number</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g+<em>n</em></code></dt>
+<dd>
+<p>Relative reference by number (PCRE2 extension)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g-<em>n</em></code></dt>
+<dd>
+<p>Relative reference by number</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g{+<em>n</em>}</code></dt>
+<dd>
+<p>Relative reference by number (PCRE2 extension)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g{-<em>n</em>}</code></dt>
+<dd>
+<p>Relative reference by number</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\k&lt;<em>name</em>&gt;</code></dt>
+<dd>
+<p>Reference by name (Perl)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\k'<em>name</em>'</code></dt>
+<dd>
+<p>Reference by name (Perl)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g{<em>name</em>}</code></dt>
+<dd>
+<p>Reference by name (Perl)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\k{<em>name</em>}</code></dt>
+<dd>
+<p>Reference by name (.NET)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?P=<em>name</em>)</code></dt>
+<dd>
+<p>Reference by name (Python)</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_subroutine_references_possibly_recursive">Subroutine References (Possibly Recursive)</h2>
+<h2 id="_subroutine_references_possibly_recursive">Subroutine references (possibly recursive)</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?R)            recurse whole pattern<br>
-(?n)            call subroutine by absolute number<br>
-(?+n)           call subroutine by relative number<br>
-(?-n)           call subroutine by relative number<br>
-(?&amp;name)        call subroutine by name (Perl)<br>
-(?P&gt;name)       call subroutine by name (Python)<br>
-\g&lt;name&gt;        call subroutine by name (Oniguruma)<br>
-\g'name'        call subroutine by name (Oniguruma)<br>
-\g&lt;n&gt;           call subroutine by absolute number (Oniguruma)<br>
-\g'n'           call subroutine by absolute number (Oniguruma)<br>
-\g&lt;+n&gt;          call subroutine by relative number (PCRE2 extension)<br>
-\g'+n'          call subroutine by relative number (PCRE2 extension)<br>
-\g&lt;-n&gt;          call subroutine by relative number (PCRE2 extension)<br>
-\g'-n'          call subroutine by relative number (PCRE2 extension)</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(?R)</code></dt>
+<dd>
+<p>Recurse whole pattern</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?<em>n</em>)</code></dt>
+<dd>
+<p>Call subroutine by absolute number</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?+<em>n</em>)</code></dt>
+<dd>
+<p>Call subroutine by relative number</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?-<em>n</em>)</code></dt>
+<dd>
+<p>Call subroutine by relative number</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?&amp;<em>name</em>)</code></dt>
+<dd>
+<p>Call subroutine by name (Perl)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?P&gt;<em>name</em>)</code></dt>
+<dd>
+<p>Call subroutine by name (Python)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g&lt;<em>name</em>&gt;</code></dt>
+<dd>
+<p>Call subroutine by name (Oniguruma)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g'<em>name</em>'</code></dt>
+<dd>
+<p>Call subroutine by name (Oniguruma)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g&lt;<em>n</em>&gt;</code></dt>
+<dd>
+<p>Call subroutine by absolute number (Oniguruma)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g'<em>n</em>'</code></dt>
+<dd>
+<p>Call subroutine by absolute number (Oniguruma)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g&lt;+<em>n</em>&gt;</code></dt>
+<dd>
+<p>Call subroutine by relative number (PCRE2 extension)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g'+<em>n</em>'</code></dt>
+<dd>
+<p>Call subroutine by relative number (PCRE2 extension)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g&lt;-<em>n</em>&gt;</code></dt>
+<dd>
+<p>Call subroutine by relative number (PCRE2 extension)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">\g'-<em>n</em>'</code></dt>
+<dd>
+<p>Call subroutine by relative number (PCRE2 extension)</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>The variants using parentheses (?&#8230;&#8203;) may also specify a list of capture groups
+<p>The variants using parentheses <code class="regex">(?...)</code> may also specify a list of capture groups
 to return, which shall be retained in the calling subexpression if set during
 the recursion (this feature is not supported by Perl).</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?R(grouplist))       recurse whole pattern, returning capture groups<br>
-                        (PCRE2 extension)<br>
-(?n(grouplist))       )<br>
-(?+n(grouplist))      ) call subroutine, returning capture groups<br>
-(?-n(grouplist))      )   (PCRE2 extension)<br>
-(?&amp;name(grouplist))   )<br>
-(?P&gt;name(grouplist))  )</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(?R(<em>grouplist</em>))</code></dt>
+<dd>
+<p>Recurse whole pattern, returning capture groups
+(PCRE2 extension)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?<em>n</em>(<em>grouplist</em>))</code></dt>
+<dt class="hdlist1"><code class="regex">(?+<em>n</em>(<em>grouplist</em>))</code></dt>
+<dt class="hdlist1"><code class="regex">(?-<em>n</em>(<em>grouplist</em>))</code></dt>
+<dt class="hdlist1"><code class="regex">(?&amp;<em>name</em>(<em>grouplist</em>))</code></dt>
+<dt class="hdlist1"><code class="regex">(?P&gt;<em>name</em>(<em>grouplist</em>))</code></dt>
+<dd>
+<p>Call subroutine, returning capture groups
+(PCRE2 extension)</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>The comma-separated list "grouplist" uses the same syntax as
-(*scan_substring:(grouplist)&#8230;&#8203;), and may identify groups in any of the
+<p>The comma-separated list <em>grouplist</em> uses the same syntax as
+<code class="regex">(*scan_substring:(<em>grouplist</em>)...)</code>, and may identify groups in any of the
 following ways:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">n       absolute reference<br>
-+n      relative reference<br>
--n      relative reference<br>
-&lt;name&gt;  name<br>
-'name'  name</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex"><em>n</em></code></dt>
+<dd>
+<p>Absolute reference</p>
+</dd>
+<dt class="hdlist1"><code class="regex">&#43;<em>n</em></code></dt>
+<dd>
+<p>Relative reference</p>
+</dd>
+<dt class="hdlist1"><code class="regex">-<em>n</em></code></dt>
+<dd>
+<p>Relative reference</p>
+</dd>
+<dt class="hdlist1"><code class="regex">&lt;<em>name</em>&gt;</code></dt>
+<dd>
+<p>Name</p>
+</dd>
+<dt class="hdlist1"><code class="regex">'<em>name</em>'</code></dt>
+<dd>
+<p>Name</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_conditional_patterns">Conditional Patterns</h2>
+<h2 id="_conditional_patterns">Conditional patterns</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?(condition)yes-pattern)<br>
-(?(condition)yes-pattern|no-pattern)</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(?(<em>condition</em>)<em>yes-pattern</em>)</code></dt>
+<dd>
+<p>Conditional pattern without an alternative</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?(<em>condition</em>)<em>yes-pattern</em>|<em>no-pattern</em>)</code></dt>
+<dd>
+<p>Conditional pattern with an alternative</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-  <p style="margin-left: 2ch">(?(n)                absolute reference condition<br>
-(?(+n)               relative reference condition (PCRE2 extension)<br>
-(?(-n)               relative reference condition (PCRE2 extension)<br>
-(?(&lt;name&gt;)           named reference condition (Perl)<br>
-(?('name')           named reference condition (Perl)<br>
-(?(name)             named reference condition (PCRE2, deprecated)<br>
-(?(R)                overall recursion condition<br>
-(?(Rn)               specific numbered group recursion condition<br>
-(?(R&amp;name)           specific named group recursion condition<br>
-(?(DEFINE)           define groups for reference<br>
-(?(VERSION[&gt;]=n[.m]) test PCRE2 version<br>
-(?(assert)           assertion condition</p>
+<p>The forms for the <em>condition</em> are:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(?(<em>n</em>)</code></dt>
+<dd>
+<p>Absolute reference condition</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?(+<em>n</em>)</code></dt>
+<dd>
+<p>Relative reference condition (PCRE2 extension)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?(-<em>n</em>)</code></dt>
+<dd>
+<p>Relative reference condition (PCRE2 extension)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?(&lt;<em>name</em>&gt;)</code></dt>
+<dd>
+<p>Named reference condition (Perl)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?('<em>name</em>')</code></dt>
+<dd>
+<p>Named reference condition (Perl)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?(<em>name</em>)</code></dt>
+<dd>
+<p>Named reference condition (PCRE2, deprecated)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?(R)</code></dt>
+<dd>
+<p>Overall recursion condition</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?(R<em>n</em>)</code></dt>
+<dd>
+<p>Specific numbered group recursion condition</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?(R&amp;<em>name</em>)</code></dt>
+<dd>
+<p>Specific named group recursion condition</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?(DEFINE)</code></dt>
+<dd>
+<p>Define groups for reference</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?(VERSION<em>[</em>&gt;<em>]</em>=<em>n</em><em>[</em>.<em>m</em><em>]</em>)</code></dt>
+<dd>
+<p>Test PCRE2 version</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?(<em>assert</em>)</code></dt>
+<dd>
+<p>Assertion condition</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>Note the ambiguity of (?&#174; and (?(Rn) which might be named reference
+<p>Note the ambiguity of <code class="regex">(?(R)</code> and <code class="regex">(?(R<em>n</em>)</code> which might be named reference
 conditions or recursion tests. Such a condition is interpreted as a reference
 condition if the relevant named group exists.</p>
 </div>
 <div class="paragraph">
-<p>The parts within brackets for the VERSION conditional syntax could be ommited.
+<p>The parts within brackets for the VERSION conditional syntax can be ommited.
 The fractional part of the version number defaults to 0 in that case.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_backtracking_control">Backtracking Control</h2>
+<h2 id="_backtracking_control">Backtracking control</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>All backtracking control verbs may be in the form (*VERB:NAME). For (*MARK) the
-name is mandatory, for the others it is optional. (*SKIP) changes its behaviour
-if :NAME is present. The others just set a name for passing back to the caller,
-but this is not a name that (*SKIP) can see. The following act immediately they
+<p>All backtracking control verbs may be in the form <code class="regex">(*VERB:<em>NAME</em>)</code>. For <code class="regex">(*MARK)</code> the
+name is mandatory, for the others it is optional. <code class="regex">(*SKIP)</code> changes its behaviour
+if <code class="regex">:<em>NAME</em></code> is present. The others just set a name for passing back to the caller,
+but this is not a name that <code class="regex">(*SKIP)</code> can see. The following act immediately they
 are reached:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(*ACCEPT)       force successful match<br>
-(*FAIL)         force backtrack; synonym (*F)<br>
-(*MARK:NAME)    set name to be passed back; synonym (*:NAME)</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(*ACCEPT)</code></dt>
+<dd>
+<p>Force successful match</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*FAIL)</code></dt>
+<dd>
+<p>Force backtrack; synonym <code class="regex">(*F)</code></p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*MARK:<em>NAME</em>)</code></dt>
+<dd>
+<p>Set name to be passed back; synonym <code class="regex">(*:<em>NAME</em>)</code></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>The following act only when a subsequent match failure causes a backtrack to
@@ -1214,13 +2152,30 @@ reach them. They all force a match failure, but they differ in what happens
 afterwards. Those that advance the start-of-match point do so only if the
 pattern is not anchored.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">(*COMMIT)       overall failure, no advance of starting point<br>
-(*PRUNE)        advance to next starting character<br>
-(*SKIP)         advance to current matching position<br>
-(*SKIP:NAME)    advance to position corresponding to an earlier<br>
-                (*MARK:NAME); if not found, the (*SKIP) is ignored<br>
-(*THEN)         local failure, backtrack to next alternation</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(*COMMIT)</code></dt>
+<dd>
+<p>Overall failure, no advance of starting point</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*PRUNE)</code></dt>
+<dd>
+<p>Advance to next starting character</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*SKIP)</code></dt>
+<dd>
+<p>Advance to current matching position</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*SKIP:<em>NAME</em>)</code></dt>
+<dd>
+<p>Advance to position corresponding to an earlier
+<code class="regex">(*MARK:<em>NAME</em>)</code>; if not found, the <code class="regex">(*SKIP)</code> is ignored</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(*THEN)</code></dt>
+<dd>
+<p>Local failure, backtrack to next alternation</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>The effect of one of these verbs in a group called as a subroutine is confined
@@ -1231,102 +2186,177 @@ to the subroutine call.</p>
 <div class="sect1">
 <h2 id="_callouts">Callouts</h2>
 <div class="sectionbody">
-<div class="paragraph">
-  <p style="margin-left: 2ch">(?C)            callout (assumed number 0)<br>
-(?Cn)           callout with numerical data n<br>
-(?C"text")      callout with string data</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="regex">(?C)</code></dt>
+<dd>
+<p>Callout (assumed number 0)</p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?C<em>n</em>)</code></dt>
+<dd>
+<p>Callout with numerical data <em>n</em></p>
+</dd>
+<dt class="hdlist1"><code class="regex">(?C"<em>text</em>")</code></dt>
+<dd>
+<p>Callout with string data</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>The allowed string delimiters are ` ' " ^ % # $ (which are the same for the
-start and the end), and the starting delimiter { matched with the ending
-delimiter }. To encode the ending delimiter within the string, double it.</p>
+<p>The allowed string delimiters are <code class="regex">'</code>, <code class="regex">"</code>, <code class="regex">^</code>,
+<code class="regex">%</code>, <code class="regex">#</code>, and <code class="regex">$</code> (which are the same for the start
+and the end), and the starting delimiter <code class="regex">{</code> matched with the ending
+delimiter <code class="regex">}</code>. To encode the ending delimiter within the string, double it.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_replacement_strings">Replacement Strings</h2>
+<h2 id="_replacement_strings">Replacement strings</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>If the PCRE2_SUBSTITUTE_LITERAL option is set, a replacement string for
-<code>pcre2_substitute()</code> is not interpreted. Otherwise, by default, the only
+<p>If the <code class="constant">PCRE2_SUBSTITUTE_LITERAL</code> option is set, a replacement string for
+<code class="function">pcre2_substitute()</code> is not interpreted. Otherwise, by default, the only
 special character is the dollar character in one of the following forms:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">$$                  insert a dollar character<br>
-$n or ${n}          insert the contents of group <em>n</em><br>
-$&lt;name&gt;             insert the contents of named group<br>
-$0 or $&amp;            insert the entire matched substring<br>
-$`                  insert the substring that precedes the match<br>
-$'                  insert the substring that follows the match<br>
-$_                  insert the entire input string<br>
-$+                  insert the highest-numbered capture group which matched<br>
-$*MARK or ${*MARK}  insert a control verb name</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="repl">$$</code></dt>
+<dd>
+<p>Insert a dollar character</p>
+</dd>
+<dt class="hdlist1"><code class="repl">$<em>n</em></code> or <code class="repl">${<em>n</em>}</code></dt>
+<dd>
+<p>Insert the contents of group <em>n</em></p>
+</dd>
+<dt class="hdlist1"><code class="repl">$&lt;<em>name</em>&gt;</code></dt>
+<dd>
+<p>Insert the contents of named group</p>
+</dd>
+<dt class="hdlist1"><code class="repl">$0</code> or <code class="repl">$&amp;</code></dt>
+<dd>
+<p>Insert the entire matched substring</p>
+</dd>
+<dt class="hdlist1"><code class="repl">$`</code></dt>
+<dd>
+<p>Insert the substring that precedes the match</p>
+</dd>
+<dt class="hdlist1"><code class="repl">$'</code></dt>
+<dd>
+<p>Insert the substring that follows the match</p>
+</dd>
+<dt class="hdlist1"><code class="repl">$_</code></dt>
+<dd>
+<p>Insert the entire input string</p>
+</dd>
+<dt class="hdlist1"><code class="repl">$+</code></dt>
+<dd>
+<p>Insert the highest-numbered capture group which matched</p>
+</dd>
+<dt class="hdlist1"><code class="repl">$*MARK</code> or <code class="repl">${*MARK}</code></dt>
+<dd>
+<p>Insert a control verb name</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>For ${n}, n can be a name or a number. If PCRE2_SUBSTITUTE_EXTENDED is set,
+<p>For <code class="repl">${<em>n</em>}</code>, <em>n</em> can be a name or a number. If <code class="constant">PCRE2_SUBSTITUTE_EXTENDED</code> is set,
 there is additional interpretation:</p>
 </div>
-<div class="paragraph">
-<p>1. Backslash is an escape character, and the forms described in "ESCAPED
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Backslash is an escape character, and the forms described in "ESCAPED
 CHARACTERS" above are recognized. Also:</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="repl">\Q...\E</code></dt>
+<dd>
+<p>Suppress interpretation</p>
+</dd>
+<dt class="hdlist1"><code class="repl">\l</code></dt>
+<dd>
+<p>Force the next character to lower case</p>
+</dd>
+<dt class="hdlist1"><code class="repl">\u</code></dt>
+<dd>
+<p>Force the next character to upper case</p>
+</dd>
+<dt class="hdlist1"><code class="repl">\L</code></dt>
+<dd>
+<p>Force subsequent characters to lower case</p>
+</dd>
+<dt class="hdlist1"><code class="repl">\U</code></dt>
+<dd>
+<p>Force subsequent characters to upper case</p>
+</dd>
+<dt class="hdlist1"><code class="repl">\u\L</code></dt>
+<dd>
+<p>Force next character to upper case, then all lower</p>
+</dd>
+<dt class="hdlist1"><code class="repl">\l\U</code></dt>
+<dd>
+<p>Force next character to lower case, then all upper</p>
+</dd>
+<dt class="hdlist1"><code class="repl">\E</code></dt>
+<dd>
+<p>End <code class="repl">\L</code> or <code class="repl">\U</code> case forcing</p>
+</dd>
+<dt class="hdlist1"><code class="repl">\b</code></dt>
+<dd>
+<p>Backspace character (note: as in character class in pattern)</p>
+</dd>
+<dt class="hdlist1"><code class="repl">\v</code></dt>
+<dd>
+<p>Vertical tab character (note: not the same as in a pattern)</p>
+</dd>
+</dl>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">\Q...\E can be used to suppress interpretation<br>
-\l      force the next character to lower case<br>
-\u      force the next character to upper case<br>
-\L      force subsequent characters to lower case<br>
-\U      force subsequent characters to upper case<br>
-\u\L    force next character to upper case, then all lower<br>
-\l\U    force next character to lower case, then all upper<br>
-\E      end \L or \U case forcing<br>
-\b      backspace character (note: as in character class in pattern)<br>
-\v      vertical tab character (note: not the same as in a pattern)</p>
-</div>
-<div class="paragraph">
-<p>2. The Python form \g&lt;n&gt;, where the angle brackets are part of the syntax and
+</li>
+<li>
+<p>The Python form <code class="repl">\g&lt;<em>n</em>&gt;</code>, where the angle brackets are part of the syntax and
 <em>n</em> is either a group name or a number, is recognized as an alternative way
-of inserting the contents of a group, for example \g&lt;3&gt;.</p>
-</div>
-<div class="paragraph">
-<p>3. Capture substitution supports the following additional forms:</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">${n:-string}             default for unset group<br>
-${n:+string1:string2}    values for set/unset group</p>
+of inserting the contents of a group, for example <code class="repl">\g&lt;3&gt;</code>.</p>
+</li>
+<li>
+<p>Capture substitution supports the following additional forms:</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code class="repl">${<em>n</em>:-<em>string</em>}</code></dt>
+<dd>
+<p>Default for unset group</p>
+</dd>
+<dt class="hdlist1"><code class="repl">${<em>n</em>:+<em>string1</em>:<em>string2</em>}</code></dt>
+<dd>
+<p>Values for set/unset group</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>The substitution strings themselves are expanded. Backslash can be used to
 escape colons and closing curly brackets.</p>
 </div>
+</li>
+</ol>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_see_also">See Also</h2>
+<h2 id="_see_also">See also</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>pcre2pattern</code>(3), <code>pcre2api</code>(3), <code>pcre2callout</code>(3),
-<code>pcre2matching</code>(3), <code>pcre2</code>(3).</p>
+<p><a href="pcre2pattern.html"><code>pcre2pattern</code></a>, <a href="pcre2api.html"><code>pcre2api</code></a>, <a href="pcre2callout.html"><code>pcre2callout</code></a>,
+<a href="pcre2matching.html"><code>pcre2matching</code></a>, <a href="pcre2.html"><code>pcre2</code></a>.</p>
 </div>
+<h2 id="_author" class="discrete">Author</h2>
+<div class="paragraph">
+<p>Philip Hazel<br>
+Retired from University Computing Service<br>
+Cambridge, England.</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_author">Author</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>Philip Hazel
-Retired from University Computing Service
-Cambridge, England.</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_revision">Revision</h2>
-<div class="sectionbody">
+<h2 id="_revision" class="discrete">Revision</h2>
 <div class="paragraph">
 <p>Last updated: 14 October 2025<br>
-Copyright (c) 1997-2024 University of Cambridge.</p>
+Copyright &#169; 1997-2024 University of Cambridge.</p>
 </div>
 </div>
 </div>

@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_set_offset_limit
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 22 September 2015
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,18 +31,20 @@
 pcre2_set_offset_limit \- set the offset limit
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_set_offset_limit(pcre2_match_context *mcontext,
-                           PCRE2_SIZE limit);
+\fBint\fP pcre2_set_offset_limit(\fBpcre2_match_context\fP *\fImcontext\fP,
+                           \fBPCRE2_SIZE\fP \fIlimit\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function sets the offset limit field in a match context. The result is
-always zero. The largest value a PCRE2_SIZE variable can hold removes the
+always zero. The largest value a \fBPCRE2_SIZE\fP variable can hold removes the
 offset limit.
 .sp
 There is a complete description of the PCRE2 native API in the

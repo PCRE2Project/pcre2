@@ -303,6 +303,12 @@ PRIV(script_run)(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf)
         }
 
         break;
+
+        /* LCOV_EXCL_START - require_state is assigned only SCRIPT_* values. */
+      default:
+        PCRE2_DEBUG_UNREACHABLE();
+        break;
+        /* LCOV_EXCL_STOP */
       }
     } // End checking character's script and extensions.
 

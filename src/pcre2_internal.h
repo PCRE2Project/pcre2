@@ -150,20 +150,20 @@ only if it is not already set. */
 #endif
 
 #ifndef PCRE2_EXP_DECL
-#if defined(_WIN32) && !defined(PCRE2_STATIC)
-#define PCRE2_EXP_DECL extern __declspec(dllexport)
-#elif defined(PCRE2_STATIC)
+#if defined(PCRE2_STATIC)
 #define PCRE2_EXP_DECL extern
+#elif defined(_WIN32)
+#define PCRE2_EXP_DECL extern __declspec(dllexport)
 #else
 #define PCRE2_EXP_DECL extern PCRE2_EXPORT
 #endif
 #endif
 
 #ifndef PCRE2_EXP_DEFN
-#if defined(_WIN32) && !defined(PCRE2_STATIC)
-#define PCRE2_EXP_DEFN extern __declspec(dllexport)
-#elif defined(PCRE2_STATIC)
+#if defined(PCRE2_STATIC)
 #define PCRE2_EXP_DEFN extern
+#elif defined(_WIN32)
+#define PCRE2_EXP_DEFN extern __declspec(dllexport)
 #else
 #define PCRE2_EXP_DEFN extern PCRE2_EXPORT
 #endif

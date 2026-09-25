@@ -10,19 +10,19 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int pcre2_next_match(pcre2_match_data *match_data,
                      PCRE2_SIZE *pstart_offset, uint32_t *poptions);
-....
+----
 
 == Description
 
 This function can be called after one of the match functions
-(`pcre2_match()`, `pcre2_dfa_match()`, or `pcre2_jit_match()`), and
-must be provided with the same _match_data_ parameter. It outputs the
+(func:pcre2_match(), func:pcre2_dfa_match(), or func:pcre2_jit_match()), and
+must be provided with the same arg:match_data parameter. It outputs the
 appropriate parameters for searching for the next match in the same subject
 string, and is suitable for applications providing "global" matching behaviour
 (for example, replacing all matches in the subject, or splitting the subject on
@@ -31,9 +31,9 @@ all matches, or simply counting the number of matches).
 It returns 0 ("false") if there is no need to make any further match attempts,
 or 1 ("true") if another match should be attempted.
 
-The pass:[*]_pstart_offset_ and pass:[*]_poptions_ are set if the function returns 1.
-The pass:[*]_pstart_offset_ should be passed to the next match attempt directly,
-and the pass:[*]_poptions_ should be passed to the next match attempt by combining
+The [.c]`+*pstart_offset+` and [.c]`+*poptions+` are set if the function returns 1.
+The [.c]`+*pstart_offset+` should be passed to the next match attempt directly,
+and the [.c]`+*poptions+` should be passed to the next match attempt by combining
 with the application's match options using OR.
 
 There is a complete description of the PCRE2 native API in the

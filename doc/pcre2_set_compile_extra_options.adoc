@@ -10,46 +10,61 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int pcre2_set_compile_extra_options(pcre2_compile_context *ccontext,
                                     uint32_t options);
-....
+----
 
 == Description
 
-This function sets additional option bits for `pcre2_compile()` that are
+This function sets additional option bits for func:pcre2_compile() that are
 housed in a compile context. It completely replaces all the bits. The extra
 options are:
 
-[literal]
-....
-PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK     Allow \K in lookarounds
-PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES  Allow \x{d800} to \x{dfff}
-                                       in UTF-8 and UTF-32 modes
-PCRE2_EXTRA_ALT_BSUX                 Extended alternate \u, \U, and
-                                       \x handling
-PCRE2_EXTRA_ASCII_BSD                \d remains ASCII in UCP mode
-PCRE2_EXTRA_ASCII_BSS                \s remains ASCII in UCP mode
-PCRE2_EXTRA_ASCII_BSW                \w remains ASCII in UCP mode
-PCRE2_EXTRA_ASCII_DIGIT              [:digit:] and [:xdigit:] POSIX classes
-                                       remain ASCII in UCP mode
-PCRE2_EXTRA_ASCII_POSIX              POSIX classes remain ASCII in
-                                       UCP mode
-PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL    Treat all invalid escapes as
-                                       a literal following character
-PCRE2_EXTRA_CASELESS_RESTRICT        Disable mixed ASCII/non-ASCII
-                                       case folding
-PCRE2_EXTRA_ESCAPED_CR_IS_LF         Interpret \r as \n
-PCRE2_EXTRA_MATCH_LINE               Pattern matches whole lines
-PCRE2_EXTRA_MATCH_WORD               Pattern matches "words"
-PCRE2_EXTRA_NEVER_CALLOUT            Disallow callouts in pattern
-PCRE2_EXTRA_NO_BS0                   Disallow \0 (but not \00 or \000)
-PCRE2_EXTRA_PYTHON_OCTAL             Use Python rules for octal
-PCRE2_EXTRA_TURKISH_CASING           Use Turkish I case folding
-....
+[.options]
+const:PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK::
+    Allow [.regex]`\K` in lookarounds
+const:PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES::
+    Allow [.regex]`+\x{d800}+` to [.regex]`+\x{dfff}+`
+    in UTF-8 and UTF-32 modes
+const:PCRE2_EXTRA_ALT_BSUX::
+    Extended alternate [.regex]`\u`, [.regex]`\U`, and
+    [.regex]`\x` handling
+const:PCRE2_EXTRA_ASCII_BSD::
+    [.regex]`\d` remains ASCII in UCP mode
+const:PCRE2_EXTRA_ASCII_BSS::
+    [.regex]`\s` remains ASCII in UCP mode
+const:PCRE2_EXTRA_ASCII_BSW::
+    [.regex]`\w` remains ASCII in UCP mode
+const:PCRE2_EXTRA_ASCII_DIGIT::
+    [.regex]`+[:digit:]+` and [.regex]`+[:xdigit:]+` POSIX classes
+    remain ASCII in UCP mode
+const:PCRE2_EXTRA_ASCII_POSIX::
+    POSIX classes remain ASCII in
+    UCP mode
+const:PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL::
+    Treat all invalid escapes as
+    a literal following character
+const:PCRE2_EXTRA_CASELESS_RESTRICT::
+    Disable mixed ASCII/non-ASCII
+    case folding
+const:PCRE2_EXTRA_ESCAPED_CR_IS_LF::
+    Interpret [.regex]`\r` as [.regex]`\n`
+const:PCRE2_EXTRA_MATCH_LINE::
+    Pattern matches whole lines
+const:PCRE2_EXTRA_MATCH_WORD::
+    Pattern matches "words"
+const:PCRE2_EXTRA_NEVER_CALLOUT::
+    Disallow callouts in pattern
+const:PCRE2_EXTRA_NO_BS0::
+    Disallow [.regex]`\0` (but not [.regex]`+\00+` or [.regex]`+\000+`)
+const:PCRE2_EXTRA_PYTHON_OCTAL::
+    Use Python rules for octal
+const:PCRE2_EXTRA_TURKISH_CASING::
+    Use Turkish I case folding
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_get_parens_nest_limit
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 11 September 2026
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,19 +31,21 @@
 pcre2_get_parens_nest_limit \- get the parentheses nesting limit
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_get_parens_nest_limit(pcre2_compile_context *ccontext,
-                                uint32_t *limit);
+\fBint\fP pcre2_get_parens_nest_limit(\fBpcre2_compile_context\fP *\fIccontext\fP,
+                                \fBuint32_t\fP *\fIlimit\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function gets, from a compile context, the maximum depth of nested
-parentheses in a pattern. The result is zero for success or PCRE2_ERROR_NULL if
-either argument is NULL.
+parentheses in a pattern. The result is zero for success or \fBPCRE2_ERROR_NULL\fP if
+either argument is \fBNULL\fP.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

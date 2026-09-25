@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_match_data_create_from_pattern
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 11 August 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,30 +31,32 @@
 pcre2_match_data_create_from_pattern \- create a match data block getting size from pattern
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-pcre2_match_data *pcre2_match_data_create_from_pattern(
-      const pcre2_code *code, pcre2_general_context *gcontext);
+\fBpcre2_match_data\fP *pcre2_match_data_create_from_pattern(
+      \fBconst\fP \fBpcre2_code\fP *\fIcode\fP, \fBpcre2_general_context\fP *\fIgcontext\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function creates a new match data block for holding the result of a match.
-If the first argument is NULL, this function returns NULL, otherwise the first
+If the first argument is \fBNULL\fP, this function returns \fBNULL\fP, otherwise the first
 argument points to a compiled pattern. The number of capturing parentheses
 within the pattern is used to compute the number of pairs of offsets that are
 required in the match data block. These form the "output vector" (ovector)
 within the match data block, and are used to identify the matched string and
-any captured substrings when matching with \f(CRpcre2_match()\fP. If you are
-using \f(CRpcre2_dfa_match()\fP, which uses the output vector in a different way,
-you should use \f(CRpcre2_match_data_create()\fP instead of this function.
+any captured substrings when matching with pcre2_match(). If you are
+using pcre2_dfa_match(), which uses the output vector in a different way,
+you should use pcre2_match_data_create() instead of this function.
 .sp
 The second argument points to a general context, for custom memory management,
-or is NULL to use the same memory allocator that was used for the compiled
-pattern. The result of the function is NULL if the memory for the block could
-not be obtained or if NULL was provided as the first argument.
+or is \fBNULL\fP to use the same memory allocator that was used for the compiled
+pattern. The result of the function is \fBNULL\fP if the memory for the block could
+not be obtained or if \fBNULL\fP was provided as the first argument.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

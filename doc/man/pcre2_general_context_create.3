@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_general_context_create
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 23 January 2023
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,23 +31,25 @@
 pcre2_general_context_create \- create a general context
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-pcre2_general_context *pcre2_general_context_create(
-      void *(*private_malloc)(size_t size, void *memory_data),
-      void (*private_free)(void *ptr, void *memory_data),
-      void *memory_data);
+\fBpcre2_general_context\fP *pcre2_general_context_create(
+      \fBvoid\fP *(*\fIprivate_malloc\fP)(\fBsize_t\fP \fIsize\fP, \fBvoid\fP *\fImemory_data\fP),
+      \fBvoid\fP (*\fIprivate_free\fP)(\fBvoid\fP *\fIptr\fP, \fBvoid\fP *\fImemory_data\fP),
+      \fBvoid\fP *\fImemory_data\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function creates and initializes a general context. The arguments define
 custom memory management functions and a data value that is passed to them when
-they are called. The \f(CRprivate_malloc()\fP function is used to get memory for
-the context. If either of the first two arguments is NULL, the system memory
-management function is used. The result is NULL if no memory could be obtained.
+they are called. The \fIprivate_malloc\fP() function is used to get memory for
+the context. If either of the first two arguments is \fBNULL\fP, the system memory
+management function is used. The result is \fBNULL\fP if no memory could be obtained.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

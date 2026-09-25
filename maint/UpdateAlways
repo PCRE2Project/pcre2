@@ -18,11 +18,6 @@
 # AsciidocRender
 #             A script that renders an AsciiDoc source as a manpage and HTML.
 
-# doc/index.html.src
-#             A file that is copied as index.html into the doc/html directory
-#             when the HTML documentation is built. It works like this so that
-#             doc/html can be deleted and re-created from scratch.
-
 # README & NON-AUTOTOOLS-BUILD
 #             These files are copied into the doc/html directory, with .txt
 #             extensions so that they can by hyperlinked from the HTML
@@ -32,6 +27,9 @@
 # Set the LANG to C, because nroff converts ASCII "HYPHEN-MINUS" to Unicode
 # "HYPHEN" if the system is using a UTF-8 locale (like "C.UTF-8").
 export LANG=C LC_ALL=C
+
+# Use groff's conventional terminal width for rendered manpage text.
+MANPAGE_WIDTH=78
 
 # Extract the current release version from configure.ac.
 CURRENT_RELEASE=`grep -E 'm4_define\(pcre2_(major|minor|prerelease)' configure.ac | \
@@ -49,47 +47,45 @@ echo Processing documentation
 # Generate pcre2demo.adoc directly from its C source.
 
 echo "Making pcre2demo.adoc"
-perl <<"END" >pcre2demo.adoc
-  open(IN, "<", "../src/pcre2demo.c") or die "Failed to open src/pcre2demo.c";
-  my $date = `git log -n1 --date=format:'%d %B %Y' --format=%cd ../src/pcre2demo.c`;
-  chomp $date;
-  my $version = $ENV{CURRENT_RELEASE};
-  print "= pcre2demo(3)\n" .
-        ":doctype: manpage\n" .
-      ":manname: pcre2demo\n" .
-      ":manpurpose: a demonstration C program for PCRE2\n" .
-        ":manvolnum: 3\n" .
-        ":manmanual: PCRE2\n" .
-        ":mansource: PCRE2 $version\n" .
-        ":docdate: $date\n" .
-        ":revdate: $date\n\n" .
-        "== Source Code\n\n" .
-        "[source,role=wide]\n----\n";
-  while (<IN>) { print; }
-  print "----\n";
-  close(IN);
-END
+../maint/AsciidocDemo.rb
+if [ $? != 0 ] ; then exit 1; fi
+
+# Generate the HTML documentation index from the manpage metadata.
+
+echo "Making index.adoc"
+../maint/AsciidocIndex.rb
 if [ $? != 0 ] ; then exit 1; fi
 
 # Verify the version number in AsciiDoc manpages and render them before their
 # generated manpages are needed by the text and warning checks below.
 
 for file in *.adoc ; do
+  if [ "$file" = "index.adoc" ] ; then
+    continue
+  fi
   if ! grep -qE "^:mansource: PCRE2 $CURRENT_RELEASE$" "$file" ; then
     echo "Version number in $file does not match current release"
     exit 1
   fi
 done
 
-echo "Making HTML documentation"
-/bin/rm html/*
-cp index.html.src html/index.html
+echo "Making HTML and manpage documentation"
+mkdir -p html
+rm -r html/*
+mkdir -p man
+rm -f man/*
 cp ../README html/README.txt
 cp ../NON-AUTOTOOLS-BUILD html/NON-AUTOTOOLS-BUILD.txt
 
-mkdir -p man
-/bin/rm -f man/*
 for file in *.adoc ; do
+  if [ "$file" = "index.adoc" ] ; then
+    echo "  Making index.html"
+    asciidoctor --failure-level WARN -v --backend html5 --attribute nofooter \
+      --out-file html/index.html index.adoc
+    if [ $? != 0 ] ; then exit 1; fi
+    continue
+  fi
+
   base=`basename $file .adoc`
   section=`sed -n 's/^:manvolnum: //p' "$file"`
   if [ "$section" != "1" ] && [ "$section" != "3" ] ; then
@@ -124,7 +120,7 @@ for file in pcre2 pcre2api pcre2build pcre2callout pcre2compat pcre2jit \
             pcre2posix pcre2sample pcre2serialize pcre2syntax \
             pcre2unicode ; do
   echo "  Processing $file.3"
-  nroff -c -man man/$file.3 >$file.rawtxt
+  nroff -c -t -Kutf8 -Tutf8 -rLL=${MANPAGE_WIDTH}n -man man/$file.3 >$file.rawtxt
   perl ../maint/CleanTxt <$file.rawtxt >>pcre2.txt
   /bin/rm $file.rawtxt
   echo "------------------------------------------------------------------------------" >>pcre2.txt
@@ -137,16 +133,17 @@ done
 # The three commands
 for file in pcre2test pcre2grep pcre2-config ; do
   echo Making $file.txt
-  nroff -c -man man/$file.1 >$file.rawtxt
+  nroff -c -t -Kutf8 -Tutf8 -rLL=${MANPAGE_WIDTH}n -man man/$file.1 >$file.rawtxt
   perl ../maint/CleanTxt <$file.rawtxt >$file.txt
   /bin/rm $file.rawtxt
 done
 
 
 # Verify that `man` can process the pages without warnings.
+echo "Validating man pages"
 if man --help 2>/dev/null | grep -q warnings ; then
   for file in man/*.1 man/*.3 ; do
-    MAN_OUT=`MANROFFSEQ='' MANWIDTH=80 man --warnings=w,all -E UTF-8 -l -Tutf8 -Z "$file" 2>&1 >/dev/null`
+    MAN_OUT=`MANROFFSEQ='' MANWIDTH=$MANPAGE_WIDTH man --warnings=w,all -E UTF-8 -l -Tutf8 -Z "$file" 2>&1 >/dev/null`
     if [ "$MAN_OUT" != "" ]; then
       printf "Running man generated warnings:\n%s\n" "$MAN_OUT"
       exit 1

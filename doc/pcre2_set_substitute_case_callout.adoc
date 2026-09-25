@@ -10,8 +10,8 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int pcre2_set_substitute_case_callout(
@@ -21,7 +21,7 @@ int pcre2_set_substitute_case_callout(
           PCRE2_UCHAR *output, PCRE2_SIZE output_capacity,
           int case_operation, void *substitute_case_callout_data),
       void *substitute_case_callout_data);
-....
+----
 
 == Description
 

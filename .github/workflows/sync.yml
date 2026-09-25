@@ -34,11 +34,18 @@ jobs:
       - name: Install zig
         uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2.2.1
 
-      # Install Asciidoctor
-      - name: Install Asciidoctor
+      # Install Asciidoctor and the Rouge source highlighter
+      - name: Install Asciidoctor and Rouge
         run: |
           sudo apt update
-          sudo apt install -y asciidoctor
+          sudo apt install -y ruby ruby-dev
+          gem install --user-install asciidoctor rouge
+          export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
+          export PATH="$GEM_HOME/bin:$PATH"
+          echo "Ruby version: $(ruby -v)"
+          echo "Asciidoctor version: $(asciidoctor --version)"
+          echo "Rouge version: $(rouge --version)"
+          echo "$GEM_HOME/bin" >> "$GITHUB_PATH"
 
       - name: UpdateDates
         if: |

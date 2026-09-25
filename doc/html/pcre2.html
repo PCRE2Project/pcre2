@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="description" content="Introductory page">
 <title>pcre2(3)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +117,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +219,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -438,7 +440,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h1>pcre2(3) Manual Page</h1>
 <h2>Name</h2>
 <div class="sectionbody">
-<p>pcre2 - Perl-compatible regular expressions (revised API)</p>
+<p>pcre2 - Perl-compatible regular expressions (PCRE2 API)</p>
 </div>
 </div>
 <div id="content">
@@ -473,22 +475,24 @@ supports 32-bit applications, versions of PCRE2 that are compiled in both
 </div>
 <div class="paragraph">
 <p>The original work to extend PCRE to 16-bit and 32-bit code units was done by
-Zoltan Herczeg and Christian Persch, respectively. In all three cases, strings
+Zoltán Herczeg and Christian Persch, respectively. In all three cases, strings
 can be interpreted either as one character per code unit, or as UTF-encoded
 Unicode, with support for Unicode general category properties. Unicode support
 is optional at build time (but is the default). However, processing strings as
 UTF code units must be enabled explicitly at run time. The version of Unicode
 in use can be discovered by running</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">pcre2test -C</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2test -C</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>The three libraries contain identical sets of functions, with names ending in
-_8, _16, or _32, respectively (for example, <code>pcre2_compile_8()</code>). However,
-by defining PCRE2_CODE_UNIT_WIDTH to be 8, 16, or 32, a program that uses just
+<code>_8</code>, <code>_16</code>, or <code>_32</code>, respectively (for example, <code class="function">pcre2_compile_8()</code>). However,
+by defining <code class="constant">PCRE2_CODE_UNIT_WIDTH</code> to be 8, 16, or 32, a program that uses just
 one code unit width can be written using generic names such as
-<code>pcre2_compile()</code>, and the documentation is written assuming that this is
+<code class="function">pcre2_compile()</code>, and the documentation is written assuming that this is
 the case.</p>
 </div>
 <div class="paragraph">
@@ -511,8 +515,7 @@ page.</p>
 </div>
 <div class="paragraph">
 <p>Some features of PCRE2 can be included, excluded, or changed when the library
-is built. The
-<a href="pcre2_config.html"><code>pcre2_config()</code></a>
+is built. The <code class="function">pcre2_config()</code>
 function makes it possible for a client to discover which features are
 available. The features themselves are described in the
 <a href="pcre2build.html"><code>pcre2build</code></a>
@@ -527,7 +530,7 @@ files in the source distribution.</p>
 <p>The libraries contains a number of undocumented internal functions and data
 tables that are used by more than one of the exported external functions, but
 which are not intended for use by external callers. Their names all begin with
-"_pcre2", which hopefully will not provoke any name clashes. In some
+<code class="c">_pcre2</code>, which hopefully will not provoke any name clashes. In some
 environments, it is possible to control which external symbols are exported
 when a shared library is built, and in these cases the undocumented symbols are
 not exported.</p>
@@ -535,13 +538,13 @@ not exported.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_security_considerations">Security Considerations</h2>
+<h2 id="_security_considerations">Security considerations</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>If you are using PCRE2 in a non-UTF application that permits users to supply
 arbitrary patterns for compilation, you should be aware of a feature that
 allows users to turn on UTF support from within a pattern. For example, an
-8-bit pattern that begins with "(*UTF)" turns on UTF-8 mode, which interprets
+8-bit pattern that begins with <code class="regex">(*UTF)</code> turns on UTF-8 mode, which interprets
 patterns and subjects as strings of UTF-8 code units instead of individual
 8-bit characters. This causes both the pattern and any data against which it is
 matched to be checked for UTF-8 validity. If the data string is very long, such
@@ -550,43 +553,43 @@ lose performance.</p>
 </div>
 <div class="paragraph">
 <p>One way of guarding against this possibility is to use the
-<code>pcre2_pattern_info()</code> function to check the compiled pattern&#8217;s options for
-PCRE2_UTF. Alternatively, you can set the PCRE2_NEVER_UTF option when calling
-<code>pcre2_compile()</code>. This causes a compile time error if the pattern contains
+<code class="function">pcre2_pattern_info()</code> function to check the compiled pattern&#8217;s options for
+<code class="constant">PCRE2_UTF</code>. Alternatively, you can set the <code class="constant">PCRE2_NEVER_UTF</code> option when calling
+<code class="function">pcre2_compile()</code>. This causes a compile time error if the pattern contains
 a UTF-setting sequence.</p>
 </div>
 <div class="paragraph">
-<p>The use of Unicode properties for character types such as \d can also be
-enabled from within the pattern, by specifying "(*UCP)". This feature can be
-disallowed by setting the PCRE2_NEVER_UCP option.</p>
+<p>The use of Unicode properties for character types such as <code class="regex">\d</code> can also be
+enabled from within the pattern, by specifying <code class="regex">(*UCP)</code>. This feature can be
+disallowed by setting the <code class="constant">PCRE2_NEVER_UCP</code> option.</p>
 </div>
 <div class="paragraph">
 <p>If your application is one that supports UTF, be aware that validity checking
 can take time. If the same data string is to be matched many times, you can use
-the PCRE2_NO_UTF_CHECK option for the second and subsequent matches to avoid
+the <code class="constant">PCRE2_NO_UTF_CHECK</code> option for the second and subsequent matches to avoid
 running redundant checks.</p>
 </div>
 <div class="paragraph">
-<p>The use of the \C escape sequence in a UTF-8 or UTF-16 pattern can lead to
+<p>The use of the <code class="regex">\C</code> escape sequence in a UTF-8 or UTF-16 pattern can lead to
 problems, because it may leave the current matching point in the middle of a
-multi-code-unit character. The PCRE2_NEVER_BACKSLASH_C option can be used by an
-application to lock out the use of \C, causing a compile-time error if it is
-encountered. It is also possible to build PCRE2 with the use of \C permanently
+multi-code-unit character. The <code class="constant">PCRE2_NEVER_BACKSLASH_C</code> option can be used by an
+application to lock out the use of <code class="regex">\C</code>, causing a compile-time error if it is
+encountered. It is also possible to build PCRE2 with the use of <code class="regex">\C</code> permanently
 disabled.</p>
 </div>
 <div class="paragraph">
 <p>Another way that performance can be hit is by running a pattern that has a very
 large search tree against a string that will never match. Nested unlimited
 repeats in a pattern are a common example. PCRE2 provides some protection
-against this: see the <code>pcre2_set_match_limit()</code> function in the
+against this: see the <code class="function">pcre2_set_match_limit()</code> function in the
 <a href="pcre2api.html"><code>pcre2api</code></a>
-page. There is a similar function called <code>pcre2_set_depth_limit()</code> that can
+page. There is a similar function called <code class="function">pcre2_set_depth_limit()</code> that can
 be used to restrict the amount of memory that is used.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_user_documentation">User Documentation</h2>
+<h2 id="_user_documentation">User documentation</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The user documentation for PCRE2 comprises a number of different sections. In
@@ -598,41 +601,102 @@ remaining sections, except for the <code>pcre2demo</code> section (which is a pr
 listing), and the short pages for individual functions, are concatenated in
 <code>pcre2.txt</code>, for ease of searching. The sections are as follows:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">pcre2              this document<br>
-pcre2-config       show PCRE2 installation configuration information<br>
-pcre2api           details of PCRE2&#8217;s native C API<br>
-pcre2build         building PCRE2<br>
-pcre2callout       details of the pattern callout feature<br>
-pcre2compat        discussion of Perl compatibility<br>
-pcre2convert       details of pattern conversion functions<br>
-pcre2demo          a demonstration C program that uses PCRE2<br>
-pcre2grep          description of the <code>pcre2grep</code> command (8-bit only)<br>
-pcre2jit           discussion of just-in-time optimization support<br>
-pcre2limits        details of size and other limits<br>
-pcre2matching      discussion of the two matching algorithms<br>
-pcre2partial       details of the partial matching facility<br>
-pcre2pattern       syntax and semantics of supported regular<br>
-                     expression patterns<br>
-pcre2perform       discussion of performance issues<br>
-pcre2posix         the POSIX-compatible C API for the 8-bit library<br>
-pcre2sample        discussion of the pcre2demo program<br>
-pcre2serialize     details of pattern serialization<br>
-pcre2syntax        quick syntax reference<br>
-pcre2test          description of the <code>pcre2test</code> command<br>
-pcre2unicode       discussion of Unicode and UTF support</p>
+<div class="dlist values">
+<dl>
+<dt class="hdlist1">pcre2</dt>
+<dd>
+<p>this document</p>
+</dd>
+<dt class="hdlist1">pcre2-config</dt>
+<dd>
+<p>show PCRE2 installation configuration information</p>
+</dd>
+<dt class="hdlist1">pcre2api</dt>
+<dd>
+<p>details of PCRE2&#8217;s native C API</p>
+</dd>
+<dt class="hdlist1">pcre2build</dt>
+<dd>
+<p>building PCRE2</p>
+</dd>
+<dt class="hdlist1">pcre2callout</dt>
+<dd>
+<p>details of the pattern callout feature</p>
+</dd>
+<dt class="hdlist1">pcre2compat</dt>
+<dd>
+<p>discussion of Perl compatibility</p>
+</dd>
+<dt class="hdlist1">pcre2convert</dt>
+<dd>
+<p>details of pattern conversion functions</p>
+</dd>
+<dt class="hdlist1">pcre2demo</dt>
+<dd>
+<p>a demonstration C program that uses PCRE2</p>
+</dd>
+<dt class="hdlist1">pcre2grep</dt>
+<dd>
+<p>description of the <code>pcre2grep</code> command (8-bit only)</p>
+</dd>
+<dt class="hdlist1">pcre2jit</dt>
+<dd>
+<p>discussion of just-in-time optimization support</p>
+</dd>
+<dt class="hdlist1">pcre2limits</dt>
+<dd>
+<p>details of size and other limits</p>
+</dd>
+<dt class="hdlist1">pcre2matching</dt>
+<dd>
+<p>discussion of the two matching algorithms</p>
+</dd>
+<dt class="hdlist1">pcre2partial</dt>
+<dd>
+<p>details of the partial matching facility</p>
+</dd>
+<dt class="hdlist1">pcre2pattern</dt>
+<dd>
+<p>syntax and semantics of supported regular
+expression patterns</p>
+</dd>
+<dt class="hdlist1">pcre2perform</dt>
+<dd>
+<p>discussion of performance issues</p>
+</dd>
+<dt class="hdlist1">pcre2posix</dt>
+<dd>
+<p>the POSIX-compatible C API for the 8-bit library</p>
+</dd>
+<dt class="hdlist1">pcre2sample</dt>
+<dd>
+<p>discussion of the pcre2demo program</p>
+</dd>
+<dt class="hdlist1">pcre2serialize</dt>
+<dd>
+<p>details of pattern serialization</p>
+</dd>
+<dt class="hdlist1">pcre2syntax</dt>
+<dd>
+<p>quick syntax reference</p>
+</dd>
+<dt class="hdlist1">pcre2test</dt>
+<dd>
+<p>description of the <code>pcre2test</code> command</p>
+</dd>
+<dt class="hdlist1">pcre2unicode</dt>
+<dd>
+<p>discussion of Unicode and UTF support</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>In the "man" and HTML formats, there is also a short page for each C library
 function, listing its arguments and results.</p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_authors">Authors</h2>
-<div class="sectionbody">
+<h2 id="_authors" class="discrete">Authors</h2>
 <div class="paragraph">
-<p>The current maintainers of PCRE2 are Nicholas Wilson and Zoltan Herczeg.</p>
+<p>The current maintainers of PCRE2 are Nicholas Wilson and Zoltán Herczeg.</p>
 </div>
 <div class="paragraph">
 <p>PCRE2 was written by Philip Hazel, of the University Computing Service,
@@ -643,14 +707,10 @@ Cambridge, England. Many others have also contributed.</p>
 mailing list, as described at the project page:
 <a href="https://github.com/PCRE2Project/pcre2" class="bare">https://github.com/PCRE2Project/pcre2</a></p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_revision">Revision</h2>
-<div class="sectionbody">
+<h2 id="_revision" class="discrete">Revision</h2>
 <div class="paragraph">
 <p>Last updated: 22 February 2025<br>
-Copyright (c) 1997-2021 University of Cambridge.</p>
+Copyright &#169; 1997-2021 University of Cambridge.</p>
 </div>
 </div>
 </div>

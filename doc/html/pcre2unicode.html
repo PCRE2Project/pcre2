@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="description" content="Discussion of Unicode and UTF-8/UTF-16/UTF-32 support">
 <title>pcre2unicode(3)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +117,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +219,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -433,9 +435,33 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 </head>
-<body class="manpage">
+<body class="manpage toc2 toc-right">
 <div id="header">
 <h1>pcre2unicode(3) Manual Page</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_unicode_and_utf_support">Unicode and UTF support</a></li>
+<li><a href="#_unicode_property_support">Unicode property support</a></li>
+<li><a href="#_wide_characters_and_utf_modes">Wide characters and UTF modes</a></li>
+<li><a href="#_unicode_case_equivalence">Unicode case-equivalence</a></li>
+<li><a href="#script-runs">Script runs</a>
+<ul class="sectlevel2">
+<li><a href="#basic-script-run-rules">Basic script run rules</a></li>
+<li><a href="#_the_chinese_han_script">The Chinese Han script</a></li>
+<li><a href="#_decimal_digits">Decimal digits</a></li>
+</ul>
+</li>
+<li><a href="#_validity_of_utf_strings">Validity of UTF strings</a>
+<ul class="sectlevel2">
+<li><a href="#utf8-string-errors">Errors in UTF-8 strings</a></li>
+<li><a href="#_errors_in_utf_16_strings">Errors in UTF-16 strings</a></li>
+<li><a href="#_errors_in_utf_32_strings">Errors in UTF-32 strings</a></li>
+</ul>
+</li>
+<li><a href="#_matching_in_invalid_utf_strings">Matching in invalid UTF strings</a></li>
+</ul>
+</div>
 <h2>Name</h2>
 <div class="sectionbody">
 <p>pcre2unicode - PCRE2 Unicode support</p>
@@ -443,7 +469,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_unicode_and_utf_support">Unicode And Utf Support</h2>
+<h2 id="_unicode_and_utf_support">Unicode and UTF support</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>PCRE2 is normally built with Unicode support, though if you do not need it, you
@@ -457,16 +483,16 @@ treats each code unit in a string as one character.</p>
 <p>There are two ways of telling PCRE2 to switch to UTF mode, where characters may
 consist of more than one code unit and the range of values is constrained. The
 program can call
-<a href="pcre2_compile.html"><code>pcre2_compile()</code></a>
-with the PCRE2_UTF option, or the pattern may start with the sequence (*UTF).
-However, the latter facility can be locked out by the PCRE2_NEVER_UTF option.
+<code class="function">pcre2_compile()</code>
+with the <code class="constant">PCRE2_UTF</code> option, or the pattern may start with the sequence <code class="regex">(*UTF)</code>.
+However, the latter facility can be locked out by the <code class="constant">PCRE2_NEVER_UTF</code> option.
 That is, the programmer can prevent the supplier of the pattern from switching
 to UTF mode.</p>
 </div>
 <div class="paragraph">
-<p>Note that the PCRE2_MATCH_INVALID_UTF option (see
+<p>Note that the <code class="constant">PCRE2_MATCH_INVALID_UTF</code> option (see
 below)
-forces PCRE2_UTF to be set.</p>
+forces <code class="constant">PCRE2_UTF</code> to be set.</p>
 </div>
 <div class="paragraph">
 <p>In UTF mode, both the pattern and any subject strings that are matched against
@@ -477,16 +503,16 @@ handled, as documented below.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_unicode_property_support">Unicode Property Support</h2>
+<h2 id="_unicode_property_support">Unicode property support</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When PCRE2 is built with Unicode support, the escape sequences \p{..},
-\P{..}, and \X can be used. This is not dependent on the PCRE2_UTF setting.
+<p>When PCRE2 is built with Unicode support, the escape sequences <code class="regex">\p{..}</code>,
+<code class="regex">\P{..}</code>, and <code class="regex">\X</code> can be used. This is not dependent on the <code class="constant">PCRE2_UTF</code> setting.
 The Unicode properties that can be tested are a subset of those that Perl
 supports. Currently they are limited to the general category properties such as
-Lu for an upper case letter or Nd for a decimal number, the derived properties
-Any and Lc (synonym L&amp;), the Unicode script names such as Arabic or Han,
-Bidi_Class, Bidi_Control, and a few binary properties.</p>
+<code class="regex">Lu</code> for an upper case letter or <code class="regex">Nd</code> for a decimal number, the derived properties
+<code class="regex">Any</code> and <code class="regex">Lc</code> (synonym <code class="regex">L&amp;</code>), the Unicode script names such as <code class="regex">Arabic</code> or <code class="regex">Han</code>,
+<code class="regex">Bidi_Class</code>, <code class="regex">Bidi_Control</code>, and a few binary properties.</p>
 </div>
 <div class="paragraph">
 <p>The full lists are given in the
@@ -494,23 +520,23 @@ Bidi_Class, Bidi_Control, and a few binary properties.</p>
 and
 <a href="pcre2syntax.html"><code>pcre2syntax</code></a>
 documentation. In general, only the short names for properties are supported.
-For example, \p{L} matches a letter. Its longer synonym, \p{Letter}, is not
+For example, <code class="regex">\p{L}</code> matches a letter. Its longer synonym, <code class="regex">\p{Letter}</code>, is not
 supported. Furthermore, in Perl, many properties may optionally be prefixed by
-"Is", for compatibility with Perl 5.6. PCRE2 does not support this.</p>
+<code class="regex">Is</code>, for compatibility with Perl 5.6. PCRE2 does not support this.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_wide_characters_and_utf_modes">Wide Characters And Utf Modes</h2>
+<h2 id="_wide_characters_and_utf_modes">Wide characters and UTF modes</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Code points less than 256 can be specified in patterns by either braced or
-unbraced hexadecimal escape sequences (for example, \x{b3} or \xb3). Larger
-values have to use braced sequences. Unbraced octal code points up to \777 are
-also recognized; larger ones can be coded using \o{&#8230;&#8203;}.</p>
+unbraced hexadecimal escape sequences (for example, <code class="regex">\x{b3}</code> or <code class="regex">\xb3</code>). Larger
+values have to use braced sequences. Unbraced octal code points up to <code class="regex">\777</code> are
+also recognized; larger ones can be coded using <code class="regex">\o{...}</code>.</p>
 </div>
 <div class="paragraph">
-<p>The escape sequence \N{U+&lt;hex digits&gt;} is recognized as another way of
+<p>The escape sequence <code class="regex">\N{U&#43;<em>hex digits</em>}</code> is recognized as another way of
 specifying a Unicode character by code point in a UTF mode. It is not allowed
 in non-UTF mode.</p>
 </div>
@@ -527,33 +553,33 @@ single code unit.</p>
 any Unicode letters and decimal digits, as well as underscore.</p>
 </div>
 <div class="paragraph">
-<p>The escape sequence \C can be used to match a single code unit in UTF mode,
+<p>The escape sequence <code class="regex">\C</code> can be used to match a single code unit in UTF mode,
 but its use can lead to some strange effects because it breaks up multi-unit
-characters (see the description of \C in the
+characters (see the description of <code class="regex">\C</code> in the
 <a href="pcre2pattern.html"><code>pcre2pattern</code></a>
 documentation). For this reason, there is a build-time option that disables
-support for \C completely. There is also a less draconian compile-time option
-for locking out the use of \C when a pattern is compiled.</p>
+support for <code class="regex">\C</code> completely. There is also a less draconian compile-time option
+for locking out the use of <code class="regex">\C</code> when a pattern is compiled.</p>
 </div>
 <div class="paragraph">
-<p>The use of \C is not supported by the alternative matching function
-<code>pcre2_dfa_match()</code> when in UTF-8 or UTF-16 mode, that is, when a character
-may consist of more than one code unit. The use of \C in these modes provokes
-a match-time error. Also, the JIT optimization does not support \C in these
+<p>The use of <code class="regex">\C</code> is not supported by the alternative matching function
+<code class="function">pcre2_dfa_match()</code> when in UTF-8 or UTF-16 mode, that is, when a character
+may consist of more than one code unit. The use of <code class="regex">\C</code> in these modes provokes
+a match-time error. Also, the JIT optimization does not support <code class="regex">\C</code> in these
 modes. If JIT optimization is requested for a UTF-8 or UTF-16 pattern that
-contains \C, it will not succeed, and so when <code>pcre2_match()</code> is called,
+contains <code class="regex">\C</code>, it will not succeed, and so when <code class="function">pcre2_match()</code> is called,
 the matching will be carried out by the interpretive function.</p>
 </div>
 <div class="paragraph">
-<p>The character escapes \b, \B, \d, \D, \s, \S, \w, and \W correctly test
+<p>The character escapes <code class="regex">\b</code>, <code class="regex">\B</code>, <code class="regex">\d</code>, <code class="regex">\D</code>, <code class="regex">\s</code>, <code class="regex">\S</code>, <code class="regex">\w</code>, and <code class="regex">\W</code> correctly test
 characters of any code value, but, by default, the characters that PCRE2
 recognizes as digits, spaces, or word characters remain the same set as in
 non-UTF mode, all with code points less than 256. This remains true even when
 PCRE2 is built to include Unicode support, because to do otherwise would slow
-down matching in many common cases. Note that this also applies to \b
-and \B, because they are defined in terms of \w and \W. If you want
+down matching in many common cases. Note that this also applies to <code class="regex">\b</code>
+and <code class="regex">\B</code>, because they are defined in terms of <code class="regex">\w</code> and <code class="regex">\W</code>. If you want
 to test for a wider sense of, say, "digit", you can use explicit Unicode
-property tests such as \p{Nd}. Alternatively, if you set the PCRE2_UCP option,
+property tests such as <code class="regex">\p{Nd}</code>. Alternatively, if you set the <code class="constant">PCRE2_UCP</code> option,
 the way that the character escapes work is changed so that Unicode properties
 are used to determine which characters match, though there are some options
 that suppress this for individual escapes. For details see the section on
@@ -564,78 +590,90 @@ documentation.</p>
 </div>
 <div class="paragraph">
 <p>Like the escapes, characters that match the POSIX named character classes are
-all low-valued characters unless the PCRE2_UCP option is set, but there is an
+all low-valued characters unless the <code class="constant">PCRE2_UCP</code> option is set, but there is an
 option to override this.</p>
 </div>
 <div class="paragraph">
 <p>In contrast to the character escapes and character classes, the special
-horizontal and vertical white space escapes (\h, \H, \v, and \V) do match
-all the appropriate Unicode characters, whether or not PCRE2_UCP is set.</p>
+horizontal and vertical white space escapes (<code class="regex">\h</code>, <code class="regex">\H</code>, <code class="regex">\v</code>, and <code class="regex">\V</code>) do match
+all the appropriate Unicode characters, whether or not <code class="constant">PCRE2_UCP</code> is set.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_unicode_case_equivalence">Unicode Case-Equivalence</h2>
+<h2 id="_unicode_case_equivalence">Unicode case-equivalence</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>If either PCRE2_UTF or PCRE2_UCP is set, upper/lower case processing makes use
+<p>If either <code class="constant">PCRE2_UTF</code> or <code class="constant">PCRE2_UCP</code> is set, upper/lower case processing makes use
 of Unicode properties except for characters whose code points are less than 128
 and that have at most two case-equivalent values. For these, a direct table
 lookup is used for speed. A few Unicode characters such as Greek sigma have
 more than two code points that are case-equivalent, and these are treated
-specially. Setting PCRE2_UCP without PCRE2_UTF allows Unicode-style case
+specially. Setting <code class="constant">PCRE2_UCP</code> without <code class="constant">PCRE2_UTF</code> allows Unicode-style case
 processing for non-UTF character encodings such as UCS-2.</p>
 </div>
 <div class="paragraph">
 <p>There are two ASCII characters (S and K) that, in addition to their ASCII lower
 case equivalents, have a non-ASCII one as well (long S and Kelvin sign).
 Recognition of these non-ASCII characters as case-equivalent to their ASCII
-counterparts can be disabled by setting the PCRE2_EXTRA_CASELESS_RESTRICT
+counterparts can be disabled by setting the <code class="constant">PCRE2_EXTRA_CASELESS_RESTRICT</code>
 option. When this is set, all characters in a case equivalence must either be
 ASCII or non-ASCII; there can be no mixing.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">Without PCRE2_EXTRA_CASELESS_RESTRICT:<br>
-  'k' = 'K' = U+212A (Kelvin sign)<br>
-  's' = 'S' = U+017F (long S)<br>
-With PCRE2_EXTRA_CASELESS_RESTRICT:<br>
-  'k' = 'K'<br>
-  U+212A (Kelvin sign)  only case-equivalent to itself<br>
-  's' = 'S'<br>
-  U+017F (long S)       only case-equivalent to itself</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Without <code class="constant">PCRE2_EXTRA_CASELESS_RESTRICT</code></dt>
+<dd>
+<p>'k' = 'K' = <code class="character">U+212A</code> (Kelvin sign)<br>
+'s' = 'S' = <code class="character">U+017F</code> (long S)</p>
+</dd>
+<dt class="hdlist1">With <code class="constant">PCRE2_EXTRA_CASELESS_RESTRICT</code></dt>
+<dd>
+<p>'k' = 'K'<br>
+<code class="character">U+212A</code> (Kelvin sign)&#8201;&#8212;&#8201;only case-equivalent to itself<br>
+'s' = 'S'<br>
+<code class="character">U+017F</code> (long S)&#8201;&#8212;&#8201;only case-equivalent to itself</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>One language family, Turkish and Azeri, has its own case-insensitivity rules,
-which can be selected by setting PCRE2_EXTRA_TURKISH_CASING. This alters the
-behaviour of the 'i', 'I', U+0130 (capital I with dot above), and U+0131
+which can be selected by setting <code class="constant">PCRE2_EXTRA_TURKISH_CASING</code>. This alters the
+behaviour of the 'i', 'I', <code class="character">U+0130</code> (capital I with dot above), and <code class="character">U+0131</code>
 (small dotless i) characters.</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">Without PCRE2_EXTRA_TURKISH_CASING:<br>
-  'i' = 'I'<br>
-  U+0130 (capital I with dot above)  only case-equivalent to itself<br>
-  U+0131 (small dotless i)           only case-equivalent to itself<br>
-With PCRE2_EXTRA_TURKISH_CASING:<br>
-  'i' = U+0130 (capital I with dot above)<br>
-  U+0131 (small dotless i) = 'I'</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Without <code class="constant">PCRE2_EXTRA_TURKISH_CASING</code></dt>
+<dd>
+<p>'i' = 'I'<br>
+<code class="character">U+0130</code> (capital I with dot above) &#8201;&#8212;&#8201;only case-equivalent to itself<br>
+<code class="character">U+0131</code> (small dotless i)&#8201;&#8212;&#8201;only case-equivalent to itself</p>
+</dd>
+<dt class="hdlist1">With <code class="constant">PCRE2_EXTRA_TURKISH_CASING</code></dt>
+<dd>
+<p>'i' = <code class="character">U+0130</code> (capital I with dot above)<br>
+<code class="character">U+0131</code> (small dotless i) = 'I'</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>It is not allowed to specify both PCRE2_EXTRA_CASELESS_RESTRICT and
-PCRE2_EXTRA_TURKISH_CASING together.</p>
+<p>It is not allowed to specify both <code class="constant">PCRE2_EXTRA_CASELESS_RESTRICT</code> and
+<code class="constant">PCRE2_EXTRA_TURKISH_CASING</code> together.</p>
 </div>
 <div class="paragraph">
-<p>From release 10.45 the Unicode letter properties Lu (upper case), Ll (lower
-case), and Lt (title case) are all treated as Lc (cased letter) when caseless
-matching is set by the PCRE2_CASELESS option or (?i) within the pattern.</p>
+<p>From release 10.45 the Unicode letter properties <code class="regex">Lu</code> (upper case), <code class="regex">Ll</code> (lower
+case), and <code class="regex">Lt</code> (title case) are all treated as <code class="regex">Lc</code> (cased letter) when caseless
+matching is set by the <code class="constant">PCRE2_CASELESS</code> option or <code class="regex">(?i)</code> within the pattern.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_script_runs">Script Runs</h2>
+<h2 id="script-runs">Script runs</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The pattern constructs (*script_run:&#8230;&#8203;) and (*atomic_script_run:&#8230;&#8203;), with
-synonyms (*sr:&#8230;&#8203;) and (*asr:&#8230;&#8203;), verify that the string matched within the
+<p>The pattern constructs <code class="regex">(*script_run:...)</code> and <code class="regex">(*atomic_script_run:...)</code>, with
+synonyms <code class="regex">(*sr:...)</code> and <code class="regex">(*asr:...)</code>, verify that the string matched within the
 parentheses is a script run. In concept, a script run is a sequence of
 characters that are all from the same Unicode script. However, because some
 scripts are commonly used together, and because some diacritical and other
@@ -649,7 +687,7 @@ are also three special values:</p>
 <div class="paragraph">
 <p>"Unknown" is used for code points that have not been assigned, and also for the
 surrogate code points. In the PCRE2 32-bit library, characters whose code
-points are greater than the Unicode maximum (U+10FFFF), which are accessible
+points are greater than the Unicode maximum (<code class="character">U+10FFFF</code>), which are accessible
 only in non-UTF mode, are assigned the Unknown script.</p>
 </div>
 <div class="paragraph">
@@ -664,23 +702,23 @@ that they modify.</p>
 </div>
 <div class="paragraph">
 <p>Some Inherited characters are used with many scripts, but many of them are only
-normally used with a small number of scripts. For example, U+102E0 (Coptic
+normally used with a small number of scripts. For example, <code class="character">U+102E0</code> (Coptic
 Epact thousands mark) is used only with Arabic and Coptic. In order to make it
 possible to check this, a Unicode property called Script Extension exists. Its
 value is a list of scripts that apply to the character. For the majority of
 characters, the list contains just one script, the same one as the Script
-property. However, for characters such as U+102E0 more than one Script is
+property. However, for characters such as <code class="character">U+102E0</code> more than one Script is
 listed. There are also some Common characters that have a single, non-Common
 script in their Script Extension list.</p>
 </div>
 <div class="paragraph">
-<p>The next section describes the basic rules for deciding whether a given string
+<p>The section <a href="#basic-script-run-rules">Basic script run rules</a> describes the basic rules for deciding whether a given string
 of characters is a script run. Note, however, that there are some special cases
 involving the Chinese Han script, and an additional constraint for decimal
 digits. These are covered in subsequent sections.</p>
 </div>
 <div class="sect2">
-<h3 id="_basic_script_run_rules">Basic script run rules</h3>
+<h3 id="basic-script-run-rules">Basic script run rules</h3>
 <div class="paragraph">
 <p>A string that is less than two characters long is a script run. This is the
 only case in which an Unknown character can be part of a script run. Longer
@@ -696,18 +734,24 @@ their Script Extension lists. In set-theoretic terminology, the intersection of
 all the sets of scripts must not be empty.</p>
 </div>
 <div class="paragraph">
-<p>A simple example is an Internet name such as "google.com". The letters are all
+<p>A simple example is an Internet name such as <code class="subject">google.com</code>. The letters are all
 in the Latin script, and the dot is Common, so this string is a script run.
-However, the Cyrillic letter "o" looks exactly the same as the Latin "o"; a
-string that looks the same, but with Cyrillic "o"s is not a script run.</p>
+However, the Cyrillic letter <code class="subject">o</code> looks exactly the same as the Latin <code class="subject">o</code>; a
+string that looks the same, but with Cyrillic <code class="subject">o</code>s is not a script run.</p>
 </div>
 <div class="paragraph">
 <p>More interesting examples involve characters with more than one script in their
 Script Extension. Consider the following characters:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">U+060C  Arabic comma<br>
-U+06D4  Arabic full stop</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code class="character">U+060C</code>, Arabic comma</p>
+</li>
+<li>
+<p><code class="character">U+06D4</code>, Arabic full stop</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>The first has the Script Extension list Arabic, Hanifi Rohingya, Syriac, and
@@ -745,37 +789,38 @@ adjacent characters.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_validity_of_utf_strings">Validity Of Utf Strings</h2>
+<h2 id="_validity_of_utf_strings">Validity of UTF strings</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When the PCRE2_UTF option is set, the strings passed as patterns and subjects
+<p>When the <code class="constant">PCRE2_UTF</code> option is set, the strings passed as patterns and subjects
 are (by default) checked for validity on entry to the relevant functions. If an
 invalid UTF string is passed, a negative error code is returned. The code unit
 offset to the offending character can be extracted from the match data block by
-calling <code>pcre2_get_startchar()</code>, which is used for this purpose after a UTF
+calling <code class="function">pcre2_get_startchar()</code>, which is used for this purpose after a UTF
 error.</p>
 </div>
 <div class="paragraph">
 <p>In some situations, you may already know that your strings are valid, and
 therefore want to skip these checks in order to improve performance, for
 example in the case of a long subject string that is being scanned repeatedly.
-If you set the PCRE2_NO_UTF_CHECK option at compile time or at match time,
+If you set the <code class="constant">PCRE2_NO_UTF_CHECK</code> option at compile time or at match time,
 PCRE2 assumes that the pattern or subject it is given (respectively) contains
 only valid UTF code unit sequences.</p>
 </div>
 <div class="paragraph">
-<p>If you pass an invalid UTF string when PCRE2_NO_UTF_CHECK is set, the result
+<p>If you pass an invalid UTF string when <code class="constant">PCRE2_NO_UTF_CHECK</code> is set, the result
 is undefined and your program may crash or loop indefinitely or give incorrect
 results. There is, however, one mode of matching that can handle invalid UTF
-subject strings. This is enabled by passing PCRE2_MATCH_INVALID_UTF to
-<code>pcre2_compile()</code> and is discussed below in the next section. The rest of
-this section covers the case when PCRE2_MATCH_INVALID_UTF is not set.</p>
+subject strings. This is enabled by passing <code class="constant">PCRE2_MATCH_INVALID_UTF</code> to
+<code class="function">pcre2_compile()</code> and is discussed below in the section
+<a href="#utf8-string-errors">Errors in UTF-8 strings</a>. The rest of
+this section covers the case when <code class="constant">PCRE2_MATCH_INVALID_UTF</code> is not set.</p>
 </div>
 <div class="paragraph">
-<p>Passing PCRE2_NO_UTF_CHECK to <code>pcre2_compile()</code> just disables the UTF check
+<p>Passing <code class="constant">PCRE2_NO_UTF_CHECK</code> to <code class="function">pcre2_compile()</code> just disables the UTF check
 for the pattern; it does not also apply to subject strings. If you want to
 disable the check for a subject string you must pass this same option to
-<code>pcre2_match()</code> or <code>pcre2_dfa_match()</code>.</p>
+<code class="function">pcre2_match()</code> or <code class="function">pcre2_dfa_match()</code>.</p>
 </div>
 <div class="paragraph">
 <p>UTF-16 and UTF-32 strings can indicate their endianness by special code knows
@@ -783,122 +828,110 @@ as a byte-order mark (BOM). The PCRE2 functions do not handle this, expecting
 strings to be in host byte order.</p>
 </div>
 <div class="paragraph">
-<p>Unless PCRE2_NO_UTF_CHECK is set, a UTF string is checked before any other
-processing takes place. In the case of <code>pcre2_match()</code> and
-<code>pcre2_dfa_match()</code> calls with a non-zero starting offset, the check is
+<p>Unless <code class="constant">PCRE2_NO_UTF_CHECK</code> is set, a UTF string is checked before any other
+processing takes place. In the case of <code class="function">pcre2_match()</code> and
+<code class="function">pcre2_dfa_match()</code> calls with a non-zero starting offset, the check is
 applied only to that part of the subject that could be inspected during
 matching, and there is a check that the starting offset points to the first
 code unit of a character or to the end of the subject. If there are no
 lookbehind assertions in the pattern, the check starts at the starting offset.
 Otherwise, it starts at the length of the longest lookbehind before the
 starting offset, or at the start of the subject if there are not that many
-characters before the starting offset. Note that the sequences \b and \B are
+characters before the starting offset. Note that the sequences <code class="regex">\b</code> and <code class="regex">\B</code> are
 one-character lookbehinds.</p>
 </div>
 <div class="paragraph">
 <p>In addition to checking the format of the string, there is a check to ensure
-that all code points lie in the range U+0 to U+10FFFF, excluding the surrogate
+that all code points lie in the range <code class="character">U+0</code> to <code class="character">U+10FFFF</code>, excluding the surrogate
 area. The so-called "non-character" code points are not excluded because
 Unicode corrigendum #9 makes it clear that they should not be.</p>
 </div>
 <div class="paragraph">
 <p>Characters in the "Surrogate Area" of Unicode are reserved for use by UTF-16,
 where they are used in pairs to encode code points with values greater than
-0xFFFF. The code points that are encoded by UTF-16 pairs are available
+<code class="character">0xFFFF</code>. The code points that are encoded by UTF-16 pairs are available
 independently in the UTF-8 and UTF-32 encodings. (In other words, the whole
 surrogate thing is a fudge for UTF-16 which unfortunately messes up UTF-8 and
 UTF-32.)</p>
 </div>
 <div class="paragraph">
-<p>Setting PCRE2_NO_UTF_CHECK at compile time does not disable the error that is
+<p>Setting <code class="constant">PCRE2_NO_UTF_CHECK</code> at compile time does not disable the error that is
 given if an escape sequence for an invalid Unicode code point is encountered in
-the pattern. If you want to allow escape sequences such as \x{d800} (a
-surrogate code point) you can set the PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES extra
+the pattern. If you want to allow escape sequences such as <code class="regex">\x{d800}</code> (a
+surrogate code point) you can set the <code class="constant">PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES</code> extra
 option. However, this is possible only in UTF-8 and UTF-32 modes, because these
 values are not representable in UTF-16.</p>
 </div>
 <div class="sect2">
-<h3 id="_errors_in_utf_8_strings">Errors in UTF-8 strings</h3>
+<h3 id="utf8-string-errors">Errors in UTF-8 strings</h3>
 <div class="paragraph">
 <p>The following negative error codes are given for invalid UTF-8 strings:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ERROR_UTF8_ERR1<br>
-PCRE2_ERROR_UTF8_ERR2<br>
-PCRE2_ERROR_UTF8_ERR3<br>
-PCRE2_ERROR_UTF8_ERR4<br>
-PCRE2_ERROR_UTF8_ERR5</p>
-</div>
-<div class="paragraph">
+<div class="dlist errors">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR1</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR2</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR3</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR4</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR5</code></dt>
+<dd>
 <p>The string ends with a truncated UTF-8 character; the code specifies how many
 bytes are missing (1 to 5). Although RFC 3629 restricts UTF-8 characters to be
 no longer than 4 bytes, the encoding scheme (originally defined by RFC 2279)
 allows for up to 6 bytes, and this is checked first; hence the possibility of
 4 or 5 missing bytes.</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ERROR_UTF8_ERR6<br>
-PCRE2_ERROR_UTF8_ERR7<br>
-PCRE2_ERROR_UTF8_ERR8<br>
-PCRE2_ERROR_UTF8_ERR9<br>
-PCRE2_ERROR_UTF8_ERR10</p>
-</div>
-<div class="paragraph">
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR6</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR7</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR8</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR9</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR10</code></dt>
+<dd>
 <p>The two most significant bits of the 2nd, 3rd, 4th, 5th, or 6th byte of the
-character do not have the binary value 0b10 (that is, either the most
+character do not have the binary value <code class="c">0b10</code> (that is, either the most
 significant bit is 0, or the next bit is 1).</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ERROR_UTF8_ERR11<br>
-PCRE2_ERROR_UTF8_ERR12</p>
-</div>
-<div class="paragraph">
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR11</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR12</code></dt>
+<dd>
 <p>A character that is valid by the RFC 2279 rules is either 5 or 6 bytes long;
 these code points are excluded by RFC 3629.</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ERROR_UTF8_ERR13</p>
-</div>
-<div class="paragraph">
-<p>A 4-byte character has a value greater than 0x10ffff; these code points are
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR13</code></dt>
+<dd>
+<p>A 4-byte character has a value greater than <code class="character">0x10ffff</code>; these code points are
 excluded by RFC 3629.</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ERROR_UTF8_ERR14</p>
-</div>
-<div class="paragraph">
-<p>A 3-byte character has a value in the range 0xd800 to 0xdfff; this range of
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR14</code></dt>
+<dd>
+<p>A 3-byte character has a value in the range <code class="character">0xd800</code> to <code class="character">0xdfff</code>; this range of
 code points are reserved by RFC 3629 for use with UTF-16, and so are excluded
 from UTF-8.</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ERROR_UTF8_ERR15<br>
-PCRE2_ERROR_UTF8_ERR16<br>
-PCRE2_ERROR_UTF8_ERR17<br>
-PCRE2_ERROR_UTF8_ERR18<br>
-PCRE2_ERROR_UTF8_ERR19</p>
-</div>
-<div class="paragraph">
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR15</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR16</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR17</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR18</code></dt>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR19</code></dt>
+<dd>
 <p>A 2-, 3-, 4-, 5-, or 6-byte character is "overlong", that is, it codes for a
 value that can be represented by fewer bytes, which is invalid. For example,
-the two bytes 0xc0, 0xae give the value 0x2e, whose correct coding uses just
+the two bytes <code class="character">0xc0</code>, <code class="character">0xae</code> give the value <code class="character">0x2e</code>, whose correct coding uses just
 one byte.</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ERROR_UTF8_ERR20</p>
-</div>
-<div class="paragraph">
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR20</code></dt>
+<dd>
 <p>The two most significant bits of the first byte of a character have the binary
-value 0b10 (that is, the most significant bit is 1 and the second is 0). Such a
+value <code class="c">0b10</code> (that is, the most significant bit is 1 and the second is 0). Such a
 byte can only validly occur as the second or subsequent byte of a multi-byte
 character.</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ERROR_UTF8_ERR21</p>
-</div>
-<div class="paragraph">
-<p>The first byte of a character has the value 0xfe or 0xff. These values can
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF8_ERR21</code></dt>
+<dd>
+<p>The first byte of a character has the value <code class="character">0xfe</code> or <code class="character">0xff</code>. These values can
 never occur in a valid UTF-8 string.</p>
+</dd>
+</dl>
 </div>
 </div>
 <div class="sect2">
@@ -906,10 +939,21 @@ never occur in a valid UTF-8 string.</p>
 <div class="paragraph">
 <p>The following negative error codes are given for invalid UTF-16 strings:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ERROR_UTF16_ERR1  Missing low surrogate at end of string<br>
-PCRE2_ERROR_UTF16_ERR2  Invalid low surrogate follows high surrogate<br>
-PCRE2_ERROR_UTF16_ERR3  Isolated low surrogate</p>
+<div class="dlist errors">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF16_ERR1</code></dt>
+<dd>
+<p>Missing low surrogate at end of string</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF16_ERR2</code></dt>
+<dd>
+<p>Invalid low surrogate follows high surrogate</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF16_ERR3</code></dt>
+<dd>
+<p>Isolated low surrogate</p>
+</dd>
+</dl>
 </div>
 </div>
 <div class="sect2">
@@ -917,43 +961,51 @@ PCRE2_ERROR_UTF16_ERR3  Isolated low surrogate</p>
 <div class="paragraph">
 <p>The following negative error codes are given for invalid UTF-32 strings:</p>
 </div>
-<div class="paragraph">
-  <p style="margin-left: 2ch">PCRE2_ERROR_UTF32_ERR1  Surrogate character (0xd800 to 0xdfff)<br>
-PCRE2_ERROR_UTF32_ERR2  Code point is greater than 0x10ffff</p>
+<div class="dlist errors">
+<dl>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF32_ERR1</code></dt>
+<dd>
+<p>Surrogate character (<code class="character">0xd800</code> to <code class="character">0xdfff</code>)</p>
+</dd>
+<dt class="hdlist1"><code class="constant">PCRE2_ERROR_UTF32_ERR2</code></dt>
+<dd>
+<p>Code point is greater than <code class="character">0x10ffff</code></p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_matching_in_invalid_utf_strings">Matching In Invalid Utf Strings</h2>
+<h2 id="_matching_in_invalid_utf_strings">Matching in invalid UTF strings</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>You can run pattern matches on subject strings that may contain invalid UTF
-sequences if you call <code>pcre2_compile()</code> with the PCRE2_MATCH_INVALID_UTF
-option. This is supported by <code>pcre2_match()</code>, including JIT matching, but
-not by <code>pcre2_dfa_match()</code>. When PCRE2_MATCH_INVALID_UTF is set, it forces
-PCRE2_UTF to be set as well. Note, however, that the pattern itself must be a
+sequences if you call <code class="function">pcre2_compile()</code> with the <code class="constant">PCRE2_MATCH_INVALID_UTF</code>
+option. This is supported by <code class="function">pcre2_match()</code>, including JIT matching, but
+not by <code class="function">pcre2_dfa_match()</code>. When <code class="constant">PCRE2_MATCH_INVALID_UTF</code> is set, it forces
+<code class="constant">PCRE2_UTF</code> to be set as well. Note, however, that the pattern itself must be a
 valid UTF string.</p>
 </div>
 <div class="paragraph">
-<p>If you do not set PCRE2_MATCH_INVALID_UTF when calling <code>pcre2_compile</code>, and
+<p>If you do not set <code class="constant">PCRE2_MATCH_INVALID_UTF</code> when calling <code class="function">pcre2_compile()</code>, and
 you are not certain that your subject strings are valid UTF sequences, you
-should not make use of the JIT "fast path" function <code>pcre2_jit_match()</code>
+should not make use of the JIT "fast path" function <code class="function">pcre2_jit_match()</code>
 because it bypasses sanity checks, including the one for UTF validity. An
 invalid string may cause undefined behaviour, including looping, crashing, or
 giving the wrong answer.</p>
 </div>
 <div class="paragraph">
-<p>Setting PCRE2_MATCH_INVALID_UTF does not affect what <code>pcre2_compile()</code>
-generates, but if <code>pcre2_jit_compile()</code> is subsequently called, it does
+<p>Setting <code class="constant">PCRE2_MATCH_INVALID_UTF</code> does not affect what <code class="function">pcre2_compile()</code>
+generates, but if <code class="function">pcre2_jit_compile()</code> is subsequently called, it does
 generate different code. If JIT is not used, the option affects the behaviour
-of the interpretive code in <code>pcre2_match()</code>. When PCRE2_MATCH_INVALID_UTF
-is set at compile time, PCRE2_NO_UTF_CHECK is ignored at match time.</p>
+of the interpretive code in <code class="function">pcre2_match()</code>. When <code class="constant">PCRE2_MATCH_INVALID_UTF</code>
+is set at compile time, <code class="constant">PCRE2_NO_UTF_CHECK</code> is ignored at match time.</p>
 </div>
 <div class="paragraph">
 <p>In this mode, an invalid code unit sequence in the subject never matches any
-pattern item. It does not match dot, it does not match \p{Any}, it does not
-even match negative items such as [^X]. A lookbehind assertion fails if it
+pattern item. It does not match dot, it does not match <code class="regex">\p{Any}</code>, it does not
+even match negative items such as <code class="regex">[^X]</code>. A lookbehind assertion fails if it
 encounters an invalid sequence while moving the current point backwards. In
 other words, an invalid UTF code unit sequence acts as a barrier which no match
 can cross.</p>
@@ -970,46 +1022,36 @@ are a few points to consider:</p>
 and so do not match circumflex or dollar characters in the pattern.</p>
 </div>
 <div class="paragraph">
-<p>If <code>pcre2_match()</code> is called with an offset that points to an invalid
+<p>If <code class="function">pcre2_match()</code> is called with an offset that points to an invalid
 UTF-sequence, that sequence is skipped, and the match starts at the next valid
 UTF character, or the end of the subject.</p>
 </div>
 <div class="paragraph">
-<p>At internal fragment boundaries, \b and \B behave in the same way as at the
-beginning and end of the subject. For example, a sequence such as \bWORD\b
-would match an instance of WORD that is surrounded by invalid UTF code units.</p>
+<p>At internal fragment boundaries, <code class="regex">\b</code> and <code class="regex">\B</code> behave in the same way as at the
+beginning and end of the subject. For example, a sequence such as <code class="regex">\bWORD\b</code>
+would match an instance of <code class="subject">WORD</code> that is surrounded by invalid UTF code units.</p>
 </div>
 <div class="paragraph">
-<p>Using PCRE2_MATCH_INVALID_UTF, an application can run matches on arbitrary
+<p>Using <code class="constant">PCRE2_MATCH_INVALID_UTF</code>, an application can run matches on arbitrary
 data, knowing that any matched strings that are returned are valid UTF. This
 can be useful when searching for UTF text in executable or other binary files.</p>
 </div>
 <div class="paragraph">
 <p>Note, however, that the 16-bit and 32-bit PCRE2 libraries process strings as
-sequences of uint16_t or uint32_t code points. They cannot find valid UTF
+sequences of <code class="type">uint16_t</code> or <code class="type">uint32_t</code> code points. They cannot find valid UTF
 sequences within an arbitrary string of bytes unless such sequences are
 suitably aligned.</p>
 </div>
+<h2 id="_author" class="discrete">Author</h2>
+<div class="paragraph">
+<p>Philip Hazel<br>
+Retired from University Computing Service<br>
+Cambridge, England.</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_author">Author</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>Philip Hazel
-Retired from University Computing Service
-Cambridge, England.</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_revision">Revision</h2>
-<div class="sectionbody">
+<h2 id="_revision" class="discrete">Revision</h2>
 <div class="paragraph">
 <p>Last updated: 27 November 2024<br>
-Copyright (c) 1997-2024 University of Cambridge.</p>
+Copyright &#169; 1997-2024 University of Cambridge.</p>
 </div>
 </div>
 </div>

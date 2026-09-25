@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_jit_free_unused_memory
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 24 April 2020
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,20 +31,22 @@
 pcre2_jit_free_unused_memory \- free unused JIT memory
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
+\fBvoid\fP pcre2_jit_free_unused_memory(\fBpcre2_general_context\fP *\fIgcontext\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function frees unused JIT executable memory. The argument is a general
-context, for custom memory management, or NULL for standard memory management.
+context, for custom memory management, or \fBNULL\fP for standard memory management.
 JIT memory allocation retains some memory in order to improve future JIT
 compilation speed. In low memory conditions,
-\f(CRpcre2_jit_free_unused_memory()\fP can be used to cause this memory to be
+pcre2_jit_free_unused_memory() can be used to cause this memory to be
 freed.
 .sp
 There is a complete description of the PCRE2 native API in the

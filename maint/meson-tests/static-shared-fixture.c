@@ -6,5 +6,5 @@
 
 FIXTURE_EXPORT int fixture_export(void)
 {
-return 0;
+  return 0;
 }

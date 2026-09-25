@@ -66,6 +66,8 @@ print('Updating man pages')
 for filename in glob.glob('doc/*.adoc'):
     if filename == 'doc/pcre2demo.adoc':
         continue
+    if filename == 'doc/index.adoc':
+        continue
     update_adoc_date(filename)
 
 # README, NON-AUTOTOOLS-BUILD

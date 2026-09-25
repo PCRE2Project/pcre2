@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_next_match
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 24 March 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,18 +31,20 @@
 pcre2_next_match \- get the match parameters for the next match
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_next_match(pcre2_match_data *match_data,
-                     PCRE2_SIZE *pstart_offset, uint32_t *poptions);
+\fBint\fP pcre2_next_match(\fBpcre2_match_data\fP *\fImatch_data\fP,
+                     \fBPCRE2_SIZE\fP *\fIpstart_offset\fP, \fBuint32_t\fP *\fIpoptions\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function can be called after one of the match functions
-(\f(CRpcre2_match()\fP, \f(CRpcre2_dfa_match()\fP, or \f(CRpcre2_jit_match()\fP), and
+(pcre2_match(), pcre2_dfa_match(), or pcre2_jit_match()), and
 must be provided with the same \fImatch_data\fP parameter. It outputs the
 appropriate parameters for searching for the next match in the same subject
 string, and is suitable for applications providing "global" matching behaviour
@@ -52,10 +54,10 @@ all matches, or simply counting the number of matches).
 It returns 0 ("false") if there is no need to make any further match attempts,
 or 1 ("true") if another match should be attempted.
 .sp
-The *\fIpstart_offset\fP and *\fIpoptions\fP are set if the function returns 1.
-The *\fIpstart_offset\fP should be passed to the next match attempt directly,
-and the *\fIpoptions\fP should be passed to the next match attempt by combining
-with the application's match options using OR.
+The \f(CR*pstart_offset\fP and \f(CR*poptions\fP are set if the function returns 1.
+The \f(CR*pstart_offset\fP should be passed to the next match attempt directly,
+and the \f(CR*poptions\fP should be passed to the next match attempt by combining
+with the application\(cqs match options using OR.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="description" content="Compatibility with Perl">
 <title>pcre2compat(3)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +117,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +219,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -443,7 +445,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_differences_between_pcre2_and_perl">Differences Between Pcre2 And Perl</h2>
+<h2 id="_differences_between_pcre2_and_perl">Differences between PCRE2 and Perl</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This document describes some of the known differences in the ways that PCRE2
@@ -451,288 +453,319 @@ and Perl handle regular expressions. The differences described here are with
 respect to Perl version 5.38.0, but as both Perl and PCRE2 are continually
 changing, the information may at times be out of date.</p>
 </div>
-<div class="paragraph">
-<p>1. When PCRE2_DOTALL (equivalent to Perl&#8217;s /s qualifier) is not set, the
-behaviour of the '.' metacharacter differs from Perl. In PCRE2, '.' matches the
+<div class="ulist">
+<ul>
+<li>
+<p>When <code class="constant">PCRE2_DOTALL</code> (equivalent to Perl&#8217;s <code class="regex">/s</code> qualifier) is not set, the
+behaviour of the <code class="regex">.</code> metacharacter differs from Perl. In PCRE2, <code class="regex">.</code> matches the
 next character unless it is the start of a newline sequence. This means that,
-if the newline setting is CR, CRLF, or NUL, '.' will match the code point LF
-(0x0A) in ASCII/Unicode environments, and NL (either 0x15 or 0x25) when using
-EBCDIC. In Perl, '.' appears never to match LF, even when 0x0A is not a newline
+if the newline setting is CR, CRLF, or NUL, <code class="regex">.</code> will match the code point LF
+(<code class="character">0x0A</code>) in ASCII/Unicode environments, and NL (either <code class="character">0x15</code> or <code class="character">0x25</code>) when using
+EBCDIC. In Perl, <code class="regex">.</code> appears never to match LF, even when <code class="character">0x0A</code> is not a newline
 indicator.</p>
-</div>
-<div class="paragraph">
-<p>2. PCRE2 has only a subset of Perl&#8217;s Unicode support. Details of what it does
+</li>
+<li>
+<p>PCRE2 has only a subset of Perl&#8217;s Unicode support. Details of what it does
 have are given in the
 <a href="pcre2unicode.html"><code>pcre2unicode</code></a>
 page.</p>
-</div>
-<div class="paragraph">
-<p>3. Like Perl, PCRE2 allows repeat quantifiers on parenthesized assertions, but
-they do not mean what you might think. For example, (?!a){3} does not assert
-that the next three characters are not "a". It just asserts that the next
-character is not "a" three times (in principle; PCRE2 optimizes this to run the
+</li>
+<li>
+<p>Like Perl, PCRE2 allows repeat quantifiers on parenthesized assertions, but
+they do not mean what you might think. For example, <code class="regex">(?!a){3}</code> does not assert
+that the next three characters are not <code class="subject">a</code>. It just asserts that the next
+character is not <code class="subject">a</code> three times (in principle; PCRE2 optimizes this to run the
 assertion just once). Perl allows some repeat quantifiers on other assertions,
-for example, \b* , but these do not seem to have any use. PCRE2 does not allow
+for example, <code class="regex">\b*</code> , but these do not seem to have any use. PCRE2 does not allow
 any kind of quantifier on non-lookaround assertions.</p>
-</div>
-<div class="paragraph">
-<p>4. If a braced quantifier such as {1,2} appears where there is nothing to
+</li>
+<li>
+<p>If a braced quantifier such as <code class="regex">{1,2}</code> appears where there is nothing to
 repeat (for example, at the start of a branch), PCRE2 raises an error whereas
 Perl treats the quantifier characters as literal. When a braced quantifier
-(&#8230;&#8203;){min,max} has min &gt; max, Perl treats it as an item which fails to match
+<code class="regex">(...){<em>min</em>,<em>max</em>}</code> has <em>min</em> &gt; <em>max</em>, Perl treats it as an item which fails to match
 any portion of the subject (as no number of repetitions can meet the
 condition), and additionally issues a warning when in warning mode. PCRE2 has
 no warning features, so it gives an error in this case.</p>
-</div>
-<div class="paragraph">
-<p>5. Capture groups that occur inside negative lookaround assertions are counted,
+</li>
+<li>
+<p>Capture groups that occur inside negative lookaround assertions are counted,
 but their entries in the offsets vector are set only when a negative assertion
 is a condition that has a matching branch (that is, the condition is false).
 Perl may set such capture groups in other circumstances.</p>
-</div>
-<div class="paragraph">
-<p>6. The following Perl escape sequences are not supported: \F, \l, \L, \u,
-\U, and \N when followed by a character name. \N on its own, matching a
-non-newline character, and \N{U+dd..}, matching a Unicode code point, are
+</li>
+<li>
+<p>The following Perl escape sequences are not supported: <code class="regex">\F</code>, <code class="regex">\l</code>, <code class="regex">\L</code>, <code class="regex">\u</code>,
+<code class="regex">\U</code>, and <code class="regex">\N</code> when followed by a character name. <code class="regex">\N</code> on its own, matching a
+non-newline character, and <code class="regex">\N{U+<em>dd...</em>}</code>, matching a Unicode code point, are
 supported. The escapes that modify the case of following letters are
 implemented by Perl&#8217;s general string-handling and are not part of its pattern
 matching engine. If any of these are encountered by PCRE2, an error is
-generated by default. However, if either of the PCRE2_ALT_BSUX or
-PCRE2_EXTRA_ALT_BSUX options is set, \U and \u are interpreted as ECMAScript
+generated by default. However, if either of the <code class="constant">PCRE2_ALT_BSUX</code> or
+<code class="constant">PCRE2_EXTRA_ALT_BSUX</code> options is set, <code class="regex">\U</code> and <code class="regex">\u</code> are interpreted as ECMAScript
 interprets them.</p>
-</div>
-<div class="paragraph">
-<p>7. The Perl escape sequences \p, \P, and \X are supported only if PCRE2 is
+</li>
+<li>
+<p>The Perl escape sequences <code class="regex">\p</code>, <code class="regex">\P</code>, and <code class="regex">\X</code> are supported only if PCRE2 is
 built with Unicode support (the default). The properties that can be tested
-with \p and \P are limited to the general category properties such as Lu and
-Nd, the derived properties Any and Lc (synonym L&amp;), script names such as Greek
-or Han, Bidi_Class, Bidi_Control, and a few binary properties. Both PCRE2 and
-Perl support the Cs (surrogate) property, but in PCRE2 its use is limited. See
+with <code class="regex">\p</code> and <code class="regex">\P</code> are limited to the general category properties such as
+<code class="regex">Lu</code> and <code class="regex">Nd</code>, the derived properties <code class="regex">Any</code> and <code class="regex">Lc</code>
+(synonym <code class="regex">L&amp;</code>), script names such as <code class="regex">Greek</code> or <code class="regex">Han</code>,
+<code class="regex">Bidi_Class</code>, <code class="regex">Bidi_Control</code>, and a few binary properties. Both PCRE2 and
+Perl support the <code class="regex">Cs</code> (surrogate) property, but in PCRE2 its use is limited. See
 the
 <a href="pcre2pattern.html"><code>pcre2pattern</code></a>
 documentation for details. The long synonyms for property names that Perl
-supports (such as \p{Letter}) are not supported by PCRE2, nor is it permitted
-to prefix any of these properties with "Is".</p>
-</div>
-<div class="paragraph">
-<p>8. PCRE2 supports the \Q&#8230;&#8203;\E escape for quoting substrings. Characters
+supports (such as <code class="regex">\p{Letter}</code>) are not supported by PCRE2, nor is it permitted
+to prefix any of these properties with <code class="regex">Is</code>.</p>
+</li>
+<li>
+<p>PCRE2 supports the <code class="regex">\Q...\E</code> escape for quoting substrings. Characters
 in between are treated as literals. However, this is slightly different from
-Perl in that $ and @ are also handled as literals inside the quotes. In Perl,
+Perl in that <code class="regex">$</code> and <code class="regex">@</code> are also handled as literals inside the quotes. In Perl,
 they cause variable interpolation (PCRE2 does not have variables). Also, Perl
-does "double-quotish backslash interpolation" on any backslashes between \Q
-and \E which, its documentation says, "may lead to confusing results". PCRE2
-treats a backslash between \Q and \E just like any other character. Note the
+does "double-quotish backslash interpolation" on any backslashes between <code class="regex">\Q</code>
+and <code class="regex">\E</code> which, its documentation says, "may lead to confusing results". PCRE2
+treats a backslash between <code class="regex">\Q</code> and <code class="regex">\E</code> just like any other character. Note the
 following examples:</p>
-</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Pattern</th>
+<th class="tableblock halign-left valign-top">PCRE2 matches</th>
+<th class="tableblock halign-left valign-top">Perl matches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">\Qabc$xyz\E</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="subject">abc$xyz</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="subject">abc</code> followed by the contents of <code>$xyz</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">\Qabc\$xyz\E</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="subject">abc\$xyz</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="subject">abc\$xyz</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">\Qabc\E\$\Qxyz\E</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="subject">abc$xyz</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="subject">abc$xyz</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">\QA\B\E</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="subject">A\B</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="subject">A\B</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">\Q\\E</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="subject">\</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="subject">\\E</code></p></td>
+</tr>
+</tbody>
+</table>
 <div class="paragraph">
-  <p style="margin-left: 2.5ch">  Pattern            PCRE2 matches     Perl matches</p>
-</div>
-<div class="paragraph">
-  <p style="margin-left: 2.5ch">  \Qabc$xyz\E        abc$xyz           abc followed by the<br>
-                                         contents of $xyz<br>
-  \Qabc\$xyz\E       abc\$xyz          abc\$xyz<br>
-  \Qabc\E\$\Qxyz\E   abc$xyz           abc$xyz<br>
-  \QA\B\E            A\B               A\B<br>
-  \Q\\E              \                 \\E</p>
-</div>
-<div class="paragraph">
-<p>The \Q&#8230;&#8203;\E sequence is recognized both inside and outside character classes
+<p>The <code class="regex">\Q...\E</code> sequence is recognized both inside and outside character classes
 by both PCRE2 and Perl. Another difference from Perl is that any appearance of
-\Q or \E inside what might otherwise be a quantifier causes PCRE2 not to
+<code class="regex">\Q</code> or <code class="regex">\E</code> inside what might otherwise be a quantifier causes PCRE2 not to
 recognize the sequence as a quantifier. Perl recognizes a quantifier if
-(redundantly) either of the numbers is inside \Q&#8230;&#8203;\E, but not if the
+(redundantly) either of the numbers is inside <code class="regex">\Q...\E</code>, but not if the
 separating comma is. When not recognized as a quantifier a sequence such as
-{\Q1\E,2} is treated as the literal string "{1,2}".</p>
+<code class="regex">{\Q1\E,2}</code> is treated as the literal string <code class="subject">{1,2}</code>.</p>
 </div>
-<div class="paragraph">
-<p>9. Fairly obviously, PCRE2 does not support the (?{code}) and (??{code})
+</li>
+<li>
+<p>Fairly obviously, PCRE2 does not support the <code class="regex">(?{<em>code</em>})</code> and
+<code class="regex">(??{<em>code</em>})</code>
 constructions. However, PCRE2 does have a "callout" feature, which allows an
 external function to be called during pattern matching. See the
 <a href="pcre2callout.html"><code>pcre2callout</code></a>
 documentation for details.</p>
-</div>
-<div class="paragraph">
-<p>10. Subroutine calls (whether recursive or not) were treated as atomic groups
+</li>
+<li>
+<p>Subroutine calls (whether recursive or not) were treated as atomic groups
 up to PCRE2 release 10.23, but from release 10.30 this changed, and
 backtracking into subroutine calls is now supported, as in Perl.</p>
-</div>
-<div class="paragraph">
-<p>11. In PCRE2, if any of the backtracking control verbs are used in a group that
+</li>
+<li>
+<p>In PCRE2, if any of the backtracking control verbs are used in a group that
 is called as a subroutine (whether or not recursively), their effect is
 confined to that group; it does not extend to the surrounding pattern. This is
-not always the case in Perl. In particular, if (*THEN) is present in a group
+not always the case in Perl. In particular, if <code class="regex">(*THEN)</code> is present in a group
 that is called as a subroutine, its action is limited to that group, even if
-the group does not contain any | characters. Note that such groups are
+the group does not contain any <code class="regex">|</code> characters. Note that such groups are
 processed as anchored at the point where they are tested. PCRE2 also confines
-all control verbs within atomic assertions, again including (*THEN) in
+all control verbs within atomic assertions, again including <code class="regex">(*THEN)</code> in
 assertions with only one branch.</p>
-</div>
-<div class="paragraph">
-<p>12. If a pattern contains more than one backtracking control verb, the first
+</li>
+<li>
+<p>If a pattern contains more than one backtracking control verb, the first
 one that is backtracked onto acts. For example, in the pattern
-A(*COMMIT)B(*PRUNE)C a failure in B triggers (*COMMIT), but a failure in C
-triggers (*PRUNE). Perl&#8217;s behaviour is more complex; in many cases it is the
+<code class="regex">A(*COMMIT)B(*PRUNE)C</code> a failure in <code class="regex">B</code> triggers <code class="regex">(*COMMIT)</code>, but a failure in <code class="regex">C</code>
+triggers <code class="regex">(*PRUNE)</code>. Perl&#8217;s behaviour is more complex; in many cases it is the
 same as PCRE2, but there are cases where it differs.</p>
-</div>
-<div class="paragraph">
-<p>13. There are some differences that are concerned with the settings of captured
-strings when part of a pattern is repeated. For example, matching "aba" against
-the pattern /^(a(b)?)+$/ in Perl leaves $2 unset, but in PCRE2 it is set to
-"b".</p>
-</div>
-<div class="paragraph">
-<p>14. PCRE2&#8217;s handling of duplicate capture group numbers and names is not as
+</li>
+<li>
+<p>There are some differences that are concerned with the settings of captured
+strings when part of a pattern is repeated. For example, matching <code class="subject">aba</code> against
+the pattern <code class="regex">^(a(b)?)+$</code> in Perl leaves <code class="regex">$2</code> unset, but in PCRE2 it is set to
+<code class="subject">b</code>.</p>
+</li>
+<li>
+<p>PCRE2&#8217;s handling of duplicate capture group numbers and names is not as
 general as Perl&#8217;s. This is a consequence of the fact the PCRE2 works internally
 just with numbers, using an external table to translate between numbers and
-names. In particular, a pattern such as (?|(?&lt;a&gt;A)|(?&lt;b&gt;B)), where the two
+names. In particular, a pattern such as <code class="regex">(?|(?&lt;a&gt;A)|(?&lt;b&gt;B))</code>, where the two
 capture groups have the same number but different names, is not supported, and
 causes an error at compile time. If it were allowed, it would not be possible
 to distinguish which group matched, because both names map to capture group
 number 1. To avoid this confusing situation, an error is given at compile time.</p>
-</div>
-<div class="paragraph">
-<p>15. Perl used to recognize comments in some places that PCRE2 does not, for
-example, between the ( and ? at the start of a group. If the /x modifier is
-set, Perl allowed white space between ( and ? though the latest Perls give an
+</li>
+<li>
+<p>Perl used to recognize comments in some places that PCRE2 does not, for
+example, between the <code class="regex">(</code> and <code class="regex">?</code> at the start of a group. If the <code class="regex">/x</code> modifier is
+set, Perl allowed white space between <code class="regex">(</code> and <code class="regex">?</code> though the latest Perls give an
 error (for a while it was just deprecated). There may still be some cases where
 Perl behaves differently.</p>
-</div>
-<div class="paragraph">
-<p>16. Perl, when in warning mode, gives warnings for character classes such as
-[A-\d] or [a-[:digit:]]. It then treats the hyphens as literals. PCRE2 has no
+</li>
+<li>
+<p>Perl, when in warning mode, gives warnings for character classes such as
+<code class="regex">[A-\d]</code> or <code class="regex">[a-[:digit:]]</code>. It then treats the hyphens as literals. PCRE2 has no
 warning features, so it gives an error in these cases because they are almost
 certainly user mistakes.</p>
-</div>
-<div class="paragraph">
-<p>17. In PCRE2, until release 10.45, the upper/lower case character properties Lu
-and Ll were not affected when case-independent matching was specified. Perl has
+</li>
+<li>
+<p>In PCRE2, until release 10.45, the upper/lower case character properties
+<code class="regex">Lu</code> and <code class="regex">Ll</code> were not affected when case-independent matching was specified. Perl has
 changed in this respect, and PCRE2 has now changed to match. When caseless
-matching is in force, Lu, Ll, and Lt (title case) are all treated as Lc (cased
-letter).</p>
-</div>
-<div class="paragraph">
-<p>18. From release 5.32.0, Perl locks out the use of \K in lookaround
+matching is in force, <code class="regex">Lu</code>, <code class="regex">Ll</code>, and <code class="regex">Lt</code> (title case)
+are all treated as <code class="regex">Lc</code> (cased letter).</p>
+</li>
+<li>
+<p>From release 5.32.0, Perl locks out the use of <code class="regex">\K</code> in lookaround
 assertions. From release 10.38 PCRE2 does the same by default. However, there
 is an option for re-enabling the previous behaviour. When this option is set,
-\K is acted on when it occurs in positive assertions, but is ignored in
+<code class="regex">\K</code> is acted on when it occurs in positive assertions, but is ignored in
 negative assertions.</p>
-</div>
-<div class="paragraph">
-<p>19. PCRE2 provides some extensions to the Perl regular expression facilities.
+</li>
+<li>
+<p>PCRE2 provides some extensions to the Perl regular expression facilities.
 Perl 5.10 included new features that were not in earlier versions of Perl, some
 of which (such as named parentheses) were in PCRE2 for some time before. This
 list is with respect to Perl 5.38:</p>
-</div>
-<div class="paragraph">
-<p>(a) If PCRE2_DOLLAR_ENDONLY is set and PCRE2_MULTILINE is not set, the $
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>If <code class="constant">PCRE2_DOLLAR_ENDONLY</code> is set and <code class="constant">PCRE2_MULTILINE</code> is not set, the <code class="regex">$</code>
 meta-character matches only at the very end of the string.</p>
-</div>
-<div class="paragraph">
-<p>(b) A backslash followed by a letter with no special meaning is faulted. (Perl
+</li>
+<li>
+<p>A backslash followed by a letter with no special meaning is faulted. (Perl
 can be made to issue a warning.)</p>
-</div>
-<div class="paragraph">
-<p>(c) If PCRE2_UNGREEDY is set, the greediness of the repetition quantifiers is
+</li>
+<li>
+<p>If <code class="constant">PCRE2_UNGREEDY</code> is set, the greediness of the repetition quantifiers is
 inverted, that is, by default they are not greedy, but if followed by a
 question mark they are.</p>
-</div>
-<div class="paragraph">
-<p>(d) PCRE2_ANCHORED can be used at matching time to force a pattern to be tried
+</li>
+<li>
+<p><code class="constant">PCRE2_ANCHORED</code> can be used at matching time to force a pattern to be tried
 only at the first matching position in the subject string.</p>
-</div>
-<div class="paragraph">
-<p>(e) The PCRE2_NOTBOL, PCRE2_NOTEOL, PCRE2_NOTEMPTY and PCRE2_NOTEMPTY_ATSTART
+</li>
+<li>
+<p>The <code class="constant">PCRE2_NOTBOL</code>, <code class="constant">PCRE2_NOTEOL</code>, <code class="constant">PCRE2_NOTEMPTY</code> and <code class="constant">PCRE2_NOTEMPTY_ATSTART</code>
 options have no Perl equivalents.</p>
-</div>
-<div class="paragraph">
-<p>(f) The \R escape sequence can be restricted to match only CR, LF, or CRLF
-by the PCRE2_BSR_ANYCRLF option.</p>
-</div>
-<div class="paragraph">
-<p>(g) The callout facility is PCRE2-specific. Perl supports codeblocks and
+</li>
+<li>
+<p>The <code class="regex">\R</code> escape sequence can be restricted to match only CR,
+LF, or CRLF
+by the <code class="constant">PCRE2_BSR_ANYCRLF</code> option.</p>
+</li>
+<li>
+<p>The callout facility is PCRE2-specific. Perl supports codeblocks and
 variable interpolation, but not general hooks on every match.</p>
-</div>
-<div class="paragraph">
-<p>(h) The partial matching facility is PCRE2-specific.</p>
-</div>
-<div class="paragraph">
-<p>(i) The alternative matching function (<code>pcre2_dfa_match()</code>) matches in a
+</li>
+<li>
+<p>The partial matching facility is PCRE2-specific.</p>
+</li>
+<li>
+<p>The alternative matching function (<code class="function">pcre2_dfa_match()</code>) matches in a
 different way and is not Perl-compatible.</p>
-</div>
-<div class="paragraph">
-<p>(j) PCRE2 recognizes some special sequences such as (*CR) or (*NO_JIT) at
+</li>
+<li>
+<p>PCRE2 recognizes some special sequences such as <code class="regex">(*CR)</code> or <code class="regex">(*NO_JIT)</code> at
 the start of a pattern. These set overall options that cannot be changed within
 the pattern.</p>
-</div>
-<div class="paragraph">
-<p>(k) PCRE2 supports non-atomic positive lookaround assertions. This is an
+</li>
+<li>
+<p>PCRE2 supports non-atomic positive lookaround assertions. This is an
 extension to the lookaround facilities. The default, Perl-compatible
 lookarounds are atomic.</p>
-</div>
-<div class="paragraph">
-<p>(l) There are three syntactical items in patterns that can refer to a capturing
-group by number: back references such as \g{2}, subroutine calls such as (?3),
-and condition references such as (?(4)&#8230;&#8203;). PCRE2 supports relative group
-numbers such as +2 and -4 in all three cases. Perl supports both plus and minus
+</li>
+<li>
+<p>There are three syntactical items in patterns that can refer to a capturing
+group by number: back references such as <code class="regex">\g{2}</code>, subroutine calls such as <code class="regex">(?3)</code>,
+and condition references such as <code class="regex">(?(4)...)</code>. PCRE2 supports relative group
+numbers such as <code class="regex">+2</code> and <code class="regex">-4</code> in all three cases. Perl supports both plus and minus
 for subroutine calls, but only minus for back references, and no relative
 numbering at all for conditions.</p>
-</div>
-<div class="paragraph">
-<p>(m) The scan substring assertion (syntax (*scs:(n)&#8230;&#8203;)) is a PCRE2 extension
+</li>
+<li>
+<p>The scan substring assertion (syntax <code class="regex">(*scs:(<em>n</em>)...)</code>) is a PCRE2 extension
 that is not available in Perl.</p>
+</li>
+</ol>
 </div>
-<div class="paragraph">
-<p>20. Perl has different limits than PCRE2. See the
+</li>
+<li>
+<p>Perl has different limits than PCRE2. See the
 <a href="pcre2limits.html"><code>pcre2limits</code></a>
 documentation for details. Perl went with 5.10 from recursion to iteration
 keeping the intermediate matches on the heap, which is ~10% slower but does not
 fall into any stack-overflow limit. PCRE2 made a similar change at release
 10.30, and also has many build-time and run-time customizable limits.</p>
-</div>
-<div class="paragraph">
-<p>21. Unlike Perl, PCRE2 doesn&#8217;t have character set modifiers and specially no way
-to set characters by context just like Perl&#8217;s "/d". A regular expression using
-PCRE2_UTF and PCRE2_UCP will use similar rules to Perl&#8217;s "/u"; something closer
-to "/a" could be selected by adding other PCRE2_EXTRA_ASCII* options on top.</p>
-</div>
-<div class="paragraph">
-<p>22. Some recursive patterns that Perl diagnoses as infinite recursions can be
+</li>
+<li>
+<p>Unlike Perl, PCRE2 doesn&#8217;t have character set modifiers and specially no way
+to set characters by context just like Perl&#8217;s <code class="regex">/d</code>. A regular expression using
+<code class="constant">PCRE2_UTF</code> and <code class="constant">PCRE2_UCP</code> will use similar rules to Perl&#8217;s <code class="regex">/u</code>; something closer
+to <code class="regex">/a</code> could be selected by adding other <code>PCRE2_EXTRA_ASCII*</code> options on top.</p>
+</li>
+<li>
+<p>Some recursive patterns that Perl diagnoses as infinite recursions can be
 handled by PCRE2, either by the interpreter or the JIT. An example is
-/(?:|(?0)abcd)(?&#174;|\z)/, which matches a sequence of any number of repeated
-"abcd" substrings at the end of the subject.</p>
-</div>
-<div class="paragraph">
-<p>23. Both PCRE2 and Perl error when \x{ escapes are invalid, but Perl tries to
+<code class="regex">(?:|(?0)abcd)(?(R)|\z)</code>, which matches a sequence of any number of repeated
+<code class="subject">abcd</code> substrings at the end of the subject.</p>
+</li>
+<li>
+<p>Both PCRE2 and Perl error when <code class="regex">\x{</code> escapes are invalid, but Perl tries to
 recover and prints a warning if the problem was that an invalid hexadecimal
 digit was found. Since PCRE2 doesn&#8217;t have warnings it returns an error instead.
-Additionally, Perl accepts \x{} and generates NUL unlike PCRE2.</p>
-</div>
-<div class="paragraph">
-<p>24. From release 10.45, PCRE2 gives an error if \x is not followed by a
+Additionally, Perl accepts <code class="regex">\x{}</code> and matches NUL unlike PCRE2.</p>
+</li>
+<li>
+<p>From release 10.45, PCRE2 gives an error if <code class="regex">\x</code> is not followed by a
 hexadecimal digit or a curly bracket. It used to interpret this as the NUL
-character. Perl still generates NUL, but warns when in warning mode in most
+character. Perl still matches NUL, but warns when in warning mode in most
 cases.</p>
+</li>
+</ul>
 </div>
+<h2 id="_author" class="discrete">Author</h2>
+<div class="paragraph">
+<p>Philip Hazel<br>
+Retired from University Computing Service<br>
+Cambridge, England.</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_author">Author</h2>
-<div class="sectionbody">
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>Philip Hazel
-Retired from University Computing Service
-Cambridge, England.</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_revision">Revision</h2>
-<div class="sectionbody">
+<h2 id="_revision" class="discrete">Revision</h2>
 <div class="paragraph">
 <p>Last updated: 02 June 2025<br>
-Copyright (c) 1997-2024 University of Cambridge.</p>
+Copyright &#169; 1997-2024 University of Cambridge.</p>
 </div>
 </div>
 </div>

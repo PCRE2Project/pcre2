@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_set_max_pattern_compiled_length
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 09 June 2024
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,21 +31,23 @@
 pcre2_set_max_pattern_compiled_length \- set the maximum length of a compiled pattern
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_set_max_pattern_compiled_length(
-      pcre2_compile_context *ccontext, PCRE2_SIZE length);
+\fBint\fP pcre2_set_max_pattern_compiled_length(
+      \fBpcre2_compile_context\fP *\fIccontext\fP, \fBPCRE2_SIZE\fP \fIlength\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function sets, in a compile context, the maximum size (in bytes) for the
 memory needed to hold the compiled version of a pattern that is using this
 context. The result is always zero. If a pattern that is passed to
-\f(CRpcre2_compile()\fP referencing this context needs more memory, an error is
-generated. The default is the largest number that a PCRE2_SIZE variable can
+pcre2_compile() referencing this context needs more memory, an error is
+generated. The default is the largest number that a \fBPCRE2_SIZE\fP variable can
 hold, which is effectively unlimited.
 .sp
 There is a complete description of the PCRE2 native API in the

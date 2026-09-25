@@ -10,18 +10,18 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 void pcre2_substring_list_free(PCRE2_UCHAR **list);
-....
+----
 
 == Description
 
 This is a convenience function for freeing the store obtained by a previous
-call to `pcre2substring_list_get()`. Its only argument is a pointer to
-the list of string pointers. If the argument is NULL, the function returns
+call to func:pcre2_substring_list_get(). Its only argument is a pointer to
+the list of string pointers. If the argument is const:NULL, the function returns
 immediately, without doing anything.
 
 There is a complete description of the PCRE2 native API in the

@@ -10,19 +10,19 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int pcre2_get_max_pattern_length(pcre2_compile_context *ccontext,
                                  PCRE2_SIZE *length);
-....
+----
 
 == Description
 
 This function gets, from a compile context, the maximum text length (in code
 units) of the pattern that can be compiled. The result is zero for success or
-PCRE2_ERROR_NULL if either argument is NULL. The largest value a PCRE2_SIZE
+const:PCRE2_ERROR_NULL if either argument is const:NULL. The largest value a type:PCRE2_SIZE
 variable can hold indicates an unlimited limit.
 
 There is a complete description of the PCRE2 native API in the

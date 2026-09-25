@@ -1,7 +1,7 @@
 = pcre2_dfa_match(3)
 :doctype: manpage
 :manname: pcre2_dfa_match
-:manpurpose: match a pattern using the alternative matching algorithm
+:manpurpose: match a compiled pattern to a subject string using the alternative matching algorithm (DFA algorithm; not Perl compatible)
 :manvolnum: 3
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
@@ -10,8 +10,8 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject,
@@ -19,7 +19,7 @@ int pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject,
                     uint32_t options, pcre2_match_data *match_data,
                     pcre2_match_context *mcontext, int *workspace,
                     PCRE2_SIZE wscount);
-....
+----
 
 == Description
 
@@ -27,52 +27,68 @@ This function matches a compiled regular expression against a given subject
 string, using an alternative matching algorithm that scans the subject string
 just once (except when processing lookaround assertions). This function is
 _not_ Perl-compatible (the Perl-compatible matching function is
-`pcre2_match()`). The arguments for this function are:
+func:pcre2_match()). The arguments for this function are:
 
-[literal,subs=normal]
-....
-_code_         Points to the compiled pattern
-_subject_      Points to the subject string
-_length_       Length of the subject string
-_startoffset_  Offset in the subject at which to start matching
-_options_      Option bits
-_match_data_   Points to a match data block, for results
-_mcontext_     Points to a match context, or is NULL
-_workspace_    Points to a vector of ints used as working space
-_wscount_      Number of elements in the vector
-....
+[.parameters]
+arg:code::
+    Points to the compiled pattern
+arg:subject::
+    Points to the subject string
+arg:length::
+    Length of the subject string
+arg:start_offset::
+    Offset in the subject at which to start matching
+arg:options::
+    Option bits
+arg:match_data::
+    Points to a match data block, for results
+arg:mcontext::
+    Points to a match context, or is const:NULL
+arg:workspace::
+    Points to a vector of ints used as working space
+arg:wscount::
+    Number of elements in the vector
 
 The size of output vector needed to contain all the results depends on the
 number of simultaneous matches, not on the number of parentheses in the
-pattern. Using `pcre2_match_data_create_from_pattern()` to create the match
+pattern. Using func:pcre2_match_data_create_from_pattern() to create the match
 data block is therefore not advisable when using this function.
 
 A match context is needed only if you want to set up a callout function or
 specify the heap limit or the match or the recursion depth limits. The
-_length_ and _startoffset_ values are code units, not characters. The
+arg:length and arg:start_offset values are code units, not characters. The
 options are:
 
-[literal]
-....
-PCRE2_ANCHORED          Match only at the first position
-PCRE2_COPY_MATCHED_SUBJECT
-                        On success, make a private subject copy
-PCRE2_ENDANCHORED       Pattern can match only at end of subject
-PCRE2_NOTBOL            Subject is not the beginning of a line
-PCRE2_NOTEOL            Subject is not the end of a line
-PCRE2_NOTEMPTY          An empty string is not a valid match
-PCRE2_NOTEMPTY_ATSTART  An empty string at the start of the subject
-                         is not a valid match
-PCRE2_NO_UTF_CHECK      Do not check the subject for UTF
-                         validity (only relevant if PCRE2_UTF
-                         was set at compile time)
-PCRE2_PARTIAL_HARD      Return PCRE2_ERROR_PARTIAL for a partial
-                         match even if there is a full match
-PCRE2_PARTIAL_SOFT      Return PCRE2_ERROR_PARTIAL for a partial
-                         match if no full matches are found
-PCRE2_DFA_RESTART       Restart after a partial match
-PCRE2_DFA_SHORTEST      Return only the shortest match
-....
+[.options]
+const:PCRE2_ANCHORED::
+    Match only at the first position
+const:PCRE2_COPY_MATCHED_SUBJECT::
+    On success, make a private subject copy
+const:PCRE2_ENDANCHORED::
+    Pattern can match only at end of subject
+const:PCRE2_NOTBOL::
+    Subject is not the beginning of a line
+const:PCRE2_NOTEOL::
+    Subject is not the end of a line
+const:PCRE2_NOTEMPTY::
+    An empty string is not a valid match
+const:PCRE2_NOTEMPTY_ATSTART::
+    An empty string at the start of the subject
+    is not a valid match
+const:PCRE2_NO_UTF_CHECK::
+    Do not check the subject for UTF
+    validity (only relevant if const:PCRE2_UTF
+    was set at compile time)
+const:PCRE2_PARTIAL_HARD::
+    Return const:PCRE2_ERROR_PARTIAL for a partial
+    match even if there is a full match
+const:PCRE2_PARTIAL_SOFT::
+    Return const:PCRE2_ERROR_PARTIAL for a partial
+    match if no full matches are found
+const:PCRE2_DFA_RESTART::
+    Restart after a partial match
+const:PCRE2_DFA_SHORTEST::
+    Return only the shortest match
 
 There are restrictions on what may appear in a pattern when using this matching
 function. Details are given in the

@@ -10,21 +10,21 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 pcre2_code *pcre2_code_copy(const pcre2_code *code);
-....
+----
 
 == Description
 
 This function makes a copy of the memory used for a compiled pattern, excluding
 any memory used by the JIT compiler. Without a subsequent call to
-`pcre2_jit_compile()`, the copy can be used only for non-JIT matching. The
+func:pcre2_jit_compile(), the copy can be used only for non-JIT matching. The
 pointer to the character tables is copied, not the tables themselves (see
-`pcre2_code_copy_with_tables()`). The yield of the function is NULL if
-_code_ is NULL or if sufficient memory cannot be obtained.
+func:pcre2_code_copy_with_tables()). The yield of the function is const:NULL if
+arg:code is const:NULL or if sufficient memory cannot be obtained.
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

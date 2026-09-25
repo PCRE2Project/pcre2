@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_get_ovector_pointer
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 25 October 2014
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,18 +31,20 @@
 pcre2_get_ovector_pointer \- get a pointer to the ovector
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-PCRE2_SIZE *pcre2_get_ovector_pointer(pcre2_match_data *match_data);
+\fBPCRE2_SIZE\fP *pcre2_get_ovector_pointer(\fBpcre2_match_data\fP *\fImatch_data\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function returns a pointer to the vector of offsets that forms part of the
 given match data block. The number of pairs can be found by calling
-\f(CRpcre2_get_ovector_count()\fP.
+pcre2_get_ovector_count().
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_substring_length_byname
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 26 September 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,30 +31,42 @@
 pcre2_substring_length_byname \- find length of named substring
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_substring_length_byname(pcre2_match_data *match_data,
-                                  PCRE2_SPTR stringname,
-                                  PCRE2_SIZE *sizeptr);
+\fBint\fP pcre2_substring_length_byname(\fBpcre2_match_data\fP *\fImatch_data\fP,
+                                  \fBPCRE2_SPTR\fP \fIstringname\fP,
+                                  \fBPCRE2_SIZE\fP *\fIsizeptr\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function returns the length of a matched substring, identified by name.
 The arguments are:
 .sp
-.ti +2
-\fImatch_data\fP   The match data block for the match
-.br
-.ti +2
-\fIname\fP         The substring name
-.br
-.ti +2
-\fIlength\fP       Where to return the length, or NULL
+.RS 4
+.PD 0
+.TP 11
+\fImatch_data\fP
+.ad l
+The match data block for the match
+.TP 11
+\fIstringname\fP
+.ad l
+The substring name
+.TP 11
+\fIsizeptr\fP
+.ad l
+Where to return the length, or \fBNULL\fP
+.PD
+.RE
+.PP
+.ad l
 .sp
-The third argument may be NULL if all you want to know is whether or not a
+The third argument may be \fBNULL\fP if all you want to know is whether or not a
 substring is set. The yield is zero on success, or a negative error code
 otherwise.
 .sp

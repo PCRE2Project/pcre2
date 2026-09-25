@@ -48,6 +48,8 @@ for library in ('posix', '8', '16', '32'):
 
 print('Updating AsciiDoc sources')
 for filename in glob.glob('doc/*.adoc'):
+    if filename == 'doc/index.adoc':
+        continue
     update_adoc_version(filename)
 
 # MODULE.bazel

@@ -10,13 +10,13 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 int pcre2_set_parens_nest_limit(pcre2_compile_context *ccontext,
                                 uint32_t limit);
-....
+----
 
 == Description
 

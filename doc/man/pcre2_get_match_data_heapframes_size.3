@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_get_match_data_heapframes_size
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 18 January 2023
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,14 +31,16 @@
 pcre2_get_match_data_heapframes_size \- get the size of match data heapframes
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-PCRE2_SIZE pcre2_get_match_data_heapframes_size(
-      pcre2_match_data *match_data);
+\fBPCRE2_SIZE\fP pcre2_get_match_data_heapframes_size(
+      \fBpcre2_match_data\fP *\fImatch_data\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function returns the size, in bytes, of the heapframes data block that is

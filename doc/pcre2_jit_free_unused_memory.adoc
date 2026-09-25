@@ -10,20 +10,20 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
-....
+----
 
 == Description
 
 This function frees unused JIT executable memory. The argument is a general
-context, for custom memory management, or NULL for standard memory management.
+context, for custom memory management, or const:NULL for standard memory management.
 JIT memory allocation retains some memory in order to improve future JIT
 compilation speed. In low memory conditions,
-`pcre2_jit_free_unused_memory()` can be used to cause this memory to be
+func:pcre2_jit_free_unused_memory() can be used to cause this memory to be
 freed.
 
 There is a complete description of the PCRE2 native API in the

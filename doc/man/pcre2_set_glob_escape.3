@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_set_glob_escape
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 12 July 2017
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -31,14 +31,16 @@
 pcre2_set_glob_escape \- set glob escape character
 .SH "SYNOPSIS"
 .sp
+.ss \n[.ss]
 .nf
 .fam C
-#include <pcre2.h>
+\fB\&#include\fP \fB<pcre2.h>\fP
 
-int pcre2_set_glob_escape(pcre2_convert_context *ccontext,
-                          uint32_t escape_char);
+\fBint\fP pcre2_set_glob_escape(\fBpcre2_convert_context\fP *\fIccontext\fP,
+                          \fBuint32_t\fP \fIescape_char\fP);
 .fam
 .fi
+.ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function is part of an experimental set of pattern conversion functions.
@@ -46,7 +48,7 @@ It sets the escape character that is used when converting globs. The second
 argument must either be zero (meaning there is no escape character) or a
 punctuation character whose code point is less than 256. The default is grave
 accent if running under Windows, otherwise backslash. The result of the
-function is zero for success or PCRE2_ERROR_BADDATA if the second argument is
+function is zero for success or \fBPCRE2_ERROR_BADDATA\fP if the second argument is
 invalid.
 .sp
 The pattern conversion functions are described in the

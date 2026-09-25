@@ -10,19 +10,19 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,c,role=prototype]
+----
 #include <pcre2.h>
 
 void pcre2_converted_pattern_free(PCRE2_UCHAR *converted);
-....
+----
 
 == Description
 
 This function is part of an experimental set of pattern conversion functions.
 It frees the memory occupied by a converted pattern that was obtained by
-calling `pcre2_pattern_convert()` with arguments that caused it to place
-the converted pattern into newly obtained heap memory. If the argument is NULL,
+calling func:pcre2_pattern_convert() with arguments that caused it to place
+the converted pattern into newly obtained heap memory. If the argument is const:NULL,
 the function returns immediately without doing anything.
 
 The pattern conversion functions are described in the
