@@ -166,6 +166,89 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
     result.join "\n"
   end
 
+  def convert_ulist(node)
+    result = []
+    result << %(.sp
+.B #{manify node.title}
+.br) if node.title?
+    spaced = node.items.any?(&:blocks?)
+    node.items.each_with_index do |item, index|
+      # Keep compact lists together, but space every item if any item has
+      # attached blocks so the list uses consistent vertical rhythm.
+      result << '.sp' if index.zero? || spaced
+      result << %[.RS 4
+.ie n \\{\\
+\\h'-04'\\(bu\\h'+03'\\c
+.\\}
+.el \\{\\
+.  sp -1
+.  IP \\(bu 2.3
+.\\}#{(list_text = manify item.text, whitespace: :normalize).empty? ? '' : "\n#{list_text}"}]
+      if item.blocks?
+        item_content = item.content
+        item_content = item_content.slice 4, item_content.length if list_text.empty? && (item_content.start_with? %(.sp\n))
+        result << item_content
+      end
+      result << '.RE'
+    end
+    result.join "\n"
+  end
+
+  def convert_olist(node)
+    result = []
+    result << %(.sp
+.B #{manify node.title}
+.br) if node.title?
+    spaced = node.items.any?(&:blocks?)
+    start = (node.attr 'start', 1).to_i
+    node.items.each_with_index do |item, index|
+      result << '.sp' if index.zero? || spaced
+      numeral = ordered_list_numeral(index + start, node.style)
+      result << %(.RS 4
+.ie n \\{\\
+\\h'-04' #{numeral}.\\h'+01'\\c
+.\\}
+.el \\{\\
+.  sp -1
+.  IP " #{numeral}." 4.2
+.\\}#{(list_text = manify item.text, whitespace: :normalize).empty? ? '' : "\n#{list_text}"})
+      if item.blocks?
+        item_content = item.content
+        item_content = item_content.slice 4, item_content.length if list_text.empty? && (item_content.start_with? %(.sp\n))
+        result << item_content
+      end
+      result << '.RE'
+    end
+    result.join "\n"
+  end
+
+  def ordered_list_numeral(number, style)
+    return number.to_s unless number.positive?
+
+    case style
+    when 'loweralpha'
+      alpha_list_numeral(number).downcase
+    when 'upperalpha'
+      alpha_list_numeral(number)
+    when 'lowerroman'
+      Asciidoctor::Helpers.int_to_roman(number).downcase
+    when 'upperroman'
+      Asciidoctor::Helpers.int_to_roman(number)
+    else
+      number.to_s
+    end
+  end
+
+  def alpha_list_numeral(number)
+    result = +''
+    while number > 0
+      number -= 1
+      result.prepend((65 + (number % 26)).chr)
+      number /= 26
+    end
+    result
+  end
+
   # Flatten nested font changes into independent runs because roff's `\fP`
   # remembers only one previous font; it does not maintain a font stack.
   def convert_inline_quoted(node)
