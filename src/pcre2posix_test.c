@@ -254,6 +254,74 @@ main(int argc, char **argv)
     regfree(&re);
   }
 
+  /* Validation and edge case tests */
+  PRINTF("Testing NULL and boundary validation\n");
+  regfree(NULL);
+
+  if (regcomp(NULL, "pattern", 0) != REG_INVARG)
+  {
+    fprintf(stderr, "regcomp(NULL, ...) did not return REG_INVARG\n");
+    return 1;
+  }
+
+  if (regcomp(&re, NULL, 0) != REG_INVARG)
+  {
+    fprintf(stderr, "regcomp(..., NULL, ...) did not return REG_INVARG\n");
+    return 1;
+  }
+
+  re.re_endp = NULL;
+  if (regcomp(&re, "pattern", REG_PEND) != REG_INVARG)
+  {
+    fprintf(stderr, "regcomp with NULL re_endp did not return REG_INVARG\n");
+    return 1;
+  }
+
+  if (regexec(NULL, "subject", 0, NULL, 0) != REG_INVARG)
+  {
+    fprintf(stderr, "regexec(NULL, ...) did not return REG_INVARG\n");
+    return 1;
+  }
+
+  if (regcomp(&re, "test", 0) == 0)
+  {
+    if (regexec(&re, NULL, 0, NULL, 0) != REG_INVARG)
+    {
+      fprintf(stderr, "regexec(..., NULL, ...) did not return REG_INVARG\n");
+      regfree(&re);
+      return 1;
+    }
+
+    match[0].rm_so = -1;
+    match[0].rm_eo = 2;
+    if (regexec(&re, "test", 1, match, REG_STARTEND) != REG_INVARG)
+    {
+      fprintf(stderr,
+              "regexec with negative rm_so did not return REG_INVARG\n");
+      regfree(&re);
+      return 1;
+    }
+
+    match[0].rm_so = 3;
+    match[0].rm_eo = 2;
+    if (regexec(&re, "test", 1, match, REG_STARTEND) != REG_INVARG)
+    {
+      fprintf(stderr,
+              "regexec with rm_eo < rm_so did not return REG_INVARG\n");
+      regfree(&re);
+      return 1;
+    }
+
+    regfree(&re);
+    regfree(&re); /* Test idempotency */
+  }
+
+  if (regerror(0, NULL, NULL, 0) == 0)
+  {
+    fprintf(stderr, "regerror(..., NULL, 0) returned 0\n");
+    return 1;
+  }
+
   PRINTF("End of test\n");
   return 0;
 }
