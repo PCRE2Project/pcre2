@@ -28,6 +28,19 @@ jobs:
           sudo apt-get -qq update
           sudo apt-get -qq install -y hugo
 
+      # Install Asciidoctor and the Rouge source highlighter
+      - name: Install Asciidoctor and Rouge
+        run: |
+          sudo apt update
+          sudo apt install -y ruby ruby-dev
+          gem install --user-install asciidoctor rouge
+          export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
+          export PATH="$GEM_HOME/bin:$PATH"
+          echo "Ruby version: $(ruby -v)"
+          echo "Asciidoctor version: $(asciidoctor --version)"
+          echo "Rouge version: $(rouge --version)"
+          echo "$GEM_HOME/bin" >> "$GITHUB_PATH"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

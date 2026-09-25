@@ -36,73 +36,35 @@ for directory in clean_dirs:
 
 # Import the documentation
 
-# - 1) Each individual man page
-
-man_pages = [entry.path for entry in os.scandir('../doc') if entry.is_file() and entry.name.endswith(('.1', '.3'))]
-for file in man_pages:
+os.makedirs('content/doc', exist_ok=True)
+doc_pages = sorted(
+    entry.path for entry in os.scandir('../doc')
+    if entry.is_file() and entry.name.endswith('.adoc')
+)
+for file in doc_pages:
     base = os.path.splitext(os.path.basename(file))[0]
-    os.makedirs(f'content/doc/{base}', exist_ok=True)
-    with open(file, 'r') as infile, open(f'content/doc/{base}/index.html', 'w') as outfile:
+    is_index = base == 'index'
+    output_name = '_index.adoc' if is_index else f'{base}.adoc'
+    title = 'Manual pages' if is_index else base
+    relfileprefix = '' if is_index else '../'
+
+    with open(file, 'r') as infile:
+        lines = infile.readlines()
+    if not lines or not lines[0].startswith('= '):
+        raise ValueError(f"AsciiDoc document {file} does not start with a title")
+
+    lines[1:1] = [
+        ':outfilesuffix: /\n',
+        f':relfileprefix: {relfileprefix}\n',
+    ]
+
+    with open(f'content/doc/{output_name}', 'w') as outfile:
         outfile.write(f"""+++
-title = "{base}"
-aliases = ["/doc/html/{base}.html"]
+title = "{title}"
 +++
 
 """)
-
-        # Run and capture the output
-        result = subprocess.run(['perl', '../maint/132html', '-noheader', base], stdin=infile, capture_output=True, text=True)
-        output = result.stdout
-
-        # Adjust the links for the website's structure
-        def adjust_link(match):
-            existing = match[0]
-            href = match[1]
-            try_match = re.match(r'^(https?://|#)', href)
-            if try_match:
-                return existing
-            try_match = re.match(r'^([^/]+).html((?:#[^/]+)?)$', href)
-            if try_match:
-                return f'href="../{try_match[1]}/{try_match[2]}"'
-            try_match = re.match(r'^(README|NON-AUTOTOOLS-BUILD).txt$', href)
-            if try_match:
-                return f'href="../../guide/{try_match[1].lower()}/"'
-            raise Exception(f"Could not adjust link {href}")
-
-        output = re.sub(r'href="([^"]*)"', adjust_link, output)
-
-        outfile.write(output)
-
-# - 2) The index page
-
-with open('../doc/html/index.html', 'r') as doc_index:
-    index_content = doc_index.read()
-with open('content/doc/_index.md', 'w') as f:
-    f.write("""+++
-title = "Manual pages"
-+++
-
-<p>
-The reference manual for PCRE2 consists of a number of pages that are listed
-below in alphabetical order. If you are new to PCRE2, please read the first one
-first.
-</p>
-""")
-
-    # Extract both the tables from the input file
-    tables = re.search(r'<table>.*</table>', index_content, re.DOTALL)
-
-    # Adjust the links for the website's structure
-    def adjust_link(match):
-        href = match[1]
-        try_match = re.match(r'^([^/]+).html$', href)
-        if try_match:
-            return f'href="./{try_match[1]}/"'
-        raise Exception(f"Could not adjust link {href}")
-
-    tables = re.sub(r'href="([^"]*)"', adjust_link, tables[0])
-
-    f.write(tables + "\n")
+        outfile.writelines(lines)
 
 # Import the project pages
 
@@ -164,7 +126,13 @@ commands = [
     ["npx", "-y", "pagefind", "--site", "public"]
 ]
 
+build_env = {**os.environ, "HUGO_PARAMS_release": CURRENT_RELEASE}
+ruby_load_path = os.path.abspath(f"{script_dir}/../../maint")
+if "RUBYLIB" in build_env:
+    ruby_load_path += os.pathsep + build_env["RUBYLIB"]
+build_env["RUBYLIB"] = ruby_load_path
+
 for command in commands:
-    result = subprocess.run(command, env={**os.environ, "HUGO_PARAMS_release": CURRENT_RELEASE})
+    result = subprocess.run(command, env=build_env)
     if result.returncode != 0:
         raise Exception(f"Command '{command}' failed with exit code {result.returncode}")

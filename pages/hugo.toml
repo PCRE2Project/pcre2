@@ -4,11 +4,20 @@ title = 'PCRE2 - Perl-Compatible Regular Expressions'
 disableKinds = ["taxonomy", "term", "rss"]
 
 [markup]
+  [markup.asciidocExt]
+    extensions = ['AsciidocConverterPcre2']
+    failureLevel = 'warn'
+    preserveTOC = true
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true
   [markup.highlight]
     noClasses = false
+
+[security]
+  [security.exec]
+    allow = ['^asciidoctor$']
+    osEnv = ['(?i)^(PATH|PATHEXT|APPDATA|TMP|TEMP|TERM|RUBYLIB)$']
 
 [params]
   release = 'Unknown'
