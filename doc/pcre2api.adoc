@@ -4134,11 +4134,15 @@ const:PCRE2_ERROR_NOMEMORY::
       default.
 
 const:PCRE2_ERROR_NULL::
-      is returned if const:PCRE2_SUBSTITUTE_MATCHED is set but the
-      arg:match_data argument is const:NULL; or if the arg:subject or arg:replacement
-      or arg:buffer argument is const:NULL. However, a const:NULL arg:replacement
-      argument is allowed if the arg:rlength argument is zero; and similarly for
-      arg:subject with zero arg:length and arg:buffer with zero arg:blength.
+      is returned if arg:code or arg:blength is const:NULL; or if
+      const:PCRE2_SUBSTITUTE_MATCHED is set but the arg:match_data argument is
+      const:NULL; or if the arg:subject or arg:replacement or arg:buffer
+      argument is const:NULL. However, a const:NULL arg:replacement argument is
+      allowed if the arg:rlength argument is zero; and similarly for arg:subject
+      with zero arg:length and arg:buffer with zero arg:blength.
+
+const:PCRE2_ERROR_BADMAGIC::
+      the magic number in the compiled code was not recognized.
 
 const:PCRE2_ERROR_BADREPLACEMENT::
       is used for miscellaneous syntax errors in the
