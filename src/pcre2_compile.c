@@ -8238,7 +8238,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
                 *code++ = OP_BRAZERO + repeat_type;
 
                 /* All but the final copy start a new nesting, maintaining the
-              chain of brackets outstanding. */
+                chain of brackets outstanding. */
 
                 if (i != 1)
                 {
@@ -8569,7 +8569,7 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
 
         /* Possessifying an EXACT quantifier has no effect, so we can ignore it.
         However, QUERY, STAR, or UPTO may follow (for quantifiers such as {5,6},
-      {  5,}, or {5,10}). We skip over an EXACT item; if the length of what
+        {5,}, or {5,10}). We skip over an EXACT item; if the length of what
         remains is greater than zero, there's a further opcode that can be
         handled. If not, do nothing, leaving the EXACT alone. */
 

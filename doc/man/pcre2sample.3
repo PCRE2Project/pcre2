@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2sample
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 28 February 2025
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -32,11 +32,11 @@ pcre2sample \- PCRE2 sample program
 .SH "PCRE2 SAMPLE PROGRAM"
 .sp
 A simple, complete demonstration program to get you started with using PCRE2 is
-supplied in the file \fIpcre2demo.c\fP in the \f(CRsrc\fP directory in the PCRE2
+supplied in the file \f(CRpcre2demo.c\fP in the \f(CRsrc\fP directory in the PCRE2
 distribution. A listing of this program is given in the
 \f(CRpcre2demo\fP
 documentation. If you do not have a copy of the PCRE2 distribution, you can
-save this listing to recreate the contents of \fIpcre2demo.c\fP.
+save this listing to recreate the contents of \f(CRpcre2demo.c\fP.
 .sp
 The demonstration program compiles the regular expression that is its
 first argument, and matches it against the subject string in its second
@@ -44,7 +44,7 @@ argument. No PCRE2 options are set, and default character tables are used. If
 matching succeeds, the program outputs the portion of the subject that matched,
 together with the contents of any captured substrings.
 .sp
-If the \-g option is given on the command line, the program then goes on to
+If the \f(CR\-g\fP option is given on the command line, the program then goes on to
 check for further matches of the same regular expression in the same subject
 string. The logic is a little bit tricky because of the possibility of matching
 an empty string. Comments in the code explain what is going on.
@@ -69,7 +69,7 @@ cc \-o pcre2demo pcre2demo.c \-lpcre2\-8
 .sp
 If PCRE2 is installed elsewhere, you may need to add additional options to the
 command line. For example, on a Unix\-like system that has PCRE2 installed in
-\fI/usr/local\fP, you can compile the demonstration program using a command
+\f(CR/usr/local\fP, you can compile the demonstration program using a command
 like this:
 .sp
 .ss \n[.ss]
@@ -107,8 +107,14 @@ If you try to run
 when PCRE2 is not installed in the standard library directory, you may get an
 error like this on some operating systems (e.g. Solaris):
 .sp
-.ti +2
-ld.so.1: pcre2demo: fatal: libpcre2\-8.so.0: open failed: No such file or directory
+.ss \n[.ss]
+.nf
+.fam C
+ld.so.1: pcre2demo: fatal: libpcre2\-8.so.0: open failed: No such
+file or directory
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
 This is caused by the way shared library support works on those systems. You
 need to add
@@ -122,18 +128,15 @@ need to add
 .ss \n[.ss] 0
 .sp
 (for example) to the compile command to get round this problem.
-.SH "AUTHOR"
+.SS "Author"
 .sp
-.ti +2
 Philip Hazel
 .br
-.ti +2
 Retired from University Computing Service
 .br
-.ti +2
 Cambridge, England.
-.SH "REVISION"
+.SS "Revision"
 .sp
 Last updated: 28 February 2025
 .br
-Copyright (c) 1997\-2016 University of Cambridge.
+Copyright \(co 1997\-2016 University of Cambridge.

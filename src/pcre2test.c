@@ -3298,7 +3298,7 @@ c_option(const char *arg)
     }
 
     /* For VMS, return the value by setting a symbol, for certain values only. This
-  is contributed code which the PCRE2 developers have no means of testing. */
+    is contributed code which the PCRE2 developers have no means of testing. */
 
 #ifdef __VMS
 

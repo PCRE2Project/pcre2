@@ -1577,7 +1577,7 @@ NEW_FRAME:
 #endif /* SUPPORT_UNICODE */
 
         /* When not in UTF mode, load a single-code-unit character. Then proceed as
-      above, using Unicode casing if either UTF or UCP is set. */
+        above, using Unicode casing if either UTF or UCP is set. */
 
         Lc = *Fecode++;
 
@@ -3870,7 +3870,7 @@ NEW_FRAME:
 #endif /* SUPPORT_UNICODE */
 
           /* Code for the non-UTF case for minimum matching of operators other
-        than OP_PROP and OP_NOTPROP. */
+          than OP_PROP and OP_NOTPROP. */
 
           switch (Lctype)
           {
@@ -3910,18 +3910,20 @@ NEW_FRAME:
             break;
 
             /* This OP_ANYBYTE case will never be reached because \C gets turned
-          into OP_ALLANY in non-UTF mode. Cut out the code so that coverage
-          reports don't complain about it's never being used. */
+            into OP_ALLANY in non-UTF mode. Cut out the code so that coverage
+            reports don't complain about it's never being used. */
 
-            /*        case OP_ANYBYTE:
-  *        if (Feptr > mb->end_subject - Lmin)
-  *          {
-  *          SCHECK_PARTIAL();
-  *          RRETURN(MATCH_NOMATCH);
-  *          }
-  *        Feptr += Lmin;
-  *        break;
-  */
+            /* case OP_ANYBYTE:
+             *   if (Feptr > mb->end_subject - Lmin)
+             *   {
+             *     SCHECK_PARTIAL();
+             *     RRETURN(MATCH_NOMATCH);
+             *   }
+             *
+             *   Feptr += Lmin;
+             *   break;
+             */
+
           case OP_ANYNL:
             for (i = 1; i <= Lmin; i++)
             {

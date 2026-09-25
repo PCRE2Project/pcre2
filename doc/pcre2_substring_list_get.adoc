@@ -36,11 +36,11 @@ arg:match_data::
 arg:listptr::
     Where to put a pointer to the list
 arg:lengthsptr::
-    Where to put a pointer to the lengths, or [.c]`NULL`
+    Where to put a pointer to the lengths, or const:NULL
 
 A pointer to a list of pointers is put in the variable whose address is in
-arg:listptr. The list is terminated by a [.c]`NULL` pointer. If arg:lengthsptr is
-not [.c]`NULL`, a matching list of lengths is created, and its address is placed in
+arg:listptr. The list is terminated by a const:NULL pointer. If arg:lengthsptr is
+not const:NULL, a matching list of lengths is created, and its address is placed in
 arg:lengthsptr. The yield of the function is zero on success or
 const:PCRE2_ERROR_NOMEMORY if sufficient memory could not be obtained.
 

@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_code_free
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 28 June 2018
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -42,7 +42,7 @@ pcre2_code_free \- free a compiled pattern
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
-If \fIcode\fP is \f(CRNULL\fP, this function does nothing. Otherwise, \fIcode\fP must
+If \fIcode\fP is \fBNULL\fP, this function does nothing. Otherwise, \fIcode\fP must
 point to a compiled pattern. This function frees its memory, including any
 memory used by the JIT compiler. If the compiled pattern was created by a call
 to pcre2_code_copy_with_tables(), the memory for the character tables is

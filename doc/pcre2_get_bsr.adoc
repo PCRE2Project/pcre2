@@ -20,7 +20,7 @@ int pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *length);
 == Description
 
 This function gets the convention for processing [.regex]`\R` within a compile context.
-The result is zero for success or const:PCRE2_ERROR_NULL if either argument is [.c]`NULL`.
+The result is zero for success or const:PCRE2_ERROR_NULL if either argument is const:NULL.
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

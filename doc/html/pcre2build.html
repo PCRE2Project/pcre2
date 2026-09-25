@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="description" content="Building PCRE2">
 <title>pcre2build(3)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +117,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +219,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -433,9 +435,39 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 </head>
-<body class="manpage">
+<body class="manpage toc2 toc-right">
 <div id="header">
 <h1>pcre2build(3) Manual Page</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_building_pcre2">Building PCRE2</a></li>
+<li><a href="#_pcre2_build_time_options">PCRE2 build-time options</a></li>
+<li><a href="#_building_8_bit_16_bit_and_32_bit_libraries">Building 8-bit, 16-bit and 32-bit libraries</a></li>
+<li><a href="#_building_shared_and_static_libraries">Building shared and static libraries</a></li>
+<li><a href="#_unicode_and_utf_support">Unicode and UTF support</a></li>
+<li><a href="#_disabling_the_use_of_c">Disabling the use of <code class="regex">\C</code></a></li>
+<li><a href="#_just_in_time_compiler_support">Just-in-time compiler support</a></li>
+<li><a href="#_newline_recognition">Newline recognition</a></li>
+<li><a href="#_what_r_matches">What <code class="regex">\R</code> matches</a></li>
+<li><a href="#_handling_very_large_patterns">Handling very large patterns</a></li>
+<li><a href="#_limiting_pcre2_resource_usage">Limiting PCRE2 resource usage</a></li>
+<li><a href="#_limiting_variable_length_lookbehind_assertions">Limiting variable-length lookbehind assertions</a></li>
+<li><a href="#_creating_character_tables_at_build_time">Creating character tables at build time</a></li>
+<li><a href="#_using_ebcdic_code">Using EBCDIC code</a></li>
+<li><a href="#_pcre2grep_support_for_external_scripts">pcre2grep support for external scripts</a></li>
+<li><a href="#_pcre2grep_options_for_compressed_file_support">pcre2grep options for compressed file support</a></li>
+<li><a href="#_pcre2grep_buffer_size">pcre2grep buffer size</a></li>
+<li><a href="#_pcre2test_option_for_libreadline_support">pcre2test option for libreadline support</a></li>
+<li><a href="#_including_debugging_code">Including debugging code</a></li>
+<li><a href="#_debugging_with_valgrind_support">Debugging with Valgrind support</a></li>
+<li><a href="#_code_coverage_reporting">Code coverage reporting</a></li>
+<li><a href="#_disabling_the_z_and_t_formatting_modifiers">Disabling the z and t formatting modifiers</a></li>
+<li><a href="#_support_for_fuzzers">Support for fuzzers</a></li>
+<li><a href="#_obsolete_option">Obsolete option</a></li>
+<li><a href="#_see_also">See also</a></li>
+</ul>
+</div>
 <h2>Name</h2>
 <div class="sectionbody">
 <p>pcre2build - PCRE2 build-time options</p>
@@ -448,14 +480,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p>PCRE2 is distributed with a <code>configure</code> script that can be used to build
 the library in Unix-like environments using the Autotools applications. Also in
-the distribution are files to support building using <code>CMake</code> instead of
+the distribution are files to support building using CMake instead of
 <code>configure</code>. The text file
 <code>README</code>
 contains general information about building with Autotools (some of which is
 repeated below), and also has some comments about building on various operating
 systems. The files in the <code>vms</code> directory support building under OpenVMS.
 There is a lot more information about building PCRE2 without using
-Autotools (including information about using <code>CMake</code> and building "by
+Autotools (including information about using CMake and building "by
 hand") in the text file called
 <code>NON-AUTOTOOLS-BUILD</code>.
 You should consult this file as well as the
@@ -473,10 +505,10 @@ selected when the library is compiled. It assumes use of the <code>configure</co
 script, where the optional features are selected or deselected by providing
 options to <code>configure</code> before running the <code>make</code> command. However, the
 same options can be selected in both Unix-like and non-Unix-like environments
-if you are using <code>CMake</code> instead of <code>configure</code> to build PCRE2.</p>
+if you are using CMake instead of <code>configure</code> to build PCRE2.</p>
 </div>
 <div class="paragraph">
-<p>If you are not using Autotools or <code>CMake</code>, option selection can be done by
+<p>If you are not using Autotools or CMake, option selection can be done by
 editing the <code>config.h</code> file, or by passing parameter settings to the
 compiler, as described in
 <code>NON-AUTOTOOLS-BUILD</code>.</p>
@@ -493,10 +525,10 @@ running</p>
 </div>
 <div class="paragraph">
 <p>The following sections include descriptions of "on/off" options whose names
-begin with --enable or --disable. Because of the way that <code>configure</code>
-works, --enable and --disable always come in pairs, so the complementary option
+begin with <code>--enable</code> or <code>--disable</code>. Because of the way that <code>configure</code>
+works, <code>--enable</code> and <code>--disable</code> always come in pairs, so the complementary option
 always exists as well, but as it specifies the default, it is not described.
-Options that specify values have names that start with --with. At the end of a
+Options that specify values have names that start with <code>--with</code>. At the end of a
 <code>configure</code> run, a summary of the configuration is output.</p>
 </div>
 </div>
@@ -540,7 +572,7 @@ libraries.</p>
 <h2 id="_building_shared_and_static_libraries">Building shared and static libraries</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Autotools PCRE2 building process uses <code>libtool</code> to build both shared
+<p>The Autotools PCRE2 building process uses Libtool to build both shared
 and static libraries by default. You can suppress an unwanted library by adding
 one of</p>
 </div>
@@ -551,7 +583,7 @@ one of</p>
 </div>
 </div>
 <div class="paragraph">
-<p>to the <code>configure</code> command. Setting --disable-shared ensures that PCRE2
+<p>to the <code>configure</code> command. Setting <code>--disable-shared</code> ensures that PCRE2
 libraries are built as static libraries. The binaries that are then created as
 part of the build process (for example, <code>pcre2test</code> and <code>pcre2grep</code>)
 are linked statically with one or more PCRE2 libraries, but may also be
@@ -564,7 +596,7 @@ binaries to be fully statically linked, you can set LDFLAGS like this:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Note the two hyphens in --static. Of course, this works only if static versions
+<p>Note the two hyphens in <code>--static</code>. Of course, this works only if static versions
 of all the relevant libraries are available for linking.</p>
 </div>
 </div>
@@ -595,9 +627,9 @@ locked this out by setting <code class="constant">PCRE2_NEVER_UTF</code>.</p>
 </div>
 <div class="paragraph">
 <p>UTF support allows the libraries to process character code points up to
-0x10ffff in the strings that they handle. Unicode support also gives access to
+<code class="character">0x10ffff</code> in the strings that they handle. Unicode support also gives access to
 the Unicode properties of characters, using pattern escapes such as <code class="regex">\P</code>, <code class="regex">\p</code>,
-and <code class="regex">\X</code>. Only the general category properties such as <em>Lu</em> and <em>Nd</em>,
+and <code class="regex">\X</code>. Only the general category properties such as <code class="regex">Lu</code> and <code class="regex">Nd</code>,
 script names, and some bi-directional and binary properties are supported.
 Details are given in the
 <a href="pcre2pattern.html"><code>pcre2pattern</code></a>
@@ -694,7 +726,7 @@ compile PCRE2 to use carriage return (CR) instead, by adding</p>
 </div>
 </div>
 <div class="paragraph">
-<p>to the <code>configure</code> command. There is also an --enable-newline-is-lf option,
+<p>to the <code>configure</code> command. There is also an <code>--enable-newline-is-lf</code> option,
 which explicitly specifies linefeed as the newline character.</p>
 </div>
 <div class="paragraph">
@@ -727,8 +759,8 @@ indicating a line ending. A fifth option, specified by</p>
 <div class="paragraph">
 <p>causes PCRE2 to recognize any Unicode newline sequence. The Unicode newline
 sequences are the three just mentioned, plus the single characters VT (vertical
-tab, <code>U+000B</code>), FF (form feed, <code>U+000C</code>), NEL (next line, <code>U+0085</code>), LS (line
-separator, <code>U+2028</code>), and PS (paragraph separator, <code>U+2029</code>). The final option is</p>
+tab, <code class="character">U+000B</code>), FF (form feed, <code class="character">U+000C</code>), NEL (next line, <code class="character">U+0085</code>), LS (line
+separator, <code class="character">U+2028</code>), and PS (paragraph separator, <code class="character">U+2029</code>). The final option is</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -788,7 +820,7 @@ offsets by adding a setting such as</p>
 16-bit library, a value of 3 is rounded up to 4. In these libraries, using
 longer offsets slows down the operation of PCRE2 because it has to load
 additional data when handling them. For the 32-bit library the value is always
-4 and cannot be overridden; the value of --with-link-size is ignored.</p>
+4 and cannot be overridden; the value of <code>--with-link-size</code> is ignored.</p>
 </div>
 </div>
 </div>
@@ -839,7 +871,7 @@ arrangements) is used.</p>
 <div class="paragraph">
 <p>You can also explicitly limit the depth of nested backtracking in the
 <code class="function">pcre2_match()</code> interpreter. This limit defaults to the value that is set
-for --with-match-limit. You can set a lower default limit by adding, for
+for <code>--with-match-limit</code>. You can set a lower default limit by adding, for
 example,</p>
 </div>
 <div class="listingblock">
@@ -891,7 +923,7 @@ not constrained by this limit.</p>
 <div class="paragraph">
 <p>PCRE2 uses fixed tables for processing characters whose code points are less
 than 256. By default, PCRE2 is built with a set of tables that are distributed
-in the file <em>src/pcre2_chartables.c.dist</em>. These tables are for ASCII codes
+in the file <code>src/pcre2_chartables.c.dist</code>. These tables are for ASCII codes
 only. If you add</p>
 </div>
 <div class="listingblock">
@@ -930,7 +962,7 @@ specify a locale, you must use the -L option:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>You can also specify -b (with or without -L). This causes the tables to be
+<p>You can also specify <code>-b</code> (with or without <code>-L</code>). This causes the tables to be
 written in binary instead of as source code. A set of binary tables can be
 loaded into memory by an application and passed to <code class="function">pcre2_compile()</code> in the
 same way as tables created by calling <code class="function">pcre2_maketables()</code>. The tables are
@@ -959,21 +991,21 @@ most computer operating systems. PCRE2 can, however, be compiled to run in an
 in an EBCDIC environment (for example, an IBM mainframe operating system).</p>
 </div>
 <div class="paragraph">
-<p>This setting implies --enable-rebuild-chartables, in order to ensure that you
+<p>This setting implies <code>--enable-rebuild-chartables</code>, in order to ensure that you
 have the correct default character tables for your system&#8217;s codepage. There is
-an exception when you set --enable-ebcdic-ignoring-compiler (see below), which
+an exception when you set <code>--enable-ebcdic-ignoring-compiler</code> (see below), which
 allows using a default set of EBCDIC 1047 character tables rather than forcing
-use of --enable-rebuild-chartables.</p>
+use of <code>--enable-rebuild-chartables</code>.</p>
 </div>
 <div class="paragraph">
 <p>It is not supported to enable both EBCDIC input and either ASCII or UTF-8/16/32
 in the same build of the library. When PCRE2 is built with EBCDIC support, it
-always operates in EBCDIC, and consequently --enable-unicode and --enable-ebcdic
+always operates in EBCDIC, and consequently <code>--enable-unicode</code> and <code>--enable-ebcdic</code>
 are mutually exclusive.</p>
 </div>
 <div class="paragraph">
 <p>The EBCDIC character that corresponds to an ASCII LF is assumed to have the
-value 0x15 by default. However, in some EBCDIC environments, 0x25 is used. In
+value <code class="character">0x15</code> by default. However, in some EBCDIC environments, <code class="character">0x25</code> is used. In
 such an environment you should use</p>
 </div>
 <div class="listingblock">
@@ -982,18 +1014,18 @@ such an environment you should use</p>
 </div>
 </div>
 <div class="paragraph">
-<p>(which implies --enable-ebcdic). The EBCDIC character for CR has the same value
-as in ASCII, namely, 0x0d. Whichever of 0x15 and 0x25 is <em>not</em> chosen as LF
-is made to correspond to the Unicode NEL character (which, in Unicode, is 0x85).</p>
+<p>(which implies <code>--enable-ebcdic</code>). The EBCDIC character for CR has the same value
+as in ASCII, namely, <code class="character">0x0d</code>. Whichever of <code class="character">0x15</code> and <code class="character">0x25</code> is <em>not</em> chosen as LF
+is made to correspond to the Unicode NEL character (which, in Unicode, is <code class="character">0x85</code>).</p>
 </div>
 <div class="paragraph">
-<p>The options that select newline behaviour, such as --enable-newline-is-cr,
+<p>The options that select newline behaviour, such as <code>--enable-newline-is-cr</code>,
 and equivalent run-time options, refer to these character values in an EBCDIC
 environment.</p>
 </div>
 <div class="paragraph">
 <p>On systems requiring an EBCDIC build of PCRE2, the compiler should be set to use
-the correct codepage, so that C character literals such as 'z' use the correct
+the correct codepage, so that C character literals such as <code class="c">'z'</code> use the correct
 numeric value for whichever EBCDIC codpage is in use. (PCRE2 cannot support
 multiple EBCDIC codepages dynamically.) However, if this not possible, then you
 can use</p>
@@ -1017,8 +1049,8 @@ used to build (or test) EBCDIC support on an ASCII/UTF-8 system such as Linux.</
 <p>By default <code>pcre2grep</code> supports the use of callouts with string arguments
 within the patterns it is matching. There are two kinds: one that generates
 output using local code, and another that calls an external program or script.
-If --disable-pcre2grep-callout-fork is added to the <code>configure</code> command,
-only the first kind of callout is supported; if --disable-pcre2grep-callout is
+If <code>--disable-pcre2grep-callout-fork</code> is added to the <code>configure</code> command,
+only the first kind of callout is supported; if <code>--disable-pcre2grep-callout</code> is
 used, all callouts are completely ignored. For more details of <code>pcre2grep</code>
 callouts, see the
 <a href="pcre2grep.html"><code>pcre2grep</code></a>
@@ -1069,7 +1101,7 @@ default parameter values by adding, for example,</p>
 </div>
 <div class="paragraph">
 <p>to the <code>configure</code> command. The caller of <code>pcre2grep</code> can override
-these values by using --buffer-size and --max-buffer-size on the command line.</p>
+these values by using <code>--buffer-size</code> and <code>--max-buffer-size</code> on the command line.</p>
 </div>
 </div>
 </div>
@@ -1095,7 +1127,7 @@ way, there may be licensing issues. These can be avoided by linking instead
 with <code>libedit</code>, which has a BSD licence.</p>
 </div>
 <div class="paragraph">
-<p>Setting --enable-pcre2test-libreadline causes the <code>-lreadline</code> option to be
+<p>Setting <code>--enable-pcre2test-libreadline</code> causes the <code>-lreadline</code> option to be
 added to the <code>pcre2test</code> build. In many operating environments with a
 system-installed readline library this is sufficient. However, in some
 environments (e.g. if an unmodified distribution version of readline is in
@@ -1188,8 +1220,8 @@ on your system, you must set the environment variable</p>
 <p>before running <code>make</code> to build PCRE2, so that <code>ccache</code> is not used.</p>
 </div>
 <div class="paragraph">
-<p>When --enable-coverage is used, the following addition targets are added to the
-<em>Makefile</em>:</p>
+<p>When <code>--enable-coverage</code> is used, the following addition targets are added to the
+<code>Makefile</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1198,8 +1230,8 @@ on your system, you must set the environment variable</p>
 </div>
 <div class="paragraph">
 <p>This creates a fresh coverage report for the PCRE2 test suite. It is equivalent
-to running "make coverage-reset", "make coverage-baseline", "make check", and
-then "make coverage-report".</p>
+to running <code>make coverage-reset</code>, <code>make coverage-baseline</code>, <code>make check</code>, and
+then <code>make coverage-report</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1259,10 +1291,11 @@ documentation.</p>
 <h2 id="_disabling_the_z_and_t_formatting_modifiers">Disabling the z and t formatting modifiers</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The C99 standard defines formatting modifiers z and t for size_t and
-ptrdiff_t values, respectively. By default, PCRE2 uses these modifiers in
+<p>The C99 standard defines formatting modifiers <code class="c">z</code> and <code class="c">t</code> for
+<code class="type">size_t</code> and <code class="type">ptrdiff_t</code> values, respectively. By default, PCRE2 uses
+these modifiers in
 environments other than old versions of Microsoft Visual Studio when
-<code class="c"><em>STDC_VERSION</em></code> is defined and has a value greater than or equal to 199901L
+<code class="c">__STDC_VERSION__</code> is defined and has a value greater than or equal to <code class="c">199901L</code>
 (indicating support for C99).
 However, there is at least one environment that claims to be C99 but does not
 support these modifiers. If</p>
@@ -1273,8 +1306,9 @@ support these modifiers. If</p>
 </div>
 </div>
 <div class="paragraph">
-<p>is specified, no use is made of the z or t modifiers. Instead of %td or %zu,
-a suitable format is used depending in the size of long for the platform.</p>
+<p>is specified, no use is made of the <code class="c">z</code> or <code class="c">t</code> modifiers. Instead of
+<code class="c">%td</code> or <code class="c">%zu</code>,
+a suitable format is used depending on the size of long for the platform.</p>
 </div>
 </div>
 </div>
@@ -1292,15 +1326,15 @@ PCRE2:</p>
 </div>
 <div class="paragraph">
 <p>At present this applies only to the 8-bit library. If set, it causes an extra
-library called libpcre2-fuzzsupport.a to be built, but not installed. This
-contains a single function called LLVMFuzzerTestOneInput() whose arguments are
+library called <code>libpcre2-fuzzsupport.a</code> to be built, but not installed. This
+contains a single function called <code class="c">LLVMFuzzerTestOneInput()</code> whose arguments are
 a pointer to a string and the length of the string. When called, this function
 tries to compile the string as a pattern, and if that succeeds, to match it.
 This is done both with no options and with some random options bits that are
 generated from the string.</p>
 </div>
 <div class="paragraph">
-<p>Setting --enable-fuzz-support also causes a binary called <code>pcre2fuzzcheck</code>
+<p>Setting <code>--enable-fuzz-support</code> also causes a binary called <code>pcre2fuzzcheck</code>
 to be created. This is normally run under valgrind or used when PCRE2 is
 compiled with address sanitizing enabled. It calls the fuzzing function and
 outputs information about what it is doing. The input strings are specified by
@@ -1334,28 +1368,18 @@ give a warning.</p>
 <h2 id="_see_also">See also</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>pcre2api</code>(3), <code>pcre2-config</code>(3).</p>
+<p><a href="pcre2api.html"><code>pcre2api</code></a>, <a href="pcre2-config.html"><code>pcre2-config</code></a>.</p>
 </div>
+<h2 id="_author" class="discrete">Author</h2>
+<div class="paragraph">
+<p>Philip Hazel<br>
+Retired from University Computing Service<br>
+Cambridge, England.</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_author">Author</h2>
-<div class="sectionbody">
-<div class="literalblock">
-<div class="content">
-<pre>Philip Hazel
-Retired from University Computing Service
-Cambridge, England.</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_revision">Revision</h2>
-<div class="sectionbody">
+<h2 id="_revision" class="discrete">Revision</h2>
 <div class="paragraph">
 <p>Last updated: 17 October 2025<br>
-Copyright (c) 1997-2024 University of Cambridge.</p>
+Copyright &#169; 1997-2024 University of Cambridge.</p>
 </div>
 </div>
 </div>

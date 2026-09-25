@@ -28,7 +28,7 @@ options are:
 const:PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK::
     Allow [.regex]`\K` in lookarounds
 const:PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES::
-    Allow [.regex]`\x{d800}` to [.regex]`\x{dfff}`
+    Allow [.regex]`+\x{d800}+` to [.regex]`+\x{dfff}+`
     in UTF-8 and UTF-32 modes
 const:PCRE2_EXTRA_ALT_BSUX::
     Extended alternate [.regex]`\u`, [.regex]`\U`, and
@@ -40,7 +40,7 @@ const:PCRE2_EXTRA_ASCII_BSS::
 const:PCRE2_EXTRA_ASCII_BSW::
     [.regex]`\w` remains ASCII in UCP mode
 const:PCRE2_EXTRA_ASCII_DIGIT::
-    [.regex]`[:digit:]` and [.regex]`[:xdigit:]` POSIX classes
+    [.regex]`+[:digit:]+` and [.regex]`+[:xdigit:]+` POSIX classes
     remain ASCII in UCP mode
 const:PCRE2_EXTRA_ASCII_POSIX::
     POSIX classes remain ASCII in
@@ -60,7 +60,7 @@ const:PCRE2_EXTRA_MATCH_WORD::
 const:PCRE2_EXTRA_NEVER_CALLOUT::
     Disallow callouts in pattern
 const:PCRE2_EXTRA_NO_BS0::
-    Disallow [.regex]`\0` (but not [.regex]`\00` or [.regex]`\000`)
+    Disallow [.regex]`\0` (but not [.regex]`+\00+` or [.regex]`+\000+`)
 const:PCRE2_EXTRA_PYTHON_OCTAL::
     Use Python rules for octal
 const:PCRE2_EXTRA_TURKISH_CASING::

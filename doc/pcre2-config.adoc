@@ -2,6 +2,7 @@
 :doctype: manpage
 :manname: pcre2-config
 :manpurpose: program to return PCRE2 configuration
+:description: Information about the installation configuration
 :manvolnum: 1
 :manmanual: PCRE2
 :mansource: PCRE2 10.49-DEV
@@ -10,12 +11,12 @@
 
 == Synopsis
 
-[synopsis]
-....
+[source,shell,role=synopsis]
+----
 pcre2-config [--prefix] [--exec-prefix] [--version]
              [--libs8] [--libs16] [--libs32] [--libs-posix]
              [--cflags] [--cflags-posix]
-....
+----
 
 == Description
 
@@ -31,7 +32,7 @@ encountered, the "usage" information is output.
 
 `--prefix`::
 Writes the directory prefix used in the PCRE2 installation for
-architecture-independent files (_/usr_ on many systems, _/usr/local_ on
+architecture-independent files (`/usr` on many systems, `/usr/local` on
 some systems) to the standard output.
 
 `--exec-prefix`::
@@ -57,7 +58,7 @@ with the 32-bit PCRE2 library (`-lpcre2-32` on many systems).
 
 `--libs-posix`::
 Writes to the standard output the command line options required to link with
-PCRE2's POSIX API wrapper library (`-lpcre2-posix` `-lpcre2-8` on many
+PCRE2's POSIX API wrapper library (`-lpcre2-posix -lpcre2-8` on many
 systems).
 
 `--cflags`::
@@ -72,13 +73,15 @@ files that use PCRE2's POSIX API wrapper library (this may include some
 
 == See also
 
-`pcre2(3)`
+xref:pcre2.adoc[`pcre2`].
 
+[discrete]
 == Author
 
 This manual page was originally written by Mark Baker for the Debian GNU/Linux
 system. It has been subsequently revised as a generic PCRE2 man page.
 
+[discrete]
 == Revision
 
 Last updated: 22 February 2025

@@ -102,7 +102,11 @@ pcre2_maketables(pcre2_general_context *gcontext)
   for (i = 0; i < 256; i++)
   {
     int c = charfn_from(tolower(charfn_to(i)));
-    *p++ = (c < 256) ? c : i;
+    /* LCOV_EXCL_START - toupper/tolower are specified to return unsigned-char
+       values or EOF in the supported locales. */
+    if (c >= 256) c = i;
+    /* LCOV_EXCL_STOP */
+    *p++ = c;
   }
 
   /* Next the case-flipping table */
@@ -110,7 +114,11 @@ pcre2_maketables(pcre2_general_context *gcontext)
   for (i = 0; i < 256; i++)
   {
     int c = charfn_from(islower(charfn_to(i)) ? toupper(charfn_to(i)) : tolower(charfn_to(i)));
-    *p++ = (c < 256) ? c : i;
+    /* LCOV_EXCL_START - toupper/tolower are specified to return unsigned-char
+       values or EOF in the supported locales. */
+    if (c >= 256) c = i;
+    /* LCOV_EXCL_STOP */
+    *p++ = c;
   }
 
   /* Then the character class tables. Don't try to be clever and save effort on

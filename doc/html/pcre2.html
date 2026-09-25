@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
+<meta name="description" content="Introductory page">
 <title>pcre2(3)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +117,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -218,6 +219,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -327,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -438,7 +440,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h1>pcre2(3) Manual Page</h1>
 <h2>Name</h2>
 <div class="sectionbody">
-<p>pcre2 - Perl-compatible regular expressions (revised API)</p>
+<p>pcre2 - Perl-compatible regular expressions (PCRE2 API)</p>
 </div>
 </div>
 <div id="content">
@@ -473,7 +475,7 @@ supports 32-bit applications, versions of PCRE2 that are compiled in both
 </div>
 <div class="paragraph">
 <p>The original work to extend PCRE to 16-bit and 32-bit code units was done by
-Zoltan Herczeg and Christian Persch, respectively. In all three cases, strings
+Zoltán Herczeg and Christian Persch, respectively. In all three cases, strings
 can be interpreted either as one character per code unit, or as UTF-encoded
 Unicode, with support for Unicode general category properties. Unicode support
 is optional at build time (but is the default). However, processing strings as
@@ -487,7 +489,7 @@ in use can be discovered by running</p>
 </div>
 <div class="paragraph">
 <p>The three libraries contain identical sets of functions, with names ending in
-_8, _16, or _32, respectively (for example, <code class="function">pcre2_compile_8()</code>). However,
+<code>_8</code>, <code>_16</code>, or <code>_32</code>, respectively (for example, <code class="function">pcre2_compile_8()</code>). However,
 by defining <code class="constant">PCRE2_CODE_UNIT_WIDTH</code> to be 8, 16, or 32, a program that uses just
 one code unit width can be written using generic names such as
 <code class="function">pcre2_compile()</code>, and the documentation is written assuming that this is
@@ -513,8 +515,7 @@ page.</p>
 </div>
 <div class="paragraph">
 <p>Some features of PCRE2 can be included, excluded, or changed when the library
-is built. The
-<a href="pcre2_config.html"><code class="function">pcre2_config()</code></a>
+is built. The <code class="function">pcre2_config()</code>
 function makes it possible for a client to discover which features are
 available. The features themselves are described in the
 <a href="pcre2build.html"><code>pcre2build</code></a>
@@ -529,7 +530,7 @@ files in the source distribution.</p>
 <p>The libraries contains a number of undocumented internal functions and data
 tables that are used by more than one of the exported external functions, but
 which are not intended for use by external callers. Their names all begin with
-"_pcre2", which hopefully will not provoke any name clashes. In some
+<code class="c">_pcre2</code>, which hopefully will not provoke any name clashes. In some
 environments, it is possible to control which external symbols are exported
 when a shared library is built, and in these cases the undocumented symbols are
 not exported.</p>
@@ -693,13 +694,9 @@ expression patterns</p>
 <p>In the "man" and HTML formats, there is also a short page for each C library
 function, listing its arguments and results.</p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_authors">Authors</h2>
-<div class="sectionbody">
+<h2 id="_authors" class="discrete">Authors</h2>
 <div class="paragraph">
-<p>The current maintainers of PCRE2 are Nicholas Wilson and Zoltan Herczeg.</p>
+<p>The current maintainers of PCRE2 are Nicholas Wilson and Zoltán Herczeg.</p>
 </div>
 <div class="paragraph">
 <p>PCRE2 was written by Philip Hazel, of the University Computing Service,
@@ -710,14 +707,10 @@ Cambridge, England. Many others have also contributed.</p>
 mailing list, as described at the project page:
 <a href="https://github.com/PCRE2Project/pcre2" class="bare">https://github.com/PCRE2Project/pcre2</a></p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_revision">Revision</h2>
-<div class="sectionbody">
+<h2 id="_revision" class="discrete">Revision</h2>
 <div class="paragraph">
 <p>Last updated: 22 February 2025<br>
-Copyright (c) 1997-2021 University of Cambridge.</p>
+Copyright &#169; 1997-2021 University of Cambridge.</p>
 </div>
 </div>
 </div>

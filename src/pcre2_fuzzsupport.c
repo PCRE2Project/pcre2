@@ -615,7 +615,7 @@ END_QSCAN:
 #endif
 
         /* If JIT is enabled, do a JIT match and, if appropriately compiled, compare
-  with the interpreter. */
+        with the interpreter. */
 
 #ifdef SUPPORT_JIT
         if (jit_ret >= 0)

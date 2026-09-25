@@ -1628,7 +1628,14 @@
     A\x{200d}B                     A ZWJ
     \x{261D}\x{1F3FB}B             Extended_Pictographic Extend
     \x{1F1E6}\x{1F1E7}B            RegionalIndicator RegionalIndicator 
+    \x{1F1E6}\x{1F1E7}\x{1F1E8}B   RegionalIndicator RegionalIndicator RegionalIndicator
+    \x{1F1E6}\x{1F1E7}\x{1F1E8}\x{1F1E9}B RegionalIndicator RegionalIndicator RegionalIndicator RegionalIndicator
+    \x{200d}\x{1f308}B             ZWJ without Extended_Pictographic
+    \x{261d}\x{200d}\x{1f308}B    Extended_Pictographic ZWJ Extended_Pictographic
     *There are no Prepend characters, so we can't test Prepend, CR
+
+/^.\X/utf,aftertext
+    A\x{1F1E6}\x{1F1E7}\x{1F1E8}B
 
 /^(?>\X{2})X/utf,aftertext
     \x{1111}\x{ae4c}\x{1111}\x{ae4c}X

@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_pattern_info
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 14 February 2019
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -47,15 +47,15 @@ This function returns information about a compiled pattern. Its arguments are:
 .sp
 .RS 4
 .PD 0
-.TP 6
+.TP 7
 \fIcode\fP
 .ad l
 Pointer to a compiled regular expression pattern
-.TP 6
+.TP 7
 \fIwhat\fP
 .ad l
 What information is required
-.TP 6
+.TP 7
 \fIwhere\fP
 .ad l
 Where to put the information
@@ -68,23 +68,27 @@ The recognized values for the \fIwhat\fP argument, and the information they
 request are as follows:
 .sp
 .RS 4
-.PD 0
-.TP 24
+.PD
+.TP 26
 \fBPCRE2_INFO_ALLOPTIONS\fP
 .ad l
 Final options after compiling
-.TP 24
+.TP 26
 \fBPCRE2_INFO_ARGOPTIONS\fP
 .ad l
 Options passed to pcre2_compile()
-.TP 24
+.TP 26
 \fBPCRE2_INFO_BACKREFMAX\fP
 .ad l
 Number of highest backreference
-.TP 24
+.TP 26
 \fBPCRE2_INFO_BSR\fP
 .ad l
 What \f(CR\(rsR\fP matches:
+.RS 26
+.sp
+.RS 4
+.PD 0
 .TP 18
 \fBPCRE2_BSR_UNICODE\fP
 .ad l
@@ -93,113 +97,161 @@ Unicode line endings
 \fBPCRE2_BSR_ANYCRLF\fP
 .ad l
 CR, LF, or CRLF only
+.PD
+.RE
 .PP
 .ad l
-.TP 24
+.RE
+.TP 26
 \fBPCRE2_INFO_CAPTURECOUNT\fP
 .ad l
 Number of capturing subpatterns
-.TP 24
+.TP 26
 \fBPCRE2_INFO_DEPTHLIMIT\fP
 .ad l
 Backtracking depth limit if set,
 otherwise \fBPCRE2_ERROR_UNSET\fP
-.TP 24
+.TP 26
 \fBPCRE2_INFO_EXTRAOPTIONS\fP
 .ad l
 Extra options that were passed in the
 compile context
-.TP 24
+.TP 26
 \fBPCRE2_INFO_FIRSTBITMAP\fP
 .ad l
-Bitmap of first code units, or \f(CRNULL\fP
-.TP 24
+Bitmap of first code units, or \fBNULL\fP
+.TP 26
 \fBPCRE2_INFO_FIRSTCODETYPE\fP
 .ad l
 Type of start\-of\-match information
-\f(CR0\fP nothing set
-\f(CR1\fP first code unit is set
-\f(CR2\fP start of string or after newline
-.TP 24
+.RS 26
+.sp
+.RS 4
+.PD 0
+.TP 7
+0
+.ad l
+nothing set
+.TP 7
+1
+.ad l
+first code unit is set
+.TP 7
+2
+.ad l
+start of string or after newline
+.PD
+.RE
+.PP
+.ad l
+.RE
+.TP 26
 \fBPCRE2_INFO_FIRSTCODEUNIT\fP
 .ad l
-First code unit when type is \f(CR1\fP
-.TP 24
+First code unit when type is 1
+.TP 26
 \fBPCRE2_INFO_FRAMESIZE\fP
 .ad l
 Size of backtracking frame
-.TP 24
+.TP 26
 \fBPCRE2_INFO_HASBACKSLASHC\fP
 .ad l
-Return \f(CR1\fP if pattern contains \f(CR\(rsC\fP
-.TP 24
+Return 1 if pattern contains \f(CR\(rsC\fP
+.TP 26
 \fBPCRE2_INFO_HASCRORLF\fP
 .ad l
-Return \f(CR1\fP if explicit CR or LF matches
+Return 1 if explicit CR or LF matches
 exist in the pattern
-.TP 24
+.TP 26
 \fBPCRE2_INFO_HEAPLIMIT\fP
 .ad l
 Heap memory limit if set,
 otherwise \fBPCRE2_ERROR_UNSET\fP
-.TP 24
+.TP 26
 \fBPCRE2_INFO_JCHANGED\fP
 .ad l
-Return \f(CR1\fP if \f(CR(?J)\fP or \f(CR(?\-J)\fP was used
-.TP 24
+Return 1 if \f(CR(?J)\fP or \f(CR(?\-J)\fP was used
+.TP 26
 \fBPCRE2_INFO_JITSIZE\fP
 .ad l
-Size of JIT compiled code, or \f(CR0\fP
-.TP 24
+Size of JIT compiled code, or 0
+.TP 26
 \fBPCRE2_INFO_LASTCODETYPE\fP
 .ad l
 Type of must\-be\-present information
-\f(CR0\fP nothing set
-\f(CR1\fP code unit is set
-.TP 24
+.RS 26
+.sp
+.RS 4
+.PD 0
+.TP 7
+0
+.ad l
+nothing set
+.TP 7
+1
+.ad l
+code unit is set
+.PD
+.RE
+.PP
+.ad l
+.RE
+.TP 26
 \fBPCRE2_INFO_LASTCODEUNIT\fP
 .ad l
-Last code unit when type is \f(CR1\fP
-.TP 24
+Last code unit when type is 1
+.TP 26
 \fBPCRE2_INFO_MATCHEMPTY\fP
 .ad l
-\f(CR1\fP if the pattern can match an
-empty string, \f(CR0\fP otherwise
-.TP 24
+1 if the pattern can match an
+empty string, 0 otherwise
+.TP 26
 \fBPCRE2_INFO_MATCHLIMIT\fP
 .ad l
 Match limit if set,
 otherwise \fBPCRE2_ERROR_UNSET\fP
-.TP 24
+.TP 26
 \fBPCRE2_INFO_MAXLOOKBEHIND\fP
 .ad l
 Length (in characters) of the longest
 lookbehind assertion
-.TP 24
+.TP 26
 \fBPCRE2_INFO_MINLENGTH\fP
 .ad l
 Lower bound length of matching strings
-.TP 24
+.TP 26
 \fBPCRE2_INFO_NAMECOUNT\fP
 .ad l
 Number of named subpatterns
-.TP 24
+.TP 26
 \fBPCRE2_INFO_NAMEENTRYSIZE\fP
 .ad l
 Size of name table entries
-.TP 24
+.TP 26
 \fBPCRE2_INFO_NAMETABLE\fP
 .ad l
 Pointer to name table
-.TP 24
+.TP 26
 \fBPCRE2_CONFIG_NEWLINE\fP
 .ad l
 Code for the newline sequence:
-.TP 24
-\fBPCRE2_NEWLINE_CR\fP, \fBPCRE2_NEWLINE_LF\fP, \fBPCRE2_NEWLINE_CRLF\fP, \fBPCRE2_NEWLINE_ANY\fP, \fBPCRE2_NEWLINE_ANYCRLF\fP, \fBPCRE2_NEWLINE_NUL\fP, \fBPCRE2_INFO_RECURSIONLIMIT\fP
+.RS 26
+.sp
+.RS 4
+.PD 0
+.TP 7
+\fBPCRE2_NEWLINE_CR\fP, \fBPCRE2_NEWLINE_LF\fP, \fBPCRE2_NEWLINE_CRLF\fP, \fBPCRE2_NEWLINE_ANY\fP, \fBPCRE2_NEWLINE_ANYCRLF\fP, \fBPCRE2_NEWLINE_NUL\fP
+.ad l
+.PD
+.RE
+.PP
+.ad l
+.RE
+.TP 26
+\fBPCRE2_INFO_RECURSIONLIMIT\fP
 .ad l
 Obsolete synonym for \fBPCRE2_INFO_DEPTHLIMIT\fP
-.TP 24
+.TP 26
 \fBPCRE2_INFO_SIZE\fP
 .ad l
 Size of compiled pattern
@@ -208,9 +260,9 @@ Size of compiled pattern
 .PP
 .ad l
 .sp
-If \fIwhere\fP is \f(CRNULL\fP, the function returns the amount of memory needed for
+If \fIwhere\fP is \fBNULL\fP, the function returns the amount of memory needed for
 the requested information, in bytes. Otherwise, the \fIwhere\fP argument must
-point to an unsigned 32\-bit integer (\f(CRuint32_t\fP variable), except for the
+point to an unsigned 32\-bit integer (\fBuint32_t\fP variable), except for the
 following \fIwhat\fP values, when it must point to a variable of the type
 shown:
 .sp
@@ -223,7 +275,7 @@ shown:
 .TP 23
 \fBPCRE2_INFO_JITSIZE\fP
 .ad l
-\f(CRsize_t\fP
+\fBsize_t\fP
 .TP 23
 \fBPCRE2_INFO_NAMETABLE\fP
 .ad l
@@ -231,7 +283,7 @@ shown:
 .TP 23
 \fBPCRE2_INFO_SIZE\fP
 .ad l
-\f(CRsize_t\fP
+\fBsize_t\fP
 .PD
 .RE
 .PP
@@ -244,7 +296,7 @@ The yield of the function is zero on success or:
 .TP 22
 \fBPCRE2_ERROR_NULL\fP
 .ad l
-the argument \fIcode\fP is \f(CRNULL\fP
+the argument \fIcode\fP is \fBNULL\fP
 .TP 22
 \fBPCRE2_ERROR_BADMAGIC\fP
 .ad l

@@ -300,6 +300,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/doc/man
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2syntax.3
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2test.1
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2unicode.3
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/index.adoc
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/pcre2-config.adoc
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/pcre2-config.txt
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/pcre2.adoc

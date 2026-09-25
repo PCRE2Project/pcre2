@@ -1,7 +1,7 @@
 '\" t
 .\"     Title: pcre2_code_copy
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 22 November 2016
 .\"    Manual: PCRE2
 .\"    Source: PCRE2 10.49-DEV
@@ -46,8 +46,8 @@ This function makes a copy of the memory used for a compiled pattern, excluding
 any memory used by the JIT compiler. Without a subsequent call to
 pcre2_jit_compile(), the copy can be used only for non\-JIT matching. The
 pointer to the character tables is copied, not the tables themselves (see
-pcre2_code_copy_with_tables()). The yield of the function is \f(CRNULL\fP if
-\fIcode\fP is \f(CRNULL\fP or if sufficient memory cannot be obtained.
+pcre2_code_copy_with_tables()). The yield of the function is \fBNULL\fP if
+\fIcode\fP is \fBNULL\fP or if sufficient memory cannot be obtained.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

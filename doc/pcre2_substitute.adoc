@@ -41,15 +41,15 @@ arg:start_offset::
 arg:options::
     Option bits
 arg:match_data::
-    Points to a match data block, or is [.c]`NULL`
+    Points to a match data block, or is const:NULL
 arg:mcontext::
-    Points to a match context, or is [.c]`NULL`
+    Points to a match context, or is const:NULL
 arg:replacement::
     Points to the replacement string
 arg:rlength::
     Length of the replacement string
 arg:buffer::
-    Points to the output buffer, or may be [.c]`NULL` if arg:blength is zero
+    Points to the output buffer, or may be const:NULL if arg:blength is zero
 arg:blength::
     Points to the length of the output buffer
 
@@ -118,7 +118,7 @@ const:PCRE2_SUBSTITUTE_UNSET_EMPTY::
 If const:PCRE2_SUBSTITUTE_LITERAL is set, const:PCRE2_SUBSTITUTE_EXTENDED,
 const:PCRE2_SUBSTITUTE_UNKNOWN_UNSET, and const:PCRE2_SUBSTITUTE_UNSET_EMPTY are ignored.
 
-If const:PCRE2_SUBSTITUTE_MATCHED is set, arg:match_data must be non-[.c]`NULL`; its
+If const:PCRE2_SUBSTITUTE_MATCHED is set, arg:match_data must be non-const:NULL; its
 contents must be the result of a call to func:pcre2_match() (or
 func:pcre2_jit_match()) using the same pattern, subject pointer, effective
 subject length, start offset, and match options.
