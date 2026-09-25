@@ -1,0 +1,42 @@
+= pcre2_get_subject(3)
+:doctype: manpage
+:manname: pcre2_get_subject
+:manpurpose: get a match subject pointer
+:manvolnum: 3
+:manmanual: PCRE2
+:mansource: PCRE2 10.49-DEV
+:docdate: 22 September 2026
+:revdate: 22 September 2026
+
+== Synopsis
+
+[source,c,role=prototype]
+----
+#include <pcre2.h>
+
+PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data,
+                             PCRE2_SIZE *lengthptr);
+----
+
+== Description
+
+After a successful match, a partial match, or a failure to match, this function
+returns the subject pointer that was passed to the matching function. For a
+successful match with const:PCRE2_COPY_MATCHED_SUBJECT, it returns a pointer to
+a copy of the subject that is owned by the match data block instead (except for
+func:pcre2_jit_match() which ignores const:PCRE2_COPY_MATCHED_SUBJECT). The copy
+is exactly the same length as the subject that was passed to the matching
+function and is additionally zero-terminated. The copy is freed when the match
+data block is reused for another match or is freed. If there is any match error
+other than const:PCRE2_ERROR_NOMATCH or const:PCRE2_ERROR_PARTIAL,
+func:pcre2_get_subject() may return const:NULL.
+
+If the arg:lengthptr argument is not const:NULL, it receives the length in code
+units of the string which is returned, excluding the terminating zero (the
+subject string may contain embedded NUL characters).
+
+There is a complete description of the PCRE2 native API in the
+xref:pcre2api.adoc[`pcre2api`]
+page and a description of the POSIX API in the
+xref:pcre2posix.adoc[`pcre2posix`]
+page.

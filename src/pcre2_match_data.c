@@ -63,10 +63,21 @@ pcre2_match_data_create(uint32_t oveccount, pcre2_general_context *gcontext)
                           (pcre2_memctl *)gcontext);
   if (yield == NULL)
     return NULL;
-  yield->oveccount = oveccount;
-  yield->flags = 0;
+  yield->code = NULL;
+  yield->subject = NULL;
+  yield->mark = NULL;
   yield->heapframes = NULL;
   yield->heapframes_size = 0;
+  yield->subject_length = 0;
+  yield->start_offset = 0;
+  yield->leftchar = 0;
+  yield->rightchar = 0;
+  yield->startchar = 0;
+  yield->matchedby = 0;
+  yield->flags = 0;
+  yield->oveccount = oveccount;
+  yield->options = 0;
+  yield->rc = 0;
   return yield;
 }
 
@@ -155,6 +166,20 @@ PCRE2_EXP_DEFN PCRE2_SIZE PCRE2_CALL_CONVENTION
 pcre2_get_startchar(pcre2_match_data *match_data)
 {
   return match_data->startchar;
+}
+
+
+
+/*************************************************
+*             Get subject                        *
+*************************************************/
+
+PCRE2_EXP_DEFN PCRE2_SPTR PCRE2_CALL_CONVENTION
+pcre2_get_subject(pcre2_match_data *match_data, PCRE2_SIZE *lengthptr)
+{
+  if (lengthptr != NULL)
+    *lengthptr = match_data->subject_length;
+  return match_data->subject;
 }
 
 

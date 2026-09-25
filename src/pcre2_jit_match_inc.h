@@ -128,12 +128,14 @@ pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     return match_data->rc = PCRE2_ERROR_JIT_BADOPTION;
 
   /* If the match data block was previously used with PCRE2_COPY_MATCHED_SUBJECT,
-free the memory that was obtained. */
+  free the memory that was obtained. */
 
   if ((match_data->flags & PCRE2_MD_COPIED_SUBJECT) != 0)
   {
     match_data->memctl.free((void *)match_data->subject, match_data->memctl.memory_data);
     match_data->flags &= ~PCRE2_MD_COPIED_SUBJECT;
+    match_data->subject = NULL;
+    match_data->subject_length = 0;
   }
 
   /* Sanity checks should be handled by pcre2_match. */
@@ -187,9 +189,16 @@ free the memory that was obtained. */
   if (rc > (int)oveccount)
     rc = 0;
   match_data->code = re;
-  match_data->subject =
-      (rc >= 0 || rc == PCRE2_ERROR_NOMATCH || rc == PCRE2_ERROR_PARTIAL) ? subject : NULL;
-  match_data->subject_length = length;
+  if (rc >= 0 || rc == PCRE2_ERROR_NOMATCH || rc == PCRE2_ERROR_PARTIAL)
+  {
+    match_data->subject = subject;
+    match_data->subject_length = length;
+  }
+  else
+  {
+    match_data->subject = NULL;
+    match_data->subject_length = 0;
+  }
   match_data->start_offset = start_offset;
   match_data->rc = rc;
   match_data->startchar = arguments.startchar_ptr - subject;
