@@ -191,6 +191,7 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/doc/html
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/pcre2syntax.html
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/pcre2test.html
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/pcre2unicode.html
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/index.adoc
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/doc/man
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2-config.1
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2.3
@@ -300,7 +301,6 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/doc/man
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2syntax.3
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2test.1
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/man/pcre2unicode.3
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/index.adoc
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/pcre2-config.adoc
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/pcre2-config.txt
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/pcre2.adoc

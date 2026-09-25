@@ -575,7 +575,6 @@ been matched by pcre2_match(). They are:
 .\}
 pcre2_substring_copy_byname()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -586,7 +585,6 @@ pcre2_substring_copy_byname()
 .\}
 pcre2_substring_copy_bynumber()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -597,7 +595,6 @@ pcre2_substring_copy_bynumber()
 .\}
 pcre2_substring_get_byname()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -608,7 +605,6 @@ pcre2_substring_get_byname()
 .\}
 pcre2_substring_get_bynumber()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -619,7 +615,6 @@ pcre2_substring_get_bynumber()
 .\}
 pcre2_substring_list_get()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -630,7 +625,6 @@ pcre2_substring_list_get()
 .\}
 pcre2_substring_length_byname()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -641,7 +635,6 @@ pcre2_substring_length_byname()
 .\}
 pcre2_substring_length_bynumber()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -652,7 +645,6 @@ pcre2_substring_length_bynumber()
 .\}
 pcre2_substring_nametable_scan()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -928,7 +920,6 @@ following compile\-time parameters:
 .\}
 What \f(CR\(rsR\fP matches (Unicode newlines or CR, LF, CRLF only)
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -939,7 +930,6 @@ What \f(CR\(rsR\fP matches (Unicode newlines or CR, LF, CRLF only)
 .\}
 PCRE2\(cqs character tables
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -950,7 +940,6 @@ PCRE2\(cqs character tables
 .\}
 The newline character sequence
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -961,7 +950,6 @@ The newline character sequence
 .\}
 The compile time nested parentheses limit
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -972,7 +960,6 @@ The compile time nested parentheses limit
 .\}
 The maximum length of the pattern string
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -983,7 +970,6 @@ The maximum length of the pattern string
 .\}
 The extra options bits (none set by default)
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -1337,7 +1323,6 @@ A match context is required if you want to:
 .\}
 Set up a callout function
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -1348,7 +1333,6 @@ Set up a callout function
 .\}
 Set an offset limit for matching an unanchored pattern
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -1359,7 +1343,6 @@ Set an offset limit for matching an unanchored pattern
 .\}
 Change the limit on the amount of heap used when matching
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -1370,7 +1353,6 @@ Change the limit on the amount of heap used when matching
 .\}
 Change the backtracking match limit
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -1381,7 +1363,6 @@ Change the backtracking match limit
 .\}
 Change the backtracking depth limit
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -2087,7 +2068,6 @@ makes PCRE2\(cqs behaviour more like ECMAScript (JavaScript). When it is set:
 \f(CR\(rsU\fP matches an upper case \f(CRU\fP character; by default \f(CR\(rsU\fP causes a compile
 time error (Perl uses \f(CR\(rsU\fP to upper case subsequent characters).
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 2.\h'+01'\c
@@ -2101,7 +2081,6 @@ hexadecimal digits, in which case the hexadecimal number defines the code point
 to match. By default, \f(CR\(rsu\fP causes a compile time error (Perl uses it to upper
 case the following character).
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 3.\h'+01'\c
@@ -2986,66 +2965,61 @@ following are true:
 .sp
 .RS 4
 .ie n \{\
-\h'-04' 1.\h'+01'\c
+\h'-04' a.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 1." 4.2
+.  IP " a." 4.2
 .\}
 \f(CR.*\fP is not in an atomic group
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 2.\h'+01'\c
+\h'-04' b.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 2." 4.2
+.  IP " b." 4.2
 .\}
 \f(CR.*\fP is not in a capture group that is the subject of a backreference
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 3.\h'+01'\c
+\h'-04' c.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 3." 4.2
+.  IP " c." 4.2
 .\}
 \fBPCRE2_DOTALL\fP is in force for \f(CR.*\fP
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 4.\h'+01'\c
+\h'-04' d.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 4." 4.2
+.  IP " d." 4.2
 .\}
 Neither \f(CR(*PRUNE)\fP nor \f(CR(*SKIP)\fP appears in the pattern
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 5.\h'+01'\c
+\h'-04' e.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 5." 4.2
+.  IP " e." 4.2
 .\}
 \fBPCRE2_NO_DOTSTAR_ANCHOR\fP is not set
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 6.\h'+01'\c
+\h'-04' f.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 6." 4.2
+.  IP " f." 4.2
 .\}
 Dotstar anchoring has not been disabled with \fBPCRE2_DOTSTAR_ANCHOR_OFF\fP
 .RE
@@ -4212,34 +4186,32 @@ ensure this are that either:
 .sp
 .RS 4
 .ie n \{\
-\h'-04' 1.\h'+01'\c
+\h'-04' a.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 1." 4.2
+.  IP " a." 4.2
 .\}
 pcre2_next_match() returns 0 (false); or
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 2.\h'+01'\c
+\h'-04' b.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 2." 4.2
+.  IP " b." 4.2
 .\}
 the returned \f(CR*pstart_offset\fP is strictly greater than the previous
 \f(CRstart_offset\fP; or
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 3.\h'+01'\c
+\h'-04' c.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 3." 4.2
+.  IP " c." 4.2
 .\}
 if the previous match was a successful match of the empty string, the returned
 \f(CR*pstart_offset\fP is equal to the previous \f(CRovector[1]\fP, and \f(CR*poptions\fP

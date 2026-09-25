@@ -212,45 +212,42 @@ available:
 .sp
 .RS 4
 .ie n \{\
-\h'-04' 1.\h'+01'\c
+\h'-04' a.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 1." 4.2
+.  IP " a." 4.2
 .\}
 Backreferences;
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 2.\h'+01'\c
+\h'-04' b.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 2." 4.2
+.  IP " b." 4.2
 .\}
 Conditional expressions that use a backreference as the condition or test
 for a specific group recursion;
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 3.\h'+01'\c
+\h'-04' c.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 3." 4.2
+.  IP " c." 4.2
 .\}
 Script runs;
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 4.\h'+01'\c
+\h'-04' d.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 4." 4.2
+.  IP " d." 4.2
 .\}
 Scan substring assertions.
 .RE
@@ -346,7 +343,6 @@ It is substantially slower than the standard algorithm. This is partly
 because it has to search for all possible matches, but is also because it is
 less susceptible to optimization.
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 2.\h'+01'\c
@@ -358,7 +354,6 @@ less susceptible to optimization.
 Capturing parentheses and other features such as backreferences that rely on
 them are not supported.
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 3.\h'+01'\c
@@ -369,7 +364,6 @@ them are not supported.
 .\}
 Matching within invalid UTF strings is not supported.
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 4.\h'+01'\c
@@ -381,7 +375,6 @@ Matching within invalid UTF strings is not supported.
 Although atomic groups are supported, their use does not provide the
 performance advantage that it does for the standard algorithm.
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 5.\h'+01'\c
