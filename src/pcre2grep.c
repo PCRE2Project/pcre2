@@ -1650,7 +1650,7 @@ end_of_line(char *p, char *endptr, int *lenptr)
 
       if (utf && c >= 0xc0)
       {
-        int gcii, gcss;
+        int gcii;
         extra = utf8_table4[c & 0x3f]; // Number of additional bytes
         if (endptr - p < 1 + extra)
         {
@@ -1658,7 +1658,7 @@ end_of_line(char *p, char *endptr, int *lenptr)
           return endptr;
         }
 
-        gcss = 6 * extra;
+        int gcss = 6 * extra;
         c = (c & utf8_table3[extra]) << gcss;
         for (gcii = 1; gcii <= extra; gcii++)
         {
@@ -1806,7 +1806,7 @@ previous_line(char *p, char *startptr)
         c = *((unsigned char *)pp);
         if (c >= 0xc0)
         {
-          int gcii, gcss;
+          int gcii;
           extra = utf8_table4[c & 0x3f]; // Number of additional bytes
           if (p - pp < 1 + extra)
           {
@@ -1814,7 +1814,7 @@ previous_line(char *p, char *startptr)
             continue;
           }
 
-          gcss = 6 * extra;
+          int gcss = 6 * extra;
           c = (c & utf8_table3[extra]) << gcss;
           for (gcii = 1; gcii <= extra; gcii++)
           {
@@ -2409,10 +2409,9 @@ display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject, PCRE2_S
       case DDE_CAPTURE:
         if (value < capture_top)
         {
-          PCRE2_SIZE capturesize, start, end;
           value *= 2;
-          start = ovector[value];
-          end = ovector[value + 1];
+          PCRE2_SIZE start = ovector[value];
+          PCRE2_SIZE end = ovector[value + 1];
 
           /* The use of \K may make the end offset earlier than the start. In
           this situation, swap them round. */
@@ -2424,7 +2423,7 @@ display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject, PCRE2_S
             end = temp;
           }
 
-          capturesize = end - start;
+          PCRE2_SIZE capturesize = end - start;
           if (capturesize > 0)
           {
             print_match(subject + start, capturesize);
@@ -2651,10 +2650,9 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
       case DDE_CAPTURE:
         if (value < capture_top)
         {
-          PCRE2_SIZE capturesize, start, end;
           value *= 2;
-          start = ovector[value];
-          end = ovector[value + 1];
+          PCRE2_SIZE start = ovector[value];
+          PCRE2_SIZE end = ovector[value + 1];
 
           /* The use of \K may make the end offset earlier than the start. In
           this situation, swap them round. */
@@ -2666,7 +2664,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
             end = temp;
           }
 
-          capturesize = end - start;
+          PCRE2_SIZE capturesize = end - start;
           memcpy(argsptr, subject + start, capturesize);
           argsptr += capturesize;
         }
@@ -4172,13 +4170,13 @@ static BOOL
 compile_pattern(patstr *p, int options, int fromfile, const char *fromtext, int count)
 {
   int errcode;
-  PCRE2_SIZE patlen, erroffset;
+  PCRE2_SIZE erroffset;
   PCRE2_UCHAR errmessbuffer[ERRBUFSIZ];
 
   if (p->compiled != NULL)
     return TRUE;
   char *ps = p->string;
-  patlen = p->length;
+  PCRE2_SIZE patlen = p->length;
 
   if ((options & PCRE2_LITERAL) != 0)
   {

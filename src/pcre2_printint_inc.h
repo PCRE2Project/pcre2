@@ -359,7 +359,7 @@ Arguments:
 static PCRE2_SPTR
 print_char_list(FILE *f, PCRE2_SPTR code, const uint8_t *char_lists_end)
 {
-  uint32_t type, list_ind;
+  uint32_t type;
   uint32_t char_list_add = XCL_CHAR_LIST_LOW_16_ADD;
   uint32_t range_start = ~(uint32_t)0, range_end = 0;
 
@@ -374,7 +374,7 @@ print_char_list(FILE *f, PCRE2_SPTR code, const uint8_t *char_lists_end)
   /* Align characters. */
   const uint8_t *next_char = char_lists_end - (GET(code, 0) << 1);
   type &= XCL_TYPE_MASK;
-  list_ind = 0;
+  uint32_t list_ind = 0;
 
   if ((type & XCL_BEGIN_WITH_RANGE) != 0)
     range_start = XCL_CHAR_LIST_LOW_16_START;
@@ -684,12 +684,12 @@ Returns:          nothing
 static void
 pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
 {
-  PCRE2_SPTR codestart, nametable, code;
+  PCRE2_SPTR codestart;
   uint32_t nesize = re->name_entry_size;
   BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
 
-  nametable = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code));
-  code = codestart = (PCRE2_SPTR)((uint8_t *)re + re->code_start);
+  PCRE2_SPTR nametable = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code));
+  PCRE2_SPTR code = codestart = (PCRE2_SPTR)((uint8_t *)re + re->code_start);
 
   for (;;)
   {

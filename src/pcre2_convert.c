@@ -189,7 +189,7 @@ convert_posix(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf
 
   while (plength > 0)
   {
-    uint32_t c, sc;
+    uint32_t c;
     int clength = 1;
 
     /* Add in the length of the last item, then, if in the dummy run, pull the
@@ -211,7 +211,7 @@ convert_posix(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf
     posix += clength;
     plength -= clength;
 
-    sc = nextisliteral ? 0 : c;
+    uint32_t sc = nextisliteral ? 0 : c;
     nextisliteral = FALSE;
 
     /* Handle a character within a class. */

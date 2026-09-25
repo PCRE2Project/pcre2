@@ -241,11 +241,11 @@ index. */
 static const char *
 get_propname(int prop, int type)
 {
-  size_t i, j, len;
+  size_t i;
   size_t foundlist[2];
   int typex = (type == PT_SC) ? PT_SCX : type;
 
-  j = 0;
+  size_t j = 0;
   for (i = 0; i < PRIV(utt_size); i++)
   {
     const ucp_type_table *u = PRIV(utt) + i;
@@ -261,7 +261,7 @@ get_propname(int prop, int type)
     return "??";
 
   const char *yield = NULL;
-  len = 0;
+  size_t len = 0;
 
   for (i = 0; i < j; i++)
   {

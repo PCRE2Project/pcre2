@@ -132,7 +132,7 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
 
   for (p = string; length > 0; p++)
   {
-    uint32_t ab, d;
+    uint32_t d;
 
     c = *p;
     length--;
@@ -152,7 +152,7 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
       return PCRE2_ERROR_UTF8_ERR21;
     }
 
-    ab = PRIV(utf8_table4)[c & 0x3f]; // Number of additional bytes (1-5)
+    uint32_t ab = PRIV(utf8_table4)[c & 0x3f]; // Number of additional bytes (1-5)
     if (length < ab)                  // Missing bytes
     {
       *erroroffset = (PCRE2_SIZE)(p - string);

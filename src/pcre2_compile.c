@@ -2882,11 +2882,11 @@ read_name(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, uint32_t terminator,
 #ifdef SUPPORT_UNICODE
   if (utf && is_group)
   {
-    uint32_t c, type;
+    uint32_t c;
     PCRE2_SPTR p = ptr;
 
     GETCHARINC(c, p); // Peek at next character
-    type = UCD_CHARTYPE(c);
+    uint32_t type = UCD_CHARTYPE(c);
 
     if (type == ucp_Nd)
     {
@@ -10661,10 +10661,10 @@ set_lookbehind_lengths(uint32_t **pptrptr, int *errcodeptr, int *lcptr,
 
   do
   {
-    int branchlength, branchminlength;
+    int branchminlength;
 
     *pptrptr += 1;
-    branchlength = get_branchlength(pptrptr, &branchminlength, errcodeptr, lcptr, recurses, cb);
+    int branchlength = get_branchlength(pptrptr, &branchminlength, errcodeptr, lcptr, recurses, cb);
 
     if (branchlength < 0)
     {
@@ -11721,9 +11721,9 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options, int *erro
     for (rcode = find_recurse(codestart, utf); rcode != NULL;
          rcode = find_recurse(rcode + 1 + LINK_SIZE, utf))
     {
-      int p, groupnumber;
+      int p;
 
-      groupnumber = (int)GET(rcode, 1);
+      int groupnumber = (int)GET(rcode, 1);
       if (groupnumber == 0)
       {
         rgroup = codestart;

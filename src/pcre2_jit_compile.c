@@ -4080,7 +4080,7 @@ static unsigned int
 char_get_othercase_bit(compiler_common *common, PCRE2_SPTR cc)
 {
   /* Detects if the character and its othercase has only 1 bit difference. */
-  unsigned int c, oc, bit;
+  unsigned int c, oc;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
   int n;
 #endif
@@ -4114,7 +4114,7 @@ char_get_othercase_bit(compiler_common *common, PCRE2_SPTR cc)
 
   SLJIT_ASSERT(c != oc);
 
-  bit = c ^ oc;
+  unsigned int bit = c ^ oc;
 
 #ifndef EBCDIC
   /* Optimized for English alphabet. */
@@ -6675,12 +6675,12 @@ them. */
 static int
 extract_class_ranges(const sljit_u8 *bits, int *ranges, int max_ranges)
 {
-  sljit_u8 bit, cbit, all;
+  sljit_u8 cbit;
   int i, byte, length = 0;
 
-  bit = bits[0] & 0x1;
+  sljit_u8 bit = bits[0] & 0x1;
   /* All bits will be zero or one (since bit is zero or one). */
-  all = (sljit_u8)-bit;
+  sljit_u8 all = (sljit_u8)-bit;
 
   for (i = 0; i < 256;)
   {
@@ -9342,7 +9342,7 @@ static sljit_s32 SLJIT_FUNC
 do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_block,
                PCRE2_SPTR *jit_ovector)
 {
-  sljit_u32 oveccount, capture_top;
+  sljit_u32 capture_top;
 
   if (arguments->callout == NULL)
     return 0;
@@ -9352,7 +9352,7 @@ do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_blo
 
   PCRE2_SPTR begin = arguments->begin;
   PCRE2_SIZE *ovector = (PCRE2_SIZE *)(callout_block + 1);
-  oveccount = callout_block->capture_top;
+  sljit_u32 oveccount = callout_block->capture_top;
 
   SLJIT_ASSERT(oveccount >= 1);
 

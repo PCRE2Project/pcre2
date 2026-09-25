@@ -322,7 +322,7 @@ static void
 xclass_update_min_max(compiler_common *common, PCRE2_SPTR cc, sljit_u32 *min_ptr,
                       sljit_u32 *max_ptr)
 {
-  uint32_t type, list_ind, c;
+  uint32_t type, c;
   sljit_u32 min = *min_ptr;
   sljit_u32 max = *max_ptr;
   uint32_t char_list_add;
@@ -375,7 +375,7 @@ xclass_update_min_max(compiler_common *common, PCRE2_SPTR cc, sljit_u32 *min_ptr
   /* Detect minimum. */
 
   /* Skip unused ranges. */
-  list_ind = 0;
+  uint32_t list_ind = 0;
   while ((type & (XCL_BEGIN_WITH_RANGE | XCL_ITEM_COUNT_MASK)) == 0)
   {
     type >>= XCL_TYPE_BIT_LEN;

@@ -2295,7 +2295,7 @@ run_invalid_utf8_test(const struct invalid_utf8_regression_test_case *current, i
 {
   pcre2_code_8 *code;
   int result, errorcode;
-  PCRE2_SIZE length, erroroffset;
+  PCRE2_SIZE erroroffset;
   PCRE2_SIZE *ovector = pcre2_get_ovector_pointer_8(mdata);
 
   if (current->pattern[i] == NULL)
@@ -2317,7 +2317,8 @@ run_invalid_utf8_test(const struct invalid_utf8_regression_test_case *current, i
     return 0;
   }
 
-  length = (PCRE2_SIZE)(strlen(current->input) - current->skip_left - current->skip_right);
+  PCRE2_SIZE length =
+      (PCRE2_SIZE)(strlen(current->input) - current->skip_left - current->skip_right);
 
   if (current->jit_compile_options & PCRE2_JIT_COMPLETE)
   {
@@ -2524,7 +2525,7 @@ run_invalid_utf16_test(const struct invalid_utf16_regression_test_case *current,
 {
   pcre2_code_16 *code;
   int result, errorcode;
-  PCRE2_SIZE length, erroroffset;
+  PCRE2_SIZE erroroffset;
   PCRE2_SIZE *ovector = pcre2_get_ovector_pointer_16(mdata);
 
   if (current->pattern[i] == NULL)
@@ -2547,7 +2548,7 @@ run_invalid_utf16_test(const struct invalid_utf16_regression_test_case *current,
   }
 
   const PCRE2_UCHAR16 *input = current->input;
-  length = 0;
+  PCRE2_SIZE length = 0;
 
   while (*input++ != 0)
     length++;
@@ -2726,7 +2727,7 @@ run_invalid_utf32_test(const struct invalid_utf32_regression_test_case *current,
 {
   pcre2_code_32 *code;
   int result, errorcode;
-  PCRE2_SIZE length, erroroffset;
+  PCRE2_SIZE erroroffset;
   PCRE2_SIZE *ovector = pcre2_get_ovector_pointer_32(mdata);
 
   if (current->pattern[i] == NULL)
@@ -2749,7 +2750,7 @@ run_invalid_utf32_test(const struct invalid_utf32_regression_test_case *current,
   }
 
   const PCRE2_UCHAR32 *input = current->input;
-  length = 0;
+  PCRE2_SIZE length = 0;
 
   while (*input++ != 0)
     length++;

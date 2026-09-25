@@ -1003,20 +1003,19 @@ Returns:         nothing
 static void
 study_char_list(PCRE2_SPTR code, uint8_t *start_bitmap, const uint8_t *char_lists_end)
 {
-  uint32_t type, list_ind;
   uint32_t char_list_add = XCL_CHAR_LIST_LOW_16_ADD;
   uint32_t range_start = ~(uint32_t)0, range_end = 0;
   PCRE2_UCHAR start_buffer[6], end_buffer[6];
   PCRE2_UCHAR start, end;
 
   /* Only needed in 8-bit mode at the moment. */
-  type = (uint32_t)(code[0] << 8) | code[1];
+  uint32_t type = (uint32_t)(code[0] << 8) | code[1];
   code += 2;
 
   /* Align characters. */
   const uint8_t *next_char = char_lists_end - (GET(code, 0) << 1);
   type &= XCL_TYPE_MASK;
-  list_ind = 0;
+  uint32_t list_ind = 0;
 
   if ((type & XCL_BEGIN_WITH_RANGE) != 0)
     range_start = XCL_CHAR_LIST_LOW_16_START;

@@ -1247,9 +1247,9 @@ static void
 show_memory_info(void)
 {
   uint32_t name_count, name_entry_size;
-  PCRE2_SIZE size, cblock_size, data_size;
+  PCRE2_SIZE size;
 
-  cblock_size = sizeof(pcre2_real_code);
+  PCRE2_SIZE cblock_size = sizeof(pcre2_real_code);
 
   (void)pattern_info(PCRE2_INFO_SIZE, &size, FALSE);
   (void)pattern_info(PCRE2_INFO_NAMECOUNT, &name_count, FALSE);
@@ -1257,7 +1257,7 @@ show_memory_info(void)
 
   /* The uint32_t variables are cast before multiplying to avoid potential
    integer overflow. */
-  data_size = CU2BYTES((PCRE2_SIZE)name_count * (PCRE2_SIZE)name_entry_size);
+  PCRE2_SIZE data_size = CU2BYTES((PCRE2_SIZE)name_count * (PCRE2_SIZE)name_entry_size);
 
   cfprintf(clr_profiling, outfile, "Memory allocation - code size : %" SIZ_FORM "\n",
            size - cblock_size - data_size);
@@ -1842,14 +1842,14 @@ process_command(void)
   FILE *f;
   PCRE2_SIZE serial_size;
   size_t i;
-  int rc, cmd, yield, config_value;
+  int rc, config_value;
   uint16_t first_listed_newline;
   const char *cmdname;
   uint8_t *argptr, *serial;
   BOOL if_inverted;
 
-  yield = PR_OK;
-  cmd = CMD_UNKNOWN;
+  int yield = PR_OK;
+  int cmd = CMD_UNKNOWN;
   size_t cmdlen = 0;
 
   for (i = 0; i < cmdlistcount; i++)
@@ -2689,7 +2689,7 @@ process_pattern(void)
 
     if (rc != 0)
     {
-      size_t bsize, usize, strsize;
+      size_t bsize;
 
       preg.re_pcre2_code = NULL; // In case something was left in there
       preg.re_match_data = NULL;
@@ -2699,8 +2699,8 @@ process_pattern(void)
                   ? (unsigned)pat_patctl.regerror_buffsize
                   : pbuffer8_size;
       char *regbuffer = (char *)pbuffer8 + (pbuffer8_size - bsize);
-      usize = regerror(rc, &preg, regbuffer, bsize);
-      strsize = ((usize > bsize) ? bsize : usize) - 1;
+      size_t usize = regerror(rc, &preg, regbuffer, bsize);
+      size_t strsize = ((usize > bsize) ? bsize : usize) - 1;
 
       cfprintf(clr_api_error, outfile, "Failed: POSIX code %d: ", rc);
       if (bsize > 0)
@@ -3879,12 +3879,11 @@ copy_and_get(BOOL utf, int capcount)
 
   for (i = 0; i < MAXCPYGET && dat_datctl.copy_numbers[i] >= 0; i++)
   {
-    int rc, rc2;
-    PCRE2_SIZE length, length2;
+    PCRE2_SIZE length2;
     PCRE2_UCHAR copybuffer[256];
     uint32_t n = (uint32_t)(dat_datctl.copy_numbers[i]);
-    length = sizeof(copybuffer) / sizeof(*copybuffer);
-    rc = pcre2_substring_copy_bynumber(match_data, n, copybuffer, &length);
+    PCRE2_SIZE length = sizeof(copybuffer) / sizeof(*copybuffer);
+    int rc = pcre2_substring_copy_bynumber(match_data, n, copybuffer, &length);
     if (rc < 0)
     {
       cfprintf(clr_api_error, outfile, "Copy substring %d failed (%d): ", n, rc);
@@ -3898,7 +3897,7 @@ copy_and_get(BOOL utf, int capcount)
       fprintf(outfile, " (%" SIZ_FORM ")\n", length);
     }
 
-    rc2 = pcre2_substring_length_bynumber(match_data, n, &length2);
+    int rc2 = pcre2_substring_length_bynumber(match_data, n, &length2);
     if (rc2 < 0)
     {
       cfprintf(clr_api_error, outfile, "Get substring %d length failed (%d): ", n, rc2);
@@ -3917,8 +3916,7 @@ copy_and_get(BOOL utf, int capcount)
   uint8_t *nptr = dat_datctl.copy_names;
   for (;;)
   {
-    int rc, rc2;
-    PCRE2_SIZE length, length2;
+    PCRE2_SIZE length2;
     PCRE2_UCHAR copybuffer[256];
     size_t namelen = strlen((const char *)nptr);
 #if PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
@@ -3944,8 +3942,8 @@ copy_and_get(BOOL utf, int capcount)
     if (groupnumber < 0 && groupnumber != PCRE2_ERROR_NOUNIQUESUBSTRING)
       cfprintf(clr_api_error, outfile, "Number not found for group \"%s\"\n", nptr);
 
-    length = sizeof(copybuffer) / sizeof(*copybuffer);
-    rc = pcre2_substring_copy_byname(match_data, pbuffer, copybuffer, &length);
+    PCRE2_SIZE length = sizeof(copybuffer) / sizeof(*copybuffer);
+    int rc = pcre2_substring_copy_byname(match_data, pbuffer, copybuffer, &length);
     if (rc < 0)
     {
       cfprintf(clr_api_error, outfile, "Copy substring \"%s\" failed (%d): ", nptr, rc);
@@ -3963,7 +3961,7 @@ copy_and_get(BOOL utf, int capcount)
         fprintf(outfile, " (non-unique)\n");
     }
 
-    rc2 = pcre2_substring_length_byname(match_data, pbuffer, &length2);
+    int rc2 = pcre2_substring_length_byname(match_data, pbuffer, &length2);
     if (rc2 < 0)
     {
       cfprintf(clr_api_error, outfile, "Get substring \"%s\" length failed (%d): ", nptr, rc2);

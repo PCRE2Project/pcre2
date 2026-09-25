@@ -284,8 +284,6 @@ Returns:     the return from the callout
 static int
 do_callout(heapframe *F, match_block *mb, PCRE2_SIZE *lengthptr)
 {
-  PCRE2_SIZE save0, save1;
-
   *lengthptr =
       (*Fecode == OP_CALLOUT) ? PRIV(OP_lengths)[OP_CALLOUT] : GET(Fecode, 1 + 2 * LINK_SIZE);
 
@@ -332,8 +330,8 @@ do_callout(heapframe *F, match_block *mb, PCRE2_SIZE *lengthptr)
     cb->callout_string_length = *lengthptr - (1 + 4 * LINK_SIZE) - 2;
   }
 
-  save0 = callout_ovector[0];
-  save1 = callout_ovector[1];
+  PCRE2_SIZE save0 = callout_ovector[0];
+  PCRE2_SIZE save1 = callout_ovector[1];
   callout_ovector[0] = callout_ovector[1] = PCRE2_UNSET;
   int rc = mb->callout(cb, mb->callout_data);
   callout_ovector[0] = save0;
@@ -471,11 +469,10 @@ match_ref(PCRE2_SIZE offset, BOOL caseless, int caseopts, heapframe *F, match_bl
     {
       for (; length > 0; length--)
       {
-        uint32_t cc, cp;
         if (eptr >= mb->end_subject)
           return 1; // Partial match
-        cc = *eptr;
-        cp = *p;
+        uint32_t cc = *eptr;
+        uint32_t cp = *p;
         if (TABLE_GET(cp, mb->lcc, cp) != TABLE_GET(cc, mb->lcc, cc))
           return -1; // No match
         p++;
@@ -3411,7 +3408,6 @@ NEW_FRAME:
           case PT_WORD:
             for (i = 1; i <= Lmin; i++)
             {
-              int chartype, category;
               if (Feptr >= mb->end_subject)
               {
                 SCHECK_PARTIAL();
@@ -3419,8 +3415,8 @@ NEW_FRAME:
               }
 
               GETCHARINCTEST(fc, Feptr);
-              chartype = UCD_CHARTYPE(fc);
-              category = PRIV(ucp_gentype)[chartype];
+              int chartype = UCD_CHARTYPE(fc);
+              int category = PRIV(ucp_gentype)[chartype];
               if ((category == ucp_L || category == ucp_N || chartype == ucp_Mn ||
                    chartype == ucp_Pc) == notmatch)
                 RRETURN(MATCH_NOMATCH);
@@ -4321,7 +4317,6 @@ NEW_FRAME:
           case PT_WORD:
             for (;;)
             {
-              int chartype, category;
               RMATCH(Fecode, RM214);
               if (rrc != MATCH_NOMATCH)
                 RRETURN(rrc);
@@ -4334,8 +4329,8 @@ NEW_FRAME:
               }
 
               GETCHARINCTEST(fc, Feptr);
-              chartype = UCD_CHARTYPE(fc);
-              category = PRIV(ucp_gentype)[chartype];
+              int chartype = UCD_CHARTYPE(fc);
+              int category = PRIV(ucp_gentype)[chartype];
               if ((category == ucp_L || category == ucp_N || chartype == ucp_Mn ||
                    chartype == ucp_Pc) == (Lctype == OP_NOTPROP))
                 RRETURN(MATCH_NOMATCH);
@@ -4974,7 +4969,6 @@ NEW_FRAME:
           case PT_WORD:
             for (i = Lmin; i < Lmax; i++)
             {
-              int chartype, category;
               int len = 1;
               if (Feptr >= mb->end_subject)
               {
@@ -4983,8 +4977,8 @@ NEW_FRAME:
               }
 
               GETCHARLENTEST(fc, Feptr, len);
-              chartype = UCD_CHARTYPE(fc);
-              category = PRIV(ucp_gentype)[chartype];
+              int chartype = UCD_CHARTYPE(fc);
+              int category = PRIV(ucp_gentype)[chartype];
               if ((category == ucp_L || category == ucp_N || chartype == ucp_Mn ||
                    chartype == ucp_Pc) == notmatch)
                 break;
@@ -5160,7 +5154,7 @@ NEW_FRAME:
 
           for (;;)
           {
-            int lgb, rgb;
+            int lgb;
             PCRE2_SPTR fptr;
 
             if (Feptr <= Lstart_eptr)
@@ -5184,7 +5178,7 @@ NEW_FRAME:
               GETCHAR(fc, Feptr);
             }
 
-            rgb = UCD_GRAPHBREAK(fc);
+            int rgb = UCD_GRAPHBREAK(fc);
 
             for (;;)
             {
