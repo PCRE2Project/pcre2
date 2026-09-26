@@ -1002,7 +1002,7 @@ The distribution should contain the files listed below.
   vms/pcre2.h_patch       )
   vms/stdint.h            )
 
-=============================
-Last updated: 15 October 2025
-=============================
+============================
+Last updated: 08 August 2026
+============================
 
