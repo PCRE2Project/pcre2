@@ -6930,6 +6930,36 @@ unittest(void)
   pcre2_substring_free(NULL);
   pcre2_substring_list_free(NULL);
 
+  rc = pcre2_substring_copy_byname(NULL, name_n, copy_buf, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_NULL,
+         "pcre2_substring_copy_byname(NULL match_data)");
+  rc = pcre2_substring_copy_bynumber(NULL, 1, copy_buf, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_NULL,
+         "pcre2_substring_copy_bynumber(NULL match_data)");
+  rc = pcre2_substring_get_byname(NULL, name_n, &sptrval, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_substring_get_byname(NULL match_data)");
+  rc = pcre2_substring_get_bynumber(NULL, 1, &sptrval, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_NULL,
+         "pcre2_substring_get_bynumber(NULL match_data)");
+  rc = pcre2_substring_length_byname(NULL, name_n, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_NULL,
+         "pcre2_substring_length_byname(NULL match_data)");
+  rc = pcre2_substring_length_bynumber(NULL, 1, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_NULL,
+         "pcre2_substring_length_bynumber(NULL match_data)");
+  rc = pcre2_substring_list_get(NULL, &stringlist, &lengthslist);
+  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_substring_list_get(NULL match_data)");
+  rc = pcre2_substring_nametable_scan(NULL, name_n, NULL, NULL);
+  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_substring_nametable_scan(NULL code)");
+  rc = pcre2_substring_number_from_name(NULL, name_n);
+  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_substring_number_from_name(NULL code)");
+  rc = pcre2_substring_nametable_scan(invalid_code, name_n, NULL, NULL);
+  ASSERT(rc == PCRE2_ERROR_BADMAGIC,
+         "pcre2_substring_nametable_scan(bad magic)");
+  rc = pcre2_substring_number_from_name(invalid_code, name_n);
+  ASSERT(rc == PCRE2_ERROR_BADMAGIC,
+         "pcre2_substring_number_from_name(bad magic)");
+
   pcre2_code_free(test_compiled_code);
   test_compiled_code =
       pcre2_compile(capture_pattern, PCRE2_ZERO_TERMINATED, 0, &errorcode, &erroroffset, NULL);

@@ -3711,6 +3711,13 @@ const:PCRE2_ERROR_UNSET::
       [.regex]`+(abc)|(def)+` and the subject is [.subject]`def`, and the ovector contains at least two
       capturing slots, substring number 1 is unset.
 
+const:PCRE2_ERROR_NULL::
+      A required pointer argument was passed as const:NULL, or the match data
+      block was not initialized with a valid pattern or subject.
+
+const:PCRE2_ERROR_BADMAGIC::
+      An invalid pattern block was passed whose magic number does not match.
+
 [[extracting-substrings-by-name]]
 == Extracting a list of all captured substrings
 
