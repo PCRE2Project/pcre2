@@ -180,6 +180,23 @@ This macro should be used with no following semicolon, and ideally with a commen
 #define PCRE2_FALLTHROUGH
 #endif
 
+/* This macro can be used as an attribute to custom printf-like
+functions. By using it, the compiler will check that the format string
+and the parameters passed to the function are actually compatible. */
+
+#ifndef PCRE2_FORMAT_PRINTF
+#if (defined(__GNUC__) || defined(__clang__)) && defined(__has_attribute)
+#if __has_attribute(format)
+#define PCRE2_FORMAT_PRINTF(fmt_idx, arg_idx) \
+    __attribute__((format(printf, fmt_idx, arg_idx)))
+#endif
+#endif
+#endif /* !PCRE2_FORMAT_PRINTF */
+
+#ifndef PCRE2_FORMAT_PRINTF
+#define PCRE2_FORMAT_PRINTF(fmt_idx, arg_idx)
+#endif
+
 #endif /* PCRE2_UTIL_H_IDEMPOTENT_GUARD */
 
 /* End of pcre2_util.h */
