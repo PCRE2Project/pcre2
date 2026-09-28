@@ -784,13 +784,13 @@ file(REMOVE ${PROJECT_SOURCE_DIR}/src/pcre2.h)
 # Release and library version information
 
 set(PCRE2_MAJOR "10")
-set(PCRE2_MINOR "49")
+set(PCRE2_MINOR "50")
 set(PCRE2_PRERELEASE "-DEV")
 set(PCRE2_DATE "2026-11-31")
-set(LIBPCRE2_POSIX_VERSION "3:8:0")
-set(LIBPCRE2_8_VERSION "16:0:16")
-set(LIBPCRE2_16_VERSION "16:0:16")
-set(LIBPCRE2_32_VERSION "16:0:16")
+set(LIBPCRE2_POSIX_VERSION "3:10:0")
+set(LIBPCRE2_8_VERSION "17:0:17")
+set(LIBPCRE2_16_VERSION "17:0:17")
+set(LIBPCRE2_32_VERSION "17:0:17")
 
 macro(parse_lib_version variable_prefix)
   string(REPLACE ":" ";" ${variable_prefix}_VERSION_LIST ${${variable_prefix}_VERSION})

@@ -4,7 +4,7 @@
 :manpurpose: set an optimization directive
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 22 September 2024
 :revdate: 22 September 2024
 

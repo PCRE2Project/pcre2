@@ -4,7 +4,7 @@
 :manpurpose: find length of numbered substring
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 22 December 2014
 :revdate: 22 December 2014
 

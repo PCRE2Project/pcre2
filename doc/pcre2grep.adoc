@@ -5,7 +5,7 @@
 :description: The `pcre2grep` command
 :manvolnum: 1
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 24 January 2025
 :revdate: 24 January 2025
 :toc: right

@@ -4,7 +4,7 @@
 :manpurpose: free a match data block
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 16 August 2023
 :revdate: 16 August 2023
 

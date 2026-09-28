@@ -4,7 +4,7 @@
 :manpurpose: get the \R convention
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 11 September 2026
 :revdate: 11 September 2026
 
