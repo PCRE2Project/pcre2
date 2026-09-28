@@ -1152,4 +1152,4 @@ SEE ALSO
        Copyright © 1997-2023 University of Cambridge.
 
 
-PCRE2 10.49-DEV                 24 January 2025                   PCRE2GREP(1)
+PCRE2 10.50-DEV                 24 January 2025                   PCRE2GREP(1)
