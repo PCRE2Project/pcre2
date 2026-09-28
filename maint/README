@@ -101,8 +101,8 @@ UpdateRelease.py
   Python scripts to be run less frequently than UpdateAlways. These should only
   be needed immediately before a release, when finalising the repository.
   UpdateDates.py checks in the last-updated times on documentation pages.
-  UpdateRelease.py is needed after any change to the version number in
-  configure.ac.
+  UpdateRelease.py is needed after any change to the release number or libtool
+  library versions in configure.ac.
 
 pcre2_chartables.c.non-standard
   This is a set of character tables that came from a Windows system. It has

@@ -5,6 +5,7 @@
 #  - AsciiDoc documentation sources.
 #  - Bazel MODULE file.
 #  - Zig package manifest.
+#  - Installed library filenames in platform manifests.
 
 # This script should be run in the main PCRE2 directory.
 
@@ -17,6 +18,20 @@ from UpdateCommon import update_file, CURRENT_RELEASE, VERSION_INFO
 def update_adoc_version(filename):
     print('  Updating %s' % filename)
     update_file(filename, r'(?m)^:mansource: PCRE2 .*$', ':mansource: PCRE2 %s' % CURRENT_RELEASE)
+
+
+def libtool_filename_version(library):
+    version = VERSION_INFO['libpcre2_%s_version' % library]
+
+    try:
+        current, revision, age = (int(value) for value in version.split(':'))
+    except ValueError:
+        raise Exception('Invalid libtool version for libpcre2-%s: %s' % (library, version))
+
+    if current < age:
+        raise Exception('Invalid libtool version for libpcre2-%s: current is less than age' % library)
+
+    return '%d.%d.%d' % (current - age, age, revision)
 
 
 print('Updating CMakeLists.txt')
@@ -49,3 +64,24 @@ update_file('MODULE.bazel', r'(?m)^    version = ".*?"', '    version = "%s"' % 
 print('Updating build.zig.zon')
 ZIG_VERSION = re.sub(r'^(\d+\.\d+)(.*)$', r'\1.0\2', CURRENT_RELEASE)
 update_file('build.zig.zon', r'(?m)^    \.version = ".*?"', '    .version = "%s"' % ZIG_VERSION)
+
+# Install manifests
+print('Updating install manifests')
+for filename in sorted(glob.glob('maint/manifest-*install-*')):
+    if filename.endswith('-windows'):
+        continue
+
+    print('  Updating %s' % filename)
+    is_macos = filename.endswith('-macos')
+
+    for library in ('8', '16', '32', 'posix'):
+        version = libtool_filename_version(library)
+
+        if is_macos:
+            pattern = r'libpcre2-%s\.\d+\.\d+\.\d+\.dylib' % library
+            replacement = 'libpcre2-%s.%s.dylib' % (library, version)
+        else:
+            pattern = r'libpcre2-%s\.so\.\d+\.\d+\.\d+' % library
+            replacement = 'libpcre2-%s.so.%s' % (library, version)
+
+        update_file(filename, pattern, replacement)
