@@ -4,7 +4,7 @@
 :manpurpose: enumerate callouts in a compiled pattern
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 23 March 2017
 :revdate: 23 March 2017
 

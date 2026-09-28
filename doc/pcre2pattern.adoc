@@ -5,7 +5,7 @@
 :description: Specification of the regular expressions supported by PCRE2
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 25 October 2025
 :revdate: 25 October 2025
 :toc: right

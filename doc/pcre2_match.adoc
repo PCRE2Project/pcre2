@@ -4,7 +4,7 @@
 :manpurpose: match a compiled pattern to a subject string (Perl compatible)
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 27 January 2024
 :revdate: 27 January 2024
 

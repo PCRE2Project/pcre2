@@ -5,7 +5,7 @@
 :description: Compatibility with Perl
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 02 June 2025
 :revdate: 02 June 2025
 

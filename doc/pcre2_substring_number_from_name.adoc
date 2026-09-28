@@ -4,7 +4,7 @@
 :manpurpose: convert captured string name to number
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 03 November 2014
 :revdate: 03 November 2014
 

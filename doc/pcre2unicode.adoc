@@ -5,7 +5,7 @@
 :description: Discussion of Unicode and UTF-8/UTF-16/UTF-32 support
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 27 November 2024
 :revdate: 27 November 2024
 :toc: right

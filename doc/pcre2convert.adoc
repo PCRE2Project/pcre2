@@ -5,7 +5,7 @@
 :description: Experimental foreign pattern conversion functions
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 14 November 2023
 :revdate: 14 November 2023
 :toc: right

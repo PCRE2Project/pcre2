@@ -4,7 +4,7 @@
 :manpurpose: fast path interface to JIT matching
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 20 January 2023
 :revdate: 20 January 2023
 

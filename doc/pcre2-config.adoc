@@ -5,7 +5,7 @@
 :description: Information about the installation configuration
 :manvolnum: 1
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 22 February 2025
 :revdate: 22 February 2025
 
