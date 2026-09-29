@@ -6736,9 +6736,28 @@ unittest(void)
   rc = pcre2_pattern_info(invalid_code, PCRE2_INFO_NEWLINE, &uval);
   ASSERT(rc == PCRE2_ERROR_BADMAGIC, "pcre2_pattern_info(bad magic)");
 
+  ASSERT(pcre2_code_copy(invalid_code) == NULL, "pcre2_code_copy(bad magic)");
+  ASSERT(pcre2_code_copy_with_tables(invalid_code) == NULL,
+         "pcre2_code_copy_with_tables(bad magic)");
+
+#ifdef SUPPORT_JIT
+  rc = pcre2_jit_compile(invalid_code, PCRE2_JIT_COMPLETE);
+  ASSERT(rc == PCRE2_ERROR_BADMAGIC, "pcre2_jit_compile(bad magic)");
+#endif
+
 #ifdef BITOTHER
   rc = pcre2_pattern_info((pcre2_code *)bitother_code, PCRE2_INFO_NEWLINE, &uval);
   ASSERT(rc == PCRE2_ERROR_BADMODE, "pcre2_pattern_info(bitmode mismatch)");
+
+  ASSERT(pcre2_code_copy((pcre2_code *)bitother_code) == NULL,
+         "pcre2_code_copy(bitmode mismatch)");
+  ASSERT(pcre2_code_copy_with_tables((pcre2_code *)bitother_code) == NULL,
+         "pcre2_code_copy_with_tables(bitmode mismatch)");
+
+#ifdef SUPPORT_JIT
+  rc = pcre2_jit_compile((pcre2_code *)bitother_code, PCRE2_JIT_COMPLETE);
+  ASSERT(rc == PCRE2_ERROR_BADMODE, "pcre2_jit_compile(bitmode mismatch)");
+#endif
 #endif
 
 #ifdef SUPPORT_JIT
@@ -6883,6 +6902,8 @@ unittest(void)
   test_tables = pcre2_maketables(test_gen_context);
   ASSERT(test_tables != NULL, "pcre2_maketables()");
   pcre2_maketables_free(test_gen_context, test_tables);
+  pcre2_maketables_free(test_gen_context, NULL);
+  pcre2_maketables_free(NULL, NULL);
 
   mallocs_until_failure = 0;
   test_tables = pcre2_maketables(test_gen_context);
@@ -6894,6 +6915,9 @@ unittest(void)
 
   rc = pcre2_callout_enumerate(NULL, callout_enumerate_function_void, NULL);
   ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_callout_enumerate(null)");
+
+  rc = pcre2_callout_enumerate(invalid_code, NULL, NULL);
+  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_callout_enumerate(null callback)");
 
   rc = pcre2_callout_enumerate(invalid_code, callout_enumerate_function_void, NULL);
   ASSERT(rc == PCRE2_ERROR_BADMAGIC, "pcre2_callout_enumerate(invalid)");
@@ -6907,6 +6931,10 @@ unittest(void)
   test_compiled_code =
       pcre2_compile(callout_int_pattern, PCRE2_ZERO_TERMINATED, 0, &errorcode, &erroroffset, NULL);
   ASSERT(test_compiled_code != NULL, "test pattern compilation");
+
+  rc = pcre2_callout_enumerate(test_compiled_code, NULL, &errorcode);
+  ASSERT(rc == PCRE2_ERROR_NULL,
+         "pcre2_callout_enumerate(null callback, valid code)");
 
   rc = pcre2_callout_enumerate(test_compiled_code, callout_enumerate_function_void, &errorcode);
   ASSERT(rc == 0, "pcre2_callout_enumerate(void)");

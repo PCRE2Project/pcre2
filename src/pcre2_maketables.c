@@ -194,6 +194,8 @@ pcre2_maketables(pcre2_general_context *gcontext)
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_maketables_free(pcre2_general_context *gcontext, const uint8_t *tables)
 {
+  if (tables == NULL)
+    return;
   if (gcontext != NULL)
     gcontext->memctl.free((void *)tables, gcontext->memctl.memory_data);
   else

@@ -278,7 +278,7 @@ pcre2_callout_enumerate(const pcre2_code *code,
   BOOL utf;
 #endif
 
-  if (re == NULL)
+  if (re == NULL || callback == NULL)
     return PCRE2_ERROR_NULL;
 
 #ifdef SUPPORT_UNICODE

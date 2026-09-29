@@ -1265,6 +1265,10 @@ pcre2_code_copy(const pcre2_code *code)
 
   if (code == NULL)
     return NULL;
+  if (code->magic_number != MAGIC_NUMBER)
+    return NULL;
+  if ((code->flags & (PCRE2_CODE_UNIT_WIDTH / 8)) == 0)
+    return NULL;
   newcode = code->memctl.malloc(code->blocksize, code->memctl.memory_data);
   if (newcode == NULL)
     return NULL;
@@ -1274,7 +1278,7 @@ pcre2_code_copy(const pcre2_code *code)
   /* If the code is one that has been deserialized, increment the reference count
   in the decoded tables. */
 
-  if ((code->flags & PCRE2_DEREF_TABLES) != 0)
+  if ((code->flags & PCRE2_DEREF_TABLES) != 0 && code->tables != NULL)
   {
     ref_count = (PCRE2_SIZE *)(code->tables + TABLES_LENGTH);
     (*ref_count)++;
@@ -1300,7 +1304,11 @@ pcre2_code_copy_with_tables(const pcre2_code *code)
   pcre2_code *newcode;
   uint8_t *newtables;
 
-  if (code == NULL)
+  if (code == NULL || code->tables == NULL)
+    return NULL;
+  if (code->magic_number != MAGIC_NUMBER)
+    return NULL;
+  if ((code->flags & (PCRE2_CODE_UNIT_WIDTH / 8)) == 0)
     return NULL;
   newcode = code->memctl.malloc(code->blocksize, code->memctl.memory_data);
   if (newcode == NULL)
@@ -1342,7 +1350,7 @@ pcre2_code_free(pcre2_code *code)
       PRIV(jit_free)(code->executable_jit, &code->memctl);
 #endif
 
-    if ((code->flags & PCRE2_DEREF_TABLES) != 0)
+    if ((code->flags & PCRE2_DEREF_TABLES) != 0 && code->tables != NULL)
     {
       /* Decoded tables belong to the codes after deserialization, and they must
       be freed when there are no more references to them. The *ref_count should
