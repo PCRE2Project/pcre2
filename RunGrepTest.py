@@ -1294,8 +1294,15 @@ if supports("callout scripts in patterns are supported"):
     print("Testing pcre2grep script callouts")
 
     # On Windows, we don't have a convenient echo binary, so it's built into
-    # pcre2test for convenience.
-    callout_echo = "/bin/echo" if os.name != "nt" else f"{pcre2test}|-echo"
+    # pcre2test for convenience. Elsewhere pcre2grep runs the script with
+    # execv(), which does not search PATH, so it must be an absolute path.
+    # /bin/echo is not present everywhere (NixOS, for example, keeps only
+    # /bin/sh there), so use the first echo in an absolute PATH directory.
+    if os.name == "nt":
+        callout_echo = f"{pcre2test}|-echo"
+    else:
+        absolute_path = os.pathsep.join(d for d in os.environ.get("PATH", "").split(os.pathsep) if os.path.isabs(d))
+        callout_echo = shutil.which("echo", path=absolute_path) or "/bin/echo"
 
     write_test_output(b"--- Test 1 ---\n", append=False)
     output([
