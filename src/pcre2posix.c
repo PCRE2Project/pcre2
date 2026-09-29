@@ -377,7 +377,8 @@ PCRE2POSIX_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t pmatch[],
               int eflags)
 {
-  int rc, so, eo;
+  int rc;
+  PCRE2_SIZE so, eo;
   int options = 0;
   pcre2_match_data *md = (pcre2_match_data *)preg->re_match_data;
 
@@ -413,7 +414,7 @@ pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t
   else
   {
     so = 0;
-    eo = (int)strlen(string);
+    eo = strlen(string);
   }
 
   rc = pcre2_match((const pcre2_code *)preg->re_pcre2_code, (PCRE2_SPTR)string + so, (eo - so), 0,
