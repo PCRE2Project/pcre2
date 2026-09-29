@@ -1310,18 +1310,35 @@ fi
 
 if $valgrind $vjs "$pcre2grep" $pcre2grep_opts --help | $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q 'callout scripts in patterns are supported'; then
   echo "Testing pcre2grep script callouts"
+
+  # pcre2grep runs a callout script with execv(), which does not search PATH,
+  # so the script must be named by an absolute path. /bin/echo is not present
+  # everywhere (NixOS, for example, keeps only /bin/sh there), so use the first
+  # echo executable found in an absolute PATH directory. Fall back to /bin/echo
+  # if none is found.
+
+  echo_prog=/bin/echo
+  saved_ifs=$IFS
+  IFS=:
+  for dir in $PATH; do
+    case $dir in
+      /*) if [ -f "$dir/echo" ] && [ -x "$dir/echo" ]; then echo_prog="$dir/echo"; break; fi ;;
+    esac
+  done
+  IFS=$saved_ifs
+
   rm -f testtrygrep
   echo "--- Test 1 ---" >testtrygrep
-  $valgrind $vjs "$pcre2grep" $pcre2grep_opts '(T)(..(.))(?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4) ($14) ($0)")()' "$srcdir/testdata/grepinputv" >>testtrygrep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts '(T)(..(.))(?C"'"$echo_prog"'|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4) ($14) ($0)")()' "$srcdir/testdata/grepinputv" >>testtrygrep
   echo "RC=$?" >>testtrygrep
   echo "--- Test 2 ---" >>testtrygrep
-  $valgrind $vjs "$pcre2grep" $pcre2grep_opts '(T)(..(.))()()()()()()()(..)(?C"/bin/echo|Arg1: [$11] [${11}]")' "$srcdir/testdata/grepinputv" >>testtrygrep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts '(T)(..(.))()()()()()()()(..)(?C"'"$echo_prog"'|Arg1: [$11] [${11}]")' "$srcdir/testdata/grepinputv" >>testtrygrep
   echo "RC=$?" >>testtrygrep
   echo "--- Test 3 ---" >>testtrygrep
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts '(T)(?C"|$0:$1$n")' "$srcdir/testdata/grepinputv" >>testtrygrep
   echo "RC=$?" >>testtrygrep
   echo "--- Test 4 ---" >>testtrygrep
-  $valgrind $vjs "$pcre2grep" $pcre2grep_opts '(T)(?C"/bin/echo|$0:$1$n")' "$srcdir/testdata/grepinputv" >>testtrygrep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts '(T)(?C"'"$echo_prog"'|$0:$1$n")' "$srcdir/testdata/grepinputv" >>testtrygrep
   echo "RC=$?" >>testtrygrep
   echo "--- Test 5 ---" >>testtrygrep
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts '(T)(?C"|$1$n")(*F)' "$srcdir/testdata/grepinputv" >>testtrygrep
@@ -1348,7 +1365,7 @@ if $valgrind $vjs "$pcre2grep" $pcre2grep_opts --help | $valgrind $vjs "$pcre2gr
     $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u '(T)(?C"|$0:$x{a6}$n")' "$srcdir/testdata/grepinputv" >>testtrygrep
     echo "RC=$?" >>testtrygrep
     echo "--- Test 2 ---" >>testtrygrep
-    $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u '(T)(?C"/bin/echo|$0:$x{a6}$n")' "$srcdir/testdata/grepinputv" >>testtrygrep
+    $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u '(T)(?C"'"$echo_prog"'|$0:$x{a6}$n")' "$srcdir/testdata/grepinputv" >>testtrygrep
     echo "RC=$?" >>testtrygrep
 
     if [ $nonfork = 1 ] ; then
