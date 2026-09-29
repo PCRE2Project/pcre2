@@ -581,6 +581,14 @@ compile_optimize_class(uint32_t *start_ptr, uint32_t options, uint32_t xoptions,
 #ifdef PCRE2_DEBUG
   cranges->header.type = CDATA_CRANGE;
 #endif
+  /* The range list count is stored as uint16_t; reject classes that would
+     silently truncate it rather than storing an inconsistent count. */
+  if (range_list_size > 0xFFFF)
+    {
+    *errorcodeptr = ERR20;
+    cb->erroroffset = 0;
+    return NULL;
+    }
   cranges->range_list_size = (uint16_t)range_list_size;
   cranges->char_lists_types = 0;
   cranges->char_lists_size = 0;
