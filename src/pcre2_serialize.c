@@ -81,6 +81,12 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
   const pcre2_memctl *memctl =
       (gcontext != NULL) ? &gcontext->memctl : &PRIV(default_compile_context).memctl;
 
+  if (serialized_bytes != NULL)
+    *serialized_bytes = NULL;
+
+  if (serialized_size != NULL)
+    *serialized_size = 0;
+
   if (codes == NULL || serialized_bytes == NULL || serialized_size == NULL)
     return PCRE2_ERROR_NULL;
 
@@ -102,10 +108,15 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
       tables = re->tables;
     else if (tables != re->tables)
       return PCRE2_ERROR_MIXEDTABLES;
+    if (PCRE2_SIZE_MAX - re->blocksize < total_size)
+      return PCRE2_ERROR_NOMEMORY;
     total_size += re->blocksize;
   }
 
   /* Initialize the byte stream. */
+  if (PCRE2_SIZE_MAX - sizeof(pcre2_memctl) < total_size)
+    return PCRE2_ERROR_NOMEMORY;
+
   bytes = memctl->malloc(total_size + sizeof(pcre2_memctl), memctl->memory_data);
   if (bytes == NULL)
     return PCRE2_ERROR_NOMEMORY;

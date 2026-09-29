@@ -129,6 +129,7 @@ pcre2_match_data_free(pcre2_match_data *match_data)
 PCRE2_EXP_DEFN PCRE2_SPTR PCRE2_CALL_CONVENTION
 pcre2_get_mark(pcre2_match_data *match_data)
 {
+  PCRE2_ASSERT(match_data != NULL);
   return match_data->mark;
 }
 
@@ -141,6 +142,7 @@ pcre2_get_mark(pcre2_match_data *match_data)
 PCRE2_EXP_DEFN PCRE2_SIZE *PCRE2_CALL_CONVENTION
 pcre2_get_ovector_pointer(pcre2_match_data *match_data)
 {
+  PCRE2_ASSERT(match_data != NULL);
   return match_data->ovector;
 }
 
@@ -153,6 +155,7 @@ pcre2_get_ovector_pointer(pcre2_match_data *match_data)
 PCRE2_EXP_DEFN uint32_t PCRE2_CALL_CONVENTION
 pcre2_get_ovector_count(pcre2_match_data *match_data)
 {
+  PCRE2_ASSERT(match_data != NULL);
   return match_data->oveccount;
 }
 
@@ -165,6 +168,7 @@ pcre2_get_ovector_count(pcre2_match_data *match_data)
 PCRE2_EXP_DEFN PCRE2_SIZE PCRE2_CALL_CONVENTION
 pcre2_get_startchar(pcre2_match_data *match_data)
 {
+  PCRE2_ASSERT(match_data != NULL);
   return match_data->startchar;
 }
 
@@ -177,6 +181,7 @@ pcre2_get_startchar(pcre2_match_data *match_data)
 PCRE2_EXP_DEFN PCRE2_SPTR PCRE2_CALL_CONVENTION
 pcre2_get_subject(pcre2_match_data *match_data, PCRE2_SIZE *lengthptr)
 {
+  PCRE2_ASSERT(match_data != NULL);
   if (lengthptr != NULL)
     *lengthptr = match_data->subject_length;
   return match_data->subject;
@@ -191,6 +196,7 @@ pcre2_get_subject(pcre2_match_data *match_data, PCRE2_SIZE *lengthptr)
 PCRE2_EXP_DEFN PCRE2_SIZE PCRE2_CALL_CONVENTION
 pcre2_get_match_data_size(pcre2_match_data *match_data)
 {
+  PCRE2_ASSERT(match_data != NULL);
   return offsetof(pcre2_match_data, ovector) + 2 * (match_data->oveccount) * sizeof(PCRE2_SIZE);
 }
 
@@ -203,6 +209,7 @@ pcre2_get_match_data_size(pcre2_match_data *match_data)
 PCRE2_EXP_DEFN PCRE2_SIZE PCRE2_CALL_CONVENTION
 pcre2_get_match_data_heapframes_size(pcre2_match_data *match_data)
 {
+  PCRE2_ASSERT(match_data != NULL);
   return match_data->heapframes_size;
 }
 

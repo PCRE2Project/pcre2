@@ -6724,6 +6724,9 @@ unittest(void)
   rc = pcre2_pattern_info(NULL, PCRE2_INFO_NEWLINE, &uval);
   ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_pattern_info(null)");
 
+  rc = pcre2_pattern_info(NULL, 999, NULL);
+  ASSERT(rc == PCRE2_ERROR_BADOPTION, "pcre2_pattern_info(bad option, null code)");
+
   rc = pcre2_pattern_info(test_compiled_code, 999, NULL);
   ASSERT(rc == PCRE2_ERROR_BADOPTION, "pcre2_pattern_info(bad option)");
 
@@ -6733,6 +6736,7 @@ unittest(void)
   invalid_code = malloc(1024);
   ASSERT(invalid_code != NULL, "malloc()");
   memset(invalid_code, 0, 1024);
+
   rc = pcre2_pattern_info(invalid_code, PCRE2_INFO_NEWLINE, &uval);
   ASSERT(rc == PCRE2_ERROR_BADMAGIC, "pcre2_pattern_info(bad magic)");
 
@@ -7125,8 +7129,23 @@ unittest(void)
     ASSERT(serialize_code != NULL, "serialize setup");
     rc = pcre2_serialize_encode((const pcre2_code **)&serialize_code, 1, &serialized_bytes,
                                 &serialized_size, NULL);
-    pcre2_code_free(serialize_code);
     ASSERT(rc == 1 && serialized_bytes != NULL, "serialize setup");
+
+    {
+      uint8_t *null_bytes = (uint8_t *)1;
+      PCRE2_SIZE null_size = 999;
+      rc = pcre2_serialize_encode(NULL, 1, &null_bytes, &null_size, NULL);
+      ASSERT(rc == PCRE2_ERROR_NULL && null_bytes == NULL && null_size == 0,
+             "pcre2_serialize_encode(null codes)");
+
+      null_bytes = (uint8_t *)1;
+      null_size = 999;
+      rc = pcre2_serialize_encode((const pcre2_code **)&serialize_code, 0, &null_bytes, &null_size, NULL);
+      ASSERT(rc == PCRE2_ERROR_BADDATA && null_bytes == NULL && null_size == 0,
+             "pcre2_serialize_encode(zero codes)");
+    }
+
+    pcre2_code_free(serialize_code);
 
     /* goto 1: blocksize <= sizeof(pcre2_real_code) */
     {

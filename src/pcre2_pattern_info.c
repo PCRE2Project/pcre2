@@ -67,6 +67,9 @@ pcre2_pattern_info(const pcre2_code *code, uint32_t what, void *where)
   {
     switch (what)
     {
+    default:
+      return PCRE2_ERROR_BADOPTION;
+
     case PCRE2_INFO_ALLOPTIONS:
     case PCRE2_INFO_ARGOPTIONS:
     case PCRE2_INFO_BACKREFMAX:

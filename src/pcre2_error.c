@@ -340,6 +340,8 @@ pcre2_get_error_message(int errorcode, PCRE2_UCHAR *buffer, PCRE2_SIZE bufflen)
   PCRE2_SIZE i;
   int n, rc = 0;
 
+  PCRE2_ASSERT(bufflen == 0 || buffer != NULL);
+
   if (bufflen == 0)
     return PCRE2_ERROR_NOMEMORY;
 
