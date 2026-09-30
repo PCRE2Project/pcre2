@@ -432,8 +432,17 @@ pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t
       rc = (int)nmatch;
     for (i = 0; i < (size_t)rc; i++)
     {
-      pmatch[i].rm_so = (ovector[i * 2] == PCRE2_UNSET || ovector[i * 2] + so > INT_MAX) ? -1 : (int)(ovector[i * 2] + so);
-      pmatch[i].rm_eo = (ovector[i * 2 + 1] == PCRE2_UNSET || ovector[i * 2 + 1] + so > INT_MAX) ? -1 : (int)(ovector[i * 2 + 1] + so);
+      if (ovector[i * 2] == PCRE2_UNSET || ovector[i * 2] + so > (PCRE2_SIZE)INT_MAX ||
+          ovector[i * 2 + 1] == PCRE2_UNSET || ovector[i * 2 + 1] + so > (PCRE2_SIZE)INT_MAX)
+      {
+        pmatch[i].rm_so = -1;
+        pmatch[i].rm_eo = -1;
+      }
+      else
+      {
+        pmatch[i].rm_so = (int)(ovector[i * 2] + so);
+        pmatch[i].rm_eo = (int)(ovector[i * 2 + 1] + so);
+      }
     }
 
     for (; i < nmatch; i++)
