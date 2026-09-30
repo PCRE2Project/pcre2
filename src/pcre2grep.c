@@ -2856,7 +2856,7 @@ static int
 pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
 {
   int rc = 1;
-  PCRE2_SIZE filepos = 0;
+  int64_t filepos = 0;
   unsigned long int linenumber = 1;
   unsigned long int lastmatchnumber = 0;
   unsigned long int count = 0;
@@ -3138,7 +3138,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
             if (line_offsets)
               fprintf(stdout, "%llu,%llu%s", (int)start, (int)(end - start), stdout_nl);
             else
-              fprintf(stdout, "%llu,%llu%s", (unsigned long long)(filepos + start),
+              fprintf(stdout, "%lld,%llu%s", (long long)(filepos + start),
                   (unsigned long long)(end - start), stdout_nl);
           }
 
