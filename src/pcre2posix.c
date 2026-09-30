@@ -377,7 +377,8 @@ PCRE2POSIX_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t pmatch[],
               int eflags)
 {
-  int rc, so, eo;
+  int rc;
+  PCRE2_SIZE so, eo;
   int options = 0;
   pcre2_match_data *md = (pcre2_match_data *)preg->re_match_data;
 
@@ -407,13 +408,15 @@ pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t
   {
     if (pmatch == NULL)
       return REG_INVARG;
-    so = pmatch[0].rm_so;
-    eo = pmatch[0].rm_eo;
+    if (pmatch[0].rm_so < 0 || pmatch[0].rm_eo < 0 || pmatch[0].rm_so > pmatch[0].rm_eo)
+      return REG_INVARG;
+    so = (PCRE2_SIZE)pmatch[0].rm_so;
+    eo = (PCRE2_SIZE)pmatch[0].rm_eo;
   }
   else
   {
     so = 0;
-    eo = (int)strlen(string);
+    eo = strlen(string);
   }
 
   rc = pcre2_match((const pcre2_code *)preg->re_pcre2_code, (PCRE2_SPTR)string + so, (eo - so), 0,
@@ -429,8 +432,17 @@ pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t
       rc = (int)nmatch;
     for (i = 0; i < (size_t)rc; i++)
     {
-      pmatch[i].rm_so = (ovector[i * 2] == PCRE2_UNSET) ? -1 : (int)(ovector[i * 2] + so);
-      pmatch[i].rm_eo = (ovector[i * 2 + 1] == PCRE2_UNSET) ? -1 : (int)(ovector[i * 2 + 1] + so);
+      if (ovector[i * 2] == PCRE2_UNSET || ovector[i * 2] + so > (PCRE2_SIZE)INT_MAX ||
+          ovector[i * 2 + 1] == PCRE2_UNSET || ovector[i * 2 + 1] + so > (PCRE2_SIZE)INT_MAX)
+      {
+        pmatch[i].rm_so = -1;
+        pmatch[i].rm_eo = -1;
+      }
+      else
+      {
+        pmatch[i].rm_so = (int)(ovector[i * 2] + so);
+        pmatch[i].rm_eo = (int)(ovector[i * 2 + 1] + so);
+      }
     }
 
     for (; i < nmatch; i++)
