@@ -3136,7 +3136,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
             }
 
             if (line_offsets)
-              fprintf(stdout, "%llu,%llu%s", (int)start, (int)(end - start), stdout_nl);
+              fprintf(stdout, "%lld,%llu%s", (long long)start, (unsigned long long)(end - start), stdout_nl);
             else
               fprintf(stdout, "%lld,%llu%s", (long long)(filepos + start),
                   (unsigned long long)(end - start), stdout_nl);
