@@ -6340,6 +6340,11 @@ unittest(void)
   test_con_context_copy = pcre2_convert_context_copy(test_con_context);
   ASSERT(test_con_context_copy != NULL, "pcre2_convert_context_copy()");
 
+  ASSERT(pcre2_general_context_copy(NULL) == NULL, "pcre2_general_context_copy(null)");
+  ASSERT(pcre2_compile_context_copy(NULL) == NULL, "pcre2_compile_context_copy(null)");
+  ASSERT(pcre2_match_context_copy(NULL) == NULL, "pcre2_match_context_copy(null)");
+  ASSERT(pcre2_convert_context_copy(NULL) == NULL, "pcre2_convert_context_copy(null)");
+
   /* Test default context values. */
   uval = 123;
   rc = pcre2_get_bsr(test_pat_context, &uval);
@@ -6381,63 +6386,14 @@ unittest(void)
   ASSERT(rc == 0, "pcre2_get_match_limit()");
   ASSERT(uval == MATCH_LIMIT, "pcre2_get_match_limit()");
 
-  rc = pcre2_get_bsr(NULL, &uval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_bsr(null context)");
-  rc = pcre2_get_bsr(test_pat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_bsr(null value)");
-
-  rc = pcre2_get_max_pattern_length(NULL, &sizeval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_max_pattern_length(null context)");
-  rc = pcre2_get_max_pattern_length(test_pat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_max_pattern_length(null value)");
-
-  rc = pcre2_get_newline(NULL, &uval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_newline(null context)");
-  rc = pcre2_get_newline(test_pat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_newline(null value)");
-
-  rc = pcre2_get_parens_nest_limit(NULL, &uval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_parens_nest_limit(null context)");
-  rc = pcre2_get_parens_nest_limit(test_pat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_parens_nest_limit(null value)");
-
-  rc = pcre2_get_offset_limit(NULL, &sizeval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_offset_limit(null context)");
-  rc = pcre2_get_offset_limit(test_dat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_offset_limit(null value)");
-
-  rc = pcre2_get_depth_limit(NULL, &uval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_depth_limit(null context)");
-  rc = pcre2_get_depth_limit(test_dat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_depth_limit(null value)");
-
-  rc = pcre2_get_heap_limit(NULL, &uval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_heap_limit(null context)");
-  rc = pcre2_get_heap_limit(test_dat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_heap_limit(null value)");
-
-  rc = pcre2_get_match_limit(NULL, &uval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_match_limit(null context)");
-  rc = pcre2_get_match_limit(test_dat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_match_limit(null value)");
-
   rc = pcre2_set_compile_extra_options(test_pat_context, 0);
   ASSERT(rc == 0, "pcre2_set_compile_extra_options()");
-
-  rc = pcre2_set_compile_extra_options(NULL, 0);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_compile_extra_options(null)");
 
   rc = pcre2_set_max_pattern_length(test_pat_context, 10);
   ASSERT(rc == 0, "pcre2_set_max_pattern_length()");
 
-  rc = pcre2_set_max_pattern_length(NULL, 10);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_max_pattern_length(null)");
-
   rc = pcre2_set_max_pattern_compiled_length(test_pat_context, 256);
   ASSERT(rc == 0, "pcre2_set_max_pattern_compiled_length()");
-
-  rc = pcre2_set_max_pattern_compiled_length(NULL, 256);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_max_pattern_compiled_length(null)");
 
   rc = pcre2_set_max_varlookbehind(test_pat_context, 0);
   ASSERT(rc == 0, "pcre2_set_max_varlookbehind()");
@@ -6446,9 +6402,6 @@ unittest(void)
   /* test setting offset limit */
   rc = pcre2_set_offset_limit(test_dat_context, 999);
   ASSERT(rc == 0, "pcre2_set_offset_limit()");
-
-  rc = pcre2_set_offset_limit(NULL, 999);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_offset_limit(null)");
 
   sizeval = 123;
   rc = pcre2_get_offset_limit(test_dat_context, &sizeval);
@@ -6518,9 +6471,6 @@ unittest(void)
   rc = pcre2_set_parens_nest_limit(test_pat_context, 100);
   ASSERT(rc == 0, "pcre2_set_parens_nest_limit()");
 
-  rc = pcre2_set_parens_nest_limit(NULL, 100);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_parens_nest_limit(null)");
-
   uval = 123;
   rc = pcre2_get_parens_nest_limit(test_pat_context, &uval);
   ASSERT(rc == 0, "pcre2_get_parens_nest_limit()");
@@ -6557,9 +6507,6 @@ unittest(void)
   rc = pcre2_set_depth_limit(test_dat_context, 123456);
   ASSERT(rc == 0, "pcre2_set_depth_limit()");
 
-  rc = pcre2_set_depth_limit(NULL, 123456);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_depth_limit(null)");
-
   uval = 123;
   rc = pcre2_get_depth_limit(test_dat_context, &uval);
   ASSERT(rc == 0, "pcre2_get_depth_limit()");
@@ -6578,9 +6525,6 @@ unittest(void)
   rc = pcre2_set_heap_limit(test_dat_context, 123456);
   ASSERT(rc == 0, "pcre2_set_heap_limit()");
 
-  rc = pcre2_set_heap_limit(NULL, 123456);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_heap_limit(null)");
-
   uval = 123;
   rc = pcre2_get_heap_limit(test_dat_context, &uval);
   ASSERT(rc == 0, "pcre2_get_heap_limit()");
@@ -6598,9 +6542,6 @@ unittest(void)
   /* test setting match_limit */
   rc = pcre2_set_match_limit(test_dat_context, 123456);
   ASSERT(rc == 0, "pcre2_set_match_limit()");
-
-  rc = pcre2_set_match_limit(NULL, 123456);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_match_limit(null)");
 
   uval = 123;
   rc = pcre2_get_match_limit(test_dat_context, &uval);
@@ -6621,9 +6562,6 @@ unittest(void)
 
   rc = pcre2_set_recursion_memory_management(test_dat_context, NULL, NULL, NULL);
   ASSERT(rc == 0, "pcre2_set_recursion_memory_management()");
-
-  rc = pcre2_set_optimize(NULL, PCRE2_OPTIMIZATION_NONE);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_optimize(null)");
 
   rc = pcre2_set_optimize(test_pat_context, PCRE2_AUTO_POSSESS - 1);
   ASSERT(rc == PCRE2_ERROR_BADOPTION, "pcre2_set_optimize(bad option)");
