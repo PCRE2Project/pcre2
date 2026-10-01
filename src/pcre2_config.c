@@ -212,33 +212,13 @@ pcre2_config(uint32_t what, void *where)
 #endif
     break;
 
-    /* The hackery in setting "v" below is to cope with the case when
-    PCRE2_PRERELEASE is set to an empty string (which it is for real releases).
-    If the second alternative is used in this case, it does not leave a space
-    before the date. On the other hand, if all four macros are put into a single
-    XSTRING when PCRE2_PRERELEASE is not empty, an unwanted space is inserted.
-    There are problems using an "obvious" approach like this:
-
-       XSTRING(PCRE2_MAJOR) "." XSTRING(PCRE2_MINOR)
-       XSTRING(PCRE2_PRERELEASE) " " XSTRING(PCRE2_DATE)
-
-    because, when PCRE2_PRERELEASE is empty, this leads to an attempted expansion
-    of STRING(). The C standard states: "If (before argument substitution) any
-    argument consists of no preprocessing tokens, the behavior is undefined." It
-    turns out the gcc treats this case as a single empty string - which is what
-    we really want - but Visual C grumbles about the lack of an argument for the
-    macro. Unfortunately, both are within their rights. As there seems to be no
-    way to test for a macro's value being empty at compile time, we have to
-    resort to a runtime test.
-
-    Now that we have raised the minimum language requirement to C99, and no
-    longer support old MSVC versions, we could simplify this. */
-
   case PCRE2_CONFIG_VERSION:
     {
-      const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)
-                          ? XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE)
-                          : XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
+      /* Note that XSTRING(PCRE2_PRERELEASE) attempts to apply the STRING() macro to an empty sequence
+      of tokens in release builds (when PCRE2_PRERELEASE is empty). This is valid as of C99, but
+      historically some compilers did not support this. */
+
+      const char *v = XSTRING(PCRE2_MAJOR) "." XSTRING(PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE) " " XSTRING(PCRE2_DATE);
       return (int)(1 + ((where == NULL) ? strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
     }
   }
