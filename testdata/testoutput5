@@ -5871,7 +5871,7 @@ No match
 Failed: error 206 at offset 0: PCRE2_EXTRA_TURKISH_CASING and PCRE2_EXTRA_CASELESS_RESTRICT are not compatible
 
 /i/i,turkish_casing
-Failed: error 204 at offset 0: PCRE2_EXTRA_TURKISH_CASING require Unicode (UTF or UCP) mode
+Failed: error 204 at offset 0: PCRE2_EXTRA_TURKISH_CASING requires Unicode (UTF or UCP) mode
 
 /i/i,utf,caseless_restrict
     i

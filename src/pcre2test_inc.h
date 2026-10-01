@@ -6824,6 +6824,54 @@ unittest(void)
   ASSERT(rc == 14 && pcre2_strcmp_c8(errorbuffer, "bad data value") == 0,
          "pcre2_get_error_message(null)");
 
+  rc = pcre2_get_error_message(0, NULL, 0);
+  ASSERT(rc == PCRE2_ERROR_NOMEMORY, "pcre2_get_error_message(0, null)");
+
+  errorbuffer[0] = CHAR_A;
+  errorbuffer[1] = CHAR_B;
+  rc = pcre2_get_error_message(0, errorbuffer, 0);
+  ASSERT(rc == PCRE2_ERROR_NOMEMORY && errorbuffer[0] == CHAR_A && errorbuffer[1] == CHAR_B,
+         "pcre2_get_error_message(0, zero code units)");
+
+  rc = pcre2_get_error_message(0, errorbuffer, 1);
+  ASSERT(rc == PCRE2_ERROR_NOMEMORY && errorbuffer[0] == 0 && errorbuffer[1] == CHAR_B,
+         "pcre2_get_error_message(0, one code unit)");
+
+  rc = pcre2_get_error_message(0, errorbuffer, 8);
+  BUFFER_OUTPUT
+  ASSERT(rc == PCRE2_ERROR_NOMEMORY && pcre2_strcmp_c8(errorbuffer, "no erro") == 0,
+         "pcre2_get_error_message(0, truncated)");
+
+  rc = pcre2_get_error_message(0, errorbuffer, 9);
+  BUFFER_OUTPUT
+  ASSERT(rc == 8 && pcre2_strcmp_c8(errorbuffer, "no error") == 0,
+         "pcre2_get_error_message(0)");
+
+  rc = pcre2_get_error_message(COMPILE_ERROR_BASE, errorbuffer, 9);
+  BUFFER_OUTPUT
+  ASSERT(rc == 8 && pcre2_strcmp_c8(errorbuffer, "no error") == 0,
+         "pcre2_get_error_message(COMPILE_ERROR_BASE)");
+
+  {
+    const int invalid_errorcodes[] = {INT_MIN, INT_MIN + 1, INT_MAX, 1, COMPILE_ERROR_BASE - 1};
+
+    for (size_t i = 0; i < sizeof(invalid_errorcodes) / sizeof(invalid_errorcodes[0]); i++)
+    {
+      rc = pcre2_get_error_message(invalid_errorcodes[i], NULL, 0);
+      ASSERT(rc == PCRE2_ERROR_BADDATA, "pcre2_get_error_message(invalid code, null)");
+
+      errorbuffer[0] = CHAR_A;
+      errorbuffer[1] = CHAR_B;
+      rc = pcre2_get_error_message(invalid_errorcodes[i], errorbuffer, 0);
+      ASSERT(rc == PCRE2_ERROR_BADDATA && errorbuffer[0] == CHAR_A && errorbuffer[1] == CHAR_B,
+             "pcre2_get_error_message(invalid code, zero code units)");
+
+      rc = pcre2_get_error_message(invalid_errorcodes[i], errorbuffer, 9);
+      ASSERT(rc == PCRE2_ERROR_BADDATA && errorbuffer[0] == CHAR_A && errorbuffer[1] == CHAR_B,
+             "pcre2_get_error_message(invalid code)");
+    }
+  }
+
 #undef BUFFER_OUTPUT
 
   /* ----------------------- pcre2_maketables -------------------------------- */
