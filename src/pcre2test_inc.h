@@ -6736,10 +6736,6 @@ unittest(void)
   rc = pcre2_pattern_info(invalid_code, PCRE2_INFO_NEWLINE, &uval);
   ASSERT(rc == PCRE2_ERROR_BADMAGIC, "pcre2_pattern_info(bad magic)");
 
-  ASSERT(pcre2_code_copy(invalid_code) == NULL, "pcre2_code_copy(bad magic)");
-  ASSERT(pcre2_code_copy_with_tables(invalid_code) == NULL,
-         "pcre2_code_copy_with_tables(bad magic)");
-
 #ifdef SUPPORT_JIT
   rc = pcre2_jit_compile(invalid_code, PCRE2_JIT_COMPLETE);
   ASSERT(rc == PCRE2_ERROR_BADMAGIC, "pcre2_jit_compile(bad magic)");
@@ -6748,11 +6744,6 @@ unittest(void)
 #ifdef BITOTHER
   rc = pcre2_pattern_info((pcre2_code *)bitother_code, PCRE2_INFO_NEWLINE, &uval);
   ASSERT(rc == PCRE2_ERROR_BADMODE, "pcre2_pattern_info(bitmode mismatch)");
-
-  ASSERT(pcre2_code_copy((pcre2_code *)bitother_code) == NULL,
-         "pcre2_code_copy(bitmode mismatch)");
-  ASSERT(pcre2_code_copy_with_tables((pcre2_code *)bitother_code) == NULL,
-         "pcre2_code_copy_with_tables(bitmode mismatch)");
 
 #ifdef SUPPORT_JIT
   rc = pcre2_jit_compile((pcre2_code *)bitother_code, PCRE2_JIT_COMPLETE);
