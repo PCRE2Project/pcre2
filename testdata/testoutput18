@@ -268,4 +268,22 @@ No match: POSIX code 16: bad argument
     xxxx 
 No match: POSIX code 14: failed to get memory
 
+/(*LIMIT_DEPTH=1)(a)/
+    a
+No match: POSIX code 14: failed to get memory
+
+/(*LIMIT_MATCH=1)(a)/
+    a
+No match: POSIX code 14: failed to get memory
+
+/(?R)/
+    a
+No match: POSIX code 3: pattern error
+
+/(?(DEFINE)(?<sneaky>b\K))a(?=(?&sneaky))/
+    ab
+No match: POSIX code 3: pattern error
+    zz
+No match: POSIX code 17: match failed
+
 # End of testdata/testinput18

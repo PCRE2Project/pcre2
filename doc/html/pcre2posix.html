@@ -618,7 +618,8 @@ set. The <code class="type">regex_t</code> structure used by <code class="functi
 <code>pcre2posix.h</code> and is not the same as the structure used by other libraries
 that provide POSIX-style matching.</p>
 <p>The argument <code class="parameter">cflags</code> is either zero, or contains one or more of the bits
-defined by the following macros:</p>
+defined by the following macros. Any other option bits cause
+<code class="constant">REG_INVARG</code> to be returned.</p>
 <div class="dlist options"><dl><dt><code class="constant">REG_DOTALL</code></dt><dd>The <code class="constant">PCRE2_DOTALL</code> option is set when the regular expression is passed for
 compilation to the native function. Note that <code class="constant">REG_DOTALL</code> is not part of the
 POSIX standard.</dd><dt><code class="constant">REG_ICASE</code></dt><dd>The <code class="constant">PCRE2_CASELESS</code> option is set when the regular expression is passed for
@@ -663,7 +664,9 @@ are defined in the header file.</p>
 <aside class="admonition-block note" role="note"><h6 class="block-title label-only"><span class="title-label">Note: </span></h6><p>If the yield of <code class="function">pcre2_regcomp()</code> is non-zero, you must not attempt
 to use the contents of the <code class="parameter">preg</code> structure. If, for example, you pass it
 to <code class="function">pcre2_regexec()</code>, the result is undefined and your program is likely to
-crash.</p></aside></section>
+crash.</p>
+<p>The <code class="parameter">preg</code> structure can still be passed to <code class="function">pcre2_regerror()</code> after a
+compilation error.</p></aside></section>
 <section class="doc-section level-1"><h2 id="matching-newline-characters">Matching newline characters</h2><p>This area is not simple, because POSIX and Perl take different views of things.
 It is not possible to get PCRE2 to obey POSIX semantics, but then PCRE2 was
 never intended to be a POSIX engine. The following table lists the different
@@ -684,7 +687,8 @@ passes <code class="constant">PCRE2_DOTALL</code>. There is no way to pass <code
 <section class="doc-section level-1"><h2 id="_matching_a_pattern">Matching a pattern</h2><p>The function <code class="function">pcre2_regexec()</code> is called to match a compiled pattern
 <code class="parameter">preg</code> against a given <code class="parameter">string</code>, which is by default terminated by a
 zero byte (but see <code class="constant">REG_STARTEND</code> below), subject to the options in <code class="parameter">eflags</code>.
-These can be:</p>
+Any option bits other than those listed below cause <code class="constant">REG_INVARG</code> to be
+returned.</p>
 <div class="dlist options"><dl><dt><code class="constant">REG_NOTBOL</code></dt><dd>The <code class="constant">PCRE2_NOTBOL</code> option is set when calling the underlying PCRE2 matching
 function.</dd><dt><code class="constant">REG_NOTEMPTY</code></dt><dd>The <code class="constant">PCRE2_NOTEMPTY</code> option is set when calling the underlying PCRE2 matching
 function. Note that <code class="constant">REG_NOTEMPTY</code> is not part of the POSIX standard. However,
@@ -723,7 +727,10 @@ array have both structure members set to -1.</p>
 <code>pcre2posix.h</code> and are not warranted to have the same size or layout as other
 similarly named types from other libraries that provide POSIX-style matching.</p>
 <p>A successful match yields a zero return; various error codes are defined in the
-header file, of which <code class="constant">REG_NOMATCH</code> is the "expected" failure code.</p></section>
+header file, of which <code class="constant">REG_NOMATCH</code> is the "expected" failure code.
+Memory allocation failures and heap, match, or depth limit exhaustion return
+<code class="constant">REG_ESPACE</code>. Pattern errors detected during matching, such as recursion
+loops or invalid uses of <code class="regex">\K</code>, return <code class="constant">REG_BADPAT</code>.</p></section>
 <section class="doc-section level-1"><h2 id="_error_messages">Error messages</h2><p>The <code class="function">pcre2_regerror()</code> function maps a non-zero errorcode from either
 <code class="function">pcre2_regcomp()</code> or <code class="function">pcre2_regexec()</code> to a printable message. If
 <code class="parameter">preg</code> is not <code class="constant">NULL</code>, the error should have arisen from the use of that

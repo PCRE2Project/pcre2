@@ -413,7 +413,7 @@ if [ $useebcdic -ne 0 -o $useebcdicjit -ne 0 ]; then
 
   if [ $useebcdic -ne 0 ]; then
     for opts in \
-      "--disable-unicode --enable-ebcdic --enable-ebcdic-ignoring-compiler" \
+      "--disable-unicode --enable-ebcdic --enable-ebcdic-ignoring-compiler --disable-shared" \
       "--disable-unicode --enable-ebcdic --enable-ebcdic-ignoring-compiler --enable-ebcdic-nl25"
     do
       runtest

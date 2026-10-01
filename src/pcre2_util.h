@@ -43,6 +43,12 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* Assertion macros */
 
+/* Helper macro for static (compile-time) assertions. Can be used inside
+functions, or at the top-level of a file. */
+#define STATIC_ASSERT_JOIN(a, b) a##b
+#define STATIC_ASSERT(cond, msg) \
+  typedef int STATIC_ASSERT_JOIN(static_assertion_, msg)[(cond) ? 1 : -1]
+
 #ifdef PCRE2_DEBUG
 
 #if defined(HAVE_ASSERT_H) && !defined(NDEBUG)
