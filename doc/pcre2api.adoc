@@ -1344,7 +1344,7 @@ is placed. If const:NULL is passed, the function returns the amount of memory th
 needed for the requested information. For calls that return numerical values,
 the value is in bytes; when requesting these values, arg:where should point
 to appropriately aligned memory. For calls that return strings, the required
-length is given in code units, not counting the terminating zero.
+length is given in code units, including the terminating zero.
 
 When requesting information, the returned value from func:pcre2_config() is
 non-negative on success, or the negative error code const:PCRE2_ERROR_BADOPTION if

@@ -55,15 +55,19 @@ convenient for user programs that want to test their values. */
 * Return info about what features are configured *
 *************************************************/
 
-/* If where is NULL, the length of memory required is returned.
+/* If where is NULL, the required size is returned: bytes for numerical values,
+or code units including the terminating zero for strings. Otherwise, the
+requested information is written to where.
 
 Arguments:
   what             what information is required
-  where            where to put the information
+  where            where to put the information, or NULL to query its size
 
-Returns:           0 if a numerical value is returned
-                   >= 0 if a string value
-                   PCRE2_ERROR_BADOPTION if "where" not recognized
+Returns:           sizeof(uint32_t) for a numerical value if where is NULL
+                   0 if a numerical value is written
+                   number of code units including the terminating zero
+                     if a string is requested
+                   PCRE2_ERROR_BADOPTION if "what" not recognized
                      or JIT target requested when JIT not enabled
 */
 
@@ -108,11 +112,7 @@ pcre2_config(uint32_t what, void *where)
     return PCRE2_ERROR_BADOPTION;
 
   case PCRE2_CONFIG_BSR:
-#ifdef BSR_ANYCRLF
-    *((uint32_t *)where) = PCRE2_BSR_ANYCRLF;
-#else
-    *((uint32_t *)where) = PCRE2_BSR_UNICODE;
-#endif
+    *((uint32_t *)where) = BSR_DEFAULT;
     break;
 
   case PCRE2_CONFIG_COMPILED_WIDTHS:
@@ -229,7 +229,10 @@ pcre2_config(uint32_t what, void *where)
     we really want - but Visual C grumbles about the lack of an argument for the
     macro. Unfortunately, both are within their rights. As there seems to be no
     way to test for a macro's value being empty at compile time, we have to
-    resort to a runtime test. */
+    resort to a runtime test.
+
+    Now that we have raised the minimum language requirement to C99, and no
+    longer support old MSVC versions, we could simplify this. */
 
   case PCRE2_CONFIG_VERSION:
     {
