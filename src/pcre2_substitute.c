@@ -761,8 +761,8 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   BOOL overflowed = FALSE;
   BOOL use_existing_match;
   BOOL replacement_only;
-  BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
-  BOOL partial = (options & (PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT)) != 0;
+  BOOL utf;
+  BOOL partial;
   PCRE2_UCHAR temp[6];
   PCRE2_UCHAR null_str[1] = { 0xcd };
   PCRE2_UCHAR null_buffer[1] = { 0xcd };
@@ -779,6 +779,22 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   PCRE2_SIZE (*substitute_case_callout)(PCRE2_SPTR, PCRE2_SIZE, PCRE2_UCHAR *, PCRE2_SIZE, int,
                                         void *) = NULL;
   void *substitute_case_callout_data = NULL;
+
+  if (code == NULL || blength == NULL)
+    return PCRE2_ERROR_NULL;
+
+  /* Check that the first field in the block is the magic number. */
+
+  if (code->magic_number != MAGIC_NUMBER)
+    return PCRE2_ERROR_BADMAGIC;
+
+  /* Check the code unit width. */
+
+  if ((code->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH / 8)
+    return PCRE2_ERROR_BADMODE;
+
+  utf = (code->overall_options & PCRE2_UTF) != 0;
+  partial = (options & (PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT)) != 0;
 
   /* General initialization */
 
