@@ -4891,11 +4891,20 @@ default.
 .TP 24
 \fBPCRE2_ERROR_NULL\fP
 .ad l
-is returned if \fBPCRE2_SUBSTITUTE_MATCHED\fP is set but the
-\fImatch_data\fP argument is \fBNULL\fP; or if the \fIsubject\fP or \fIreplacement\fP
-or \fIbuffer\fP argument is \fBNULL\fP. However, a \fBNULL\fP \fIreplacement\fP
-argument is allowed if the \fIrlength\fP argument is zero; and similarly for
-\fIsubject\fP with zero \fIlength\fP and \fIbuffer\fP with zero \fIblength\fP.
+is returned if \fIcode\fP or \fIblength\fP is \fBNULL\fP; or if
+\fBPCRE2_SUBSTITUTE_MATCHED\fP is set but the \fImatch_data\fP argument is
+\fBNULL\fP; or if the \fIsubject\fP or \fIreplacement\fP or \fIbuffer\fP
+argument is \fBNULL\fP. However, a \fBNULL\fP \fIreplacement\fP argument is
+allowed if the \fIrlength\fP argument is zero; and similarly for \fIsubject\fP
+with zero \fIlength\fP and \fIbuffer\fP with zero \fIblength\fP.
+.TP 24
+\fBPCRE2_ERROR_BADMAGIC\fP
+.ad l
+the magic number in the compiled code was not recognized.
+.TP 24
+\fBPCRE2_ERROR_BADMODE\fP
+.ad l
+the pattern was compiled for a different code unit width.
 .TP 24
 \fBPCRE2_ERROR_BADREPLACEMENT\fP
 .ad l

@@ -4541,14 +4541,18 @@ CREATING A NEW STRING WITH SUBSTITUTIONS
                                    set, the size of buffer that is needed is
                                    returned via blength. Note that this does
                                    not happen by default.
-           PCRE2_ERROR_NULL        is returned if PCRE2_SUBSTITUTE_MATCHED is
-                                   set but the match_data argument is NULL; or
-                                   if the subject or replacement or buffer
-                                   argument is NULL. However, a NULL
-                                   replacement argument is allowed if the
-                                   rlength argument is zero; and similarly for
-                                   subject with zero length and buffer with
-                                   zero blength.
+           PCRE2_ERROR_NULL        is returned if code or blength is NULL; or
+                                   if PCRE2_SUBSTITUTE_MATCHED is set but the
+                                   match_data argument is NULL; or if the
+                                   subject or replacement or buffer argument
+                                   is NULL. However, a NULL replacement
+                                   argument is allowed if the rlength argument
+                                   is zero; and similarly for subject with
+                                   zero length and buffer with zero blength.
+           PCRE2_ERROR_BADMAGIC    the magic number in the compiled code was
+                                   not recognized.
+           PCRE2_ERROR_BADMODE     the pattern was compiled for a different
+                                   code unit width.
            PCRE2_ERROR_BADREPLACEMENT
                                    is used for miscellaneous syntax errors in
                                    the replacement string, with more
