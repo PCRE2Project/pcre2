@@ -71,6 +71,14 @@ pcre2_substring_copy_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
 {
   PCRE2_SPTR first, last, entry;
   int failrc, entrysize;
+
+  /* Preconditions on argument values */
+
+  PCRE2_ASSERT(match_data != NULL);
+  PCRE2_ASSERT(stringname != NULL);
+  PCRE2_ASSERT(sizeptr != NULL);
+  PCRE2_ASSERT(*sizeptr == 0 || buffer != NULL);
+
   if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
     return PCRE2_ERROR_DFA_UFUNC;
   entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
@@ -120,6 +128,13 @@ pcre2_substring_copy_bynumber(pcre2_match_data *match_data, uint32_t stringnumbe
 {
   int rc;
   PCRE2_SIZE size;
+
+  /* Preconditions on argument values */
+
+  PCRE2_ASSERT(match_data != NULL);
+  PCRE2_ASSERT(sizeptr != NULL);
+  PCRE2_ASSERT(*sizeptr == 0 || buffer != NULL);
+
   rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
   if (rc < 0)
     return rc;
@@ -162,6 +177,13 @@ pcre2_substring_get_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
 {
   PCRE2_SPTR first, last, entry;
   int failrc, entrysize;
+
+  /* Preconditions on argument values */
+
+  PCRE2_ASSERT(match_data != NULL);
+  PCRE2_ASSERT(stringname != NULL);
+  PCRE2_ASSERT(stringptr != NULL);
+
   if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
     return PCRE2_ERROR_DFA_UFUNC;
   entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
@@ -212,6 +234,13 @@ pcre2_substring_get_bynumber(pcre2_match_data *match_data, uint32_t stringnumber
   int rc;
   PCRE2_SIZE size;
   PCRE2_UCHAR *yield;
+
+  /* Preconditions on argument values */
+
+  PCRE2_ASSERT(match_data != NULL);
+  PCRE2_ASSERT(stringptr != NULL);
+  PCRE2_ASSERT(sizeptr != NULL);
+
   rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
   if (rc < 0)
     return rc;
@@ -280,6 +309,12 @@ pcre2_substring_length_byname(pcre2_match_data *match_data, PCRE2_SPTR stringnam
 {
   PCRE2_SPTR first, last, entry;
   int failrc, entrysize;
+
+  /* Preconditions on argument values */
+
+  PCRE2_ASSERT(match_data != NULL);
+  PCRE2_ASSERT(stringname != NULL);
+
   if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
     return PCRE2_ERROR_DFA_UFUNC;
   entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
@@ -328,7 +363,13 @@ pcre2_substring_length_bynumber(pcre2_match_data *match_data, uint32_t stringnum
                                 PCRE2_SIZE *sizeptr)
 {
   PCRE2_SIZE left, right;
-  int count = match_data->rc;
+  int count;
+
+  /* Preconditions on argument values */
+
+  PCRE2_ASSERT(match_data != NULL);
+
+  count = match_data->rc;
   if (count == PCRE2_ERROR_PARTIAL)
   {
     if (stringnumber > 0)
@@ -407,6 +448,11 @@ pcre2_substring_list_get(pcre2_match_data *match_data, PCRE2_UCHAR ***listptr,
   PCRE2_UCHAR **listp;
   PCRE2_UCHAR *sp;
   PCRE2_SIZE *ovector;
+
+  /* Preconditions on argument values */
+
+  PCRE2_ASSERT(match_data != NULL);
+  PCRE2_ASSERT(listptr != NULL);
 
   if ((count = match_data->rc) < 0)
     return count; // Match failed
@@ -516,9 +562,18 @@ pcre2_substring_nametable_scan(const pcre2_code *code, PCRE2_SPTR stringname, PC
                                PCRE2_SPTR *lastptr)
 {
   uint16_t bot = 0;
-  uint16_t top = code->name_count;
-  uint16_t entrysize = code->name_entry_size;
-  PCRE2_SPTR nametable = (PCRE2_SPTR)((const char *)code + sizeof(pcre2_real_code));
+  uint16_t top;
+  uint16_t entrysize;
+  PCRE2_SPTR nametable;
+
+  /* Preconditions on argument values */
+
+  PCRE2_ASSERT(code != NULL);
+  PCRE2_ASSERT(stringname != NULL);
+
+  top = code->name_count;
+  entrysize = code->name_entry_size;
+  nametable = (PCRE2_SPTR)((const char *)code + sizeof(pcre2_real_code));
 
   while (top > bot)
   {
