@@ -61,8 +61,6 @@ Returns:        0 when data returned
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_pattern_info(const pcre2_code *code, uint32_t what, void *where)
 {
-  const pcre2_real_code *re = (const pcre2_real_code *)code;
-
   if (where == NULL) // Requests field length
   {
     switch (what)
@@ -107,141 +105,141 @@ pcre2_pattern_info(const pcre2_code *code, uint32_t what, void *where)
     }
   }
 
-  if (re == NULL)
+  if (code == NULL)
     return PCRE2_ERROR_NULL;
 
   /* Check that the first field in the block is the magic number. If it is not,
   return with PCRE2_ERROR_BADMAGIC. */
 
-  if (re->magic_number != MAGIC_NUMBER)
+  if (code->magic_number != MAGIC_NUMBER)
     return PCRE2_ERROR_BADMAGIC;
 
   /* Check that this pattern was compiled in the correct bit mode */
 
-  if ((re->flags & (PCRE2_CODE_UNIT_WIDTH / 8)) == 0)
+  if ((code->flags & (PCRE2_CODE_UNIT_WIDTH / 8)) == 0)
     return PCRE2_ERROR_BADMODE;
 
   switch (what)
   {
   case PCRE2_INFO_ALLOPTIONS:
-    *((uint32_t *)where) = re->overall_options;
+    *((uint32_t *)where) = code->overall_options;
     break;
 
   case PCRE2_INFO_ARGOPTIONS:
-    *((uint32_t *)where) = re->compile_options;
+    *((uint32_t *)where) = code->compile_options;
     break;
 
   case PCRE2_INFO_BACKREFMAX:
-    *((uint32_t *)where) = re->top_backref;
+    *((uint32_t *)where) = code->top_backref;
     break;
 
   case PCRE2_INFO_BSR:
-    *((uint32_t *)where) = re->bsr_convention;
+    *((uint32_t *)where) = code->bsr_convention;
     break;
 
   case PCRE2_INFO_CAPTURECOUNT:
-    *((uint32_t *)where) = re->top_bracket;
+    *((uint32_t *)where) = code->top_bracket;
     break;
 
   case PCRE2_INFO_DEPTHLIMIT:
-    *((uint32_t *)where) = re->limit_depth;
-    if (re->limit_depth == UINT32_MAX)
+    *((uint32_t *)where) = code->limit_depth;
+    if (code->limit_depth == UINT32_MAX)
       return PCRE2_ERROR_UNSET;
     break;
 
   case PCRE2_INFO_EXTRAOPTIONS:
-    *((uint32_t *)where) = re->extra_options;
+    *((uint32_t *)where) = code->extra_options;
     break;
 
   case PCRE2_INFO_FIRSTCODETYPE:
-    *((uint32_t *)where) = ((re->flags & PCRE2_FIRSTSET) != 0)    ? 1
-                           : ((re->flags & PCRE2_STARTLINE) != 0) ? 2
+    *((uint32_t *)where) = ((code->flags & PCRE2_FIRSTSET) != 0)    ? 1
+                           : ((code->flags & PCRE2_STARTLINE) != 0) ? 2
                                                                   : 0;
     break;
 
   case PCRE2_INFO_FIRSTCODEUNIT:
-    *((uint32_t *)where) = ((re->flags & PCRE2_FIRSTSET) != 0) ? re->first_codeunit : 0;
+    *((uint32_t *)where) = ((code->flags & PCRE2_FIRSTSET) != 0) ? code->first_codeunit : 0;
     break;
 
   case PCRE2_INFO_FIRSTBITMAP:
     *((const uint8_t **)where) =
-        ((re->flags & PCRE2_FIRSTMAPSET) != 0) ? &(re->start_bitmap[0]) : NULL;
+        ((code->flags & PCRE2_FIRSTMAPSET) != 0) ? &(code->start_bitmap[0]) : NULL;
     break;
 
   case PCRE2_INFO_FRAMESIZE:
-    *((size_t *)where) = offsetof(heapframe, ovector) + re->top_bracket * 2 * sizeof(PCRE2_SIZE);
+    *((size_t *)where) = offsetof(heapframe, ovector) + code->top_bracket * 2 * sizeof(PCRE2_SIZE);
     break;
 
   case PCRE2_INFO_HASBACKSLASHC:
-    *((uint32_t *)where) = (re->flags & PCRE2_HASBKC) != 0;
+    *((uint32_t *)where) = (code->flags & PCRE2_HASBKC) != 0;
     break;
 
   case PCRE2_INFO_HASCRORLF:
-    *((uint32_t *)where) = (re->flags & PCRE2_HASCRORLF) != 0;
+    *((uint32_t *)where) = (code->flags & PCRE2_HASCRORLF) != 0;
     break;
 
   case PCRE2_INFO_HEAPLIMIT:
-    *((uint32_t *)where) = re->limit_heap;
-    if (re->limit_heap == UINT32_MAX)
+    *((uint32_t *)where) = code->limit_heap;
+    if (code->limit_heap == UINT32_MAX)
       return PCRE2_ERROR_UNSET;
     break;
 
   case PCRE2_INFO_JCHANGED:
-    *((uint32_t *)where) = (re->flags & PCRE2_JCHANGED) != 0;
+    *((uint32_t *)where) = (code->flags & PCRE2_JCHANGED) != 0;
     break;
 
   case PCRE2_INFO_JITSIZE:
 #ifdef SUPPORT_JIT
-    *((size_t *)where) = (re->executable_jit != NULL) ? PRIV(jit_get_size)(re->executable_jit) : 0;
+    *((size_t *)where) = (code->executable_jit != NULL) ? PRIV(jit_get_size)(code->executable_jit) : 0;
 #else
     *((size_t *)where) = 0;
 #endif
     break;
 
   case PCRE2_INFO_LASTCODETYPE:
-    *((uint32_t *)where) = ((re->flags & PCRE2_LASTSET) != 0) ? 1 : 0;
+    *((uint32_t *)where) = ((code->flags & PCRE2_LASTSET) != 0) ? 1 : 0;
     break;
 
   case PCRE2_INFO_LASTCODEUNIT:
-    *((uint32_t *)where) = ((re->flags & PCRE2_LASTSET) != 0) ? re->last_codeunit : 0;
+    *((uint32_t *)where) = ((code->flags & PCRE2_LASTSET) != 0) ? code->last_codeunit : 0;
     break;
 
   case PCRE2_INFO_MATCHEMPTY:
-    *((uint32_t *)where) = (re->flags & PCRE2_MATCH_EMPTY) != 0;
+    *((uint32_t *)where) = (code->flags & PCRE2_MATCH_EMPTY) != 0;
     break;
 
   case PCRE2_INFO_MATCHLIMIT:
-    *((uint32_t *)where) = re->limit_match;
-    if (re->limit_match == UINT32_MAX)
+    *((uint32_t *)where) = code->limit_match;
+    if (code->limit_match == UINT32_MAX)
       return PCRE2_ERROR_UNSET;
     break;
 
   case PCRE2_INFO_MAXLOOKBEHIND:
-    *((uint32_t *)where) = re->max_lookbehind;
+    *((uint32_t *)where) = code->max_lookbehind;
     break;
 
   case PCRE2_INFO_MINLENGTH:
-    *((uint32_t *)where) = re->minlength;
+    *((uint32_t *)where) = code->minlength;
     break;
 
   case PCRE2_INFO_NAMEENTRYSIZE:
-    *((uint32_t *)where) = re->name_entry_size;
+    *((uint32_t *)where) = code->name_entry_size;
     break;
 
   case PCRE2_INFO_NAMECOUNT:
-    *((uint32_t *)where) = re->name_count;
+    *((uint32_t *)where) = code->name_count;
     break;
 
   case PCRE2_INFO_NAMETABLE:
-    *((PCRE2_SPTR *)where) = (PCRE2_SPTR)((const char *)re + sizeof(pcre2_real_code));
+    *((PCRE2_SPTR *)where) = (PCRE2_SPTR)((const char *)code + sizeof(pcre2_real_code));
     break;
 
   case PCRE2_INFO_NEWLINE:
-    *((uint32_t *)where) = re->newline_convention;
+    *((uint32_t *)where) = code->newline_convention;
     break;
 
   case PCRE2_INFO_SIZE:
-    *((size_t *)where) = re->blocksize;
+    *((size_t *)where) = code->blocksize;
     break;
 
   default:
@@ -274,33 +272,32 @@ pcre2_callout_enumerate(const pcre2_code *code,
                                         void *callout_data),
                         void *callout_data)
 {
-  const pcre2_real_code *re = (const pcre2_real_code *)code;
   pcre2_callout_enumerate_block cb;
   PCRE2_SPTR cc;
 #ifdef SUPPORT_UNICODE
   BOOL utf;
 #endif
 
-  if (re == NULL || callback == NULL)
+  if (code == NULL || callback == NULL)
     return PCRE2_ERROR_NULL;
 
   /* Check that the first field in the block is the magic number. If it is not,
   return with PCRE2_ERROR_BADMAGIC. */
 
-  if (re->magic_number != MAGIC_NUMBER)
+  if (code->magic_number != MAGIC_NUMBER)
     return PCRE2_ERROR_BADMAGIC;
 
   /* Check that this pattern was compiled in the correct bit mode */
 
-  if ((re->flags & (PCRE2_CODE_UNIT_WIDTH / 8)) == 0)
+  if ((code->flags & (PCRE2_CODE_UNIT_WIDTH / 8)) == 0)
     return PCRE2_ERROR_BADMODE;
 
 #ifdef SUPPORT_UNICODE
-  utf = (re->overall_options & PCRE2_UTF) != 0;
+  utf = (code->overall_options & PCRE2_UTF) != 0;
 #endif
 
   cb.version = 0;
-  cc = (PCRE2_SPTR)((uint8_t *)re + re->code_start);
+  cc = (PCRE2_SPTR)((uint8_t *)code + code->code_start);
 
   while (TRUE)
   {
