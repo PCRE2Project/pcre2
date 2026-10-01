@@ -553,7 +553,7 @@ jobs:
           submodules: true
 
       - name: Setup
-        uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         with:
           msystem: ${{ matrix.msystem }}
           update: true
@@ -614,7 +614,7 @@ jobs:
       - name: Prepare
         run: ./autogen.sh
 
-      - uses: uraimo/run-on-arch-action@460cb8e6d9f726a588fc9b5e681c8a6cab09ae41 # v3.2.0
+      - uses: uraimo/run-on-arch-action@fa1f3e7de95534497266c7265950b5188355fbfb # v3.2.1
         name: Configure, build, and test
         with:
           arch: ${{ matrix.arch }}
