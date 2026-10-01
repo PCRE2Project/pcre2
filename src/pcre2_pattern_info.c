@@ -281,10 +281,6 @@ pcre2_callout_enumerate(const pcre2_code *code,
   if (re == NULL || callback == NULL)
     return PCRE2_ERROR_NULL;
 
-#ifdef SUPPORT_UNICODE
-  utf = (re->overall_options & PCRE2_UTF) != 0;
-#endif
-
   /* Check that the first field in the block is the magic number. If it is not,
   return with PCRE2_ERROR_BADMAGIC. */
 
@@ -295,6 +291,10 @@ pcre2_callout_enumerate(const pcre2_code *code,
 
   if ((re->flags & (PCRE2_CODE_UNIT_WIDTH / 8)) == 0)
     return PCRE2_ERROR_BADMODE;
+
+#ifdef SUPPORT_UNICODE
+  utf = (re->overall_options & PCRE2_UTF) != 0;
+#endif
 
   cb.version = 0;
   cc = (PCRE2_SPTR)((uint8_t *)re + re->code_start);
