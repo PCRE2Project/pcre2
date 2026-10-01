@@ -1276,6 +1276,7 @@ pcre2_code_copy(const pcre2_code *code)
 
   if ((code->flags & PCRE2_DEREF_TABLES) != 0)
   {
+    PCRE2_ASSERT(code->tables != NULL);
     ref_count = (PCRE2_SIZE *)(code->tables + TABLES_LENGTH);
     (*ref_count)++;
   }
@@ -1302,6 +1303,7 @@ pcre2_code_copy_with_tables(const pcre2_code *code)
 
   if (code == NULL)
     return NULL;
+  PCRE2_ASSERT(code->tables != NULL);
   newcode = code->memctl.malloc(code->blocksize, code->memctl.memory_data);
   if (newcode == NULL)
     return NULL;
@@ -1348,6 +1350,7 @@ pcre2_code_free(pcre2_code *code)
       be freed when there are no more references to them. The *ref_count should
       always be > 0. */
 
+      PCRE2_ASSERT(code->tables != NULL);
       ref_count = (PCRE2_SIZE *)(code->tables + TABLES_LENGTH);
       if (*ref_count > 0)
       {
