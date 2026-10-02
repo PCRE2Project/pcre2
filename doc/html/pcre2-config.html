@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.26">
-<meta name="description" content="Information about the installation configuration">
-<title>pcre2-config(1)</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
-<style>
-/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Information about the installation configuration"><title>pcre2-config(1)</title><style>/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
 /* Uncomment the following line when using as a custom stylesheet */
 /* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
 html{font-family:sans-serif;-webkit-text-size-adjust:100%}
@@ -432,118 +421,150 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .sect1+.sect1{border:0}
 #footer{background:none}
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
-@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
-</style>
-</head>
-<body class="manpage">
-<div id="header">
-<h1>pcre2-config(1) Manual Page</h1>
-<h2>Name</h2>
-<div class="sectionbody">
-<p>pcre2-config - program to return PCRE2 configuration</p>
-</div>
-</div>
-<div id="content">
-<div class="sect1">
-<h2 id="_synopsis">Synopsis</h2>
-<div class="sectionbody">
-<div class="listingblock synopsis">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2-config [--prefix] [--exec-prefix] [--version]
-             [--libs8] [--libs16] [--libs32] [--libs-posix]
-             [--cflags] [--cflags-posix]</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p><code>pcre2-config</code> returns the configuration of the installed PCRE2 libraries
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}</style>
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge, pre.rouge .w {
+  color: #24292f;
+  background-color: #f6f8fa;
+}
+pre.rouge .k, pre.rouge .kd, pre.rouge .kn, pre.rouge .kp, pre.rouge .kr, pre.rouge .kt, pre.rouge .kv {
+  color: #cf222e;
+}
+pre.rouge .gr {
+  color: #f6f8fa;
+}
+pre.rouge .gd {
+  color: #82071e;
+  background-color: #ffebe9;
+}
+pre.rouge .nb {
+  color: #953800;
+}
+pre.rouge .nc {
+  color: #953800;
+}
+pre.rouge .no {
+  color: #953800;
+}
+pre.rouge .nn {
+  color: #953800;
+}
+pre.rouge .sr {
+  color: #116329;
+}
+pre.rouge .na {
+  color: #116329;
+}
+pre.rouge .nt {
+  color: #116329;
+}
+pre.rouge .gi {
+  color: #116329;
+  background-color: #dafbe1;
+}
+pre.rouge .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .kc {
+  color: #0550ae;
+}
+pre.rouge .l, pre.rouge .ld, pre.rouge .m, pre.rouge .mb, pre.rouge .mf, pre.rouge .mh, pre.rouge .mi, pre.rouge .il, pre.rouge .mo, pre.rouge .mx {
+  color: #0550ae;
+}
+pre.rouge .sb {
+  color: #0550ae;
+}
+pre.rouge .bp {
+  color: #0550ae;
+}
+pre.rouge .ne {
+  color: #0550ae;
+}
+pre.rouge .nl {
+  color: #0550ae;
+}
+pre.rouge .py {
+  color: #0550ae;
+}
+pre.rouge .nv, pre.rouge .vc, pre.rouge .vg, pre.rouge .vi, pre.rouge .vm {
+  color: #0550ae;
+}
+pre.rouge .o, pre.rouge .ow {
+  color: #0550ae;
+}
+pre.rouge .gh {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .s, pre.rouge .sa, pre.rouge .sc, pre.rouge .dl, pre.rouge .sd, pre.rouge .s2, pre.rouge .se, pre.rouge .sh, pre.rouge .sx, pre.rouge .s1, pre.rouge .ss {
+  color: #0a3069;
+}
+pre.rouge .nd {
+  color: #8250df;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #8250df;
+}
+pre.rouge .err {
+  color: #f6f8fa;
+  background-color: #82071e;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cm, pre.rouge .cp, pre.rouge .cpf, pre.rouge .c1, pre.rouge .cs {
+  color: #6e7781;
+}
+pre.rouge .gl {
+  color: #6e7781;
+}
+pre.rouge .gt {
+  color: #6e7781;
+}
+pre.rouge .ni {
+  color: #24292f;
+}
+pre.rouge .si {
+  color: #24292f;
+}
+pre.rouge .ge {
+  color: #24292f;
+  font-style: italic;
+}
+pre.rouge .gs {
+  color: #24292f;
+  font-weight: bold;
+}
+</style></head><body class="manpage"><header><h1>pcre2-config(1)</h1><div class="details"><time id="revdate" datetime="2025-02-22">22 February 2025</time></div></header><div id="content"><section class="doc-section level-1"><h2 id="_synopsis">Synopsis</h2><div class="listing-block synopsis"><pre class="rouge highlight"><code data-lang="shell">pcre2-config <span class="o">[</span><span class="nt">--prefix</span><span class="o">]</span> <span class="o">[</span><span class="nt">--exec-prefix</span><span class="o">]</span> <span class="o">[</span><span class="nt">--version</span><span class="o">]</span>
+             <span class="o">[</span><span class="nt">--libs8</span><span class="o">]</span> <span class="o">[</span><span class="nt">--libs16</span><span class="o">]</span> <span class="o">[</span><span class="nt">--libs32</span><span class="o">]</span> <span class="o">[</span><span class="nt">--libs-posix</span><span class="o">]</span>
+             <span class="o">[</span><span class="nt">--cflags</span><span class="o">]</span> <span class="o">[</span><span class="nt">--cflags-posix</span><span class="o">]</span></code></pre></div></section>
+<section class="doc-section level-1"><h2 id="_description">Description</h2><p><code>pcre2-config</code> returns the configuration of the installed PCRE2 libraries
 and the options required to compile a program to use them. Some of the options
 apply only to the 8-bit, 16-bit, or 32-bit libraries, respectively, and are not
 available for libraries that have not been built. If an unavailable option is
-encountered, the "usage" information is output.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_options">Options</h2>
-<div class="sectionbody">
-<div class="dlist options">
-<dl>
-<dt class="hdlist1"><code>--prefix</code></dt>
-<dd>
-<p>Writes the directory prefix used in the PCRE2 installation for
+encountered, the "usage" information is output.</p></section>
+<section class="doc-section level-1"><h2 id="_options">Options</h2><div class="dlist options"><dl><dt><code>--prefix</code></dt><dd>Writes the directory prefix used in the PCRE2 installation for
 architecture-independent files (<code>/usr</code> on many systems, <code>/usr/local</code> on
-some systems) to the standard output.</p>
-</dd>
-<dt class="hdlist1"><code>--exec-prefix</code></dt>
-<dd>
-<p>Writes the directory prefix used in the PCRE2 installation for
+some systems) to the standard output.</dd><dt><code>--exec-prefix</code></dt><dd>Writes the directory prefix used in the PCRE2 installation for
 architecture-dependent files (normally the same as <code>--prefix</code>) to the
-standard output.</p>
-</dd>
-<dt class="hdlist1"><code>--version</code></dt>
-<dd>
-<p>Writes the version number of the installed PCRE2 libraries to the standard
-output.</p>
-</dd>
-<dt class="hdlist1"><code>--libs8</code></dt>
-<dd>
-<p>Writes to the standard output the command line options required to link
-with the 8-bit PCRE2 library (<code>-lpcre2-8</code> on many systems).</p>
-</dd>
-<dt class="hdlist1"><code>--libs16</code></dt>
-<dd>
-<p>Writes to the standard output the command line options required to link
-with the 16-bit PCRE2 library (<code>-lpcre2-16</code> on many systems).</p>
-</dd>
-<dt class="hdlist1"><code>--libs32</code></dt>
-<dd>
-<p>Writes to the standard output the command line options required to link
-with the 32-bit PCRE2 library (<code>-lpcre2-32</code> on many systems).</p>
-</dd>
-<dt class="hdlist1"><code>--libs-posix</code></dt>
-<dd>
-<p>Writes to the standard output the command line options required to link with
+standard output.</dd><dt><code>--version</code></dt><dd>Writes the version number of the installed PCRE2 libraries to the standard
+output.</dd><dt><code>--libs8</code></dt><dd>Writes to the standard output the command line options required to link
+with the 8-bit PCRE2 library (<code>-lpcre2-8</code> on many systems).</dd><dt><code>--libs16</code></dt><dd>Writes to the standard output the command line options required to link
+with the 16-bit PCRE2 library (<code>-lpcre2-16</code> on many systems).</dd><dt><code>--libs32</code></dt><dd>Writes to the standard output the command line options required to link
+with the 32-bit PCRE2 library (<code>-lpcre2-32</code> on many systems).</dd><dt><code>--libs-posix</code></dt><dd>Writes to the standard output the command line options required to link with
 PCRE2&#8217;s POSIX API wrapper library (<code>-lpcre2-posix -lpcre2-8</code> on many
-systems).</p>
-</dd>
-<dt class="hdlist1"><code>--cflags</code></dt>
-<dd>
-<p>Writes to the standard output the command line options required to compile
+systems).</dd><dt><code>--cflags</code></dt><dd>Writes to the standard output the command line options required to compile
 files that use PCRE2 (this may include some <code>-I</code> options, but is blank on
-many systems).</p>
-</dd>
-<dt class="hdlist1"><code>--cflags-posix</code></dt>
-<dd>
-<p>Writes to the standard output the command line options required to compile
+many systems).</dd><dt><code>--cflags-posix</code></dt><dd>Writes to the standard output the command line options required to compile
 files that use PCRE2&#8217;s POSIX API wrapper library (this may include some
-<code>-I</code> options, but is blank on many systems).</p>
-</dd>
-</dl>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p><a href="pcre2.html"><code>pcre2</code></a>.</p>
-</div>
+<code>-I</code> options, but is blank on many systems).</dd></dl></div></section>
+<section class="doc-section level-1"><h2 id="_see_also">See also</h2><p><a href="pcre2.html"><code>pcre2</code></a>.</p>
 <h2 id="_author" class="discrete">Author</h2>
-<div class="paragraph">
 <p>This manual page was originally written by Mark Baker for the Debian GNU/Linux
 system. It has been subsequently revised as a generic PCRE2 man page.</p>
-</div>
 <h2 id="_revision" class="discrete">Revision</h2>
-<div class="paragraph">
-<p>Last updated: 22 February 2025</p>
-</div>
-</div>
-</div>
-</div>
-</body>
-</html>
+<p>Last updated: 22 February 2025</p></section></div></body></html>

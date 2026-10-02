@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.26">
-<meta name="description" content="The callout facility">
-<title>pcre2callout(3)</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
-<style>
-/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="The callout facility"><title>pcre2callout(3)</title><style>/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
 /* Uncomment the following line when using as a custom stylesheet */
 /* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
 html{font-family:sans-serif;-webkit-text-size-adjust:100%}
@@ -432,80 +421,146 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .sect1+.sect1{border:0}
 #footer{background:none}
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
-@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
-</style>
-</head>
-<body class="manpage toc2 toc-right">
-<div id="header">
-<h1>pcre2callout(3) Manual Page</h1>
-<div id="toc" class="toc2">
-<div id="toctitle">Table of Contents</div>
-<ul class="sectlevel1">
-<li><a href="#_synopsis">Synopsis</a></li>
-<li><a href="#_description">Description</a></li>
-<li><a href="#_missing_callouts">Missing callouts</a>
-<ul class="sectlevel2">
-<li><a href="#_auto_possessification">Auto-possessification</a></li>
-<li><a href="#_automatic_anchoring">Automatic <code class="regex">.*</code> anchoring</a></li>
-<li><a href="#other-optimizations">Other optimizations</a></li>
-</ul>
-</li>
-<li><a href="#_the_callout_interface">The callout interface</a>
-<ul class="sectlevel2">
-<li><a href="#_fields_for_numerical_callouts">Fields for numerical callouts</a></li>
-<li><a href="#_fields_for_string_callouts">Fields for string callouts</a></li>
-<li><a href="#_fields_for_all_callouts">Fields for all callouts</a></li>
-</ul>
-</li>
-<li><a href="#_return_values_from_callouts">Return values from callouts</a></li>
-<li><a href="#_callout_enumeration">Callout enumeration</a></li>
-</ul>
-</div>
-<h2>Name</h2>
-<div class="sectionbody">
-<p>pcre2callout - PCRE2 callouts</p>
-</div>
-</div>
-<div id="content">
-<div class="sect1">
-<h2 id="_synopsis">Synopsis</h2>
-<div class="sectionbody">
-<div class="listingblock prototype">
-<div class="content">
-<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}</style>
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge, pre.rouge .w {
+  color: #24292f;
+  background-color: #f6f8fa;
+}
+pre.rouge .k, pre.rouge .kd, pre.rouge .kn, pre.rouge .kp, pre.rouge .kr, pre.rouge .kt, pre.rouge .kv {
+  color: #cf222e;
+}
+pre.rouge .gr {
+  color: #f6f8fa;
+}
+pre.rouge .gd {
+  color: #82071e;
+  background-color: #ffebe9;
+}
+pre.rouge .nb {
+  color: #953800;
+}
+pre.rouge .nc {
+  color: #953800;
+}
+pre.rouge .no {
+  color: #953800;
+}
+pre.rouge .nn {
+  color: #953800;
+}
+pre.rouge .sr {
+  color: #116329;
+}
+pre.rouge .na {
+  color: #116329;
+}
+pre.rouge .nt {
+  color: #116329;
+}
+pre.rouge .gi {
+  color: #116329;
+  background-color: #dafbe1;
+}
+pre.rouge .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .kc {
+  color: #0550ae;
+}
+pre.rouge .l, pre.rouge .ld, pre.rouge .m, pre.rouge .mb, pre.rouge .mf, pre.rouge .mh, pre.rouge .mi, pre.rouge .il, pre.rouge .mo, pre.rouge .mx {
+  color: #0550ae;
+}
+pre.rouge .sb {
+  color: #0550ae;
+}
+pre.rouge .bp {
+  color: #0550ae;
+}
+pre.rouge .ne {
+  color: #0550ae;
+}
+pre.rouge .nl {
+  color: #0550ae;
+}
+pre.rouge .py {
+  color: #0550ae;
+}
+pre.rouge .nv, pre.rouge .vc, pre.rouge .vg, pre.rouge .vi, pre.rouge .vm {
+  color: #0550ae;
+}
+pre.rouge .o, pre.rouge .ow {
+  color: #0550ae;
+}
+pre.rouge .gh {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .s, pre.rouge .sa, pre.rouge .sc, pre.rouge .dl, pre.rouge .sd, pre.rouge .s2, pre.rouge .se, pre.rouge .sh, pre.rouge .sx, pre.rouge .s1, pre.rouge .ss {
+  color: #0a3069;
+}
+pre.rouge .nd {
+  color: #8250df;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #8250df;
+}
+pre.rouge .err {
+  color: #f6f8fa;
+  background-color: #82071e;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cm, pre.rouge .cp, pre.rouge .cpf, pre.rouge .c1, pre.rouge .cs {
+  color: #6e7781;
+}
+pre.rouge .gl {
+  color: #6e7781;
+}
+pre.rouge .gt {
+  color: #6e7781;
+}
+pre.rouge .ni {
+  color: #24292f;
+}
+pre.rouge .si {
+  color: #24292f;
+}
+pre.rouge .ge {
+  color: #24292f;
+  font-style: italic;
+}
+pre.rouge .gs {
+  color: #24292f;
+  font-weight: bold;
+}
+</style></head><body class="manpage toc2 toc-right"><header><h1>pcre2callout(3)</h1><div class="details"><time id="revdate" datetime="2025-02-26">26 February 2025</time></div><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Table of Contents</h2><ol class="toc-list level-1"><li><a href="#_synopsis">Synopsis</a></li><li><a href="#_description">Description</a></li><li><a href="#_missing_callouts">Missing callouts</a><ol class="toc-list level-2"><li><a href="#_auto_possessification">Auto-possessification</a></li><li><a href="#_automatic_anchoring">Automatic <code class="regex">.*</code> anchoring</a></li><li><a href="#other-optimizations">Other optimizations</a></li></ol></li><li><a href="#_the_callout_interface">The callout interface</a><ol class="toc-list level-2"><li><a href="#_fields_for_numerical_callouts">Fields for numerical callouts</a></li><li><a href="#_fields_for_string_callouts">Fields for string callouts</a></li><li><a href="#_fields_for_all_callouts">Fields for all callouts</a></li></ol></li><li><a href="#_return_values_from_callouts">Return values from callouts</a></li><li><a href="#_callout_enumeration">Callout enumeration</a></li></ol></nav></header><div id="content"><section class="doc-section level-1"><h2 id="_synopsis">Synopsis</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;pcre2.h&gt;</span><span class="cp">
+</span>
+<span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">pcre2_callout</span><span class="p">)(</span><span class="n">pcre2_callout_block</span> <span class="o">*</span><span class="n">callout_block</span><span class="p">,</span>
+                     <span class="kt">void</span> <span class="o">*</span><span class="n">callout_data</span><span class="p">);</span>
 
-int (*pcre2_callout)(pcre2_callout_block *callout_block,
-                     void *callout_data);
-
-int pcre2_callout_enumerate(
-      const pcre2_code *code,
-      int (*callback)(pcre2_callout_enumerate_block *callout_block,
-                      void *callout_data),
-      void *callout_data);</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>PCRE2 provides a feature called "callout", which is a means of temporarily
+<span class="kt">int</span> <span class="nf">pcre2_callout_enumerate</span><span class="p">(</span>
+      <span class="k">const</span> <span class="n">pcre2_code</span> <span class="o">*</span><span class="n">code</span><span class="p">,</span>
+      <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">callback</span><span class="p">)(</span><span class="n">pcre2_callout_enumerate_block</span> <span class="o">*</span><span class="n">callout_block</span><span class="p">,</span>
+                      <span class="kt">void</span> <span class="o">*</span><span class="n">callout_data</span><span class="p">),</span>
+      <span class="kt">void</span> <span class="o">*</span><span class="n">callout_data</span><span class="p">);</span></code></pre></div></section>
+<section class="doc-section level-1"><h2 id="_description">Description</h2><p>PCRE2 provides a feature called "callout", which is a means of temporarily
 passing control to the caller of PCRE2 in the middle of pattern matching. The
 caller of PCRE2 provides an external function by putting its entry point in
 a match context (see <code class="function">pcre2_set_callout()</code> in the
 <a href="pcre2api.html"><code>pcre2api</code></a>
 documentation).</p>
-</div>
-<div class="paragraph">
 <p>When using the <code class="function">pcre2_substitute()</code> function, an additional callout feature
 is available. This does a callout after each change to the subject string and
 is described in the
 <a href="pcre2api.html"><code>pcre2api</code></a>
 documentation; the rest of this document is concerned with callouts during
 pattern matching.</p>
-</div>
-<div class="paragraph">
 <p>Within a regular expression, <code class="regex">(?C<em>arg</em>)</code> indicates a point at which the external
 function is to be called. Different callout points can be identified by putting
 a number less than 256 after the letter C. The default value is zero.
@@ -514,159 +569,80 @@ must be one of <code class="regex">'</code>, <code class="regex">"</code>, <code
 start, except for <code class="regex">{</code>, where the ending delimiter is <code class="regex">}</code>. If the ending delimiter
 is needed within the string, it must be doubled. For example, this pattern has
 two callout points:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">(?C1)abc(?C"some ""arbitrary"" text")def</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(?C1)abc(?C"some ""arbitrary"" text")def</code></pre></div>
 <p>If the <code class="constant">PCRE2_AUTO_CALLOUT</code> option bit is set when a pattern is compiled, PCRE2
 automatically inserts callouts, all with number 255, before each item in the
 pattern except for immediately before or after an explicit callout. For
 example, if <code class="constant">PCRE2_AUTO_CALLOUT</code> is used with the pattern</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">A(?C3)B</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">A(?C3)B</code></pre></div>
 <p>it is processed as if it were</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">(?C255)A(?C3)B(?C255)</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(?C255)A(?C3)B(?C255)</code></pre></div>
 <p>Here is a more complicated example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">A(\d{2}|--)</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">A(\d{2}|--)</code></pre></div>
 <p>With <code class="constant">PCRE2_AUTO_CALLOUT</code>, this pattern is processed as if it were</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">(?C255)A(?C255)((?C255)\d{2}(?C255)|(?C255)-(?C255)-(?C255))(?C255)</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(?C255)A(?C255)((?C255)\d{2}(?C255)|(?C255)-(?C255)-(?C255))(?C255)</code></pre></div>
 <p>Notice that there is a callout before and after each parenthesis and
 alternation bar. If the pattern contains a conditional group whose condition is
 an assertion, an automatic callout is inserted immediately before the
 condition. Such a callout may also be inserted explicitly, for example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">(?(?C9)(?=a)ab|de)  (?(?C%text%)(?!=d)ab|de)</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(?(?C9)(?=a)ab|de)  (?(?C%text%)(?!=d)ab|de)</code></pre></div>
 <p>This applies only to assertion conditions (because they are themselves
 independent groups).</p>
-</div>
-<div class="paragraph">
 <p>Callouts can be useful for tracking the progress of pattern matching. The
 <a href="pcre2test.html"><code>pcre2test</code></a>
 program has a pattern qualifier (<code>auto_callout</code>) that sets automatic callouts.
 When any callouts are present, the output from <code>pcre2test</code> indicates how
 the pattern is being matched. This is useful information when you are trying to
-optimize the performance of a particular pattern.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_missing_callouts">Missing callouts</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>You should be aware that, because of optimizations in the way PCRE2 compiles
+optimize the performance of a particular pattern.</p></section>
+<section class="doc-section level-1"><h2 id="_missing_callouts">Missing callouts</h2><p>You should be aware that, because of optimizations in the way PCRE2 compiles
 and matches patterns, callouts sometimes do not happen exactly as you might
 expect.</p>
-</div>
-<div class="sect2">
-<h3 id="_auto_possessification">Auto-possessification</h3>
-<div class="paragraph">
-<p>At compile time, PCRE2 "auto-possessifies" repeated items when it knows that
+<section class="doc-section level-2"><h3 id="_auto_possessification">Auto-possessification</h3><p>At compile time, PCRE2 "auto-possessifies" repeated items when it knows that
 what follows cannot be part of the repeat. For example, <code class="regex">a+[bc]</code> is compiled as
 if it were <code class="regex">a++[bc]</code>. The <code>pcre2test</code> output when this pattern is compiled
 with <code class="constant">PCRE2_ANCHORED</code> and <code class="constant">PCRE2_AUTO_CALLOUT</code> and then applied to the string
 <code class="subject">aaaa</code> is:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-text" data-lang="text">---&gt;aaaa
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="text">---&gt;aaaa
  +0 ^        a+
  +2 ^   ^    [bc]
-No match</code></pre>
-</div>
-</div>
-<div class="paragraph">
+No match</code></pre></div>
 <p>This indicates that when matching <code class="regex">[bc]</code> fails, there is no backtracking into <code class="regex">a&#43;</code>
 (because it is being treated as <code class="regex">a&#43;&#43;</code>) and therefore the callouts that would be
 taken for the backtracks do not occur. You can disable the auto-possessify
 feature by passing <code class="constant">PCRE2_NO_AUTO_POSSESS</code> to <code class="function">pcre2_compile()</code>, or starting
 the pattern with <code class="regex">(*NO_AUTO_POSSESS)</code>. In this case, the output changes to this:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-text" data-lang="text">---&gt;aaaa
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="text">---&gt;aaaa
  +0 ^        a+
  +2 ^   ^    [bc]
  +2 ^  ^     [bc]
  +2 ^ ^      [bc]
  +2 ^^       [bc]
-No match</code></pre>
-</div>
-</div>
-<div class="paragraph">
+No match</code></pre></div>
 <p>This time, when matching <code class="regex">[bc]</code> fails, the matcher backtracks into <code class="regex">a&#43;</code> and tries
-again, repeatedly, until <code class="regex">a&#43;</code> itself fails.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_automatic_anchoring">Automatic <code class="regex">.*</code> anchoring</h3>
-<div class="paragraph">
-<p>By default, an optimization is applied when <code class="regex">.*</code> is the first significant item in
+again, repeatedly, until <code class="regex">a&#43;</code> itself fails.</p></section>
+<section class="doc-section level-2"><h3 id="_automatic_anchoring">Automatic <code class="regex">.*</code> anchoring</h3><p>By default, an optimization is applied when <code class="regex">.*</code> is the first significant item in
 a pattern. If <code class="constant">PCRE2_DOTALL</code> is set, so that the dot can match any character, the
 pattern is automatically anchored. If <code class="constant">PCRE2_DOTALL</code> is not set, a match can
 start only after an internal newline or at the beginning of the subject, and
 <code class="function">pcre2_compile()</code> remembers this. If a pattern has more than one top-level
 branch, automatic anchoring occurs if all branches are anchorable.</p>
-</div>
-<div class="paragraph">
 <p>This optimization is disabled, however, if <code class="regex">.*</code> is in an atomic group or if there
 is a backreference to the capture group in which it appears. It is also
 disabled if the pattern contains <code class="regex">(*PRUNE)</code> or <code class="regex">(*SKIP)</code>. However, the presence of
 callouts does not affect it.</p>
-</div>
-<div class="paragraph">
 <p>For example, if the pattern <code class="regex">.*\d</code> is compiled with <code class="constant">PCRE2_AUTO_CALLOUT</code> and
 applied to the string <code class="subject">aa</code>, the <code>pcre2test</code> output is:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-text" data-lang="text">---&gt;aa
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="text">---&gt;aa
  +0 ^      .*
  +2 ^ ^    \d
  +2 ^^     \d
  +2 ^      \d
-No match</code></pre>
-</div>
-</div>
-<div class="paragraph">
+No match</code></pre></div>
 <p>This shows that all match attempts start at the beginning of the subject. In
 other words, the pattern is anchored. You can disable this optimization by
 passing <code class="constant">PCRE2_NO_DOTSTAR_ANCHOR</code> to <code class="function">pcre2_compile()</code>, or starting the
 pattern with <code class="regex">(*NO_DOTSTAR_ANCHOR)</code>. In this case, the output changes to:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-text" data-lang="text">---&gt;aa
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="text">---&gt;aa
  +0 ^      .*
  +2 ^ ^    \d
  +2 ^^     \d
@@ -674,52 +650,26 @@ pattern with <code class="regex">(*NO_DOTSTAR_ANCHOR)</code>. In this case, the 
  +0  ^     .*
  +2  ^^    \d
  +2  ^     \d
-No match</code></pre>
-</div>
-</div>
-<div class="paragraph">
+No match</code></pre></div>
 <p>This shows more match attempts, starting at the second subject character.
 Another optimization, described in the section <a href="#other-optimizations">Other optimizations</a>, means that there is no
-subsequent attempt to match with an empty subject.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="other-optimizations">Other optimizations</h3>
-<div class="paragraph">
-<p>Other optimizations that provide fast "no match" results also affect callouts.
+subsequent attempt to match with an empty subject.</p></section>
+<section class="doc-section level-2"><h3 id="other-optimizations">Other optimizations</h3><p>Other optimizations that provide fast "no match" results also affect callouts.
 For example, if the pattern is</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">ab(?C4)cd</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">ab(?C4)cd</code></pre></div>
 <p>PCRE2 knows that any matching string must contain the letter <code class="subject">d</code>. If the
 subject string is <code class="subject">abyz</code>, the lack of <code class="subject">d</code> means that matching doesn&#8217;t ever
 start, and the callout is never reached. However, with <code class="subject">abyd</code>, though the
 result is still no match, the callout is obeyed.</p>
-</div>
-<div class="paragraph">
 <p>For most patterns PCRE2 also knows the minimum length of a matching string, and
 will immediately give a "no match" return without actually running a match if
 the subject is not long enough, or, for unanchored patterns, if it has been
 scanned far enough.</p>
-</div>
-<div class="paragraph">
 <p>You can disable these optimizations by passing the <code class="constant">PCRE2_NO_START_OPTIMIZE</code>
 option to <code class="function">pcre2_compile()</code>, or by starting the pattern with
 <code class="regex">(*NO_START_OPT)</code>. This slows down the matching process, but does ensure that
-callouts such as the example above are obeyed.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_the_callout_interface">The callout interface</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>During matching, when PCRE2 reaches a callout point, if an external function is
+callouts such as the example above are obeyed.</p></section></section>
+<section class="doc-section level-1"><h2 id="_the_callout_interface">The callout interface</h2><p>During matching, when PCRE2 reaches a callout point, if an external function is
 provided in the match context, it is called. This applies to both normal,
 DFA, and JIT matching. The first argument to the callout function is a pointer
 to a <code class="type">pcre2_callout</code> block. The second argument is the <code class="c">void *</code> callout data
@@ -728,28 +678,22 @@ that was supplied when the callout was set up by calling
 <a href="pcre2api.html"><code>pcre2api</code></a>
 documentation). The callout block structure contains the following fields, not
 necessarily in this order:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-c" data-lang="c">uint32_t    version;
-uint32_t    callout_number;
-uint32_t    capture_top;
-uint32_t    capture_last;
-uint32_t    callout_flags;
-PCRE2_SIZE *offset_vector;
-PCRE2_SPTR  mark;
-PCRE2_SPTR  subject;
-PCRE2_SIZE  subject_length;
-PCRE2_SIZE  start_match;
-PCRE2_SIZE  current_position;
-PCRE2_SIZE  pattern_position;
-PCRE2_SIZE  next_item_length;
-PCRE2_SIZE  callout_string_offset;
-PCRE2_SIZE  callout_string_length;
-PCRE2_SPTR  callout_string;</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="kt">uint32_t</span>    <span class="n">version</span><span class="p">;</span>
+<span class="kt">uint32_t</span>    <span class="n">callout_number</span><span class="p">;</span>
+<span class="kt">uint32_t</span>    <span class="n">capture_top</span><span class="p">;</span>
+<span class="kt">uint32_t</span>    <span class="n">capture_last</span><span class="p">;</span>
+<span class="kt">uint32_t</span>    <span class="n">callout_flags</span><span class="p">;</span>
+<span class="n">PCRE2_SIZE</span> <span class="o">*</span><span class="n">offset_vector</span><span class="p">;</span>
+<span class="n">PCRE2_SPTR</span>  <span class="n">mark</span><span class="p">;</span>
+<span class="n">PCRE2_SPTR</span>  <span class="n">subject</span><span class="p">;</span>
+<span class="n">PCRE2_SIZE</span>  <span class="n">subject_length</span><span class="p">;</span>
+<span class="n">PCRE2_SIZE</span>  <span class="n">start_match</span><span class="p">;</span>
+<span class="n">PCRE2_SIZE</span>  <span class="n">current_position</span><span class="p">;</span>
+<span class="n">PCRE2_SIZE</span>  <span class="n">pattern_position</span><span class="p">;</span>
+<span class="n">PCRE2_SIZE</span>  <span class="n">next_item_length</span><span class="p">;</span>
+<span class="n">PCRE2_SIZE</span>  <span class="n">callout_string_offset</span><span class="p">;</span>
+<span class="n">PCRE2_SIZE</span>  <span class="n">callout_string_length</span><span class="p">;</span>
+<span class="n">PCRE2_SPTR</span>  <span class="n">callout_string</span><span class="p">;</span></code></pre></div>
 <p>The <code class="parameter">version</code> field contains the version number of the block format. The
 current version is 2; the three callout string fields were added for version 1,
 and the <code class="parameter">callout_flags</code> field for version 2. If you are writing an
@@ -757,20 +701,11 @@ application that might use an earlier release of PCRE2, you should check the
 version number before accessing any of these fields. The version number will
 increase in future if more fields are added, but the intention is never to
 remove any of the existing fields.</p>
-</div>
-<div class="sect2">
-<h3 id="_fields_for_numerical_callouts">Fields for numerical callouts</h3>
-<div class="paragraph">
-<p>For a numerical callout, <code class="parameter">callout_string</code> is <code class="constant">NULL</code>, and <code class="parameter">callout_number</code>
+<section class="doc-section level-2"><h3 id="_fields_for_numerical_callouts">Fields for numerical callouts</h3><p>For a numerical callout, <code class="parameter">callout_string</code> is <code class="constant">NULL</code>, and <code class="parameter">callout_number</code>
 contains the number of the callout, in the range 0-255. This is the number
 that follows <code class="regex">(?C</code> for callouts that part of the pattern; it is 255 for
-automatically generated callouts.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_fields_for_string_callouts">Fields for string callouts</h3>
-<div class="paragraph">
-<p>For callouts with string arguments, <code class="parameter">callout_number</code> is always zero, and
+automatically generated callouts.</p></section>
+<section class="doc-section level-2"><h3 id="_fields_for_string_callouts">Fields for string callouts</h3><p>For callouts with string arguments, <code class="parameter">callout_number</code> is always zero, and
 <code class="parameter">callout_string</code> points to the string that is contained within the compiled
 pattern. Its length is given by <code class="parameter">callout_string_length</code>. Duplicated ending
 delimiters that were present in the original pattern string have been turned
@@ -780,34 +715,21 @@ string, but is not included in the length. The delimiter that was used to start
 the string is also stored within the pattern, immediately before the string
 itself. You can access this delimiter as <code class="c">callout_string[-1]</code> if you need
 it.</p>
-</div>
-<div class="paragraph">
 <p>The <code class="parameter">callout_string_offset</code> field is the code unit offset to the start of
 the callout argument string within the original pattern string. This is
 provided for the benefit of applications such as script languages that might
-need to report errors in the callout string within the pattern.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_fields_for_all_callouts">Fields for all callouts</h3>
-<div class="paragraph">
-<p>The remaining fields in the callout block are the same for both kinds of
+need to report errors in the callout string within the pattern.</p></section>
+<section class="doc-section level-2"><h3 id="_fields_for_all_callouts">Fields for all callouts</h3><p>The remaining fields in the callout block are the same for both kinds of
 callout.</p>
-</div>
-<div class="paragraph">
 <p>The <code class="parameter">offset_vector</code> field is a pointer to a vector of capturing offsets
 (the "ovector"). You may read the elements in this vector, but you must not
 change any of them.</p>
-</div>
-<div class="paragraph">
 <p>For calls to <code class="function">pcre2_match()</code>, the <code class="parameter">offset_vector</code> field is not (since
 release 10.30) a pointer to the actual ovector that was passed to the matching
 function in the match data block. Instead it points to an internal ovector of a
 size large enough to hold all possible captured substrings in the pattern. Note
 that whenever a recursion or subroutine call within a pattern completes, the
 capturing state is reset to what it was before.</p>
-</div>
-<div class="paragraph">
 <p>The <code class="parameter">capture_last</code> field contains the number of the most recently captured
 substring, and the <code class="parameter">capture_top</code> field contains one more than the number of
 the highest numbered captured substring so far. If no substrings have yet been
@@ -815,8 +737,6 @@ captured, the value of <code class="parameter">capture_last</code> is 0 and the 
 <code class="parameter">capture_top</code> is 1. The values of these fields do not always differ by one;
 for example, when the callout in the pattern <code class="regex">((a)(b))(?C2)</code> is taken,
 <code class="parameter">capture_last</code> is 1 but <code class="parameter">capture_top</code> is 4.</p>
-</div>
-<div class="paragraph">
 <p>The contents of <code class="c">ovector[2]</code> to <code class="c">ovector[capture_top*2-1]</code> can be inspected in
 order to extract substrings that have been matched so far, in the same way as
 extracting substrings after a match has completed. The values in <code class="c">ovector[0]</code> and
@@ -824,8 +744,6 @@ extracting substrings after a match has completed. The values in <code class="c"
 complete. Substrings that have not been captured but whose numbers are less
 than <code class="parameter">capture_top</code> also have both of their ovector slots set to
 <code class="constant">PCRE2_UNSET</code>.</p>
-</div>
-<div class="paragraph">
 <p>For DFA matching, the <code class="parameter">offset_vector</code> field points to the ovector that was
 passed to the matching function in the match data block for callouts at the top
 level, but to an internal ovector during the processing of pattern recursions,
@@ -833,28 +751,18 @@ lookarounds, and atomic groups. However, these ovectors hold no useful
 information because <code class="function">pcre2_dfa_match()</code> does not support substring
 capturing. The value of <code class="parameter">capture_top</code> is always 1 and the value of
 <code class="parameter">capture_last</code> is always 0 for DFA matching.</p>
-</div>
-<div class="paragraph">
 <p>The <code class="parameter">subject</code> and <code class="parameter">subject_length</code> fields contain copies of the values
 that were passed to the matching function.</p>
-</div>
-<div class="paragraph">
 <p>The <code class="parameter">start_match</code> field normally contains the offset within the subject at
 which the current match attempt started. However, if the escape sequence <code class="regex">\K</code>
 has been encountered, this value is changed to reflect the modified starting
 point. If the pattern is not anchored, the callout function may be called
 several times from the same point in the pattern for different starting points
 in the subject.</p>
-</div>
-<div class="paragraph">
 <p>The <code class="parameter">current_position</code> field contains the offset within the subject of the
 current match pointer.</p>
-</div>
-<div class="paragraph">
 <p>The <code class="parameter">pattern_position</code> field contains the offset in the pattern string to
 the next item to be matched.</p>
-</div>
-<div class="paragraph">
 <p>The <code class="parameter">next_item_length</code> field contains the length of the next item to be
 processed in the pattern string. When the callout is at the end of the pattern,
 the length is zero. When the callout precedes an opening parenthesis, the
@@ -865,90 +773,48 @@ is followed by a quantifier, in which case its length is included. (This
 changed in release 10.23. In earlier releases, before an opening parenthesis
 the length was that of the entire group, and before an alternation bar or a
 closing parenthesis the length was zero.)</p>
-</div>
-<div class="paragraph">
 <p>The <code class="parameter">pattern_position</code> and <code class="parameter">next_item_length</code> fields are intended to
 help in distinguishing between different automatic callouts, which all have the
 same callout number. However, they are set for all callouts, and are used by
 <code>pcre2test</code> to show the next item to be matched when displaying callout
 information.</p>
-</div>
-<div class="paragraph">
 <p>In callouts from <code class="function">pcre2_match()</code> the <code class="parameter">mark</code> field contains a pointer to
 the zero-terminated name of the most recently passed <code class="regex">(*MARK)</code>, <code class="regex">(*PRUNE)</code>, or
 <code class="regex">(*THEN)</code> item in the match, or <code class="constant">NULL</code> if no such items have been passed. Instances
 of <code class="regex">(*PRUNE)</code> or <code class="regex">(*THEN)</code> without a name do not obliterate a previous <code class="regex">(*MARK)</code>. In
 callouts from the DFA matching function this field always contains <code class="constant">NULL</code>.</p>
-</div>
-<div class="paragraph">
 <p>The <code class="parameter">callout_flags</code> field is always zero in callouts from
 <code class="function">pcre2_dfa_match()</code> or when JIT is being used. When <code class="function">pcre2_match()</code>
 without JIT is used, the following bits may be set:</p>
-</div>
-<div class="dlist values">
-<dl>
-<dt class="hdlist1"><code class="constant">PCRE2_CALLOUT_STARTMATCH</code></dt>
-<dd>
-<p>This is set for the first callout after the start of matching for each new
-starting position in the subject.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_CALLOUT_BACKTRACK</code></dt>
-<dd>
-<p>This is set if there has been a matching backtrack since the previous callout,
+<div class="dlist values"><dl><dt><code class="constant">PCRE2_CALLOUT_STARTMATCH</code></dt><dd>This is set for the first callout after the start of matching for each new
+starting position in the subject.</dd><dt><code class="constant">PCRE2_CALLOUT_BACKTRACK</code></dt><dd>This is set if there has been a matching backtrack since the previous callout,
 or since the start of matching if this is the first callout from a
-<code class="function">pcre2_match()</code> run.</p>
-</dd>
-</dl>
-</div>
-<div class="paragraph">
+<code class="function">pcre2_match()</code> run.</dd></dl></div>
 <p>Both bits are set when a backtrack has caused a "bumpalong" to a new starting
 position in the subject. Output from <code>pcre2test</code> does not indicate the
 presence of these bits unless the <code>callout_extra</code> modifier is set.</p>
-</div>
-<div class="paragraph">
 <p>The information in the <code class="parameter">callout_flags</code> field is provided so that
 applications can track and tell their users how matching with backtracking is
 done. This can be useful when trying to optimize patterns, or just to
 understand how PCRE2 works. There is no support in <code class="function">pcre2_dfa_match()</code>
 because there is no backtracking in DFA matching, and there is no support in
 JIT because JIT is all about maximimizing matching performance. In both these
-cases the <code class="parameter">callout_flags</code> field is always zero.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_return_values_from_callouts">Return values from callouts</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The external callout function returns an integer to PCRE2. If the value is
+cases the <code class="parameter">callout_flags</code> field is always zero.</p></section></section>
+<section class="doc-section level-1"><h2 id="_return_values_from_callouts">Return values from callouts</h2><p>The external callout function returns an integer to PCRE2. If the value is
 zero, matching proceeds as normal. If the value is greater than zero, matching
 fails at the current point, but the testing of other matching possibilities
 goes ahead, just as if a lookahead assertion had failed. If the value is less
 than zero, the match is abandoned, and the matching function returns the
 negative value.</p>
-</div>
-<div class="paragraph">
 <p>Negative values should normally be chosen from the set of <code>PCRE2_ERROR_<em>xxx</em></code>
 values. In particular, <code class="constant">PCRE2_ERROR_NOMATCH</code> forces a standard "no match"
 failure. The error number <code class="constant">PCRE2_ERROR_CALLOUT</code> is reserved for use by callout
-functions; it will never be used by PCRE2 itself.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_callout_enumeration">Callout enumeration</h2>
-<div class="sectionbody">
-<div class="listingblock prototype">
-<div class="content">
-<pre class="highlight"><code class="language-c" data-lang="c">int pcre2_callout_enumerate(
-      const pcre2_code *code,
-      int (*callback)(pcre2_callout_enumerate_block *callout_block,
-                      void *callout_data),
-      void *callout_data);</code></pre>
-</div>
-</div>
-<div class="paragraph">
+functions; it will never be used by PCRE2 itself.</p></section>
+<section class="doc-section level-1"><h2 id="_callout_enumeration">Callout enumeration</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nf">pcre2_callout_enumerate</span><span class="p">(</span>
+      <span class="k">const</span> <span class="n">pcre2_code</span> <span class="o">*</span><span class="n">code</span><span class="p">,</span>
+      <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">callback</span><span class="p">)(</span><span class="n">pcre2_callout_enumerate_block</span> <span class="o">*</span><span class="n">callout_block</span><span class="p">,</span>
+                      <span class="kt">void</span> <span class="o">*</span><span class="n">callout_data</span><span class="p">),</span>
+      <span class="kt">void</span> <span class="o">*</span><span class="n">callout_data</span><span class="p">);</span></code></pre></div>
 <p>A script language that supports the use of string arguments in callouts might
 like to scan all the callouts in a pattern before running the match. This can
 be done by calling <code class="function">pcre2_callout_enumerate()</code>. The first argument is a
@@ -958,52 +824,32 @@ callout in the pattern in the order in which they appear. Its first argument is
 a pointer to a callout enumeration block, and its second argument is the
 <code class="parameter">user_data</code> value that was passed to <code class="function">pcre2_callout_enumerate()</code>. The
 data block contains the following fields:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-c" data-lang="c">uint32_t   version;               /* Block version number */
-PCRE2_SIZE pattern_position;      /* Offset to next item in pattern */
-PCRE2_SIZE next_item_length;      /* Length of next item in pattern */
-uint32_t   callout_number;        /* Number for numbered callouts */
-PCRE2_SIZE callout_string_offset; /* Offset to string within pattern */
-PCRE2_SIZE callout_string_length; /* Length of callout string */
-PCRE2_SPTR callout_string;        /* Points to callout string or is
-                                     NULL */</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="kt">uint32_t</span>   <span class="n">version</span><span class="p">;</span>               <span class="cm">/* Block version number */</span>
+<span class="n">PCRE2_SIZE</span> <span class="n">pattern_position</span><span class="p">;</span>      <span class="cm">/* Offset to next item in pattern */</span>
+<span class="n">PCRE2_SIZE</span> <span class="n">next_item_length</span><span class="p">;</span>      <span class="cm">/* Length of next item in pattern */</span>
+<span class="kt">uint32_t</span>   <span class="n">callout_number</span><span class="p">;</span>        <span class="cm">/* Number for numbered callouts */</span>
+<span class="n">PCRE2_SIZE</span> <span class="n">callout_string_offset</span><span class="p">;</span> <span class="cm">/* Offset to string within pattern */</span>
+<span class="n">PCRE2_SIZE</span> <span class="n">callout_string_length</span><span class="p">;</span> <span class="cm">/* Length of callout string */</span>
+<span class="n">PCRE2_SPTR</span> <span class="n">callout_string</span><span class="p">;</span>        <span class="cm">/* Points to callout string or is
+                                     NULL */</span></code></pre></div>
 <p>The version number is currently 0. It will increase if new fields are ever
 added to the block. The remaining fields are the same as their namesakes in the
 <code class="type">pcre2_callout</code> block that is used for callouts during matching, as
 described
 above.</p>
-</div>
-<div class="paragraph">
 <p>Note that the value of <code class="parameter">pattern_position</code> is unique for each callout.
 However, if a callout occurs inside a group that is quantified with a non-zero
 minimum or a fixed maximum, the group is replicated inside the compiled
 pattern. For example, a pattern such as <code class="regex">(a){2}</code> is compiled as if it were
 <code class="regex">(a)(a)</code>. This means that the callout will be enumerated more than once, but
 with the same value for <code class="parameter">pattern_position</code> in each case.</p>
-</div>
-<div class="paragraph">
 <p>The callback function should normally return zero. If it returns a non-zero
 value, scanning the pattern stops, and that value is returned from
 <code class="function">pcre2_callout_enumerate()</code>.</p>
-</div>
 <h2 id="_author" class="discrete">Author</h2>
-<div class="paragraph">
 <p>Philip Hazel<br>
 Retired from University Computing Service<br>
 Cambridge, England.</p>
-</div>
 <h2 id="_revision" class="discrete">Revision</h2>
-<div class="paragraph">
 <p>Last updated: 26 February 2025<br>
-Copyright &#169; 1997-2024 University of Cambridge.</p>
-</div>
-</div>
-</div>
-</div>
-</body>
-</html>
+Copyright &#169; 1997-2024 University of Cambridge.</p></section></div></body></html>

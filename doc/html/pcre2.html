@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.26">
-<meta name="description" content="Introductory page">
-<title>pcre2(3)</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
-<style>
-/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Introductory page"><title>pcre2(3)</title><style>/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
 /* Uncomment the following line when using as a custom stylesheet */
 /* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
 html{font-family:sans-serif;-webkit-text-size-adjust:100%}
@@ -432,23 +421,125 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .sect1+.sect1{border:0}
 #footer{background:none}
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
-@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
-</style>
-</head>
-<body class="manpage">
-<div id="header">
-<h1>pcre2(3) Manual Page</h1>
-<h2>Name</h2>
-<div class="sectionbody">
-<p>pcre2 - Perl-compatible regular expressions (PCRE2 API)</p>
-</div>
-</div>
-<div id="content">
-<div class="sect1">
-<h2 id="_introduction">Introduction</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>PCRE2 is the name used for a revised API for the PCRE library, which is a set
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}</style>
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge, pre.rouge .w {
+  color: #24292f;
+  background-color: #f6f8fa;
+}
+pre.rouge .k, pre.rouge .kd, pre.rouge .kn, pre.rouge .kp, pre.rouge .kr, pre.rouge .kt, pre.rouge .kv {
+  color: #cf222e;
+}
+pre.rouge .gr {
+  color: #f6f8fa;
+}
+pre.rouge .gd {
+  color: #82071e;
+  background-color: #ffebe9;
+}
+pre.rouge .nb {
+  color: #953800;
+}
+pre.rouge .nc {
+  color: #953800;
+}
+pre.rouge .no {
+  color: #953800;
+}
+pre.rouge .nn {
+  color: #953800;
+}
+pre.rouge .sr {
+  color: #116329;
+}
+pre.rouge .na {
+  color: #116329;
+}
+pre.rouge .nt {
+  color: #116329;
+}
+pre.rouge .gi {
+  color: #116329;
+  background-color: #dafbe1;
+}
+pre.rouge .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .kc {
+  color: #0550ae;
+}
+pre.rouge .l, pre.rouge .ld, pre.rouge .m, pre.rouge .mb, pre.rouge .mf, pre.rouge .mh, pre.rouge .mi, pre.rouge .il, pre.rouge .mo, pre.rouge .mx {
+  color: #0550ae;
+}
+pre.rouge .sb {
+  color: #0550ae;
+}
+pre.rouge .bp {
+  color: #0550ae;
+}
+pre.rouge .ne {
+  color: #0550ae;
+}
+pre.rouge .nl {
+  color: #0550ae;
+}
+pre.rouge .py {
+  color: #0550ae;
+}
+pre.rouge .nv, pre.rouge .vc, pre.rouge .vg, pre.rouge .vi, pre.rouge .vm {
+  color: #0550ae;
+}
+pre.rouge .o, pre.rouge .ow {
+  color: #0550ae;
+}
+pre.rouge .gh {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .s, pre.rouge .sa, pre.rouge .sc, pre.rouge .dl, pre.rouge .sd, pre.rouge .s2, pre.rouge .se, pre.rouge .sh, pre.rouge .sx, pre.rouge .s1, pre.rouge .ss {
+  color: #0a3069;
+}
+pre.rouge .nd {
+  color: #8250df;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #8250df;
+}
+pre.rouge .err {
+  color: #f6f8fa;
+  background-color: #82071e;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cm, pre.rouge .cp, pre.rouge .cpf, pre.rouge .c1, pre.rouge .cs {
+  color: #6e7781;
+}
+pre.rouge .gl {
+  color: #6e7781;
+}
+pre.rouge .gt {
+  color: #6e7781;
+}
+pre.rouge .ni {
+  color: #24292f;
+}
+pre.rouge .si {
+  color: #24292f;
+}
+pre.rouge .ge {
+  color: #24292f;
+  font-style: italic;
+}
+pre.rouge .gs {
+  color: #24292f;
+  font-weight: bold;
+}
+</style></head><body class="manpage"><header><h1>pcre2(3)</h1><div class="details"><time id="revdate" datetime="2025-02-22">22 February 2025</time></div></header><div id="content"><section class="doc-section level-1"><h2 id="_introduction">Introduction</h2><p>PCRE2 is the name used for a revised API for the PCRE library, which is a set
 of functions, written in C, that implement regular expression pattern matching
 using the same syntax and semantics as Perl, with just a few differences. After
 nearly two decades, the limitations of the original API were making development
@@ -457,23 +548,17 @@ by abolishing the separate "study" optimizing function; in PCRE2, patterns are
 automatically optimized where possible. Since forking from PCRE1, the code has
 been extensively refactored and new features introduced. The old library is now
 obsolete and is no longer maintained.</p>
-</div>
-<div class="paragraph">
 <p>As well as Perl-style regular expression patterns, some features that appeared
 in Python and the original PCRE before they appeared in Perl are available
 using the Python syntax. There is also support for some .NET and Oniguruma
 syntax items, and there are options for requesting minor changes that give
 better ECMAScript (JavaScript) compatibility.</p>
-</div>
-<div class="paragraph">
 <p>The source code for PCRE2 can be compiled to support strings of 8-bit, 16-bit,
 or 32-bit code units, which means that up to three separate libraries may be
 installed, one for each code unit size. The size of a code unit is not related
 to the bit size of the underlying hardware. In a 64-bit environment that also
 supports 32-bit applications, versions of PCRE2 that are compiled in both
 64-bit and 32-bit modes may be needed.</p>
-</div>
-<div class="paragraph">
 <p>The original work to extend PCRE to 16-bit and 32-bit code units was done by
 Zoltán Herczeg and Christian Persch, respectively. In all three cases, strings
 can be interpreted either as one character per code unit, or as UTF-encoded
@@ -481,29 +566,19 @@ Unicode, with support for Unicode general category properties. Unicode support
 is optional at build time (but is the default). However, processing strings as
 UTF code units must be enabled explicitly at run time. The version of Unicode
 in use can be discovered by running</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2test -C</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">pcre2test <span class="nt">-C</span></code></pre></div>
 <p>The three libraries contain identical sets of functions, with names ending in
 <code>_8</code>, <code>_16</code>, or <code>_32</code>, respectively (for example, <code class="function">pcre2_compile_8()</code>). However,
 by defining <code class="constant">PCRE2_CODE_UNIT_WIDTH</code> to be 8, 16, or 32, a program that uses just
 one code unit width can be written using generic names such as
 <code class="function">pcre2_compile()</code>, and the documentation is written assuming that this is
 the case.</p>
-</div>
-<div class="paragraph">
 <p>In addition to the Perl-compatible matching function, PCRE2 contains an
 alternative function that matches the same compiled patterns in a different
 way. In certain circumstances, the alternative function has some advantages.
 For a discussion of the two matching algorithms, see the
 <a href="pcre2matching.html"><code>pcre2matching</code></a>
 page.</p>
-</div>
-<div class="paragraph">
 <p>Details of exactly which Perl regular expression features are and are not
 supported by PCRE2 are given in separate documents. See the
 <a href="pcre2pattern.html"><code>pcre2pattern</code></a>
@@ -512,8 +587,6 @@ and
 pages. There is a syntax summary in the
 <a href="pcre2syntax.html"><code>pcre2syntax</code></a>
 page.</p>
-</div>
-<div class="paragraph">
 <p>Some features of PCRE2 can be included, excluded, or changed when the library
 is built. The <code class="function">pcre2_config()</code>
 function makes it possible for a client to discover which features are
@@ -525,23 +598,14 @@ found in the
 and
 <code>NON-AUTOTOOLS-BUILD</code>
 files in the source distribution.</p>
-</div>
-<div class="paragraph">
 <p>The libraries contains a number of undocumented internal functions and data
 tables that are used by more than one of the exported external functions, but
 which are not intended for use by external callers. Their names all begin with
 <code class="c">_pcre2</code>, which hopefully will not provoke any name clashes. In some
 environments, it is possible to control which external symbols are exported
 when a shared library is built, and in these cases the undocumented symbols are
-not exported.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_security_considerations">Security considerations</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>If you are using PCRE2 in a non-UTF application that permits users to supply
+not exported.</p></section>
+<section class="doc-section level-1"><h2 id="_security_considerations">Security considerations</h2><p>If you are using PCRE2 in a non-UTF application that permits users to supply
 arbitrary patterns for compilation, you should be aware of a feature that
 allows users to turn on UTF support from within a pattern. For example, an
 8-bit pattern that begins with <code class="regex">(*UTF)</code> turns on UTF-8 mode, which interprets
@@ -550,49 +614,32 @@ patterns and subjects as strings of UTF-8 code units instead of individual
 matched to be checked for UTF-8 validity. If the data string is very long, such
 a check might use sufficiently many resources as to cause your application to
 lose performance.</p>
-</div>
-<div class="paragraph">
 <p>One way of guarding against this possibility is to use the
 <code class="function">pcre2_pattern_info()</code> function to check the compiled pattern&#8217;s options for
 <code class="constant">PCRE2_UTF</code>. Alternatively, you can set the <code class="constant">PCRE2_NEVER_UTF</code> option when calling
 <code class="function">pcre2_compile()</code>. This causes a compile time error if the pattern contains
 a UTF-setting sequence.</p>
-</div>
-<div class="paragraph">
 <p>The use of Unicode properties for character types such as <code class="regex">\d</code> can also be
 enabled from within the pattern, by specifying <code class="regex">(*UCP)</code>. This feature can be
 disallowed by setting the <code class="constant">PCRE2_NEVER_UCP</code> option.</p>
-</div>
-<div class="paragraph">
 <p>If your application is one that supports UTF, be aware that validity checking
 can take time. If the same data string is to be matched many times, you can use
 the <code class="constant">PCRE2_NO_UTF_CHECK</code> option for the second and subsequent matches to avoid
 running redundant checks.</p>
-</div>
-<div class="paragraph">
 <p>The use of the <code class="regex">\C</code> escape sequence in a UTF-8 or UTF-16 pattern can lead to
 problems, because it may leave the current matching point in the middle of a
 multi-code-unit character. The <code class="constant">PCRE2_NEVER_BACKSLASH_C</code> option can be used by an
 application to lock out the use of <code class="regex">\C</code>, causing a compile-time error if it is
 encountered. It is also possible to build PCRE2 with the use of <code class="regex">\C</code> permanently
 disabled.</p>
-</div>
-<div class="paragraph">
 <p>Another way that performance can be hit is by running a pattern that has a very
 large search tree against a string that will never match. Nested unlimited
 repeats in a pattern are a common example. PCRE2 provides some protection
 against this: see the <code class="function">pcre2_set_match_limit()</code> function in the
 <a href="pcre2api.html"><code>pcre2api</code></a>
 page. There is a similar function called <code class="function">pcre2_set_depth_limit()</code> that can
-be used to restrict the amount of memory that is used.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_user_documentation">User documentation</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The user documentation for PCRE2 comprises a number of different sections. In
+be used to restrict the amount of memory that is used.</p></section>
+<section class="doc-section level-1"><h2 id="_user_documentation">User documentation</h2><p>The user documentation for PCRE2 comprises a number of different sections. In
 the "man" format, each of these is a separate "man page". In the HTML format,
 each is a separate page, linked from the index page. In the plain text format,
 the descriptions of the <code>pcre2grep</code> and <code>pcre2test</code> programs are in
@@ -600,120 +647,17 @@ files called <code>pcre2grep.txt</code> and <code>pcre2test.txt</code>, respecti
 remaining sections, except for the <code>pcre2demo</code> section (which is a program
 listing), and the short pages for individual functions, are concatenated in
 <code>pcre2.txt</code>, for ease of searching. The sections are as follows:</p>
-</div>
-<div class="dlist values">
-<dl>
-<dt class="hdlist1">pcre2</dt>
-<dd>
-<p>this document</p>
-</dd>
-<dt class="hdlist1">pcre2-config</dt>
-<dd>
-<p>show PCRE2 installation configuration information</p>
-</dd>
-<dt class="hdlist1">pcre2api</dt>
-<dd>
-<p>details of PCRE2&#8217;s native C API</p>
-</dd>
-<dt class="hdlist1">pcre2build</dt>
-<dd>
-<p>building PCRE2</p>
-</dd>
-<dt class="hdlist1">pcre2callout</dt>
-<dd>
-<p>details of the pattern callout feature</p>
-</dd>
-<dt class="hdlist1">pcre2compat</dt>
-<dd>
-<p>discussion of Perl compatibility</p>
-</dd>
-<dt class="hdlist1">pcre2convert</dt>
-<dd>
-<p>details of pattern conversion functions</p>
-</dd>
-<dt class="hdlist1">pcre2demo</dt>
-<dd>
-<p>a demonstration C program that uses PCRE2</p>
-</dd>
-<dt class="hdlist1">pcre2grep</dt>
-<dd>
-<p>description of the <code>pcre2grep</code> command (8-bit only)</p>
-</dd>
-<dt class="hdlist1">pcre2jit</dt>
-<dd>
-<p>discussion of just-in-time optimization support</p>
-</dd>
-<dt class="hdlist1">pcre2limits</dt>
-<dd>
-<p>details of size and other limits</p>
-</dd>
-<dt class="hdlist1">pcre2matching</dt>
-<dd>
-<p>discussion of the two matching algorithms</p>
-</dd>
-<dt class="hdlist1">pcre2partial</dt>
-<dd>
-<p>details of the partial matching facility</p>
-</dd>
-<dt class="hdlist1">pcre2pattern</dt>
-<dd>
-<p>syntax and semantics of supported regular
-expression patterns</p>
-</dd>
-<dt class="hdlist1">pcre2perform</dt>
-<dd>
-<p>discussion of performance issues</p>
-</dd>
-<dt class="hdlist1">pcre2posix</dt>
-<dd>
-<p>the POSIX-compatible C API for the 8-bit library</p>
-</dd>
-<dt class="hdlist1">pcre2sample</dt>
-<dd>
-<p>discussion of the pcre2demo program</p>
-</dd>
-<dt class="hdlist1">pcre2serialize</dt>
-<dd>
-<p>details of pattern serialization</p>
-</dd>
-<dt class="hdlist1">pcre2syntax</dt>
-<dd>
-<p>quick syntax reference</p>
-</dd>
-<dt class="hdlist1">pcre2test</dt>
-<dd>
-<p>description of the <code>pcre2test</code> command</p>
-</dd>
-<dt class="hdlist1">pcre2unicode</dt>
-<dd>
-<p>discussion of Unicode and UTF support</p>
-</dd>
-</dl>
-</div>
-<div class="paragraph">
+<div class="dlist values"><dl><dt>pcre2</dt><dd>this document</dd><dt>pcre2-config</dt><dd>show PCRE2 installation configuration information</dd><dt>pcre2api</dt><dd>details of PCRE2&#8217;s native C API</dd><dt>pcre2build</dt><dd>building PCRE2</dd><dt>pcre2callout</dt><dd>details of the pattern callout feature</dd><dt>pcre2compat</dt><dd>discussion of Perl compatibility</dd><dt>pcre2convert</dt><dd>details of pattern conversion functions</dd><dt>pcre2demo</dt><dd>a demonstration C program that uses PCRE2</dd><dt>pcre2grep</dt><dd>description of the <code>pcre2grep</code> command (8-bit only)</dd><dt>pcre2jit</dt><dd>discussion of just-in-time optimization support</dd><dt>pcre2limits</dt><dd>details of size and other limits</dd><dt>pcre2matching</dt><dd>discussion of the two matching algorithms</dd><dt>pcre2partial</dt><dd>details of the partial matching facility</dd><dt>pcre2pattern</dt><dd>syntax and semantics of supported regular
+expression patterns</dd><dt>pcre2perform</dt><dd>discussion of performance issues</dd><dt>pcre2posix</dt><dd>the POSIX-compatible C API for the 8-bit library</dd><dt>pcre2sample</dt><dd>discussion of the pcre2demo program</dd><dt>pcre2serialize</dt><dd>details of pattern serialization</dd><dt>pcre2syntax</dt><dd>quick syntax reference</dd><dt>pcre2test</dt><dd>description of the <code>pcre2test</code> command</dd><dt>pcre2unicode</dt><dd>discussion of Unicode and UTF support</dd></dl></div>
 <p>In the "man" and HTML formats, there is also a short page for each C library
 function, listing its arguments and results.</p>
-</div>
 <h2 id="_authors" class="discrete">Authors</h2>
-<div class="paragraph">
 <p>The current maintainers of PCRE2 are Nicholas Wilson and Zoltán Herczeg.</p>
-</div>
-<div class="paragraph">
 <p>PCRE2 was written by Philip Hazel, of the University Computing Service,
 Cambridge, England. Many others have also contributed.</p>
-</div>
-<div class="paragraph">
 <p>To contact the maintainers, please use the GitHub issues tracker or PCRE2
 mailing list, as described at the project page:
-<a href="https://github.com/PCRE2Project/pcre2" class="bare">https://github.com/PCRE2Project/pcre2</a></p>
-</div>
+<a class="bare" href="https://github.com/PCRE2Project/pcre2">https://github.com/PCRE2Project/pcre2</a></p>
 <h2 id="_revision" class="discrete">Revision</h2>
-<div class="paragraph">
 <p>Last updated: 22 February 2025<br>
-Copyright &#169; 1997-2021 University of Cambridge.</p>
-</div>
-</div>
-</div>
-</div>
-</body>
-</html>
+Copyright &#169; 1997-2021 University of Cambridge.</p></section></div></body></html>

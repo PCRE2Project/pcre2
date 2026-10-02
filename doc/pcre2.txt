@@ -1563,8 +1563,8 @@ CHECKING BUILD-TIME OPTIONS
                                      The output is a uint32_t integer that
                                      gives the length of PCRE2’s character
                                      processing tables in bytes. For details
-                                     of these tables see the section on locale
-                                     support below.
+                                     of these tables see the section LOCALE
+                                     SUPPORT below.
 
            PCRE2_CONFIG_UNICODE_VERSION
                                      The where argument should point to a
@@ -2330,9 +2330,8 @@ COMPILING A PATTERN
                                      used to classify characters. There are
                                      some PCRE2_EXTRA options (see below) that
                                      add finer control to this behaviour. More
-                                     details are given in the section on
-                                     generic character types in the
-                                     pcre2pattern page.
+                                     details are given in the section Generic
+                                     character types in the pcre2pattern page.
 
                                      The second effect of PCRE2_UCP is to
                                      force the use of Unicode properties for
@@ -3084,11 +3083,11 @@ INFORMATION ABOUT A COMPILED PATTERN
                                     The names are in alphabetical order. If
                                     (?| is used to create multiple capture
                                     groups with the same number, as described
-                                    in the section on duplicate group numbers
-                                    in the pcre2pattern page, the groups may
-                                    be given the same name, but there is only
-                                    one entry in the table. Different names
-                                    for groups of the same number are not
+                                    in the section Duplicate group numbers in
+                                    the pcre2pattern page, the groups may be
+                                    given the same name, but there is only one
+                                    entry in the table. Different names for
+                                    groups of the same number are not
                                     permitted.
 
                                     Duplicate names for capture groups with
@@ -3254,8 +3253,8 @@ THE MATCH DATA BLOCK
        A match data block can be used many times, with the same or different
        compiled patterns. You can extract information from a match data block
        after a match operation has finished, using functions that are
-       described in the sections on matched strings and other match data
-       below.
+       described in the sections HOW pcre2_match() RETURNS A STRING AND
+       CAPTURED SUBSTRINGS and OTHER INFORMATION ABOUT A MATCH below.
 
        When a call of pcre2_match() fails, valid data is available in the
        match block only when the error is PCRE2_ERROR_NOMATCH,
@@ -4189,12 +4188,12 @@ EXTRACTING CAPTURED SUBSTRINGS BY NAME
            Warning
 
            If the pattern uses the (?| feature to set up multiple capture
-           groups with the same number, as described in the section on
-           duplicate group numbers in the pcre2pattern page, you cannot use
-           names to distinguish the different capture groups, because names
-           are not included in the compiled code. The matching process uses
-           only numbers. For this reason, the use of different names for
-           groups with the same number causes an error at compile time.
+           groups with the same number, as described in the section Duplicate
+           group numbers in the pcre2pattern page, you cannot use names to
+           distinguish the different capture groups, because names are not
+           included in the compiled code. The matching process uses only
+           numbers. For this reason, the use of different names for groups
+           with the same number causes an error at compile time.
 
 
 CREATING A NEW STRING WITH SUBSTITUTIONS
@@ -6408,19 +6407,18 @@ SIMPLE USE OF JIT
        the entire compiled pattern is freed by calling pcre2_code_free().
 
        In some circumstances you may need to call additional functions. These
-       are described in the section entitled "Controlling the JIT stack"
-       below.
+       are described in the section CONTROLLING THE JIT STACK below.
 
        There are some pcre2_match() options that are not supported by JIT, and
        there are also some pattern items that JIT cannot handle. Details are
        given below. In both cases, matching automatically falls back to the
        interpretive code. If you want to know whether JIT was actually used
        for a particular match, you should arrange for a JIT callback function
-       to be set up as described in the section entitled "Controlling the JIT
-       stack" below, even if you do not need to supply a non-default JIT
-       stack. Such a callback function is called whenever JIT code is about to
-       be obeyed. If the match-time options are not right for JIT execution,
-       the callback function is not obeyed.
+       to be set up as described in the section CONTROLLING THE JIT STACK
+       below, even if you do not need to supply a non-default JIT stack. Such
+       a callback function is called whenever JIT code is about to be obeyed.
+       If the match-time options are not right for JIT execution, the callback
+       function is not obeyed.
 
        If the JIT compiler finds an unsupported item, no JIT data is
        generated. You can find out if JIT compilation was successful for a
@@ -6478,8 +6476,8 @@ RETURN VALUES FROM JIT MATCHING
        When a pattern is matched using JIT, the return values are the same as
        those given by the interpretive pcre2_match() code, with the addition
        of one new error code: PCRE2_ERROR_JIT_STACKLIMIT. This means that the
-       memory used for the JIT stack was insufficient. See "Controlling the
-       JIT stack" below for a discussion of JIT stack usage.
+       memory used for the JIT stack was insufficient. See the section
+       CONTROLLING THE JIT STACK below for a discussion of JIT stack usage.
 
        The error code PCRE2_ERROR_MATCHLIMIT is returned by the JIT code if
        searching a very large pattern tree goes on for too long, as it is in
@@ -6495,7 +6493,7 @@ CONTROLLING THE JIT STACK
        PCRE2_ERROR_JIT_STACKLIMIT is given when there is not enough stack.
        Three functions are provided for managing blocks of memory for use as
        JIT stacks. There is further discussion about the use of JIT stacks in
-       the section entitled "JIT stack FAQ" below.
+       the section JIT STACK FAQ below.
 
        The pcre2_jit_stack_create() function creates a JIT stack. Its
        arguments are a starting size, a maximum size, and a general context
@@ -8008,7 +8006,7 @@ BACKSLASH
 
        By default, characters whose code points are greater than 127 never
        match \d, \s, or \w, and always match \D, \S, and \W, although this may
-       be different for characters in the range 128—255 when locale-specific
+       be different for characters in the range 128–255 when locale-specific
        matching is happening. These escape sequences retain their original
        meanings from before Unicode support was available, mainly for
        efficiency reasons. If the PCRE2_UCP option is set, the behaviour is
@@ -8706,7 +8704,7 @@ SQUARE BRACKETS AND CHARACTER CLASSES
        character, or z.
 
        There is some special treatment for alphabetic ranges in EBCDIC
-       environments; see the section "EBCDIC environments" below.
+       environments; see the section EBCDIC ENVIRONMENTS below.
 
        Perl treats a hyphen as a literal if it appears before or after a POSIX
        class (see below) or before or after a character type escape such as \d
@@ -8875,7 +8873,7 @@ POSIX CHARACTER CLASSES
 
            [:alnum:]  Letters and digits.
            [:alpha:]  Letters.
-           [:ascii:]  Character codes 0—127.
+           [:ascii:]  Character codes 0–127.
            [:blank:]  Space or tab only.
            [:cntrl:]  Control characters.
            [:digit:]  Decimal digits (same as \d).
@@ -8907,7 +8905,7 @@ POSIX CHARACTER CLASSES
 
        By default, characters with values greater than 127 do not match any of
        the POSIX character classes, although this may be different for
-       characters in the range 128—255 when locale-specific matching is
+       characters in the range 128–255 when locale-specific matching is
        happening. However, in UCP mode, unless certain options are set (see
        below), some of the classes are changed so that Unicode character
        properties are used. This is achieved by replacing POSIX classes with
@@ -8933,10 +8931,9 @@ POSIX CHARACTER CLASSES
                       all characters with the L, M, N, P, S, or Cf properties,
                       except for:
 
-                          U+061C Arabic Letter Mark
-                          U+180E Mongolian Vowel Separator
-                          U+2066 — U+2069
-                                 Various "isolates"
+                          U+061C              Arabic Letter Mark
+                          U+180E              Mongolian Vowel Separator
+                          U+2066–U+2069       Various "isolates"
 
            [:print:]  This matches the same characters as [:graph:] plus space
                       characters that are not controls, that is, characters
@@ -9284,13 +9281,13 @@ NAMED CAPTURE GROUPS
        corresponds to the first occurrence of the name is used. In the absence
        of duplicate numbers this is the one with the lowest number.
 
-       If you use a named reference in a condition test (see the section about
-       conditions below), either to check whether a capture group has matched,
-       or to check for recursion, all groups with the same name are tested. If
-       the condition is true for any one of them, the overall condition is
-       true. This is the same behaviour as testing by number. For further
-       details of the interfaces for handling named capture groups, see the
-       pcre2api documentation.
+       If you use a named reference in a condition test (see the section
+       CONDITIONAL GROUPS below), either to check whether a capture group has
+       matched, or to check for recursion, all groups with the same name are
+       tested. If the condition is true for any one of them, the overall
+       condition is true. This is the same behaviour as testing by number. For
+       further details of the interfaces for handling named capture groups,
+       see the pcre2api documentation.
 
 
 REPETITION
@@ -10723,7 +10720,7 @@ BACKTRACKING CONTROL
        pcre2_compile(), by calling pcre2_set_optimize() with a
        PCRE2_START_OPTIMIZE_OFF directive, or by starting the pattern with
        (*NO_START_OPT). There is more discussion of this option in the section
-       entitled "Compiling a pattern" in the pcre2api documentation.
+       Compiling a pattern in the pcre2api documentation.
 
        Experiments with Perl suggest that it too has similar optimizations,
        and like PCRE2, turning them off can change the result of a match.
@@ -11248,11 +11245,11 @@ EBCDIC ENVIRONMENTS
        When PCRE2 is compiled in EBCDIC mode, \N{U+hhh...} is not supported.
        \a, \e, \f, \n, \r, and \t generate the appropriate EBCDIC code values.
        The \c escape is processed as specified for Perl in the perlebcdic
-       document. The only characters that are allowed after \c are A—Z, a—z,
+       document. The only characters that are allowed after \c are A–Z, a–z,
        or one of @, [, \, ], ^, _, or ?. Any other character provokes a
        compile-time error. The sequence \c@ encodes character code 0; after \c
-       the letters (in either case) encode characters 1—26 (0x01 to 0x1A); [,
-       \, ], ^, and _ encode characters 27—31 (0x1B to 0x1F), and \c? becomes
+       the letters (in either case) encode characters 1–26 (0x01 to 0x1A); [,
+       \, ], ^, and _ encode characters 27–31 (0x1B to 0x1F), and \c? becomes
        either 255 (0xFF) or 95 (0x5F).
 
        Thus, apart from \c?, these escapes generate the same character code
@@ -12060,7 +12057,7 @@ SAVING COMPILED PATTERNS
        stream may contain any number of compiled patterns, but they must all
        use the same character tables. A single copy of the tables is included
        in the byte stream (its size is 1088 bytes). For more details of
-       character tables, see the section on locale support in the pcre2api
+       character tables, see the section Locale support in the pcre2api
        documentation.
 
        The function pcre2_serialize_encode() creates a serialized byte stream
@@ -12305,7 +12302,7 @@ CHARACTER TYPES
        By default, \d, \s, and \w match only ASCII characters, even in UTF-8
        mode or in the 16-bit and 32-bit libraries. However, if locale-specific
        matching is happening, \s and \w may also match characters with code
-       points in the range 128—255. If the PCRE2_UCP option is set, the
+       points in the range 128–255. If the PCRE2_UCP option is set, the
        behaviour of these escape sequences is changed to use Unicode
        properties and they match many more characters, but there are some
        option settings that can restrict individual sequences to matching only
@@ -12434,7 +12431,7 @@ CHARACTER CLASSES
 
            alnum  Alphanumeric
            alpha  Alphabetic
-           ascii  0—127
+           ascii  0–127
            blank  Space or tab
            cntrl  Control character
            digit  Decimal digit
@@ -12988,8 +12985,8 @@ WIDE CHARACTERS AND UTF MODES
        Alternatively, if you set the PCRE2_UCP option, the way that the
        character escapes work is changed so that Unicode properties are used
        to determine which characters match, though there are some options that
-       suppress this for individual escapes. For details see the section on
-       generic character types in the pcre2pattern documentation.
+       suppress this for individual escapes. For details see the section
+       Generic character types in the pcre2pattern documentation.
 
        Like the escapes, characters that match the POSIX named character
        classes are all low-valued characters unless the PCRE2_UCP option is

@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.26">
-<meta name="description" content="Discussion of the pcre2demo program">
-<title>pcre2sample(3)</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
-<style>
-/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Discussion of the pcre2demo program"><title>pcre2sample(3)</title><style>/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
 /* Uncomment the following line when using as a custom stylesheet */
 /* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
 html{font-family:sans-serif;-webkit-text-size-adjust:100%}
@@ -432,83 +421,159 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .sect1+.sect1{border:0}
 #footer{background:none}
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
-@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
-</style>
-</head>
-<body class="manpage">
-<div id="header">
-<h1>pcre2sample(3) Manual Page</h1>
-<h2>Name</h2>
-<div class="sectionbody">
-<p>pcre2sample - PCRE2 sample program</p>
-</div>
-</div>
-<div id="content">
-<div class="sect1">
-<h2 id="_pcre2_sample_program">PCRE2 sample program</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>A simple, complete demonstration program to get you started with using PCRE2 is
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}</style>
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge, pre.rouge .w {
+  color: #24292f;
+  background-color: #f6f8fa;
+}
+pre.rouge .k, pre.rouge .kd, pre.rouge .kn, pre.rouge .kp, pre.rouge .kr, pre.rouge .kt, pre.rouge .kv {
+  color: #cf222e;
+}
+pre.rouge .gr {
+  color: #f6f8fa;
+}
+pre.rouge .gd {
+  color: #82071e;
+  background-color: #ffebe9;
+}
+pre.rouge .nb {
+  color: #953800;
+}
+pre.rouge .nc {
+  color: #953800;
+}
+pre.rouge .no {
+  color: #953800;
+}
+pre.rouge .nn {
+  color: #953800;
+}
+pre.rouge .sr {
+  color: #116329;
+}
+pre.rouge .na {
+  color: #116329;
+}
+pre.rouge .nt {
+  color: #116329;
+}
+pre.rouge .gi {
+  color: #116329;
+  background-color: #dafbe1;
+}
+pre.rouge .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .kc {
+  color: #0550ae;
+}
+pre.rouge .l, pre.rouge .ld, pre.rouge .m, pre.rouge .mb, pre.rouge .mf, pre.rouge .mh, pre.rouge .mi, pre.rouge .il, pre.rouge .mo, pre.rouge .mx {
+  color: #0550ae;
+}
+pre.rouge .sb {
+  color: #0550ae;
+}
+pre.rouge .bp {
+  color: #0550ae;
+}
+pre.rouge .ne {
+  color: #0550ae;
+}
+pre.rouge .nl {
+  color: #0550ae;
+}
+pre.rouge .py {
+  color: #0550ae;
+}
+pre.rouge .nv, pre.rouge .vc, pre.rouge .vg, pre.rouge .vi, pre.rouge .vm {
+  color: #0550ae;
+}
+pre.rouge .o, pre.rouge .ow {
+  color: #0550ae;
+}
+pre.rouge .gh {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .s, pre.rouge .sa, pre.rouge .sc, pre.rouge .dl, pre.rouge .sd, pre.rouge .s2, pre.rouge .se, pre.rouge .sh, pre.rouge .sx, pre.rouge .s1, pre.rouge .ss {
+  color: #0a3069;
+}
+pre.rouge .nd {
+  color: #8250df;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #8250df;
+}
+pre.rouge .err {
+  color: #f6f8fa;
+  background-color: #82071e;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cm, pre.rouge .cp, pre.rouge .cpf, pre.rouge .c1, pre.rouge .cs {
+  color: #6e7781;
+}
+pre.rouge .gl {
+  color: #6e7781;
+}
+pre.rouge .gt {
+  color: #6e7781;
+}
+pre.rouge .ni {
+  color: #24292f;
+}
+pre.rouge .si {
+  color: #24292f;
+}
+pre.rouge .ge {
+  color: #24292f;
+  font-style: italic;
+}
+pre.rouge .gs {
+  color: #24292f;
+  font-weight: bold;
+}
+</style></head><body class="manpage"><header><h1>pcre2sample(3)</h1><div class="details"><time id="revdate" datetime="2025-02-28">28 February 2025</time></div></header><div id="content"><section class="doc-section level-1"><h2 id="_pcre2_sample_program">PCRE2 sample program</h2><p>A simple, complete demonstration program to get you started with using PCRE2 is
 supplied in the file <code>pcre2demo.c</code> in the <code>src</code> directory in the PCRE2
 distribution. A listing of this program is given in the
 <a href="pcre2demo.html"><code>pcre2demo</code></a>
 documentation. If you do not have a copy of the PCRE2 distribution, you can
 save this listing to recreate the contents of <code>pcre2demo.c</code>.</p>
-</div>
-<div class="paragraph">
 <p>The demonstration program compiles the regular expression that is its
 first argument, and matches it against the subject string in its second
 argument. No PCRE2 options are set, and default character tables are used. If
 matching succeeds, the program outputs the portion of the subject that matched,
 together with the contents of any captured substrings.</p>
-</div>
-<div class="paragraph">
 <p>If the <code>-g</code> option is given on the command line, the program then goes on to
 check for further matches of the same regular expression in the same subject
 string. The logic is a little bit tricky because of the possibility of matching
 an empty string. Comments in the code explain what is going on.</p>
-</div>
-<div class="paragraph">
 <p>The code in <code>pcre2demo.c</code> is an 8-bit program that uses the PCRE2 8-bit
 library. It handles strings and characters that are stored in 8-bit code units.
 By default, one character corresponds to one code unit, but if the pattern
 starts with <code class="regex">(*UTF)</code>, both it and the subject are treated as UTF-8 strings,
 where characters may occupy multiple code units.</p>
-</div>
-<div class="paragraph">
 <p>If PCRE2 is installed in the standard include and library directories for your
 operating system, you should be able to compile the demonstration program using
 a command like this:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">cc -o pcre2demo pcre2demo.c -lpcre2-8</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">cc <span class="nt">-o</span> pcre2demo pcre2demo.c <span class="nt">-lpcre2-8</span></code></pre></div>
 <p>If PCRE2 is installed elsewhere, you may need to add additional options to the
 command line. For example, on a Unix-like system that has PCRE2 installed in
 <code>/usr/local</code>, you can compile the demonstration program using a command
 like this:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">cc -o pcre2demo -I/usr/local/include pcre2demo.c \
-   -L/usr/local/lib -lpcre2-8</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">cc <span class="nt">-o</span> pcre2demo <span class="nt">-I</span>/usr/local/include pcre2demo.c <span class="se">\</span>
+   <span class="nt">-L</span>/usr/local/lib <span class="nt">-lpcre2-8</span></code></pre></div>
 <p>Once you have built the demonstration program, you can run simple tests like
 this:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">./pcre2demo 'cat|dog' 'the cat sat on the mat'
-./pcre2demo -g 'cat|dog' 'the dog sat on the cat'
-./pcre2demo -i 'cat' 'the dog sat on the CAT'</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">./pcre2demo <span class="s1">'cat|dog'</span> <span class="s1">'the cat sat on the mat'</span>
+./pcre2demo <span class="nt">-g</span> <span class="s1">'cat|dog'</span> <span class="s1">'the dog sat on the cat'</span>
+./pcre2demo <span class="nt">-i</span> <span class="s1">'cat'</span> <span class="s1">'the dog sat on the CAT'</span></code></pre></div>
 <p>Note that there is a much more comprehensive test program, called
 <a href="pcre2test.html"><code>pcre2test</code>,</a>
 which supports many more facilities for testing regular expressions using all
@@ -516,44 +581,20 @@ three PCRE2 libraries (8-bit, 16-bit, and 32-bit, though not all three need be
 installed). The
 <a href="pcre2demo.html"><code>pcre2demo</code></a>
 program is provided as a relatively simple coding example.</p>
-</div>
-<div class="paragraph">
 <p>If you try to run
 <a href="pcre2demo.html"><code>pcre2demo</code></a>
 when PCRE2 is not installed in the standard library directory, you may get an
 error like this on some operating systems (e.g. Solaris):</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>ld.so.1: pcre2demo: fatal: libpcre2-8.so.0: open failed: No such
-file or directory</pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="literal-block"><pre>ld.so.1: pcre2demo: fatal: libpcre2-8.so.0: open failed: No such
+file or directory</pre></div>
 <p>This is caused by the way shared library support works on those systems. You
 need to add</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">-R/usr/local/lib</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">-R</span>/usr/local/lib</code></pre></div>
 <p>(for example) to the compile command to get round this problem.</p>
-</div>
 <h2 id="_author" class="discrete">Author</h2>
-<div class="paragraph">
 <p>Philip Hazel<br>
 Retired from University Computing Service<br>
 Cambridge, England.</p>
-</div>
 <h2 id="_revision" class="discrete">Revision</h2>
-<div class="paragraph">
 <p>Last updated: 28 February 2025<br>
-Copyright &#169; 1997-2016 University of Cambridge.</p>
-</div>
-</div>
-</div>
-</div>
-</body>
-</html>
+Copyright &#169; 1997-2016 University of Cambridge.</p></section></div></body></html>

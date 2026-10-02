@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.26">
-<meta name="description" content="The `pcre2grep` command">
-<title>pcre2grep(1)</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
-<style>
-/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="The `pcre2grep` command"><title>pcre2grep(1)</title><style>/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
 /* Uncomment the following line when using as a custom stylesheet */
 /* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
 html{font-family:sans-serif;-webkit-text-size-adjust:100%}
@@ -432,57 +421,126 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .sect1+.sect1{border:0}
 #footer{background:none}
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
-@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
-</style>
-</head>
-<body class="manpage toc2 toc-right">
-<div id="header">
-<h1>pcre2grep(1) Manual Page</h1>
-<div id="toc" class="toc2">
-<div id="toctitle">Table of Contents</div>
-<ul class="sectlevel1">
-<li><a href="#_synopsis">Synopsis</a></li>
-<li><a href="#_description">Description</a></li>
-<li><a href="#_support_for_compressed_files">Support for compressed files</a></li>
-<li><a href="#_binary_files">Binary files</a></li>
-<li><a href="#_binary_zeros_in_patterns">Binary zeros in patterns</a></li>
-<li><a href="#_options">Options</a></li>
-<li><a href="#_environment_variables">Environment variables</a></li>
-<li><a href="#_newlines">Newlines</a></li>
-<li><a href="#_options_compatibility_with_gnu_grep">Options compatibility with GNU grep</a></li>
-<li><a href="#_options_with_data">Options with data</a></li>
-<li><a href="#_using_pcre2s_callout_facility">Using PCRE2&#8217;s callout facility</a>
-<ul class="sectlevel2">
-<li><a href="#_echoing_a_specific_string">Echoing a specific string</a></li>
-<li><a href="#_calling_external_programs_or_scripts">Calling external programs or scripts</a></li>
-</ul>
-</li>
-<li><a href="#_matching_errors">Matching errors</a></li>
-<li><a href="#_diagnostics">Diagnostics</a></li>
-<li><a href="#_see_also">See also</a></li>
-</ul>
-</div>
-<h2>Name</h2>
-<div class="sectionbody">
-<p>pcre2grep - a grep with Perl-compatible regular expressions</p>
-</div>
-</div>
-<div id="content">
-<div class="sect1">
-<h2 id="_synopsis">Synopsis</h2>
-<div class="sectionbody">
-<div class="listingblock synopsis">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2grep [options] [long options] [pattern] [path1 path2 ...]</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p><code>pcre2grep</code> searches files for character patterns, in the same way as other
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}</style>
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge, pre.rouge .w {
+  color: #24292f;
+  background-color: #f6f8fa;
+}
+pre.rouge .k, pre.rouge .kd, pre.rouge .kn, pre.rouge .kp, pre.rouge .kr, pre.rouge .kt, pre.rouge .kv {
+  color: #cf222e;
+}
+pre.rouge .gr {
+  color: #f6f8fa;
+}
+pre.rouge .gd {
+  color: #82071e;
+  background-color: #ffebe9;
+}
+pre.rouge .nb {
+  color: #953800;
+}
+pre.rouge .nc {
+  color: #953800;
+}
+pre.rouge .no {
+  color: #953800;
+}
+pre.rouge .nn {
+  color: #953800;
+}
+pre.rouge .sr {
+  color: #116329;
+}
+pre.rouge .na {
+  color: #116329;
+}
+pre.rouge .nt {
+  color: #116329;
+}
+pre.rouge .gi {
+  color: #116329;
+  background-color: #dafbe1;
+}
+pre.rouge .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .kc {
+  color: #0550ae;
+}
+pre.rouge .l, pre.rouge .ld, pre.rouge .m, pre.rouge .mb, pre.rouge .mf, pre.rouge .mh, pre.rouge .mi, pre.rouge .il, pre.rouge .mo, pre.rouge .mx {
+  color: #0550ae;
+}
+pre.rouge .sb {
+  color: #0550ae;
+}
+pre.rouge .bp {
+  color: #0550ae;
+}
+pre.rouge .ne {
+  color: #0550ae;
+}
+pre.rouge .nl {
+  color: #0550ae;
+}
+pre.rouge .py {
+  color: #0550ae;
+}
+pre.rouge .nv, pre.rouge .vc, pre.rouge .vg, pre.rouge .vi, pre.rouge .vm {
+  color: #0550ae;
+}
+pre.rouge .o, pre.rouge .ow {
+  color: #0550ae;
+}
+pre.rouge .gh {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .s, pre.rouge .sa, pre.rouge .sc, pre.rouge .dl, pre.rouge .sd, pre.rouge .s2, pre.rouge .se, pre.rouge .sh, pre.rouge .sx, pre.rouge .s1, pre.rouge .ss {
+  color: #0a3069;
+}
+pre.rouge .nd {
+  color: #8250df;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #8250df;
+}
+pre.rouge .err {
+  color: #f6f8fa;
+  background-color: #82071e;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cm, pre.rouge .cp, pre.rouge .cpf, pre.rouge .c1, pre.rouge .cs {
+  color: #6e7781;
+}
+pre.rouge .gl {
+  color: #6e7781;
+}
+pre.rouge .gt {
+  color: #6e7781;
+}
+pre.rouge .ni {
+  color: #24292f;
+}
+pre.rouge .si {
+  color: #24292f;
+}
+pre.rouge .ge {
+  color: #24292f;
+  font-style: italic;
+}
+pre.rouge .gs {
+  color: #24292f;
+  font-weight: bold;
+}
+</style></head><body class="manpage toc2 toc-right"><header><h1>pcre2grep(1)</h1><div class="details"><time id="revdate" datetime="2025-01-24">24 January 2025</time></div><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Table of Contents</h2><ol class="toc-list level-1"><li><a href="#_synopsis">Synopsis</a></li><li><a href="#_description">Description</a></li><li><a href="#_support_for_compressed_files">Support for compressed files</a></li><li><a href="#_binary_files">Binary files</a></li><li><a href="#_binary_zeros_in_patterns">Binary zeros in patterns</a></li><li><a href="#_options">Options</a></li><li><a href="#_environment_variables">Environment variables</a></li><li><a href="#_newlines">Newlines</a></li><li><a href="#_options_compatibility_with_gnu_grep">Options compatibility with GNU grep</a></li><li><a href="#_options_with_data">Options with data</a></li><li><a href="#_using_pcre2s_callout_facility">Using PCRE2&#8217;s callout facility</a><ol class="toc-list level-2"><li><a href="#_echoing_a_specific_string">Echoing a specific string</a></li><li><a href="#_calling_external_programs_or_scripts">Calling external programs or scripts</a></li></ol></li><li><a href="#_matching_errors">Matching errors</a></li><li><a href="#_diagnostics">Diagnostics</a></li><li><a href="#_see_also">See also</a></li></ol></nav></header><div id="content"><section class="doc-section level-1"><h2 id="_synopsis">Synopsis</h2><div class="listing-block synopsis"><pre class="rouge highlight"><code data-lang="shell">pcre2grep <span class="o">[</span>options] <span class="o">[</span>long options] <span class="o">[</span>pattern] <span class="o">[</span>path1 path2 ...]</code></pre></div></section>
+<section class="doc-section level-1"><h2 id="_description">Description</h2><p><code>pcre2grep</code> searches files for character patterns, in the same way as other
 grep commands do, but it uses the PCRE2 regular expression library to support
 patterns that are compatible with the regular expressions of Perl 5. See
 <a href="pcre2syntax.html"><code>pcre2syntax</code></a>
@@ -490,41 +548,23 @@ for a quick-reference summary of pattern syntax, or
 <a href="pcre2pattern.html"><code>pcre2pattern</code></a>
 for a full description of the syntax and semantics of the regular expressions
 that PCRE2 supports.</p>
-</div>
-<div class="paragraph">
 <p>Patterns, whether supplied on the command line or in a separate file, are given
 without delimiters. For example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2grep Thursday /etc/motd</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">pcre2grep Thursday /etc/motd</code></pre></div>
 <p>If you attempt to use delimiters (for example, by surrounding a pattern with
 slashes, as is common in Perl scripts), they are interpreted as part of the
 pattern. Quotes can of course be used to delimit patterns on the command line
 because they are interpreted by the shell, and indeed quotes are required if a
 pattern contains white space or shell metacharacters.</p>
-</div>
-<div class="paragraph">
 <p>The first argument that follows any option settings is treated as the single
 pattern to be matched when neither <code>-e</code> nor <code>-f</code> is present.
 Conversely, when one or both of these options are used to specify patterns, all
 arguments are treated as path names. At least one of <code>-e</code>, <code>-f</code>, or an
 argument pattern must be provided.</p>
-</div>
-<div class="paragraph">
 <p>If no files are specified, <code>pcre2grep</code> reads the standard input. The
 standard input can also be referenced by a name consisting of a single hyphen.
 For example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2grep some-pattern file1 - file3</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">pcre2grep some-pattern file1 - file3</code></pre></div>
 <p>By default, input files are searched line by line, so pattern assertions about
 the beginning and end of a subject string (<code class="regex">^</code>, <code class="regex">$</code>, <code class="regex">\A</code>, <code class="regex">\Z</code>, and <code class="regex">\z</code>) match at
 the beginning and end of each line. When a line matches a pattern, it is copied
@@ -535,8 +575,6 @@ option makes it possible to search for strings that span line boundaries. What
 defines a line boundary is controlled by the <code>-N</code> (<code>--newline</code>) option.
 The <code>-h</code> and <code>-H</code> options control whether or not file names are shown,
 and the <code>-Z</code> option changes the file name terminator to a zero byte.</p>
-</div>
-<div class="paragraph">
 <p>The amount of memory used for buffering files that are being scanned is
 controlled by parameters that can be set by the <code>--buffer-size</code> and
 <code>--max-buffer-size</code> options. The first of these sets the size of buffer
@@ -547,24 +585,16 @@ default values for these parameters can be set when <code>pcre2grep</code> is
 built; if nothing is specified, the defaults are set to 20KiB and 1MiB
 respectively. An error occurs if a line is too long and the buffer can no
 longer be expanded.</p>
-</div>
-<div class="paragraph">
 <p>The block of memory that is actually used is three times the "buffer size", to
 allow for buffering "before" and "after" lines. If the buffer size is too
 small, fewer than requested "before" and "after" lines may be output.</p>
-</div>
-<div class="paragraph">
 <p>When matching with a multiline pattern, the size of the buffer must be at least
 half of the maximum match expected or the pattern might fail to match.</p>
-</div>
-<div class="paragraph">
 <p>Patterns can be no longer than 8KiB or <code class="constant">BUFSIZ</code> bytes, whichever is the greater.
 BUFSIZ is defined in <code>&lt;stdio.h&gt;</code>. When there is more than one pattern
 (specified by the use of <code>-e</code> and/or <code>-f</code>), each pattern is applied to
 each line in the order in which they are defined, except that all the <code>-e</code>
 patterns are tried before the <code>-f</code> patterns.</p>
-</div>
-<div class="paragraph">
 <p>By default, as soon as one pattern matches a line, no further patterns are
 considered. However, if <code>--colour</code> (or <code>--color</code>) is used to colour the
 matching substrings, or if <code>--only-matching</code>, <code>--file-offsets</code>,
@@ -575,36 +605,21 @@ there is more than one match, the one that begins nearest to the start of the
 subject is processed; if there is more than one match at that position, the one
 with the longest matching substring is processed; if the matching substrings
 are equal, the first match found is processed.</p>
-</div>
-<div class="paragraph">
 <p>Scanning with all the patterns resumes immediately following the match, so that
 later matches on the same line can be found. Note, however, that an overlapping
 match that starts in the middle of another match will not be processed.</p>
-</div>
-<div class="paragraph">
 <p>The above behaviour was changed at release 10.41 to be more compatible with GNU
 grep. In earlier releases, <code>pcre2grep</code> did not recognize matches from
 later patterns that were earlier in the subject.</p>
-</div>
-<div class="paragraph">
 <p>Patterns that can match an empty string are accepted, but empty string
 matches are never recognized. An example is the pattern <code class="regex">(super)?(man)?</code>, in
 which all components are optional. This pattern finds all occurrences of both
 "super" and "man"; the output differs from matching with "super|man" when only
 the matching substrings are being shown.</p>
-</div>
-<div class="paragraph">
 <p>If the <code>LC_ALL</code> or <code>LC_CTYPE</code> environment variable is set,
 <code>pcre2grep</code> uses the value to set a locale when calling the PCRE2 library.
-The <code>--locale</code> option can be used to override this.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_support_for_compressed_files">Support for compressed files</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Compile-time options for <code>pcre2grep</code> can set it up to use <code>libz</code> or
+The <code>--locale</code> option can be used to override this.</p></section>
+<section class="doc-section level-1"><h2 id="_support_for_compressed_files">Support for compressed files</h2><p>Compile-time options for <code>pcre2grep</code> can set it up to use <code>libz</code> or
 <code>libbz2</code> for reading compressed files whose names end in <code>.gz</code> or
 <code>.bz2</code>, respectively. You can find out whether your <code>pcre2grep</code> binary
 has support for one or both of these file types by running it with the
@@ -612,54 +627,24 @@ has support for one or both of these file types by running it with the
 treated as plain text. The standard input is always so treated. If a file with
 a <code>.gz</code> or <code>.bz2</code> extension is not in fact compressed, it is read as a
 plain text file. When input is from a compressed .gz or .bz2 file, the
-<code>--line-buffered</code> option is ignored.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_binary_files">Binary files</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>By default, a file that contains a binary zero byte within the first 1024 bytes
+<code>--line-buffered</code> option is ignored.</p></section>
+<section class="doc-section level-1"><h2 id="_binary_files">Binary files</h2><p>By default, a file that contains a binary zero byte within the first 1024 bytes
 is identified as a binary file, and is processed specially. However, if the
 newline type is specified as NUL, that is, the line terminator is a binary
 zero, the test for a binary file is not applied. See the <code>--binary-files</code>
-option for a means of changing the way binary files are handled.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_binary_zeros_in_patterns">Binary zeros in patterns</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Patterns passed from the command line are strings that are terminated by a
+option for a means of changing the way binary files are handled.</p></section>
+<section class="doc-section level-1"><h2 id="_binary_zeros_in_patterns">Binary zeros in patterns</h2><p>Patterns passed from the command line are strings that are terminated by a
 binary zero, so cannot contain internal zeros. However, patterns that are read
-from a file via the <code>-f</code> option may contain binary zeros.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_options">Options</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The order in which some of the options appear can affect the output. For
+from a file via the <code>-f</code> option may contain binary zeros.</p></section>
+<section class="doc-section level-1"><h2 id="_options">Options</h2><p>The order in which some of the options appear can affect the output. For
 example, both the <code>-H</code> and <code>-l</code> options affect the printing of file
 names. Whichever comes later in the command line will be the one that takes
 effect. Similarly, except where noted below, if an option is given twice, the
 later setting is used. Numerical values for options may be followed by K or M,
 to signify multiplication by 1024 or <code>1024*1024</code> respectively.</p>
-</div>
-<div class="dlist options">
-<dl>
-<dt class="hdlist1"><code>--</code></dt>
-<dd>
-<p>This terminates the list of options. It is useful if the next item on the
+<div class="dlist options"><dl><dt><code>--</code></dt><dd>This terminates the list of options. It is useful if the next item on the
 command line starts with a hyphen but is not an option. This allows for the
-processing of patterns and file names that start with hyphens.</p>
-</dd>
-<dt class="hdlist1"><code>-A <em>number</em></code>, <code>--after-context=<em>number</em></code></dt>
-<dd>
-<p>Output up to <em>number</em> lines of context after each matching line. Fewer
+processing of patterns and file names that start with hyphens.</dd><dt><code>-A <em>number</em></code>, <code>--after-context=<em>number</em></code></dt><dd>Output up to <em>number</em> lines of context after each matching line. Fewer
 lines are output if the next match or the end of the file is reached, or if the
 processing buffer size has been set too small. If file names and/or line
 numbers are being output, a hyphen separator is used instead of a colon for the
@@ -667,22 +652,10 @@ context lines (the <code>-Z</code> option can be used to change the file name
 terminator to a zero byte). A line containing <code>--</code> is output between each group
 of lines, unless they are in fact contiguous in the input file. The value of
 <em>number</em> is expected to be relatively small. When <code>-c</code> is used,
-<code>-A</code> is ignored.</p>
-</dd>
-<dt class="hdlist1"><code>-a</code>, <code>--text</code></dt>
-<dd>
-<p>Treat binary files as text. This is equivalent to
-<code>--binary-files=text</code>.</p>
-</dd>
-<dt class="hdlist1"><code>--allow-lookaround-bsk</code></dt>
-<dd>
-<p>PCRE2 now forbids the use of <code class="regex">\K</code> in lookarounds by default, in line with Perl.
+<code>-A</code> is ignored.</dd><dt><code>-a</code>, <code>--text</code></dt><dd>Treat binary files as text. This is equivalent to
+<code>--binary-files=text</code>.</dd><dt><code>--allow-lookaround-bsk</code></dt><dd>PCRE2 now forbids the use of <code class="regex">\K</code> in lookarounds by default, in line with Perl.
 This option causes <code>pcre2grep</code> to set the <code class="constant">PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK</code>
-option, which enables this somewhat dangerous usage.</p>
-</dd>
-<dt class="hdlist1"><code>-B <em>number</em></code>, <code>--before-context=<em>number</em></code></dt>
-<dd>
-<p>Output up to <em>number</em> lines of context before each matching line. Fewer
+option, which enables this somewhat dangerous usage.</dd><dt><code>-B <em>number</em></code>, <code>--before-context=<em>number</em></code></dt><dd>Output up to <em>number</em> lines of context before each matching line. Fewer
 lines are output if the previous match or the start of the file is within
 <em>number</em> lines, or if the processing buffer size has been set too small. If
 file names and/or line numbers are being output, a hyphen separator is used
@@ -690,11 +663,7 @@ instead of a colon for the context lines (the <code>-Z</code> option can be used
 change the file name terminator to a zero byte). A line containing <code>--</code> is
 output between each group of lines, unless they are in fact contiguous in the
 input file. The value of <em>number</em> is expected to be relatively small. When
-<code>-c</code> is used, <code>-B</code> is ignored.</p>
-</dd>
-<dt class="hdlist1"><code>--binary-files=<em>word</em></code></dt>
-<dd>
-<p>Specify how binary files are to be processed. If the word is <code>binary</code> (the
+<code>-c</code> is used, <code>-B</code> is ignored.</dd><dt><code>--binary-files=<em>word</em></code></dt><dd>Specify how binary files are to be processed. If the word is <code>binary</code> (the
 default), pattern matching is performed on binary files, but the only output is
 <code>Binary file <em>name</em> matches</code> when a match succeeds. If the word is <code>text</code>,
 which is equivalent to the <code>-a</code> or <code>--text</code> option, binary files are
@@ -703,45 +672,22 @@ succeeds, the output may be binary garbage, which can have nasty effects if
 sent to a terminal. If the word is <code>without-match</code>, which is equivalent to the
 <code>-I</code> option, binary files are not processed at all; they are assumed not to
 be of interest and are skipped without causing any output or affecting the
-return code.</p>
-</dd>
-<dt class="hdlist1"><code>--buffer-size=<em>number</em></code></dt>
-<dd>
-<p>Set the parameter that controls how much memory is obtained at the start of
+return code.</dd><dt><code>--buffer-size=<em>number</em></code></dt><dd>Set the parameter that controls how much memory is obtained at the start of
 processing for buffering files that are being scanned. See also
-<code>--max-buffer-size</code> below.</p>
-</dd>
-<dt class="hdlist1"><code>-C <em>number</em></code>, <code>--context=<em>number</em></code></dt>
-<dd>
-<p>Output <em>number</em> lines of context both before and after each matching line.
-This is equivalent to setting both <code>-A</code> and <code>-B</code> to the same value.</p>
-</dd>
-<dt class="hdlist1"><code>-c</code>, <code>--count</code></dt>
-<dd>
-<p>Do not output lines from the files that are being scanned; instead output the
+<code>--max-buffer-size</code> below.</dd><dt><code>-C <em>number</em></code>, <code>--context=<em>number</em></code></dt><dd>Output <em>number</em> lines of context both before and after each matching line.
+This is equivalent to setting both <code>-A</code> and <code>-B</code> to the same value.</dd><dt><code>-c</code>, <code>--count</code></dt><dd><p>Do not output lines from the files that are being scanned; instead output the
 number of lines that would have been shown, either because they matched, or, if
 <code>-v</code> is set, because they failed to match. By default, this count is
 exactly the same as the number of lines that would have been output, but if the
 <code>-M</code> (multiline) option is used (without <code>-v</code>), there may be more
-suppressed lines than the count (that is, the number of matches).</p>
-<div class="paragraph">
-<p>If no lines are selected, the number zero is output. If several files are
+suppressed lines than the count (that is, the number of matches).</p><p>If no lines are selected, the number zero is output. If several files are
 being scanned, a count is output for each of them and the <code>-t</code> option can
 be used to cause a total to be output at the end. However, if the
 <code>--files-with-matches</code> option is also used, only those files whose counts
 are greater than zero are listed. When <code>-c</code> is used, the <code>-A</code>,
-<code>-B</code>, and <code>-C</code> options are ignored.</p>
-</div>
-</dd>
-<dt class="hdlist1"><code>--colour</code>, <code>--color</code></dt>
-<dd>
-<p>If this option is given without any data, it is equivalent to <code>--colour=auto</code>.
+<code>-B</code>, and <code>-C</code> options are ignored.</p></dd><dt><code>--colour</code>, <code>--color</code></dt><dd>If this option is given without any data, it is equivalent to <code>--colour=auto</code>.
 If data is required, it must be given in the same shell item, separated by an
-equals sign.</p>
-</dd>
-<dt class="hdlist1"><code>--colour=<em>value</em></code>, <code>--color=<em>value</em></code></dt>
-<dd>
-<p>This option specifies under what circumstances the parts of a line that matched
+equals sign.</dd><dt><code>--colour=<em>value</em></code>, <code>--color=<em>value</em></code></dt><dd><p>This option specifies under what circumstances the parts of a line that matched
 a pattern should be coloured in the output. It is ignored if
 <code>--file-offsets</code>, <code>--line-offsets</code>, or <code>--output</code> is set. By
 default, output is not coloured. The value for the <code>--colour</code> option (which
@@ -749,9 +695,7 @@ is optional, see above) may be <code>never</code>, <code>always</code>, or <code
 case, colouring happens only if the standard output is connected to a terminal.
 More resources are used when colouring is enabled, because <code>pcre2grep</code> has
 to search for all possible matches in a line, not just one, in order to colour
-them all.</p>
-<div class="paragraph">
-<p>The colour that is used can be specified by setting one of the environment
+them all.</p><p>The colour that is used can be specified by setting one of the environment
 variables <code>PCRE2GREP_COLOUR</code>, <code>PCRE2GREP_COLOR</code>, <code>PCREGREP_COLOUR</code>, or
 <code>PCREGREP_COLOR</code>, which are checked in that order. If none of these are set,
 <code>pcre2grep</code> looks for <code>GREP_COLORS</code> or <code>GREP_COLOR</code> (in that order). The value
@@ -760,61 +704,31 @@ except in the case of <code>GREP_COLORS</code>, which must start with <code>ms=<
 followed by two semicolon-separated colours, terminated by the end of the
 string or by a colon. If <code>GREP_COLORS</code> does not start with <code>ms=</code> or <code>mt=</code> it is
 ignored, and <code>GREP_COLOR</code> is checked.</p>
-</div>
-<div class="paragraph">
 <p>If the string obtained from one of the above variables contains any characters
 other than semicolon or digits, the setting is ignored and the default colour
 is used. The string is copied directly into the control string for setting
 colour on a terminal, so it is your responsibility to ensure that the values
 make sense. If no relevant environment variable is set, the default is <code>1;31</code>,
-which gives red.</p>
-</div>
-</dd>
-<dt class="hdlist1"><code>-D <em>action</em></code>, <code>--devices=<em>action</em></code></dt>
-<dd>
-<p>If an input path is not a regular file or a directory, <em>action</em> specifies how
+which gives red.</p></dd><dt><code>-D <em>action</em></code>, <code>--devices=<em>action</em></code></dt><dd>If an input path is not a regular file or a directory, <em>action</em> specifies how
 it is to be processed. Valid values are <code>read</code> (the default) or <code>skip</code>
-(silently skip the path).</p>
-</dd>
-<dt class="hdlist1"><code>-d <em>action</em></code>, <code>--directories=<em>action</em></code></dt>
-<dd>
-<p>If an input path is a directory, <em>action</em> specifies how it is to be processed.
+(silently skip the path).</dd><dt><code>-d <em>action</em></code>, <code>--directories=<em>action</em></code></dt><dd>If an input path is a directory, <em>action</em> specifies how it is to be processed.
 Valid values are <code>read</code> (the default in non-Windows environments, for
 compatibility with GNU grep), <code>recurse</code> (equivalent to the <code>-r</code> option), or
 <code>skip</code> (silently skip the path, the default in Windows environments). In the
 <code>read</code> case, directories are read as if they were ordinary files. In some
 operating systems the effect of reading a directory like this is an immediate
-end-of-file; in others it may provoke an error.</p>
-</dd>
-<dt class="hdlist1"><code>--depth-limit=<em>number</em></code></dt>
-<dd>
-<p>See <code>--match-limit</code> below.</p>
-</dd>
-<dt class="hdlist1"><code>-E</code>, <code>--case-restrict</code></dt>
-<dd>
-<p>When case distinctions are being ignored in Unicode mode, two ASCII letters (K
+end-of-file; in others it may provoke an error.</dd><dt><code>--depth-limit=<em>number</em></code></dt><dd>See <code>--match-limit</code> below.</dd><dt><code>-E</code>, <code>--case-restrict</code></dt><dd>When case distinctions are being ignored in Unicode mode, two ASCII letters (K
 and S) will by default match Unicode characters <code class="character">U+212A</code> (Kelvin sign) and <code class="character">U+017F</code>
 (long S) respectively, as well as their lower case ASCII counterparts. When
 this option is set, case equivalences are restricted such that no ASCII
-character matches a non-ASCII character, and vice versa.</p>
-</dd>
-<dt class="hdlist1"><code>-e <em>pattern</em></code>, <code>--regex=<em>pattern</em></code>, <code>--regexp=<em>pattern</em></code></dt>
-<dd>
-<p>Specify a pattern to be matched. This option can be used multiple times in
+character matches a non-ASCII character, and vice versa.</dd><dt><code>-e <em>pattern</em></code>, <code>--regex=<em>pattern</em></code>, <code>--regexp=<em>pattern</em></code></dt><dd><p>Specify a pattern to be matched. This option can be used multiple times in
 order to specify several patterns. It can also be used as a way of specifying a
 single pattern that starts with a hyphen. When <code>-e</code> is used, no argument
 pattern is taken from the command line; all arguments are treated as file
 names. There is no limit to the number of patterns. They are applied to each
-line in the order in which they are defined.</p>
-<div class="paragraph">
-<p>If <code>-f</code> is used with <code>-e</code>, the command line patterns are matched first,
+line in the order in which they are defined.</p><p>If <code>-f</code> is used with <code>-e</code>, the command line patterns are matched first,
 followed by the patterns from the file(s), independent of the order in which
-these options are specified.</p>
-</div>
-</dd>
-<dt class="hdlist1"><code>--exclude=<em>pattern</em></code></dt>
-<dd>
-<p>Files (but not directories) whose names match the pattern are skipped without
+these options are specified.</p></dd><dt><code>--exclude=<em>pattern</em></code></dt><dd>Files (but not directories) whose names match the pattern are skipped without
 being processed. This applies to all files, whether listed on the command line,
 obtained from <code>--file-list</code>, or by scanning a directory. The pattern is a
 PCRE2 regular expression, and is matched against the final component of the
@@ -822,19 +736,11 @@ file name, not the entire path. The <code>-F</code>, <code>-w</code>, and <code>
 not apply to this pattern. The option may be given any number of times in order
 to specify multiple patterns. If a file name matches both an <code>--include</code>
 and an <code>--exclude</code> pattern, it is excluded. There is no short form for this
-option.</p>
-</dd>
-<dt class="hdlist1"><code>--exclude-from=<em>filename</em></code></dt>
-<dd>
-<p>Treat each non-empty line of the file as the data for an <code>--exclude</code>
+option.</dd><dt><code>--exclude-from=<em>filename</em></code></dt><dd>Treat each non-empty line of the file as the data for an <code>--exclude</code>
 option. What constitutes a newline when reading the file is the operating
 system&#8217;s default. The <code>--newline</code> option has no effect on this option. This
 option may be given more than once in order to specify a number of files to
-read.</p>
-</dd>
-<dt class="hdlist1"><code>--exclude-dir=<em>pattern</em></code></dt>
-<dd>
-<p>Directories whose names match the pattern are skipped without being processed,
+read.</dd><dt><code>--exclude-dir=<em>pattern</em></code></dt><dd>Directories whose names match the pattern are skipped without being processed,
 whatever the setting of the <code>--recursive</code> option. This applies to all
 directories, whether listed on the command line, obtained from
 <code>--file-list</code>, or by scanning a parent directory. The pattern is a PCRE2
@@ -843,11 +749,7 @@ name, not the entire path. The <code>-F</code>, <code>-w</code>, and <code>-x</c
 apply to this pattern. The option may be given any number of times in order to
 specify more than one pattern. If a directory matches both <code>--include-dir</code>
 and <code>--exclude-dir</code>, it is excluded. There is no short form for this
-option.</p>
-</dd>
-<dt class="hdlist1"><code>-F</code>, <code>--fixed-strings</code></dt>
-<dd>
-<p>Interpret each data-matching pattern as a list of fixed strings, separated by
+option.</dd><dt><code>-F</code>, <code>--fixed-strings</code></dt><dd>Interpret each data-matching pattern as a list of fixed strings, separated by
 newlines, instead of as a regular expression. What constitutes a newline for
 this purpose is controlled by the <code>--newline</code> option. The <code>-w</code> (match
 as a word) and <code>-x</code> (match whole line) options can be used with <code>-F</code>.
@@ -855,30 +757,19 @@ They apply to each of the fixed strings. A line is selected if any of the fixed
 strings are found in it (subject to <code>-w</code> or <code>-x</code>, if present). This
 option applies only to the patterns that are matched against the contents of
 files; it does not apply to patterns specified by any of the <code>--include</code> or
-<code>--exclude</code> options.</p>
-</dd>
-<dt class="hdlist1"><code>-f <em>filename</em></code>, <code>--file=<em>filename</em></code></dt>
-<dd>
-<p>Read patterns from the file, one per line. As is the case with patterns on the
+<code>--exclude</code> options.</dd><dt><code>-f <em>filename</em></code>, <code>--file=<em>filename</em></code></dt><dd><p>Read patterns from the file, one per line. As is the case with patterns on the
 command line, no delimiters should be used. What constitutes a newline when
 reading the file is the operating system&#8217;s default interpretation of <code class="c">\n</code>. The
 <code>--newline</code> option has no effect on this option. Trailing white space is
 removed from each line, and blank lines are ignored unless the
 <code>--posix-pattern-file</code> option is also provided. An empty file contains no
 patterns and therefore matches nothing. Patterns read from a file in this way
-may contain binary zeros, which are treated as ordinary character literals.</p>
-<div class="paragraph">
-<p>If this option is given more than once, all the specified files are read. A
+may contain binary zeros, which are treated as ordinary character literals.</p><p>If this option is given more than once, all the specified files are read. A
 data line is output if any of the patterns match it. A file name can be given
 as <code>-</code> to refer to the standard input. When <code>-f</code> is used, patterns
 specified on the command line using <code>-e</code> may also be present; they are
 matched before the file&#8217;s patterns. However, no pattern is taken from the
-command line; all arguments are treated as the names of paths to be searched.</p>
-</div>
-</dd>
-<dt class="hdlist1"><code>--file-list=<em>filename</em></code></dt>
-<dd>
-<p>Read a list of files and/or directories that are to be scanned from the given
+command line; all arguments are treated as the names of paths to be searched.</p></dd><dt><code>--file-list=<em>filename</em></code></dt><dd>Read a list of files and/or directories that are to be scanned from the given
 file, one per line. What constitutes a newline when reading the file is the
 operating system&#8217;s default. Trailing white space is removed from each line, and
 blank lines are ignored. These paths are processed before any that are listed
@@ -887,66 +778,30 @@ input. If <code>--file</code> and <code>--file-list</code> are both specified as
 patterns are read first. This is useful only when the standard input is a
 terminal, from which further lines (the list of files) can be read after an
 end-of-file indication. If this option is given more than once, all the
-specified files are read.</p>
-</dd>
-<dt class="hdlist1"><code>--file-offsets</code></dt>
-<dd>
-<p>Instead of showing lines or parts of lines that match, show each match as an
+specified files are read.</dd><dt><code>--file-offsets</code></dt><dd>Instead of showing lines or parts of lines that match, show each match as an
 offset from the start of the file and a length, separated by a comma. In this
 mode, <code>--colour</code> has no effect, and no context is shown. That is, the
 <code>-A</code>, <code>-B</code>, and <code>-C</code> options are ignored. If there is more than one
 match in a line, each of them is shown separately. This option is mutually
-exclusive with <code>--output</code>, <code>--line-offsets</code>, and <code>--only-matching</code>.</p>
-</dd>
-<dt class="hdlist1"><code>--group-separator=<em>text</em></code></dt>
-<dd>
-<p>Output this text string instead of two hyphens between groups of lines when
-<code>-A</code>, <code>-B</code>, or <code>-C</code> is in use. See also <code>--no-group-separator</code>.</p>
-</dd>
-<dt class="hdlist1"><code>-H</code>, <code>--with-filename</code></dt>
-<dd>
-<p>Force the inclusion of the file name at the start of output lines when
+exclusive with <code>--output</code>, <code>--line-offsets</code>, and <code>--only-matching</code>.</dd><dt><code>--group-separator=<em>text</em></code></dt><dd>Output this text string instead of two hyphens between groups of lines when
+<code>-A</code>, <code>-B</code>, or <code>-C</code> is in use. See also <code>--no-group-separator</code>.</dd><dt><code>-H</code>, <code>--with-filename</code></dt><dd>Force the inclusion of the file name at the start of output lines when
 searching a single file. The file name is not normally shown in this case.
 By default, for matching lines, the file name is followed by a colon; for
 context lines, a hyphen separator is used. The <code>-Z</code> option can be used to
 change the terminator to a zero byte. If a line number is also being output,
 it follows the file name. When the <code>-M</code> option causes a pattern to match
 more than one line, only the first is preceded by the file name. This option
-overrides any previous <code>-h</code>, <code>-l</code>, or <code>-L</code> options.</p>
-</dd>
-<dt class="hdlist1"><code>-h</code>, <code>--no-filename</code></dt>
-<dd>
-<p>Suppress the output file names when searching multiple files. File names are
+overrides any previous <code>-h</code>, <code>-l</code>, or <code>-L</code> options.</dd><dt><code>-h</code>, <code>--no-filename</code></dt><dd>Suppress the output file names when searching multiple files. File names are
 normally shown when multiple files are searched. By default, for matching
 lines, the file name is followed by a colon; for context lines, a hyphen
 separator is used. The <code>-Z</code> option can be used to change the terminator to
 a zero byte. If a line number is also being output, it follows the file name.
-This option overrides any previous <code>-H</code>, <code>-L</code>, or <code>-l</code> options.</p>
-</dd>
-<dt class="hdlist1"><code>--heap-limit=<em>number</em></code></dt>
-<dd>
-<p>See <code>--match-limit</code> below.</p>
-</dd>
-<dt class="hdlist1"><code>--help</code></dt>
-<dd>
-<p>Output a help message, giving brief details of the command options and file
+This option overrides any previous <code>-H</code>, <code>-L</code>, or <code>-l</code> options.</dd><dt><code>--heap-limit=<em>number</em></code></dt><dd>See <code>--match-limit</code> below.</dd><dt><code>--help</code></dt><dd>Output a help message, giving brief details of the command options and file
 type support, and then exit. Anything else on the command line is
-ignored.</p>
-</dd>
-<dt class="hdlist1"><code>-I</code></dt>
-<dd>
-<p>Ignore binary files. This is equivalent to
-<code>--binary-files=without-match</code>.</p>
-</dd>
-<dt class="hdlist1"><code>-i</code>, <code>--ignore-case</code></dt>
-<dd>
-<p>Ignore upper/lower case distinctions when pattern matching. This applies when
+ignored.</dd><dt><code>-I</code></dt><dd>Ignore binary files. This is equivalent to
+<code>--binary-files=without-match</code>.</dd><dt><code>-i</code>, <code>--ignore-case</code></dt><dd>Ignore upper/lower case distinctions when pattern matching. This applies when
 matching path names for inclusion or exclusion as well as when matching lines
-in files.</p>
-</dd>
-<dt class="hdlist1"><code>--include=<em>pattern</em></code></dt>
-<dd>
-<p>If any <code>--include</code> patterns are specified, the only files that are
+in files.</dd><dt><code>--include=<em>pattern</em></code></dt><dd>If any <code>--include</code> patterns are specified, the only files that are
 processed are those whose names match one of the patterns and do not match an
 <code>--exclude</code> pattern. This option does not affect directories, but it
 applies to all files, whether listed on the command line, obtained from
@@ -955,18 +810,10 @@ expression, and is matched against the final component of the file name, not
 the entire path. The <code>-F</code>, <code>-w</code>, and <code>-x</code> options do not apply to
 this pattern. The option may be given any number of times. If a file name
 matches both an <code>--include</code> and an <code>--exclude</code> pattern, it is excluded.
-There is no short form for this option.</p>
-</dd>
-<dt class="hdlist1"><code>--include-from=<em>filename</em></code></dt>
-<dd>
-<p>Treat each non-empty line of the file as the data for an <code>--include</code>
+There is no short form for this option.</dd><dt><code>--include-from=<em>filename</em></code></dt><dd>Treat each non-empty line of the file as the data for an <code>--include</code>
 option. What constitutes a newline for this purpose is the operating system&#8217;s
 default. The <code>--newline</code> option has no effect on this option. This option
-may be given any number of times; all the files are read.</p>
-</dd>
-<dt class="hdlist1"><code>--include-dir=<em>pattern</em></code></dt>
-<dd>
-<p>If any <code>--include-dir</code> patterns are specified, the only directories that
+may be given any number of times; all the files are read.</dd><dt><code>--include-dir=<em>pattern</em></code></dt><dd>If any <code>--include-dir</code> patterns are specified, the only directories that
 are processed are those whose names match one of the patterns and do not match
 an <code>--exclude-dir</code> pattern. This applies to all directories, whether listed
 on the command line, obtained from <code>--file-list</code>, or by scanning a parent
@@ -974,19 +821,11 @@ directory. The pattern is a PCRE2 regular expression, and is matched against
 the final component of the directory name, not the entire path. The <code>-F</code>,
 <code>-w</code>, and <code>-x</code> options do not apply to this pattern. The option may be
 given any number of times. If a directory matches both <code>--include-dir</code> and
-<code>--exclude-dir</code>, it is excluded. There is no short form for this option.</p>
-</dd>
-<dt class="hdlist1"><code>-L</code>, <code>--files-without-match</code></dt>
-<dd>
-<p>Instead of outputting lines from the files, just output the names of the files
+<code>--exclude-dir</code>, it is excluded. There is no short form for this option.</dd><dt><code>-L</code>, <code>--files-without-match</code></dt><dd>Instead of outputting lines from the files, just output the names of the files
 that do not contain any lines that would have been output. Each file name is
 output once, on a separate line by default, but if the <code>-Z</code> option is set,
 they are separated by zero bytes instead of newlines. This option overrides any
-previous <code>-H</code>, <code>-h</code>, or <code>-l</code> options.</p>
-</dd>
-<dt class="hdlist1"><code>-l</code>, <code>--files-with-matches</code></dt>
-<dd>
-<p>Instead of outputting lines from the files, just output the names of the files
+previous <code>-H</code>, <code>-h</code>, or <code>-l</code> options.</dd><dt><code>-l</code>, <code>--files-with-matches</code></dt><dd>Instead of outputting lines from the files, just output the names of the files
 containing lines that would have been output. Each file name is output once, on
 a separate line, but if the <code>-Z</code> option is set, they are separated by zero
 bytes instead of newlines. Searching normally stops as soon as a matching line
@@ -995,22 +834,10 @@ matching continues in order to obtain the correct count, and those files that
 have at least one match are listed along with their counts. Using this option
 with <code>-c</code> is a way of suppressing the listing of files with no matches that
 occurs with <code>-c</code> on its own. This option overrides any previous <code>-H</code>,
-<code>-h</code>, or <code>-L</code> options.</p>
-</dd>
-<dt class="hdlist1"><code>--label=<em>name</em></code></dt>
-<dd>
-<p>This option supplies a name to be used for the standard input when file names
+<code>-h</code>, or <code>-L</code> options.</dd><dt><code>--label=<em>name</em></code></dt><dd>This option supplies a name to be used for the standard input when file names
 are being output. If not supplied, <code>(standard input)</code> is used. There is no
-short form for this option.</p>
-</dd>
-<dt class="hdlist1"><code>--lf</code></dt>
-<dd>
-<p>Use LF as the line ending for standard output. This has no effect except on
-Windows, where CRLF is the default. There is no short form for this option.</p>
-</dd>
-<dt class="hdlist1"><code>--line-buffered</code></dt>
-<dd>
-<p>When this option is given, non-compressed input is read and processed line by
+short form for this option.</dd><dt><code>--lf</code></dt><dd>Use LF as the line ending for standard output. This has no effect except on
+Windows, where CRLF is the default. There is no short form for this option.</dd><dt><code>--line-buffered</code></dt><dd>When this option is given, non-compressed input is read and processed line by
 line, and the output is flushed after each write. By default, input is read in
 large chunks, unless <code>pcre2grep</code> can determine that it is reading from a
 terminal, which is currently possible only in Unix-like environments or
@@ -1019,131 +846,71 @@ system. This option can be useful when the input or output is attached to a
 pipe and you do not want <code>pcre2grep</code> to buffer up large amounts of data.
 However, its use will affect performance, and the <code>-M</code> (multiline) option
 ceases to work. When input is from a compressed .gz or .bz2 file,
-<code>--line-buffered</code> is ignored.</p>
-</dd>
-<dt class="hdlist1"><code>--line-offsets</code></dt>
-<dd>
-<p>Instead of showing lines or parts of lines that match, show each match as a
+<code>--line-buffered</code> is ignored.</dd><dt><code>--line-offsets</code></dt><dd>Instead of showing lines or parts of lines that match, show each match as a
 line number, the offset from the start of the line, and a length. The line
 number is terminated by a colon (as usual; see the <code>-n</code> option), and the
 offset and length are separated by a comma. In this mode, <code>--colour</code> has no
 effect, and no context is shown. That is, the <code>-A</code>, <code>-B</code>, and <code>-C</code>
 options are ignored. If there is more than one match in a line, each of them is
 shown separately. This option is mutually exclusive with <code>--output</code>,
-<code>--file-offsets</code>, and <code>--only-matching</code>.</p>
-</dd>
-<dt class="hdlist1"><code>--locale=<em>locale-name</em></code></dt>
-<dd>
-<p>This option specifies a locale to be used for pattern matching. It overrides
+<code>--file-offsets</code>, and <code>--only-matching</code>.</dd><dt><code>--locale=<em>locale-name</em></code></dt><dd>This option specifies a locale to be used for pattern matching. It overrides
 the value in the <code>LC_ALL</code> or <code>LC_CTYPE</code> environment variables. If no
 locale is specified, the PCRE2 library&#8217;s default (usually the "C" locale) is
-used. There is no short form for this option.</p>
-</dd>
-<dt class="hdlist1"><code>-M</code>, <code>--multiline</code></dt>
-<dd>
-<p>Allow patterns to match more than one line. When this option is set, the PCRE2
+used. There is no short form for this option.</dd><dt><code>-M</code>, <code>--multiline</code></dt><dd><p>Allow patterns to match more than one line. When this option is set, the PCRE2
 library is called in "multiline" mode, and a match is allowed to continue past
-the end of the initial line and onto one or more subsequent lines.</p>
-<div class="paragraph">
-<p>Patterns used with <code>-M</code> may usefully contain literal newline characters and
+the end of the initial line and onto one or more subsequent lines.</p><p>Patterns used with <code>-M</code> may usefully contain literal newline characters and
 internal occurrences of <code class="regex">^</code> and <code class="regex">$</code> characters, because in multiline mode these can
 match at internal newlines. Because <code>pcre2grep</code> is scanning multiple lines,
 the <code class="regex">\Z</code> and <code class="regex">\z</code> assertions match only at the end of the last line in the file.
 The <code class="regex">\A</code> assertion matches at the start of the first line of a match. This can
 be any line in the file; it is not anchored to the first line.</p>
-</div>
-<div class="paragraph">
 <p>The output for a successful match may consist of more than one line. The first
 line is the line in which the match started, and the last line is the line in
 which the match ended. If the matched string ends with a newline sequence, the
 output ends at the end of that line. If <code>-v</code> is set, none of the lines in a
 multi-line match are output. Once a match has been handled, scanning restarts
 at the beginning of the line after the one in which the match ended.</p>
-</div>
-<div class="paragraph">
 <p>The newline sequence that separates multiple lines must be matched as part of
 the pattern. For example, to find the phrase <code class="subject">regular expression</code> in a file
 where <code class="subject">regular</code> might be at the end of a line and <code class="subject">expression</code> at the start of
 the next line, you could use this command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2grep -M 'regular\s+expression' &lt;file&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">pcre2grep <span class="nt">-M</span> <span class="s1">'regular\s+expression'</span> &lt;file&gt;</code></pre></div>
 <p>The <code class="regex">\s</code> escape sequence matches any white space character, including newlines,
 and is followed by <code class="regex">+</code> so as to match trailing white space on the first line as
 well as possibly handling a two-character newline sequence.</p>
-</div>
-<div class="paragraph">
 <p>There is a limit to the number of lines that can be matched, imposed by the way
 that <code>pcre2grep</code> buffers the input file as it scans it. With a sufficiently
 large processing buffer, this should not be a problem.</p>
-</div>
-<div class="paragraph">
 <p>The <code>-M</code> option does not work when input is read line by line (see
-<code>--line-buffered</code>.)</p>
-</div>
-</dd>
-<dt class="hdlist1"><code>-m <em>number</em></code>, <code>--max-count=<em>number</em></code></dt>
-<dd>
-<p>Stop processing after finding <em>number</em> matching lines, or non-matching
+<code>--line-buffered</code>.)</p></dd><dt><code>-m <em>number</em></code>, <code>--max-count=<em>number</em></code></dt><dd>Stop processing after finding <em>number</em> matching lines, or non-matching
 lines if <code>-v</code> is also set. Any trailing context lines are output after the
 final match. In multiline mode, each multiline match counts as just one line
 for this purpose. If this limit is reached when reading the standard input from
 a regular file, the file is left positioned just after the last matching line.
 If <code>-c</code> is also set, the count that is output is never greater than
 <em>number</em>. This option has no effect if used with <code>-L</code>, <code>-l</code>, or
-<code>-q</code>, or when just checking for a match in a binary file.</p>
-</dd>
-<dt class="hdlist1"><code>--match-limit=<em>number</em></code></dt>
-<dd>
-<p>Processing some regular expression patterns may take a very long time to search
+<code>-q</code>, or when just checking for a match in a binary file.</dd><dt><code>--match-limit=<em>number</em></code></dt><dd><p>Processing some regular expression patterns may take a very long time to search
 for all possible matching strings. Others may require a very large amount of
-memory. There are three options that set resource limits for matching.</p>
-<div class="paragraph">
-<p>The <code>--match-limit</code> option provides a means of limiting computing resource
+memory. There are three options that set resource limits for matching.</p><p>The <code>--match-limit</code> option provides a means of limiting computing resource
 usage when processing patterns that are not going to match, but which have a
 very large number of possibilities in their search trees. The classic example
 is a pattern that uses nested unlimited repeats. Internally, PCRE2 has a
 counter that is incremented each time around its main processing loop. If the
 value set by <code>--match-limit</code> is reached, an error occurs.</p>
-</div>
-<div class="paragraph">
 <p>The <code>--heap-limit</code> option specifies, as a number of kibibytes (units of
 1024 bytes), the maximum amount of heap memory that may be used for matching.</p>
-</div>
-<div class="paragraph">
 <p>The <code>--depth-limit</code> option limits the depth of nested backtracking points,
 which indirectly limits the amount of memory that is used. The amount of memory
 needed for each backtracking point depends on the number of capturing
 parentheses in the pattern, so the amount of memory that is used before this
 limit acts varies from pattern to pattern. This limit is of use only if it is
 set smaller than <code>--match-limit</code>.</p>
-</div>
-<div class="paragraph">
 <p>There are no short forms for these options. The default limits can be set
 when the PCRE2 library is compiled; if they are not specified, the defaults
-are very large and so effectively unlimited.</p>
-</div>
-</dd>
-<dt class="hdlist1"><code>--max-buffer-size=<em>number</em></code></dt>
-<dd>
-<p>This limits the expansion of the processing buffer, whose initial size can be
+are very large and so effectively unlimited.</p></dd><dt><code>--max-buffer-size=<em>number</em></code></dt><dd>This limits the expansion of the processing buffer, whose initial size can be
 set by <code>--buffer-size</code>. The maximum buffer size is silently forced to be no
-smaller than the starting buffer size.</p>
-</dd>
-<dt class="hdlist1"><code>-N <em>newline-type</em></code>, <code>--newline=<em>newline-type</em></code></dt>
-<dd>
-<p>Six different conventions for indicating the ends of lines in scanned files are
-supported. For example:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2grep -N CRLF 'some pattern' &lt;file&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
+smaller than the starting buffer size.</dd><dt><code>-N <em>newline-type</em></code>, <code>--newline=<em>newline-type</em></code></dt><dd><p>Six different conventions for indicating the ends of lines in scanned files are
+supported. For example:</p><div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">pcre2grep <span class="nt">-N</span> CRLF <span class="s1">'some pattern'</span> &lt;file&gt;</code></pre></div>
 <p>The newline type may be specified in upper, lower, or mixed case. If the
 newline type is NUL, lines are separated by binary zero characters. The other
 types are the single-character sequences CR (carriage return) and LF
@@ -1153,89 +920,51 @@ Unicode line ending sequence is assumed to end a line. The Unicode sequences
 are the three just mentioned, plus VT (vertical tab, <code class="character">U+000B</code>), FF (form feed,
 <code class="character">U+000C</code>), NEL (next line, <code class="character">U+0085</code>), LS (line separator, <code class="character">U+2028</code>), and PS
 (paragraph separator, <code class="character">U+2029</code>).</p>
-</div>
-<div class="paragraph">
 <p>When the PCRE2 library is built, a default line-ending sequence is specified.
 This is normally the standard sequence for the operating system. Unless
 otherwise specified by this option, <code>pcre2grep</code> uses the library&#8217;s default.</p>
-</div>
-<div class="paragraph">
 <p>This option makes it possible to use <code>pcre2grep</code> to scan files that have
 come from other environments without having to modify their line endings. If
 the data that is being scanned does not agree with the convention set by this
 option, <code>pcre2grep</code> may behave in strange ways. Note that this option does
 not apply to files specified by the <code>-f</code>, <code>--exclude-from</code>, or
 <code>--include-from</code> options, which are expected to use the operating system&#8217;s
-standard newline sequence.</p>
-</div>
-</dd>
-<dt class="hdlist1"><code>-n</code>, <code>--line-number</code></dt>
-<dd>
-<p>Precede each output line by its line number in the file, followed by a colon
+standard newline sequence.</p></dd><dt><code>-n</code>, <code>--line-number</code></dt><dd>Precede each output line by its line number in the file, followed by a colon
 for matching lines or a hyphen for context lines. If the file name is also
 being output, it precedes the line number. When the <code>-M</code> option causes a
 pattern to match more than one line, only the first is preceded by its line
-number. This option is forced if <code>--line-offsets</code> is used.</p>
-</dd>
-<dt class="hdlist1"><code>--no-group-separator</code></dt>
-<dd>
-<p>Do not output a separator between groups of lines when <code>-A</code>, <code>-B</code>, or
+number. This option is forced if <code>--line-offsets</code> is used.</dd><dt><code>--no-group-separator</code></dt><dd>Do not output a separator between groups of lines when <code>-A</code>, <code>-B</code>, or
 <code>-C</code> is in use. The default is to output a line containing two hyphens. See
-also <code>--group-separator</code>.</p>
-</dd>
-<dt class="hdlist1"><code>--no-jit</code></dt>
-<dd>
-<p>If the PCRE2 library is built with support for just-in-time compiling (which
+also <code>--group-separator</code>.</dd><dt><code>--no-jit</code></dt><dd>If the PCRE2 library is built with support for just-in-time compiling (which
 speeds up matching), <code>pcre2grep</code> automatically makes use of this, unless it
 was explicitly disabled at build time. This option can be used to disable the
 use of JIT at run time. It is provided for testing and working around problems.
-It should never be needed in normal use.</p>
-</dd>
-<dt class="hdlist1"><code>-O <em>text</em></code>, <code>--output=<em>text</em></code></dt>
-<dd>
-<p>When there is a match, instead of outputting the line that matched, output just
+It should never be needed in normal use.</dd><dt><code>-O <em>text</em></code>, <code>--output=<em>text</em></code></dt><dd><p>When there is a match, instead of outputting the line that matched, output just
 the text specified in this option, followed by an operating-system standard
 newline. In this mode, <code>--colour</code> has no effect, and no context is shown.
 That is, the <code>-A</code>, <code>-B</code>, and <code>-C</code> options are ignored. The
 <code>--newline</code> option has no effect on this option, which is mutually
 exclusive with <code>--only-matching</code>, <code>--file-offsets</code>, and
 <code>--line-offsets</code>. However, like <code>--only-matching</code>, if there is more
-than one match in a line, each of them causes a line of output.</p>
-<div class="paragraph">
-<p>Escape sequences starting with a dollar character may be used to insert the
+than one match in a line, each of them causes a line of output.</p><p>Escape sequences starting with a dollar character may be used to insert the
 contents of the matched part of the line and/or captured substrings into the
 text.</p>
-</div>
-<div class="paragraph">
 <p><code class="repl">$<em>digits</em></code> or <code class="repl">${<em>digits</em>}</code> is replaced by the captured substring of the given
 decimal number; <code class="repl">$&amp;</code> (or the legacy <code class="repl">$0</code>) substitutes the whole match. If the
 number is greater than the number of capturing substrings, or if the capture
 is unset, the replacement is empty.</p>
-</div>
-<div class="paragraph">
 <p><code class="repl">$a</code> is replaced by bell; <code class="repl">$b</code> by backspace; <code class="repl">$e</code> by escape; <code class="repl">$f</code> by form feed; <code class="repl">$n</code> by
 newline; <code class="repl">$r</code> by carriage return; <code class="repl">$t</code> by tab; <code class="repl">$v</code> by vertical tab.</p>
-</div>
-<div class="paragraph">
 <p><code class="repl">$o<em>digits</em></code> or <code class="repl">$o{<em>digits</em>}</code> is replaced by the character whose code point is
 the given octal number. In the first form, up to three octal digits are processed.
 When more digits are needed in Unicode mode to specify a wide character, the
 second form must be used.</p>
-</div>
-<div class="paragraph">
 <p><code class="repl">$x<em>digits</em></code> or <code class="repl">$x{<em>digits</em>}</code> is replaced by the character represented by
 the given hexadecimal number. In the first form, up to two hexadecimal digits are
 processed. When more digits are needed in Unicode mode to specify a wide
 character, the second form must be used.</p>
-</div>
-<div class="paragraph">
 <p>Any other character is substituted by itself. In particular, <code class="repl">$$</code> is replaced by
-a single dollar.</p>
-</div>
-</dd>
-<dt class="hdlist1"><code>-o</code>, <code>--only-matching</code></dt>
-<dd>
-<p>Show only the part of the line that matched a pattern instead of the whole
+a single dollar.</p></dd><dt><code>-o</code>, <code>--only-matching</code></dt><dd>Show only the part of the line that matched a pattern instead of the whole
 line. In this mode, no context is shown. That is, the <code>-A</code>, <code>-B</code>, and
 <code>-C</code> options are ignored. If there is more than one match in a line, each
 of them is shown separately, on a separate line of output. If <code>-o</code> is
@@ -1244,46 +973,25 @@ lines), no output is generated, but the return code is set appropriately. If
 the matched portion of the line is empty, nothing is output unless the file
 name or line number are being printed, in which case they are shown on an
 otherwise empty line. This option is mutually exclusive with <code>--output</code>,
-<code>--file-offsets</code> and <code>--line-offsets</code>.</p>
-</dd>
-<dt class="hdlist1"><code>-o<em>number</em></code>, <code>--only-matching=<em>number</em></code></dt>
-<dd>
-<p>Show only the part of the line that matched the capturing parentheses of the
+<code>--file-offsets</code> and <code>--line-offsets</code>.</dd><dt><code>-o<em>number</em></code>, <code>--only-matching=<em>number</em></code></dt><dd><p>Show only the part of the line that matched the capturing parentheses of the
 given number. Up to 50 capturing parentheses are supported by default. This
 limit can be changed via the <code>--om-capture</code> option. A pattern may contain
 any number of capturing parentheses, but only those whose number is within the
 limit can be accessed by <code>-o</code>. An error occurs if the number specified by
-<code>-o</code> is greater than the limit.</p>
-<div class="paragraph">
-<p><code>-o0</code> is the same as <code>-o</code> without a number. Because these options can be
+<code>-o</code> is greater than the limit.</p><p><code>-o0</code> is the same as <code>-o</code> without a number. Because these options can be
 given without an argument (see above), if an argument is present, it must be
 given in the same shell item, for example, <code>-o3</code> or <code>--only-matching=2</code>. The
 comments given for the non-argument case above also apply to this option. If
 the specified capturing parentheses do not exist in the pattern, or were not
 set in the match, nothing is output unless the file name or line number are
 being output.</p>
-</div>
-<div class="paragraph">
 <p>If this option is given multiple times, multiple substrings are output for each
 match, in the order the options are given, and all on one line. For example,
 <code>-o3 -o1 -o3</code> causes the substrings matched by capturing parentheses 3 and 1 and
 then 3 again to be output. By default, there is no separator (but see the next
-but one option).</p>
-</div>
-</dd>
-<dt class="hdlist1"><code>--om-capture=<em>number</em></code></dt>
-<dd>
-<p>Set the number of capturing parentheses that can be accessed by <code>-o</code>. The
-default is 50.</p>
-</dd>
-<dt class="hdlist1"><code>--om-separator=<em>text</em></code></dt>
-<dd>
-<p>Specify a separating string for multiple occurrences of <code>-o</code>. The default
-is an empty string. Separating strings are never coloured.</p>
-</dd>
-<dt class="hdlist1"><code>-P</code>, <code>--no-ucp</code></dt>
-<dd>
-<p>Starting from release 10.43, when UTF/Unicode mode is specified with <code>-u</code>
+but one option).</p></dd><dt><code>--om-capture=<em>number</em></code></dt><dd>Set the number of capturing parentheses that can be accessed by <code>-o</code>. The
+default is 50.</dd><dt><code>--om-separator=<em>text</em></code></dt><dd>Specify a separating string for multiple occurrences of <code>-o</code>. The default
+is an empty string. Separating strings are never coloured.</dd><dt><code>-P</code>, <code>--no-ucp</code></dt><dd>Starting from release 10.43, when UTF/Unicode mode is specified with <code>-u</code>
 or <code>-U</code>, the <code class="constant">PCRE2_UCP</code> option is used by default. This means that the
 POSIX classes in patterns match more than just ASCII characters. For example,
 <code class="regex">[:digit:]</code> matches any Unicode decimal digit. The <code>--no-ucp</code> option
@@ -1291,44 +999,20 @@ suppresses <code class="constant">PCRE2_UCP</code>, thus restricting the POSIX c
 as was the case in earlier releases. Note that there are now more fine-grained
 option settings within patterns that affect individual classes. For example,
 when in UCP mode, the sequence <code class="regex">(?aP)</code> restricts <code class="regex">[:word:]</code> to ASCII letters, while
-allowing <code class="regex">\w</code> to match Unicode letters and digits.</p>
-</dd>
-<dt class="hdlist1"><code>--posix-pattern-file</code></dt>
-<dd>
-<p>When patterns are provided with the <code>-f</code> option, do not trim trailing
+allowing <code class="regex">\w</code> to match Unicode letters and digits.</dd><dt><code>--posix-pattern-file</code></dt><dd>When patterns are provided with the <code>-f</code> option, do not trim trailing
 spaces or ignore empty lines in a similar way than other grep tools. To keep
 the behaviour consistent with older versions, if the pattern read was
 terminated with CRLF (as character literals) then both characters won&#8217;t be
 included as part of it, so if you really need to have pattern ending in <code class="regex">\r</code>,
-use a escape sequence or provide it by a different method.</p>
-</dd>
-<dt class="hdlist1"><code>-q</code>, <code>--quiet</code></dt>
-<dd>
-<p>Work quietly, that is, display nothing except error messages. The exit
-status indicates whether or not any matches were found.</p>
-</dd>
-<dt class="hdlist1"><code>-r</code>, <code>--recursive</code></dt>
-<dd>
-<p>If any given path is a directory, recursively scan the files it contains,
+use a escape sequence or provide it by a different method.</dd><dt><code>-q</code>, <code>--quiet</code></dt><dd>Work quietly, that is, display nothing except error messages. The exit
+status indicates whether or not any matches were found.</dd><dt><code>-r</code>, <code>--recursive</code></dt><dd>If any given path is a directory, recursively scan the files it contains,
 taking note of any <code>--include</code> and <code>--exclude</code> settings. By default, a
 directory is read as a normal file; in some operating systems this gives an
 immediate end-of-file. This option is a shorthand for setting the <code>-d</code>
-option to "recurse".</p>
-</dd>
-<dt class="hdlist1"><code>--recursion-limit=<em>number</em></code></dt>
-<dd>
-<p>This is an obsolete synonym for <code>--depth-limit</code>. See <code>--match-limit</code>
-above for details.</p>
-</dd>
-<dt class="hdlist1"><code>-s</code>, <code>--no-messages</code></dt>
-<dd>
-<p>Suppress error messages about non-existent or unreadable files. Such files are
+option to "recurse".</dd><dt><code>--recursion-limit=<em>number</em></code></dt><dd>This is an obsolete synonym for <code>--depth-limit</code>. See <code>--match-limit</code>
+above for details.</dd><dt><code>-s</code>, <code>--no-messages</code></dt><dd>Suppress error messages about non-existent or unreadable files. Such files are
 quietly skipped. However, the return code is still 2, even if matches were
-found in other files.</p>
-</dd>
-<dt class="hdlist1"><code>-t</code>, <code>--total-count</code></dt>
-<dd>
-<p>This option is useful when scanning more than one file. If used on its own,
+found in other files.</dd><dt><code>-t</code>, <code>--total-count</code></dt><dd>This option is useful when scanning more than one file. If used on its own,
 <code>-t</code> suppresses all output except for a grand total number of matching
 lines (or non-matching lines if <code>-v</code> is used) in all the files. If <code>-t</code>
 is used with <code>-c</code>, a grand total is output except when the previous output
@@ -1336,114 +1020,59 @@ is just one line. In other words, it is not output when just one file&#8217;s co
 is listed. If file names are being output, the grand total is preceded by
 <code>TOTAL:</code>. Otherwise, it appears as just another number. The <code>-t</code> option is
 ignored when used with <code>-L</code> (list files without matches), because the grand
-total would always be zero.</p>
-</dd>
-<dt class="hdlist1"><code>-u</code>, <code>--utf</code></dt>
-<dd>
-<p>Operate in UTF/Unicode mode. This option is available only if PCRE2 has been
+total would always be zero.</dd><dt><code>-u</code>, <code>--utf</code></dt><dd>Operate in UTF/Unicode mode. This option is available only if PCRE2 has been
 compiled with UTF-8 support. All patterns (including those for any
 <code>--exclude</code> and <code>--include</code> options) and all lines that are scanned
 must be valid strings of UTF-8 characters. If an invalid UTF-8 string is
-encountered, an error occurs.</p>
-</dd>
-<dt class="hdlist1"><code>-U</code>, <code>--utf-allow-invalid</code></dt>
-<dd>
-<p>As <code>--utf</code>, but in addition subject lines may contain invalid UTF-8 code
+encountered, an error occurs.</dd><dt><code>-U</code>, <code>--utf-allow-invalid</code></dt><dd>As <code>--utf</code>, but in addition subject lines may contain invalid UTF-8 code
 unit sequences. These can never form part of any pattern match. Patterns
 themselves, however, must still be valid UTF-8 strings. This facility allows
 valid UTF-8 strings to be sought within arbitrary byte sequences in executable
 or other binary files. For more details about matching in non-valid UTF-8
 strings, see the
 <a href="pcre2unicode.html"><code>pcre2unicode</code></a>
-documentation.</p>
-</dd>
-<dt class="hdlist1"><code>-V</code>, <code>--version</code></dt>
-<dd>
-<p>Write the version numbers of <code>pcre2grep</code> and the PCRE2 library to the
+documentation.</dd><dt><code>-V</code>, <code>--version</code></dt><dd>Write the version numbers of <code>pcre2grep</code> and the PCRE2 library to the
 standard output and then exit. Anything else on the command line is
-ignored.</p>
-</dd>
-<dt class="hdlist1"><code>-v</code>, <code>--invert-match</code></dt>
-<dd>
-<p>Invert the sense of the match, so that lines which do <em>not</em> match any of
+ignored.</dd><dt><code>-v</code>, <code>--invert-match</code></dt><dd>Invert the sense of the match, so that lines which do <em>not</em> match any of
 the patterns are the ones that are found. When this option is set, options such
 as <code>--only-matching</code> and <code>--output</code>, which specify parts of a match
-that are to be output, are ignored.</p>
-</dd>
-<dt class="hdlist1"><code>-w</code>, <code>--word-regex</code>, <code>--word-regexp</code></dt>
-<dd>
-<p>Force the patterns only to match "words". That is, there must be a word
+that are to be output, are ignored.</dd><dt><code>-w</code>, <code>--word-regex</code>, <code>--word-regexp</code></dt><dd>Force the patterns only to match "words". That is, there must be a word
 boundary at the start and end of each matched string. This is equivalent to
 having <code class="regex">\b(?:</code> at the start of each pattern, and <code class="regex">)\b</code> at the end. This
 option applies only to the patterns that are matched against the contents of
 files; it does not apply to patterns specified by any of the <code>--include</code> or
-<code>--exclude</code> options.</p>
-</dd>
-<dt class="hdlist1"><code>-x</code>, <code>--line-regex</code>, <code>--line-regexp</code></dt>
-<dd>
-<p>Force the patterns to start matching only at the beginnings of lines, and in
+<code>--exclude</code> options.</dd><dt><code>-x</code>, <code>--line-regex</code>, <code>--line-regexp</code></dt><dd>Force the patterns to start matching only at the beginnings of lines, and in
 addition, require them to match entire lines. In multiline mode the match may
 be more than one line. This is equivalent to having <code class="regex">^(?:</code> at the start of each
 pattern and <code class="regex">)$</code> at the end. This option applies only to the patterns that are
 matched against the contents of files; it does not apply to patterns specified
-by any of the <code>--include</code> or <code>--exclude</code> options.</p>
-</dd>
-<dt class="hdlist1"><code>-Z</code>, <code>--null</code></dt>
-<dd>
-<p>Terminate files names in the regular output with a zero byte (the NUL
+by any of the <code>--include</code> or <code>--exclude</code> options.</dd><dt><code>-Z</code>, <code>--null</code></dt><dd>Terminate files names in the regular output with a zero byte (the NUL
 character) instead of what would normally appear. This is useful when file
 names contain unusual characters such as colons, hyphens, or even newlines. The
-option does not apply to file names in error messages.</p>
-</dd>
-</dl>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_environment_variables">Environment variables</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The environment variables <code>LC_ALL</code> and <code>LC_CTYPE</code> are examined, in that
+option does not apply to file names in error messages.</dd></dl></div></section>
+<section class="doc-section level-1"><h2 id="_environment_variables">Environment variables</h2><p>The environment variables <code>LC_ALL</code> and <code>LC_CTYPE</code> are examined, in that
 order, for a locale. The first one that is set is used. This can be overridden
 by the <code>--locale</code> option. If no locale is set, the PCRE2 library&#8217;s default
-(usually the "C" locale) is used.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_newlines">Newlines</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The <code>-N</code> (<code>--newline</code>) option allows <code>pcre2grep</code> to scan files with
+(usually the "C" locale) is used.</p></section>
+<section class="doc-section level-1"><h2 id="_newlines">Newlines</h2><p>The <code>-N</code> (<code>--newline</code>) option allows <code>pcre2grep</code> to scan files with
 newline conventions that differ from the default. This option affects only the
 way scanned files are processed. It does not affect the interpretation of files
 specified by the <code>-f</code>, <code>--file-list</code>, <code>--exclude-from</code>, or
 <code>--include-from</code> options.</p>
-</div>
-<div class="paragraph">
 <p>Any parts of the scanned input files that are written to the standard output
 are copied with whatever newline sequences they have in the input. However, if
 the final line of a file is output, and it does not end with a newline
 sequence, a newline sequence is added. If the newline setting is CR, LF, CRLF
 or NUL, that line ending is output; for the other settings (ANYCRLF or ANY) a
 single NL is used.</p>
-</div>
-<div class="paragraph">
 <p>The newline setting does not affect the way in which <code>pcre2grep</code> writes
 newlines in informational messages to the standard output and error streams.
 Under Windows, the standard output is set to be binary, so that <code>\r\n</code> at the
 ends of output lines that are copied from the input is not converted to
 <code>\r\r\n</code> by the C I/O library. This means that any messages written to the
 standard output must end with <code>\r\n</code>. For all other operating systems, and
-for all messages to the standard error stream, <code>\n</code> is used.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_options_compatibility_with_gnu_grep">Options compatibility with GNU grep</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Many of the short and long forms of <code>pcre2grep</code>'s options are the same as
+for all messages to the standard error stream, <code>\n</code> is used.</p></section>
+<section class="doc-section level-1"><h2 id="_options_compatibility_with_gnu_grep">Options compatibility with GNU grep</h2><p>Many of the short and long forms of <code>pcre2grep</code>'s options are the same as
 in the GNU <code>grep</code> program. Any long option of the form <code>--<em>xxx</em>-regexp</code>
 (GNU terminology) is also available as <code>--<em>xxx</em>-regex</code> (PCRE2 terminology).
 However, the <code>--case-restrict</code>, <code>--depth-limit</code>, <code>-E</code>,
@@ -1454,66 +1083,34 @@ However, the <code>--case-restrict</code>, <code>--depth-limit</code>, <code>-E<
 <code>-U</code>, and <code>--utf-allow-invalid</code> options are specific to
 <code>pcre2grep</code>, as is the use of the <code>--only-matching</code> option with a
 capturing parentheses number.</p>
-</div>
-<div class="paragraph">
 <p>Although most of the common options work the same way, a few are different in
 <code>pcre2grep</code>. For example, the <code>--include</code> option&#8217;s argument is a glob
 for GNU <code>grep</code>, but in <code>pcre2grep</code> it is a regular expression to which
 the <code>-i</code> option applies. If both the <code>-c</code> and <code>-l</code> options are
 given, GNU grep lists only file names, without counts, but <code>pcre2grep</code>
-gives the counts as well.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_options_with_data">Options with data</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>There are four different ways in which an option with data can be specified.
+gives the counts as well.</p></section>
+<section class="doc-section level-1"><h2 id="_options_with_data">Options with data</h2><p>There are four different ways in which an option with data can be specified.
 If a short form option is used, the data may follow immediately, or (with one
 exception) in the next command line item. For example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">-f/some/file
--f /some/file</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">-f</span>/some/file
+<span class="nt">-f</span> /some/file</code></pre></div>
 <p>The exception is the <code>-o</code> option, which may appear with or without data.
 Because of this, if data is present, it must follow immediately in the same
 item, for example -o3.</p>
-</div>
-<div class="paragraph">
 <p>If a long form option is used, the data may appear in the same command line
 item, separated by an equals character, or (with two exceptions) it may appear
 in the next command line item. For example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">--file=/some/file
---file /some/file</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">--file</span><span class="o">=</span>/some/file
+<span class="nt">--file</span> /some/file</code></pre></div>
 <p>Note, however, that if you want to supply a file name beginning with <code>~</code> as data
 in a shell command, and have the shell expand <code>~</code> to a home directory, you must
 separate the file name from the option, because the shell does not treat <code>~</code>
 specially unless it is at the start of an item.</p>
-</div>
-<div class="paragraph">
 <p>The exceptions to the above are the <code>--colour</code> (or <code>--color</code>) and
 <code>--only-matching</code> options, for which the data is optional. If one of these
 options does have data, it must be given in the first form, using an equals
-character. Otherwise <code>pcre2grep</code> will assume that it has no data.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_using_pcre2s_callout_facility">Using PCRE2&#8217;s callout facility</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p><code>pcre2grep</code> has, by default, support for calling external programs or
+character. Otherwise <code>pcre2grep</code> will assume that it has no data.</p></section>
+<section class="doc-section level-1"><h2 id="_using_pcre2s_callout_facility">Using PCRE2&#8217;s callout facility</h2><p><code>pcre2grep</code> has, by default, support for calling external programs or
 scripts or echoing specific strings during matching by making use of PCRE2&#8217;s
 callout facility. However, this support can be completely or partially disabled
 when <code>pcre2grep</code> is built. You can find out whether your binary has support
@@ -1521,18 +1118,12 @@ for callouts by running it with the <code>--help</code> option. If callout suppo
 completely disabled, callouts in patterns are forbidden by <code>pcre2grep</code>.
 If the facility is partially disabled, calling external programs is not
 supported, and callouts that request it are ignored.</p>
-</div>
-<div class="paragraph">
 <p>A callout in a PCRE2 pattern is of the form <code class="regex">(?C<em>arg</em>)</code> where the argument is
 either a number or a quoted string (see the
 <a href="pcre2callout.html"><code>pcre2callout</code></a>
 documentation for details). Numbered callouts are ignored by <code>pcre2grep</code>;
 only callouts with string arguments are useful.</p>
-</div>
-<div class="sect2">
-<h3 id="_echoing_a_specific_string">Echoing a specific string</h3>
-<div class="paragraph">
-<p>Starting the callout string with a pipe character invokes an echoing facility
+<section class="doc-section level-2"><h3 id="_echoing_a_specific_string">Echoing a specific string</h3><p>Starting the callout string with a pipe character invokes an echoing facility
 that avoids calling an external program or script. This facility is always
 available, provided that callouts were not completely disabled when
 <code>pcre2grep</code> was built. The rest of the callout string is processed as a
@@ -1545,62 +1136,33 @@ Any syntax errors in the string (for example, a dollar not followed by another
 character) causes the callout to be ignored. No terminator is added to the
 output string, so if you want a newline, you must include it explicitly using
 the escape <code class="repl">$n</code>. For example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">pcre2grep '(.)(..(.))(?C"|[$1] [$2] [$3]$n")' &lt;some file&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">pcre2grep <span class="s1">'(.)(..(.))(?C"|[$1] [$2] [$3]$n")'</span> &lt;some file&gt;</code></pre></div>
 <p>Matching continues normally after the string is output. If you want to see only
 the callout output but not any output from an actual match, you should end the
-pattern with <code class="regex">(*FAIL)</code>.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_calling_external_programs_or_scripts">Calling external programs or scripts</h3>
-<div class="paragraph">
-<p>This facility can be independently disabled when <code>pcre2grep</code> is built. It
+pattern with <code class="regex">(*FAIL)</code>.</p></section>
+<section class="doc-section level-2"><h3 id="_calling_external_programs_or_scripts">Calling external programs or scripts</h3><p>This facility can be independently disabled when <code>pcre2grep</code> is built. It
 is supported for Windows, where a call to <code class="c">_spawnvp()</code> is used, for VMS,
 where <code class="c">lib$spawn()</code> is used, and for any Unix-like environment where
 <code class="c">fork()</code> and <code class="c">execv()</code> are available.</p>
-</div>
-<div class="paragraph">
 <p>If the callout string does not start with a pipe (vertical bar) character, it
 is parsed into a list of substrings separated by pipe characters. The first
 substring must be an executable name, with the following substrings specifying
 arguments:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre><em>executable_name</em>|<em>arg1</em>|<em>arg2</em>|...</pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="literal-block"><pre><em>executable_name</em>|<em>arg1</em>|<em>arg2</em>|...</pre></div>
 <p>Any substring (including the executable name) may contain escape sequences
 started by a dollar character. These are the same as for the <code>--output</code>
 (<code>-O</code>) option documented above, except that <code class="repl">$0</code> or <code class="repl">$&amp;</code> cannot insert the
 matched string because the match is still in progress. Instead, the character
 <code>0</code> is inserted. If you need a literal dollar or pipe character in any
 substring, use <code class="repl">$$</code> or <code class="repl">$|</code> respectively. Here is an example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">echo -e "abcde\n12345" | pcre2grep \
-  '(?x)(.)(..(.))
-  (?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4)")()' -</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">Output</div>
-<div class="content">
-<pre class="highlight"><code class="language-text" data-lang="text">Arg1: [a] [bcd] [d] Arg2: |a| ()
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nb">echo</span> <span class="nt">-e</span> <span class="s2">"abcde</span><span class="se">\n</span><span class="s2">12345"</span> | pcre2grep <span class="se">\</span>
+  <span class="s1">'(?x)(.)(..(.))
+  (?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4)")()'</span> -</code></pre></div>
+<figure class="listing-block"><figcaption>Output</figcaption>
+<pre class="rouge highlight"><code data-lang="text">Arg1: [a] [bcd] [d] Arg2: |a| ()
 abcde
 Arg1: [1] [234] [4] Arg2: |1| ()
-12345</code></pre>
-</div>
-</div>
-<div class="paragraph">
+12345</code></pre></figure>
 <p>The parameters for the system call that is used to run the program or script
 are zero-terminated strings. This means that binary zero characters in the
 callout argument will cause premature termination of their substrings, and
@@ -1608,67 +1170,31 @@ therefore should not be present. Any syntax errors in the string (for example,
 a dollar not followed by another character) causes the callout to be ignored.
 If running the program fails for any reason (including the non-existence of the
 executable), a local matching failure occurs and the matcher backtracks in the
-normal way.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_matching_errors">Matching errors</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>It is possible to supply a regular expression that takes a very long time to
+normal way.</p></section></section>
+<section class="doc-section level-1"><h2 id="_matching_errors">Matching errors</h2><p>It is possible to supply a regular expression that takes a very long time to
 fail to match certain lines. Such patterns normally involve nested indefinite
 repeats, for example: <code class="regex">(a&#43;)*\d</code> when matched against a line of <code class="subject">a</code>s with no final
 digit. The PCRE2 matching function has a resource limit that causes it to abort
 in these circumstances. If this happens, <code>pcre2grep</code> outputs an error
 message and the line that caused the problem to the standard error stream. If
 there are more than 20 such errors, <code>pcre2grep</code> gives up.</p>
-</div>
-<div class="paragraph">
 <p>The <code>--match-limit</code> option of <code>pcre2grep</code> can be used to set the
 overall resource limit. There are also other limits that affect the amount of
 memory used during matching; see the discussion of <code>--heap-limit</code> and
-<code>--depth-limit</code> above.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_diagnostics">Diagnostics</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Exit status is 0 if any matches were found, 1 if no matches were found, and 2
+<code>--depth-limit</code> above.</p></section>
+<section class="doc-section level-1"><h2 id="_diagnostics">Diagnostics</h2><p>Exit status is 0 if any matches were found, 1 if no matches were found, and 2
 for syntax errors, overlong lines, non-existent or inaccessible files (even if
 matches were found in other files) or too many matching errors. Using the
 <code>-s</code> option to suppress error messages about inaccessible files does not
 affect the return code.</p>
-</div>
-<div class="paragraph">
 <p>When run under VMS, the return code is placed in the symbol <code class="c">PCRE2GREP_RC</code>
-because VMS does not distinguish between <code class="c">exit(0)</code> and <code class="c">exit(1)</code>.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_see_also">See also</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p><a href="pcre2pattern.html"><code>pcre2pattern</code></a>, <a href="pcre2syntax.html"><code>pcre2syntax</code></a>, <a href="pcre2callout.html"><code>pcre2callout</code></a>,
+because VMS does not distinguish between <code class="c">exit(0)</code> and <code class="c">exit(1)</code>.</p></section>
+<section class="doc-section level-1"><h2 id="_see_also">See also</h2><p><a href="pcre2pattern.html"><code>pcre2pattern</code></a>, <a href="pcre2syntax.html"><code>pcre2syntax</code></a>, <a href="pcre2callout.html"><code>pcre2callout</code></a>,
 <a href="pcre2unicode.html"><code>pcre2unicode</code></a>.</p>
-</div>
 <h2 id="_author" class="discrete">Author</h2>
-<div class="paragraph">
 <p>Philip Hazel<br>
 Retired from University Computing Service<br>
 Cambridge, England.</p>
-</div>
 <h2 id="_revision" class="discrete">Revision</h2>
-<div class="paragraph">
 <p>Last updated: 24 January 2025<br>
-Copyright &#169; 1997-2023 University of Cambridge.</p>
-</div>
-</div>
-</div>
-</div>
-</body>
-</html>
+Copyright &#169; 1997-2023 University of Cambridge.</p></section></div></body></html>
