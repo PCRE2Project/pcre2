@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#! /usr/bin/env python3
 
 # Run pcre2grep tests. The assumption is that the PCRE2 tests check the library
 # itself. What we are checking here is the file handling and options that are

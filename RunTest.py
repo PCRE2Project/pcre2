@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#! /usr/bin/env python3
 
 ###############################################################################
 # Run the PCRE2 tests using the pcre2test program. The appropriate tests are

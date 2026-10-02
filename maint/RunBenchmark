@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 #
 # Compile maint/pcre2bench.c, which no PCRE2 build system builds, against an
 # already-built PCRE2 tree and run it.
