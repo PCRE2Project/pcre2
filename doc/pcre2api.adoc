@@ -1464,7 +1464,7 @@ const:PCRE2_CONFIG_STACKRECURSE::
 const:PCRE2_CONFIG_TABLES_LENGTH::
       The output is a type:uint32_t integer that gives the length of PCRE2's character
       processing tables in bytes. For details of these tables see the
-      section on locale support
+      section <<locale-support>>
       below.
 
 const:PCRE2_CONFIG_UNICODE_VERSION::
@@ -1492,6 +1492,7 @@ const:PCRE2_CONFIG_VERSION::
       code units used is returned. This is the length of the string plus one unit for
       the terminating zero.
 
+[[compiling-a-pattern]]
 == Compiling a pattern
 
 [source,c,role=prototype]
@@ -2071,8 +2072,8 @@ This option has two effects. Firstly, it change the way PCRE2 processes [.regex]
 default, only ASCII characters are recognized, but if const:PCRE2_UCP is set, Unicode
 properties are used to classify characters. There are some PCRE2_EXTRA
 options (see below) that add finer control to this behaviour. More details are
-given in the section on
-generic character types
+given in the section
+xref:pcre2pattern.adoc#generic-character-types[Generic character types]
 in the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 page.
@@ -2321,6 +2322,7 @@ patterns to be analyzed, and for one-off matches and simple patterns the
 benefit of faster execution might be offset by a much slower compilation time.
 Most (but not all) patterns can be optimized by the JIT compiler.
 
+[[locale-support]]
 == Locale support
 
 [source,c,role=prototype]
@@ -2703,7 +2705,7 @@ const:PCRE2_INFO_NAMETABLE returns a pointer to the first entry of the table. Th
 +
 The names are in alphabetical order. If [.regex]`+(?|+` is used to create multiple capture
 groups with the same number, as described in the
-section on duplicate group numbers
+section xref:pcre2pattern.adoc#duplicate-group-numbers[Duplicate group numbers]
 in the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 page, the groups may be given the same name, but there is only one entry in the
@@ -2865,10 +2867,10 @@ same allocator that was used for the compiled pattern (custom or default).
 
 A match data block can be used many times, with the same or different compiled
 patterns. You can extract information from a match data block after a match
-operation has finished, using functions that are described in the sections on
-matched strings
+operation has finished, using functions that are described in the sections
+<<matched-strings>>
 and
-other match data
+<<other-match-information>>
 below.
 
 When a call of func:pcre2_match() fails, valid data is available in the match
@@ -3239,6 +3241,7 @@ does [.regex]`\s`, even though it includes CR and LF in the characters that it m
 Notwithstanding the above, anomalous effects may still occur when CRLF is a
 valid newline sequence and explicit [.regex]`\r` or [.regex]`\n` escapes appear in the pattern.
 
+[[matched-strings]]
 == How func:pcre2_match() returns a string and captured substrings
 
 [source,c,role=prototype]
@@ -3807,7 +3810,7 @@ set, const:PCRE2_ERROR_UNSET is returned.
 ====
 If the pattern uses the [.regex]`+(?|+` feature to set up multiple
 capture groups with the same number, as described in the
-section on duplicate group numbers
+section xref:pcre2pattern.adoc#duplicate-group-numbers[Duplicate group numbers]
 in the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 page, you cannot use names to distinguish the different capture groups, because

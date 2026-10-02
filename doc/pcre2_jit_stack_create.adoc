@@ -30,7 +30,9 @@ func:pcre2_jit_stack_assign() to associate the stack with a compiled pattern,
 which can then be processed by func:pcre2_match() or func:pcre2_jit_match().
 A maximum stack size of 512KiB to 1MiB should be more than enough for any
 pattern. If the stack couldn't be allocated or the values passed were not
-reasonable, const:NULL will be returned. For more details, see the
+reasonable, const:NULL will be returned. For more details, see the section
+xref:pcre2jit.adoc#controlling-the-jit-stack[Controlling the JIT stack]
+in the
 xref:pcre2jit.adoc[`pcre2jit`]
 page.
 

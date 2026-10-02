@@ -103,8 +103,8 @@ to test for a wider sense of, say, "digit", you can use explicit Unicode
 property tests such as [.regex]`+\p{Nd}+`. Alternatively, if you set the const:PCRE2_UCP option,
 the way that the character escapes work is changed so that Unicode properties
 are used to determine which characters match, though there are some options
-that suppress this for individual escapes. For details see the section on
-generic character types
+that suppress this for individual escapes. For details see the section
+xref:pcre2pattern.adoc#generic-character-types[Generic character types]
 in the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 documentation.
