@@ -28,12 +28,12 @@ jobs:
           sudo apt-get -qq update
           sudo apt-get -qq install -y hugo
 
-      # Install Asciidoctor and the Rouge source highlighter
-      - name: Install Asciidoctor and Rouge
+      # Install Asciidoctor, the semantic HTML converter, and the Rouge source highlighter
+      - name: Install Asciidoctor, HTML5s, and Rouge
         run: |
           sudo apt update
           sudo apt install -y ruby ruby-dev
-          gem install --user-install asciidoctor rouge
+          gem install --user-install asciidoctor asciidoctor-html5s rouge
           export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
           export PATH="$GEM_HOME/bin:$PATH"
           echo "Ruby version: $(ruby -v)"

@@ -139,9 +139,9 @@ Without const:PCRE2_EXTRA_CASELESS_RESTRICT::
   's' = 'S' = char:U+017F (long S)
 With const:PCRE2_EXTRA_CASELESS_RESTRICT::
   'k' = 'K' +
-  char:U+212A (Kelvin sign) -- only case-equivalent to itself +
+  char:U+212A (Kelvin sign) --- only case-equivalent to itself +
   's' = 'S' +
-  char:U+017F (long S) -- only case-equivalent to itself
+  char:U+017F (long S) --- only case-equivalent to itself
 
 One language family, Turkish and Azeri, has its own case-insensitivity rules,
 which can be selected by setting const:PCRE2_EXTRA_TURKISH_CASING. This alters the
@@ -150,8 +150,8 @@ behaviour of the 'i', 'I', char:U+0130 (capital I with dot above), and char:U+01
 
 Without const:PCRE2_EXTRA_TURKISH_CASING::
   'i' = 'I' +
-  char:U+0130 (capital I with dot above)  -- only case-equivalent to itself +
-  char:U+0131 (small dotless i) -- only case-equivalent to itself
+  char:U+0130 (capital I with dot above)  --- only case-equivalent to itself +
+  char:U+0131 (small dotless i) --- only case-equivalent to itself
 With const:PCRE2_EXTRA_TURKISH_CASING::
   'i' = char:U+0130 (capital I with dot above) +
   char:U+0131 (small dotless i) = 'I'

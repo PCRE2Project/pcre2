@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -e
+
 # Render one PCRE2 AsciiDoc source as both a manpage and an HTML document.
 
 if [ $# = 1 ] ; then
@@ -26,8 +28,13 @@ if ! ruby -r rouge -e '' 2>/dev/null ; then
   exit 1
 fi
 
+if ! ruby -r asciidoctor -r asciidoctor-html5s -e '' 2>/dev/null ; then
+  echo "the asciidoctor-html5s Ruby gem is required to render documentation" >&2
+  exit 1
+fi
+
 script_dir=$(cd "$(dirname "$0")" && pwd)
 
 mkdir -p "$(dirname "$man_output")" "$(dirname "$html_output")"
 asciidoctor --failure-level WARN -v --require "$script_dir/AsciidocConverterPcre2.rb" --backend manpage --out-file "$man_output" "$input"
-asciidoctor --failure-level WARN -v --require "$script_dir/AsciidocConverterPcre2.rb" --backend html5 --attribute nofooter --out-file "$html_output" "$input"
+asciidoctor --failure-level WARN -v --require "$script_dir/AsciidocConverterPcre2.rb" --backend html5 --out-file "$html_output" "$input"

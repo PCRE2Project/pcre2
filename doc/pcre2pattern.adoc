@@ -1574,7 +1574,7 @@ properties, except for:
 +
 char:U+061C::: Arabic Letter Mark
 char:U+180E::: Mongolian Vowel Separator
-char:U+2066 -- char:U+2069::: Various "isolates"
+char:U+2066{blank}--{blank}char:U+2069::: Various "isolates"
 
 [.regex]`[:print:]`::
 This matches the same characters as [.regex]`[:graph:]` plus space characters that are

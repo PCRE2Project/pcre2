@@ -74,7 +74,7 @@ pattern is not always exactly equivalent, because any captures within
 subroutine calls are lost when the subroutine completes. If this is not a
 problem, this kind of rewriting will allow you to process patterns that PCRE2
 cannot otherwise handle. The matching performance of the two different versions
-of the pattern are roughly the same. (This applies from release 10.30 -- things
+of the pattern are roughly the same. (This applies from release 10.30 --- things
 were different in earlier releases.)
 
 == Stack and heap usage at run time

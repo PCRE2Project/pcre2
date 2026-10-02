@@ -1,14 +1,26 @@
 # frozen_string_literal: true
 
 # PCRE2's Asciidoctor extension defines a small semantic inline vocabulary and
-# backend-specific presentation for manpage output. Keep the extension
+# backend-specific presentation for HTML and manpage output. Keep the extension
 # backend-neutral until conversion so all outputs consume the same AST.
 require 'asciidoctor/converter/manpage'
 require 'asciidoctor/extensions'
+require 'asciidoctor-html5s'
 # Decode Asciidoctor's special-character substitutions before Rouge lexing.
 require 'cgi'
 # Supply lexical tokens for terminal highlighting of C source blocks.
 require 'rouge'
+
+class Pcre2DocumentDefaults < Asciidoctor::Extensions::Preprocessor
+  def process(document, reader)
+    document.set_attribute 'lang', 'en' unless document.attr? 'lang'
+    document.set_attribute 'source-highlighter', 'rouge' unless document.attr? 'source-highlighter'
+    if document.basebackend? 'html'
+      document.set_attribute 'nofooter' unless document.attr? 'nofooter'
+    end
+    reader
+  end
+end
 
 # Base processor for short API macros such as `func:pcre2_match()`. Each macro
 # becomes a monospaced quoted node with a semantic role; converters decide how
@@ -78,13 +90,18 @@ class Pcre2CharacterInlineMacro < Pcre2ApiInlineMacro
   end
 end
 
-# Install the API macros globally for documents loaded with this extension.
+# Install defaults and API macros for documents loaded with this extension.
 Asciidoctor::Extensions.register do
+  preprocessor Pcre2DocumentDefaults
   inline_macro Pcre2FunctionInlineMacro
   inline_macro Pcre2TypeInlineMacro
   inline_macro Pcre2ConstantInlineMacro
   inline_macro Pcre2ArgumentInlineMacro
   inline_macro Pcre2CharacterInlineMacro
+end
+
+class Pcre2HtmlConverter < Asciidoctor::Html5s::Converter
+  register_for 'html5'
 end
 
 # Preserve PCRE2's established terminal layout while adding description-list,

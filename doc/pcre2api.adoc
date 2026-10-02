@@ -2492,7 +2492,7 @@ the first significant item in every top-level branch is one of the following:
 [.regex]`+^+`  ::: unless const:PCRE2_MULTILINE is set
 [.regex]`\A`   ::: always
 [.regex]`\G`   ::: always
-[.regex]`+.*+` ::: sometimes -- see below
+[.regex]`+.*+` ::: sometimes --- see below
 --
 
 +
@@ -2721,7 +2721,7 @@ later capture groups may have lower numbers.
 +
 As a simple example of the name/number table, consider the following pattern
 after compilation by the 8-bit library (assume const:PCRE2_EXTENDED is set, so white
-space -- including newlines -- is ignored):
+space --- including newlines --- is ignored):
 
 +
 [source,regex]
