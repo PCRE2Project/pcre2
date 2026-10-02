@@ -9761,10 +9761,7 @@ compile_assert_matchingpath(compiler_common *common, PCRE2_SPTR cc, assert_backt
   }
 
   if (end_block_size > 0)
-  {
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), STR_END, 0);
-    OP1(SLJIT_MOV, STR_END, 0, STR_PTR, 0);
-  }
 
   memset(&altbacktrack, 0, sizeof(backtrack_common));
   if (conditional || (opcode == OP_ASSERT_NOT || opcode == OP_ASSERTBACK_NOT))
@@ -9777,7 +9774,8 @@ compile_assert_matchingpath(compiler_common *common, PCRE2_SPTR cc, assert_backt
     common->quit = NULL;
   }
 
-  common->in_positive_assertion = (opcode == OP_ASSERT || opcode == OP_ASSERTBACK);
+  common->in_positive_assertion =
+      (opcode == OP_ASSERT || opcode == OP_ASSERTBACK) && !local_quit_available;
   common->positive_assertion_quit = NULL;
 
   while (1)
@@ -9818,9 +9816,17 @@ compile_assert_matchingpath(compiler_common *common, PCRE2_SPTR cc, assert_backt
 
     if (has_vreverse)
     {
-      SLJIT_ASSERT(altbacktrack.top != NULL);
-      add_jump(compiler, &altbacktrack.top->simple_backtracks,
-               CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0));
+      SLJIT_ASSERT(altbacktrack.top != NULL && extrasize > 0);
+      if (framesize == no_stack)
+        add_jump(compiler, &altbacktrack.top->simple_backtracks,
+                 CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, SLJIT_MEM1(STACK_TOP), STACK(0)));
+      else
+      {
+        OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
+        add_jump(compiler, &altbacktrack.top->simple_backtracks,
+                 CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, SLJIT_MEM1(TMP1),
+                     STACK(-(framesize < 0 ? 0 : framesize) - extrasize)));
+      }
     }
 
     common->accept_label = LABEL();
@@ -10632,7 +10638,6 @@ compile_bracket_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_c
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), private_data_ptr + sizeof(sljit_sw), STR_END, 0);
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(0), TMP2, 0);
     OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), TMP1, 0);
-    OP1(SLJIT_MOV, STR_END, 0, STR_PTR, 0);
 
     has_vreverse = (*matchingpath == OP_VREVERSE);
     if (*matchingpath == OP_REVERSE || has_vreverse)
@@ -10874,7 +10879,7 @@ compile_bracket_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_c
     {
       SLJIT_ASSERT(backtrack->top != NULL && PRIVATE_DATA(ccbegin + 1));
       add_jump(compiler, &backtrack->top->simple_backtracks,
-               CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0));
+               CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr));
     }
 
     if (PRIVATE_DATA(ccbegin + 1))
@@ -13344,8 +13349,6 @@ compile_bracket_backtrackingpath(compiler_common *common, struct backtrack_commo
     if (common->restore_end_ptr == 0)
       common->restore_end_ptr = private_data_ptr + sizeof(sljit_sw);
   }
-  else if (SLJIT_UNLIKELY(opcode == OP_ASSERTBACK_NA) && PRIVATE_DATA(ccbegin + 1))
-    OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
 
   if (SLJIT_UNLIKELY(opcode == OP_ONCE))
   {
@@ -13485,7 +13488,7 @@ compile_bracket_backtrackingpath(compiler_common *common, struct backtrack_commo
           {
             SLJIT_ASSERT(current->top != NULL && PRIVATE_DATA(ccbegin + 1));
             add_jump(compiler, &current->top->simple_backtracks,
-                     CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0));
+                     CMP(SLJIT_NOT_EQUAL, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr));
           }
 
           if (PRIVATE_DATA(ccbegin + 1))
@@ -13858,7 +13861,7 @@ compile_control_verb_backtrackingpath(compiler_common *common, struct backtrack_
       add_jump(compiler, &common->then_trap->quit, JUMP(SLJIT_JUMP));
       return;
     }
-    else if (!common->local_quit_available && common->in_positive_assertion)
+    else if (common->in_positive_assertion)
     {
       add_jump(compiler, &common->positive_assertion_quit, JUMP(SLJIT_JUMP));
       return;
@@ -13961,6 +13964,12 @@ compile_then_trap_backtrackingpath(compiler_common *common, struct backtrack_com
 
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(STACK_TOP), STACK(0));
   free_stack(common, 3);
+
+  if (current->prev != NULL && *current->prev->cc == OP_VREVERSE)
+  {
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->control_head_ptr, TMP1, 0);
+    add_jump(compiler, &current->prev->own_backtracks, JUMP(SLJIT_JUMP));
+  }
 
   JUMPHERE(jump);
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->control_head_ptr, TMP1, 0);
