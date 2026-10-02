@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.26">
-<meta name="description" content="Using PCRE2 for partial matching">
-<title>pcre2partial(3)</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
-<style>
-/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Using PCRE2 for partial matching"><title>pcre2partial(3)</title><style>/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
 /* Uncomment the following line when using as a custom stylesheet */
 /* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
 html{font-family:sans-serif;-webkit-text-size-adjust:100%}
@@ -432,216 +421,213 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .sect1+.sect1{border:0}
 #footer{background:none}
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
-@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
-</style>
-</head>
-<body class="manpage toc2 toc-right">
-<div id="header">
-<h1>pcre2partial(3) Manual Page</h1>
-<div id="toc" class="toc2">
-<div id="toctitle">Table of Contents</div>
-<ul class="sectlevel1">
-<li><a href="#_partial_matching_in_pcre2">Partial matching in PCRE2</a></li>
-<li><a href="#_requirements_for_a_partial_match">Requirements for a partial match</a></li>
-<li><a href="#_partial_matching_using_pcre2_match">Partial matching using <code class="function">pcre2_match()</code></a>
-<ul class="sectlevel2">
-<li><a href="#_how_a_partial_match_is_processed_by_pcre2_match">How a partial match is processed by <code class="function">pcre2_match()</code></a></li>
-<li><a href="#_example_of_partial_matching_using_pcre2test">Example of partial matching using pcre2test</a></li>
-</ul>
-</li>
-<li><a href="#_multi_segment_matching_with_pcre2_match">Multi-segment matching with <code class="function">pcre2_match()</code></a></li>
-<li><a href="#_partial_matching_using_pcre2_dfa_match">Partial matching using <code class="function">pcre2_dfa_match()</code></a></li>
-<li><a href="#_multi_segment_matching_with_pcre2_dfa_match">Multi-segment matching with <code class="function">pcre2_dfa_match()</code></a></li>
-</ul>
-</div>
-<h2>Name</h2>
-<div class="sectionbody">
-<p>pcre2partial - PCRE2 partial matching</p>
-</div>
-</div>
-<div id="content">
-<div class="sect1">
-<h2 id="_partial_matching_in_pcre2">Partial matching in PCRE2</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>In normal use of PCRE2, if there is a match up to the end of a subject string,
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}</style>
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge, pre.rouge .w {
+  color: #24292f;
+  background-color: #f6f8fa;
+}
+pre.rouge .k, pre.rouge .kd, pre.rouge .kn, pre.rouge .kp, pre.rouge .kr, pre.rouge .kt, pre.rouge .kv {
+  color: #cf222e;
+}
+pre.rouge .gr {
+  color: #f6f8fa;
+}
+pre.rouge .gd {
+  color: #82071e;
+  background-color: #ffebe9;
+}
+pre.rouge .nb {
+  color: #953800;
+}
+pre.rouge .nc {
+  color: #953800;
+}
+pre.rouge .no {
+  color: #953800;
+}
+pre.rouge .nn {
+  color: #953800;
+}
+pre.rouge .sr {
+  color: #116329;
+}
+pre.rouge .na {
+  color: #116329;
+}
+pre.rouge .nt {
+  color: #116329;
+}
+pre.rouge .gi {
+  color: #116329;
+  background-color: #dafbe1;
+}
+pre.rouge .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .kc {
+  color: #0550ae;
+}
+pre.rouge .l, pre.rouge .ld, pre.rouge .m, pre.rouge .mb, pre.rouge .mf, pre.rouge .mh, pre.rouge .mi, pre.rouge .il, pre.rouge .mo, pre.rouge .mx {
+  color: #0550ae;
+}
+pre.rouge .sb {
+  color: #0550ae;
+}
+pre.rouge .bp {
+  color: #0550ae;
+}
+pre.rouge .ne {
+  color: #0550ae;
+}
+pre.rouge .nl {
+  color: #0550ae;
+}
+pre.rouge .py {
+  color: #0550ae;
+}
+pre.rouge .nv, pre.rouge .vc, pre.rouge .vg, pre.rouge .vi, pre.rouge .vm {
+  color: #0550ae;
+}
+pre.rouge .o, pre.rouge .ow {
+  color: #0550ae;
+}
+pre.rouge .gh {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .s, pre.rouge .sa, pre.rouge .sc, pre.rouge .dl, pre.rouge .sd, pre.rouge .s2, pre.rouge .se, pre.rouge .sh, pre.rouge .sx, pre.rouge .s1, pre.rouge .ss {
+  color: #0a3069;
+}
+pre.rouge .nd {
+  color: #8250df;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #8250df;
+}
+pre.rouge .err {
+  color: #f6f8fa;
+  background-color: #82071e;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cm, pre.rouge .cp, pre.rouge .cpf, pre.rouge .c1, pre.rouge .cs {
+  color: #6e7781;
+}
+pre.rouge .gl {
+  color: #6e7781;
+}
+pre.rouge .gt {
+  color: #6e7781;
+}
+pre.rouge .ni {
+  color: #24292f;
+}
+pre.rouge .si {
+  color: #24292f;
+}
+pre.rouge .ge {
+  color: #24292f;
+  font-style: italic;
+}
+pre.rouge .gs {
+  color: #24292f;
+  font-weight: bold;
+}
+</style></head><body class="manpage toc2 toc-right"><header><h1>pcre2partial(3)</h1><div class="details"><time id="revdate" datetime="2026-08-16">16 August 2026</time></div><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Table of Contents</h2><ol class="toc-list level-1"><li><a href="#_partial_matching_in_pcre2">Partial matching in PCRE2</a></li><li><a href="#_requirements_for_a_partial_match">Requirements for a partial match</a></li><li><a href="#_partial_matching_using_pcre2_match">Partial matching using <code class="function">pcre2_match()</code></a><ol class="toc-list level-2"><li><a href="#_how_a_partial_match_is_processed_by_pcre2_match">How a partial match is processed by <code class="function">pcre2_match()</code></a></li><li><a href="#_example_of_partial_matching_using_pcre2test">Example of partial matching using pcre2test</a></li></ol></li><li><a href="#_multi_segment_matching_with_pcre2_match">Multi-segment matching with <code class="function">pcre2_match()</code></a></li><li><a href="#_partial_matching_using_pcre2_dfa_match">Partial matching using <code class="function">pcre2_dfa_match()</code></a></li><li><a href="#_multi_segment_matching_with_pcre2_dfa_match">Multi-segment matching with <code class="function">pcre2_dfa_match()</code></a></li></ol></nav></header><div id="content"><section class="doc-section level-1"><h2 id="_partial_matching_in_pcre2">Partial matching in PCRE2</h2><p>In normal use of PCRE2, if there is a match up to the end of a subject string,
 but more characters are needed to match the entire pattern, <code class="constant">PCRE2_ERROR_NOMATCH</code>
 is returned, just like any other failing match. There are circumstances where
 it might be helpful to distinguish this "partial match" case.</p>
-</div>
-<div class="paragraph">
 <p>One example is an application where the subject string is very long, and not
 all available at once. The requirement here is to be able to do the matching
 segment by segment, but special action is needed when a matched substring spans
 the boundary between two segments.</p>
-</div>
-<div class="paragraph">
 <p>Another example is checking a user input string as it is typed, to ensure that
 it conforms to a required format. Invalid characters can be immediately
 diagnosed and rejected, giving instant feedback.</p>
-</div>
-<div class="paragraph">
 <p>Partial matching is a PCRE2-specific feature; it is not Perl-compatible. It is
 requested by setting one of the <code class="constant">PCRE2_PARTIAL_HARD</code> or <code class="constant">PCRE2_PARTIAL_SOFT</code>
 options when calling a matching function. The difference between the two
 options is whether or not a partial match is preferred to an alternative
 complete match, though the details differ between the two types of matching
 function. If both options are set, <code class="constant">PCRE2_PARTIAL_HARD</code> takes precedence.</p>
-</div>
-<div class="paragraph">
 <p>If you want to use partial matching with just-in-time optimized code, as well
 as setting a partial match option for the matching function, you must also call
 <code class="function">pcre2_jit_compile()</code> with one or both of these options:</p>
-</div>
-<div class="dlist options">
-<dl>
-<dt class="hdlist1"><code class="constant">PCRE2_JIT_PARTIAL_HARD</code></dt>
-<dt class="hdlist1"><code class="constant">PCRE2_JIT_PARTIAL_SOFT</code></dt>
-<dd>
-<p><code class="constant">PCRE2_JIT_COMPLETE</code> should also be set if you are going to run non-partial
+<div class="dlist options"><dl><dt><code class="constant">PCRE2_JIT_PARTIAL_HARD</code></dt><dt><code class="constant">PCRE2_JIT_PARTIAL_SOFT</code></dt><dd><code class="constant">PCRE2_JIT_COMPLETE</code> should also be set if you are going to run non-partial
 matches on the same pattern. Separate code is compiled for each mode. If the
-appropriate JIT mode has not been compiled, interpretive matching code is used.</p>
-</dd>
-</dl>
-</div>
-<div class="paragraph">
+appropriate JIT mode has not been compiled, interpretive matching code is used.</dd></dl></div>
 <p>Setting a partial matching option disables two of PCRE2&#8217;s standard
 optimization hints. PCRE2 remembers the last literal code unit in a pattern,
 and abandons matching immediately if it is not present in the subject string.
 This optimization cannot be used for a subject string that might match only
 partially. PCRE2 also remembers a minimum length of a matching string, and does
 not bother to run the matching function on shorter strings. This optimization
-is also disabled for partial matching.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_requirements_for_a_partial_match">Requirements for a partial match</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>A possible partial match occurs during matching when the end of the subject
+is also disabled for partial matching.</p></section>
+<section class="doc-section level-1"><h2 id="_requirements_for_a_partial_match">Requirements for a partial match</h2><p>A possible partial match occurs during matching when the end of the subject
 string is reached successfully, but either more characters are needed to
 complete the match, or the addition of more characters might change what is
 matched.</p>
-</div>
-<div class="paragraph">
 <p>Example 1: if the pattern is <code class="regex">abc</code> and the subject is <code class="subject">ab</code>, more characters are
 definitely needed to complete a match. In this case both hard and soft matching
 options yield a partial match.</p>
-</div>
-<div class="paragraph">
 <p>Example 2: if the pattern is <code class="regex">ab+</code> and the subject is <code class="subject">ab</code>, a complete match
 can be found, but the addition of more characters might change what is
 matched. In this case, only <code class="constant">PCRE2_PARTIAL_HARD</code> returns a partial match;
 <code class="constant">PCRE2_PARTIAL_SOFT</code> returns the complete match.</p>
-</div>
-<div class="paragraph">
 <p>On reaching the end of the subject, when <code class="constant">PCRE2_PARTIAL_HARD</code> is set, if the next
 pattern item is <code class="regex">\z</code>, <code class="regex">\Z</code>, <code class="regex">\b</code>, <code class="regex">\B</code>, or <code class="regex">$</code> there is always a partial match.
 Otherwise, for both options, the next pattern item must be one that inspects a
 character, and at least one of the following must be true:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>At least one character has already been inspected. An inspected character
+<div class="olist arabic"><ol class="arabic"><li>At least one character has already been inspected. An inspected character
 need not form part of the final matched string; lookbehind assertions and the
 <code class="regex">\K</code> escape sequence provide ways of inspecting characters before the start of a
-matched string.</p>
-</li>
-<li>
-<p>The pattern contains one or more lookbehind assertions. This condition
+matched string.</li><li>The pattern contains one or more lookbehind assertions. This condition
 exists in case there is a lookbehind that inspects characters before the start
-of the match.</p>
-</li>
-<li>
-<p>There is a special case when the whole pattern can match an empty string.
+of the match.</li><li>There is a special case when the whole pattern can match an empty string.
 When the starting point is at the end of the subject, the empty string match is
 a possibility, and if <code class="constant">PCRE2_PARTIAL_SOFT</code> is set and neither of the above
 conditions is true, it is returned. However, because adding more characters
 might result in a non-empty match, <code class="constant">PCRE2_PARTIAL_HARD</code> returns a partial match,
 which in this case means "there is going to be a match at this point, but until
 some more characters are added, we do not know if it will be an empty string or
-something longer".</p>
-</li>
-</ol>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_partial_matching_using_pcre2_match">Partial matching using <code class="function">pcre2_match()</code></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>When a partial matching option is set, the result of calling
+something longer".</li></ol></div></section>
+<section class="doc-section level-1"><h2 id="_partial_matching_using_pcre2_match">Partial matching using <code class="function">pcre2_match()</code></h2><p>When a partial matching option is set, the result of calling
 <code class="function">pcre2_match()</code> can be one of the following:</p>
-</div>
-<div class="dlist returns">
-<dl>
-<dt class="hdlist1">A successful match</dt>
-<dd>
-<p>A complete match has been found, starting and ending within this subject.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_ERROR_NOMATCH</code></dt>
-<dd>
-<p>No match can start anywhere in this subject.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_ERROR_PARTIAL</code></dt>
-<dd>
-<p>Adding more characters may result in a complete match that uses one or more
-characters from the end of this subject.</p>
-</dd>
-</dl>
-</div>
-<div class="paragraph">
+<div class="dlist returns"><dl><dt>A successful match</dt><dd>A complete match has been found, starting and ending within this subject.</dd><dt><code class="constant">PCRE2_ERROR_NOMATCH</code></dt><dd>No match can start anywhere in this subject.</dd><dt><code class="constant">PCRE2_ERROR_PARTIAL</code></dt><dd>Adding more characters may result in a complete match that uses one or more
+characters from the end of this subject.</dd></dl></div>
 <p>When a partial match is returned, the first two elements in the ovector point
 to the portion of the subject that was matched, but the values in the rest of
 the ovector are undefined. The appearance of <code class="regex">\K</code> in the pattern has no effect
 for a partial match. Consider this pattern:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">abc\K123</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">abc\K123</code></pre></div>
 <p>If it is matched against <code class="subject">456abc123xyz</code> the result is a complete match, and the
 ovector defines the matched string as <code class="subject">123</code>, because <code class="regex">\K</code> resets the "start of
 match" point. However, if a partial match is requested and the subject string
 is <code class="subject">456abc12</code>, a partial match is found for the string <code class="subject">abc12</code>, because all
 these characters are needed for a subsequent re-match with additional
 characters.</p>
-</div>
-<div class="paragraph">
 <p>If there is more than one partial match, the first one that was found provides
 the data that is returned. Consider this pattern:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">123\w+X|dogY</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">123\w+X|dogY</code></pre></div>
 <p>If this is matched against the subject string <code class="subject">abc123dog</code>, both alternatives
 fail to match, but the end of the subject is reached during matching, so
 <code class="constant">PCRE2_ERROR_PARTIAL</code> is returned. The offsets are set to 3 and 9, identifying
 <code class="subject">123dog</code> as the first partial match. (In this example, there are two partial
 matches, because <code class="subject">dog</code> on its own partially matches the second alternative.)</p>
-</div>
-<div class="sect2">
-<h3 id="_how_a_partial_match_is_processed_by_pcre2_match">How a partial match is processed by <code class="function">pcre2_match()</code></h3>
-<div class="paragraph">
-<p>What happens when a partial match is identified depends on which of the two
+<section class="doc-section level-2"><h3 id="_how_a_partial_match_is_processed_by_pcre2_match">How a partial match is processed by <code class="function">pcre2_match()</code></h3><p>What happens when a partial match is identified depends on which of the two
 partial matching options is set.</p>
-</div>
-<div class="paragraph">
 <p>If <code class="constant">PCRE2_PARTIAL_HARD</code> is set, <code class="constant">PCRE2_ERROR_PARTIAL</code> is returned as soon as a
 partial match is found, without continuing to search for possible complete
 matches. This option is "hard" because it prefers an earlier partial match over
 a later complete match. For this reason, the assumption is made that the end of
 the supplied subject string is not the true end of the available data, which is
 why <code class="regex">\z</code>, <code class="regex">\Z</code>, <code class="regex">\b</code>, <code class="regex">\B</code>, and <code class="regex">$</code> always give a partial match.</p>
-</div>
-<div class="paragraph">
 <p>If <code class="constant">PCRE2_PARTIAL_SOFT</code> is set, the partial match is remembered, but matching
 continues as normal, and other alternatives in the pattern are tried. If no
 complete match can be found, <code class="constant">PCRE2_ERROR_PARTIAL</code> is returned instead of
@@ -650,95 +636,45 @@ over a partial match. All the various matching items in a pattern behave as if
 the subject string is potentially complete; <code class="regex">\z</code>, <code class="regex">\Z</code>, and <code class="regex">$</code> match at the end of
 the subject, as normal, and for <code class="regex">\b</code> and <code class="regex">\B</code> the end of the subject is treated
 as a non-alphanumeric.</p>
-</div>
-<div class="paragraph">
 <p>The difference between the two partial matching options can be illustrated by a
 pattern such as:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">dog(sbody)?</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">dog(sbody)?</code></pre></div>
 <p>This matches either <code class="subject">dog</code> or <code class="subject">dogsbody</code>, greedily (that is, it prefers the
 longer string if possible). If it is matched against the string <code class="subject">dog</code> with
 <code class="constant">PCRE2_PARTIAL_SOFT</code>, it yields a complete match for <code class="subject">dog</code>. However, if
 <code class="constant">PCRE2_PARTIAL_HARD</code> is set, the result is <code class="constant">PCRE2_ERROR_PARTIAL</code>. On the other
 hand, if the pattern is made ungreedy the result is different:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">dog(sbody)??</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">dog(sbody)??</code></pre></div>
 <p>In this case the result is always a complete match because that is found first,
 and matching never continues after finding a complete match. It might be easier
 to follow this explanation by thinking of the two patterns like this:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><code class="regex">dog(sbody)?</code>    is the same as  <code class="regex">dogsbody|dog</code></p>
-</li>
-<li>
-<p><code class="regex">dog(sbody)??</code>   is the same as  <code class="regex">dog|dogsbody</code></p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
+<div class="ulist"><ul><li><code class="regex">dog(sbody)?</code>    is the same as  <code class="regex">dogsbody|dog</code></li><li><code class="regex">dog(sbody)??</code>   is the same as  <code class="regex">dog|dogsbody</code></li></ul></div>
 <p>The second pattern will never match <code class="subject">dogsbody</code>, because it will always find the
-shorter match first.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_example_of_partial_matching_using_pcre2test">Example of partial matching using pcre2test</h3>
-<div class="paragraph">
-<p>The <code>pcre2test</code> data modifiers <code>partial_hard</code> (or <code>ph</code>) and
+shorter match first.</p></section>
+<section class="doc-section level-2"><h3 id="_example_of_partial_matching_using_pcre2test">Example of partial matching using pcre2test</h3><p>The <code>pcre2test</code> data modifiers <code>partial_hard</code> (or <code>ph</code>) and
 <code>partial_soft</code> (or <code>ps</code>) set <code class="constant">PCRE2_PARTIAL_HARD</code> and <code class="constant">PCRE2_PARTIAL_SOFT</code>,
 respectively, when calling <code class="function">pcre2_match()</code>. Here is a run of
 <code>pcre2test</code> using a pattern that matches the whole subject in the form of a
 date:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-text" data-lang="text">  re&gt; /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="text">  re&gt; /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
 data&gt; 25dec3\=ph
 Partial match: 23dec3
 data&gt; 3ju\=ph
 Partial match: 3ju
 data&gt; 3juj\=ph
-No match</code></pre>
-</div>
-</div>
-<div class="paragraph">
+No match</code></pre></div>
 <p>This example gives the same results for both hard and soft partial matching
 options. Here is an example where there is a difference:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-text" data-lang="text">  re&gt; /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="text">  re&gt; /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
 data&gt; 25jun04\=ps
  0: 25jun04
  1: jun
 data&gt; 25jun04\=ph
-Partial match: 25jun04</code></pre>
-</div>
-</div>
-<div class="paragraph">
+Partial match: 25jun04</code></pre></div>
 <p>With <code class="constant">PCRE2_PARTIAL_SOFT</code>, the subject is matched completely. For
 <code class="constant">PCRE2_PARTIAL_HARD</code>, however, the subject is assumed not to be complete, so
-there is only a partial match.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_multi_segment_matching_with_pcre2_match">Multi-segment matching with <code class="function">pcre2_match()</code></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>PCRE was not originally designed with multi-segment matching in mind. However,
+there is only a partial match.</p></section></section>
+<section class="doc-section level-1"><h2 id="_multi_segment_matching_with_pcre2_match">Multi-segment matching with <code class="function">pcre2_match()</code></h2><p>PCRE was not originally designed with multi-segment matching in mind. However,
 over time, features (including partial matching) that make multi-segment
 matching possible have been added. A very long string can be searched segment
 by segment by calling <code class="function">pcre2_match()</code> repeatedly, with the aim of achieving
@@ -746,31 +682,21 @@ the same results that would happen if the entire string was available for
 searching all the time. Normally, the strings that are being sought are much
 shorter than each individual segment, and are in the middle of very long
 strings, so the pattern is normally not anchored.</p>
-</div>
-<div class="paragraph">
 <p>Special logic must be implemented to handle a matched substring that spans a
 segment boundary. <code class="constant">PCRE2_PARTIAL_HARD</code> should be used, because it returns a
 partial match at the end of a segment whenever there is the possibility of
 changing the match by adding more characters. The <code class="constant">PCRE2_NOTBOL</code> option should
 also be set for all but the first segment.</p>
-</div>
-<div class="paragraph">
 <p>When a partial match occurs, the next segment must be added to the current
 subject and the match re-run, using the <code class="parameter">startoffset</code> argument of
 <code class="function">pcre2_match()</code> to begin at the point where the partial match started.
 For example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-text" data-lang="text">  re&gt; /\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d/
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="text">  re&gt; /\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d/
 data&gt; ...the date is 23ja\=ph
 Partial match: 23ja
 data&gt; ...the date is 23jan19 and on that day...\=offset=15
  0: 23jan19
- 1: jan</code></pre>
-</div>
-</div>
-<div class="paragraph">
+ 1: jan</code></pre></div>
 <p>Note the use of the <code>offset</code> modifier to start the new match where the
 partial match was found. In this example, the next segment was added to the one
 in which the partial match was found. This is the most straightforward
@@ -779,8 +705,6 @@ segment. After a partial match, the first half of the buffer is discarded, the
 second half is moved to the start of the buffer, and a new segment is added
 before repeating the match as in the example above. After a no match, the
 entire buffer can be discarded.</p>
-</div>
-<div class="paragraph">
 <p>If there are memory constraints, you may want to discard text that precedes a
 partial match before adding the next segment. Unfortunately, this is not at
 present straightforward. In cases such as the above, where the pattern does not
@@ -789,24 +713,16 @@ substring. However, if the pattern contains a lookbehind assertion, characters
 that precede the start of the partial match may have been inspected during the
 matching process. When <code>pcre2test</code> displays a partial match, it indicates
 these characters with <code>&lt;</code> if the <code>allusedtext</code> modifier is set:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-text" data-lang="text">  re&gt; "(?&lt;=123)abc"
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="text">  re&gt; "(?&lt;=123)abc"
 data&gt; xx123ab\=ph,allusedtext
 Partial match: 123ab
-               &lt;&lt;&lt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
+               &lt;&lt;&lt;</code></pre></div>
 <p>However, the <code>allusedtext</code> modifier is not available for JIT matching,
 because JIT matching does not record the first (or last) consulted characters.
 For this reason, this information is not available via the API. It is therefore
 not possible in general to obtain the exact number of characters that must be
 retained in order to get the right match result. If you cannot retain the
 entire segment, you must find some heuristic way of choosing.</p>
-</div>
-<div class="paragraph">
 <p>If you know the approximate length of the matching substrings, you can use that
 to decide how much text to retain. The only lookbehind information that is
 currently available via the API is the length of the longest individual
@@ -816,53 +732,27 @@ lookbehinds. The value returned by calling <code class="function">pcre2_pattern_
 units) that any individual lookbehind moves back when it is processed. A
 pattern such as <code class="regex">(?&lt;=(?&lt;!b)a)</code> has a maximum lookbehind value of one, but
 inspects two characters before its starting point.</p>
-</div>
-<div class="paragraph">
 <p>In a non-UTF or a 32-bit case, moving back is just a subtraction, but in
 UTF-8 or UTF-16 you have to count characters while moving back through the code
-units.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_partial_matching_using_pcre2_dfa_match">Partial matching using <code class="function">pcre2_dfa_match()</code></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The DFA function moves along the subject string character by character, without
+units.</p></section>
+<section class="doc-section level-1"><h2 id="_partial_matching_using_pcre2_dfa_match">Partial matching using <code class="function">pcre2_dfa_match()</code></h2><p>The DFA function moves along the subject string character by character, without
 backtracking, searching for all possible matches simultaneously. If the end of
 the subject is reached before the end of the pattern, there is the possibility
 of a partial match.</p>
-</div>
-<div class="paragraph">
 <p>When <code class="constant">PCRE2_PARTIAL_SOFT</code> is set, <code class="constant">PCRE2_ERROR_PARTIAL</code> is returned only if there
 have been no complete matches. Otherwise, the complete matches are returned.
 If <code class="constant">PCRE2_PARTIAL_HARD</code> is set, a partial match takes precedence over any
 complete matches. The portion of the string that was matched when the longest
 partial match was found is set as the first matching string.</p>
-</div>
-<div class="paragraph">
 <p>Because the DFA function always searches for all possible matches, and there is
 no difference between greedy and ungreedy repetition, its behaviour is
 different from <code class="function">pcre2_match()</code>. Consider the string <code class="subject">dog</code> matched
 against this ungreedy pattern:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">dog(sbody)??</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">dog(sbody)??</code></pre></div>
 <p>Whereas the standard function stops as soon as it finds the complete match for
 <code class="subject">dog</code>, the DFA function also finds the partial match for <code class="subject">dogsbody</code>, and so
-returns that when <code class="constant">PCRE2_PARTIAL_HARD</code> is set.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_multi_segment_matching_with_pcre2_dfa_match">Multi-segment matching with <code class="function">pcre2_dfa_match()</code></h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>When a partial match has been found using the DFA matching function, it is
+returns that when <code class="constant">PCRE2_PARTIAL_HARD</code> is set.</p></section>
+<section class="doc-section level-1"><h2 id="_multi_segment_matching_with_pcre2_dfa_match">Multi-segment matching with <code class="function">pcre2_dfa_match()</code></h2><p>When a partial match has been found using the DFA matching function, it is
 possible to continue the match by providing additional subject data and calling
 the function again with the same compiled regular expression, this time setting
 the <code class="constant">PCRE2_DFA_RESTART</code> option. You must pass the same working space as before,
@@ -870,17 +760,11 @@ because this is where details of the previous partial match are stored. You can
 set the <code class="constant">PCRE2_PARTIAL_SOFT</code> or <code class="constant">PCRE2_PARTIAL_HARD</code> options with <code class="constant">PCRE2_DFA_RESTART</code>
 to continue partial matching over multiple segments. Here is an example using
 <code>pcre2test</code>:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-text" data-lang="text">  re&gt; /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="text">  re&gt; /^\d?\d(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d\d$/
 data&gt; 23ja\=dfa,ps
 Partial match: 23ja
 data&gt; n05\=dfa,dfa_restart
- 0: n05</code></pre>
-</div>
-</div>
-<div class="paragraph">
+ 0: n05</code></pre></div>
 <p>The first call has <code class="subject">23ja</code> as the subject, and requests partial matching; the
 second call has <code class="subject">n05</code> as the subject for the continued (restarted) match.
 Notice that when the match is complete, only the last part is shown; PCRE2 does
@@ -889,13 +773,7 @@ program to do that if it needs to. This means that, for an unanchored pattern,
 if a continued match fails, it is not possible to try again at a new starting
 point. All this facility is capable of doing is continuing with the previous
 match attempt. For example, consider this pattern:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-regex" data-lang="regex">1234|3789</code></pre>
-</div>
-</div>
-<div class="paragraph">
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">1234|3789</code></pre></div>
 <p>If the first part of the subject is <code class="subject">ABC123</code>, a partial match of the first
 alternative is found at offset 3. There is no partial match for the second
 alternative, because such a match does not start at the same point in the
@@ -903,16 +781,12 @@ subject string. Attempting to continue with the string <code class="subject">789
 match because only those alternatives that match at one point in the subject
 are remembered. Depending on the application, this may or may not be what you
 want.</p>
-</div>
-<div class="paragraph">
 <p>If you do want to allow for starting again at the next character, one way of
 doing it is to retain some or all of the segment and try a new complete match,
 as described for <code class="function">pcre2_match()</code> above. Another possibility is to work with
 two buffers. If a partial match at offset <em>n</em> in the first buffer is
 followed by "no match" when <code class="constant">PCRE2_DFA_RESTART</code> is used on the second buffer, you
 can then try a new match starting at offset <em>n</em>+1 in the first buffer.</p>
-</div>
-<div class="paragraph">
 <p>Therefore, <code class="constant">PCRE2_DFA_RESTART</code> does not remove the need to keep earlier subject
 data. In order to perform a bumpalong and continue matching at the next
 character, all subject data from the current match start must be retained,
@@ -925,20 +799,10 @@ bound on the number of chunks to buffer. For multi-segment searching that is
 intended to produce the same result as searching the whole subject, it is
 usually simpler to avoid <code class="constant">PCRE2_DFA_RESTART</code> and run a fresh match, using either
 matching function, over the retained text.</p>
-</div>
 <h2 id="_author" class="discrete">Author</h2>
-<div class="paragraph">
 <p>Philip Hazel<br>
 Retired from University Computing Service<br>
 Cambridge, England.</p>
-</div>
 <h2 id="_revision" class="discrete">Revision</h2>
-<div class="paragraph">
 <p>Last updated: 16 August 2026<br>
-Copyright &#169; 1997-2019 University of Cambridge.</p>
-</div>
-</div>
-</div>
-</div>
-</body>
-</html>
+Copyright &#169; 1997-2019 University of Cambridge.</p></section></div></body></html>

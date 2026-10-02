@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 
 # Running aclocal here first (as happened for a while) caused the macros that
 # libtoolize puts in the m4 directory to be newer than the aclocal.m4 file that

@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.26">
-<meta name="description" content="The POSIX API to the PCRE2 8-bit library">
-<title>pcre2posix(3)</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
-<style>
-/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="The POSIX API to the PCRE2 8-bit library"><title>pcre2posix(3)</title><style>/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
 /* Uncomment the following line when using as a custom stylesheet */
 /* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
 html{font-family:sans-serif;-webkit-text-size-adjust:100%}
@@ -432,80 +421,145 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .sect1+.sect1{border:0}
 #footer{background:none}
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
-@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
-</style>
-</head>
-<body class="manpage toc2 toc-right">
-<div id="header">
-<h1>pcre2posix(3) Manual Page</h1>
-<div id="toc" class="toc2">
-<div id="toctitle">Table of Contents</div>
-<ul class="sectlevel1">
-<li><a href="#_synopsis">Synopsis</a></li>
-<li><a href="#_description">Description</a></li>
-<li><a href="#_using_the_posix_functions">Using the POSIX functions</a></li>
-<li><a href="#_compiling_a_pattern">Compiling a pattern</a></li>
-<li><a href="#matching-newline-characters">Matching newline characters</a></li>
-<li><a href="#_matching_a_pattern">Matching a pattern</a></li>
-<li><a href="#_error_messages">Error messages</a></li>
-<li><a href="#_memory_usage">Memory usage</a></li>
-</ul>
-</div>
-<h2>Name</h2>
-<div class="sectionbody">
-<p>pcre2posix - PCRE2 POSIX API</p>
-</div>
-</div>
-<div id="content">
-<div class="sect1">
-<h2 id="_synopsis">Synopsis</h2>
-<div class="sectionbody">
-<div class="listingblock prototype">
-<div class="content">
-<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2posix.h&gt;
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}</style>
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge, pre.rouge .w {
+  color: #24292f;
+  background-color: #f6f8fa;
+}
+pre.rouge .k, pre.rouge .kd, pre.rouge .kn, pre.rouge .kp, pre.rouge .kr, pre.rouge .kt, pre.rouge .kv {
+  color: #cf222e;
+}
+pre.rouge .gr {
+  color: #f6f8fa;
+}
+pre.rouge .gd {
+  color: #82071e;
+  background-color: #ffebe9;
+}
+pre.rouge .nb {
+  color: #953800;
+}
+pre.rouge .nc {
+  color: #953800;
+}
+pre.rouge .no {
+  color: #953800;
+}
+pre.rouge .nn {
+  color: #953800;
+}
+pre.rouge .sr {
+  color: #116329;
+}
+pre.rouge .na {
+  color: #116329;
+}
+pre.rouge .nt {
+  color: #116329;
+}
+pre.rouge .gi {
+  color: #116329;
+  background-color: #dafbe1;
+}
+pre.rouge .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .kc {
+  color: #0550ae;
+}
+pre.rouge .l, pre.rouge .ld, pre.rouge .m, pre.rouge .mb, pre.rouge .mf, pre.rouge .mh, pre.rouge .mi, pre.rouge .il, pre.rouge .mo, pre.rouge .mx {
+  color: #0550ae;
+}
+pre.rouge .sb {
+  color: #0550ae;
+}
+pre.rouge .bp {
+  color: #0550ae;
+}
+pre.rouge .ne {
+  color: #0550ae;
+}
+pre.rouge .nl {
+  color: #0550ae;
+}
+pre.rouge .py {
+  color: #0550ae;
+}
+pre.rouge .nv, pre.rouge .vc, pre.rouge .vg, pre.rouge .vi, pre.rouge .vm {
+  color: #0550ae;
+}
+pre.rouge .o, pre.rouge .ow {
+  color: #0550ae;
+}
+pre.rouge .gh {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .s, pre.rouge .sa, pre.rouge .sc, pre.rouge .dl, pre.rouge .sd, pre.rouge .s2, pre.rouge .se, pre.rouge .sh, pre.rouge .sx, pre.rouge .s1, pre.rouge .ss {
+  color: #0a3069;
+}
+pre.rouge .nd {
+  color: #8250df;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #8250df;
+}
+pre.rouge .err {
+  color: #f6f8fa;
+  background-color: #82071e;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cm, pre.rouge .cp, pre.rouge .cpf, pre.rouge .c1, pre.rouge .cs {
+  color: #6e7781;
+}
+pre.rouge .gl {
+  color: #6e7781;
+}
+pre.rouge .gt {
+  color: #6e7781;
+}
+pre.rouge .ni {
+  color: #24292f;
+}
+pre.rouge .si {
+  color: #24292f;
+}
+pre.rouge .ge {
+  color: #24292f;
+  font-style: italic;
+}
+pre.rouge .gs {
+  color: #24292f;
+  font-weight: bold;
+}
+</style></head><body class="manpage toc2 toc-right"><header><h1>pcre2posix(3)</h1><div class="details"><time id="revdate" datetime="2024-11-27">27 November 2024</time></div><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Table of Contents</h2><ol class="toc-list level-1"><li><a href="#_synopsis">Synopsis</a></li><li><a href="#_description">Description</a></li><li><a href="#_using_the_posix_functions">Using the POSIX functions</a></li><li><a href="#_compiling_a_pattern">Compiling a pattern</a></li><li><a href="#matching-newline-characters">Matching newline characters</a></li><li><a href="#_matching_a_pattern">Matching a pattern</a></li><li><a href="#_error_messages">Error messages</a></li><li><a href="#_memory_usage">Memory usage</a></li></ol></nav></header><div id="content"><section class="doc-section level-1"><h2 id="_synopsis">Synopsis</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;pcre2posix.h&gt;</span><span class="cp">
+</span>
+<span class="kt">int</span> <span class="nf">pcre2_regcomp</span><span class="p">(</span><span class="n">regex_t</span> <span class="o">*</span><span class="n">preg</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">pattern</span><span class="p">,</span>
+     <span class="kt">int</span> <span class="n">cflags</span><span class="p">);</span>
 
-int pcre2_regcomp(regex_t *preg, const char *pattern,
-     int cflags);
+<span class="kt">int</span> <span class="nf">pcre2_regexec</span><span class="p">(</span><span class="k">const</span> <span class="n">regex_t</span> <span class="o">*</span><span class="n">preg</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">string</span><span class="p">,</span>
+     <span class="kt">size_t</span> <span class="n">nmatch</span><span class="p">,</span> <span class="n">regmatch_t</span> <span class="n">pmatch</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">eflags</span><span class="p">);</span>
 
-int pcre2_regexec(const regex_t *preg, const char *string,
-     size_t nmatch, regmatch_t pmatch[], int eflags);
+<span class="kt">size_t</span> <span class="nf">pcre2_regerror</span><span class="p">(</span><span class="kt">int</span> <span class="n">errcode</span><span class="p">,</span> <span class="k">const</span> <span class="n">regex_t</span> <span class="o">*</span><span class="n">preg</span><span class="p">,</span>
+     <span class="kt">char</span> <span class="o">*</span><span class="n">errbuf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">errbuf_size</span><span class="p">);</span>
 
-size_t pcre2_regerror(int errcode, const regex_t *preg,
-     char *errbuf, size_t errbuf_size);
-
-void pcre2_regfree(regex_t *preg);</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>This set of functions provides a POSIX-style API for the PCRE2 regular
+<span class="kt">void</span> <span class="nf">pcre2_regfree</span><span class="p">(</span><span class="n">regex_t</span> <span class="o">*</span><span class="n">preg</span><span class="p">);</span></code></pre></div></section>
+<section class="doc-section level-1"><h2 id="_description">Description</h2><p>This set of functions provides a POSIX-style API for the PCRE2 regular
 expression 8-bit library. There are no POSIX-style wrappers for PCRE2&#8217;s 16-bit
 and 32-bit libraries. See the
 <a href="pcre2api.html"><code>pcre2api</code></a>
 documentation for a description of PCRE2&#8217;s native API, which contains much
 additional functionality.</p>
-</div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Important</div>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>The functions described here are NOT thread-safe, and
+<section class="admonition-block important" role="doc-notice"><h6 class="block-title label-only"><span class="title-label">Important: </span></h6><p>The functions described here are NOT thread-safe, and
 should not be used in multi-threaded applications. They are also limited to
-processing subjects that are not bigger than 2GB. Use the native API instead.</p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
+processing subjects that are not bigger than 2GB. Use the native API instead.</p></section>
 <p>These functions are wrapper functions that ultimately call the PCRE2 native
 API. Their prototypes are defined in the <code>pcre2posix.h</code> header file, and
 they all have unique names starting with <code class="c">pcre2_</code>. However, the
@@ -513,20 +567,14 @@ they all have unique names starting with <code class="c">pcre2_</code>. However,
 standard POSIX names such as <code class="c">regcomp()</code> into <code class="function">pcre2_regcomp()</code> etc. This
 means that a program can use the usual POSIX names without running the risk of
 accidentally linking with POSIX functions from a different library.</p>
-</div>
-<div class="paragraph">
 <p>On Unix-like systems the PCRE2 POSIX library is called <code>libpcre2-posix</code>, so
 can be accessed by adding <code>-lpcre2-posix</code> to the command for linking an
 application. Because the POSIX functions call the native ones, it is also
 necessary to add <code>-lpcre2-8</code>.</p>
-</div>
-<div class="paragraph">
 <p>On Windows systems, if you are linking to a DLL version of the library, it is
 recommended that <code class="constant">PCRE2POSIX_SHARED</code> is defined before including the
 <code>pcre2posix.h</code> header, as it will allow for a more efficient way to
 invoke the functions by adding the <code class="c">__declspec(dllimport)</code> decorator.</p>
-</div>
-<div class="paragraph">
 <p>Although they were not defined as prototypes in <code>pcre2posix.h</code>, releases
 10.33 to 10.36 of the library contained functions with the POSIX names
 <code class="c">regcomp()</code> etc. These simply passed their arguments to the PCRE2
@@ -535,57 +583,33 @@ earlier versions of PCRE2, which had only POSIX names. However, this has proved
 troublesome in situations where a program links with several libraries, some of
 which use PCRE2&#8217;s POSIX interface while others use the real POSIX functions.
 For this reason, the POSIX names have been removed since release 10.37.</p>
-</div>
-<div class="paragraph">
 <p>Calling the header file <code>pcre2posix.h</code> avoids any conflict with other POSIX
 libraries. It can, of course, be renamed or aliased as <code>regex.h</code>, which is
 the "correct" name, if there is no clash. It provides two structure types,
 <code class="type">regex_t</code> for compiled internal forms, and <code class="type">regmatch_t</code> for returning
 captured substrings. It also defines some constants whose names start with
-<code class="c">REG_</code>; these are used for setting options and identifying error codes.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_using_the_posix_functions">Using the POSIX functions</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Note that these functions are just POSIX-style wrappers for PCRE2&#8217;s native API.
+<code class="c">REG_</code>; these are used for setting options and identifying error codes.</p></section>
+<section class="doc-section level-1"><h2 id="_using_the_posix_functions">Using the POSIX functions</h2><p>Note that these functions are just POSIX-style wrappers for PCRE2&#8217;s native API.
 They do not give POSIX regular expression behaviour, and they are not
 thread-safe or even POSIX compatible.</p>
-</div>
-<div class="paragraph">
 <p>Those POSIX option bits that can reasonably be mapped to PCRE2 native options
 have been implemented. In addition, the option <code class="constant">REG_EXTENDED</code> is defined with the
 value zero. This has no effect, but since programs that are written to the
 POSIX interface often use it, this makes it easier to slot in PCRE2 as a
 replacement library. Other POSIX options are not even defined.</p>
-</div>
-<div class="paragraph">
 <p>There are also some options that are not defined by POSIX. These have been
 added at the request of users who want to make use of certain PCRE2-specific
 features via the POSIX calling interface or to add BSD or GNU functionality.</p>
-</div>
-<div class="paragraph">
 <p>When PCRE2 is called via these functions, it is only the API that is POSIX-like
 in style. The syntax and semantics of the regular expressions themselves are
 still those of Perl, subject to the setting of various PCRE2 options, as
 described below. "POSIX-like in style" means that the API approximates to the
 POSIX definition; it is not fully POSIX-compatible, and in multi-unit encoding
 domains it is probably even less compatible.</p>
-</div>
-<div class="paragraph">
 <p>The descriptions below use the actual names of the functions, but, as described
 above, the standard POSIX names (without the <code class="c">pcre2_</code> prefix) may also be
-used.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_compiling_a_pattern">Compiling a pattern</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The function <code class="function">pcre2_regcomp()</code> is called to compile a pattern into an
+used.</p></section>
+<section class="doc-section level-1"><h2 id="_compiling_a_pattern">Compiling a pattern</h2><p>The function <code class="function">pcre2_regcomp()</code> is called to compile a pattern into an
 internal form. By default, the pattern is a C string terminated by a binary
 zero (but see <code class="constant">REG_PEND</code> below). The <code class="parameter">preg</code> argument is a pointer to a
 <code class="type">regex_t</code> structure that is used as a base for storing information about
@@ -593,80 +617,37 @@ the compiled regular expression. It is also used for input when <code class="con
 set. The <code class="type">regex_t</code> structure used by <code class="function">pcre2_regcomp()</code> is defined in
 <code>pcre2posix.h</code> and is not the same as the structure used by other libraries
 that provide POSIX-style matching.</p>
-</div>
-<div class="paragraph">
 <p>The argument <code class="parameter">cflags</code> is either zero, or contains one or more of the bits
 defined by the following macros:</p>
-</div>
-<div class="dlist options">
-<dl>
-<dt class="hdlist1"><code class="constant">REG_DOTALL</code></dt>
-<dd>
-<p>The <code class="constant">PCRE2_DOTALL</code> option is set when the regular expression is passed for
+<div class="dlist options"><dl><dt><code class="constant">REG_DOTALL</code></dt><dd>The <code class="constant">PCRE2_DOTALL</code> option is set when the regular expression is passed for
 compilation to the native function. Note that <code class="constant">REG_DOTALL</code> is not part of the
-POSIX standard.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">REG_ICASE</code></dt>
-<dd>
-<p>The <code class="constant">PCRE2_CASELESS</code> option is set when the regular expression is passed for
-compilation to the native function.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">REG_NEWLINE</code></dt>
-<dd>
-<p>The <code class="constant">PCRE2_MULTILINE</code> option is set when the regular expression is passed for
+POSIX standard.</dd><dt><code class="constant">REG_ICASE</code></dt><dd>The <code class="constant">PCRE2_CASELESS</code> option is set when the regular expression is passed for
+compilation to the native function.</dd><dt><code class="constant">REG_NEWLINE</code></dt><dd>The <code class="constant">PCRE2_MULTILINE</code> option is set when the regular expression is passed for
 compilation to the native function. Note that this does <em>not</em> mimic the
 defined POSIX behaviour for <code class="constant">REG_NEWLINE</code> (see the section
-<a href="#matching-newline-characters">Matching newline characters</a>).</p>
-</dd>
-<dt class="hdlist1"><code class="constant">REG_NOSPEC</code></dt>
-<dd>
-<p>The <code class="constant">PCRE2_LITERAL</code> option is set when the regular expression is passed for
+<a href="#matching-newline-characters">Matching newline characters</a>).</dd><dt><code class="constant">REG_NOSPEC</code></dt><dd>The <code class="constant">PCRE2_LITERAL</code> option is set when the regular expression is passed for
 compilation to the native function. This disables all meta characters in the
 pattern, causing it to be treated as a literal string. The only other options
 that are allowed with <code class="constant">REG_NOSPEC</code> are <code class="constant">REG_ICASE</code>, <code class="constant">REG_NOSUB</code>, <code class="constant">REG_PEND</code>, and
-<code class="constant">REG_UTF</code>. Note that <code class="constant">REG_NOSPEC</code> is not part of the POSIX standard.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">REG_NOSUB</code></dt>
-<dd>
-<p>When a pattern that is compiled with this flag is passed to
+<code class="constant">REG_UTF</code>. Note that <code class="constant">REG_NOSPEC</code> is not part of the POSIX standard.</dd><dt><code class="constant">REG_NOSUB</code></dt><dd>When a pattern that is compiled with this flag is passed to
 <code class="function">pcre2_regexec()</code> for matching, the <code class="parameter">nmatch</code> and <code class="parameter">pmatch</code> arguments
 are ignored, and no captured strings are returned. Versions of the PCRE2 library
 prior to 10.22 used to set the <code class="constant">PCRE2_NO_AUTO_CAPTURE</code> compile option, but this
-no longer happens because it disables the use of backreferences.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">REG_PEND</code></dt>
-<dd>
-<p>If this option is set, the <code class="parameter">reg_endp</code> field in the <code class="parameter">preg</code> structure
+no longer happens because it disables the use of backreferences.</dd><dt><code class="constant">REG_PEND</code></dt><dd>If this option is set, the <code class="parameter">reg_endp</code> field in the <code class="parameter">preg</code> structure
 (which has the type <code class="c">const char *</code>) must be set to point to the character beyond
 the end of the pattern before calling <code class="function">pcre2_regcomp()</code>. The pattern itself
 may now contain binary zeros, which are treated as data characters. Without
 <code class="constant">REG_PEND</code>, a binary zero terminates the pattern and the <code class="parameter">re_endp</code> field is
 ignored. This is a GNU extension to the POSIX standard and should be used with
-caution in software intended to be portable to other systems.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">REG_UCP</code></dt>
-<dd>
-<p>The <code class="constant">PCRE2_UCP</code> option is set when the regular expression is passed for
+caution in software intended to be portable to other systems.</dd><dt><code class="constant">REG_UCP</code></dt><dd>The <code class="constant">PCRE2_UCP</code> option is set when the regular expression is passed for
 compilation to the native function. This causes PCRE2 to use Unicode properties
 when matching <code class="regex">\d</code>, <code class="regex">\w</code>, etc., instead of just recognizing ASCII values. Note
-that <code class="constant">REG_UCP</code> is not part of the POSIX standard.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">REG_UNGREEDY</code></dt>
-<dd>
-<p>The <code class="constant">PCRE2_UNGREEDY</code> option is set when the regular expression is passed for
+that <code class="constant">REG_UCP</code> is not part of the POSIX standard.</dd><dt><code class="constant">REG_UNGREEDY</code></dt><dd>The <code class="constant">PCRE2_UNGREEDY</code> option is set when the regular expression is passed for
 compilation to the native function. Note that <code class="constant">REG_UNGREEDY</code> is not part of the
-POSIX standard.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">REG_UTF</code></dt>
-<dd>
-<p>The <code class="constant">PCRE2_UTF</code> option is set when the regular expression is passed for
+POSIX standard.</dd><dt><code class="constant">REG_UTF</code></dt><dd>The <code class="constant">PCRE2_UTF</code> option is set when the regular expression is passed for
 compilation to the native function. This causes the pattern itself and all data
 strings used for matching it to be treated as UTF-8 strings. Note that <code class="constant">REG_UTF</code>
-is not part of the POSIX standard.</p>
-</dd>
-</dl>
-</div>
-<div class="paragraph">
+is not part of the POSIX standard.</dd></dl></div>
 <p>In the absence of these flags, no options are passed to the native function.
 This means that the regex is compiled with PCRE2 default semantics. In
 particular, the way it handles newline characters in the subject string is the
@@ -674,206 +655,61 @@ Perl way, not the POSIX way. Note that setting <code class="constant">PCRE2_MULT
 <em>some</em> of the effects specified for <code class="constant">REG_NEWLINE</code>. It does not affect the way
 newlines are matched by the dot metacharacter (they are not) or by a negative
 class such as <code class="regex">[^a]</code> (they are).</p>
-</div>
-<div class="paragraph">
 <p>The yield of <code class="function">pcre2_regcomp()</code> is zero on success, and non-zero otherwise.
 The <code class="parameter">preg</code> structure is filled in on success, and one other member of the
 structure (as well as <code class="parameter">re_endp</code>) is public: <code class="parameter">re_nsub</code> contains the
 number of capturing subpatterns in the regular expression. Various error codes
 are defined in the header file.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>If the yield of <code class="function">pcre2_regcomp()</code> is non-zero, you must not attempt
+<aside class="admonition-block note" role="note"><h6 class="block-title label-only"><span class="title-label">Note: </span></h6><p>If the yield of <code class="function">pcre2_regcomp()</code> is non-zero, you must not attempt
 to use the contents of the <code class="parameter">preg</code> structure. If, for example, you pass it
 to <code class="function">pcre2_regexec()</code>, the result is undefined and your program is likely to
-crash.</p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="matching-newline-characters">Matching newline characters</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>This area is not simple, because POSIX and Perl take different views of things.
+crash.</p></aside></section>
+<section class="doc-section level-1"><h2 id="matching-newline-characters">Matching newline characters</h2><p>This area is not simple, because POSIX and Perl take different views of things.
 It is not possible to get PCRE2 to obey POSIX semantics, but then PCRE2 was
 never intended to be a POSIX engine. The following table lists the different
 possibilities for matching newline characters in Perl and PCRE2:</p>
-</div>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 40%;">
-<col style="width: 20%;">
-<col style="width: 40%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top"></th>
-<th class="tableblock halign-left valign-top">Default</th>
-<th class="tableblock halign-left valign-top">Change with</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">.</code> matches newline</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="constant">PCRE2_DOTALL</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">[^a]</code> matches newline</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">not changeable</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">$</code> matches newline at end</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="constant">PCRE2_DOLLAR_ENDONLY</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">$</code> matches newline in middle</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="constant">PCRE2_MULTILINE</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">^</code> matches newline in middle</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="constant">PCRE2_MULTILINE</code></p></td>
-</tr>
-</tbody>
-</table>
-<div class="paragraph">
+<div class="table-block"><table class="frame-all grid-all stretch"><colgroup><col style="width: 40%;"><col style="width: 20%;"><col style="width: 40%;"></colgroup><thead><tr><th class="halign-left valign-top"></th><th class="halign-left valign-top">Default</th><th class="halign-left valign-top">Change with</th></tr></thead><tbody><tr><td class="halign-left valign-top"><code class="regex">.</code> matches newline</td><td class="halign-left valign-top">no</td><td class="halign-left valign-top"><code class="constant">PCRE2_DOTALL</code></td></tr><tr><td class="halign-left valign-top"><code class="regex">[^a]</code> matches newline</td><td class="halign-left valign-top">yes</td><td class="halign-left valign-top">not changeable</td></tr><tr><td class="halign-left valign-top"><code class="regex">$</code> matches newline at end</td><td class="halign-left valign-top">yes</td><td class="halign-left valign-top"><code class="constant">PCRE2_DOLLAR_ENDONLY</code></td></tr><tr><td class="halign-left valign-top"><code class="regex">$</code> matches newline in middle</td><td class="halign-left valign-top">no</td><td class="halign-left valign-top"><code class="constant">PCRE2_MULTILINE</code></td></tr><tr><td class="halign-left valign-top"><code class="regex">^</code> matches newline in middle</td><td class="halign-left valign-top">no</td><td class="halign-left valign-top"><code class="constant">PCRE2_MULTILINE</code></td></tr></tbody></table></div>
 <p>This is the equivalent table for a POSIX-compatible pattern matcher:</p>
-</div>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 40%;">
-<col style="width: 20%;">
-<col style="width: 40%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top"></th>
-<th class="tableblock halign-left valign-top">Default</th>
-<th class="tableblock halign-left valign-top">Change with</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">.</code> matches newline</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="constant">REG_NEWLINE</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">[^a]</code> matches newline</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">yes</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="constant">REG_NEWLINE</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">$</code> matches newline at end</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="constant">REG_NEWLINE</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">$</code> matches newline in middle</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="constant">REG_NEWLINE</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="regex">^</code> matches newline in middle</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">no</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code class="constant">REG_NEWLINE</code></p></td>
-</tr>
-</tbody>
-</table>
-<div class="paragraph">
+<div class="table-block"><table class="frame-all grid-all stretch"><colgroup><col style="width: 40%;"><col style="width: 20%;"><col style="width: 40%;"></colgroup><thead><tr><th class="halign-left valign-top"></th><th class="halign-left valign-top">Default</th><th class="halign-left valign-top">Change with</th></tr></thead><tbody><tr><td class="halign-left valign-top"><code class="regex">.</code> matches newline</td><td class="halign-left valign-top">yes</td><td class="halign-left valign-top"><code class="constant">REG_NEWLINE</code></td></tr><tr><td class="halign-left valign-top"><code class="regex">[^a]</code> matches newline</td><td class="halign-left valign-top">yes</td><td class="halign-left valign-top"><code class="constant">REG_NEWLINE</code></td></tr><tr><td class="halign-left valign-top"><code class="regex">$</code> matches newline at end</td><td class="halign-left valign-top">no</td><td class="halign-left valign-top"><code class="constant">REG_NEWLINE</code></td></tr><tr><td class="halign-left valign-top"><code class="regex">$</code> matches newline in middle</td><td class="halign-left valign-top">no</td><td class="halign-left valign-top"><code class="constant">REG_NEWLINE</code></td></tr><tr><td class="halign-left valign-top"><code class="regex">^</code> matches newline in middle</td><td class="halign-left valign-top">no</td><td class="halign-left valign-top"><code class="constant">REG_NEWLINE</code></td></tr></tbody></table></div>
 <p>This behaviour is not what happens when PCRE2 is called via its POSIX
 API. By default, PCRE2&#8217;s behaviour is the same as Perl&#8217;s, except that there is
 no equivalent for <code class="constant">PCRE2_DOLLAR_ENDONLY</code> in Perl. In both PCRE2 and Perl, there
 is no way to stop newline from matching <code class="regex">[^a]</code>.</p>
-</div>
-<div class="paragraph">
 <p>Default POSIX newline handling can be obtained by setting <code class="constant">PCRE2_DOTALL</code> and
 <code class="constant">PCRE2_DOLLAR_ENDONLY</code> when calling <code class="function">pcre2_compile()</code> directly, but there is
 no way to make PCRE2 behave exactly as for the <code class="constant">REG_NEWLINE</code> action. When using
 the POSIX API, passing <code class="constant">REG_NEWLINE</code> to PCRE2&#8217;s <code class="function">pcre2_regcomp()</code> function
 causes <code class="constant">PCRE2_MULTILINE</code> to be passed to <code class="function">pcre2_compile()</code>, and <code class="constant">REG_DOTALL</code>
-passes <code class="constant">PCRE2_DOTALL</code>. There is no way to pass <code class="constant">PCRE2_DOLLAR_ENDONLY</code>.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_matching_a_pattern">Matching a pattern</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The function <code class="function">pcre2_regexec()</code> is called to match a compiled pattern
+passes <code class="constant">PCRE2_DOTALL</code>. There is no way to pass <code class="constant">PCRE2_DOLLAR_ENDONLY</code>.</p></section>
+<section class="doc-section level-1"><h2 id="_matching_a_pattern">Matching a pattern</h2><p>The function <code class="function">pcre2_regexec()</code> is called to match a compiled pattern
 <code class="parameter">preg</code> against a given <code class="parameter">string</code>, which is by default terminated by a
 zero byte (but see <code class="constant">REG_STARTEND</code> below), subject to the options in <code class="parameter">eflags</code>.
 These can be:</p>
-</div>
-<div class="dlist options">
-<dl>
-<dt class="hdlist1"><code class="constant">REG_NOTBOL</code></dt>
-<dd>
-<p>The <code class="constant">PCRE2_NOTBOL</code> option is set when calling the underlying PCRE2 matching
-function.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">REG_NOTEMPTY</code></dt>
-<dd>
-<p>The <code class="constant">PCRE2_NOTEMPTY</code> option is set when calling the underlying PCRE2 matching
+<div class="dlist options"><dl><dt><code class="constant">REG_NOTBOL</code></dt><dd>The <code class="constant">PCRE2_NOTBOL</code> option is set when calling the underlying PCRE2 matching
+function.</dd><dt><code class="constant">REG_NOTEMPTY</code></dt><dd>The <code class="constant">PCRE2_NOTEMPTY</code> option is set when calling the underlying PCRE2 matching
 function. Note that <code class="constant">REG_NOTEMPTY</code> is not part of the POSIX standard. However,
-setting this option can give more POSIX-like behaviour in some situations.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">REG_NOTEOL</code></dt>
-<dd>
-<p>The <code class="constant">PCRE2_NOTEOL</code> option is set when calling the underlying PCRE2 matching
-function.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">REG_STARTEND</code></dt>
-<dd>
-<p>When this option is set, the subject string starts at <code class="c">string + pmatch[0].rm_so</code>
+setting this option can give more POSIX-like behaviour in some situations.</dd><dt><code class="constant">REG_NOTEOL</code></dt><dd>The <code class="constant">PCRE2_NOTEOL</code> option is set when calling the underlying PCRE2 matching
+function.</dd><dt><code class="constant">REG_STARTEND</code></dt><dd><p>When this option is set, the subject string starts at <code class="c">string + pmatch[0].rm_so</code>
 and ends at <code class="c">string + pmatch[0].rm_eo</code>, which
 should point to the first character beyond the string. There may be binary
 zeros within the subject string, and indeed, using <code class="constant">REG_STARTEND</code> is the only
-way to pass a subject string that contains a binary zero.</p>
-<div class="paragraph">
-<p>Whatever the value of <code class="c">pmatch[0].rm_so</code>, the offsets of the matched string
+way to pass a subject string that contains a binary zero.</p><p>Whatever the value of <code class="c">pmatch[0].rm_so</code>, the offsets of the matched string
 and any captured substrings are still given relative to the start of
 <code class="parameter">string</code> itself. (Before PCRE2 release 10.30 these were given relative to
 <code class="c">string + pmatch[0].rm_so</code>, but this differs from other
 implementations.)</p>
-</div>
-<div class="paragraph">
 <p>This is a BSD extension, compatible with but not specified by IEEE Standard
 1003.2 (POSIX.2), and should be used with caution in software intended to be
 portable to other systems. Note that a non-zero <code class="parameter">rm_so</code> does not imply
 <code class="constant">REG_NOTBOL</code>; <code class="constant">REG_STARTEND</code> affects only the location and length of the string,
 not how it is matched. Setting <code class="constant">REG_STARTEND</code> and passing <code class="parameter">pmatch</code> as <code class="constant">NULL</code>
-are mutually exclusive; the error <code class="constant">REG_INVARG</code> is returned.</p>
-</div>
-</dd>
-</dl>
-</div>
-<div class="paragraph">
+are mutually exclusive; the error <code class="constant">REG_INVARG</code> is returned.</p></dd></dl></div>
 <p>If the pattern was compiled with the <code class="constant">REG_NOSUB</code> flag, no data about any matched
 strings is returned. The <code class="parameter">nmatch</code> and <code class="parameter">pmatch</code> arguments of
 <code class="function">pcre2_regexec()</code> are ignored (except possibly as input for <code class="constant">REG_STARTEND</code>).</p>
-</div>
-<div class="paragraph">
 <p>The value of <code class="parameter">nmatch</code> may be zero, and the value <code class="parameter">pmatch</code> may be <code class="constant">NULL</code>
 (unless <code class="constant">REG_STARTEND</code> is set); in both these cases no data about any matched
 strings is returned.</p>
-</div>
-<div class="paragraph">
 <p>Otherwise, the portion of the string that was matched, and also any captured
 substrings, are returned via the <code class="parameter">pmatch</code> argument, which points to an
 array of <code class="parameter">nmatch</code> structures of type <code class="type">regmatch_t</code>, containing the
@@ -883,55 +719,27 @@ of each substring, respectively. The 0th element of the vector relates to the
 entire portion of <code class="parameter">string</code> that was matched; subsequent elements relate to
 the capturing subpatterns of the regular expression. Unused entries in the
 array have both structure members set to -1.</p>
-</div>
-<div class="paragraph">
 <p><code class="type">regmatch_t</code> as well as the <code class="type">regoff_t</code> typedef it uses are defined in
 <code>pcre2posix.h</code> and are not warranted to have the same size or layout as other
 similarly named types from other libraries that provide POSIX-style matching.</p>
-</div>
-<div class="paragraph">
 <p>A successful match yields a zero return; various error codes are defined in the
-header file, of which <code class="constant">REG_NOMATCH</code> is the "expected" failure code.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_error_messages">Error messages</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The <code class="function">pcre2_regerror()</code> function maps a non-zero errorcode from either
+header file, of which <code class="constant">REG_NOMATCH</code> is the "expected" failure code.</p></section>
+<section class="doc-section level-1"><h2 id="_error_messages">Error messages</h2><p>The <code class="function">pcre2_regerror()</code> function maps a non-zero errorcode from either
 <code class="function">pcre2_regcomp()</code> or <code class="function">pcre2_regexec()</code> to a printable message. If
 <code class="parameter">preg</code> is not <code class="constant">NULL</code>, the error should have arisen from the use of that
 structure. A message terminated by a binary zero is placed in <code class="parameter">errbuf</code>. If
 the buffer is too short, only the first <code class="parameter">errbuf_size</code> - 1 characters of the
 error message are used. The yield of the function is the size of buffer needed
 to hold the whole message, including the terminating zero. This value is
-greater than <code class="parameter">errbuf_size</code> if the message was truncated.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_memory_usage">Memory usage</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Compiling a regular expression causes memory to be allocated and associated
+greater than <code class="parameter">errbuf_size</code> if the message was truncated.</p></section>
+<section class="doc-section level-1"><h2 id="_memory_usage">Memory usage</h2><p>Compiling a regular expression causes memory to be allocated and associated
 with the <code class="parameter">preg</code> structure. The function <code class="function">pcre2_regfree()</code> frees all
 such memory, after which <code class="parameter">preg</code> may no longer be used as a compiled
 expression.</p>
-</div>
 <h2 id="_author" class="discrete">Author</h2>
-<div class="paragraph">
 <p>Philip Hazel<br>
 Retired from University Computing Service<br>
 Cambridge, England.</p>
-</div>
 <h2 id="_revision" class="discrete">Revision</h2>
-<div class="paragraph">
 <p>Last updated: 27 November 2024<br>
-Copyright &#169; 1997-2024 University of Cambridge.</p>
-</div>
-</div>
-</div>
-</div>
-</body>
-</html>
+Copyright &#169; 1997-2024 University of Cambridge.</p></section></div></body></html>

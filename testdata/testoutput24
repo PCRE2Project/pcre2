@@ -549,15 +549,15 @@ No match
 
 # Error
 /a*b/null_pattern
-** Pattern conversion error at offset 0: NULL argument passed with non-zero length
+** Pattern conversion error at offset 0: NULL argument passed
 
 # Error
 //null_pattern
-** Pattern conversion error at offset 0: NULL argument passed with non-zero length
+** Pattern conversion error at offset 0: NULL argument passed
 
 # Error
 /a*b/use_length,null_pattern
-** Pattern conversion error at offset 0: NULL argument passed with non-zero length
+** Pattern conversion error at offset 0: NULL argument passed
 
 # Kind-of error... pattern conversion succeeds, but it converts to a non-empty
 # pattern, and null_pattern applies to the regex parse afterwards too, which

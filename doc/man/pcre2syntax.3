@@ -259,7 +259,7 @@ with the use of \f(CR\(rsC\fP permanently disabled.
 By default, \f(CR\(rsd\fP, \f(CR\(rss\fP, and \f(CR\(rsw\fP match only ASCII characters, even in UTF\-8 mode
 or in the 16\-bit and 32\-bit libraries. However, if locale\-specific matching is
 happening, \f(CR\(rss\fP and \f(CR\(rsw\fP may also match characters with code points in the range
-128\(em255. If the \fBPCRE2_UCP\fP option is set, the behaviour of these escape
+128\(en255. If the \fBPCRE2_UCP\fP option is set, the behaviour of these escape
 sequences is changed to use Unicode properties and they match many more
 characters, but there are some option settings that can restrict individual
 sequences to matching only ASCII characters.
@@ -654,7 +654,7 @@ Alphabetic
 .TP 7
 \f(CRascii\fP
 .ad l
-0\(em127
+0\(en127
 .TP 7
 \f(CRblank\fP
 .ad l

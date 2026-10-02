@@ -15265,6 +15265,12 @@ pcre2_jit_compile(pcre2_code *code, uint32_t options)
   if (code == NULL)
     return PCRE2_ERROR_NULL;
 
+  if (re->magic_number != MAGIC_NUMBER)
+    return PCRE2_ERROR_BADMAGIC;
+
+  if ((re->flags & (PCRE2_CODE_UNIT_WIDTH / 8)) == 0)
+    return PCRE2_ERROR_BADMODE;
+
   if ((options & ~PUBLIC_JIT_COMPILE_OPTIONS) != 0)
     return PCRE2_ERROR_JIT_BADOPTION;
 

@@ -44,6 +44,22 @@ classes from the same backend-neutral AsciiDoc nodes.
 The semantic vocabulary does not include raw HTML, styling-only backend
 conditionals, or `pass:[]` workarounds.
 
+HTML rendering uses the `asciidoctor-html5s` gem through `Pcre2HtmlConverter`,
+registered as the `html5` backend in `maint/AsciidocConverterPcre2.rb`. The
+subclass is reserved for PCRE2-specific overrides. It produces semantic HTML
+with fewer presentation wrappers; the default Asciidoctor CSS is not compatible
+with all of its markup. The gem's typography substitutions apply to both HTML
+and manpages: `--` becomes an en dash and `---` becomes an em dash in ordinary
+prose. The manpage converter remains separate.
+
+The extension supplies shared defaults before the document header is parsed:
+`lang=en`, `source-highlighter=rouge`, and, for HTML only, `nofooter`. Document
+headers can override or unset these defaults, and CLI/API attribute locks are
+respected. HTML uses Asciidoctor's Rouge integration; the manpage converter
+continues to highlight C source independently. Rendering commands specify only
+the input, backend, extension, output, and `--failure-level WARN` to reject
+documentation warnings.
+
 ## Inline public API vocabulary
 
 The converter implements five short-form inline macros. They do not take a

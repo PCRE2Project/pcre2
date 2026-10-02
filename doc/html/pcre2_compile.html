@@ -1,14 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.26">
-<title>pcre2_compile(3)</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
-<style>
-/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><title>pcre2_compile(3)</title><style>/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
 /* Uncomment the following line when using as a custom stylesheet */
 /* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
 html{font-family:sans-serif;-webkit-text-size-adjust:100%}
@@ -431,237 +421,149 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .sect1+.sect1{border:0}
 #footer{background:none}
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
-@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
-</style>
-</head>
-<body class="manpage">
-<div id="header">
-<h1>pcre2_compile(3) Manual Page</h1>
-<h2>Name</h2>
-<div class="sectionbody">
-<p>pcre2_compile - compile a regular expression pattern</p>
-</div>
-</div>
-<div id="content">
-<div class="sect1">
-<h2 id="_synopsis">Synopsis</h2>
-<div class="sectionbody">
-<div class="listingblock prototype">
-<div class="content">
-<pre class="highlight"><code class="language-c" data-lang="c">#include &lt;pcre2.h&gt;
-
-pcre2_code *pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen,
-                          uint32_t options, int *errorptr,
-                          PCRE2_SIZE *erroroffset,
-                          pcre2_compile_context *ccontext);</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_description">Description</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>This function compiles a regular expression pattern into an internal form. Its
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}</style>
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge, pre.rouge .w {
+  color: #24292f;
+  background-color: #f6f8fa;
+}
+pre.rouge .k, pre.rouge .kd, pre.rouge .kn, pre.rouge .kp, pre.rouge .kr, pre.rouge .kt, pre.rouge .kv {
+  color: #cf222e;
+}
+pre.rouge .gr {
+  color: #f6f8fa;
+}
+pre.rouge .gd {
+  color: #82071e;
+  background-color: #ffebe9;
+}
+pre.rouge .nb {
+  color: #953800;
+}
+pre.rouge .nc {
+  color: #953800;
+}
+pre.rouge .no {
+  color: #953800;
+}
+pre.rouge .nn {
+  color: #953800;
+}
+pre.rouge .sr {
+  color: #116329;
+}
+pre.rouge .na {
+  color: #116329;
+}
+pre.rouge .nt {
+  color: #116329;
+}
+pre.rouge .gi {
+  color: #116329;
+  background-color: #dafbe1;
+}
+pre.rouge .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .kc {
+  color: #0550ae;
+}
+pre.rouge .l, pre.rouge .ld, pre.rouge .m, pre.rouge .mb, pre.rouge .mf, pre.rouge .mh, pre.rouge .mi, pre.rouge .il, pre.rouge .mo, pre.rouge .mx {
+  color: #0550ae;
+}
+pre.rouge .sb {
+  color: #0550ae;
+}
+pre.rouge .bp {
+  color: #0550ae;
+}
+pre.rouge .ne {
+  color: #0550ae;
+}
+pre.rouge .nl {
+  color: #0550ae;
+}
+pre.rouge .py {
+  color: #0550ae;
+}
+pre.rouge .nv, pre.rouge .vc, pre.rouge .vg, pre.rouge .vi, pre.rouge .vm {
+  color: #0550ae;
+}
+pre.rouge .o, pre.rouge .ow {
+  color: #0550ae;
+}
+pre.rouge .gh {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .s, pre.rouge .sa, pre.rouge .sc, pre.rouge .dl, pre.rouge .sd, pre.rouge .s2, pre.rouge .se, pre.rouge .sh, pre.rouge .sx, pre.rouge .s1, pre.rouge .ss {
+  color: #0a3069;
+}
+pre.rouge .nd {
+  color: #8250df;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #8250df;
+}
+pre.rouge .err {
+  color: #f6f8fa;
+  background-color: #82071e;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cm, pre.rouge .cp, pre.rouge .cpf, pre.rouge .c1, pre.rouge .cs {
+  color: #6e7781;
+}
+pre.rouge .gl {
+  color: #6e7781;
+}
+pre.rouge .gt {
+  color: #6e7781;
+}
+pre.rouge .ni {
+  color: #24292f;
+}
+pre.rouge .si {
+  color: #24292f;
+}
+pre.rouge .ge {
+  color: #24292f;
+  font-style: italic;
+}
+pre.rouge .gs {
+  color: #24292f;
+  font-weight: bold;
+}
+</style></head><body class="manpage"><header><h1>pcre2_compile(3)</h1><div class="details"><time id="revdate" datetime="2024-10-30">30 October 2024</time></div></header><div id="content"><section class="doc-section level-1"><h2 id="_synopsis">Synopsis</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;pcre2.h&gt;</span><span class="cp">
+</span>
+<span class="n">pcre2_code</span> <span class="o">*</span><span class="nf">pcre2_compile</span><span class="p">(</span><span class="n">PCRE2_SPTR</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">PCRE2_SIZE</span> <span class="n">patlen</span><span class="p">,</span>
+                          <span class="kt">uint32_t</span> <span class="n">options</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">errorptr</span><span class="p">,</span>
+                          <span class="n">PCRE2_SIZE</span> <span class="o">*</span><span class="n">erroroffset</span><span class="p">,</span>
+                          <span class="n">pcre2_compile_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">);</span></code></pre></div></section>
+<section class="doc-section level-1"><h2 id="_description">Description</h2><p>This function compiles a regular expression pattern into an internal form. Its
 arguments are:</p>
-</div>
-<div class="dlist parameters">
-<dl>
-<dt class="hdlist1"><code class="parameter">pattern</code></dt>
-<dd>
-<p>A string containing expression to be compiled</p>
-</dd>
-<dt class="hdlist1"><code class="parameter">patlen</code></dt>
-<dd>
-<p>The length of the string or <code class="constant">PCRE2_ZERO_TERMINATED</code></p>
-</dd>
-<dt class="hdlist1"><code class="parameter">options</code></dt>
-<dd>
-<p>Primary option bits</p>
-</dd>
-<dt class="hdlist1"><code class="parameter">errorptr</code></dt>
-<dd>
-<p>Where to put an error code</p>
-</dd>
-<dt class="hdlist1"><code class="parameter">erroroffset</code></dt>
-<dd>
-<p>Where to put an error offset</p>
-</dd>
-<dt class="hdlist1"><code class="parameter">ccontext</code></dt>
-<dd>
-<p>Pointer to a compile context or <code class="constant">NULL</code></p>
-</dd>
-</dl>
-</div>
-<div class="paragraph">
+<div class="dlist parameters"><dl><dt><code class="parameter">pattern</code></dt><dd>A string containing expression to be compiled</dd><dt><code class="parameter">patlen</code></dt><dd>The length of the string or <code class="constant">PCRE2_ZERO_TERMINATED</code></dd><dt><code class="parameter">options</code></dt><dd>Primary option bits</dd><dt><code class="parameter">errorptr</code></dt><dd>Where to put an error code</dd><dt><code class="parameter">erroroffset</code></dt><dd>Where to put an error offset</dd><dt><code class="parameter">ccontext</code></dt><dd>Pointer to a compile context or <code class="constant">NULL</code></dd></dl></div>
 <p>The length of the pattern and any error offset that is returned are in code
 units, not characters. A <code class="constant">NULL</code> pattern with zero length is treated as an empty
 string. A compile context is needed only if you want to provide custom memory
 allocation functions, or to provide an external function for system stack size
 checking (see <code class="function">pcre2_set_compile_recursion_guard()</code>), or to change one or
 more of these parameters:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>What <code class="regex">\R</code> matches (Unicode newlines, or CR, LF, CRLF only);</p>
-</li>
-<li>
-<p>PCRE2&#8217;s character tables;</p>
-</li>
-<li>
-<p>The newline character sequence;</p>
-</li>
-<li>
-<p>The compile time nested parentheses limit;</p>
-</li>
-<li>
-<p>The maximum pattern length (in code units) that is allowed;</p>
-</li>
-<li>
-<p>The additional options bits.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
+<div class="ulist"><ul><li>What <code class="regex">\R</code> matches (Unicode newlines, or CR, LF, CRLF only);</li><li>PCRE2&#8217;s character tables;</li><li>The newline character sequence;</li><li>The compile time nested parentheses limit;</li><li>The maximum pattern length (in code units) that is allowed;</li><li>The additional options bits.</li></ul></div>
 <p>The primary option bits are:</p>
-</div>
-<div class="dlist options">
-<dl>
-<dt class="hdlist1"><code class="constant">PCRE2_ANCHORED</code></dt>
-<dd>
-<p>Force pattern anchoring</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_ALLOW_EMPTY_CLASS</code></dt>
-<dd>
-<p>Allow empty classes</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_ALT_BSUX</code></dt>
-<dd>
-<p>Alternative handling of <code class="regex">\u</code>, <code class="regex">\U</code>, and <code class="regex">\x</code></p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_ALT_CIRCUMFLEX</code></dt>
-<dd>
-<p>Alternative handling of <code class="regex">^</code> in multiline mode</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_ALT_EXTENDED_CLASS</code></dt>
-<dd>
-<p>Alternative extended character class syntax</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_ALT_VERBNAMES</code></dt>
-<dd>
-<p>Process backslashes in verb names</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_AUTO_CALLOUT</code></dt>
-<dd>
-<p>Compile automatic callouts</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_CASELESS</code></dt>
-<dd>
-<p>Do caseless matching</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_DOLLAR_ENDONLY</code></dt>
-<dd>
-<p><code class="regex">$</code> not to match newline at end</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_DOTALL</code></dt>
-<dd>
-<p><code class="regex">.</code> matches anything including NL</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_DUPNAMES</code></dt>
-<dd>
-<p>Allow duplicate names for subpatterns</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_ENDANCHORED</code></dt>
-<dd>
-<p>Pattern can match only at end of subject</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_EXTENDED</code></dt>
-<dd>
-<p>Ignore white space and <code class="regex">#</code> comments</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_FIRSTLINE</code></dt>
-<dd>
-<p>Force matching to be before newline</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_LITERAL</code></dt>
-<dd>
-<p>Pattern characters are all literal</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_MATCH_INVALID_UTF</code></dt>
-<dd>
-<p>Enable support for matching invalid UTF</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_MATCH_UNSET_BACKREF</code></dt>
-<dd>
-<p>Match unset backreferences</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_MULTILINE</code></dt>
-<dd>
-<p><code class="regex">^</code> and <code class="regex">$</code> match newlines within data</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_NEVER_BACKSLASH_C</code></dt>
-<dd>
-<p>Lock out the use of <code class="regex">\C</code> in patterns</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_NEVER_UCP</code></dt>
-<dd>
-<p>Lock out <code class="constant">PCRE2_UCP</code>, e.g. via <code class="regex">(*UCP)</code></p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_NEVER_UTF</code></dt>
-<dd>
-<p>Lock out <code class="constant">PCRE2_UTF</code>, e.g. via <code class="regex">(*UTF)</code></p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_NO_AUTO_CAPTURE</code></dt>
-<dd>
-<p>Disable numbered capturing paren-
-theses (named ones available)</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_NO_AUTO_POSSESS</code></dt>
-<dd>
-<p>Disable auto-possessification</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_NO_DOTSTAR_ANCHOR</code></dt>
-<dd>
-<p>Disable automatic anchoring for <code class="regex">.*</code></p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_NO_START_OPTIMIZE</code></dt>
-<dd>
-<p>Disable match-time start optimizations</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_NO_UTF_CHECK</code></dt>
-<dd>
-<p>Do not check the pattern for UTF validity
-(only relevant if <code class="constant">PCRE2_UTF</code> is set)</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_UCP</code></dt>
-<dd>
-<p>Use Unicode properties for <code class="regex">\d</code>, <code class="regex">\w</code>, etc.</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_UNGREEDY</code></dt>
-<dd>
-<p>Invert greediness of quantifiers</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_USE_OFFSET_LIMIT</code></dt>
-<dd>
-<p>Enable offset limit for unanchored matching</p>
-</dd>
-<dt class="hdlist1"><code class="constant">PCRE2_UTF</code></dt>
-<dd>
-<p>Treat pattern and subjects as UTF strings</p>
-</dd>
-</dl>
-</div>
-<div class="paragraph">
+<div class="dlist options"><dl><dt><code class="constant">PCRE2_ANCHORED</code></dt><dd>Force pattern anchoring</dd><dt><code class="constant">PCRE2_ALLOW_EMPTY_CLASS</code></dt><dd>Allow empty classes</dd><dt><code class="constant">PCRE2_ALT_BSUX</code></dt><dd>Alternative handling of <code class="regex">\u</code>, <code class="regex">\U</code>, and <code class="regex">\x</code></dd><dt><code class="constant">PCRE2_ALT_CIRCUMFLEX</code></dt><dd>Alternative handling of <code class="regex">^</code> in multiline mode</dd><dt><code class="constant">PCRE2_ALT_EXTENDED_CLASS</code></dt><dd>Alternative extended character class syntax</dd><dt><code class="constant">PCRE2_ALT_VERBNAMES</code></dt><dd>Process backslashes in verb names</dd><dt><code class="constant">PCRE2_AUTO_CALLOUT</code></dt><dd>Compile automatic callouts</dd><dt><code class="constant">PCRE2_CASELESS</code></dt><dd>Do caseless matching</dd><dt><code class="constant">PCRE2_DOLLAR_ENDONLY</code></dt><dd><code class="regex">$</code> not to match newline at end</dd><dt><code class="constant">PCRE2_DOTALL</code></dt><dd><code class="regex">.</code> matches anything including NL</dd><dt><code class="constant">PCRE2_DUPNAMES</code></dt><dd>Allow duplicate names for subpatterns</dd><dt><code class="constant">PCRE2_ENDANCHORED</code></dt><dd>Pattern can match only at end of subject</dd><dt><code class="constant">PCRE2_EXTENDED</code></dt><dd>Ignore white space and <code class="regex">#</code> comments</dd><dt><code class="constant">PCRE2_FIRSTLINE</code></dt><dd>Force matching to be before newline</dd><dt><code class="constant">PCRE2_LITERAL</code></dt><dd>Pattern characters are all literal</dd><dt><code class="constant">PCRE2_MATCH_INVALID_UTF</code></dt><dd>Enable support for matching invalid UTF</dd><dt><code class="constant">PCRE2_MATCH_UNSET_BACKREF</code></dt><dd>Match unset backreferences</dd><dt><code class="constant">PCRE2_MULTILINE</code></dt><dd><code class="regex">^</code> and <code class="regex">$</code> match newlines within data</dd><dt><code class="constant">PCRE2_NEVER_BACKSLASH_C</code></dt><dd>Lock out the use of <code class="regex">\C</code> in patterns</dd><dt><code class="constant">PCRE2_NEVER_UCP</code></dt><dd>Lock out <code class="constant">PCRE2_UCP</code>, e.g. via <code class="regex">(*UCP)</code></dd><dt><code class="constant">PCRE2_NEVER_UTF</code></dt><dd>Lock out <code class="constant">PCRE2_UTF</code>, e.g. via <code class="regex">(*UTF)</code></dd><dt><code class="constant">PCRE2_NO_AUTO_CAPTURE</code></dt><dd>Disable numbered capturing paren-
+theses (named ones available)</dd><dt><code class="constant">PCRE2_NO_AUTO_POSSESS</code></dt><dd>Disable auto-possessification</dd><dt><code class="constant">PCRE2_NO_DOTSTAR_ANCHOR</code></dt><dd>Disable automatic anchoring for <code class="regex">.*</code></dd><dt><code class="constant">PCRE2_NO_START_OPTIMIZE</code></dt><dd>Disable match-time start optimizations</dd><dt><code class="constant">PCRE2_NO_UTF_CHECK</code></dt><dd>Do not check the pattern for UTF validity
+(only relevant if <code class="constant">PCRE2_UTF</code> is set)</dd><dt><code class="constant">PCRE2_UCP</code></dt><dd>Use Unicode properties for <code class="regex">\d</code>, <code class="regex">\w</code>, etc.</dd><dt><code class="constant">PCRE2_UNGREEDY</code></dt><dd>Invert greediness of quantifiers</dd><dt><code class="constant">PCRE2_USE_OFFSET_LIMIT</code></dt><dd>Enable offset limit for unanchored matching</dd><dt><code class="constant">PCRE2_UTF</code></dt><dd>Treat pattern and subjects as UTF strings</dd></dl></div>
 <p>PCRE2 must be built with Unicode support (the default) in order to use
 <code class="constant">PCRE2_UTF</code>, <code class="constant">PCRE2_UCP</code> and related options.</p>
-</div>
-<div class="paragraph">
 <p>Additional options may be set in the compile context via the
 <code class="function">pcre2_set_compile_extra_options()</code>
 function.</p>
-</div>
-<div class="paragraph">
 <p>If either of <code class="parameter">errorptr</code> or <code class="parameter">erroroffset</code> is <code class="constant">NULL</code>, the function returns
 <code class="constant">NULL</code> immediately. Otherwise, the yield of this function is a pointer to a
 private data structure that contains the compiled pattern, or <code class="constant">NULL</code> if an error
@@ -669,22 +571,12 @@ was detected. In the error case, a text error message can be obtained by
 passing the value returned via the <code class="parameter">errorptr</code> argument to the
 <code class="function">pcre2_get_error_message()</code> function. The offset (in code units) where the
 error was encountered is returned via the <code class="parameter">erroroffset</code> argument.</p>
-</div>
-<div class="paragraph">
 <p>If there is no error, the value passed via <code class="parameter">errorptr</code> returns the message
 "no error" if passed to <code class="function">pcre2_get_error_message()</code>, and the value passed
 via <code class="parameter">erroroffset</code> is zero.</p>
-</div>
-<div class="paragraph">
 <p>There is a complete description of the PCRE2 native API, with more detail on
 each option, in the
 <a href="pcre2api.html"><code>pcre2api</code></a>
 page, and a description of the POSIX API in the
 <a href="pcre2posix.html"><code>pcre2posix</code></a>
-page.</p>
-</div>
-</div>
-</div>
-</div>
-</body>
-</html>
+page.</p></section></div></body></html>

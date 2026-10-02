@@ -1842,7 +1842,7 @@ This parameter is obsolete and should not be used in new code. The output is a
 .ad l
 The output is a \fBuint32_t\fP integer that gives the length of PCRE2\(cqs character
 processing tables in bytes. For details of these tables see the
-section on locale support
+section LOCALE SUPPORT
 below.
 .TP 26
 \fBPCRE2_CONFIG_UNICODE_VERSION\fP
@@ -2497,8 +2497,8 @@ This option has two effects. Firstly, it change the way PCRE2 processes \f(CR\(r
 default, only ASCII characters are recognized, but if \fBPCRE2_UCP\fP is set, Unicode
 properties are used to classify characters. There are some PCRE2_EXTRA
 options (see below) that add finer control to this behaviour. More details are
-given in the section on
-generic character types
+given in the section
+Generic character types
 in the
 \f(CRpcre2pattern\fP
 page.
@@ -3221,7 +3221,7 @@ The map consists of a number of fixed\-size entries. \fBPCRE2_INFO_NAMECOUNT\fP 
 .sp
 The names are in alphabetical order. If \f(CR(?|\fP is used to create multiple capture
 groups with the same number, as described in the
-section on duplicate group numbers
+section Duplicate group numbers
 in the
 \f(CRpcre2pattern\fP
 page, the groups may be given the same name, but there is only one entry in the
@@ -3416,10 +3416,10 @@ same allocator that was used for the compiled pattern (custom or default).
 .sp
 A match data block can be used many times, with the same or different compiled
 patterns. You can extract information from a match data block after a match
-operation has finished, using functions that are described in the sections on
-matched strings
+operation has finished, using functions that are described in the sections
+HOW pcre2_match() RETURNS A STRING AND CAPTURED SUBSTRINGS
 and
-other match data
+OTHER INFORMATION ABOUT A MATCH
 below.
 .sp
 When a call of pcre2_match() fails, valid data is available in the match
@@ -4482,7 +4482,7 @@ set, \fBPCRE2_ERROR_UNSET\fP is returned.
 .sp
 If the pattern uses the \f(CR(?|\fP feature to set up multiple
 capture groups with the same number, as described in the
-section on duplicate group numbers
+section Duplicate group numbers
 in the
 \f(CRpcre2pattern\fP
 page, you cannot use names to distinguish the different capture groups, because

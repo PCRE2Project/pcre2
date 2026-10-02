@@ -280,7 +280,7 @@ static const unsigned char match_error_texts[] =
   "unknown substring\0"
   /* 50 */
   "non-unique substring name\0"
-  "NULL argument passed with non-zero length\0"
+  "NULL argument passed\0"
   "nested recursion at the same subject position\0"
   "matching depth limit exceeded\0"
   "requested value is not available\0"
@@ -339,6 +339,8 @@ pcre2_get_error_message(int errorcode, PCRE2_UCHAR *buffer, PCRE2_SIZE bufflen)
   const unsigned char *message;
   PCRE2_SIZE i;
   int n, rc = 0;
+
+  PCRE2_ASSERT(bufflen == 0 || buffer != NULL);
 
   if (bufflen == 0)
     return PCRE2_ERROR_NOMEMORY;

@@ -1349,8 +1349,7 @@ or immediately after a range. For example, [.regex]`[b-d-z]` matches letters in 
 b to d, a hyphen character, or z.
 
 There is some special treatment for alphabetic ranges in EBCDIC environments;
-see the section
-"EBCDIC environments"
+see the section <<ebcdic-environments>>
 below.
 
 Perl treats a hyphen as a literal if it appears before or after a POSIX class
@@ -1575,7 +1574,7 @@ properties, except for:
 +
 char:U+061C::: Arabic Letter Mark
 char:U+180E::: Mongolian Vowel Separator
-char:U+2066 -- char:U+2069::: Various "isolates"
+char:U+2066{blank}--{blank}char:U+2069::: Various "isolates"
 
 [.regex]`[:print:]`::
 This matches the same characters as [.regex]`[:graph:]` plus space characters that are
@@ -1975,7 +1974,7 @@ duplicate numbers this is the one with the lowest number.
 
 If you use a named reference in a condition
 test (see the
-section about conditions
+section <<conditional-groups>>
 below), either to check whether a capture group has matched, or to check for
 recursion, all groups with the same name are tested. If the condition is true
 for any one of them, the overall condition is true. This is the same behaviour
@@ -2936,6 +2935,7 @@ Warning: The [.regex]`+(*ACCEPT)+` control verb
 should not be used within a script run group, because it causes an immediate
 exit from the group, bypassing the script run checking.
 
+[[conditional-groups]]
 == Conditional groups
 
 It is possible to cause the matching process to obey a pattern fragment
@@ -3644,8 +3644,7 @@ the start-of-match optimizations by setting the const:PCRE2_NO_START_OPTIMIZE op
 when calling func:pcre2_compile(), by calling func:pcre2_set_optimize() with a
 const:PCRE2_START_OPTIMIZE_OFF directive, or by starting the pattern with
 [.regex]`+(*NO_START_OPT)+`. There is more discussion of this option in the section
-entitled
-"Compiling a pattern"
+xref:pcre2api.adoc#compiling-a-pattern[Compiling a pattern]
 in the
 xref:pcre2api.adoc[`pcre2api`]
 documentation.
