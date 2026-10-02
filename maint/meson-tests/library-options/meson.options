@@ -1,0 +1,3 @@
+option('expect_default_static', type: 'boolean', value: false)
+option('request_static', type: 'boolean', value: false)
+option('request_shared', type: 'boolean', value: false)

@@ -26,6 +26,8 @@ on:
         - coelacanth
         - zebrilus
         - bee
+        - meson
+        - meson-old
   push:
     branches: [ main, "release/**" ]
   pull_request:
@@ -40,6 +42,111 @@ env:
   CMAKE_FLAGS: '-Wdev -Werror=dev -Wdeprecated -Werror=deprecated --warn-uninitialized'
 
 jobs:
+
+  meson:
+    name: Meson release (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'meson')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux
+            os: ubuntu-latest
+            manifest: linux
+          - name: macOS
+            os: macos-latest
+            manifest: macos
+          - name: Windows
+            os: windows-latest
+            manifest: windows
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+
+      # Meson uses Ninja, so MSVC and dumpbin must be available in this shell.
+      - name: Set up MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
+        with:
+          arch: x64
+
+      - name: Install Meson
+        run: |
+          python -m pip install --disable-pip-version-check meson
+          meson --version
+          ninja --version
+
+      - name: Configure
+        run: meson setup build --buildtype=release --prefix="${{ github.workspace }}/install-dir" --libdir=lib -Ddefault_library=both -Dpcre2_build_pcre2_16=true -Dpcre2_build_pcre2_32=true -Dpcre2_build_tests=true -Dpcre2_debug=enabled -Dpcre2_support_jit=enabled -Dwerror=true
+
+      - name: Build
+        run: meson compile -C build
+
+      - name: Test
+        run: meson test -C build --print-errorlogs
+
+      - name: Install
+        run: meson install -C build
+
+      - name: Check installation
+        if: runner.os != 'Windows'
+        run: |
+          maint/RunManifestTest install-dir maint/manifest-cmakeinstall-${{ matrix.manifest }} release meson
+          maint/RunSymbolTest install-dir/lib maint
+
+      - name: Check installation
+        if: runner.os == 'Windows'
+        run: |
+          ./maint/RunManifestTest.ps1 install-dir maint/manifest-cmakeinstall-windows meson
+          ./maint/RunSymbolTest.ps1 install-dir/bin maint
+
+      - name: Check Meson static/shared implementation
+        if: runner.os == 'Linux'
+        run: python maint/meson-tests/check-static-shared.py build
+
+      - name: Test Meson subproject interface
+        if: runner.os == 'Linux'
+        run: python maint/meson-tests/check-library-options.py
+
+      - name: Test installed CMake package with Meson
+        run: python maint/meson-tests/check-installed-cmake-package.py install-dir
+
+      - name: Test installed CMake package with CMake
+        run: python maint/cmake-tests/check-interface.py install install-dir --generator Ninja --build-type Release
+
+  meson-old:
+    name: Meson 1.6.1
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'meson-old')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+
+      - name: Install Meson 1.6.1
+        run: |
+          python -m pip install --disable-pip-version-check meson==1.6.1
+          meson --version | grep '^1\.6\.1$'
+          ninja --version
+
+      - name: Configure
+        run: meson setup build --buildtype=release -Ddefault_library=both -Dpcre2_build_pcre2_16=true -Dpcre2_build_pcre2_32=true -Dpcre2_build_tests=true -Dpcre2_support_jit=enabled -Dwerror=true
+
+      - name: Build
+        run: meson compile -C build
+
+      - name: Test
+        run: meson test -C build --print-errorlogs
+
+      - name: Check Meson static/shared implementation
+        run: python maint/meson-tests/check-static-shared.py build
+
+      - name: Test Meson subproject interface
+        run: python maint/meson-tests/check-library-options.py
 
   canary:
     # Tests with: Debug & assertions; link-size=4; libedit
@@ -142,6 +249,9 @@ jobs:
           tar -xz -f cmake-${CMAKE_VER}-linux-x86_64.tar.gz -C "$RUNNER_TEMP"
           realpath "$RUNNER_TEMP/cmake-${CMAKE_VER}-linux-x86_64/bin" >> "$GITHUB_PATH"
 
+      - name: Install Meson
+        run: python3 -m pip install --disable-pip-version-check meson
+
       - name: Configure
         run: |
           cmake --version | grep "version ${CMAKE_VER}" || (echo "CMake version mismatch" && exit 1)
@@ -160,49 +270,14 @@ jobs:
           ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
-      - name: Test CMake install interface
-        run: |
-          INSTALL_PREFIX=`pwd`/build/install-dir
-          cd maint/cmake-tests/install-interface
+      - name: Test installed CMake package with Meson
+        run: python3 maint/meson-tests/check-installed-cmake-package.py build/install-dir
 
-          for useStaticLibs in ON OFF; do
-            echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
-            rm -rf build
-            cmake -GNinja $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
-            (cd build; ninja)
-            ./build/test_executable
-            ldd ./build/test_executable
-            if [ $useStaticLibs = ON ]; then
-              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
-            else
-              # Test that the shared library is actually linked in
-              (ldd ./build/test_executable | grep -q "$INSTALL_PREFIX/lib/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
-            fi
-          done
+      - name: Test installed CMake package with CMake
+        run: python3 maint/cmake-tests/check-interface.py install build/install-dir --generator Ninja --build-type Release
 
-      - name: Test CMake build interface
-        run: |
-          BUILD_DIR=`pwd`
-          cp -rp maint/cmake-tests/build-interface ../cmake-tests-build-interface
-          cd ../cmake-tests-build-interface
-          ln -s "$BUILD_DIR" pcre2
-
-          for buildLibs in "ON;OFF" "OFF;ON"; do
-            static=`echo $buildLibs | cut -d';' -f1`
-            shared=`echo $buildLibs | cut -d';' -f2`
-            echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
-            rm -rf build
-            cmake -GNinja $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
-            (cd build; ninja)
-            ./build/test_executable
-            ldd ./build/test_executable
-            if [ $static = ON ]; then
-              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
-            else
-              # Test that the shared library is actually linked in
-              (ldd ./build/test_executable | grep -q "`pwd`/build/pcre2/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
-            fi
-          done
+      - name: Test CMake build-tree interface
+        run: python3 maint/cmake-tests/check-interface.py build-tree . --generator Ninja --build-type Debug
 
   dodo:
     # Tests with: Autoconf on oldest supported Ubuntu (in non-extended support)
@@ -328,49 +403,11 @@ jobs:
           ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux relwithdebinfo
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
-      - name: Test CMake install interface
-        run: |
-          INSTALL_PREFIX=`pwd`/build/install-dir
-          cd maint/cmake-tests/install-interface
+      - name: Test installed CMake package with CMake
+        run: python3 maint/cmake-tests/check-interface.py install build/install-dir --build-type RelWithDebInfo
 
-          for useStaticLibs in ON OFF; do
-            echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
-            rm -rf build
-            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
-            (cd build; make)
-            ./build/test_executable
-            ldd ./build/test_executable
-            if [ $useStaticLibs = ON ]; then
-              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
-            else
-              # Test that the shared library is actually linked in
-              (ldd ./build/test_executable | grep -q "$INSTALL_PREFIX/lib/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
-            fi
-          done
-
-      - name: Test CMake build interface
-        run: |
-          BUILD_DIR=`pwd`
-          cp -rp maint/cmake-tests/build-interface ../cmake-tests-build-interface
-          cd ../cmake-tests-build-interface
-          ln -s "$BUILD_DIR" pcre2
-
-          for buildLibs in "ON;OFF" "OFF;ON"; do
-            static=`echo $buildLibs | cut -d';' -f1`
-            shared=`echo $buildLibs | cut -d';' -f2`
-            echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
-            rm -rf build
-            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
-            (cd build; make)
-            ./build/test_executable
-            ldd ./build/test_executable
-            if [ $static = ON ]; then
-              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
-            else
-              # Test that the shared library is actually linked in
-              (ldd ./build/test_executable | grep -q "`pwd`/build/pcre2/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
-            fi
-          done
+      - name: Test CMake build-tree interface
+        run: python3 maint/cmake-tests/check-interface.py build-tree . --build-type Debug
 
   wasp:
     # Tests with: French locale; oldest supported CMake; no JIT; -Os; libreadline

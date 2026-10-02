@@ -21,6 +21,7 @@ BUILDIFIER_DOWNLOAD_URL = ('https://github.com/bazel-contrib/buildtools/'
 ZIG_VERSION = '0.16.0'
 YAPF_VERSION = '0.43.0'
 GERSEMI_VERSION = '0.29.0'
+MESON_VERSION = '1.7.0'
 
 
 def require_command(command, version_args, expected_version, download_url=None):
@@ -143,6 +144,20 @@ def run_gersemi():
 
 
 #######################
+# Run meson format
+#######################
+def run_meson_format():
+    meson_files = sorted({
+        filename
+        for pattern in ('meson.build', 'meson.options', 'maint/meson-tests/**/meson.build',
+                        'maint/meson-tests/**/meson.options')
+        for filename in glob.glob(pattern, recursive=True)
+    })
+    meson = venv_tool('meson', 'meson', MESON_VERSION)
+    subprocess.run([meson, 'format', '-i', '-c', 'maint/formatting/meson.format', *meson_files], check=True)
+
+
+#######################
 # Run buildifier
 #######################
 def run_buildifier():
@@ -163,7 +178,7 @@ if __name__ == "__main__":
     parser.add_argument('formatter',
                         nargs='?',
                         default='all',
-                        choices=('all', 'clang-format', 'yapf', 'gersemi', 'buildifier', 'zig'),
+                        choices=('all', 'clang-format', 'yapf', 'gersemi', 'meson', 'buildifier', 'zig'),
                         help='formatter to run (default: all)')
     arguments = parser.parse_args()
 
@@ -171,6 +186,7 @@ if __name__ == "__main__":
         'clang-format': run_clang_format,
         'yapf': run_yapf,
         'gersemi': run_gersemi,
+        'meson': run_meson_format,
         'buildifier': run_buildifier,
         'zig': run_zig_format,
     }

@@ -6,11 +6,13 @@ param (
   [string]$inputDir,
 
   [Parameter(Mandatory=$true)]
-  [string]$manifestName
+  [string]$manifestName,
+
+  [string]$producer = "cmake"
 )
 
 if ((-not $inputDir) -or (-not $manifestName)) {
-  throw "Usage: .\RunManifestTest.ps1 <dir> <manifest name>"
+  throw "Usage: .\RunManifestTest.ps1 <dir> <manifest name> [<producer>]"
 }
 
 $base = [System.IO.Path]::GetFileName($manifestName)
@@ -22,6 +24,13 @@ $installedFiles = Get-ChildItem -Recurse -Force -Path $inputDir |
 $null = New-Item -Force $base -Value (($installedFiles | Out-String) -replace "`r`n", "`n")
 
 $expectedFiles = Get-Content -Path $manifestName -Raw
+if ($producer -eq "meson") {
+  $expectedFiles = $expectedFiles.Replace("pcre2-config-version.cmake", "PCRE2ConfigVersion.cmake")
+  $expectedFiles = $expectedFiles.Replace("pcre2-config.cmake", "PCRE2Config.cmake")
+  $expectedFiles = (($expectedFiles.TrimEnd() -split "`n") |
+    Sort-Object {[System.BitConverter]::ToString([system.Text.Encoding]::UTF8.GetBytes($_.Substring($_.IndexOf(" ") + 1)))} |
+    Out-String) -replace "`r`n", "`n"
+}
 $actualFiles = Get-Content -Path $base -Raw
 
 if ($expectedFiles -ne $actualFiles) {
