@@ -41,6 +41,11 @@ and type:PCRE2_SIZE type. For example, patterns compiled on a 32-bit system usin
 PCRE2's 16-bit library cannot be reloaded on a 64-bit system, nor can they be
 reloaded using the 8-bit library.
 
+The builds must also have compatible bytecode and structure layouts, including
+the effective link size, character encoding, feature support, and compiler ABI.
+The decoder's version and size checks are only sanity checks; passing them does
+not establish complete build compatibility.
+
 Note that "serialization" in PCRE2 does not convert compiled patterns to an
 abstract format like Java or .NET serialization. The serialized output is
 really just a bytecode dump, which is why it can only be reloaded in the same

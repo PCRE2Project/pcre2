@@ -133,9 +133,9 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
     const pcre2_code *re = (const pcre2_code *)(codes[i]);
     (void)memcpy(dst_bytes, (const char *)re, re->blocksize);
 
-    /* Certain fields in the compiled code block are re-set during
-    deserialization. In order to ensure that the serialized data stream is always
-    the same for the same pattern, set them to zero here. We can't assume the
+    /* Clear process-specific fields that are re-set during deserialization.
+    Other fields, such as table ownership flags, can still depend on the pattern's
+    history, so this is not a canonical encoding. We can't assume the
     copy of the pattern is correctly aligned for accessing the fields as part of
     a structure. Note the use of sizeof(void *) in the second of these, to
     specify the size of a pointer. If sizeof(uint8_t *) is used (tables is a

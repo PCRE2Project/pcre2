@@ -25,8 +25,13 @@ int32_t pcre2_serialize_decode(pcre2_code **codes,
 This function decodes a serialized set of compiled patterns back into a list of
 individual patterns. This is possible only on a host that is running the same
 version of PCRE2, with the same code unit width, and the host must also have
-the same endianness, pointer width and type:PCRE2_SIZE type. The arguments for
-func:pcre2_serialize_decode() are:
+the same endianness, pointer width and type:PCRE2_SIZE type.
+
+The builds must also have compatible bytecode and structure layouts, including
+the effective link size. The decoder's sanity checks do not establish complete
+compatibility; see xref:pcre2serialize.adoc[`pcre2serialize`].
+
+The arguments for func:pcre2_serialize_decode() are:
 
 [.parameters]
 arg:codes::
