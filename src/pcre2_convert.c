@@ -857,7 +857,7 @@ convert_glob_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end, pcre2_output_
     }
 
     if (c == CHAR_LEFT_SQUARE_BRACKET || c == CHAR_RIGHT_SQUARE_BRACKET || c == CHAR_BACKSLASH ||
-        c == CHAR_MINUS)
+        c == CHAR_MINUS || c == CHAR_CIRCUMFLEX_ACCENT)
       convert_glob_write(out, CHAR_BACKSLASH);
 
     if (c == separator)
