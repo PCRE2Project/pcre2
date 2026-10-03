@@ -216,8 +216,9 @@ tables is used by all the decoded patterns and a reference count is used to
 arrange for its memory to be automatically freed when the last pattern is
 freed, but there is no locking on this reference count. Therefore, if you want
 to call func:pcre2_code_free() for these patterns in different threads, you
-must arrange your own locking, and ensure that func:pcre2_code_free() cannot
-be called by two threads at the same time.
+must arrange your own locking. The same reference count is updated by
+func:pcre2_code_copy(), so copying and freeing patterns sharing these tables
+must not run concurrently without synchronization.
 
 If a pattern was processed by func:pcre2_jit_compile() before being
 serialized, the JIT data is discarded and so is no longer available after a
