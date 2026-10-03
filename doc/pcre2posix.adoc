@@ -117,7 +117,8 @@ set. The type:regex_t structure used by func:pcre2_regcomp() is defined in
 that provide POSIX-style matching.
 
 The argument arg:cflags is either zero, or contains one or more of the bits
-defined by the following macros:
+defined by the following macros. Any other option bits cause
+const:REG_INVARG to be returned.
 
 [.options]
 const:REG_DOTALL::
@@ -195,6 +196,9 @@ If the yield of func:pcre2_regcomp() is non-zero, you must not attempt
 to use the contents of the arg:preg structure. If, for example, you pass it
 to func:pcre2_regexec(), the result is undefined and your program is likely to
 crash.
+
+The arg:preg structure can still be passed to func:pcre2_regerror() after a
+compilation error.
 ====
 
 [[matching-newline-characters]]
@@ -246,7 +250,8 @@ passes const:PCRE2_DOTALL. There is no way to pass const:PCRE2_DOLLAR_ENDONLY.
 The function func:pcre2_regexec() is called to match a compiled pattern
 arg:preg against a given arg:string, which is by default terminated by a
 zero byte (but see const:REG_STARTEND below), subject to the options in arg:eflags.
-These can be:
+Any option bits other than those listed below cause const:REG_INVARG to be
+returned.
 
 [.options]
 const:REG_NOTBOL::
@@ -308,6 +313,9 @@ similarly named types from other libraries that provide POSIX-style matching.
 
 A successful match yields a zero return; various error codes are defined in the
 header file, of which const:REG_NOMATCH is the "expected" failure code.
+Memory allocation failures and heap, match, or depth limit exhaustion return
+const:REG_ESPACE. Pattern errors detected during matching, such as recursion
+loops or invalid uses of [.regex]`\K`, return const:REG_BADPAT.
 
 == Error messages
 

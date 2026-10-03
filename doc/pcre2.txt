@@ -11656,7 +11656,8 @@ COMPILING A PATTERN
        other libraries that provide POSIX-style matching.
 
        The argument cflags is either zero, or contains one or more of the bits
-       defined by the following macros:
+       defined by the following macros. Any other option bits cause REG_INVARG
+       to be returned.
 
            REG_DOTALL   The PCRE2_DOTALL option is set when the regular
                         expression is passed for compilation to the native
@@ -11734,6 +11735,9 @@ COMPILING A PATTERN
            pass it to pcre2_regexec(), the result is undefined and your
            program is likely to crash.
 
+           The preg structure can still be passed to pcre2_regerror() after a
+           compilation error.
+
 
 MATCHING NEWLINE CHARACTERS
        This area is not simple, because POSIX and Perl take different views of
@@ -11809,8 +11813,9 @@ MATCHING NEWLINE CHARACTERS
 MATCHING A PATTERN
        The function pcre2_regexec() is called to match a compiled pattern preg
        against a given string, which is by default terminated by a zero byte
-       (but see REG_STARTEND below), subject to the options in eflags. These
-       can be:
+       (but see REG_STARTEND below), subject to the options in eflags. Any
+       option bits other than those listed below cause REG_INVARG to be
+       returned.
 
 
            REG_NOTBOL   The PCRE2_NOTBOL option is set when calling the
@@ -11876,7 +11881,10 @@ MATCHING A PATTERN
 
        A successful match yields a zero return; various error codes are
        defined in the header file, of which REG_NOMATCH is the "expected"
-       failure code.
+       failure code. Memory allocation failures and heap, match, or depth
+       limit exhaustion return REG_ESPACE. Pattern errors detected during
+       matching, such as recursion loops or invalid uses of \K, return
+       REG_BADPAT.
 
 
 ERROR MESSAGES

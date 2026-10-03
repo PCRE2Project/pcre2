@@ -119,8 +119,8 @@ changed. This #define is a copy of the one in pcre2_internal.h. */
 
 /* For pcre2_tables.c */
 #define PCRE2_PCRE2POSIX
-/* For pcre2_tables.c */
-#define PRIV(name) name
+/* Avoid collisions with pcre2test's tables when linking statically. */
+#define PRIV(name) _pcre2posix_##name
 
 #include "pcre2_tables.c"
 
@@ -205,11 +205,16 @@ static const char *const pstring[] = {
 *          Translate error code to string        *
 *************************************************/
 
+/* Ensure that re_erroffset can be passed to snprintf() as %llu. */
+STATIC_ASSERT(SIZE_MAX <= ULLONG_MAX, size_t_fits_in_unsigned_long_long);
+
 PCRE2POSIX_EXP_DEFN size_t PCRE2_CALL_CONVENTION
 pcre2_regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
 {
   const char *message;
-  char offset_buf[11 + 12]; // big enough for " at offset -2147483648"
+  /* Ensure that offset_buf has enough space for a size_t decimal. This estimate
+  of N characters in an N-bit build is a gross overestimate, but safe. */
+  char offset_buf[sizeof(" at offset ") + sizeof(size_t) * CHAR_BIT];
   int snprintf_rc, have_offset = 0;
   PCRE2_SIZE i;
 
@@ -218,12 +223,13 @@ pcre2_regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_siz
                 : pstring[errcode];
 
   if (preg != NULL &&
-      preg->re_erroffset != (size_t)(-1)
-      /* LCOV_EXCL_START - snprintf failures here are essentially unreachable */
-      && (snprintf_rc = snprintf(offset_buf, sizeof(offset_buf), " at offset %d",
-                                 (int)preg->re_erroffset)) > 0 &&
-      snprintf_rc < (int)sizeof(offset_buf))
-  /* LCOV_EXCL_STOP */
+      preg->re_erroffset != SIZE_MAX
+      // LCOV_EXCL_START - snprintf failures here are essentially unreachable
+      && (snprintf_rc = snprintf(offset_buf, sizeof(offset_buf), " at offset %llu",
+                                 (unsigned long long)preg->re_erroffset)) > 0 &&
+      snprintf_rc < (int)sizeof(offset_buf)
+      // LCOV_EXCL_STOP
+  )
   {
     have_offset = 1;
     offset_buf[sizeof(offset_buf) - 1] = 0; // Paranoia for very old snprintf
@@ -245,7 +251,7 @@ pcre2_regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_siz
   then we are in the "force EBCDIC 1047" mode. I have chosen to add a few lines
   here to translate the error strings on the fly, rather than require the string
   literals above to be written out arduously using the "STR_XYZ" macros. */
-  for (PCRE2_SIZE j = 0; j < i && j < errbuf_size; ++j)
+  for (PCRE2_SIZE j = 0; j < i && j + 1 < errbuf_size; ++j)
     errbuf[j] = PRIV(ascii_to_ebcdic_1047)[(uint8_t)errbuf[j]];
 #endif
 
@@ -297,14 +303,19 @@ pcre2_regcomp(regex_t *preg, const char *pattern, int cflags)
   PCRE2_SIZE erroffset;
   PCRE2_SIZE patlen;
   int errorcode;
-  int options = 0;
-  int re_nsub = 0;
+  pcre2_code *re_pcre2_code;
+  pcre2_match_data *re_match_data;
+  uint32_t options = 0;
+  uint32_t re_nsub = 0;
 
   if (preg == NULL)
     return REG_INVARG;
 
   preg->re_match_data = NULL;
   preg->re_pcre2_code = NULL;
+  preg->re_nsub = 0;
+  preg->re_erroffset = SIZE_MAX;
+  preg->re_cflags = 0;
 
   if (pattern == NULL)
     return REG_INVARG;
@@ -317,8 +328,13 @@ pcre2_regcomp(regex_t *preg, const char *pattern, int cflags)
   }
   else
   {
+    preg->re_endp = NULL;
     patlen = PCRE2_ZERO_TERMINATED;
   }
+
+  if ((cflags & ~(REG_ICASE | REG_NEWLINE | REG_DOTALL | REG_NOSUB | REG_UTF | REG_UCP |
+                  REG_UNGREEDY | REG_PEND | REG_NOSPEC)) != 0)
+    return REG_INVARG;
 
   if ((cflags & REG_ICASE) != 0)
     options |= PCRE2_CASELESS;
@@ -335,14 +351,13 @@ pcre2_regcomp(regex_t *preg, const char *pattern, int cflags)
   if ((cflags & REG_UNGREEDY) != 0)
     options |= PCRE2_UNGREEDY;
 
-  preg->re_cflags = cflags;
-  preg->re_pcre2_code =
-      pcre2_compile((PCRE2_SPTR)pattern, patlen, options, &errorcode, &erroffset, NULL);
-  preg->re_erroffset = erroffset;
+  re_pcre2_code = pcre2_compile((PCRE2_SPTR)pattern, patlen, options, &errorcode, &erroffset, NULL);
 
-  if (preg->re_pcre2_code == NULL)
+  if (re_pcre2_code == NULL)
   {
     unsigned int i;
+
+    preg->re_erroffset = erroffset;
 
     /* A negative value is a UTF error; otherwise all error codes are greater
     than COMPILE_ERROR_BASE, but check, just in case. */
@@ -359,23 +374,24 @@ pcre2_regcomp(regex_t *preg, const char *pattern, int cflags)
     return REG_BADPAT;
   }
 
-  (void)pcre2_pattern_info((const pcre2_code *)preg->re_pcre2_code, PCRE2_INFO_CAPTURECOUNT,
-                           &re_nsub);
-  preg->re_nsub = (size_t)re_nsub;
-  preg->re_match_data = pcre2_match_data_create(re_nsub + 1, NULL);
-  preg->re_erroffset = (size_t)(-1); // No meaning after successful compile
+  (void)pcre2_pattern_info(re_pcre2_code, PCRE2_INFO_CAPTURECOUNT, &re_nsub);
+  re_match_data = pcre2_match_data_create(re_nsub + 1, NULL);
 
-  if (preg->re_match_data == NULL)
+  if (re_match_data == NULL)
   {
     /* There is no facility for passing a custom allocator to the POSIX API, so
     our test code cannot force a malloc failure here. If there were an API to
     customize the default (global) PCRE2 allocator, we could test it. Since the
     code is nonetheless reachable, I prefer not to exclude it from coverage
     reporting. */
-    pcre2_code_free(preg->re_pcre2_code);
-    preg->re_pcre2_code = NULL;
+    pcre2_code_free(re_pcre2_code);
     return REG_ESPACE;
   }
+
+  preg->re_pcre2_code = re_pcre2_code;
+  preg->re_match_data = re_match_data;
+  preg->re_nsub = (size_t)re_nsub;
+  preg->re_cflags = cflags;
 
   return 0;
 }
@@ -386,10 +402,10 @@ pcre2_regcomp(regex_t *preg, const char *pattern, int cflags)
 *              Match a regular expression        *
 *************************************************/
 
-/* A suitable match_data block, large enough to hold all possible captures, was
-obtained when the pattern was compiled, to save having to allocate and free it
-for each match. If REG_NOSUB was specified at compile time, the nmatch and
-pmatch arguments are ignored, and the only result is yes/no/error. */
+/* A match_data block was obtained when the pattern was compiled, to save having
+to allocate and free it for each match. If REG_NOSUB was specified at compile
+time, the nmatch and pmatch arguments are ignored except as input for
+REG_STARTEND, and the only result is yes/no/error. */
 
 PCRE2POSIX_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t pmatch[],
@@ -397,11 +413,13 @@ pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t
 {
   int rc;
   PCRE2_SIZE so, eo;
-  int options = 0;
+  uint32_t options = 0;
   pcre2_match_data *md;
 
-  if (preg == NULL || preg->re_pcre2_code == NULL ||
-      preg->re_match_data == NULL || string == NULL)
+  if (preg == NULL || preg->re_pcre2_code == NULL || preg->re_match_data == NULL || string == NULL)
+    return REG_INVARG;
+
+  if ((eflags & ~(REG_NOTBOL | REG_NOTEOL | REG_NOTEMPTY | REG_STARTEND)) != 0)
     return REG_INVARG;
 
   md = (pcre2_match_data *)preg->re_match_data;
@@ -448,10 +466,11 @@ pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t
   if (rc >= 0)
   {
     size_t i;
+    size_t count = rc == 0 ? pcre2_get_ovector_count(md) : (size_t)rc;
     PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(md);
-    if ((size_t)rc > nmatch)
-      rc = (int)nmatch;
-    for (i = 0; i < (size_t)rc; i++)
+    if (count > nmatch)
+      count = nmatch;
+    for (i = 0; i < count; i++)
     {
       if (ovector[i * 2] == PCRE2_UNSET || ovector[i * 2] + so > (PCRE2_SIZE)INT_MAX ||
           ovector[i * 2 + 1] == PCRE2_UNSET || ovector[i * 2 + 1] + so > (PCRE2_SIZE)INT_MAX)
@@ -481,21 +500,33 @@ pcre2_regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t
 
   switch (rc)
   {
+  case PCRE2_ERROR_BAD_BACKSLASH_K:
+    return REG_BADPAT;
+  case PCRE2_ERROR_DEPTHLIMIT:
+    return REG_ESPACE;
   case PCRE2_ERROR_HEAPLIMIT:
+    return REG_ESPACE;
+  case PCRE2_ERROR_MATCHLIMIT:
     return REG_ESPACE;
   case PCRE2_ERROR_NOMATCH:
     return REG_NOMATCH;
+  case PCRE2_ERROR_RECURSELOOP:
+    return REG_BADPAT;
 
     /* LCOV_EXCL_START */
   case PCRE2_ERROR_BADMODE:
     return REG_INVARG;
   case PCRE2_ERROR_BADMAGIC:
     return REG_INVARG;
+  case PCRE2_ERROR_BADOFFSET:
+    return REG_INVARG;
+  case PCRE2_ERROR_BADOFFSETLIMIT:
+    return REG_INVARG;
   case PCRE2_ERROR_BADOPTION:
     return REG_INVARG;
   case PCRE2_ERROR_BADUTFOFFSET:
     return REG_INVARG;
-  case PCRE2_ERROR_MATCHLIMIT:
+  case PCRE2_ERROR_JIT_STACKLIMIT:
     return REG_ESPACE;
   case PCRE2_ERROR_NOMEMORY:
     return REG_ESPACE;

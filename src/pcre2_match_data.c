@@ -48,7 +48,7 @@ POSSIBILITY OF SUCH DAMAGE.
 *************************************************/
 
 /* A minimum of 1 is imposed on the number of ovector pairs. A maximum is also
-imposed because the oveccount field in a match data block is uintt6_t. */
+imposed because the oveccount field in a match data block is uint16_t. */
 
 PCRE2_EXP_DEFN pcre2_match_data *PCRE2_CALL_CONVENTION
 pcre2_match_data_create(uint32_t oveccount, pcre2_general_context *gcontext)

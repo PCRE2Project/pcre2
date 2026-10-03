@@ -55,6 +55,8 @@ For testing purposes, the "-v" option causes verification output to be written
 to stdout. */
 
 
+#include <limits.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <pcre2posix.h>
@@ -277,14 +279,57 @@ main(int argc, char **argv)
     return 1;
   }
 
+  {
+    const int invalid_flags[] = { REG_NOTBOL, REG_NOTEOL, REG_STARTEND, REG_NOTEMPTY, 0x2000,
+                                  INT_MIN,    -1 };
+    for (size_t i = 0; i < sizeof(invalid_flags) / sizeof(invalid_flags[0]); i++)
+    {
+      char errbuf[64];
+      if (regcomp(&re, "pattern", invalid_flags[i]) != REG_INVARG)
+      {
+        fprintf(stderr, "regcomp accepted invalid flags %d\n", invalid_flags[i]);
+        regfree(&re);
+        return 1;
+      }
+      if (re.re_pcre2_code != NULL || re.re_match_data != NULL || re.re_nsub != 0 ||
+          re.re_cflags != 0 || re.re_erroffset != SIZE_MAX ||
+          regerror(REG_INVARG, &re, errbuf, sizeof(errbuf)) != sizeof("bad argument") ||
+          strcmp(errbuf, "bad argument") != 0)
+      {
+        fprintf(stderr, "regcomp left invalid state after rejecting flags\n");
+        return 1;
+      }
+    }
+  }
+
   if (regexec(NULL, "subject", 0, NULL, 0) != REG_INVARG)
   {
     fprintf(stderr, "regexec(NULL, ...) did not return REG_INVARG\n");
     return 1;
   }
 
-  if (regcomp(&re, "test", 0) == 0)
+  if (regcomp(&re, "test", 0) != 0)
   {
+    fprintf(stderr, "regcomp failed for validation test pattern\n");
+    return 1;
+  }
+  else
+  {
+    const int invalid_flags[] = { REG_ICASE,  REG_NEWLINE,  REG_DOTALL, REG_NOSUB,
+                                  REG_UTF,    REG_UNGREEDY, REG_UCP,    REG_PEND,
+                                  REG_NOSPEC, 0x2000,       INT_MIN,    -1 };
+    for (size_t i = 0; i < sizeof(invalid_flags) / sizeof(invalid_flags[0]); i++)
+    {
+      match[0].rm_so = match[0].rm_eo = -2;
+      if (regexec(&re, "test", CAPCOUNT, match, invalid_flags[i]) != REG_INVARG ||
+          match[0].rm_so != -2 || match[0].rm_eo != -2)
+      {
+        fprintf(stderr, "regexec mishandled invalid flags %d\n", invalid_flags[i]);
+        regfree(&re);
+        return 1;
+      }
+    }
+
     if (regexec(&re, NULL, 0, NULL, 0) != REG_INVARG)
     {
       fprintf(stderr, "regexec(..., NULL, ...) did not return REG_INVARG\n");
@@ -322,6 +367,97 @@ main(int argc, char **argv)
     {
       fprintf(stderr, "regerror returned 0\n");
       return 1;
+    }
+  }
+
+  {
+    const size_t offsets[] = { 0, INT_MAX, (size_t)INT_MAX + 1, SIZE_MAX - 1, SIZE_MAX };
+    for (size_t i = 0; i < sizeof(offsets) / sizeof(offsets[0]); i++)
+    {
+      char expected[sizeof("bad argument at offset ") + sizeof(size_t) * CHAR_BIT];
+      size_t needed;
+      re.re_erroffset = offsets[i];
+      if (offsets[i] == SIZE_MAX)
+        strcpy(expected, "bad argument");
+      else
+        sprintf(expected, "bad argument at offset %llu", (unsigned long long)offsets[i]);
+      needed = strlen(expected) + 1;
+
+      if (regerror(REG_INVARG, &re, NULL, 0) != needed)
+      {
+        fprintf(stderr, "regerror returned an incorrect required size\n");
+        return 1;
+      }
+      for (size_t size = 0; size <= needed; size++)
+      {
+        char errbuf[sizeof(expected)];
+        size_t written = size == 0 ? 0 : size - 1;
+        if (regerror(REG_INVARG, &re, errbuf, size) != needed ||
+            (size > 0 && (memcmp(errbuf, expected, written) != 0 || errbuf[written] != 0)))
+        {
+          fprintf(stderr, "regerror mishandled an offset or truncated buffer\n");
+          return 1;
+        }
+      }
+    }
+  }
+
+  {
+    char *pattern = malloc(2 * 65534 + sizeof("(?(DEFINE))(a)"));
+    char *p;
+    int rc;
+    if (pattern == NULL)
+    {
+      fprintf(stderr, "Failed to allocate capture-limit test pattern\n");
+      return 1;
+    }
+    strcpy(pattern, "(?(DEFINE)");
+    p = pattern + strlen(pattern);
+    for (size_t i = 0; i < 65534; i++)
+    {
+      *p++ = '(';
+      *p++ = ')';
+    }
+    strcpy(p, ")(a)");
+    rc = regcomp(&re, pattern, 0);
+    free(pattern);
+    if (rc == REG_ESIZE)
+      PRINTF("Skipping capture-limit test: compiled pattern size limit\n");
+    else if (rc != 0)
+    {
+      fprintf(stderr, "Capture-limit test pattern failed to compile: %d\n", rc);
+      return 1;
+    }
+    else
+    {
+      PRINTF("Testing truncated native capture vector\n");
+      if (re.re_nsub != 65535 || regexec(&re, "a", CAPCOUNT, match, 0) != 0 ||
+          match[0].rm_so != 0 || match[0].rm_eo != 1)
+      {
+        fprintf(stderr, "Truncated capture vector lost the overall match\n");
+        regfree(&re);
+        return 1;
+      }
+      for (size_t i = 1; i < CAPCOUNT; i++)
+      {
+        if (match[i].rm_so != -1 || match[i].rm_eo != -1)
+        {
+          fprintf(stderr, "Truncated capture vector returned an unmatched capture\n");
+          regfree(&re);
+          return 1;
+        }
+      }
+      match[0].rm_so = 1;
+      match[0].rm_eo = 2;
+      if (regexec(&re, "xa", 1, match, REG_STARTEND) != 0 || match[0].rm_so != 1 ||
+          match[0].rm_eo != 2 || regexec(&re, "a", 0, match, 0) != 0 || match[0].rm_so != 1 ||
+          match[0].rm_eo != 2 || regexec(&re, "a", 0, NULL, 0) != 0)
+      {
+        fprintf(stderr, "Truncated capture vector mishandled match bounds\n");
+        regfree(&re);
+        return 1;
+      }
+      regfree(&re);
     }
   }
 

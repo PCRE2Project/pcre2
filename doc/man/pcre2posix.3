@@ -145,7 +145,8 @@ set. The \fBregex_t\fP structure used by pcre2_regcomp() is defined in
 that provide POSIX\-style matching.
 .sp
 The argument \fIcflags\fP is either zero, or contains one or more of the bits
-defined by the following macros:
+defined by the following macros. Any other option bits cause
+\fBREG_INVARG\fP to be returned.
 .sp
 .RS 4
 .PD 0
@@ -246,6 +247,9 @@ If the yield of pcre2_regcomp() is non\-zero, you must not attempt
 to use the contents of the \fIpreg\fP structure. If, for example, you pass it
 to pcre2_regexec(), the result is undefined and your program is likely to
 crash.
+.sp
+The \fIpreg\fP structure can still be passed to pcre2_regerror() after a
+compilation error.
 .sp .5v
 .RE
 .SH "MATCHING NEWLINE CHARACTERS"
@@ -407,7 +411,8 @@ passes \fBPCRE2_DOTALL\fP. There is no way to pass \fBPCRE2_DOLLAR_ENDONLY\fP.
 The function pcre2_regexec() is called to match a compiled pattern
 \fIpreg\fP against a given \fIstring\fP, which is by default terminated by a
 zero byte (but see \fBREG_STARTEND\fP below), subject to the options in \fIeflags\fP.
-These can be:
+Any option bits other than those listed below cause \fBREG_INVARG\fP to be
+returned.
 .sp
 .RS 4
 .PD
@@ -479,6 +484,9 @@ similarly named types from other libraries that provide POSIX\-style matching.
 .sp
 A successful match yields a zero return; various error codes are defined in the
 header file, of which \fBREG_NOMATCH\fP is the "expected" failure code.
+Memory allocation failures and heap, match, or depth limit exhaustion return
+\fBREG_ESPACE\fP. Pattern errors detected during matching, such as recursion
+loops or invalid uses of \f(CR\(rsK\fP, return \fBREG_BADPAT\fP.
 .SH "ERROR MESSAGES"
 .sp
 The pcre2_regerror() function maps a non\-zero errorcode from either
