@@ -6257,29 +6257,67 @@ unittest(void)
   rc = pcre2_config(PCRE2_CONFIG_UNICODE, NULL);
   ASSERT(rc == (int)sizeof(uint32_t), "pcre2_config(NULL)");
 
-#ifdef SUPPORT_JIT
-  rc = pcre2_config(PCRE2_CONFIG_JITTARGET, NULL);
-  ASSERT(rc > 0, "pcre2_config(NULL)");
+  {
+    const uint32_t string_options[] = {
+      PCRE2_CONFIG_JITTARGET, PCRE2_CONFIG_UNICODE_VERSION, PCRE2_CONFIG_VERSION
+    };
+    for (size_t i = 0; i < sizeof(string_options) / sizeof(string_options[0]); i++)
+    {
+      int length = pcre2_config(string_options[i], NULL);
+      errorbuffer[0] = CHAR_A;
+#ifndef SUPPORT_JIT
+      if (string_options[i] == PCRE2_CONFIG_JITTARGET)
+      {
+        rc = pcre2_config(string_options[i], errorbuffer);
+        ASSERT(length == PCRE2_ERROR_BADOPTION && rc == PCRE2_ERROR_BADOPTION &&
+                   errorbuffer[0] == CHAR_A, "pcre2_config(disabled JIT target)");
+        continue;
+      }
 #endif
-  rc = pcre2_config(PCRE2_CONFIG_UNICODE_VERSION, NULL);
-  ASSERT(rc > 4, "pcre2_config(NULL)");
-  rc = pcre2_config(PCRE2_CONFIG_VERSION, NULL);
-  ASSERT(rc > 4, "pcre2_config(NULL)");
+      ASSERT(length > 1 && length < (int)(sizeof(errorbuffer) / sizeof(errorbuffer[0])),
+             "pcre2_config(string size)");
+      for (int j = 0; j <= length; j++)
+        errorbuffer[j] = CHAR_A;
+      rc = pcre2_config(string_options[i], errorbuffer);
+      ASSERT(rc == length && pcre2_strlen(errorbuffer) == (size_t)length - 1 &&
+                 errorbuffer[length - 1] == 0 && errorbuffer[length] == CHAR_A,
+             "pcre2_config(string contents and terminator)");
+    }
+  }
 
-  rc = pcre2_config(PCRE2_CONFIG_MATCHLIMIT, &uval);
-  ASSERT(rc == 0, "pcre2_config(PCRE2_CONFIG_MATCHLIMIT)");
+  {
+    const struct { uint32_t option; uint32_t expected; } numeric_options[] = {
+      { PCRE2_CONFIG_BSR, BSR_DEFAULT },
+      { PCRE2_CONFIG_DEPTHLIMIT, MATCH_LIMIT_DEPTH },
+      { PCRE2_CONFIG_RECURSIONLIMIT, MATCH_LIMIT_DEPTH },
+      { PCRE2_CONFIG_HEAPLIMIT, HEAP_LIMIT },
+      { PCRE2_CONFIG_MATCHLIMIT, MATCH_LIMIT },
+      { PCRE2_CONFIG_NEWLINE, NEWLINE_DEFAULT },
+      { PCRE2_CONFIG_PARENSLIMIT, PARENS_NEST_LIMIT },
+      { PCRE2_CONFIG_STACKRECURSE, 0 },
+      { PCRE2_CONFIG_TABLES_LENGTH, TABLES_LENGTH }
+    };
+    for (size_t i = 0; i < sizeof(numeric_options) / sizeof(numeric_options[0]); i++)
+    {
+      uint32_t values[] = { 123, 0, 456 };
+      rc = pcre2_config(numeric_options[i].option, &values[1]);
+      ASSERT(rc == 0 && values[1] == numeric_options[i].expected &&
+                 values[0] == 123 && values[2] == 456, "pcre2_config(numeric value)");
+    }
+  }
 
   rc = pcre2_config(999, NULL);
   ASSERT(rc == PCRE2_ERROR_BADOPTION, "pcre2_config(bad option)");
 
+  uval = 123;
   rc = pcre2_config(999, &uval);
-  ASSERT(rc == PCRE2_ERROR_BADOPTION, "pcre2_config(bad option)");
+  ASSERT(rc == PCRE2_ERROR_BADOPTION && uval == 123, "pcre2_config(bad option)");
 
   rc = pcre2_config(PCRE2_CONFIG_STACKRECURSE, &uval);
-  ASSERT(rc == 0, "pcre2_config(PCRE2_CONFIG_STACKRECURSE)");
+  ASSERT(rc == 0 && uval == 0, "pcre2_config(PCRE2_CONFIG_STACKRECURSE)");
 
   rc = pcre2_config(PCRE2_CONFIG_LINKSIZE, &uval);
-  ASSERT(rc == 0, "pcre2_config(PCRE2_CONFIG_LINKSIZE)");
+  ASSERT(rc == 0 && uval == CONFIGURED_LINK_SIZE, "pcre2_config(PCRE2_CONFIG_LINKSIZE)");
 
   /* ------------------------ Context functions ------------------------------ */
 
