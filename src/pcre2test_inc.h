@@ -2017,17 +2017,33 @@ process_command(void)
     though reloading with the opposite endianness does not work), write the
     length byte-by-byte. */
 
-    for (i = 0; i < 4; i++)
-      fputc((serial_size >> (i * 8)) & 255, f);
-    if (fwrite(serial, 1, serial_size, f) != serial_size)
+    if (serial_size > SERIALIZED_SIZE_LIMIT)
     {
-      cfprintf(clr_test_error, outfile, "** Wrong return from fwrite()\n");
+      cfprintf(clr_test_error, outfile, "** Serialized data is too large for #save\n");
+      pcre2_serialize_free(serial);
       fclose(f);
       return PR_ABEND;
     }
 
-    fclose(f);
+    BOOL write_failed = FALSE;
+    for (i = 0; i < 4; i++)
+    {
+      if (fputc((serial_size >> (i * 8)) & 255, f) == EOF)
+      {
+        write_failed = TRUE;
+        break;
+      }
+    }
+    if (!write_failed && fwrite(serial, 1, serial_size, f) != serial_size)
+      write_failed = TRUE;
+    if (fclose(f) != 0)
+      write_failed = TRUE;
     pcre2_serialize_free(serial);
+    if (write_failed)
+    {
+      cfprintf(clr_test_error, outfile, "** Write error in #save\n");
+      return PR_ABEND;
+    }
     while (patstacknext > 0)
     {
       compiled_code = patstack[--patstacknext];
@@ -2058,7 +2074,7 @@ process_command(void)
       serial_size |= (PCRE2_SIZE)c << (i * 8);
     }
 
-    if (serial_size > (PCRE2_SIZE)1024 * 1024 * 1024)
+    if (serial_size > SERIALIZED_SIZE_LIMIT)
     {
       cfprintf(clr_test_error, outfile, "** Serialized data is too large for #load\n");
       fclose(f);

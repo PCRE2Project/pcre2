@@ -2189,7 +2189,9 @@ The command
 ....
 
 causes all the stacked patterns to be serialized and the result written to the
-named file. Afterwards, all the stacked patterns are freed. The command
+named file. Only after a successful write and close are the stacked patterns
+freed. Both saving and loading limit the serialized stream to 1 GiB, excluding
+the four-byte file-length prefix. The command
 
 ....
 #load <filename>

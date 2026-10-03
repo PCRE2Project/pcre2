@@ -220,6 +220,7 @@ claim to be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 #define MALLOCLISTSIZE             20         /* For remembering mallocs */
 #define PARENS_NEST_DEFAULT        220        /* Default parentheses nest limit */
 #define PATSTACKSIZE               20         /* Pattern stack for save/restore testing */
+#define SERIALIZED_SIZE_LIMIT     ((PCRE2_SIZE)1024 * 1024 * 1024)
 #define REPLACE_MODSIZE            100        /* Field for reading 8-bit replacement */
 #define SUBSTITUTE_SUBJECT_MODSIZE 100        /* Field for reading 8-bit subject for substitute */
 #define REPLACE_BUFFSIZE           256        /* Code units for replacement buffer */
