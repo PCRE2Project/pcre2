@@ -7527,7 +7527,8 @@ NEW_FRAME:
       position that corresponds to this mark. Otherwise, pass back the return
       code unaltered. */
 
-      if (rrc == MATCH_SKIP_ARG && PRIV(strcmp)(Fecode + 2, mb->verb_skip_ptr) == 0)
+      if (rrc == MATCH_SKIP_ARG && Fecode[1] == mb->verb_skip_ptr[-1] &&
+          PRIV(strncmp)(Fecode + 2, mb->verb_skip_ptr, Fecode[1]) == 0)
       {
         mb->verb_skip_ptr = Feptr; // Pass back current position
         RRETURN(MATCH_SKIP);

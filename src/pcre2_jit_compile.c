@@ -3853,9 +3853,12 @@ do_search_mark(sljit_sw *current, PCRE2_SPTR skip_arg)
       break;
 
     case type_mark:
-      if (PRIV(strcmp)(skip_arg, (PCRE2_SPTR)current[2]) == 0)
-        return current[3];
-      break;
+      {
+        PCRE2_SPTR mark = (PCRE2_SPTR)current[2];
+        if (skip_arg[-1] == mark[-1] && PRIV(strncmp)(skip_arg, mark, mark[-1]) == 0)
+          return current[3];
+        break;
+      }
 
     default:
       SLJIT_UNREACHABLE();

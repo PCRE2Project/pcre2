@@ -3894,7 +3894,8 @@ When [.regex]`+(*SKIP)+` has an associated name, its behaviour is modified. When
 most recent [.regex]`+(*MARK)+` that has the same name. If one is found, the "bumpalong"
 advance is to the subject position that corresponds to that [.regex]`+(*MARK)+` instead of
 to where [.regex]`+(*SKIP)+` was encountered. If no [.regex]`+(*MARK)+` with a matching name is found,
-the [.regex]`+(*SKIP)+` is ignored.
+the [.regex]`+(*SKIP)+` is ignored. The complete names are compared, including any
+embedded binary zeros.
 +
 The search for a [.regex]`+(*MARK)+` name uses the normal backtracking mechanism, which
 means that it does not see [.regex]`+(*MARK)+` settings that are inside atomic groups or

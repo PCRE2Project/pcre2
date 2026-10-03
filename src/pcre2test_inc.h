@@ -7376,6 +7376,72 @@ unittest(void)
     pcre2_serialize_free(serialized_bytes);
   }
 
+  /* ------------------- Counted MARK/SKIP arguments -------------------------- */
+
+  {
+    static const struct {
+      const char *pattern;
+      int result;
+      PCRE2_SIZE start;
+      PCRE2_SIZE end;
+    } cases[] = {
+      { "a(*MARK:Ax)b(*SKIP:Ax)(*FAIL)|ab", PCRE2_ERROR_NOMATCH, 0, 0 },
+      { "a(*MARK:Ax)b(*SKIP:Ay)(*FAIL)|ab", 1, 0, 2 },
+      { "a(*MARK:A\\x00x)b(*SKIP:A\\x00x)(*FAIL)|ab", PCRE2_ERROR_NOMATCH, 0, 0 },
+      { "a(*MARK:A\\x00x)b(*SKIP:A\\x00y)(*FAIL)|ab", 1, 0, 2 },
+      { "a(*MARK:A)b(*SKIP:A\\x00x)(*FAIL)|ab", 1, 0, 2 },
+      { "a(*MARK:A\\x00x)b(*SKIP:A)(*FAIL)|ab", 1, 0, 2 },
+      { "a(*MARK:A\\x00x)b(*SKIP:A\\x00xy)(*FAIL)|ab", 1, 0, 2 },
+      { "a(*MARK:A\\x00x)b(*MARK:A\\x00y)c(*SKIP:A\\x00x)(*FAIL)|bc", 1, 1, 3 },
+      { "ab(*SKIP:A\\x00x)(*FAIL)|ab", 1, 0, 2 },
+    };
+    PCRE2_UCHAR mark_pattern[128];
+    PCRE2_UCHAR mark_subject[] = { CHAR_a, CHAR_b, CHAR_c };
+    pcre2_match_data_free(test_match_data);
+    test_match_data = pcre2_match_data_create(1, NULL);
+    ASSERT(test_match_data != NULL, "MARK/SKIP match data");
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++)
+    {
+      size_t len = strlen(cases[i].pattern);
+      ASSERT(len < sizeof(mark_pattern) / sizeof(mark_pattern[0]), "MARK/SKIP pattern capacity");
+      for (size_t j = 0; j < len; j++)
+        mark_pattern[j] = CHAR_INPUT((unsigned char)cases[i].pattern[j]);
+      for (int no_optimize = 0; no_optimize < 2; no_optimize++)
+      {
+        pcre2_code_free(test_compiled_code);
+        test_compiled_code = pcre2_compile(
+            mark_pattern, len, PCRE2_ALT_VERBNAMES |
+                (no_optimize ? PCRE2_NO_START_OPTIMIZE : 0), &errorcode, &erroroffset, NULL);
+        ASSERT(test_compiled_code != NULL, "MARK/SKIP compile");
+        for (int jit = 0; jit < 2; jit++)
+        {
+          if (jit == 0)
+            rc = pcre2_match(test_compiled_code, mark_subject, 3, 0, PCRE2_NO_JIT,
+                             test_match_data, NULL);
+          else
+          {
+#ifdef SUPPORT_JIT
+            if (!test_compiled_with_jit)
+              break;
+            ASSERT(pcre2_jit_compile(test_compiled_code, PCRE2_JIT_COMPLETE) == 0,
+                   "MARK/SKIP JIT compile");
+            rc = pcre2_jit_match(test_compiled_code, mark_subject, 3, 0, 0, test_match_data, NULL);
+#else
+            break;
+#endif
+          }
+          ASSERT(rc == cases[i].result, "MARK/SKIP full-name match result");
+          if (rc > 0)
+          {
+            PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(test_match_data);
+            ASSERT(ovector[0] == cases[i].start && ovector[1] == cases[i].end,
+                   "MARK/SKIP full-name match offsets");
+          }
+        }
+      }
+    }
+  }
+
   /* ------------------------------------------------------------------------- */
 
 #undef ASSERT
