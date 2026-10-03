@@ -6852,8 +6852,26 @@ unittest(void)
   ASSERT(rc == 8 && pcre2_strcmp_c8(errorbuffer, "no error") == 0,
          "pcre2_get_error_message(COMPILE_ERROR_BASE)");
 
+  rc = pcre2_get_error_message(PCRE2_ERROR_NULL_ERROROFFSET, errorbuffer,
+                              sizeof(errorbuffer) / sizeof(errorbuffer[0]));
+  BUFFER_OUTPUT
+  ASSERT(rc == sizeof("erroroffset passed as NULL") - 1 &&
+             pcre2_strcmp_c8(errorbuffer, "erroroffset passed as NULL") == 0,
+         "pcre2_get_error_message(last compile error)");
+
+  rc = pcre2_get_error_message(PCRE2_ERROR_PARTIALSUBS, errorbuffer,
+                              sizeof(errorbuffer) / sizeof(errorbuffer[0]));
+  BUFFER_OUTPUT
+  ASSERT(rc == sizeof("replacement $' or $_ not supported with partial match") - 1 &&
+             pcre2_strcmp_c8(errorbuffer,
+                             "replacement $' or $_ not supported with partial match") == 0,
+         "pcre2_get_error_message(last match error)");
+
   {
-    const int invalid_errorcodes[] = {INT_MIN, INT_MIN + 1, INT_MAX, 1, COMPILE_ERROR_BASE - 1};
+    const int invalid_errorcodes[] = {
+      INT_MIN, INT_MIN + 1, INT_MAX, 1, COMPILE_ERROR_BASE - 1,
+      PCRE2_ERROR_NULL_ERROROFFSET + 1, PCRE2_ERROR_PARTIALSUBS - 1
+    };
 
     for (size_t i = 0; i < sizeof(invalid_errorcodes) / sizeof(invalid_errorcodes[0]); i++)
     {
