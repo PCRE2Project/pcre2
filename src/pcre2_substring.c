@@ -122,6 +122,7 @@ Returns:         if successful: 0
                    PCRE2_ERROR_NOSUBSTRING: no such substring
                    PCRE2_ERROR_UNAVAILABLE: ovector too small
                    PCRE2_ERROR_UNSET: substring is not set
+                   or a match failure code
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -231,6 +232,7 @@ Returns:         if successful: 0
                    PCRE2_ERROR_NOSUBSTRING: no such substring
                    PCRE2_ERROR_UNAVAILABLE: ovector too small
                    PCRE2_ERROR_UNSET: substring is not set
+                   or a match failure code
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -364,6 +366,7 @@ Returns:         if successful: 0
                    PCRE2_ERROR_UNAVAILABLE: ovector is too small
                    PCRE2_ERROR_UNSET: substring is not set
                    PCRE2_ERROR_INVALIDOFFSET: internal error, should not occur
+                   or a match failure code
 */
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
@@ -400,6 +403,7 @@ pcre2_substring_length_bynumber(pcre2_match_data *match_data, uint32_t stringnum
   {
     if (stringnumber >= match_data->oveccount)
       return PCRE2_ERROR_UNAVAILABLE;
+    /* Zero means the ovector was filled with a truncated set of results. */
     if (count != 0 && stringnumber >= (uint32_t)count)
       return PCRE2_ERROR_UNSET;
   }

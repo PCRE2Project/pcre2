@@ -3742,15 +3742,13 @@ const:PCRE2_ERROR_NOSUBSTRING::
 
 const:PCRE2_ERROR_UNAVAILABLE::
       The substring number, though not greater than the number of captures in the
-      pattern, is greater than the number of slots in the ovector, so the substring
-      could not be captured.
+      pattern, does not fit in the ovector, so the substring could not be captured.
 
 const:PCRE2_ERROR_UNSET::
       The substring did not participate in the match. For example, if the pattern is
       [.regex]`+(abc)|(def)+` and the subject is [.subject]`def`, and the ovector contains at least two
       capturing slots, substring number 1 is unset.
 
-[[extracting-substrings-by-name]]
 == Extracting a list of all captured substrings
 
 [source,c,role=prototype]
@@ -3770,7 +3768,8 @@ that is obtained using the same memory allocation function that was used to get
 the match data block.
 
 This function must be called only after a successful match. If called after a
-partial match, the error code const:PCRE2_ERROR_PARTIAL is returned.
+failed match, its error code is returned, including const:PCRE2_ERROR_PARTIAL
+after a partial match.
 
 The address of the memory block is returned via arg:listptr, which is also
 the start of the list of string pointers. The end of the list is marked by a
@@ -3789,6 +3788,7 @@ distinguished from a genuine zero-length substring by inspecting the
 appropriate offset in the arg:ovector, which contain const:PCRE2_UNSET for unset
 substrings, or by calling func:pcre2_substring_length_bynumber().
 
+[[extracting-substrings-by-name]]
 == Extracting captured substrings by name
 
 [source,c,role=prototype]
@@ -3842,8 +3842,8 @@ name. This includes const:PCRE2_ERROR_PARTIAL after a partial match; no named
 capture is available in that case.
 
 If there are no groups with the given name, const:PCRE2_ERROR_NOSUBSTRING is
-returned. If all groups with the name have numbers that are greater than the
-number of slots in the ovector, const:PCRE2_ERROR_UNAVAILABLE is returned. If there
+returned. If all groups with the name have numbers that do not fit in the
+ovector, const:PCRE2_ERROR_UNAVAILABLE is returned. If there
 is at least one group with a slot in the ovector, but no group is found to be
 set, const:PCRE2_ERROR_UNSET is returned.
 
