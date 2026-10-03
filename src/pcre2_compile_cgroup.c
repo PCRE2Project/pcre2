@@ -104,12 +104,12 @@ PRIV(compile_find_named_group)(PCRE2_SPTR name, uint32_t length, compile_block *
 *************************************************/
 
 /* This function is called between compiling passes to add an entry to the
-name/number table, maintaining alphabetical order. Checking for permitted
+name/number table, maintaining code-unit order. Checking for permitted
 and forbidden duplicates has already been done.
 
 Arguments:
   cb           the compile data block
-  nb           named group entry
+  ng           named group entry
   tablecount   the count of names in the table so far
 
 Returns:       new tablecount
@@ -139,7 +139,7 @@ PRIV(compile_add_name_to_table)(compile_block *cb, named_group *ng, uint32_t tab
 
   for (i = 0; i < tablecount; i++)
   {
-    int crc = memcmp(name, slot + IMM2_SIZE, CU2BYTES(length));
+    int crc = PRIV(strncmp)(name, slot + IMM2_SIZE, length);
     if (crc == 0 && slot[IMM2_SIZE + length] != 0)
       crc = -1; // Current name is a substring
 

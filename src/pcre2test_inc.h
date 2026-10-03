@@ -7283,6 +7283,73 @@ unittest(void)
     }
   }
 
+#ifdef SUPPORT_UNICODE
+  /* The compiler and the name scanner must use the same code-unit ordering. */
+
+  {
+#if PCRE2_CODE_UNIT_WIDTH == 8
+    PCRE2_UCHAR names[][4] = {
+      { 0xc4, 0x80, 0, 0 }, { CHAR_B, 0, 0, 0 }, { 0xc5, 0x81, 0, 0 },
+      { CHAR_B, CHAR_B, 0, 0 }, { 0xc4, 0x80, CHAR_B, 0 }
+    };
+#else
+    PCRE2_UCHAR names[][4] = {
+      { 0x100, 0, 0, 0 }, { CHAR_B, 0, 0, 0 }, { 0x141, 0, 0, 0 },
+      { CHAR_B, CHAR_B, 0, 0 }, { 0x100, CHAR_B, 0, 0 }
+    };
+#endif
+    PCRE2_UCHAR unicode_pattern[64], replacement[64], output[8];
+    PCRE2_UCHAR subject[] = { CHAR_a, CHAR_b, CHAR_c, CHAR_d, CHAR_e };
+    size_t patlen = 0, replen = 0;
+    for (size_t i = 0; i < 5; i++)
+    {
+      unicode_pattern[patlen++] = CHAR_LEFT_PARENTHESIS;
+      unicode_pattern[patlen++] = CHAR_QUESTION_MARK;
+      unicode_pattern[patlen++] = CHAR_LESS_THAN_SIGN;
+      for (size_t j = 0; names[i][j] != 0; j++)
+        unicode_pattern[patlen++] = names[i][j];
+      unicode_pattern[patlen++] = CHAR_GREATER_THAN_SIGN;
+      unicode_pattern[patlen++] = subject[i];
+      unicode_pattern[patlen++] = CHAR_RIGHT_PARENTHESIS;
+      replacement[replen++] = CHAR_DOLLAR_SIGN;
+      replacement[replen++] = CHAR_LEFT_CURLY_BRACKET;
+      for (size_t j = 0; names[4 - i][j] != 0; j++)
+        replacement[replen++] = names[4 - i][j];
+      replacement[replen++] = CHAR_RIGHT_CURLY_BRACKET;
+    }
+    pcre2_code_free(test_compiled_code);
+    test_compiled_code = pcre2_compile(unicode_pattern, patlen, PCRE2_UTF,
+                                       &errorcode, &erroroffset, NULL);
+    ASSERT(test_compiled_code != NULL, "Unicode name ordering compile");
+    pcre2_match_data_free(test_match_data);
+    test_match_data = pcre2_match_data_create_from_pattern(test_compiled_code, NULL);
+    ASSERT(test_match_data != NULL, "Unicode name ordering match data");
+    ASSERT(pcre2_match(test_compiled_code, subject, 5, 0, PCRE2_NO_JIT, test_match_data, NULL) == 6,
+           "Unicode name ordering match");
+    for (uint32_t i = 0; i < 5; i++)
+    {
+      PCRE2_SPTR first = NULL, last = NULL;
+      ASSERT(pcre2_substring_number_from_name(test_compiled_code, names[i]) == (int)i + 1,
+             "Unicode name lookup number");
+      ASSERT(pcre2_substring_nametable_scan(test_compiled_code, names[i], &first, &last) ==
+                 test_compiled_code->name_entry_size && first == last,
+             "Unicode name lookup range");
+      PCRE2_UCHAR *capture = NULL;
+      PCRE2_SIZE length = 0;
+      rc = pcre2_substring_get_byname(test_match_data, names[i], &capture, &length);
+      BOOL valid = capture != NULL && length == 1 && capture[0] == subject[i] && capture[1] == 0;
+      pcre2_substring_free(capture);
+      ASSERT(rc == 0 && valid, "Unicode named extraction");
+    }
+    PCRE2_SIZE outlen = sizeof(output) / sizeof(output[0]);
+    rc = pcre2_substitute(test_compiled_code, subject, 5, 0, 0, test_match_data, NULL,
+                          replacement, replen, output, &outlen);
+    ASSERT(rc == 1 && outlen == 5 && output[5] == 0, "Unicode named substitution length");
+    for (size_t i = 0; i < 5; i++)
+      ASSERT(output[i] == subject[4 - i], "Unicode named substitution content");
+  }
+#endif
+
   /* ------------- pcre2_substitute with PCRE2_SUBSTITUTE_MATCHED ------------ */
 
   /* There are some specific edge cases here that would be a pain to exercise via
