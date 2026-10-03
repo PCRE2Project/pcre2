@@ -51,10 +51,9 @@ at COMPILE_ERROR_BASE (100).
 
 This used to be a table of strings, but in order to reduce the number of
 relocations needed when a shared library is loaded dynamically, it is now one
-long string. We cannot use a table of offsets, because the lengths of inserts
-such as XSTRING(MAX_NAME_SIZE) are not known. Instead,
-pcre2_get_error_message() counts through to the one it wants - this isn't a
-performance issue because these strings are used only when there is an error.
+long string. Instead of using a table of offsets, pcre2_get_error_message()
+counts through to the one it wants - this isn't a performance issue because
+these strings are used only when there is an error.
 
 Each substring ends with \0 to insert a null character. This includes the final
 substring, so that the whole string ends with \0\0, which can be detected when
@@ -191,7 +190,7 @@ static const unsigned char compile_error_texts[] =
   "compiled pattern would be longer than the limit set by the application\0"
   "octal value given by \\ddd is greater than \\377 (forbidden by PCRE2_EXTRA_PYTHON_OCTAL)\0"
   "using callouts is disabled by the application\0"
-  "PCRE2_EXTRA_TURKISH_CASING require Unicode (UTF or UCP) mode\0"
+  "PCRE2_EXTRA_TURKISH_CASING requires Unicode (UTF or UCP) mode\0"
   /* 105 */
   "PCRE2_EXTRA_TURKISH_CASING requires UTF in 8-bit mode\0"
   "PCRE2_EXTRA_TURKISH_CASING and PCRE2_EXTRA_CASELESS_RESTRICT are not compatible\0"
@@ -303,7 +302,7 @@ static const unsigned char match_error_texts[] =
   "feature is not supported by the JIT compiler\0"
   "error performing replacement case transformation\0"
   /* 70 */
-  "replacement too large (longer than PCRE2_SIZE)\0"
+  "replacement too large (string would be longer than SIZE_MAX)\0"
   "substitute pattern differs from prior match call\0"
   "substitute subject differs from prior match call\0"
   "substitute start offset differs from prior match call\0"
@@ -321,8 +320,12 @@ static const unsigned char match_error_texts[] =
 
 /* This function copies an error message into a buffer whose units are of an
 appropriate width. Error numbers are positive for compile-time errors, and
-negative for match-time errors (except for UTF errors), but the numbers are all
-distinct.
+negative for match-time and UTF errors. Zero returns "no error".
+
+The reason for the positive compile-time errors starting from value 100 is
+to reduce confusion over whether error codes returned from API functions
+should be negated. No arithmetic (including unary negation) should ever be
+performed on error codes by clients.
 
 Arguments:
   errorcode     error number
@@ -342,15 +345,12 @@ pcre2_get_error_message(int errorcode, PCRE2_UCHAR *buffer, PCRE2_SIZE bufflen)
 
   PCRE2_ASSERT(bufflen == 0 || buffer != NULL);
 
-  if (bufflen == 0)
-    return PCRE2_ERROR_NOMEMORY;
-
   if (errorcode >= COMPILE_ERROR_BASE) // Compile error
   {
     message = compile_error_texts;
     n = errorcode - COMPILE_ERROR_BASE;
   }
-  else if (errorcode < 0) // Match or UTF error
+  else if (errorcode <= 0 && errorcode != INT_MIN) // Match or UTF error, or no error
   {
     message = match_error_texts;
     n = -errorcode;
@@ -363,11 +363,15 @@ pcre2_get_error_message(int errorcode, PCRE2_UCHAR *buffer, PCRE2_SIZE bufflen)
 
   for (; n > 0; n--)
   {
-    while (*message++ != CHAR_NUL)
-    {}
+    while (*message != CHAR_NUL)
+      ++message;
+    ++message;
     if (*message == CHAR_NUL)
       return PCRE2_ERROR_BADDATA;
   }
+
+  if (bufflen == 0)
+    return PCRE2_ERROR_NOMEMORY;
 
   for (i = 0; *message != 0; i++)
   {

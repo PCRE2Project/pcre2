@@ -55,15 +55,19 @@ convenient for user programs that want to test their values. */
 * Return info about what features are configured *
 *************************************************/
 
-/* If where is NULL, the length of memory required is returned.
+/* If where is NULL, the required size is returned: bytes for numerical values,
+or code units including the terminating zero for strings. Otherwise, the
+requested information is written to where.
 
 Arguments:
   what             what information is required
-  where            where to put the information
+  where            where to put the information, or NULL to query its size
 
-Returns:           0 if a numerical value is returned
-                   >= 0 if a string value
-                   PCRE2_ERROR_BADOPTION if "where" not recognized
+Returns:           sizeof(uint32_t) for a numerical value if where is NULL
+                   0 if a numerical value is written
+                   number of code units including the terminating zero
+                     if a string is requested
+                   PCRE2_ERROR_BADOPTION if "what" not recognized
                      or JIT target requested when JIT not enabled
 */
 
@@ -108,11 +112,7 @@ pcre2_config(uint32_t what, void *where)
     return PCRE2_ERROR_BADOPTION;
 
   case PCRE2_CONFIG_BSR:
-#ifdef BSR_ANYCRLF
-    *((uint32_t *)where) = PCRE2_BSR_ANYCRLF;
-#else
-    *((uint32_t *)where) = PCRE2_BSR_UNICODE;
-#endif
+    *((uint32_t *)where) = BSR_DEFAULT;
     break;
 
   case PCRE2_CONFIG_COMPILED_WIDTHS:
@@ -212,30 +212,13 @@ pcre2_config(uint32_t what, void *where)
 #endif
     break;
 
-    /* The hackery in setting "v" below is to cope with the case when
-    PCRE2_PRERELEASE is set to an empty string (which it is for real releases).
-    If the second alternative is used in this case, it does not leave a space
-    before the date. On the other hand, if all four macros are put into a single
-    XSTRING when PCRE2_PRERELEASE is not empty, an unwanted space is inserted.
-    There are problems using an "obvious" approach like this:
-
-       XSTRING(PCRE2_MAJOR) "." XSTRING(PCRE2_MINOR)
-       XSTRING(PCRE2_PRERELEASE) " " XSTRING(PCRE2_DATE)
-
-    because, when PCRE2_PRERELEASE is empty, this leads to an attempted expansion
-    of STRING(). The C standard states: "If (before argument substitution) any
-    argument consists of no preprocessing tokens, the behavior is undefined." It
-    turns out the gcc treats this case as a single empty string - which is what
-    we really want - but Visual C grumbles about the lack of an argument for the
-    macro. Unfortunately, both are within their rights. As there seems to be no
-    way to test for a macro's value being empty at compile time, we have to
-    resort to a runtime test. */
-
   case PCRE2_CONFIG_VERSION:
     {
-      const char *v = (XSTRING(Z PCRE2_PRERELEASE)[1] == 0)
-                          ? XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE)
-                          : XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
+      /* Note that XSTRING(PCRE2_PRERELEASE) attempts to apply the STRING() macro to an empty sequence
+      of tokens in release builds (when PCRE2_PRERELEASE is empty). This is valid as of C99, but
+      historically some compilers did not support this. */
+
+      const char *v = XSTRING(PCRE2_MAJOR) "." XSTRING(PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE) " " XSTRING(PCRE2_DATE);
       return (int)(1 + ((where == NULL) ? strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
     }
   }

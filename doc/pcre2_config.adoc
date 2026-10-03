@@ -31,7 +31,7 @@ arg:where::
 
 If arg:where is const:NULL, the function returns the amount of memory needed for
 the requested information. When the information is a string, the value is in
-code units; for other types of data it is in bytes.
+code units including the terminating zero; for other types of data it is in bytes.
 
 If arg:where is not const:NULL, for const:PCRE2_CONFIG_JITTARGET,
 const:PCRE2_CONFIG_UNICODE_VERSION, and const:PCRE2_CONFIG_VERSION it must point to a
@@ -77,6 +77,8 @@ const:PCRE2_CONFIG_RECURSIONLIMIT::
     Obsolete: use const:PCRE2_CONFIG_DEPTHLIMIT
 const:PCRE2_CONFIG_STACKRECURSE::
     Obsolete: always returns 0
+const:PCRE2_CONFIG_TABLES_LENGTH::
+    Length of the character processing tables in bytes
 const:PCRE2_CONFIG_UNICODE::
     Availability of Unicode support
     (1=yes 0=no)
@@ -87,9 +89,9 @@ const:PCRE2_CONFIG_VERSION::
 
 The function yields a non-negative value on success or the negative value
 const:PCRE2_ERROR_BADOPTION otherwise. This is also the result for the
-const:PCRE2_CONFIG_JITTARGET code if JIT support is not available. When a string is
-requested, the function returns the number of code units used, including the
-terminating zero.
+const:PCRE2_CONFIG_JITTARGET code if JIT support is not available. When a numerical
+value is written, the function returns zero. When a string is requested, the
+function returns the number of code units used, including the terminating zero.
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

@@ -431,6 +431,6 @@ Failed: error -57 at offset 10 in replacement: bad escape sequence in replacemen
         here: >\o{012345 |<--| }<
 
 /i/turkish_casing
-Failed: error 204 at offset 0: PCRE2_EXTRA_TURKISH_CASING require Unicode (UTF or UCP) mode
+Failed: error 204 at offset 0: PCRE2_EXTRA_TURKISH_CASING requires Unicode (UTF or UCP) mode
 
 # End of testinput9
