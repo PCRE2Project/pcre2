@@ -155,11 +155,10 @@ print_char(FILE *f, PCRE2_SPTR ptr, BOOL utf)
   }
   else
   {
-    int i;
     int a = PRIV(utf8_table4)[c & 0x3f]; // Number of additional bytes
     int s = 6 * a;
     c = (c & PRIV(utf8_table3)[a]) << s;
-    for (i = 1; i <= a; i++)
+    for (int i = 1; i <= a; i++)
     {
       if ((ptr[i] & 0xc0) != 0x80)
       {
@@ -359,11 +358,10 @@ Arguments:
 static PCRE2_SPTR
 print_char_list(FILE *f, PCRE2_SPTR code, const uint8_t *char_lists_end)
 {
-  uint32_t type, list_ind;
   uint32_t char_list_add = XCL_CHAR_LIST_LOW_16_ADD;
   uint32_t range_start = ~(uint32_t)0, range_end = 0;
-  const uint8_t *next_char;
 
+  uint32_t type;
 #if PCRE2_CODE_UNIT_WIDTH == 8
   type = (uint32_t)(code[0] << 8) | code[1];
   code += 2;
@@ -373,9 +371,9 @@ print_char_list(FILE *f, PCRE2_SPTR code, const uint8_t *char_lists_end)
 #endif /* CODE_UNIT_WIDTH */
 
   /* Align characters. */
-  next_char = char_lists_end - (GET(code, 0) << 1);
+  const uint8_t *next_char = char_lists_end - (GET(code, 0) << 1);
   type &= XCL_TYPE_MASK;
-  list_ind = 0;
+  uint32_t list_ind = 0;
 
   if ((type & XCL_BEGIN_WITH_RANGE) != 0)
     range_start = XCL_CHAR_LIST_LOW_16_START;
@@ -496,30 +494,29 @@ print_map(FILE *f, const uint8_t *map, BOOL negated)
 {
   BOOL first = TRUE;
   uint8_t inverted_map[32];
-  int i, input;
 
   if (negated)
   {
     /* Using 255 ^ instead of ~ avoids clang sanitize warning. */
-    for (i = 0; i < 32; i++)
+    for (int i = 0; i < 32; i++)
       inverted_map[i] = 255 ^ map[i];
     map = inverted_map;
   }
 
-  for (input = 0; input < 256; input++)
+  for (int input = 0; input < 256; input++)
   {
-    i = CHAR_INPUT_HEX(input);
+    int i = CHAR_INPUT_HEX(input);
     if ((map[i / 8] & (1u << (i & 7))) != 0)
     {
-      int j, jinput;
+      int jinput;
       for (jinput = input; jinput + 1 < 256; jinput++)
       {
-        j = CHAR_INPUT_HEX(jinput + 1);
+        int j = CHAR_INPUT_HEX(jinput + 1);
         if ((map[j / 8] & (1u << (j & 7))) == 0)
           break;
       }
 
-      j = CHAR_INPUT_HEX(jinput);
+      int j = CHAR_INPUT_HEX(jinput);
       if (i == CHAR_MINUS || i == CHAR_BACKSLASH || i == CHAR_RIGHT_SQUARE_BRACKET ||
           (first && i == CHAR_CIRCUMFLEX_ACCENT))
         fprintf(f, "\\");
@@ -621,7 +618,6 @@ print_class(FILE *f, int type, PCRE2_SPTR code, const uint8_t *char_lists_end, B
         {
           unsigned int ptype = *ccode++;
           unsigned int pvalue = *ccode++;
-          const char *s;
           switch (ptype)
           {
           case PT_PXGRAPH:
@@ -637,9 +633,11 @@ print_class(FILE *f, int type, PCRE2_SPTR code, const uint8_t *char_lists_end, B
             fprintf(f, "[:%sxdigit:]", notch);
             break;
           default:
-            s = get_ucpname(ptype, pvalue);
-            fprintf(f, "\\%c{%c%s}", ((notch[0] == '^') ? 'P' : 'p'), toupper(s[0]), s + 1);
-            break;
+            {
+              const char *s = get_ucpname(ptype, pvalue);
+              fprintf(f, "\\%c{%c%s}", ((notch[0] == '^') ? 'P' : 'p'), toupper(s[0]), s + 1);
+              break;
+            }
           }
         }
 
@@ -685,18 +683,16 @@ Returns:          nothing
 static void
 pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
 {
-  PCRE2_SPTR codestart, nametable, code;
   uint32_t nesize = re->name_entry_size;
   BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
 
-  nametable = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code));
-  code = codestart = (PCRE2_SPTR)((uint8_t *)re + re->code_start);
+  PCRE2_SPTR nametable = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code));
+  PCRE2_SPTR codestart = (PCRE2_SPTR)((uint8_t *)re + re->code_start);
+  PCRE2_SPTR code = codestart;
 
   for (;;)
   {
     PCRE2_SPTR ccode;
-    uint32_t c;
-    int i;
     const char *flag = "  ";
     unsigned int extra = 0;
 
@@ -796,11 +792,14 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
       break;
 
     case OP_RREF:
-      c = GET2(code, 1);
-      if (c == RREF_ANY)
-        fprintf(f, "    %s any", OP_names[*code]);
-      else
-        fprintf(f, "    %s %d", OP_names[*code], c);
+      {
+        uint32_t c = GET2(code, 1);
+        if (c == RREF_ANY)
+          fprintf(f, "    %s any", OP_names[*code]);
+        else
+          fprintf(f, "    %s %d", OP_names[*code], c);
+      }
+
       break;
 
     case OP_STARI:
@@ -971,12 +970,14 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
       flag = "/i";
       PCRE2_FALLTHROUGH /* Fall through */
     case OP_REF:
-      fprintf(f, " %s \\g{%d}", flag, GET2(code, 1));
-      i = (*code == OP_REFI) ? code[1 + IMM2_SIZE] : 0;
-      if (i != 0)
-        fprintf(f, " 0x%02x", i);
-      ccode = code + OP_lengths[*code];
-      goto CLASS_REF_REPEAT;
+      {
+        fprintf(f, " %s \\g{%d}", flag, GET2(code, 1));
+        int i = (*code == OP_REFI) ? code[1 + IMM2_SIZE] : 0;
+        if (i != 0)
+          fprintf(f, " 0x%02x", i);
+        ccode = code + OP_lengths[*code];
+        goto CLASS_REF_REPEAT;
+      }
 
     case OP_DNREFI:
       flag = "/i";
@@ -987,7 +988,7 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
         fprintf(f, " %s \\k<", flag);
         print_custring(f, entry);
         fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE));
-        i = (*code == OP_DNREFI) ? code[1 + 2 * IMM2_SIZE] : 0;
+        int i = (*code == OP_DNREFI) ? code[1 + 2 * IMM2_SIZE] : 0;
         if (i != 0)
           fprintf(f, " 0x%02x", i);
       }
@@ -1001,21 +1002,24 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
       break;
 
     case OP_CALLOUT_STR:
-      c = code[1 + 4 * LINK_SIZE];
-      fprintf(f, "    %s %c", OP_names[*code], CHAR_OUTPUT(c));
-      extra = GET(code, 1 + 2 * LINK_SIZE);
-      print_custring_bylen(f, code + 2 + 4 * LINK_SIZE, extra - 3 - 4 * LINK_SIZE);
-      for (i = 0; PRIV(callout_start_delims)[i] != 0; i++)
       {
-        if (c == PRIV(callout_start_delims)[i])
+        uint32_t c = code[1 + 4 * LINK_SIZE];
+        fprintf(f, "    %s %c", OP_names[*code], CHAR_OUTPUT(c));
+        extra = GET(code, 1 + 2 * LINK_SIZE);
+        print_custring_bylen(f, code + 2 + 4 * LINK_SIZE, extra - 3 - 4 * LINK_SIZE);
+        for (int i = 0; PRIV(callout_start_delims)[i] != 0; i++)
         {
-          c = PRIV(callout_end_delims)[i];
-          break;
+          if (c == PRIV(callout_start_delims)[i])
+          {
+            c = PRIV(callout_end_delims)[i];
+            break;
+          }
         }
+
+        fprintf(f, "%c %d %d %d", CHAR_OUTPUT(c), GET(code, 1 + 3 * LINK_SIZE), GET(code, 1),
+                GET(code, 1 + LINK_SIZE));
       }
 
-      fprintf(f, "%c %d %d %d", CHAR_OUTPUT(c), GET(code, 1 + 3 * LINK_SIZE), GET(code, 1),
-              GET(code, 1 + LINK_SIZE));
       break;
 
     case OP_PROP:
@@ -1100,8 +1104,6 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
     CLASS_REF_REPEAT:
       switch (*ccode)
       {
-        unsigned int min, max;
-
       case OP_CRSTAR:
       case OP_CRMINSTAR:
       case OP_CRPLUS:
@@ -1118,17 +1120,20 @@ pcre2_printint(pcre2_code *re, FILE *f, BOOL print_lengths)
       case OP_CRRANGE:
       case OP_CRMINRANGE:
       case OP_CRPOSRANGE:
-        min = GET2(ccode, 1);
-        max = GET2(ccode, 1 + IMM2_SIZE);
-        if (max == 0)
-          fprintf(f, "{%u,}", min);
-        else
-          fprintf(f, "{%u,%u}", min, max);
-        if (*ccode == OP_CRMINRANGE)
-          fprintf(f, "?");
-        else if (*ccode == OP_CRPOSRANGE)
-          fprintf(f, "+");
-        extra += OP_lengths[*ccode];
+        {
+          unsigned int min = GET2(ccode, 1);
+          unsigned int max = GET2(ccode, 1 + IMM2_SIZE);
+          if (max == 0)
+            fprintf(f, "{%u,}", min);
+          else
+            fprintf(f, "{%u,%u}", min, max);
+          if (*ccode == OP_CRMINRANGE)
+            fprintf(f, "?");
+          else if (*ccode == OP_CRPOSRANGE)
+            fprintf(f, "+");
+          extra += OP_lengths[*ccode];
+        }
+
         break;
 
         /* Do nothing if it's not a repeat; this code stops picky compilers
