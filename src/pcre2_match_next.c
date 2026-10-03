@@ -95,7 +95,6 @@ do_bumpalong(pcre2_match_data *match_data, PCRE2_SIZE offset)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_next_match(pcre2_match_data *match_data, PCRE2_SIZE *pstart_offset, uint32_t *poptions)
 {
-  int rc = match_data->rc;
   PCRE2_SIZE start_offset = match_data->start_offset;
   PCRE2_SIZE *ovector = match_data->ovector;
 
@@ -103,7 +102,7 @@ pcre2_next_match(pcre2_match_data *match_data, PCRE2_SIZE *pstart_offset, uint32
   of PCRE2, we recommended that clients use a strategy which involved retrying in
   certain cases after PCRE2_ERROR_NOMATCH, but this is no longer required. */
 
-  if (rc < 0)
+  if (match_data->rc < 0)
     return FALSE;
 
   /* Match succeeded: get the start offset for the next match */

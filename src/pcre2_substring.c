@@ -69,9 +69,6 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_copy_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
                             PCRE2_UCHAR *buffer, PCRE2_SIZE *sizeptr)
 {
-  PCRE2_SPTR first, last, entry;
-  int failrc, entrysize;
-
   /* Preconditions on argument values */
 
   PCRE2_ASSERT(match_data != NULL);
@@ -81,11 +78,14 @@ pcre2_substring_copy_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
 
   if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
     return PCRE2_ERROR_DFA_UFUNC;
-  entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
+
+  PCRE2_SPTR first, last;
+  int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
   if (entrysize < 0)
     return entrysize;
-  failrc = PCRE2_ERROR_UNAVAILABLE;
-  for (entry = first; entry <= last; entry += entrysize)
+
+  int failrc = PCRE2_ERROR_UNAVAILABLE;
+  for (PCRE2_SPTR entry = first; entry <= last; entry += entrysize)
   {
     uint32_t n = GET2(entry, 0);
     if (n < match_data->oveccount)
@@ -126,20 +126,20 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_copy_bynumber(pcre2_match_data *match_data, uint32_t stringnumber,
                               PCRE2_UCHAR *buffer, PCRE2_SIZE *sizeptr)
 {
-  int rc;
-  PCRE2_SIZE size;
-
   /* Preconditions on argument values */
 
   PCRE2_ASSERT(match_data != NULL);
   PCRE2_ASSERT(sizeptr != NULL);
   PCRE2_ASSERT(*sizeptr == 0 || buffer != NULL);
 
-  rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
+  PCRE2_SIZE size;
+  int rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
   if (rc < 0)
     return rc;
+
   if (size + 1 > *sizeptr)
     return PCRE2_ERROR_NOMEMORY;
+
   if (size != 0)
     memcpy(buffer, match_data->subject + match_data->ovector[stringnumber * 2], CU2BYTES(size));
   buffer[size] = 0;
@@ -175,8 +175,6 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_get_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
                            PCRE2_UCHAR **stringptr, PCRE2_SIZE *sizeptr)
 {
-  PCRE2_SPTR first, last, entry;
-  int failrc, entrysize;
 
   /* Preconditions on argument values */
 
@@ -186,11 +184,14 @@ pcre2_substring_get_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
 
   if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
     return PCRE2_ERROR_DFA_UFUNC;
-  entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
+
+  PCRE2_SPTR first, last;
+  int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
   if (entrysize < 0)
     return entrysize;
-  failrc = PCRE2_ERROR_UNAVAILABLE;
-  for (entry = first; entry <= last; entry += entrysize)
+
+  int failrc = PCRE2_ERROR_UNAVAILABLE;
+  for (PCRE2_SPTR entry = first; entry <= last; entry += entrysize)
   {
     uint32_t n = GET2(entry, 0);
     if (n < match_data->oveccount)
@@ -231,19 +232,17 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_get_bynumber(pcre2_match_data *match_data, uint32_t stringnumber,
                              PCRE2_UCHAR **stringptr, PCRE2_SIZE *sizeptr)
 {
-  int rc;
-  PCRE2_SIZE size;
-  PCRE2_UCHAR *yield;
-
   /* Preconditions on argument values */
 
   PCRE2_ASSERT(match_data != NULL);
   PCRE2_ASSERT(stringptr != NULL);
   PCRE2_ASSERT(sizeptr != NULL);
 
-  rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
+  PCRE2_SIZE size;
+  int rc = pcre2_substring_length_bynumber(match_data, stringnumber, &size);
   if (rc < 0)
     return rc;
+
   /* LCOV_EXCL_START - it should be unreachable for any substring's size in
   bytes to overflow size_t */
   if (size > ((PCRE2_SIZE_MAX - sizeof(pcre2_memctl)) / CU2BYTES(1)) - 1)
@@ -252,10 +251,12 @@ pcre2_substring_get_bynumber(pcre2_match_data *match_data, uint32_t stringnumber
     return PCRE2_ERROR_NOMEMORY;
   }
   /* LCOV_EXCL_STOP */
-  yield = PRIV(memctl_malloc)(sizeof(pcre2_memctl) + CU2BYTES(size + 1),
-                              (pcre2_memctl *)match_data);
+
+  PCRE2_UCHAR *yield =
+      PRIV(memctl_malloc)(sizeof(pcre2_memctl) + CU2BYTES(size + 1), (pcre2_memctl *)match_data);
   if (yield == NULL)
     return PCRE2_ERROR_NOMEMORY;
+
   yield = (PCRE2_UCHAR *)(((char *)yield) + sizeof(pcre2_memctl));
   if (size != 0)
     memcpy(yield, match_data->subject + match_data->ovector[stringnumber * 2], CU2BYTES(size));
@@ -307,9 +308,6 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_length_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
                               PCRE2_SIZE *sizeptr)
 {
-  PCRE2_SPTR first, last, entry;
-  int failrc, entrysize;
-
   /* Preconditions on argument values */
 
   PCRE2_ASSERT(match_data != NULL);
@@ -317,11 +315,14 @@ pcre2_substring_length_byname(pcre2_match_data *match_data, PCRE2_SPTR stringnam
 
   if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
     return PCRE2_ERROR_DFA_UFUNC;
-  entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
+
+  PCRE2_SPTR first, last;
+  int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
   if (entrysize < 0)
     return entrysize;
-  failrc = PCRE2_ERROR_UNAVAILABLE;
-  for (entry = first; entry <= last; entry += entrysize)
+
+  int failrc = PCRE2_ERROR_UNAVAILABLE;
+  for (PCRE2_SPTR entry = first; entry <= last; entry += entrysize)
   {
     uint32_t n = GET2(entry, 0);
     if (n < match_data->oveccount)
@@ -362,14 +363,12 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_length_bynumber(pcre2_match_data *match_data, uint32_t stringnumber,
                                 PCRE2_SIZE *sizeptr)
 {
-  PCRE2_SIZE left, right;
-  int count;
 
   /* Preconditions on argument values */
 
   PCRE2_ASSERT(match_data != NULL);
 
-  count = match_data->rc;
+  int count = match_data->rc;
   if (count == PCRE2_ERROR_PARTIAL)
   {
     if (stringnumber > 0)
@@ -398,8 +397,9 @@ pcre2_substring_length_bynumber(pcre2_match_data *match_data, uint32_t stringnum
       return PCRE2_ERROR_UNSET;
   }
 
-  left = match_data->ovector[stringnumber * 2];
-  right = match_data->ovector[stringnumber * 2 + 1];
+  PCRE2_SIZE left = match_data->ovector[stringnumber * 2];
+  PCRE2_SIZE right = match_data->ovector[stringnumber * 2 + 1];
+
   /* LCOV_EXCL_START - this appears to be unreachable, as the ovector and
   subject_length should always be set consistently, no matter what misbehaviour
   the caller has committed. */
@@ -409,6 +409,7 @@ pcre2_substring_length_bynumber(pcre2_match_data *match_data, uint32_t stringnum
     return PCRE2_ERROR_INVALIDOFFSET;
   }
   /* LCOV_EXCL_STOP */
+
   if (sizeptr != NULL)
     *sizeptr = (left > right) ? 0 : right - left;
   return 0;
@@ -441,44 +442,39 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_list_get(pcre2_match_data *match_data, PCRE2_UCHAR ***listptr,
                          PCRE2_SIZE **lengthsptr)
 {
-  int i, count, count2;
-  PCRE2_SIZE size;
-  PCRE2_SIZE *lensp;
-  pcre2_memctl *memp;
-  PCRE2_UCHAR **listp;
-  PCRE2_UCHAR *sp;
-  PCRE2_SIZE *ovector;
-
   /* Preconditions on argument values */
 
   PCRE2_ASSERT(match_data != NULL);
   PCRE2_ASSERT(listptr != NULL);
 
-  if ((count = match_data->rc) < 0)
+  int count = match_data->rc;
+  if (count < 0)
     return count; // Match failed
   if (count == 0)
-    count = match_data->oveccount; // Ovector too small
+    count = match_data->oveccount; // ovector too small
 
-  count2 = 2 * count;
-  ovector = match_data->ovector;
-  size = sizeof(pcre2_memctl) + sizeof(PCRE2_UCHAR *); // For final NULL
+  int count2 = 2 * count;
+  PCRE2_SIZE *ovector = match_data->ovector;
+  PCRE2_SIZE size = sizeof(pcre2_memctl) + sizeof(PCRE2_UCHAR *); // For final NULL
   if (lengthsptr != NULL)
     size += sizeof(PCRE2_SIZE) * count; // For lengths
 
-  for (i = 0; i < count2; i += 2)
+  for (int i = 0; i < count2; i += 2)
   {
     size += sizeof(PCRE2_UCHAR *) + CU2BYTES(1);
     if (ovector[i + 1] > ovector[i])
       size += CU2BYTES(ovector[i + 1] - ovector[i]);
   }
 
-  memp = PRIV(memctl_malloc)(size, (pcre2_memctl *)match_data);
+  pcre2_memctl *memp = PRIV(memctl_malloc)(size, (pcre2_memctl *)match_data);
   if (memp == NULL)
     return PCRE2_ERROR_NOMEMORY;
 
-  *listptr = listp = (PCRE2_UCHAR **)((char *)memp + sizeof(pcre2_memctl));
-  lensp = (PCRE2_SIZE *)((char *)listp + sizeof(PCRE2_UCHAR *) * (count + 1));
+  PCRE2_UCHAR **listp = (PCRE2_UCHAR **)((char *)memp + sizeof(pcre2_memctl));
+  *listptr = listp;
+  PCRE2_SIZE *lensp = (PCRE2_SIZE *)((char *)listp + sizeof(PCRE2_UCHAR *) * (count + 1));
 
+  PCRE2_UCHAR *sp;
   if (lengthsptr == NULL)
   {
     sp = (PCRE2_UCHAR *)lensp;
@@ -490,7 +486,7 @@ pcre2_substring_list_get(pcre2_match_data *match_data, PCRE2_UCHAR ***listptr,
     sp = (PCRE2_UCHAR *)((char *)lensp + sizeof(PCRE2_SIZE) * count);
   }
 
-  for (i = 0; i < count2; i += 2)
+  for (int i = 0; i < count2; i += 2)
   {
     size = (ovector[i + 1] > ovector[i]) ? (ovector[i + 1] - ovector[i]) : 0;
 
@@ -561,20 +557,16 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_substring_nametable_scan(const pcre2_code *code, PCRE2_SPTR stringname, PCRE2_SPTR *firstptr,
                                PCRE2_SPTR *lastptr)
 {
-  uint16_t bot = 0;
-  uint16_t top;
-  uint16_t entrysize;
-  PCRE2_SPTR nametable;
-
   /* Preconditions on argument values */
 
   PCRE2_ASSERT(code != NULL);
   PCRE2_ASSERT(stringname != NULL);
 
-  top = code->name_count;
-  entrysize = code->name_entry_size;
-  nametable = (PCRE2_SPTR)((const char *)code + sizeof(pcre2_real_code));
+  uint16_t entrysize = code->name_entry_size;
+  PCRE2_SPTR nametable = (PCRE2_SPTR)((const char *)code + sizeof(pcre2_real_code));
 
+  uint16_t top = code->name_count;
+  uint16_t bot = 0;
   while (top > bot)
   {
     uint16_t mid = (top + bot) / 2;
@@ -582,11 +574,9 @@ pcre2_substring_nametable_scan(const pcre2_code *code, PCRE2_SPTR stringname, PC
     int c = PRIV(strcmp)(stringname, entry + IMM2_SIZE);
     if (c == 0)
     {
-      PCRE2_SPTR first;
-      PCRE2_SPTR last;
-      PCRE2_SPTR lastentry;
-      lastentry = nametable + entrysize * (code->name_count - 1);
-      first = last = entry;
+      PCRE2_SPTR lastentry = nametable + entrysize * (code->name_count - 1);
+      PCRE2_SPTR first = entry;
+      PCRE2_SPTR last = entry;
       while (first > nametable)
       {
         if (PRIV(strcmp)(stringname, (first - entrysize + IMM2_SIZE)) != 0)

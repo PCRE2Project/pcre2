@@ -98,7 +98,6 @@ PRIV(extuni)(uint32_t c, PCRE2_SPTR eptr, PCRE2_SPTR check_subject, PCRE2_SPTR e
 
   while (eptr < end_subject)
   {
-    int rgb;
     int len = 1;
     if (!utf)
     {
@@ -109,7 +108,7 @@ PRIV(extuni)(uint32_t c, PCRE2_SPTR eptr, PCRE2_SPTR check_subject, PCRE2_SPTR e
       GETCHARLEN(c, eptr, len);
     }
 
-    rgb = UCD_GRAPHBREAK(c);
+    int rgb = UCD_GRAPHBREAK(c);
     if ((PRIV(ucp_gbtable)[lgb] & (1u << rgb)) == 0)
       break;
 

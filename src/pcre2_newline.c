@@ -75,7 +75,6 @@ BOOL
 PRIV(is_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR endptr, uint32_t *lenptr, BOOL utf)
 {
   uint32_t c;
-
 #ifdef SUPPORT_UNICODE
   if (utf)
   {
