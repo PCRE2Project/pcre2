@@ -84,8 +84,14 @@ the vector. The third and fourth arguments point to variables which are set to
 point to the created byte stream and its length, respectively. The final
 argument is a pointer to a general context, which can be used to specify custom
 memory management functions. If this argument is const:NULL, [.c]`malloc()` is used
-to obtain memory for the byte stream. The yield of the function is the number
-of serialized patterns, or one of the following negative error codes:
+to obtain memory for the byte stream.
+
+Each non-const:NULL output pointer is initialized independently before validation:
+the byte-stream pointer is set to const:NULL and its size to zero. These values
+are retained if encoding fails.
+
+The yield of the function is the number of serialized patterns, or one of the
+following negative error codes:
 
 [.errors]
 const:PCRE2_ERROR_BADDATA::
@@ -97,7 +103,7 @@ const:PCRE2_ERROR_NOMEMORY::
 const:PCRE2_ERROR_MIXEDTABLES::
   the patterns do not all use the same tables
 const:PCRE2_ERROR_NULL::
-  The 1st, 3rd, or 4th argument is const:NULL
+  The 1st, 3rd, or 4th argument, or a pattern pointer in the vector, is const:NULL
 
 const:PCRE2_ERROR_BADMAGIC means either that a pattern's code has been corrupted, or
 that a slot in the vector does not point to a compiled pattern.
@@ -189,13 +195,18 @@ const:PCRE2_ERROR_BADMODE::
   mismatch of code unit size or PCRE2 version
 const:PCRE2_ERROR_BADSERIALIZEDDATA::
   other sanity check failure
-const:PCRE2_ERROR_MEMORY::
+const:PCRE2_ERROR_NOMEMORY::
   memory allocation failed
 const:PCRE2_ERROR_NULL::
   first or third argument is const:NULL
 
 const:PCRE2_ERROR_BADMAGIC may mean that the data is corrupt, or that it was compiled
 on a system with different endianness.
+
+On success, only the returned prefix of the output vector is written. On an
+early error the vector is unchanged. If an error occurs after some patterns have
+been decoded, those patterns are freed and their slots are set to const:NULL;
+the failing and unvisited slots remain unchanged.
 
 Decoded patterns can be used for matching in the usual way, and must be freed
 by calling func:pcre2_code_free(). However, be aware that there is a potential

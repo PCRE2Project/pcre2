@@ -50,20 +50,24 @@ arg:gcontext::
 
 The context argument is used to obtain memory for the byte stream. When the
 serialized data is no longer needed, it must be freed by calling
-func:pcre2_serialize_free(). The yield of the function is the number of
-serialized patterns, or one of the following negative error codes:
+func:pcre2_serialize_free(). Each non-const:NULL output pointer is initialized
+independently: the byte-stream pointer to const:NULL and its size to zero,
+including on failure.
+
+The yield of the function is the number of serialized patterns, or one of the
+following negative error codes:
 
 [.errors]
 const:PCRE2_ERROR_BADDATA::
     arg:number_of_codes is zero or less
 const:PCRE2_ERROR_BADMAGIC::
     mismatch of id bytes in one of the patterns
-const:PCRE2_ERROR_MEMORY::
+const:PCRE2_ERROR_NOMEMORY::
     memory allocation failed
 const:PCRE2_ERROR_MIXEDTABLES::
     the patterns do not all use the same tables
 const:PCRE2_ERROR_NULL::
-    an argument other than arg:gcontext is const:NULL
+    an argument other than arg:gcontext, or a pointer in arg:codes, is const:NULL
 
 const:PCRE2_ERROR_BADMAGIC means either that a pattern's code has been corrupted, or
 that a slot in the vector does not point to a compiled pattern.

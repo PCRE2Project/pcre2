@@ -7235,6 +7235,20 @@ unittest(void)
       rc = pcre2_serialize_encode((const pcre2_code **)&serialize_code, 0, &null_bytes, &null_size, NULL);
       ASSERT(rc == PCRE2_ERROR_BADDATA && null_bytes == NULL && null_size == 0,
              "pcre2_serialize_encode(zero codes)");
+
+      const pcre2_code *null_code = NULL;
+      null_bytes = (uint8_t *)1;
+      null_size = 999;
+      rc = pcre2_serialize_encode(&null_code, 1, &null_bytes, &null_size, NULL);
+      ASSERT(rc == PCRE2_ERROR_NULL && null_bytes == NULL && null_size == 0,
+             "pcre2_serialize_encode(null element)");
+
+      null_bytes = (uint8_t *)1;
+      rc = pcre2_serialize_encode(NULL, 1, &null_bytes, NULL, NULL);
+      ASSERT(rc == PCRE2_ERROR_NULL && null_bytes == NULL, "serialize independent pointer reset");
+      null_size = 999;
+      rc = pcre2_serialize_encode(NULL, 1, NULL, &null_size, NULL);
+      ASSERT(rc == PCRE2_ERROR_NULL && null_size == 0, "serialize independent size reset");
     }
 
     {
@@ -7318,7 +7332,7 @@ unittest(void)
     /* Regression: avoid stale dst_re double free on later iteration failure. */
     {
       pcre2_code *multi_codes[2];
-      pcre2_code *multi_decode_codes[2] = { NULL, NULL };
+      pcre2_code *multi_decode_codes[2] = { test_compiled_code, test_compiled_code };
       uint8_t *multi_serialized_bytes = NULL;
       PCRE2_SIZE multi_serialized_size = 0;
       CODE_BLOCKSIZE_TYPE first_blocksize;
@@ -7353,7 +7367,7 @@ unittest(void)
       memcpy(multi_serialized_bytes + second_blocksize_offset, saved_second_blocksize,
              sizeof(saved_second_blocksize));
       ASSERT(rc == PCRE2_ERROR_BADSERIALIZEDDATA && multi_decode_codes[0] == NULL &&
-                 multi_decode_codes[1] == NULL,
+                 multi_decode_codes[1] == test_compiled_code,
              "pcre2_serialize_decode(regression stale dst_re)");
 
       pcre2_serialize_free(multi_serialized_bytes);

@@ -47,8 +47,15 @@ The arg:bytes argument must point to a block of data that was originally
 created by func:pcre2_serialize_encode(), though it may have been saved on
 disc or elsewhere in the meantime. If there are more codes in the serialized
 data than slots in the list, only those compiled patterns that will fit are
-decoded. The yield of the function is the number of decoded patterns, or one of
-the following negative error codes:
+decoded.
+
+Only the returned prefix of arg:codes is written on success. Early errors leave
+the vector unchanged. On a later error, already-decoded patterns are freed and
+their slots cleared to const:NULL; failing and unvisited slots are unchanged.
+The trusted byte stream need not have any particular byte alignment.
+
+The yield of the function is the number of decoded patterns, or one of the
+following negative error codes:
 
 [.errors]
 const:PCRE2_ERROR_BADDATA::
@@ -57,6 +64,8 @@ const:PCRE2_ERROR_BADMAGIC::
     mismatch of id bytes in arg:bytes
 const:PCRE2_ERROR_BADMODE::
     mismatch of variable unit size or PCRE version
+const:PCRE2_ERROR_BADSERIALIZEDDATA::
+    other sanity check failure
 const:PCRE2_ERROR_NOMEMORY::
     memory allocation failed
 const:PCRE2_ERROR_NULL::
