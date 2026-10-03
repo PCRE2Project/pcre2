@@ -279,6 +279,8 @@ pcre2_serialize_get_number_of_codes(const uint8_t *bytes)
     return PCRE2_ERROR_NULL;
   pcre2_serialized_data data;
   memcpy(&data, bytes, sizeof(data));
+  if (data.number_of_codes <= 0)
+    return PCRE2_ERROR_BADSERIALIZEDDATA;
   if (data.magic != SERIALIZED_DATA_MAGIC)
     return PCRE2_ERROR_BADMAGIC;
   if (data.version != SERIALIZED_DATA_VERSION)

@@ -7228,6 +7228,23 @@ unittest(void)
         decode_codes[0] = NULL;
       }
       free(shifted);
+
+      int32_t counts[] = { 0, -1, INT32_MIN };
+      pcre2_serialized_data saved_header;
+      memcpy(&saved_header, serialized_bytes, sizeof(saved_header));
+      for (size_t i = 0; i < sizeof(counts) / sizeof(counts[0]); i++)
+      {
+        memcpy(serialized_bytes + offsetof(pcre2_serialized_data, number_of_codes),
+               &counts[i], sizeof(counts[i]));
+        decode_codes[0] = serialize_code;
+        ASSERT(pcre2_serialize_get_number_of_codes(serialized_bytes) == PCRE2_ERROR_BADSERIALIZEDDATA,
+               "serialized count sanity check");
+        rc = pcre2_serialize_decode(decode_codes, 1, serialized_bytes, NULL);
+        ASSERT(rc == PCRE2_ERROR_BADSERIALIZEDDATA && decode_codes[0] == serialize_code,
+               "decode count error leaves output unchanged");
+      }
+      memcpy(serialized_bytes, &saved_header, sizeof(saved_header));
+      decode_codes[0] = NULL;
     }
 
     pcre2_code_free(serialize_code);
