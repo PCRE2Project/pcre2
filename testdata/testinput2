@@ -8414,4 +8414,51 @@ a)"xI
     abc\=ps,substitute_replacement_only,replace=>$_<
     abc\=ps,substitute_replacement_only,replace=>$'<
 
+# (*ACCEPT) inside a group that is called as a subroutine ends only the
+# subroutine, even when the group itself is inside an assertion.
+
+/(?=(a|(*ACCEPT))(?1)x)/
+    a
+
+/(?=(()|(*ACCEPT))(?1)x)/
+    a
+
+/(?=(a|(*ACCEPT))(?1)x)a/
+    a
+
+/^(?!(a|(*ACCEPT))(?1)x)/
+    a
+
+/(?<=(a|(*ACCEPT))(?1)x)/
+    a
+
+# An assertion entered inside the subroutine is still ended by (*ACCEPT).
+
+/(?1)(?(DEFINE)((?=a(*ACCEPT)x)a))/
+    a
+
+/(?1)(?(DEFINE)((?=(a)(*ACCEPT)x)a))/
+    a
+
+/(?1)(?(DEFINE)((?(?=a(*ACCEPT)x)a|b)))/
+    a
+    b
+
+/(?(?=(a|(*ACCEPT))(?1)x)a|b)/
+    a
+    b
+
+# A group inside an assertion that is called from outside any assertion. The
+# interpreter used to return an internal code (-999) here.
+
+/(?=(b|(*ACCEPT)))(?1)x/
+    ax
+    bx
+
+/(?!(b|(*ACCEPT)))|(?1)a/
+    a
+
+/(a)(*scs:(1)(b|(*ACCEPT)))(?2)a/
+    aa
+
 # End of testinput2
