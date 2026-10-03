@@ -2287,8 +2287,8 @@ private structures. */
 /* Private "external" functions. These are internal functions that are called
 from modules other than the one in which they are defined. They have to be
 "external" in the C sense, but are not part of the PCRE2 public API. They are
-not referenced from pcre2test, and must not be defined when no code unit width
-is available. */
+not normally referenced from pcre2test, except by selected static-build tests.
+Their declarations require a code unit width. */
 
 #define _pcre2_auto_possessify PCRE2_SUFFIX(_pcre2_auto_possessify_)
 #define _pcre2_check_escape    PCRE2_SUFFIX(_pcre2_check_escape_)

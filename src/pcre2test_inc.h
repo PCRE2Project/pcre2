@@ -154,7 +154,7 @@ pcre2_strcmp_c8(PCRE2_SPTR str1, const char *str2)
   while (*str1 != '\0' || *str2 != '\0')
   {
     c1 = *str1++;
-    c2 = *str2++;
+    c2 = (unsigned char)*str2++;
     if (c1 != c2)
       return ((c1 > c2) << 1) - 1;
   }
@@ -6156,8 +6156,8 @@ compile-substitute.
 I think of them as perhaps more like unit tests, although they are still testing
 the public API, rather than internal modules.
 
-Inside pcre2test, which can be dynamically linked to lib-pcreX.so, we don't
-have access to any non-exported functions. */
+Most tests use only the public API because pcre2test can be dynamically linked.
+Static builds also exercise selected internal string helpers directly. */
 
 static void
 unittest(void)
@@ -6240,6 +6240,53 @@ unittest(void)
       goto EXIT;          \
     }                     \
   } while (0)
+#endif
+
+#ifdef PCRE2_STATIC
+  {
+#define STRING_UTIL(name) PCRE2_SUFFIX(_pcre2_##name##_)
+    extern int STRING_UTIL(strcmp)(PCRE2_SPTR, PCRE2_SPTR);
+    extern int STRING_UTIL(strcmp_c8)(PCRE2_SPTR, const char *);
+    extern int STRING_UTIL(strncmp)(PCRE2_SPTR, PCRE2_SPTR, size_t);
+    extern int STRING_UTIL(strncmp_c8)(PCRE2_SPTR, const char *, size_t);
+    extern PCRE2_SIZE STRING_UTIL(strlen)(PCRE2_SPTR);
+    extern PCRE2_SIZE STRING_UTIL(strcpy_c8)(PCRE2_UCHAR *, const char *);
+    PCRE2_UCHAR high[] = { 0x7f, 0x80, 0xff, 0 };
+    const char narrow[] = "\x7f\x80\xff";
+    PCRE2_UCHAR first[] = { CHAR_A, 0, CHAR_B };
+    PCRE2_UCHAR second[] = { CHAR_A, 0, CHAR_C };
+    const unsigned char narrow_second[] = { CHAR_A, 0, CHAR_C };
+    PCRE2_UCHAR copied[] = { 42, 0, 0, 0, 0, 43 };
+    ASSERT(STRING_UTIL(strcmp_c8)(high, narrow) == 0, "string helper byte widening");
+    ASSERT(STRING_UTIL(strncmp_c8)(high, narrow, 3) == 0, "span helper byte widening");
+    ASSERT(pcre2_strcmp_c8(high, narrow) == 0, "test comparator byte widening");
+    ASSERT(STRING_UTIL(strcmp)(first, second) == 0, "terminated comparison");
+    ASSERT(STRING_UTIL(strcmp)(first, first + 1) == 1 &&
+               STRING_UTIL(strcmp)(first + 1, first) == -1, "empty terminated comparison");
+    ASSERT(STRING_UTIL(strncmp)(first, second, 3) == -1 &&
+               STRING_UTIL(strncmp)(second, first, 3) == 1, "span comparison past zero");
+    ASSERT(STRING_UTIL(strncmp_c8)(first, (const char *)narrow_second, 3) == -1,
+           "mixed span comparison past zero");
+    ASSERT(STRING_UTIL(strncmp)(first, second, 2) == 0 &&
+               STRING_UTIL(strncmp_c8)(first, (const char *)narrow_second, 2) == 0,
+           "span comparison stops at count");
+    ASSERT(STRING_UTIL(strncmp)(NULL, NULL, 0) == 0 &&
+               STRING_UTIL(strncmp_c8)(NULL, NULL, 0) == 0, "zero-length span comparison");
+    ASSERT(STRING_UTIL(strcpy_c8)(copied + 1, narrow) == 3 &&
+               memcmp(copied + 1, high, sizeof(high)) == 0 && copied[0] == 42 && copied[5] == 43,
+           "copy helper byte widening and guards");
+    ASSERT(STRING_UTIL(strlen)(copied + 1) == 3, "string helper length");
+    ASSERT(STRING_UTIL(strcpy_c8)(copied + 1, "") == 0 && copied[1] == 0 &&
+               STRING_UTIL(strlen)(copied + 1) == 0, "empty string helpers");
+    ASSERT(STRING_UTIL(strcmp)(high, high + 1) == -1 &&
+               STRING_UTIL(strcmp_c8)(high + 1, narrow) == 1, "unsigned byte ordering");
+#if PCRE2_CODE_UNIT_WIDTH != 8
+    PCRE2_UCHAR wide[] = { (PCRE2_UCHAR)~(PCRE2_UCHAR)0, 0 };
+    ASSERT(STRING_UTIL(strcmp_c8)(wide, "\xff") == 1 &&
+               STRING_UTIL(strncmp_c8)(wide, "\xff", 1) == 1, "wide code-unit ordering");
+#endif
+#undef STRING_UTIL
+  }
 #endif
 
   /* -------------------------- pcre2_config --------------------------------- */

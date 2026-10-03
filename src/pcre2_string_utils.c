@@ -97,7 +97,7 @@ PRIV(strcmp_c8)(PCRE2_SPTR str1, const char *str2)
   while (*str1 != '\0' || *str2 != '\0')
   {
     c1 = *str1++;
-    c2 = *str2++;
+    c2 = (unsigned char)*str2++;
     if (c1 != c2)
       return ((c1 > c2) << 1) - 1;
   }
@@ -157,7 +157,7 @@ PRIV(strncmp_c8)(PCRE2_SPTR str1, const char *str2, size_t len)
   for (; len > 0; len--)
   {
     c1 = *str1++;
-    c2 = *str2++;
+    c2 = (unsigned char)*str2++;
     if (c1 != c2)
       return ((c1 > c2) << 1) - 1;
   }
@@ -201,7 +201,7 @@ PRIV(strcpy_c8)(PCRE2_UCHAR *str1, const char *str2)
 {
   PCRE2_UCHAR *t = str1;
   while (*str2 != 0)
-    *t++ = *str2++;
+    *t++ = (unsigned char)*str2++;
   *t = 0;
   return t - str1;
 }
