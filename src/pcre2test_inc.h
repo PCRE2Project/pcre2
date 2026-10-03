@@ -6911,12 +6911,19 @@ unittest(void)
   ASSERT(rc == sizeof("replacement $' or $_ not supported with partial match") - 1 &&
              pcre2_strcmp_c8(errorbuffer,
                              "replacement $' or $_ not supported with partial match") == 0,
+         "pcre2_get_error_message(partial substitution)");
+
+  rc = pcre2_get_error_message(PCRE2_ERROR_BADOFFSETLIMITVALUE, errorbuffer,
+                              sizeof(errorbuffer) / sizeof(errorbuffer[0]));
+  BUFFER_OUTPUT
+  ASSERT(rc == sizeof("bad offset limit value") - 1 &&
+             pcre2_strcmp_c8(errorbuffer, "bad offset limit value") == 0,
          "pcre2_get_error_message(last match error)");
 
   {
     const int invalid_errorcodes[] = {
       INT_MIN, INT_MIN + 1, INT_MAX, 1, COMPILE_ERROR_BASE - 1,
-      PCRE2_ERROR_NULL_ERROROFFSET + 1, PCRE2_ERROR_PARTIALSUBS - 1
+      PCRE2_ERROR_NULL_ERROROFFSET + 1, PCRE2_ERROR_BADOFFSETLIMITVALUE - 1
     };
 
     for (size_t i = 0; i < sizeof(invalid_errorcodes) / sizeof(invalid_errorcodes[0]); i++)

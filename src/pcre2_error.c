@@ -287,7 +287,8 @@ static const uint16_t compile_error_offsets[] = {
   X(e073, "substitute start offset differs from prior match call")                             \
   X(e074, "substitute options differ from prior match call")                                   \
   X(e075, "disallowed use of \\K in lookaround")                                               \
-  X(e076, "replacement $' or $_ not supported with partial match")
+  X(e076, "replacement $' or $_ not supported with partial match")                             \
+  X(e077, "bad offset limit value")
 // clang-format on
 
 static const struct match_error_texts {
