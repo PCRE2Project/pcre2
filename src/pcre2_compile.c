@@ -2640,7 +2640,7 @@ get_ucp(PCRE2_SPTR *ptrptr, BOOL utf, BOOL *negptr, uint16_t *ptypeptr, uint16_t
     {
       offset = 4;
       sname[0] = CHAR_b;
-      sname[1] = CHAR_i; // There is no strcpy_c8 function
+      sname[1] = CHAR_i;
       sname[2] = CHAR_d;
       sname[3] = CHAR_i;
     }

@@ -39,9 +39,9 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/* This module contains internal functions for comparing and finding the length
-of strings. These are used instead of strcmp() etc because the standard
-functions work only on 8-bit data. */
+/* This module contains internal functions for comparing, measuring and copying
+strings. They operate on code units rather than decoded characters. The counted
+comparisons do not stop at embedded zeros, unlike the standard strncmp(). */
 
 
 #include "pcre2_internal.h"
@@ -107,10 +107,13 @@ PRIV(strcmp_c8)(PCRE2_SPTR str1, const char *str2)
 
 
 /*************************************************
-*    Compare two PCRE2 strings, given a length   *
+*    Compare two PCRE2 spans, given a length      *
 *************************************************/
 
-/*
+/* Compare up to the first difference or exactly len code units, including zeros.
+Both inputs must contain at least len readable code units. Zero length reads
+neither input.
+
 Arguments:
   str1        first string
   str2        second string
@@ -136,11 +139,13 @@ PRIV(strncmp)(PCRE2_SPTR str1, PCRE2_SPTR str2, size_t len)
 
 
 /*************************************************
-* Compare PCRE2 string to 8-bit string by length *
+* Compare PCRE2 span to 8-bit span by length      *
 *************************************************/
 
 /* As the 8-bit string is almost always a literal, its type is specified as
-const char *.
+const char *. Compare up to the first difference or exactly len code units,
+including zeros. Both inputs must contain at least len readable units; zero
+length reads neither input. Source bytes are widened without decoding.
 
 Arguments:
   str1        first string
@@ -189,8 +194,11 @@ PRIV(strlen)(PCRE2_SPTR str)
 * Copy 8-bit 0-terminated string to PCRE2 string *
 *************************************************/
 
-/* Arguments:
-  str1     buffer to receive the string
+/* Copy unsigned byte values without decoding. The source and destination must
+not overlap.
+
+Arguments:
+  str1     buffer with room for the complete string and its terminating zero
   str2     8-bit string to be copied
 
 Returns:   the number of code units used (excluding trailing zero)
