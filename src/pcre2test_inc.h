@@ -7192,6 +7192,20 @@ unittest(void)
                                          &errorcode, &erroroffset, NULL);
       ASSERT(test_compiled_code != NULL, "named-query compile");
 
+      PCRE2_SPTR first = missing_name, last = missing_name;
+      int number = duplicate ? PCRE2_ERROR_NOUNIQUESUBSTRING : 1;
+      ASSERT(pcre2_substring_number_from_name(test_compiled_code, name_n) == number,
+             "unique-number query");
+      ASSERT(pcre2_substring_nametable_scan(test_compiled_code, name_n, NULL, &last) == number &&
+                 last == missing_name, "name scan ignores lastptr in number mode");
+      rc = pcre2_substring_nametable_scan(test_compiled_code, name_n, &first, &last);
+      ASSERT(rc == test_compiled_code->name_entry_size && last - first == duplicate * rc,
+             "name scan range");
+      first = last = name_n;
+      ASSERT(pcre2_substring_nametable_scan(test_compiled_code, missing_name, &first, &last) ==
+                 PCRE2_ERROR_NOSUBSTRING && first == name_n && last == name_n,
+             "missing name preserves scan outputs");
+
 #ifdef SUPPORT_JIT
       if (test_compiled_with_jit)
         ASSERT(pcre2_jit_compile(test_compiled_code, PCRE2_JIT_COMPLETE | PCRE2_JIT_PARTIAL_HARD) ==

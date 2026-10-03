@@ -183,6 +183,7 @@ pcre2_substring_get_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
   PCRE2_ASSERT(match_data != NULL);
   PCRE2_ASSERT(stringname != NULL);
   PCRE2_ASSERT(stringptr != NULL);
+  PCRE2_ASSERT(sizeptr != NULL);
 
   if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
     return PCRE2_ERROR_DFA_UFUNC;
@@ -541,18 +542,18 @@ pcre2_substring_list_free(PCRE2_UCHAR **list)
 *************************************************/
 
 /* This function scans the nametable for a given name, using binary chop. It
-returns either two pointers to the entries in the table, or, if no pointers are
-given, the number of a unique group with the given name. If duplicate names are
-permitted, and the name is not unique, an error is generated.
+returns either two pointers to the entries in the table, or, if firstptr is
+NULL, the number of a unique group with the given name. In the latter mode,
+lastptr is ignored and a nonunique name gives an error.
 
 Arguments:
   code        the compiled regex
   stringname  the name whose entries required
-  firstptr    where to put the pointer to the first entry
-  lastptr     where to put the pointer to the last entry
+  firstptr    where to put the pointer to the first entry, or NULL for number mode
+  lastptr     where to put the pointer to the last entry; required in range mode
 
 Returns:      PCRE2_ERROR_NOSUBSTRING if the name is not found
-              otherwise, if firstptr and lastptr are NULL:
+              otherwise, if firstptr is NULL:
                 a group number for a unique substring
                 else PCRE2_ERROR_NOUNIQUESUBSTRING
               otherwise:
@@ -567,6 +568,7 @@ pcre2_substring_nametable_scan(const pcre2_code *code, PCRE2_SPTR stringname, PC
 
   PCRE2_ASSERT(code != NULL);
   PCRE2_ASSERT(stringname != NULL);
+  PCRE2_ASSERT(firstptr == NULL || lastptr != NULL);
 
   uint16_t entrysize = code->name_entry_size;
   PCRE2_SPTR nametable = (PCRE2_SPTR)((const char *)code + sizeof(pcre2_real_code));
@@ -619,8 +621,7 @@ pcre2_substring_nametable_scan(const pcre2_code *code, PCRE2_SPTR stringname, PC
 *************************************************/
 
 /* This function is a convenience wrapper for pcre2_substring_nametable_scan()
-when it is known that names are unique. If there are duplicate names, it is not
-defined which number is returned.
+when a unique group number is required. A nonunique name gives an error.
 
 Arguments:
   code        the compiled regex

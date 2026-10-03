@@ -37,11 +37,15 @@ arg:lastptr::
     Where to return a pointer to the last entry
 
 When the name is found in the table, if arg:firstptr is const:NULL, the function
-returns a group number, but if there is more than one matching entry, it is not
-defined which one. Otherwise, when both arg:firstptr and arg:lastptr have been
-set, the yield of
-the function is the length of each entry in code units. If the name is not
-found, const:PCRE2_ERROR_NOSUBSTRING is returned.
+returns the group number if the name is unique, or
+const:PCRE2_ERROR_NOUNIQUESUBSTRING if there is more than one matching entry.
+In this mode arg:lastptr is ignored.
+
+Otherwise, both arg:firstptr and arg:lastptr must point to variables that can
+receive the entry pointers. Both are set and the function returns the length
+of each entry in code units. If the name is not found,
+const:PCRE2_ERROR_NOSUBSTRING is returned. Output variables are not changed on
+error.
 
 There is a complete description of the PCRE2 native API, including the format of
 the table entries, in the

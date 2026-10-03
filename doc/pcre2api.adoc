@@ -4420,18 +4420,18 @@ documentation.
 
 When duplicates are present, func:pcre2_substring_copy_byname() and
 func:pcre2_substring_get_byname() return the first substring corresponding to
-the given name that is set. Only if none are set is const:PCRE2_ERROR_UNSET is
+the given name that is set. Only if none are set is const:PCRE2_ERROR_UNSET
 returned. The func:pcre2_substring_number_from_name() function returns the
 error const:PCRE2_ERROR_NOUNIQUESUBSTRING when there are duplicate names.
 
 If you want to get full details of all captured substrings for a given name,
 you must use the func:pcre2_substring_nametable_scan() function. The first
-argument is the compiled pattern, and the second is the name. If the third and
-fourth arguments are const:NULL, the function returns a group number for a unique
-name, or const:PCRE2_ERROR_NOUNIQUESUBSTRING otherwise.
+argument is the compiled pattern, and the second is the name. If the third
+argument is const:NULL, the fourth is ignored, and the function returns a group
+number for a unique name, or const:PCRE2_ERROR_NOUNIQUESUBSTRING otherwise.
 
-When the third and fourth arguments are not const:NULL, they must be pointers to
-variables that are updated by the function. After it has run, they point to the
+When the third argument is not const:NULL, both the third and fourth arguments
+must point to variables that can be updated by the function. On success, they point to the
 first and last entries in the name-to-number table for the given name, and the
 function returns the length of each entry in code units. In both cases,
 const:PCRE2_ERROR_NOSUBSTRING is returned if there are no entries for the given name.
