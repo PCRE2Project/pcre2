@@ -1470,7 +1470,7 @@ is placed. If <code class="constant">NULL</code> is passed, the function returns
 needed for the requested information. For calls that return numerical values,
 the value is in bytes; when requesting these values, <code class="parameter">where</code> should point
 to appropriately aligned memory. For calls that return strings, the required
-length is given in code units, not counting the terminating zero.</p>
+length is given in code units, including the terminating zero.</p>
 <p>When requesting information, the returned value from <code class="function">pcre2_config()</code> is
 non-negative on success, or the negative error code <code class="constant">PCRE2_ERROR_BADOPTION</code> if
 the value in the first argument is not recognized. The following information is
@@ -2833,13 +2833,18 @@ auxiliary) can be obtained by calling <code class="function">pcre2_get_error_mes
 is passed as the first argument, with the remaining two arguments specifying a
 code unit buffer and its length in code units, into which the text message is
 placed. The message is returned in code units of the appropriate width for the
-library that is being used.</p>
+library that is being used. An error code of zero is also recognized.</p>
 <p>The returned message is terminated with a trailing zero, and the function
 returns the number of code units used, excluding the trailing zero. If the
 error number is unknown, the negative error code <code class="constant">PCRE2_ERROR_BADDATA</code> is
-returned. If the buffer is too small, the message is truncated (but still with
-a trailing zero), and the negative error code <code class="constant">PCRE2_ERROR_NOMEMORY</code> is returned.
-None of the messages is very long; a buffer size of 120 code units is ample.</p></section>
+returned without changing the buffer, and without inspecting the value of <code class="parameter">bufflen</code>.
+If the buffer is too small, the message is truncated (but still with
+a trailing zero, assuming <code class="parameter">bufflen</code> is not zero), and the negative error code
+<code class="constant">PCRE2_ERROR_NOMEMORY</code> is returned.
+None of the messages is very long; a buffer size of 120 code units is ample.</p>
+<p>No arithmetic (including unary negation) should ever be performed on error codes
+by clients. For any PCRE2 function that returns error codes, that code should be
+handled as-is.</p></section>
 <section class="doc-section level-1"><h2 id="iterating-over-matches">Iterating over all matches</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nf">pcre2_next_match</span><span class="p">(</span><span class="n">pcre2_match_data</span> <span class="o">*</span><span class="n">match_data</span><span class="p">,</span>
                      <span class="n">PCRE2_SIZE</span> <span class="o">*</span><span class="n">pstart_offset</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="o">*</span><span class="n">poptions</span><span class="p">);</span></code></pre></div>
 <p>A common task for applications is to implement "global" matching behaviour,

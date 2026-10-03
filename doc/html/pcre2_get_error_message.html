@@ -546,12 +546,14 @@ pre.rouge .gs {
 <section class="doc-section level-1"><h2 id="_description">Description</h2><p>This function provides a textual error message for each PCRE2 error code.
 Compilation errors are positive numbers; UTF formatting errors and matching
 errors are negative numbers. The arguments are:</p>
-<div class="dlist parameters"><dl><dt><code class="parameter">errorcode</code></dt><dd>an error code (positive or negative)</dd><dt><code class="parameter">buffer</code></dt><dd>where to put the message</dd><dt><code class="parameter">bufflen</code></dt><dd>the length of the buffer (code units)</dd></dl></div>
+<div class="dlist parameters"><dl><dt><code class="parameter">errorcode</code></dt><dd>an error code (positive or negative), or zero for no error</dd><dt><code class="parameter">buffer</code></dt><dd>where to put the message</dd><dt><code class="parameter">bufflen</code></dt><dd>the length of the buffer (code units)</dd></dl></div>
 <p>The function returns the length of the message in code units, excluding the
 trailing zero, or the negative error code <code class="constant">PCRE2_ERROR_NOMEMORY</code> if the buffer is
 too small. In this case, the returned message is truncated (but still with a
-trailing zero). If <code class="parameter">errorcode</code> does not contain a recognized error code
-number, the negative value <code class="constant">PCRE2_ERROR_BADDATA</code> is returned.</p>
+trailing zero, assuming <code class="parameter">bufflen</code> is not zero).</p>
+<p>If <code class="parameter">errorcode</code> is neither zero nor a recognized error code
+number, the negative value <code class="constant">PCRE2_ERROR_BADDATA</code> is returned without changing
+the buffer, and without inspecting the value of <code class="parameter">bufflen</code>.</p>
 <p>There is a complete description of the PCRE2 native API in the
 <a href="pcre2api.html"><code>pcre2api</code></a>
 page and a description of the POSIX API in the

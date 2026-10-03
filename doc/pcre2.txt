@@ -1394,7 +1394,7 @@ CHECKING BUILD-TIME OPTIONS
        calls that return numerical values, the value is in bytes; when
        requesting these values, where should point to appropriately aligned
        memory. For calls that return strings, the required length is given in
-       code units, not counting the terminating zero.
+       code units, including the terminating zero.
 
        When requesting information, the returned value from pcre2_config() is
        non-negative on success, or the negative error code
@@ -3914,15 +3914,21 @@ OBTAINING A TEXTUAL ERROR MESSAGE
        with the remaining two arguments specifying a code unit buffer and its
        length in code units, into which the text message is placed. The
        message is returned in code units of the appropriate width for the
-       library that is being used.
+       library that is being used. An error code of zero is also recognized.
 
        The returned message is terminated with a trailing zero, and the
        function returns the number of code units used, excluding the trailing
        zero. If the error number is unknown, the negative error code
-       PCRE2_ERROR_BADDATA is returned. If the buffer is too small, the
-       message is truncated (but still with a trailing zero), and the negative
-       error code PCRE2_ERROR_NOMEMORY is returned. None of the messages is
-       very long; a buffer size of 120 code units is ample.
+       PCRE2_ERROR_BADDATA is returned without changing the buffer, and
+       without inspecting the value of bufflen. If the buffer is too small,
+       the message is truncated (but still with a trailing zero, assuming
+       bufflen is not zero), and the negative error code PCRE2_ERROR_NOMEMORY
+       is returned. None of the messages is very long; a buffer size of 120
+       code units is ample.
+
+       No arithmetic (including unary negation) should ever be performed on
+       error codes by clients. For any PCRE2 function that returns error
+       codes, that code should be handled as-is.
 
 
 ITERATING OVER ALL MATCHES
