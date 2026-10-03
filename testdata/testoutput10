@@ -2096,4 +2096,11 @@ Failed: error -57 at offset 4 in replacement: bad escape sequence in replacement
     abcd
  0: abcd
 
+/\b/utf,use_offset_limit
+    \x{300}\x{4e2d}\x{1f600}1\=offset_limit=9
+ 0: 
+\= Expect no match
+    \x{300}\x{4e2d}\x{1f600}1\=offset_limit=6
+No match
+
 # End of testinput10

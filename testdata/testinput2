@@ -6217,6 +6217,55 @@ a)"xI
 /(*naplb:ab?c|PQ).../g
     abcdefgacxyzPQR123
 
+/y(?<!.{1,2}\b)b/
+    eyb
+    e yb
+
+/(?<=.{1,2}\b)yb/
+    e yb
+\= Expect no match
+    eyb
+
+/y(?<!.?\b)b/
+    eyb
+
+/(?<=ab[kK]{2,3}|[ab]key.{2}|ee\b)k/
+    abkkk
+\= Expect no match
+    ee k
+    eek
+
+/(?<=a.{1,2}\B)c/
+    abc
+\= Expect no match
+    ab c
+
+/(?<=x.{1,2}(?=z))z/
+    xyz
+    xyyz
+
+/(?<=a.{0,3}$)/
+    abc
+
+/(?<=a.{0,2})c/g
+    acc
+
+/(?(?<=a.{1,2}\b)c|d)/
+    ab c
+    abcd
+
+/(*naplb:x.{1,2}\b|zz.{1,3}\b)c/
+    xa c
+    zzab c
+\= Expect no match
+    xac
+    zzabc
+
+/(*naplb:a.{1,2}\b)(?<=a.{1,2})c/
+    ab c
+\= Expect no match
+    abc
+
 # ----
 
 # Expect error (recursion => not fixed length)
@@ -8413,5 +8462,93 @@ a)"xI
 \= Expect to fail with PCRE2_ERROR_PARTIALSUBS
     abc\=ps,substitute_replacement_only,replace=>$_<
     abc\=ps,substitute_replacement_only,replace=>$'<
+
+/(?<=a?(*THEN)(?<=e)|x)B/
+\= Expect no match
+    eBx
+
+/(?<=x|a?(*THEN)(?<=e))B/
+\= Expect no match
+    eBx
+
+/((*naplb:(a)?(*THEN)))[a-c]/
+\= Expect no match
+    eb
+
+/(?!(?=(*THEN)(*F))?)/
+\= Expect no match
+    x
+
+/(?!(?<=a?(*THEN))?)b/
+\= Expect no match
+    xb
+
+/(*naplb:(?(?=x)a))/B
+    ae\=offset=2
+    aee\=offset=2
+
+/(?<=(?(?=e)a))/
+    ae\=offset=2
+
+/(?<!(?(?=e)a))/
+\= Expect no match
+    ae\=offset=2
+
+/(*naplb:(?(?=x)ab))/
+    xabe\=offset=3
+
+/(?=X)/newline=crlf,use_offset_limit,no_start_optimize
+    \r\nX\=offset_limit=2
+\= Expect no match
+    \r\nX\=offset_limit=1
+
+/(?:xyzw\R{4}|abc)/
+    abc
+
+/(?:xyzw\X{3}|abc)/
+    abc
+
+/(?:wxyz\h{2}|abcd)/
+    abcd
+
+/(Z|[ab])\R{4}/
+    b\r\n\r\n\r\n\r\n
+
+/(?<!(x))\1/
+\= Expect no match
+    ab\=ps
+    ab\=ph
+
+/\R(*F)/
+    \r\=ps
+    \r\=ph
+
+/(?=(?!\R)?})/
+    \r\=ps
+
+/x\R?/
+    x\r\=ph
+    x\r\=ps
+
+/\R?(*F)/
+    \r\=ps
+
+/\R+(*F)/
+    \r\=ps
+
+/\b/
+    \=ph
+
+/((?<=\b!?))/
+    \=ph
+
+/(?:\b|x)(*F)/
+    \=ph
+
+/^\bw/
+    \=ph
+
+/\A\b /
+    \=ph
 
 # End of testinput2

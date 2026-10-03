@@ -3641,8 +3641,14 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
 
               case CHAR_CR:
-                if (Feptr < mb->end_subject && *Feptr == CHAR_LF)
+                if (Feptr >= mb->end_subject)
+                {
+                  SCHECK_PARTIAL();
+                }
+                else if (*Feptr == CHAR_LF)
+                {
                   Feptr++;
+                }
                 break;
 
               case CHAR_LF:
@@ -3939,8 +3945,14 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
 
               case CHAR_CR:
-                if (Feptr < mb->end_subject && *Feptr == CHAR_LF)
+                if (Feptr >= mb->end_subject)
+                {
+                  SCHECK_PARTIAL();
+                }
+                else if (*Feptr == CHAR_LF)
+                {
                   Feptr++;
+                }
                 break;
 
               case CHAR_LF:
@@ -4570,8 +4582,14 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
 
               case CHAR_CR:
-                if (Feptr < mb->end_subject && *Feptr == CHAR_LF)
+                if (Feptr >= mb->end_subject)
+                {
+                  SCHECK_PARTIAL();
+                }
+                else if (*Feptr == CHAR_LF)
+                {
                   Feptr++;
+                }
                 break;
 
               case CHAR_LF:
@@ -4719,8 +4737,14 @@ NEW_FRAME:
                 RRETURN(MATCH_NOMATCH);
 
               case CHAR_CR:
-                if (Feptr < mb->end_subject && *Feptr == CHAR_LF)
+                if (Feptr >= mb->end_subject)
+                {
+                  SCHECK_PARTIAL();
+                }
+                else if (*Feptr == CHAR_LF)
+                {
                   Feptr++;
+                }
                 break;
 
               case CHAR_LF:
@@ -5334,7 +5358,10 @@ NEW_FRAME:
               if (fc == CHAR_CR)
               {
                 if (++Feptr >= mb->end_subject)
+                {
+                  SCHECK_PARTIAL();
                   break;
+                }
                 if (*Feptr == CHAR_LF)
                   Feptr++;
               }
@@ -5609,7 +5636,10 @@ NEW_FRAME:
               if (fc == CHAR_CR)
               {
                 if (++Feptr >= mb->end_subject)
+                {
+                  SCHECK_PARTIAL();
                   break;
+                }
                 if (*Feptr == CHAR_LF)
                   Feptr++;
               }
@@ -5940,8 +5970,10 @@ NEW_FRAME:
           if (rrc != 0)
           {
             if (rrc > 0)
+            {
               Feptr = mb->end_subject; // Partial match
-            CHECK_PARTIAL();
+              CHECK_PARTIAL();
+            }
             RRETURN(MATCH_NOMATCH);
           }
         }
@@ -5977,8 +6009,10 @@ NEW_FRAME:
         if (rrc != 0)
         {
           if (rrc > 0)
+          {
             Feptr = mb->end_subject; // Partial match
-          CHECK_PARTIAL();
+            CHECK_PARTIAL();
+          }
           RRETURN(MATCH_NOMATCH);
         }
 
@@ -6006,8 +6040,10 @@ NEW_FRAME:
           if (rrc != 0)
           {
             if (rrc > 0)
+            {
               Feptr = mb->end_subject; // Partial match
-            CHECK_PARTIAL();
+              CHECK_PARTIAL();
+            }
             RRETURN(MATCH_NOMATCH);
           }
 
@@ -8405,8 +8441,8 @@ FRAGMENT_RESTART:
       {
         if (has_first_cu || start_bits != NULL)
         {
-          BOOL ok = start_match < end_subject;
-          if (ok)
+          BOOL ok = start_match < end_subject || mb->partial != 0;
+          if (start_match < end_subject)
           {
             PCRE2_UCHAR c = *start_match;
             ok = has_first_cu && (c == first_cu || c == first_cu2);
