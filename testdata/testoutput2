@@ -18686,6 +18686,78 @@ No match
  0: xyz
  0: R12
 
+/y(?<!.{1,2}\b)b/
+    eyb
+ 0: yb
+    e yb
+ 0: yb
+
+/(?<=.{1,2}\b)yb/
+    e yb
+ 0: yb
+\= Expect no match
+    eyb
+No match
+
+/y(?<!.?\b)b/
+    eyb
+ 0: yb
+
+/(?<=ab[kK]{2,3}|[ab]key.{2}|ee\b)k/
+    abkkk
+ 0: k
+\= Expect no match
+    ee k
+No match
+    eek
+No match
+
+/(?<=a.{1,2}\B)c/
+    abc
+ 0: c
+\= Expect no match
+    ab c
+No match
+
+/(?<=x.{1,2}(?=z))z/
+    xyz
+ 0: z
+    xyyz
+ 0: z
+
+/(?<=a.{0,3}$)/
+    abc
+ 0: 
+
+/(?<=a.{0,2})c/g
+    acc
+ 0: c
+ 0: c
+
+/(?(?<=a.{1,2}\b)c|d)/
+    ab c
+ 0: c
+    abcd
+ 0: d
+
+/(*naplb:x.{1,2}\b|zz.{1,3}\b)c/
+    xa c
+ 0: c
+    zzab c
+ 0: c
+\= Expect no match
+    xac
+No match
+    zzabc
+No match
+
+/(*naplb:a.{1,2}\b)(?<=a.{1,2})c/
+    ab c
+ 0: c
+\= Expect no match
+    abc
+No match
+
 # ----
 
 # Expect error (recursion => not fixed length)
@@ -23836,6 +23908,88 @@ Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported
     abc\=ps,substitute_replacement_only,replace=>$'<
 Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported with partial match
         here: >$' |<--| <
+
+/(?<=a?(*THEN)(?<=e)|x)B/
+\= Expect no match
+    eBx
+No match
+
+/(?<=x|a?(*THEN)(?<=e))B/
+\= Expect no match
+    eBx
+No match
+
+/((*naplb:(a)?(*THEN)))[a-c]/
+\= Expect no match
+    eb
+No match
+
+/(?!(?=(*THEN)(*F))?)/
+\= Expect no match
+    x
+No match
+
+/(?!(?<=a?(*THEN))?)b/
+\= Expect no match
+    xb
+No match
+
+/(*naplb:(?(?=x)a))/B
+------------------------------------------------------------------
+        Bra
+        Non-atomic assert back
+      0 VReverse 1
+        Cond
+        Assert
+        x
+        Ket
+        a
+        Ket
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    ae\=offset=2
+ 0: 
+    aee\=offset=2
+ 0: 
+
+/(?<=(?(?=e)a))/
+    ae\=offset=2
+ 0: 
+
+/(?<!(?(?=e)a))/
+\= Expect no match
+    ae\=offset=2
+No match
+
+/(*naplb:(?(?=x)ab))/
+    xabe\=offset=3
+ 0: 
+
+/(?=X)/newline=crlf,use_offset_limit,no_start_optimize
+    \r\nX\=offset_limit=2
+ 0: 
+\= Expect no match
+    \r\nX\=offset_limit=1
+No match
+
+/(?:xyzw\R{4}|abc)/
+    abc
+ 0: abc
+
+/(?:xyzw\X{3}|abc)/
+** \P, \p, and \X are not allowed after the #forbid_utf command
+    abc
+
+/(?:wxyz\h{2}|abcd)/
+    abcd
+ 0: abcd
+
+/(Z|[ab])\R{4}/
+    b\r\n\r\n\r\n\r\n
+ 0: b\x0d\x0a\x0d\x0a\x0d\x0a\x0d\x0a
+ 1: b
 
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)

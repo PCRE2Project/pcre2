@@ -2089,4 +2089,8 @@ No match
 
 # --------------------------------------------------------- 
 
+/(?<=\x{1f600})/utf,use_offset_limit
+    \x{1f600}\x{1f600}\=offset_limit=1
+ 0: 
+
 # End of testinput12
