@@ -7170,6 +7170,119 @@ unittest(void)
   rc = pcre2_substring_get_bynumber(test_match_data, 1, &sptrval, &sizeval);
   ASSERT(rc == PCRE2_ERROR_NOMATCH && sptrval == NULL, "pcre2_substring_get_bynumber(no match)");
 
+  /* Named queries must not depend on capture slots left by an earlier match. */
+
+  {
+    const char *patterns[] = { "^(?<N>[AC])?B$", "^(?:(?<N>A)|(?<N>C))?B$" };
+    PCRE2_UCHAR missing_name[] = { CHAR_X, 0 };
+    PCRE2_UCHAR seeds[][3] = {
+      { 0, 0, 0 }, { CHAR_B, 0, 0 }, { CHAR_A, CHAR_B, 0 }, { CHAR_C, CHAR_B, 0 }
+    };
+    PCRE2_UCHAR incomplete[] = { CHAR_A };
+    PCRE2_UCHAR query_pattern[64];
+    int workspace[64];
+    for (int duplicate = 0; duplicate < 2; duplicate++)
+    {
+      size_t len = strlen(patterns[duplicate]);
+      ASSERT(len < sizeof(query_pattern) / sizeof(query_pattern[0]), "named-query pattern capacity");
+      for (size_t i = 0; i < len; i++)
+        query_pattern[i] = CHAR_INPUT((unsigned char)patterns[duplicate][i]);
+      pcre2_code_free(test_compiled_code);
+      test_compiled_code = pcre2_compile(query_pattern, len, PCRE2_DUPNAMES,
+                                         &errorcode, &erroroffset, NULL);
+      ASSERT(test_compiled_code != NULL, "named-query compile");
+
+#ifdef SUPPORT_JIT
+      if (test_compiled_with_jit)
+        ASSERT(pcre2_jit_compile(test_compiled_code, PCRE2_JIT_COMPLETE | PCRE2_JIT_PARTIAL_HARD) ==
+                   0, "named-query JIT compile");
+#endif
+      for (int mode = 0; mode < 3; mode++)
+      {
+        if (mode == 1)
+        {
+#ifdef SUPPORT_JIT
+          if (!test_compiled_with_jit)
+            continue;
+#else
+          continue;
+#endif
+        }
+        for (uint32_t pairs = 1; pairs <= 3; pairs++)
+        for (int prior = 0; prior < 4; prior++)
+        for (int partial = 0; partial < 2; partial++)
+        {
+          pcre2_match_data_free(test_match_data);
+          test_match_data = pcre2_match_data_create(pairs, NULL);
+          ASSERT(test_match_data != NULL, "named-query match data");
+          for (int phase = 0; phase < 2; phase++)
+          {
+            if (phase == 0 && prior == 0)
+              continue;
+            PCRE2_SPTR subject = phase == 0 ? seeds[prior] : incomplete;
+            PCRE2_SIZE length = phase == 0 && prior > 1 ? 2 : 1;
+            uint32_t options = phase == 1 && partial ? PCRE2_PARTIAL_HARD : 0;
+            if (mode == 0)
+              rc = pcre2_match(test_compiled_code, subject, length, 0, options | PCRE2_NO_JIT,
+                               test_match_data, NULL);
+            else if (mode == 1)
+              rc = pcre2_jit_match(test_compiled_code, subject, length, 0, options,
+                                   test_match_data, NULL);
+            else
+              rc = pcre2_dfa_match(test_compiled_code, subject, length, 0, options,
+                                   test_match_data, NULL, workspace,
+                                   sizeof(workspace) / sizeof(workspace[0]));
+            int match_failure = partial ? PCRE2_ERROR_PARTIAL : PCRE2_ERROR_NOMATCH;
+            ASSERT(phase == 0 ? rc >= 0 : rc == match_failure, "named-query match state");
+            if (phase == 1 && mode != 2)
+              ASSERT(pcre2_substring_length_bynumber(test_match_data, 1, NULL) == match_failure,
+                     "numbered-query match failure");
+            for (int missing = 0; missing < 2; missing++)
+            {
+              PCRE2_SPTR name = missing ? missing_name : name_n;
+              int expected;
+              if (mode == 2)
+                expected = PCRE2_ERROR_DFA_UFUNC;
+              else if (phase == 1)
+                expected = match_failure;
+              else if (missing)
+                expected = PCRE2_ERROR_NOSUBSTRING;
+              else if (pairs == 1)
+                expected = PCRE2_ERROR_UNAVAILABLE;
+              else if (prior == 1 || (duplicate && prior == 3 && pairs == 2))
+                expected = PCRE2_ERROR_UNSET;
+              else
+                expected = 0;
+
+              PCRE2_UCHAR value = prior == 3 ? CHAR_C : CHAR_A;
+              PCRE2_UCHAR buffer[] = { 42, 42, 42, 42 };
+              PCRE2_SIZE length_out = 42;
+              rc = pcre2_substring_length_byname(test_match_data, name, &length_out);
+              ASSERT(rc == expected && length_out == (expected == 0 ? 1 : 42),
+                     "named length result and output");
+              ASSERT(pcre2_substring_length_byname(test_match_data, name, NULL) == expected,
+                     "named length optional output");
+              length_out = 2;
+              rc = pcre2_substring_copy_byname(test_match_data, name, buffer + 1, &length_out);
+              ASSERT(rc == expected && buffer[0] == 42 && buffer[3] == 42 &&
+                         length_out == (expected == 0 ? 1 : 2) &&
+                         buffer[1] == (expected == 0 ? value : 42) &&
+                         buffer[2] == (expected == 0 ? 0 : 42), "named copy result and output");
+              PCRE2_UCHAR *capture = NULL;
+              length_out = 42;
+              rc = pcre2_substring_get_byname(test_match_data, name, &capture, &length_out);
+              BOOL valid = expected == 0
+                  ? capture != NULL && length_out == 1 && capture[0] == value && capture[1] == 0
+                  : capture == NULL && length_out == 42;
+              pcre2_substring_free(capture);
+              ASSERT(rc == expected && valid, "named get result and output");
+            }
+          }
+        }
+      }
+    }
+  }
+
   /* ------------- pcre2_substitute with PCRE2_SUBSTITUTE_MATCHED ------------ */
 
   /* There are some specific edge cases here that would be a pain to exercise via

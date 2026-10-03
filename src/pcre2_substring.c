@@ -78,6 +78,8 @@ pcre2_substring_copy_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
 
   if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
     return PCRE2_ERROR_DFA_UFUNC;
+  if (match_data->rc < 0)
+    return match_data->rc;
 
   PCRE2_SPTR first, last;
   int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
@@ -184,6 +186,8 @@ pcre2_substring_get_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
 
   if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
     return PCRE2_ERROR_DFA_UFUNC;
+  if (match_data->rc < 0)
+    return match_data->rc;
 
   PCRE2_SPTR first, last;
   int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
@@ -315,6 +319,8 @@ pcre2_substring_length_byname(pcre2_match_data *match_data, PCRE2_SPTR stringnam
 
   if (match_data->matchedby == PCRE2_MATCHEDBY_DFA_INTERPRETER)
     return PCRE2_ERROR_DFA_UFUNC;
+  if (match_data->rc < 0)
+    return match_data->rc;
 
   PCRE2_SPTR first, last;
   int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);

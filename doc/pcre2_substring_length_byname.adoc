@@ -36,6 +36,10 @@ The third argument may be const:NULL if all you want to know is whether or not a
 substring is set. The yield is zero on success, or a negative error code
 otherwise.
 
+After DFA matching, const:PCRE2_ERROR_DFA_UFUNC is returned. Otherwise, a match
+failure code, including const:PCRE2_ERROR_PARTIAL, is returned before looking up
+the name.
+
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]
 page and a description of the POSIX API in the

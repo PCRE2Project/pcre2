@@ -3836,6 +3836,11 @@ name instead of a number. If const:PCRE2_DUPNAMES is set and there are duplicate
 names, these functions scan all the groups with the given name, and return the
 captured substring from the first named group that is set.
 
+These three functions return const:PCRE2_ERROR_DFA_UFUNC after DFA matching.
+Otherwise, if the match failed, its error code is returned before looking up the
+name. This includes const:PCRE2_ERROR_PARTIAL after a partial match; no named
+capture is available in that case.
+
 If there are no groups with the given name, const:PCRE2_ERROR_NOSUBSTRING is
 returned. If all groups with the name have numbers that are greater than the
 number of slots in the ovector, const:PCRE2_ERROR_UNAVAILABLE is returned. If there
