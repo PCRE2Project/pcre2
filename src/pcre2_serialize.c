@@ -164,27 +164,28 @@ PCRE2_EXP_DEFN int32_t PCRE2_CALL_CONVENTION
 pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes, const uint8_t *bytes,
                        pcre2_general_context *gcontext)
 {
-  const pcre2_serialized_data *data = (const pcre2_serialized_data *)bytes;
   const pcre2_memctl *memctl =
       (gcontext != NULL) ? &gcontext->memctl : &PRIV(default_compile_context).memctl;
 
   /* Sanity checks. */
 
-  if (data == NULL || codes == NULL)
+  if (bytes == NULL || codes == NULL)
     return PCRE2_ERROR_NULL;
   if (number_of_codes <= 0)
     return PCRE2_ERROR_BADDATA;
-  if (data->number_of_codes <= 0)
+  pcre2_serialized_data data;
+  memcpy(&data, bytes, sizeof(data));
+  if (data.number_of_codes <= 0)
     return PCRE2_ERROR_BADSERIALIZEDDATA;
-  if (data->magic != SERIALIZED_DATA_MAGIC)
+  if (data.magic != SERIALIZED_DATA_MAGIC)
     return PCRE2_ERROR_BADMAGIC;
-  if (data->version != SERIALIZED_DATA_VERSION)
+  if (data.version != SERIALIZED_DATA_VERSION)
     return PCRE2_ERROR_BADMODE;
-  if (data->config != SERIALIZED_DATA_CONFIG)
+  if (data.config != SERIALIZED_DATA_CONFIG)
     return PCRE2_ERROR_BADMODE;
 
-  if (number_of_codes > data->number_of_codes)
-    number_of_codes = data->number_of_codes;
+  if (number_of_codes > data.number_of_codes)
+    number_of_codes = data.number_of_codes;
 
   const uint8_t *src_bytes = bytes + sizeof(pcre2_serialized_data);
 
@@ -274,18 +275,18 @@ cleanup:
 PCRE2_EXP_DEFN int32_t PCRE2_CALL_CONVENTION
 pcre2_serialize_get_number_of_codes(const uint8_t *bytes)
 {
-  const pcre2_serialized_data *data = (const pcre2_serialized_data *)bytes;
-
-  if (data == NULL)
+  if (bytes == NULL)
     return PCRE2_ERROR_NULL;
-  if (data->magic != SERIALIZED_DATA_MAGIC)
+  pcre2_serialized_data data;
+  memcpy(&data, bytes, sizeof(data));
+  if (data.magic != SERIALIZED_DATA_MAGIC)
     return PCRE2_ERROR_BADMAGIC;
-  if (data->version != SERIALIZED_DATA_VERSION)
+  if (data.version != SERIALIZED_DATA_VERSION)
     return PCRE2_ERROR_BADMODE;
-  if (data->config != SERIALIZED_DATA_CONFIG)
+  if (data.config != SERIALIZED_DATA_CONFIG)
     return PCRE2_ERROR_BADMODE;
 
-  return data->number_of_codes;
+  return data.number_of_codes;
 }
 
 
