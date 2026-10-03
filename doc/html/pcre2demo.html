@@ -539,7 +539,7 @@ pre.rouge .gs {
   color: #24292f;
   font-weight: bold;
 }
-</style></head><body class="manpage"><header><h1>pcre2demo(3)</h1><div class="details"><time id="revdate" datetime="2026-09-14">14 September 2026</time></div></header><div id="content"><section class="doc-section level-1"><h2 id="_source_code">Source Code</h2><div class="listing-block wide"><pre class="rouge highlight"><code data-lang="c"><span class="cm">/*************************************************
+</style></head><body class="manpage"><header><h1>pcre2demo(3)</h1><div class="details"><time id="revdate" datetime="2026-10-03">03 October 2026</time></div></header><div id="content"><section class="doc-section level-1"><h2 id="_source_code">Source Code</h2><div class="listing-block wide"><pre class="rouge highlight"><code data-lang="c"><span class="cm">/*************************************************
 *           PCRE2 DEMONSTRATION PROGRAM          *
 *************************************************/</span>
 
@@ -610,29 +610,6 @@ need to be modified. */</span>
 <span class="kt">int</span>
 <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">pcre2_code</span> <span class="o">*</span><span class="n">re</span><span class="p">;</span>
-  <span class="cm">/* PCRE2_SPTR is a pointer to unsigned code units of the appropriate width
-  (in this case, 8 bits). */</span>
-  <span class="n">PCRE2_SPTR</span> <span class="n">pattern</span><span class="p">;</span>
-  <span class="n">PCRE2_SPTR</span> <span class="n">subject</span><span class="p">;</span>
-  <span class="n">PCRE2_SPTR</span> <span class="n">name_table</span><span class="p">;</span>
-
-  <span class="kt">int</span> <span class="n">errornumber</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">find_all</span><span class="p">,</span> <span class="n">caseless_match</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
-
-  <span class="kt">uint32_t</span> <span class="n">namecount</span><span class="p">;</span>
-  <span class="kt">uint32_t</span> <span class="n">name_entry_size</span><span class="p">;</span>
-
-  <span class="n">PCRE2_SIZE</span> <span class="n">erroroffset</span><span class="p">;</span>
-  <span class="n">PCRE2_SIZE</span> <span class="o">*</span><span class="n">ovector</span><span class="p">;</span>
-  <span class="n">PCRE2_SIZE</span> <span class="n">ovector_last</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
-  <span class="n">PCRE2_SIZE</span> <span class="n">subject_length</span><span class="p">;</span>
-
-  <span class="n">pcre2_match_data</span> <span class="o">*</span><span class="n">match_data</span><span class="p">;</span>
-
-
   <span class="cm">/*************************************************************************
   * First, sort out the command line. Options:                             *
   * - "-g" to request repeated matching to find all occurrences,           *
@@ -643,21 +620,22 @@ need to be modified. */</span>
   *   present.                                                             *
   *************************************************************************/</span>
 
-  <span class="n">find_all</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="n">caseless_match</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">argc</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+  <span class="kt">int</span> <span class="n">find_all</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">caseless_match</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">argi</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">argi</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">argi</span> <span class="o">&lt;</span> <span class="n">argc</span><span class="p">;</span> <span class="n">argi</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s">"-g"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="n">argi</span><span class="p">],</span> <span class="s">"-g"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
     <span class="p">{</span>
       <span class="n">find_all</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="p">}</span>
-    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s">"-i"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="n">argi</span><span class="p">],</span> <span class="s">"-i"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
     <span class="p">{</span>
       <span class="n">caseless_match</span> <span class="o">=</span> <span class="n">PCRE2_CASELESS</span><span class="p">;</span>
     <span class="p">}</span>
-    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">'-'</span><span class="p">)</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="n">argi</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">'-'</span><span class="p">)</span>
     <span class="p">{</span>
-      <span class="n">printf</span><span class="p">(</span><span class="s">"Unrecognised option %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"Unrecognised option %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="n">argi</span><span class="p">]);</span>
       <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="k">else</span>
@@ -669,7 +647,7 @@ need to be modified. */</span>
   <span class="cm">/* After the options, we require exactly two arguments, which are the
   pattern, and the subject string. */</span>
 
-  <span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">-</span> <span class="n">i</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">-</span> <span class="n">argi</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="n">printf</span><span class="p">(</span><span class="s">"Exactly two arguments required: a regex and a subject string</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
     <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
@@ -678,11 +656,12 @@ need to be modified. */</span>
   <span class="cm">/* Pattern and subject are char arguments, so they can be straightforwardly
   cast to PCRE2_SPTR because we are working in 8-bit code units. The subject
   length is cast to PCRE2_SIZE for completeness, though PCRE2_SIZE is in fact
-  defined to be size_t. */</span>
+  defined to be size_t. PCRE2_SPTR is a pointer to unsigned code units of the
+  appropriate width (in this case, 8 bits).*/</span>
 
-  <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="n">PCRE2_SPTR</span><span class="p">)</span><span class="n">argv</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-  <span class="n">subject</span> <span class="o">=</span> <span class="p">(</span><span class="n">PCRE2_SPTR</span><span class="p">)</span><span class="n">argv</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>
-  <span class="n">subject_length</span> <span class="o">=</span> <span class="p">(</span><span class="n">PCRE2_SIZE</span><span class="p">)</span><span class="n">strlen</span><span class="p">((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">subject</span><span class="p">);</span>
+  <span class="n">PCRE2_SPTR</span> <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="n">PCRE2_SPTR</span><span class="p">)</span><span class="n">argv</span><span class="p">[</span><span class="n">argi</span><span class="p">];</span>
+  <span class="n">PCRE2_SPTR</span> <span class="n">subject</span> <span class="o">=</span> <span class="p">(</span><span class="n">PCRE2_SPTR</span><span class="p">)</span><span class="n">argv</span><span class="p">[</span><span class="n">argi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>
+  <span class="n">PCRE2_SIZE</span> <span class="n">subject_length</span> <span class="o">=</span> <span class="p">(</span><span class="n">PCRE2_SIZE</span><span class="p">)</span><span class="n">strlen</span><span class="p">((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">subject</span><span class="p">);</span>
 
 
   <span class="cm">/*************************************************************************
@@ -690,12 +669,15 @@ need to be modified. */</span>
   * any errors that are detected.                                          *
   *************************************************************************/</span>
 
-  <span class="n">re</span> <span class="o">=</span> <span class="n">pcre2_compile</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span>               <span class="c1">// the pattern</span>
-                     <span class="n">PCRE2_ZERO_TERMINATED</span><span class="p">,</span> <span class="c1">// the pattern is null-terminated</span>
-                     <span class="n">caseless_match</span><span class="p">,</span>        <span class="c1">// possibly enable caseless</span>
-                     <span class="o">&amp;</span><span class="n">errornumber</span><span class="p">,</span>          <span class="c1">// for error number</span>
-                     <span class="o">&amp;</span><span class="n">erroroffset</span><span class="p">,</span>          <span class="c1">// for error offset</span>
-                     <span class="nb">NULL</span><span class="p">);</span>                 <span class="c1">// use default compile context</span>
+  <span class="kt">int</span> <span class="n">errornumber</span><span class="p">;</span>
+  <span class="n">PCRE2_SIZE</span> <span class="n">erroroffset</span><span class="p">;</span>
+  <span class="n">pcre2_code</span> <span class="o">*</span><span class="n">re</span> <span class="o">=</span>
+      <span class="n">pcre2_compile</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span>               <span class="c1">// the pattern</span>
+                    <span class="n">PCRE2_ZERO_TERMINATED</span><span class="p">,</span> <span class="c1">// the pattern is null-terminated</span>
+                    <span class="n">caseless_match</span><span class="p">,</span>        <span class="c1">// possibly enable caseless</span>
+                    <span class="o">&amp;</span><span class="n">errornumber</span><span class="p">,</span>          <span class="c1">// for error number</span>
+                    <span class="o">&amp;</span><span class="n">erroroffset</span><span class="p">,</span>          <span class="c1">// for error offset</span>
+                    <span class="nb">NULL</span><span class="p">);</span>                 <span class="c1">// use default compile context</span>
 
   <span class="cm">/* Compilation failed: print the error message and exit. */</span>
 
@@ -722,17 +704,18 @@ need to be modified. */</span>
   * PCRE2_SIZE match_data_size = pcre2_get_match_data_size(match_data);    *
   *************************************************************************/</span>
 
-  <span class="n">match_data</span> <span class="o">=</span> <span class="n">pcre2_match_data_create_from_pattern</span><span class="p">(</span><span class="n">re</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+  <span class="n">pcre2_match_data</span> <span class="o">*</span><span class="n">match_data</span> <span class="o">=</span>
+      <span class="n">pcre2_match_data_create_from_pattern</span><span class="p">(</span><span class="n">re</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
 
   <span class="cm">/* Now run the match. */</span>
 
-  <span class="n">rc</span> <span class="o">=</span> <span class="n">pcre2_match</span><span class="p">(</span><span class="n">re</span><span class="p">,</span>             <span class="c1">// the compiled pattern</span>
-                   <span class="n">subject</span><span class="p">,</span>        <span class="c1">// the subject string</span>
-                   <span class="n">subject_length</span><span class="p">,</span> <span class="c1">// the length of the subject</span>
-                   <span class="mi">0</span><span class="p">,</span>              <span class="c1">// start at offset 0 in the subject</span>
-                   <span class="mi">0</span><span class="p">,</span>              <span class="c1">// default options</span>
-                   <span class="n">match_data</span><span class="p">,</span>     <span class="c1">// block for storing the result</span>
-                   <span class="nb">NULL</span><span class="p">);</span>          <span class="c1">// use default match context</span>
+  <span class="kt">int</span> <span class="n">rc</span> <span class="o">=</span> <span class="n">pcre2_match</span><span class="p">(</span><span class="n">re</span><span class="p">,</span>             <span class="c1">// the compiled pattern</span>
+                       <span class="n">subject</span><span class="p">,</span>        <span class="c1">// the subject string</span>
+                       <span class="n">subject_length</span><span class="p">,</span> <span class="c1">// the length of the subject</span>
+                       <span class="mi">0</span><span class="p">,</span>              <span class="c1">// start at offset 0 in the subject</span>
+                       <span class="mi">0</span><span class="p">,</span>              <span class="c1">// default options</span>
+                       <span class="n">match_data</span><span class="p">,</span>     <span class="c1">// block for storing the result</span>
+                       <span class="nb">NULL</span><span class="p">);</span>          <span class="c1">// use default match context</span>
 
   <span class="cm">/* Matching failed: handle error cases */</span>
 
@@ -759,7 +742,7 @@ need to be modified. */</span>
   <span class="cm">/* Match succeeded. Get a pointer to the output vector, where string offsets
   are stored. */</span>
 
-  <span class="n">ovector</span> <span class="o">=</span> <span class="n">pcre2_get_ovector_pointer</span><span class="p">(</span><span class="n">match_data</span><span class="p">);</span>
+  <span class="n">PCRE2_SIZE</span> <span class="o">*</span><span class="n">ovector</span> <span class="o">=</span> <span class="n">pcre2_get_ovector_pointer</span><span class="p">(</span><span class="n">match_data</span><span class="p">);</span>
   <span class="n">printf</span><span class="p">(</span><span class="s">"Match succeeded at offset %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
 
 
@@ -798,7 +781,7 @@ need to be modified. */</span>
   <span class="cm">/* Show substrings stored in the output vector by number. Obviously, in a
   real application you might want to do things other than print them. */</span>
 
-  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">rc</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">rc</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
   <span class="p">{</span>
     <span class="n">PCRE2_SPTR</span> <span class="n">substring_start</span> <span class="o">=</span> <span class="n">subject</span> <span class="o">+</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span><span class="p">];</span>
     <span class="n">PCRE2_SIZE</span> <span class="n">substring_length</span> <span class="o">=</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span><span class="p">];</span>
@@ -816,6 +799,9 @@ need to be modified. */</span>
   <span class="cm">/* See if there are any named substrings, and if so, show them by name.
   First we have to extract the count of named parentheses from the pattern. */</span>
 
+  <span class="kt">uint32_t</span> <span class="n">namecount</span><span class="p">;</span>
+  <span class="n">PCRE2_SPTR</span> <span class="n">name_table</span><span class="p">;</span>
+  <span class="kt">uint32_t</span> <span class="n">name_entry_size</span><span class="p">;</span>
   <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">pcre2_pattern_info</span><span class="p">(</span>
       <span class="n">re</span><span class="p">,</span>                   <span class="c1">// the compiled pattern</span>
       <span class="n">PCRE2_INFO_NAMECOUNT</span><span class="p">,</span> <span class="c1">// get the number of named substrings</span>
@@ -827,7 +813,6 @@ need to be modified. */</span>
   <span class="p">}</span>
   <span class="k">else</span>
   <span class="p">{</span>
-    <span class="n">PCRE2_SPTR</span> <span class="n">tabptr</span><span class="p">;</span>
     <span class="n">printf</span><span class="p">(</span><span class="s">"Named substrings</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
 
     <span class="cm">/* Before we can access the substrings, we must extract the table for
@@ -846,8 +831,8 @@ need to be modified. */</span>
     name, and the substring itself. In the 8-bit library the number is held in
     two bytes, most significant first. */</span>
 
-    <span class="n">tabptr</span> <span class="o">=</span> <span class="n">name_table</span><span class="p">;</span>
-    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">namecount</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="n">PCRE2_SPTR</span> <span class="n">tabptr</span> <span class="o">=</span> <span class="n">name_table</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">namecount</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
     <span class="p">{</span>
       <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">tabptr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="n">tabptr</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
       <span class="n">printf</span><span class="p">(</span><span class="s">"(%d) %*s: %.*s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">name_entry_size</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span> <span class="n">tabptr</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
@@ -877,6 +862,7 @@ need to be modified. */</span>
 
   <span class="cm">/* Loop for second and subsequent matches */</span>
 
+  <span class="n">PCRE2_SIZE</span> <span class="n">ovector_last</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
   <span class="n">ovector_last</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
   <span class="n">ovector_last</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
 
@@ -975,7 +961,7 @@ need to be modified. */</span>
     <span class="cm">/* As before, show substrings stored in the output vector by number, and
     then also any named substrings. */</span>
 
-    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">rc</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">rc</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
     <span class="p">{</span>
       <span class="n">PCRE2_SPTR</span> <span class="n">substring_start</span> <span class="o">=</span> <span class="n">subject</span> <span class="o">+</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span><span class="p">];</span>
       <span class="kt">size_t</span> <span class="n">substring_length</span> <span class="o">=</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span><span class="p">];</span>
@@ -991,7 +977,7 @@ need to be modified. */</span>
     <span class="p">{</span>
       <span class="n">PCRE2_SPTR</span> <span class="n">tabptr</span> <span class="o">=</span> <span class="n">name_table</span><span class="p">;</span>
       <span class="n">printf</span><span class="p">(</span><span class="s">"Named substrings</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
-      <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">namecount</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">namecount</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
       <span class="p">{</span>
         <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">tabptr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="n">tabptr</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
         <span class="n">printf</span><span class="p">(</span><span class="s">"(%d) %*s: %.*s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">name_entry_size</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span> <span class="n">tabptr</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
