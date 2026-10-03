@@ -625,8 +625,8 @@ END_QSCAN:
           /* With differential matching enabled, compare with interpreter. */
 
 #ifdef SUPPORT_DIFF_FUZZ
-          int matches = errorcode;
-          int matches_jit = errorcode_jit;
+          const int matches = errorcode;
+          const int matches_jit = errorcode_jit;
 
           if (errorcode_jit != errorcode)
           {
@@ -641,38 +641,38 @@ END_QSCAN:
           }
           else
           {
-            for (int index = 0; index < errorcode; index++)
+            for (int index = 0; index < matches; index++)
             {
               PCRE2_UCHAR *bufferptr = NULL;
               PCRE2_UCHAR *bufferptr_jit = NULL;
               PCRE2_SIZE bufflen = 0;
               PCRE2_SIZE bufflen_jit = 0;
 
-              errorcode =
+              int substring_rc =
                   pcre2_substring_get_bynumber(match_data, (uint32_t)index, &bufferptr, &bufflen);
-              errorcode_jit = pcre2_substring_get_bynumber(match_data_jit, (uint32_t)index,
-                                                           &bufferptr_jit, &bufflen_jit);
+              int substring_rc_jit = pcre2_substring_get_bynumber(
+                  match_data_jit, (uint32_t)index, &bufferptr_jit, &bufflen_jit);
 
-              if (errorcode != errorcode_jit)
+              if (substring_rc != substring_rc_jit)
               {
                 describe_failure("match entry errorcode comparison", wdata, size, compile_options,
-                                 match_options, errorcode, errorcode_jit, matches, matches_jit,
+                                 match_options, substring_rc, substring_rc_jit, matches, matches_jit,
                                  match_data, match_data_jit);
               }
 
-              if (errorcode >= 0)
+              if (substring_rc >= 0)
               {
                 if (bufflen != bufflen_jit)
                 {
                   describe_failure("match entry length comparison", wdata, size, compile_options,
-                                   match_options, errorcode, errorcode_jit, matches, matches_jit,
+                                   match_options, substring_rc, substring_rc_jit, matches, matches_jit,
                                    match_data, match_data_jit);
                 }
 
-                if (memcmp(bufferptr, bufferptr_jit, bufflen) != 0)
+                if (memcmp(bufferptr, bufferptr_jit, CU2BYTES(bufflen)) != 0)
                 {
                   describe_failure("match entry content comparison", wdata, size, compile_options,
-                                   match_options, errorcode, errorcode_jit, matches, matches_jit,
+                                   match_options, substring_rc, substring_rc_jit, matches, matches_jit,
                                    match_data, match_data_jit);
                 }
               }
