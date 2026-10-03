@@ -154,7 +154,7 @@ pcre2_pattern_info(const pcre2_code *code, uint32_t what, void *where)
   case PCRE2_INFO_FIRSTCODETYPE:
     *((uint32_t *)where) = ((code->flags & PCRE2_FIRSTSET) != 0)    ? 1
                            : ((code->flags & PCRE2_STARTLINE) != 0) ? 2
-                                                                  : 0;
+                                                                    : 0;
     break;
 
   case PCRE2_INFO_FIRSTCODEUNIT:
@@ -190,7 +190,8 @@ pcre2_pattern_info(const pcre2_code *code, uint32_t what, void *where)
 
   case PCRE2_INFO_JITSIZE:
 #ifdef SUPPORT_JIT
-    *((size_t *)where) = (code->executable_jit != NULL) ? PRIV(jit_get_size)(code->executable_jit) : 0;
+    *((size_t *)where) =
+        (code->executable_jit != NULL) ? PRIV(jit_get_size)(code->executable_jit) : 0;
 #else
     *((size_t *)where) = 0;
 #endif
@@ -273,10 +274,7 @@ pcre2_callout_enumerate(const pcre2_code *code,
                         void *callout_data)
 {
   pcre2_callout_enumerate_block cb;
-  PCRE2_SPTR cc;
-#ifdef SUPPORT_UNICODE
-  BOOL utf;
-#endif
+  cb.version = 0;
 
   if (code == NULL || callback == NULL)
     return PCRE2_ERROR_NULL;
@@ -293,15 +291,13 @@ pcre2_callout_enumerate(const pcre2_code *code,
     return PCRE2_ERROR_BADMODE;
 
 #ifdef SUPPORT_UNICODE
-  utf = (code->overall_options & PCRE2_UTF) != 0;
+  BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
 #endif
 
-  cb.version = 0;
-  cc = (PCRE2_SPTR)((uint8_t *)code + code->code_start);
+  PCRE2_SPTR cc = (PCRE2_SPTR)((uint8_t *)code + code->code_start);
 
   while (TRUE)
   {
-    int rc;
     switch (*cc)
     {
     case OP_END:
@@ -412,9 +408,13 @@ pcre2_callout_enumerate(const pcre2_code *code,
       cb.callout_string_offset = 0;
       cb.callout_string_length = 0;
       cb.callout_string = NULL;
-      rc = callback(&cb, callout_data);
-      if (rc != 0)
-        return rc;
+
+      {
+        int rc = callback(&cb, callout_data);
+        if (rc != 0)
+          return rc;
+      }
+
       cc += PRIV(OP_lengths)[*cc];
       break;
 
@@ -425,9 +425,13 @@ pcre2_callout_enumerate(const pcre2_code *code,
       cb.callout_string_offset = GET(cc, 1 + 3 * LINK_SIZE);
       cb.callout_string_length = GET(cc, 1 + 2 * LINK_SIZE) - (1 + 4 * LINK_SIZE) - 2;
       cb.callout_string = cc + (1 + 4 * LINK_SIZE) + 1;
-      rc = callback(&cb, callout_data);
-      if (rc != 0)
-        return rc;
+
+      {
+        int rc = callback(&cb, callout_data);
+        if (rc != 0)
+          return rc;
+      }
+
       cc += GET(cc, 1 + 2 * LINK_SIZE);
       break;
 

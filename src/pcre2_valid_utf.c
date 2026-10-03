@@ -92,9 +92,6 @@ Returns:       == 0    if the string is a valid UTF string
 int
 PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
 {
-  PCRE2_SPTR p;
-  uint32_t c;
-
   /* ----------------- Check a UTF-8 string ----------------- */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -130,11 +127,9 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
   PCRE2_ERROR_UTF8_ERR21  Byte with the illegal value 0xfe or 0xff
   */
 
-  for (p = string; length > 0; p++)
+  for (PCRE2_SPTR p = string; length > 0; p++)
   {
-    uint32_t ab, d;
-
-    c = *p;
+    uint32_t c = *p;
     length--;
 
     if (c < 128)
@@ -152,8 +147,8 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
       return PCRE2_ERROR_UTF8_ERR21;
     }
 
-    ab = PRIV(utf8_table4)[c & 0x3f]; // Number of additional bytes (1-5)
-    if (length < ab)                  // Missing bytes
+    uint32_t ab = PRIV(utf8_table4)[c & 0x3f]; // Number of additional bytes (1-5)
+    if (length < ab)                           // Missing bytes
     {
       *erroroffset = (PCRE2_SIZE)(p - string);
       switch (ab - length)
@@ -175,7 +170,8 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
 
     /* Check top bits in the second byte */
 
-    if (((d = *(++p)) & 0xc0) != 0x80)
+    uint32_t d = *(++p);
+    if ((d & 0xc0) != 0x80)
     {
       *erroroffset = (PCRE2_SIZE)(p - string) - 1;
       return PCRE2_ERROR_UTF8_ERR6;
@@ -351,9 +347,9 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
   PCRE2_ERROR_UTF16_ERR3  Isolated low surrogate
   */
 
-  for (p = string; length > 0; p++)
+  for (PCRE2_SPTR p = string; length > 0; p++)
   {
-    c = *p;
+    uint32_t c = *p;
     length--;
 
     if ((c & 0xf800) != 0xd800)
@@ -398,9 +394,9 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
   PCRE2_ERROR_UTF32_ERR2  Character > 0x10ffff
   */
 
-  for (p = string; length > 0; length--, p++)
+  for (PCRE2_SPTR p = string; length > 0; length--, p++)
   {
-    c = *p;
+    uint32_t c = *p;
     if ((c & 0xfffff800u) != 0xd800u)
     {
       /* Normal UTF-32 code point. Neither high nor low surrogate. */

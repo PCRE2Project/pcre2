@@ -163,13 +163,13 @@ print_match_options(FILE *stream, uint32_t match_options)
 static void
 print_error(FILE *f, int errorcode, const char *text, ...)
 {
-  PCRE2_UCHAR buffer[256];
-  PCRE2_UCHAR *p = buffer;
   va_list ap;
   va_start(ap, text);
   vfprintf(f, text, ap);
   va_end(ap);
+  PCRE2_UCHAR buffer[256];
   pcre2_get_error_message(errorcode, buffer, 256);
+  PCRE2_UCHAR *p = buffer;
   while (*p != 0)
     fprintf(f, "%c", *p++);
   printf("\n");
@@ -182,14 +182,11 @@ print_error(FILE *f, int errorcode, const char *text, ...)
 static void
 dump_matches(FILE *stream, int count, pcre2_match_data *match_data)
 {
-  int errorcode;
-
   for (int index = 0; index < count; index++)
   {
     PCRE2_UCHAR *bufferptr = NULL;
     PCRE2_SIZE bufflen = 0;
-
-    errorcode = pcre2_substring_get_bynumber(match_data, index, &bufferptr, &bufflen);
+    int errorcode = pcre2_substring_get_bynumber(match_data, index, &bufferptr, &bufflen);
 
     if (errorcode >= 0)
     {
@@ -289,7 +286,6 @@ int LLVMFuzzerTestOneInput(unsigned char *, size_t);
 int
 LLVMFuzzerInitialize(int *argc, char ***argv)
 {
-  int rc;
   struct rlimit rlim;
   getrlimit(RLIMIT_STACK, &rlim);
   rlim.rlim_cur = STACK_SIZE_MB * 1024 * 1024;
@@ -299,7 +295,7 @@ LLVMFuzzerInitialize(int *argc, char ***argv)
     _exit(1);
   }
 
-  rc = setrlimit(RLIMIT_STACK, &rlim);
+  int rc = setrlimit(RLIMIT_STACK, &rlim);
   if (rc != 0)
   {
     fprintf(stderr, "Failed to expand stack size\n");
@@ -316,26 +312,21 @@ LLVMFuzzerInitialize(int *argc, char ***argv)
 int
 LLVMFuzzerTestOneInput(unsigned char *data, size_t size)
 {
-  PCRE2_UCHAR *wdata;
   PCRE2_UCHAR *newwdata = NULL;
-  uint32_t compile_options;
-  uint32_t match_options;
-  uint64_t random_options;
   pcre2_match_data *match_data = NULL;
 #ifdef SUPPORT_JIT
   pcre2_match_data *match_data_jit = NULL;
 #endif
-  pcre2_compile_context *compile_context = NULL;
   pcre2_match_context *match_context = NULL;
   size_t match_size;
-  int dfa_workspace[DFA_WORKSPACE_COUNT];
 
+  uint64_t random_options;
   if (size < sizeof(random_options))
     return -1;
 
-  random_options = *(uint64_t *)(data);
+  memcpy(&random_options, data, sizeof(random_options));
   data += sizeof(random_options);
-  wdata = (PCRE2_UCHAR *)data;
+  PCRE2_UCHAR *wdata = (PCRE2_UCHAR *)data;
   size -= sizeof(random_options);
   size /= PCRE2_CODE_UNIT_WIDTH / 8;
 
@@ -472,7 +463,7 @@ END_QSCAN:
   /* Create a compile context, and set a limit on the size of the compiled
   pattern. This stops the fuzzer using vast amounts of memory. */
 
-  compile_context = pcre2_compile_context_create(NULL);
+  pcre2_compile_context *compile_context = pcre2_compile_context_create(NULL);
   if (compile_context == NULL)
   {
 #ifdef STANDALONE
@@ -489,8 +480,10 @@ END_QSCAN:
   no reason to disallow UTF and UCP. Force PCRE2_NEVER_BACKSLASH_C to be set
   because \C in random patterns is highly likely to cause a crash. */
 
-  compile_options = ((random_options >> 32) & ALLOWED_COMPILE_OPTIONS) | PCRE2_NEVER_BACKSLASH_C;
-  match_options = (((uint32_t)random_options) & ALLOWED_MATCH_OPTIONS) | BASE_MATCH_OPTIONS;
+  uint32_t compile_options =
+      ((random_options >> 32) & ALLOWED_COMPILE_OPTIONS) | PCRE2_NEVER_BACKSLASH_C;
+  uint32_t match_options =
+      (((uint32_t)random_options) & ALLOWED_MATCH_OPTIONS) | BASE_MATCH_OPTIONS;
 
   /* Discard partial matching if PCRE2_ENDANCHORED is set, because they are not
   allowed together and just give an immediate error return. */
@@ -501,33 +494,25 @@ END_QSCAN:
   /* Do the compile with and without the options, and after a successful compile,
   likewise do the match with and without the options. */
 
+  int dfa_workspace[DFA_WORKSPACE_COUNT];
   for (int i = 0; i < 2; i++)
   {
     uint32_t callout_count;
-    int errorcode;
-#ifdef SUPPORT_JIT
-    int errorcode_jit;
-#ifdef SUPPORT_DIFF_FUZZ
-    int matches = 0;
-    int matches_jit = 0;
-#endif
-#endif
-    PCRE2_SIZE erroroffset;
-    pcre2_code *code;
 
 #ifdef STANDALONE
     printf("\n");
     print_compile_options(stdout, compile_options);
 #endif
 
-    code = pcre2_compile((PCRE2_SPTR)wdata, (PCRE2_SIZE)size, compile_options, &errorcode,
-                         &erroroffset, compile_context);
+    int errorcode;
+    PCRE2_SIZE erroroffset;
+    pcre2_code *code = pcre2_compile((PCRE2_SPTR)wdata, (PCRE2_SIZE)size, compile_options,
+                                     &errorcode, &erroroffset, compile_context);
 
     /* Compilation succeeded */
 
     if (code != NULL)
     {
-      int j;
       uint32_t save_match_options = match_options;
 
       /* Call JIT compile only if the compiled pattern is not too big. */
@@ -597,7 +582,7 @@ END_QSCAN:
 #ifdef STANDALONE
       printf("\n");
 #endif
-      for (j = 0; j < 2; j++)
+      for (int j = 0; j < 2; j++)
       {
 #ifdef STANDALONE
         print_match_options(stdout, match_options);
@@ -624,8 +609,9 @@ END_QSCAN:
           printf("Matching with JIT\n");
 #endif
           callout_count = 0;
-          errorcode_jit = pcre2_match(code, (PCRE2_SPTR)wdata, (PCRE2_SIZE)match_size, 0,
-                                      match_options & ~PCRE2_NO_JIT, match_data_jit, match_context);
+          int errorcode_jit =
+              pcre2_match(code, (PCRE2_SPTR)wdata, (PCRE2_SIZE)match_size, 0,
+                          match_options & ~PCRE2_NO_JIT, match_data_jit, match_context);
 
 #ifdef STANDALONE
           if (errorcode_jit >= 0)
@@ -639,8 +625,8 @@ END_QSCAN:
           /* With differential matching enabled, compare with interpreter. */
 
 #ifdef SUPPORT_DIFF_FUZZ
-          matches = errorcode;
-          matches_jit = errorcode_jit;
+          int matches = errorcode;
+          int matches_jit = errorcode_jit;
 
           if (errorcode_jit != errorcode)
           {
@@ -657,11 +643,10 @@ END_QSCAN:
           {
             for (int index = 0; index < errorcode; index++)
             {
-              PCRE2_UCHAR *bufferptr, *bufferptr_jit;
-              PCRE2_SIZE bufflen, bufflen_jit;
-
-              bufferptr = bufferptr_jit = NULL;
-              bufflen = bufflen_jit = 0;
+              PCRE2_UCHAR *bufferptr = NULL;
+              PCRE2_UCHAR *bufferptr_jit = NULL;
+              PCRE2_SIZE bufflen = 0;
+              PCRE2_SIZE bufflen_jit = 0;
 
               errorcode =
                   pcre2_substring_get_bynumber(match_data, (uint32_t)index, &bufferptr, &bufflen);
@@ -714,7 +699,7 @@ END_QSCAN:
       printf("\n");
 #endif
 
-      for (j = 0; j < 2; j++)
+      for (int j = 0; j < 2; j++)
       {
 #ifdef STANDALONE
         printf("DFA match options %.8x =", match_options);
@@ -800,21 +785,16 @@ main(int argc, char **argv)
 
   for (int i = 1; i < argc; i++)
   {
-    size_t filelen;
-    size_t readsize;
-    unsigned char *buffer;
-    FILE *f;
-
     /* Handle a literal string. Copy to an exact size buffer so that checks for
     overrunning work. */
 
     if (argv[i][0] == '=')
     {
-      readsize = strlen(argv[i]) - 1;
+      size_t readsize = strlen(argv[i]) - 1;
       printf("------ <Literal> ------\n");
       printf("Length = %lu\n", readsize);
       printf("%.*s\n", (int)readsize, argv[i] + 1);
-      buffer = (unsigned char *)malloc(readsize);
+      unsigned char *buffer = (unsigned char *)malloc(readsize);
       if (buffer == NULL)
       {
         printf("** Failed to allocate %lu bytes of memory\n", readsize);
@@ -831,7 +811,7 @@ main(int argc, char **argv)
 
     /* Handle a string given in a file */
 
-    f = fopen(argv[i], "rb");
+    FILE *f = fopen(argv[i], "rb");
     if (f == NULL)
     {
       printf("** Failed to open %s: %s\n", argv[i], strerror(errno));
@@ -841,10 +821,10 @@ main(int argc, char **argv)
     printf("------ %s ------\n", argv[i]);
 
     fseek(f, 0, SEEK_END);
-    filelen = ftell(f);
+    size_t filelen = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    buffer = (unsigned char *)malloc(filelen);
+    unsigned char *buffer = (unsigned char *)malloc(filelen);
     if (buffer == NULL)
     {
       printf("** Failed to allocate %lu bytes of memory\n", filelen);
@@ -852,7 +832,7 @@ main(int argc, char **argv)
       continue;
     }
 
-    readsize = fread(buffer, 1, filelen, f);
+    size_t readsize = fread(buffer, 1, filelen, f);
     fclose(f);
 
     if (readsize != filelen)
