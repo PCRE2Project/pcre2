@@ -150,7 +150,7 @@ pcre2_get_ovector_pointer(pcre2_match_data *match_data)
 
 
 /*************************************************
-*          Get number of ovector slots           *
+*          Get number of ovector pairs           *
 *************************************************/
 
 PCRE2_EXP_DEFN uint32_t PCRE2_CALL_CONVENTION
@@ -163,7 +163,7 @@ pcre2_get_ovector_count(pcre2_match_data *match_data)
 
 
 /*************************************************
-*         Get starting code unit in match        *
+*       Get starting code-unit offset in match   *
 *************************************************/
 
 PCRE2_EXP_DEFN PCRE2_SIZE PCRE2_CALL_CONVENTION

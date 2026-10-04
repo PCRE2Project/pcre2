@@ -6649,7 +6649,8 @@ unittest(void)
   ASSERT(pcre2_get_ovector_count(test_match_data) == 10, "pcre2_get_ovector_count()");
 
   sizeval = pcre2_get_match_data_size(test_match_data);
-  ASSERT(sizeval >= 2, "pcre2_get_match_data_size()");
+  ASSERT(sizeval == offsetof(pcre2_match_data, ovector) + 20 * sizeof(PCRE2_SIZE),
+         "pcre2_get_match_data_size()");
 
   mallocs_until_failure = INT_MAX;
 
@@ -6657,6 +6658,10 @@ unittest(void)
   test_match_data = pcre2_match_data_create(0, test_gen_context);
   ASSERT(test_match_data != NULL, "pcre2_match_data_create()");
   ASSERT(pcre2_get_ovector_count(test_match_data) == 1, "pcre2_get_ovector_count()");
+
+  ASSERT(pcre2_get_match_data_size(test_match_data) ==
+             offsetof(pcre2_match_data, ovector) + 2 * sizeof(PCRE2_SIZE),
+         "pcre2_get_match_data_size(minimum)");
 
   pcre2_match_data_free(test_match_data);
   test_match_data = pcre2_match_data_create_from_pattern(NULL, NULL);
@@ -6773,6 +6778,9 @@ unittest(void)
     ASSERT(test_match_data != NULL, "pcre2_match_data_create(100000)");
     ASSERT(pcre2_get_ovector_count(test_match_data) == 65535,
            "pcre2_get_ovector_count(UINT32_MAX) <= UINT16_MAX)");
+    ASSERT(pcre2_get_match_data_size(test_match_data) ==
+               offsetof(pcre2_match_data, ovector) + 2 * (PCRE2_SIZE)65535 * sizeof(PCRE2_SIZE),
+           "pcre2_get_match_data_size(clamped count)");
 
     rc = pcre2_jit_match(test_compiled_code, subject_abcz, 4, 0, PCRE2_NO_JIT, test_match_data,
                          NULL);
