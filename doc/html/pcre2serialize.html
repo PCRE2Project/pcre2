@@ -637,6 +637,9 @@ compiled patterns are in the serialized data without actually decoding the
 patterns:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">bytes</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">serialized</span> <span class="n">data</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="kt">int32_t</span> <span class="n">number_of_codes</span> <span class="o">=</span> <span class="n">pcre2_serialize_get_number_of_codes</span><span class="p">(</span><span class="n">bytes</span><span class="p">);</span></code></pre></div>
+<p>The count query performs the same header checks as decoding. Both readers
+accept a trusted, intact byte stream at any byte alignment. Neither accepts a
+length argument or validates that all of the required bytes are present.</p>
 <p>The <code class="function">pcre2_serialize_decode()</code> function reads a byte stream and recreates
 the compiled patterns in new memory blocks, setting pointers to them in a
 vector. The first two arguments are a pointer to a suitable vector and its

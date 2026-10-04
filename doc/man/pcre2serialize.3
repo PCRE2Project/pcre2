@@ -189,6 +189,10 @@ patterns:
 .fi
 .ss \n[.ss] 0
 .sp
+The count query performs the same header checks as decoding. Both readers
+accept a trusted, intact byte stream at any byte alignment. Neither accepts a
+length argument or validates that all of the required bytes are present.
+.sp
 The pcre2_serialize_decode() function reads a byte stream and recreates
 the compiled patterns in new memory blocks, setting pointers to them in a
 vector. The first two arguments are a pointer to a suitable vector and its

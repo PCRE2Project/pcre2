@@ -547,7 +547,7 @@ originally created by <code class="function">pcre2_serialize_encode()</code> (th
 saved on disc or elsewhere in the meantime). The function returns the number of
 serialized patterns in the byte stream, or one of the following negative error
 codes:</p>
-<div class="dlist errors"><dl><dt><code class="constant">PCRE2_ERROR_BADMAGIC</code></dt><dd>mismatch of id bytes in <code class="parameter">bytes</code></dd><dt><code class="constant">PCRE2_ERROR_BADMODE</code></dt><dd>mismatch of variable unit size or PCRE version</dd><dt><code class="constant">PCRE2_ERROR_NULL</code></dt><dd>the argument is <code class="constant">NULL</code></dd></dl></div>
+<div class="dlist errors"><dl><dt><code class="constant">PCRE2_ERROR_BADMAGIC</code></dt><dd>mismatch of id bytes in <code class="parameter">bytes</code></dd><dt><code class="constant">PCRE2_ERROR_BADMODE</code></dt><dd>mismatch of variable unit size or PCRE version</dd><dt><code class="constant">PCRE2_ERROR_BADSERIALIZEDDATA</code></dt><dd>other sanity check failure</dd><dt><code class="constant">PCRE2_ERROR_NULL</code></dt><dd>the argument is <code class="constant">NULL</code></dd></dl></div>
 <p><code class="constant">PCRE2_ERROR_BADMAGIC</code> may mean that the data is corrupt, or that it was compiled
 on a system with different endianness.</p>
 <p>There is a complete description of the PCRE2 native API in the
