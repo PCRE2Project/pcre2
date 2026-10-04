@@ -3537,10 +3537,12 @@ library that is being used. An error code of zero is also recognized.
 The returned message is terminated with a trailing zero, and the function
 returns the number of code units used, excluding the trailing zero. If the
 error number is unknown, the negative error code const:PCRE2_ERROR_BADDATA is
-returned without changing the buffer, and without inspecting the value of arg:bufflen.
+returned without changing the buffer, even when arg:bufflen is zero.
 If the buffer is too small, the message is truncated (but still with
 a trailing zero, assuming arg:bufflen is not zero), and the negative error code
 const:PCRE2_ERROR_NOMEMORY is returned.
+With a recognized code and zero capacity, no output is written. The buffer
+pointer may be const:NULL only when its capacity is zero.
 None of the messages is very long; a buffer size of 120 code units is ample.
 
 No arithmetic (including unary negation) should ever be performed on error codes
