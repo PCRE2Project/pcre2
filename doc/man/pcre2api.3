@@ -129,7 +129,7 @@ document for an overview of all the PCRE2 documentation.
 
 \fBvoid\fP pcre2_compile_context_free(\fBpcre2_compile_context\fP *\fIccontext\fP);
 
-\fBint\fP pcre2_get_bsr(\fBpcre2_compile_context\fP *\fIccontext\fP, \fBuint32_t\fP *\fIlength\fP);
+\fBint\fP pcre2_get_bsr(\fBpcre2_compile_context\fP *\fIccontext\fP, \fBuint32_t\fP *\fIvalue\fP);
 
 \fBint\fP pcre2_get_max_pattern_length(\fBpcre2_compile_context\fP *\fIccontext\fP,
                                  \fBPCRE2_SIZE\fP *\fIlength\fP);
@@ -836,10 +836,14 @@ reasonable size, and at the same time to keep the API extensible, "uncommon"
 parameters are passed to certain functions in a "context" instead of
 directly. A context is just a block of memory that holds the parameter values.
 Applications that do not need to adjust any of the context parameters can pass
-\fBNULL\fP when a context pointer is required.
+\fBNULL\fP to operations that accept a context to select their defaults. The
+context setter and getter functions require a non\-\fBNULL\fP context.
+Getter output pointers must also be non\-\fBNULL\fP.
 .sp
-There are three different types of context: a general context that is relevant
-for several PCRE2 operations, a compile\-time context, and a match\-time context.
+The main API uses a general context that is relevant for several PCRE2
+operations, a compile\-time context, and a match\-time context. The experimental
+pattern conversion API also has a conversion context, described in
+\f(CRpcre2convert\fP.
 .SS "The general context"
 .sp
 At present, this context just contains pointers to (and data for) external
@@ -1006,17 +1010,19 @@ A compile context is created, copied, and freed by the following functions:
 .sp
 A compile context is created with default values for its parameters. These can
 be changed by calling the following functions, which return 0 on success, or
-\fBPCRE2_ERROR_BADDATA\fP if invalid data is detected.
+\fBPCRE2_ERROR_BADDATA\fP if invalid data is detected. The function
+pcre2_set_optimize() returns \fBPCRE2_ERROR_BADOPTION\fP for an invalid
+\fIdirective\fP argument.
 .sp
 The following functions get, respectively, the convention for processing \f(CR\(rsR\fP,
 the maximum pattern length, the newline convention, and the maximum depth of
-nested parentheses. They return 0 on success or \fBPCRE2_ERROR_NULL\fP if either
-argument is \fBNULL\fP.
+nested parentheses. They return 0 and require both arguments to be
+non\-\fBNULL\fP.
 .sp
 .ss \n[.ss]
 .nf
 .fam C
-\fBint\fP pcre2_get_bsr(\fBpcre2_compile_context\fP *\fIccontext\fP, \fBuint32_t\fP *\fIlength\fP);
+\fBint\fP pcre2_get_bsr(\fBpcre2_compile_context\fP *\fIccontext\fP, \fBuint32_t\fP *\fIvalue\fP);
 
 \fBint\fP pcre2_get_max_pattern_length(\fBpcre2_compile_context\fP *\fIccontext\fP,
                                  \fBPCRE2_SIZE\fP *\fIlength\fP);
@@ -1057,9 +1063,11 @@ pcre2_dfa_match().
 .fi
 .ss \n[.ss] 0
 .sp
-The value must be the result of a call to pcre2_maketables(), whose only
-argument is a general context. This function builds a set of character tables
-in the current locale.
+The value may be \fBNULL\fP to select the default tables; the result of
+pcre2_maketables(); or another valid set of PCRE2 character tables.
+The pcre2_maketables() function takes a general context and builds tables
+in the current locale. Supplied tables must remain valid while the context or
+patterns compiled with them are in use.
 .sp
 .ss \n[.ss]
 .nf
@@ -1109,6 +1117,11 @@ more memory, an error is generated. This facility is provided so that
 applications that accept patterns from external sources can limit the amount of
 memory they use. The default is the largest number that a \fBPCRE2_SIZE\fP variable
 can hold, which is effectively unlimited.
+.sp
+This limit excludes the fixed, platform\-dependent compiled\-pattern header.
+Therefore, \fBPCRE2_INFO_SIZE\fP can report a larger total allocation. This limit
+does not restrict temporary compilation workspace, JIT code, or separate character
+tables.
 .sp
 .ss \n[.ss]
 .nf
@@ -1401,8 +1414,8 @@ be changed by calling the following functions, which return 0 on success, or
 \fBPCRE2_ERROR_BADDATA\fP if invalid data is detected.
 .sp
 The following functions get, respectively, the backtracking heap limit, match
-limit, depth limit, and offset limit. They return 0 on success or
-\fBPCRE2_ERROR_NULL\fP if either argument is \fBNULL\fP.
+limit, depth limit, and offset limit. They return 0 and require both arguments
+to be non\-\fBNULL\fP.
 .sp
 .ss \n[.ss]
 .nf
@@ -1491,7 +1504,14 @@ below.
 .sp
 The \fIoffset_limit\fP parameter limits how far an unanchored search can
 advance in the subject string. The default value is \fBPCRE2_UNSET\fP. The
-pcre2_match() and pcre2_dfa_match() functions return
+value \fBPCRE2_UNSET\fP removes the limit; any other value must not exceed the
+subject length in code units. pcre2_match() and pcre2_dfa_match()
+return \fBPCRE2_ERROR_BADOFFSETLIMITVALUE\fP if this requirement is not met.
+When the subject length is specified as \fBPCRE2_ZERO_TERMINATED\fP, the limit
+is checked against the actual string length. A limit equal to the subject
+length is permitted. The setter itself does not check this condition.
+.sp
+For a valid limit, pcre2_match() and pcre2_dfa_match() return
 \fBPCRE2_ERROR_NOMATCH\fP if a match with a starting point before or at the given
 offset is not found. The pcre2_substitute() function makes no more
 substitutions.
@@ -4045,6 +4065,16 @@ the 8\-bit library is passed to a 16\-bit or 32\-bit library function.
 .ad l
 The value of \fIstart_offset\fP was greater than the length of the subject.
 .TP 25
+\fBPCRE2_ERROR_BADOFFSETLIMIT\fP
+.ad l
+A non\-default offset limit was set without compiling the pattern with
+\fBPCRE2_USE_OFFSET_LIMIT\fP.
+.TP 25
+\fBPCRE2_ERROR_BADOFFSETLIMITVALUE\fP
+.ad l
+The offset limit in the match context was greater than the length of the
+subject and was not \fBPCRE2_UNSET\fP.
+.TP 25
 \fBPCRE2_ERROR_BADOPTION\fP
 .ad l
 An unrecognized bit was set in the \fIoptions\fP argument.
@@ -4136,10 +4166,12 @@ library that is being used. An error code of zero is also recognized.
 The returned message is terminated with a trailing zero, and the function
 returns the number of code units used, excluding the trailing zero. If the
 error number is unknown, the negative error code \fBPCRE2_ERROR_BADDATA\fP is
-returned without changing the buffer, and without inspecting the value of \fIbufflen\fP.
+returned without changing the buffer, even when \fIbufflen\fP is zero.
 If the buffer is too small, the message is truncated (but still with
 a trailing zero, assuming \fIbufflen\fP is not zero), and the negative error code
 \fBPCRE2_ERROR_NOMEMORY\fP is returned.
+With a recognized code and zero capacity, no output is written. The buffer
+pointer may be \fBNULL\fP only when its capacity is zero.
 None of the messages is very long; a buffer size of 120 code units is ample.
 .sp
 No arithmetic (including unary negation) should ever be performed on error codes

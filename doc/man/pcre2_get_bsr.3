@@ -36,14 +36,14 @@ pcre2_get_bsr \- get the \(rsR convention
 .fam C
 \fB\&#include\fP \fB<pcre2.h>\fP
 
-\fBint\fP pcre2_get_bsr(\fBpcre2_compile_context\fP *\fIccontext\fP, \fBuint32_t\fP *\fIlength\fP);
+\fBint\fP pcre2_get_bsr(\fBpcre2_compile_context\fP *\fIccontext\fP, \fBuint32_t\fP *\fIvalue\fP);
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function gets the convention for processing \f(CR\(rsR\fP within a compile context.
-The result is zero for success or \fBPCRE2_ERROR_NULL\fP if either argument is \fBNULL\fP.
+The result is zero. Both arguments must be non\-\fBNULL\fP.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP
