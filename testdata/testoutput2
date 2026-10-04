@@ -15846,6 +15846,92 @@ No match
     \n..\naa\=offset_limit=4
  0: a
 
+# FIRSTLINE and offset limits must both constrain the starting position.
+
+/b/firstline,use_offset_limit,newline=lf
+    ab\nb\=offset_limit=0
+No match
+    ab\nb\=offset_limit=1
+ 0: b
+    ab\nb\=offset_limit=2
+ 0: b
+    ab\nb\=offset_limit=4
+ 0: b
+    ab\nb
+ 0: b
+    b\nb\=offset_limit=0
+ 0: b
+    a\nb\=offset_limit=3
+No match
+    ab\=offset_limit=0
+No match
+    ab\=offset_limit=2
+ 0: b
+    ab\nb\=offset=1,offset_limit=0
+No match
+    ab\nb\=offset=1,offset_limit=1
+ 0: b
+    a\nab\=offset=2,offset_limit=2
+No match
+    a\nab\=offset=2,offset_limit=3
+ 0: b
+    a\nb\=offset=2,offset_limit=2
+ 0: b
+
+/b/firstline,use_offset_limit,newline=lf,no_start_optimize
+    ab\nb\=offset_limit=0
+No match
+    ab\nb\=offset_limit=1
+ 0: b
+    ab\nb\=offset_limit=2
+ 0: b
+    ab\nb\=offset_limit=4
+ 0: b
+    ab\nb
+ 0: b
+    b\nb\=offset_limit=0
+ 0: b
+    a\nb\=offset_limit=3
+No match
+    ab\=offset_limit=0
+No match
+    ab\=offset_limit=2
+ 0: b
+    ab\nb\=offset=1,offset_limit=0
+No match
+    ab\nb\=offset=1,offset_limit=1
+ 0: b
+    a\nab\=offset=2,offset_limit=2
+No match
+    a\nab\=offset=2,offset_limit=3
+ 0: b
+    a\nb\=offset=2,offset_limit=2
+ 0: b
+
+/\n/firstline,use_offset_limit,newline=lf
+    a\nb\=offset_limit=0
+No match
+    a\nb\=offset_limit=1
+ 0: \x0a
+    a\nb\=offset_limit=3
+ 0: \x0a
+
+/b\nc/firstline,use_offset_limit,newline=lf
+    ab\nc\=offset_limit=0
+No match
+    ab\nc\=offset_limit=1
+ 0: b\x0ac
+
+/b/firstline,use_offset_limit,newline=crlf
+    ab\r\nb\=offset_limit=0
+No match
+    ab\r\nb\=offset_limit=1
+ 0: b
+    ab\r\nb\=offset_limit=5
+ 0: b
+    a\r\nb\=offset_limit=4
+No match
+
 /abcd/null_context
     abcd\=null_context
  0: abcd
