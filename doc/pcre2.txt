@@ -268,7 +268,7 @@ PCRE2 NATIVE API COMPILE CONTEXT FUNCTIONS
 
        void pcre2_compile_context_free(pcre2_compile_context *ccontext);
 
-       int pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *length);
+       int pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *value);
 
        int pcre2_get_max_pattern_length(pcre2_compile_context *ccontext,
                                         PCRE2_SIZE *length);
@@ -837,12 +837,15 @@ PCRE2 CONTEXTS
        API extensible, "uncommon" parameters are passed to certain functions
        in a "context" instead of directly. A context is just a block of memory
        that holds the parameter values. Applications that do not need to
-       adjust any of the context parameters can pass NULL when a context
-       pointer is required.
+       adjust any of the context parameters can pass NULL to operations that
+       accept a context to select their defaults. The context setter and
+       getter functions require a non-NULL context. Getter output pointers
+       must also be non-NULL.
 
-       There are three different types of context: a general context that is
-       relevant for several PCRE2 operations, a compile-time context, and a
-       match-time context.
+       The main API uses a general context that is relevant for several PCRE2
+       operations, a compile-time context, and a match-time context. The
+       experimental pattern conversion API also has a conversion context,
+       described in pcre2convert.
 
    The general context
        At present, this context just contains pointers to (and data for)
@@ -920,14 +923,16 @@ PCRE2 CONTEXTS
 
        A compile context is created with default values for its parameters.
        These can be changed by calling the following functions, which return 0
-       on success, or PCRE2_ERROR_BADDATA if invalid data is detected.
+       on success, or PCRE2_ERROR_BADDATA if invalid data is detected. The
+       function pcre2_set_optimize() returns PCRE2_ERROR_BADOPTION for an
+       invalid directive argument.
 
        The following functions get, respectively, the convention for
        processing \R, the maximum pattern length, the newline convention, and
-       the maximum depth of nested parentheses. They return 0 on success or
-       PCRE2_ERROR_NULL if either argument is NULL.
+       the maximum depth of nested parentheses. They return 0 and require both
+       arguments to be non-NULL.
 
-       int pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *length);
+       int pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *value);
 
        int pcre2_get_max_pattern_length(pcre2_compile_context *ccontext,
                                         PCRE2_SIZE *length);
@@ -954,9 +959,11 @@ PCRE2 CONTEXTS
        int pcre2_set_character_tables(pcre2_compile_context *ccontext,
                                       const uint8_t *tables);
 
-       The value must be the result of a call to pcre2_maketables(), whose
-       only argument is a general context. This function builds a set of
-       character tables in the current locale.
+       The value may be NULL to select the default tables; the result of
+       pcre2_maketables(); or another valid set of PCRE2 character tables. The
+       pcre2_maketables() function takes a general context and builds tables
+       in the current locale. Supplied tables must remain valid while the
+       context or patterns compiled with them are in use.
 
        int pcre2_set_compile_extra_options(pcre2_compile_context *ccontext,
                                            uint32_t options);
@@ -989,6 +996,11 @@ PCRE2 CONTEXTS
        sources can limit the amount of memory they use. The default is the
        largest number that a PCRE2_SIZE variable can hold, which is
        effectively unlimited.
+
+       This limit excludes the fixed, platform-dependent compiled-pattern
+       header. Therefore, PCRE2_INFO_SIZE can report a larger total
+       allocation. This limit does not restrict temporary compilation
+       workspace, JIT code, or separate character tables.
 
        int pcre2_set_max_varlookbehind(pcre2_compile_context *ccontext,
                                        uint32_t limit);
@@ -1183,8 +1195,8 @@ PCRE2 CONTEXTS
        on success, or PCRE2_ERROR_BADDATA if invalid data is detected.
 
        The following functions get, respectively, the backtracking heap limit,
-       match limit, depth limit, and offset limit. They return 0 on success or
-       PCRE2_ERROR_NULL if either argument is NULL.
+       match limit, depth limit, and offset limit. They return 0 and require
+       both arguments to be non-NULL.
 
        int pcre2_get_heap_limit(pcre2_match_context *mcontext,
                                 uint32_t *limit);
@@ -3919,12 +3931,13 @@ OBTAINING A TEXTUAL ERROR MESSAGE
        The returned message is terminated with a trailing zero, and the
        function returns the number of code units used, excluding the trailing
        zero. If the error number is unknown, the negative error code
-       PCRE2_ERROR_BADDATA is returned without changing the buffer, and
-       without inspecting the value of bufflen. If the buffer is too small,
-       the message is truncated (but still with a trailing zero, assuming
-       bufflen is not zero), and the negative error code PCRE2_ERROR_NOMEMORY
-       is returned. None of the messages is very long; a buffer size of 120
-       code units is ample.
+       PCRE2_ERROR_BADDATA is returned without changing the buffer, even when
+       bufflen is zero. If the buffer is too small, the message is truncated
+       (but still with a trailing zero, assuming bufflen is not zero), and the
+       negative error code PCRE2_ERROR_NOMEMORY is returned. With a recognized
+       code and zero capacity, no output is written. The buffer pointer may be
+       NULL only when its capacity is zero. None of the messages is very long;
+       a buffer size of 120 code units is ample.
 
        No arithmetic (including unary negation) should ever be performed on
        error codes by clients. For any PCRE2 function that returns error

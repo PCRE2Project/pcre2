@@ -544,8 +544,8 @@ pre.rouge .gs {
 <span class="kt">int</span> <span class="nf">pcre2_get_parens_nest_limit</span><span class="p">(</span><span class="n">pcre2_compile_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">,</span>
                                 <span class="kt">uint32_t</span> <span class="o">*</span><span class="n">limit</span><span class="p">);</span></code></pre></div></section>
 <section class="doc-section level-1"><h2 id="_description">Description</h2><p>This function gets, from a compile context, the maximum depth of nested
-parentheses in a pattern. The result is zero for success or <code class="constant">PCRE2_ERROR_NULL</code> if
-either argument is <code class="constant">NULL</code>.</p>
+parentheses in a pattern. The result is zero. Both arguments must be
+non-<code class="constant">NULL</code>.</p>
 <p>There is a complete description of the PCRE2 native API in the
 <a href="pcre2api.html"><code>pcre2api</code></a>
 page and a description of the POSIX API in the

@@ -6257,29 +6257,67 @@ unittest(void)
   rc = pcre2_config(PCRE2_CONFIG_UNICODE, NULL);
   ASSERT(rc == (int)sizeof(uint32_t), "pcre2_config(NULL)");
 
-#ifdef SUPPORT_JIT
-  rc = pcre2_config(PCRE2_CONFIG_JITTARGET, NULL);
-  ASSERT(rc > 0, "pcre2_config(NULL)");
+  {
+    const uint32_t string_options[] = {
+      PCRE2_CONFIG_JITTARGET, PCRE2_CONFIG_UNICODE_VERSION, PCRE2_CONFIG_VERSION
+    };
+    for (size_t i = 0; i < sizeof(string_options) / sizeof(string_options[0]); i++)
+    {
+      int length = pcre2_config(string_options[i], NULL);
+      errorbuffer[0] = CHAR_A;
+#ifndef SUPPORT_JIT
+      if (string_options[i] == PCRE2_CONFIG_JITTARGET)
+      {
+        rc = pcre2_config(string_options[i], errorbuffer);
+        ASSERT(length == PCRE2_ERROR_BADOPTION && rc == PCRE2_ERROR_BADOPTION &&
+                   errorbuffer[0] == CHAR_A, "pcre2_config(disabled JIT target)");
+        continue;
+      }
 #endif
-  rc = pcre2_config(PCRE2_CONFIG_UNICODE_VERSION, NULL);
-  ASSERT(rc > 4, "pcre2_config(NULL)");
-  rc = pcre2_config(PCRE2_CONFIG_VERSION, NULL);
-  ASSERT(rc > 4, "pcre2_config(NULL)");
+      ASSERT(length > 1 && length < (int)(sizeof(errorbuffer) / sizeof(errorbuffer[0])),
+             "pcre2_config(string size)");
+      for (int j = 0; j <= length; j++)
+        errorbuffer[j] = CHAR_A;
+      rc = pcre2_config(string_options[i], errorbuffer);
+      ASSERT(rc == length && pcre2_strlen(errorbuffer) == (size_t)length - 1 &&
+                 errorbuffer[length - 1] == 0 && errorbuffer[length] == CHAR_A,
+             "pcre2_config(string contents and terminator)");
+    }
+  }
 
-  rc = pcre2_config(PCRE2_CONFIG_MATCHLIMIT, &uval);
-  ASSERT(rc == 0, "pcre2_config(PCRE2_CONFIG_MATCHLIMIT)");
+  {
+    const struct { uint32_t option; uint32_t expected; } numeric_options[] = {
+      { PCRE2_CONFIG_BSR, BSR_DEFAULT },
+      { PCRE2_CONFIG_DEPTHLIMIT, MATCH_LIMIT_DEPTH },
+      { PCRE2_CONFIG_RECURSIONLIMIT, MATCH_LIMIT_DEPTH },
+      { PCRE2_CONFIG_HEAPLIMIT, HEAP_LIMIT },
+      { PCRE2_CONFIG_MATCHLIMIT, MATCH_LIMIT },
+      { PCRE2_CONFIG_NEWLINE, NEWLINE_DEFAULT },
+      { PCRE2_CONFIG_PARENSLIMIT, PARENS_NEST_LIMIT },
+      { PCRE2_CONFIG_STACKRECURSE, 0 },
+      { PCRE2_CONFIG_TABLES_LENGTH, TABLES_LENGTH }
+    };
+    for (size_t i = 0; i < sizeof(numeric_options) / sizeof(numeric_options[0]); i++)
+    {
+      uint32_t values[] = { 123, 0, 456 };
+      rc = pcre2_config(numeric_options[i].option, &values[1]);
+      ASSERT(rc == 0 && values[1] == numeric_options[i].expected &&
+                 values[0] == 123 && values[2] == 456, "pcre2_config(numeric value)");
+    }
+  }
 
   rc = pcre2_config(999, NULL);
   ASSERT(rc == PCRE2_ERROR_BADOPTION, "pcre2_config(bad option)");
 
+  uval = 123;
   rc = pcre2_config(999, &uval);
-  ASSERT(rc == PCRE2_ERROR_BADOPTION, "pcre2_config(bad option)");
+  ASSERT(rc == PCRE2_ERROR_BADOPTION && uval == 123, "pcre2_config(bad option)");
 
   rc = pcre2_config(PCRE2_CONFIG_STACKRECURSE, &uval);
-  ASSERT(rc == 0, "pcre2_config(PCRE2_CONFIG_STACKRECURSE)");
+  ASSERT(rc == 0 && uval == 0, "pcre2_config(PCRE2_CONFIG_STACKRECURSE)");
 
   rc = pcre2_config(PCRE2_CONFIG_LINKSIZE, &uval);
-  ASSERT(rc == 0, "pcre2_config(PCRE2_CONFIG_LINKSIZE)");
+  ASSERT(rc == 0 && uval == CONFIGURED_LINK_SIZE, "pcre2_config(PCRE2_CONFIG_LINKSIZE)");
 
   /* ------------------------ Context functions ------------------------------ */
 
@@ -6611,7 +6649,8 @@ unittest(void)
   ASSERT(pcre2_get_ovector_count(test_match_data) == 10, "pcre2_get_ovector_count()");
 
   sizeval = pcre2_get_match_data_size(test_match_data);
-  ASSERT(sizeval >= 2, "pcre2_get_match_data_size()");
+  ASSERT(sizeval == offsetof(pcre2_match_data, ovector) + 20 * sizeof(PCRE2_SIZE),
+         "pcre2_get_match_data_size()");
 
   mallocs_until_failure = INT_MAX;
 
@@ -6619,6 +6658,10 @@ unittest(void)
   test_match_data = pcre2_match_data_create(0, test_gen_context);
   ASSERT(test_match_data != NULL, "pcre2_match_data_create()");
   ASSERT(pcre2_get_ovector_count(test_match_data) == 1, "pcre2_get_ovector_count()");
+
+  ASSERT(pcre2_get_match_data_size(test_match_data) ==
+             offsetof(pcre2_match_data, ovector) + 2 * sizeof(PCRE2_SIZE),
+         "pcre2_get_match_data_size(minimum)");
 
   pcre2_match_data_free(test_match_data);
   test_match_data = pcre2_match_data_create_from_pattern(NULL, NULL);
@@ -6735,6 +6778,9 @@ unittest(void)
     ASSERT(test_match_data != NULL, "pcre2_match_data_create(100000)");
     ASSERT(pcre2_get_ovector_count(test_match_data) == 65535,
            "pcre2_get_ovector_count(UINT32_MAX) <= UINT16_MAX)");
+    ASSERT(pcre2_get_match_data_size(test_match_data) ==
+               offsetof(pcre2_match_data, ovector) + 2 * (PCRE2_SIZE)65535 * sizeof(PCRE2_SIZE),
+           "pcre2_get_match_data_size(clamped count)");
 
     rc = pcre2_jit_match(test_compiled_code, subject_abcz, 4, 0, PCRE2_NO_JIT, test_match_data,
                          NULL);
@@ -6852,8 +6898,26 @@ unittest(void)
   ASSERT(rc == 8 && pcre2_strcmp_c8(errorbuffer, "no error") == 0,
          "pcre2_get_error_message(COMPILE_ERROR_BASE)");
 
+  rc = pcre2_get_error_message(PCRE2_ERROR_NULL_ERROROFFSET, errorbuffer,
+                              sizeof(errorbuffer) / sizeof(errorbuffer[0]));
+  BUFFER_OUTPUT
+  ASSERT(rc == sizeof("erroroffset passed as NULL") - 1 &&
+             pcre2_strcmp_c8(errorbuffer, "erroroffset passed as NULL") == 0,
+         "pcre2_get_error_message(last compile error)");
+
+  rc = pcre2_get_error_message(PCRE2_ERROR_PARTIALSUBS, errorbuffer,
+                              sizeof(errorbuffer) / sizeof(errorbuffer[0]));
+  BUFFER_OUTPUT
+  ASSERT(rc == sizeof("replacement $' or $_ not supported with partial match") - 1 &&
+             pcre2_strcmp_c8(errorbuffer,
+                             "replacement $' or $_ not supported with partial match") == 0,
+         "pcre2_get_error_message(last match error)");
+
   {
-    const int invalid_errorcodes[] = {INT_MIN, INT_MIN + 1, INT_MAX, 1, COMPILE_ERROR_BASE - 1};
+    const int invalid_errorcodes[] = {
+      INT_MIN, INT_MIN + 1, INT_MAX, 1, COMPILE_ERROR_BASE - 1,
+      PCRE2_ERROR_NULL_ERROROFFSET + 1, PCRE2_ERROR_PARTIALSUBS - 1
+    };
 
     for (size_t i = 0; i < sizeof(invalid_errorcodes) / sizeof(invalid_errorcodes[0]); i++)
     {

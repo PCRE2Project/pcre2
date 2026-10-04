@@ -663,7 +663,7 @@ information. */
   pcre2_compile_context_free(pcre2_compile_context *ccontext);               \
                                                                              \
   PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION                                   \
-  pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *length);          \
+  pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *value);           \
                                                                              \
   PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION                                   \
   pcre2_get_max_pattern_length(pcre2_compile_context *ccontext,              \

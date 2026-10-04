@@ -4788,6 +4788,14 @@ main(int argc, char **argv)
   match_context = pcre2_match_context_create(NULL);
   match_data_pair[0] = pcre2_match_data_create(offset_size, NULL);
   match_data_pair[1] = pcre2_match_data_create(offset_size, NULL);
+  if (compile_context == NULL || match_context == NULL ||
+      match_data_pair[0] == NULL || match_data_pair[1] == NULL)
+  {
+    /* LCOV_EXCL_START */
+    fprintf(stderr, "pcre2grep: malloc failed\n");
+    goto EXIT2;
+    /* LCOV_EXCL_STOP */
+  }
   offsets_pair[0] = pcre2_get_ovector_pointer(match_data_pair[0]);
   offsets_pair[1] = pcre2_get_ovector_pointer(match_data_pair[1]);
   match_data = match_data_pair[0];

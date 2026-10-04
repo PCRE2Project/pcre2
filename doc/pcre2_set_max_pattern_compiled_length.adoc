@@ -27,6 +27,10 @@ func:pcre2_compile() referencing this context needs more memory, an error is
 generated. The default is the largest number that a type:PCRE2_SIZE variable can
 hold, which is effectively unlimited.
 
+The limit excludes the fixed, platform-dependent compiled-pattern header, which
+is included in the total size returned by const:PCRE2_INFO_SIZE. It is not a
+limit on temporary compilation workspace, JIT code, or separate character tables.
+
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]
 page and a description of the POSIX API in the

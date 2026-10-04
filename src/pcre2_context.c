@@ -108,10 +108,8 @@ PRIV(memctl_malloc)(size_t size, pcre2_memctl *memctl)
 *          Create and initialize contexts        *
 *************************************************/
 
-/* Initializing for compile and match contexts is done in separate, private
-functions so that these can be called from functions such as pcre2_compile()
-when an external context is not supplied. The initializing functions have an
-option to set up default memory management. */
+/* Specialized contexts copy static default templates, replacing the memory
+management functions when a general context is supplied. */
 
 PCRE2_EXP_DEFN pcre2_general_context *PCRE2_CALL_CONVENTION
 pcre2_general_context_create(void *(*private_malloc)(size_t size, void *memory_data),
@@ -348,9 +346,10 @@ pcre2_convert_context_free(pcre2_convert_context *ccontext)
 *             Set values in contexts             *
 *************************************************/
 
-/* All these functions return 0 for success or PCRE2_ERROR_BADDATA if invalid
-data is given. Only some of the functions are able to test the validity of the
-data. */
+/* Setters and getters require a non-NULL context and return 0 for success.
+Functions that validate their data return PCRE2_ERROR_BADDATA, or
+PCRE2_ERROR_BADOPTION in the case of pcre2_set_optimize(). Only some of the
+functions are able to test the validity of the data. */
 
 
 /* ------------ Compile context ------------ */
@@ -380,11 +379,11 @@ pcre2_set_bsr(pcre2_compile_context *ccontext, uint32_t value)
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *length)
+pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *value)
 {
   PCRE2_ASSERT(ccontext != NULL);
-  PCRE2_ASSERT(length != NULL);
-  *length = ccontext->bsr_convention;
+  PCRE2_ASSERT(value != NULL);
+  *value = ccontext->bsr_convention;
   return 0;
 }
 
@@ -662,13 +661,12 @@ pcre2_set_glob_separator(pcre2_convert_context *ccontext, uint32_t separator_cha
   return 0;
 }
 
-static const char *globpunct = STR_EXCLAMATION_MARK STR_QUOTATION_MARK STR_NUMBER_SIGN
-    STR_DOLLAR_SIGN STR_PERCENT_SIGN STR_AMPERSAND STR_APOSTROPHE STR_LEFT_PARENTHESIS
-        STR_RIGHT_PARENTHESIS STR_ASTERISK STR_PLUS STR_COMMA STR_MINUS STR_DOT STR_SLASH STR_COLON
-            STR_SEMICOLON STR_LESS_THAN_SIGN STR_EQUALS_SIGN STR_GREATER_THAN_SIGN STR_QUESTION_MARK
-                STR_COMMERCIAL_AT STR_LEFT_SQUARE_BRACKET STR_BACKSLASH STR_RIGHT_SQUARE_BRACKET
-                    STR_CIRCUMFLEX_ACCENT STR_UNDERSCORE STR_GRAVE_ACCENT STR_LEFT_CURLY_BRACKET
-                        STR_VERTICAL_LINE STR_RIGHT_CURLY_BRACKET STR_TILDE;
+/* Glob syntax characters cannot also be escape characters. */
+static const char globpunct[] = STR_QUOTATION_MARK STR_NUMBER_SIGN STR_DOLLAR_SIGN STR_PERCENT_SIGN
+    STR_AMPERSAND STR_APOSTROPHE STR_LEFT_PARENTHESIS STR_RIGHT_PARENTHESIS STR_PLUS STR_COMMA
+        STR_DOT STR_SLASH STR_SEMICOLON STR_LESS_THAN_SIGN STR_EQUALS_SIGN STR_GREATER_THAN_SIGN
+            STR_COMMERCIAL_AT STR_BACKSLASH STR_UNDERSCORE STR_GRAVE_ACCENT STR_LEFT_CURLY_BRACKET
+                STR_VERTICAL_LINE STR_RIGHT_CURLY_BRACKET STR_TILDE;
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_glob_escape(pcre2_convert_context *ccontext, uint32_t escape_char)
