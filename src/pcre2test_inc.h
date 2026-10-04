@@ -7214,6 +7214,39 @@ unittest(void)
              "pcre2_serialize_encode(zero codes)");
     }
 
+    {
+      uint8_t *shifted = malloc(serialized_size + sizeof(pcre2_serialized_data));
+      ASSERT(shifted != NULL, "serialized stream copy");
+      for (size_t offset = 0; offset < sizeof(pcre2_serialized_data); offset++)
+      {
+        memcpy(shifted + offset, serialized_bytes, serialized_size);
+        ASSERT(pcre2_serialize_get_number_of_codes(shifted + offset) == 1,
+               "serialized count at arbitrary byte alignment");
+        rc = pcre2_serialize_decode(decode_codes, 1, shifted + offset, NULL);
+        ASSERT(rc == 1 && decode_codes[0] != NULL, "decode at arbitrary byte alignment");
+        pcre2_code_free(decode_codes[0]);
+        decode_codes[0] = NULL;
+      }
+      free(shifted);
+
+      int32_t counts[] = { 0, -1, INT32_MIN };
+      pcre2_serialized_data saved_header;
+      memcpy(&saved_header, serialized_bytes, sizeof(saved_header));
+      for (size_t i = 0; i < sizeof(counts) / sizeof(counts[0]); i++)
+      {
+        memcpy(serialized_bytes + offsetof(pcre2_serialized_data, number_of_codes),
+               &counts[i], sizeof(counts[i]));
+        decode_codes[0] = serialize_code;
+        ASSERT(pcre2_serialize_get_number_of_codes(serialized_bytes) == PCRE2_ERROR_BADSERIALIZEDDATA,
+               "serialized count sanity check");
+        rc = pcre2_serialize_decode(decode_codes, 1, serialized_bytes, NULL);
+        ASSERT(rc == PCRE2_ERROR_BADSERIALIZEDDATA && decode_codes[0] == serialize_code,
+               "decode count error leaves output unchanged");
+      }
+      memcpy(serialized_bytes, &saved_header, sizeof(saved_header));
+      decode_codes[0] = NULL;
+    }
+
     pcre2_code_free(serialize_code);
 
     /* goto 1: blocksize <= sizeof(pcre2_real_code) */
