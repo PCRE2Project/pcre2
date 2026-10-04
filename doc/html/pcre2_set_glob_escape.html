@@ -546,8 +546,10 @@ pre.rouge .gs {
 <section class="doc-section level-1"><h2 id="_description">Description</h2><p>This function is part of an experimental set of pattern conversion functions.
 It sets the escape character that is used when converting globs. The second
 argument must either be zero (meaning there is no escape character) or a
-punctuation character whose code point is less than 256. The default is grave
-accent if running under Windows, otherwise backslash. The result of the
+supported punctuation character. These are the ASCII punctuation characters
+(or their EBCDIC equivalents), except <code>!</code>, <code>*</code>, <code>-</code>, <code>:</code>, <code>?</code>, <code>[</code>, <code>]</code>, and <code>^</code>,
+which are reserved for glob wildcard or character-class syntax.
+The default is grave accent if running under Windows, otherwise backslash. The result of the
 function is zero for success or <code class="constant">PCRE2_ERROR_BADDATA</code> if the second argument is
 invalid.</p>
 <p>The pattern conversion functions are described in the

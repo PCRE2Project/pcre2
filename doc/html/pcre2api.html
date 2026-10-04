@@ -601,7 +601,7 @@ document for an overview of all the PCRE2 documentation.</p></section>
 
 <span class="kt">void</span> <span class="nf">pcre2_compile_context_free</span><span class="p">(</span><span class="n">pcre2_compile_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">);</span>
 
-<span class="kt">int</span> <span class="nf">pcre2_get_bsr</span><span class="p">(</span><span class="n">pcre2_compile_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="o">*</span><span class="n">length</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">pcre2_get_bsr</span><span class="p">(</span><span class="n">pcre2_compile_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
 
 <span class="kt">int</span> <span class="nf">pcre2_get_max_pattern_length</span><span class="p">(</span><span class="n">pcre2_compile_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">,</span>
                                  <span class="n">PCRE2_SIZE</span> <span class="o">*</span><span class="n">length</span><span class="p">);</span>
@@ -1071,9 +1071,13 @@ reasonable size, and at the same time to keep the API extensible, "uncommon"
 parameters are passed to certain functions in a "context" instead of
 directly. A context is just a block of memory that holds the parameter values.
 Applications that do not need to adjust any of the context parameters can pass
-<code class="constant">NULL</code> when a context pointer is required.</p>
-<p>There are three different types of context: a general context that is relevant
-for several PCRE2 operations, a compile-time context, and a match-time context.</p>
+<code class="constant">NULL</code> to operations that accept a context to select their defaults. The
+context setter and getter functions require a non-<code class="constant">NULL</code> context.
+Getter output pointers must also be non-<code class="constant">NULL</code>.</p>
+<p>The main API uses a general context that is relevant for several PCRE2
+operations, a compile-time context, and a match-time context. The experimental
+pattern conversion API also has a conversion context, described in
+<a href="pcre2convert.html"><code>pcre2convert</code></a>.</p>
 <section class="doc-section level-2"><h3 id="_the_general_context">The general context</h3><p>At present, this context just contains pointers to (and data for) external
 memory management functions that are called from several places in the PCRE2
 library. The context is named 'general' rather than specifically 'memory'
@@ -1122,12 +1126,14 @@ If none of these apply, just pass <code class="constant">NULL</code> as the cont
 <span class="kt">void</span> <span class="nf">pcre2_compile_context_free</span><span class="p">(</span><span class="n">pcre2_compile_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">);</span></code></pre></div>
 <p>A compile context is created with default values for its parameters. These can
 be changed by calling the following functions, which return 0 on success, or
-<code class="constant">PCRE2_ERROR_BADDATA</code> if invalid data is detected.</p>
+<code class="constant">PCRE2_ERROR_BADDATA</code> if invalid data is detected. The function
+<code class="function">pcre2_set_optimize()</code> returns <code class="constant">PCRE2_ERROR_BADOPTION</code> for an invalid
+<code class="parameter">directive</code> argument.</p>
 <p>The following functions get, respectively, the convention for processing <code class="regex">\R</code>,
 the maximum pattern length, the newline convention, and the maximum depth of
-nested parentheses. They return 0 on success or <code class="constant">PCRE2_ERROR_NULL</code> if either
-argument is <code class="constant">NULL</code>.</p>
-<div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nf">pcre2_get_bsr</span><span class="p">(</span><span class="n">pcre2_compile_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="o">*</span><span class="n">length</span><span class="p">);</span>
+nested parentheses. They return 0 and require both arguments to be
+non-<code class="constant">NULL</code>.</p>
+<div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nf">pcre2_get_bsr</span><span class="p">(</span><span class="n">pcre2_compile_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
 
 <span class="kt">int</span> <span class="nf">pcre2_get_max_pattern_length</span><span class="p">(</span><span class="n">pcre2_compile_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">,</span>
                                  <span class="n">PCRE2_SIZE</span> <span class="o">*</span><span class="n">length</span><span class="p">);</span>
@@ -1148,9 +1154,11 @@ interpreted matching functions, <code class="function">pcre2_match()</code> and
 <code class="function">pcre2_dfa_match()</code>.</p>
 <div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nf">pcre2_set_character_tables</span><span class="p">(</span><span class="n">pcre2_compile_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">,</span>
                                <span class="k">const</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">tables</span><span class="p">);</span></code></pre></div>
-<p>The value must be the result of a call to <code class="function">pcre2_maketables()</code>, whose only
-argument is a general context. This function builds a set of character tables
-in the current locale.</p>
+<p>The value may be <code class="constant">NULL</code> to select the default tables; the result of
+<code class="function">pcre2_maketables()</code>; or another valid set of PCRE2 character tables.
+The <code class="function">pcre2_maketables()</code> function takes a general context and builds tables
+in the current locale. Supplied tables must remain valid while the context or
+patterns compiled with them are in use.</p>
 <div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nf">pcre2_set_compile_extra_options</span><span class="p">(</span><span class="n">pcre2_compile_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">,</span>
                                     <span class="kt">uint32_t</span> <span class="n">options</span><span class="p">);</span></code></pre></div>
 <p>As PCRE2 has developed, almost all the 32 option bits that are available in
@@ -1176,6 +1184,10 @@ more memory, an error is generated. This facility is provided so that
 applications that accept patterns from external sources can limit the amount of
 memory they use. The default is the largest number that a <code class="type">PCRE2_SIZE</code> variable
 can hold, which is effectively unlimited.</p>
+<p>This limit excludes the fixed, platform-dependent compiled-pattern header.
+Therefore, <code class="constant">PCRE2_INFO_SIZE</code> can report a larger total allocation. This limit
+does not restrict temporary compilation workspace, JIT code, or separate character
+tables.</p>
 <div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nf">pcre2_set_max_varlookbehind</span><span class="p">(</span><span class="n">pcre2_compile_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">,</span>
                                 <span class="kt">uint32_t</span> <span class="n">limit</span><span class="p">);</span></code></pre></div>
 <p>This sets a maximum length for the number of characters matched by a
@@ -1299,8 +1311,8 @@ auxiliary information that is returned.</p></dd></dl></div></section>
 be changed by calling the following functions, which return 0 on success, or
 <code class="constant">PCRE2_ERROR_BADDATA</code> if invalid data is detected.</p>
 <p>The following functions get, respectively, the backtracking heap limit, match
-limit, depth limit, and offset limit. They return 0 on success or
-<code class="constant">PCRE2_ERROR_NULL</code> if either argument is <code class="constant">NULL</code>.</p>
+limit, depth limit, and offset limit. They return 0 and require both arguments
+to be non-<code class="constant">NULL</code>.</p>
 <div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nf">pcre2_get_heap_limit</span><span class="p">(</span><span class="n">pcre2_match_context</span> <span class="o">*</span><span class="n">mcontext</span><span class="p">,</span>
                          <span class="kt">uint32_t</span> <span class="o">*</span><span class="n">limit</span><span class="p">);</span>
 
@@ -2837,10 +2849,12 @@ library that is being used. An error code of zero is also recognized.</p>
 <p>The returned message is terminated with a trailing zero, and the function
 returns the number of code units used, excluding the trailing zero. If the
 error number is unknown, the negative error code <code class="constant">PCRE2_ERROR_BADDATA</code> is
-returned without changing the buffer, and without inspecting the value of <code class="parameter">bufflen</code>.
+returned without changing the buffer, even when <code class="parameter">bufflen</code> is zero.
 If the buffer is too small, the message is truncated (but still with
 a trailing zero, assuming <code class="parameter">bufflen</code> is not zero), and the negative error code
 <code class="constant">PCRE2_ERROR_NOMEMORY</code> is returned.
+With a recognized code and zero capacity, no output is written. The buffer
+pointer may be <code class="constant">NULL</code> only when its capacity is zero.
 None of the messages is very long; a buffer size of 120 code units is ample.</p>
 <p>No arithmetic (including unary negation) should ever be performed on error codes
 by clients. For any PCRE2 function that returns error codes, that code should be
