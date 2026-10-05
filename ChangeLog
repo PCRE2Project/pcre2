@@ -11,7 +11,9 @@ listed here.
 Version 10.50 xx-xxx-2026
 -------------------------
 
-...
+1. Fixed the CMake-generated pkg-config files and pcre2-config script to use
+the configured header installation directory and handle absolute header and
+library installation directories.
 
 
 Version 10.49 28-September-2026
