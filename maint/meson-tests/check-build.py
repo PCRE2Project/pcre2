@@ -16,6 +16,10 @@ from pathlib import Path
 SOURCE = Path(__file__).resolve().parents[2]
 
 
+def config_definitions(path):
+    return dict(re.findall(r'^#define[ \t]+(\w+)[ \t]*(.*)$', path.read_text(), re.MULTILINE))
+
+
 class BuildTests(unittest.TestCase):
 
     def setUp(self):
@@ -361,6 +365,44 @@ sys.exit(subprocess.run([os.environ['PCRE2_REAL_CC'], *args]).returncode)
         executable = build / ('pcre2test.exe' if os.name == 'nt' else 'pcre2test')
         self.assertEqual(self.run_command(executable, '-C', 'unicode').strip(), '0')
 
+    def test_deprecation_compatibility(self):
+        for ebcdic in (False, True):
+            with self.subTest(ebcdic=ebcdic):
+                build = self.work / ('ebcdic' if ebcdic else 'normal')
+                output = self.setup_meson(
+                    build,
+                    '--fatal-meson-warnings',
+                    '-Ddefault_library=both',
+                    *(['-Dpcre2_ebcdic_ignoring_compiler=true', '-Dpcre2_support_unicode=false'] if ebcdic else []),
+                )
+                self.assertNotIn('deprecated', output.lower())
+                tests = json.loads(self.run_command('meson', 'introspect', '--tests', build))
+                names = {test['name'] for test in tests}
+                self.assertIn('pcre2_test', names)
+                self.assertIn('pcre2posix_test', names)
+                self.assertEqual('pcre2_grep_test' in names, not ebcdic)
+                if not ebcdic:
+                    self.run_command('meson', 'test', '-C', build, '--print-errorlogs')
+
+        # Exercise the default naming arguments even with MSVC, where PCRE2's
+        # normal targets explicitly override both the prefix and suffix.
+        source = self.work / 'default-names'
+        source.mkdir()
+        project_setup = (SOURCE / 'meson.build').read_text().split('# External packages')[0]
+        (source / 'meson.build').write_text(project_setup + '''
+static_library('explicit-default', 'fixture.c', name_prefix: meson_default, name_suffix: meson_default)
+static_library('implicit-default', 'fixture.c')
+''')
+        (source / 'fixture.c').write_text('int fixture(void) { return 42; }\n')
+        build = self.work / 'default-names-build'
+        output = self.run_command('meson', 'setup', build, source, '--fatal-meson-warnings')
+        self.assertNotIn('deprecated', output.lower())
+        self.run_command('meson', 'compile', '-C', build)
+        targets = json.loads(self.run_command('meson', 'introspect', '--targets', build))
+        filenames = {target['name']: Path(target['filename'][0]).name for target in targets}
+        self.assertEqual(filenames['explicit-default'].replace('explicit-default', 'implicit-default'),
+                         filenames['implicit-default'])
+
     def test_clean_test_and_installed_contract(self):
         build = self.work / 'build'
         prefix = self.work / 'install'
@@ -476,7 +518,9 @@ sys.exit(subprocess.run([os.environ['PCRE2_REAL_CC'], *args]).returncode)
             '-DPCRE2_BUILD_TESTS=OFF',
         )
 
-    @unittest.skipUnless(sys.platform.startswith('linux') or os.name == 'nt', 'Fixtures use Linux or Windows modes')
+    @unittest.skipUnless(
+        sys.platform.startswith('linux') or sys.platform == 'darwin' or os.name == 'nt',
+        'Fixtures use Linux, macOS or Windows modes')
     def test_install_manifests(self):
         windows = os.name == 'nt'
         if windows and not shutil.which('pwsh'):
@@ -491,12 +535,22 @@ sys.exit(subprocess.run([os.environ['PCRE2_REAL_CC'], *args]).returncode)
         files.update({name: 0o644 for name in exports})
         files.update({name: 0o755 for name in archives})
         links = {}
+        dylibs = {}
         if not windows:
             files['lib/libpcre2-8.so.0.16.0'] = 0o644
             links = {
                 'lib/libpcre2-8.so': 'libpcre2-8.so.0.16.0',
                 'lib/libpcre2-8.so.0': 'libpcre2-8.so.0.16.0',
             }
+            for width in ('8', '16', '32', 'posix'):
+                version = '3.0.10' if width == 'posix' else '0.17.0'
+                library = 'libpcre2-' + width
+                full = library + '.' + version + '.dylib'
+                major = library + '.' + version.split('.')[0] + '.dylib'
+                files['lib/' + full] = 0o755
+                dylibs['lib/' + full] = 'lib/' + major
+                links['lib/' + major] = full
+                links['lib/' + library + '.dylib'] = major
         directories = ('', 'include', 'lib', 'lib/cmake', 'lib/cmake/pcre2')
         entries = {}
         for name in directories:
@@ -504,7 +558,7 @@ sys.exit(subprocess.run([os.environ['PCRE2_REAL_CC'], *args]).returncode)
                 entries[name] = 'd----' if windows else 'drwxr-xr-x'
         for name, mode in files.items():
             entries[name] = '-a---' if windows else ('-rwxr-xr-x' if mode == 0o755 else '-rw-r--r--')
-        entries.update({name: 'lrwxrwxrwx' for name in links})
+        entries.update({name: 'lrwxr-xr-x' if sys.platform == 'darwin' else 'lrwxrwxrwx' for name in links})
         lines = []
         for name, mode in entries.items():
             path = 'install-dir' + ('/' + name if name else '')
@@ -530,13 +584,16 @@ sys.exit(subprocess.run([os.environ['PCRE2_REAL_CC'], *args]).returncode)
                 for name, mode in files.items():
                     if (name in exports and producer != 'cmake') or (name in archives and producer != 'autoconf'):
                         continue
-                    path = prefix / name.replace('targets-release', 'targets-' + buildtype)
+                    installed_name = dylibs.get(name, name) if producer == 'meson' else name
+                    path = prefix / installed_name.replace('targets-release', 'targets-' + buildtype)
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.write_text('fixture\n')
                     if name.endswith('.so.0.16.0') and producer != 'cmake':
                         mode = 0o755
                     path.chmod(mode)
                 for name, target in links.items():
+                    if producer == 'meson' and name in dylibs.values():
+                        continue
                     if name.endswith('.so') and producer != 'autoconf':
                         target = 'libpcre2-8.so.0'
                     (prefix / name).symlink_to(target)
@@ -586,6 +643,28 @@ sys.exit(subprocess.run([os.environ['PCRE2_REAL_CC'], *args]).returncode)
                     link.unlink()
                     link.symlink_to('libpcre2-8.so.999')
                     self.assertIn('Installed files differ', check(succeeds=False))
+                    link.unlink()
+                    link.symlink_to(links['lib/libpcre2-8.so'] if producer == 'autoconf' else 'libpcre2-8.so.0')
+                    for full, major in dylibs.items():
+                        with self.subTest(library=full):
+                            link = prefix / re.sub(r'\.[0-9]+\.dylib$', '.dylib', major)
+                            link.unlink()
+                            link.symlink_to('wrong.dylib')
+                            self.assertIn('Installed files differ', check(succeeds=False))
+                            link.unlink()
+                            link.symlink_to(Path(major).name)
+                            library = prefix / (major if producer == 'meson' else full)
+                            library.unlink()
+                            self.assertIn('Installed files differ', check(succeeds=False))
+                            library.write_text('fixture\n')
+                            library.chmod(0o755)
+                            if producer == 'meson':
+                                extra = prefix / full
+                                extra.write_text('unexpected full-version dylib\n')
+                                extra.chmod(0o755)
+                                self.assertIn('Installed files differ', check(succeeds=False))
+                                extra.unlink()
+                    check()
                 else:
                     self.run_command(
                         'pwsh',
@@ -767,7 +846,7 @@ assert(have_vscript_no_star == {str(no_star).lower()}, 'version script wildcard'
                         cmake_text = cmake_text.replace('# Configuration checks\n',
                                                         '# Configuration checks\nset(MSVC TRUE)\n')
                     (source / 'meson.build'
-                     ).write_text(meson_text + "\nconfig.set('HAVE_VISIBILITY', have_visibility)\n"
+                     ).write_text(meson_text + "\nconfig.set('HAVE_VISIBILITY', have_visibility ? 1 : false)\n"
                                   "configure_file(input: 'meson.h.in', output: 'checks.h', configuration: config)\n")
                     (source / 'CMakeLists.txt').write_text(cmake_text + '\nconfigure_file(cmake.h.in checks.h @ONLY)\n')
                     meson_build = self.work / ('meson-' + compiler + '-' + mode)
@@ -788,21 +867,152 @@ assert(have_vscript_no_star == {str(no_star).lower()}, 'version script wildcard'
                                      '-DCMAKE_C_COMPILER=' + compiler,
                                      '-DCMAKE_C_EXTENSIONS=' + ('OFF' if mode == 'strict-c11' else 'ON'),
                                      env=env)
-                    definitions = []
-                    for build in (meson_build, cmake_build):
-                        # Meson's feature defines are valueless; CMake's have value 1.
-                        definitions.append({
-                            name: value if name == 'PCRE2_EXPORT' else '1'
-                            for name, value in re.findall(r'^#define[ \t]+(\w+)[ \t]*(.*)$', (
-                                build / 'checks.h').read_text(), re.MULTILINE)
-                        })
+                    definitions = [config_definitions(build / 'checks.h') for build in (meson_build, cmake_build)]
                     self.assertEqual(*definitions)
                     self.assertEqual(definitions[0]['HAVE_BUILTIN_MUL_OVERFLOW'], '1')
                     self.assertEqual(definitions[0]['HAVE_BUILTIN_UNREACHABLE'], '1')
                     self.assertEqual('HAVE_VISIBILITY' in definitions[0], mode != 'msvc-like')
                     self.assertNotIn('HAVE_MKOSTEMP:', (cmake_build / 'CMakeCache.txt').read_text())
 
-    @unittest.skipUnless(sys.platform.startswith('linux'), 'Configuration comparisons use Linux builds')
+    @unittest.skipUnless(shutil.which('cmake'), 'Header comparisons require CMake')
+    def test_configuration_header_values(self):
+        cmake_template = (SOURCE / 'src/config-cmake.h.in').read_text()
+        meson_template = (SOURCE / 'src/config-meson.h.in').read_text()
+        canonical = (SOURCE / 'src/config.h.generic').read_text()
+        features = dict(re.findall(r'^#cmakedefine (\w+) (.*)$', cmake_template, re.MULTILINE))
+        features.update(HAVE_EDITLINE_READLINE_H='1', HAVE_EDIT_READLINE_READLINE_H='1')
+        self.assertEqual(set(features), set(re.findall(r'^#mesondefine (\w+)$', meson_template, re.MULTILINE)))
+        for name, value in features.items():
+            self.assertEqual(value, '1', name)
+            self.assertIn('/* #undef ' + name + ' */', canonical)
+
+        scalars = config_definitions(SOURCE / 'src/config-cmake.h.in')
+        self.assertEqual(scalars, config_definitions(SOURCE / 'src/config-meson.h.in'))
+        defaults = config_definitions(SOURCE / 'src/config.h.generic')
+        cmake_has_sealloc = sys.platform.startswith(('linux', 'netbsd'))
+        cases = [
+            ('default', {}, {}),
+            ('enabled', {
+                'pcre2_build_pcre2_16': True,
+                'pcre2_build_pcre2_32': True,
+                'pcre2_support_bsr_anycrlf': True,
+                'pcre2_never_backslash_c': True,
+                'pcre2_support_jit': True,
+                'pcre2_support_jit_sealloc': cmake_has_sealloc,
+                'pcre2_support_valgrind': True,
+                'pcre2_fuzz_support': True,
+                'pcre2_diff_fuzz_support': True,
+                'pcre2_disable_percent_zt': True,
+            }, {
+                'SUPPORT_PCRE2_16': '1',
+                'SUPPORT_PCRE2_32': '1',
+                'BSR_ANYCRLF': '1',
+                'NEVER_BACKSLASH_C': '1',
+                'SUPPORT_JIT': '1',
+                'SLJIT_PROT_EXECUTABLE_ALLOCATOR': '1' if cmake_has_sealloc else None,
+                'SUPPORT_VALGRIND': '1',
+                'SUPPORT_DIFF_FUZZ': '1',
+                'DISABLE_PERCENT_ZT': '1',
+            }),
+            ('disabled', {
+                'pcre2_build_pcre2_8': False,
+                'pcre2_build_pcre2_16': True,
+                'pcre2_support_unicode': False,
+                'pcre2grep_support_jit': False,
+                'pcre2grep_support_callout': False,
+            }, {
+                'SUPPORT_PCRE2_8': None,
+                'SUPPORT_PCRE2_16': '1',
+                'SUPPORT_PCRE2_32': None,
+                'SUPPORT_UNICODE': None,
+                'SUPPORT_PCRE2GREP_JIT': None,
+                'SUPPORT_PCRE2GREP_CALLOUT': None,
+                'SUPPORT_PCRE2GREP_CALLOUT_FORK': None,
+            }),
+            ('ebcdic', {
+                'pcre2_ebcdic': True,
+                'pcre2_ebcdic_nl25': True,
+                'pcre2_ebcdic_ignoring_compiler': True,
+                'pcre2_support_unicode': False,
+            }, {
+                'EBCDIC': '1',
+                'EBCDIC_NL25': '1',
+                'EBCDIC_IGNORING_COMPILER': '1',
+                'SUPPORT_UNICODE': None,
+            }),
+            ('values', {
+                'pcre2_link_size': 3,
+                'pcre2_parens_nest_limit': 77,
+                'pcre2_heap_limit': 0,
+                'pcre2_max_varlookbehind': 64,
+                'pcre2_match_limit': 1234,
+                'pcre2_match_limit_depth': '(MATCH_LIMIT / 2)',
+                'pcre2grep_bufsize': 1024,
+                'pcre2grep_max_bufsize': 2048,
+                'pcre2_newline': 'NUL',
+            }, {
+                'LINK_SIZE': '3',
+                'PARENS_NEST_LIMIT': '77',
+                'HEAP_LIMIT': '0',
+                'MAX_VARLOOKBEHIND': '64',
+                'MATCH_LIMIT': '1234',
+                'MATCH_LIMIT_DEPTH': '(MATCH_LIMIT / 2)',
+                'PCRE2GREP_BUFSIZE': '1024',
+                'PCRE2GREP_MAX_BUFSIZE': '2048',
+                'NEWLINE_DEFAULT': '6',
+            }),
+        ]
+        for name, options, expected in cases:
+            with self.subTest(configuration=name):
+                definitions = []
+                for system in ('meson', 'cmake'):
+                    build = self.work / (system + '-' + name)
+                    arguments = []
+                    for option, value in options.items():
+                        if isinstance(value, bool):
+                            if system == 'cmake':
+                                value = 'ON' if value else 'OFF'
+                            elif option == 'pcre2_support_jit':
+                                value = 'enabled' if value else 'disabled'
+                            else:
+                                value = str(value).lower()
+                        arguments.append('-D' + (option.upper() if system == 'cmake' else option) + '=' + str(value))
+                    if system == 'meson':
+                        self.setup_meson(build, '-Dpcre2_build_tests=false', '-Dpcre2_build_pcre2grep=false',
+                                         *arguments)
+                        header = build / 'config.h'
+                    else:
+                        self.run_command('cmake', '-S', SOURCE, '-B', build, '-G', 'Ninja', '-DPCRE2_BUILD_TESTS=OFF',
+                                         '-DPCRE2_BUILD_PCRE2GREP=OFF', '-DPCRE2_SUPPORT_LIBBZ2=OFF',
+                                         '-DPCRE2_SUPPORT_LIBZ=OFF', '-DPCRE2_SUPPORT_LIBREADLINE=OFF', *arguments)
+                        header = build / 'src/config.h'
+                    actual = config_definitions(header)
+                    text = header.read_text()
+                    self.assertEqual(set(actual) - set(features) - set(scalars), set())
+                    for feature in features:
+                        if feature in actual:
+                            self.assertEqual(actual[feature], '1', feature)
+                        elif system == 'meson':
+                            self.assertRegex(text, r'(?m)^#undef ' + feature + r'$')
+                    for macro, value in expected.items():
+                        self.assertEqual(actual.get(macro), value, macro)
+                    for macro in scalars.keys() - {'PCRE2_EXPORT'} - expected.keys():
+                        self.assertEqual(actual[macro], defaults[macro], macro)
+                    for feature in ('SUPPORT_LIBBZ2', 'SUPPORT_LIBEDIT', 'SUPPORT_LIBREADLINE', 'SUPPORT_LIBZ',
+                                    'HAVE_EDITLINE_READLINE_H', 'HAVE_EDIT_READLINE_READLINE_H'):
+                        self.assertNotIn(feature, actual)
+                    definitions.append(actual)
+                self.assertEqual(*definitions)
+
+        if not cmake_has_sealloc:
+            # CMake ignores this option outside Linux/NetBSD; still check Meson's
+            # numeric definition on hosts where we cannot compare the enabled case.
+            build = self.work / 'meson-sealloc'
+            self.setup_meson(build, '-Dpcre2_support_jit_sealloc=true', '-Dpcre2_build_tests=false',
+                             '-Dpcre2_build_pcre2grep=false')
+            self.assertEqual(config_definitions(build / 'config.h')['SLJIT_PROT_EXECUTABLE_ALLOCATOR'], '1')
+
+    @unittest.skipUnless(shutil.which('cmake'), 'Configuration comparisons require CMake')
     def test_build_configuration(self):
         cases = [
             ({
@@ -812,6 +1022,7 @@ assert(have_vscript_no_star == {str(no_star).lower()}, 'version script wildcard'
             ({
                 'pcre2_build_pcre2_8': False,
                 'pcre2_build_pcre2_16': True,
+                'pcre2_build_pcre2grep': False,
                 'pcre2_fuzz_support': True,
                 'pcre2_ebcdic': True
             }, 'Fuzzer support requires'),
@@ -834,6 +1045,11 @@ assert(have_vscript_no_star == {str(no_star).lower()}, 'version script wildcard'
             ({
                 'pcre2_build_pcre2_8': False,
                 'pcre2_build_pcre2_16': True
+            }, 'PCRE2_BUILD_PCRE2_8 must be enabled'),
+            ({
+                'pcre2_build_pcre2_8': False,
+                'pcre2_build_pcre2_16': True,
+                'pcre2_build_pcre2grep': False
             }, None),
         ]
         for index, (options, error) in enumerate(cases):
@@ -861,9 +1077,8 @@ assert(have_vscript_no_star == {str(no_star).lower()}, 'version script wildcard'
                     elif system == 'meson':
                         targets = json.loads(self.run_command('meson', 'introspect', '--targets', build))
                         self.assertNotIn('pcre2grep', {target['name'] for target in targets})
-                        self.assertIn('disabling pcre2grep', output)
-                    else:
-                        self.assertIn('must be enabled for the pcre2grep program', output)
+                        self.assertFalse(any(target['name'].startswith('pcre2-8') for target in targets))
+                        self.assertTrue(any(target['name'].startswith('pcre2-16') for target in targets))
 
     @unittest.skipUnless(
         sys.platform.startswith('linux') and shutil.which('gcc') and shutil.which('nm'),
@@ -1096,6 +1311,219 @@ int main(void) {
         self.assertEqual([Path(path).name for path in installed if path.endswith('.pc')], ['libpcre2-16.pc'])
         self.assertEqual([path.name for path in (subset / 'meson-uninstalled').glob('*.pc')],
                          ['libpcre2-16-uninstalled.pc'])
+
+    @unittest.skipUnless(
+        os.name == 'nt' and shutil.which('cl') and shutil.which('dumpbin')
+        and (shutil.which('pkg-config') or shutil.which('pkgconf')), 'MSVC and pkg-config are required')
+    def test_msvc_install_matrix(self):
+        pkgconfig = shutil.which('pkg-config') or shutil.which('pkgconf')
+        interfaces = ('8', '16', '32', 'posix')
+        for library_type in ('static', 'shared', 'both'):
+            for buildtype in ('debug', 'release', 'debugoptimized'):
+                with self.subTest(library_type=library_type, buildtype=buildtype):
+                    directory = self.work / (library_type + '-' + buildtype)
+                    build = directory / 'build'
+                    prefix = directory / 'install-dir'
+                    postfix = 'd' if buildtype == 'debug' else ''
+                    shared = library_type != 'static'
+                    self.setup_meson(
+                        build,
+                        f'--prefix={prefix}',
+                        '--libdir=lib',
+                        f'-Ddefault_library={library_type}',
+                        f'-Dbuildtype={buildtype}',
+                        '-Dpcre2_build_pcre2_16=true',
+                        '-Dpcre2_build_pcre2_32=true',
+                        '-Dpcre2_support_jit=enabled',
+                        '-Dwerror=true',
+                    )
+                    compiler = json.loads(self.run_command('meson', 'introspect', '--compilers', build))
+                    self.assertEqual(compiler['host']['c']['id'], 'msvc')
+                    self.assertIn('#define HAVE_WINDOWS_H 1', (build / 'config.h').read_text())
+                    self.run_command('meson', 'compile', '-C', build, '-j', '4')
+                    self.run_command('meson', 'test', '-C', build, '--print-errorlogs')
+                    self.run_command('meson', 'install', '-C', build)
+                    libraries = set()
+                    if library_type != 'shared':
+                        libraries.update(f'pcre2-{width}-static{postfix}.lib' for width in interfaces)
+                    if shared:
+                        libraries.update(f'pcre2-{width}{postfix}.lib' for width in interfaces)
+                    self.assertEqual({path.name for path in (prefix / 'lib').glob('*.lib')}, libraries)
+                    dlls = {f'pcre2-{width}{postfix}.dll' for width in interfaces} if shared else set()
+                    self.assertEqual({path.name for path in (prefix / 'bin').glob('*.dll')}, dlls)
+                    pdbs = set()
+                    if buildtype != 'release':
+                        pdbs = {'pcre2test.pdb', 'pcre2grep.pdb'}
+                        pdbs.update(name.replace('.dll', '.pdb') for name in dlls)
+                    self.assertEqual({path.name for path in prefix.rglob('*.pdb')}, pdbs)
+                    for width in interfaces if shared else ():
+                        exports = self.run_command('dumpbin', '/exports',
+                                                   prefix / 'bin' / f'pcre2-{width}{postfix}.dll')
+                        actual = set(re.findall(r'^\s*\d+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+(\S+)', exports,
+                                                re.MULTILINE))
+                        manifest = (SOURCE / 'maint' / f'manifest-libpcre2-{width}.so').read_text()
+                        expected = {line.split()[1].split('@')[0] for line in manifest.splitlines()}
+                        self.assertEqual(actual, expected)
+                    if library_type == 'both' and buildtype == 'release':
+                        self.run_command('pwsh',
+                                         '-NoProfile',
+                                         '-File',
+                                         SOURCE / 'maint/RunManifestTest.ps1',
+                                         'install-dir',
+                                         SOURCE / 'maint/manifest-install-windows',
+                                         'meson',
+                                         cwd=directory)
+                        self.run_command('pwsh',
+                                         '-NoProfile',
+                                         '-File',
+                                         SOURCE / 'maint/RunSymbolTest.ps1',
+                                         prefix / 'bin',
+                                         SOURCE / 'maint',
+                                         cwd=directory)
+
+                    relocated = directory / 'relocated with spaces'
+                    prefix.rename(relocated)
+                    for program, arguments in (('pcre2test', ('-C', 'version')), ('pcre2grep', ('--version', ))):
+                        self.run_command(relocated / 'bin' / (program + '.exe'), *arguments, cwd=directory)
+                    env = os.environ.copy()
+                    env.update(PKG_CONFIG_PATH='', PKG_CONFIG_LIBDIR=str(relocated / 'lib/pkgconfig'))
+                    env.pop('PKG_CONFIG_SYSROOT_DIR', None)
+                    env['PATH'] = str(relocated / 'bin') + os.pathsep + env['PATH']
+                    for width in interfaces:
+                        package = 'libpcre2-' + width
+                        consumer = directory / 'consumer.c'
+                        if width == 'posix':
+                            consumer.write_text('''
+#include <pcre2posix.h>
+#if defined(EXPECT_STATIC) && (!defined(PCRE2_STATIC) || defined(PCRE2POSIX_SHARED))
+#error Incorrect static POSIX definitions
+#endif
+#if !defined(EXPECT_STATIC) && (!defined(PCRE2POSIX_SHARED) || defined(PCRE2_STATIC))
+#error Incorrect shared POSIX definitions
+#endif
+int main(void) {
+  regex_t regex;
+  if (regcomp(&regex, "a", 0)) return 1;
+  int result = regexec(&regex, "a", 0, 0, 0);
+  regfree(&regex);
+  return result;
+}
+''')
+                        else:
+                            consumer.write_text(f'#define PCRE2_CODE_UNIT_WIDTH {width}\n' + '''
+#include <pcre2.h>
+#if defined(EXPECT_STATIC) != defined(PCRE2_STATIC)
+#error Incorrect PCRE2_STATIC definition
+#endif
+int main(void) {
+  int error;
+  PCRE2_SIZE offset;
+  PCRE2_UCHAR pattern[] = { 'a', 0 };
+  pcre2_code *code = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, 0, &error, &offset, 0);
+  if (!code) return 1;
+  int result = pcre2_jit_compile(code, PCRE2_JIT_COMPLETE);
+  pcre2_match_data *data = pcre2_match_data_create_from_pattern(code, 0);
+  if (!result) result = pcre2_match(code, pattern, 1, 0, 0, data, 0) != 1;
+  pcre2_match_data_free(data);
+  pcre2_code_free(code);
+  return result;
+}
+''')
+                        for static_flags in (False, True):
+                            options = ['--static'] if static_flags else []
+                            cflags = shlex.split(
+                                self.run_command(pkgconfig, '--msvc-syntax', *options, '--cflags', package, env=env))
+                            libs = shlex.split(
+                                self.run_command(pkgconfig, '--msvc-syntax', *options, '--libs', package, env=env))
+                            self.assertEqual('/DPCRE2_STATIC' in cflags, not shared, cflags)
+                            self.assertEqual('/DPCRE2POSIX_SHARED' in cflags, shared and width == 'posix', cflags)
+                            archive = f'pcre2-{width}{"" if shared else "-static"}{postfix}.lib'
+                            self.assertIn(archive, libs)
+                            executable = directory / 'consumer.exe'
+                            self.run_command('cl',
+                                             '/nologo',
+                                             '/std:c11',
+                                             '/MDd' if buildtype == 'debug' else '/MD',
+                                             *cflags,
+                                             *(['/DEXPECT_STATIC'] if not shared else []),
+                                             consumer,
+                                             '/Fe' + str(executable),
+                                             '/link',
+                                             *libs,
+                                             cwd=directory,
+                                             env=env)
+                            self.run_command(executable, cwd=directory, env=env)
+                            imports = self.run_command('dumpbin', '/dependents', executable)
+                            self.assertEqual(bool(re.search(r'pcre2-[\w-]+\.dll', imports)), shared, imports)
+                    if library_type == 'both' and buildtype == 'debugoptimized':
+                        stripped = directory / 'stripped'
+                        self.run_command('meson', 'configure', build, f'--prefix={stripped}', '-Dstrip=true')
+                        self.run_command('meson', 'install', '-C', build)
+                        self.assertEqual(list(stripped.rglob('*.pdb')), [])
+
+    @unittest.skipUnless(os.name == 'nt' and shutil.which('cl') and shutil.which('cmake'),
+                         'MSVC and CMake are required')
+    def test_msvc_install_layout(self):
+        installed = []
+        for producer in ('meson', 'cmake'):
+            with self.subTest(producer=producer):
+                build = self.work / (producer + '-build')
+                prefix = self.work / (producer + ' install')
+                libraries = self.work / (producer + ' libraries')
+                headers = self.work / (producer + ' headers')
+                if producer == 'meson':
+                    self.setup_meson(
+                        build,
+                        f'--prefix={prefix}',
+                        '--bindir=custom bin',
+                        f'--libdir={libraries}',
+                        f'--includedir={headers}',
+                        '-Dbuildtype=debugoptimized',
+                        '-Ddefault_library=both',
+                        '-Dpcre2_build_pcre2_16=true',
+                        '-Dpcre2_build_pcre2_32=true',
+                        '-Dpcre2_build_tests=false',
+                        '-Dpcre2_build_pcre2grep=false',
+                    )
+                    self.run_command('meson', 'compile', '-C', build, '-j', '4')
+                    self.run_command('meson', 'install', '-C', build)
+                else:
+                    self.run_command(
+                        'cmake',
+                        '-S',
+                        SOURCE,
+                        '-B',
+                        build,
+                        '-G',
+                        'Ninja',
+                        '-DCMAKE_BUILD_TYPE=RelWithDebInfo',
+                        f'-DCMAKE_INSTALL_PREFIX={prefix}',
+                        '-DCMAKE_INSTALL_BINDIR=custom bin',
+                        f'-DCMAKE_INSTALL_LIBDIR={libraries}',
+                        f'-DCMAKE_INSTALL_INCLUDEDIR={headers}',
+                        '-DBUILD_SHARED_LIBS=ON',
+                        '-DBUILD_STATIC_LIBS=ON',
+                        '-DPCRE2_BUILD_PCRE2_16=ON',
+                        '-DPCRE2_BUILD_PCRE2_32=ON',
+                        '-DPCRE2_BUILD_TESTS=OFF',
+                        '-DPCRE2_BUILD_PCRE2GREP=OFF',
+                        '-DPCRE2_SUPPORT_LIBBZ2=OFF',
+                        '-DPCRE2_SUPPORT_LIBZ=OFF',
+                        '-DPCRE2_SUPPORT_LIBREADLINE=OFF',
+                    )
+                    self.run_command('cmake', '--build', build, '--parallel', '4')
+                    self.run_command('cmake', '--install', build)
+                    self.assertEqual(list(prefix.rglob('*.pdb')), [])
+                    self.run_command('cmake', '-S', SOURCE, '-B', build, '-DINSTALL_MSVC_PDB=ON')
+                    self.run_command('cmake', '--install', build)
+                self.assertTrue((headers / 'pcre2.h').is_file())
+                self.assertTrue((headers / 'pcre2posix.h').is_file())
+                installed.append(
+                    ({path.name
+                      for path in (prefix / 'custom bin').iterdir()}, {path.name
+                                                                       for path in libraries.glob('*.lib')}))
+        self.assertEqual(len(installed), 2)
+        self.assertEqual(installed[0], installed[1])
 
     @unittest.skipIf(os.name == 'nt', 'The shell harness requires a Unix shell')
     def test_harness_executable_paths(self):

@@ -932,6 +932,9 @@ set(
 set(PCRE2POSIX_HEADERS ${PROJECT_BINARY_DIR}/interface/pcre2posix.h)
 set(PCRE2POSIX_SOURCES src/pcre2posix.c)
 
+# It's possible that some users may still make use of the facility to place
+# their own resource files in the PCRE2 source directory to customize the DLLs.
+
 if(MINGW AND BUILD_SHARED_LIBS)
   if(EXISTS ${PROJECT_SOURCE_DIR}/pcre2.rc)
     add_custom_command(

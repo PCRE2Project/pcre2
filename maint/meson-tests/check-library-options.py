@@ -23,6 +23,7 @@ def run_case(source_dir, work_dir, case):
     request_shared = library_type in ('shared', 'both')
     setup_command = [
         'meson', 'setup', str(build_dir), str(source_dir),
+        '--buildtype=release',
         '--wrap-mode=forcefallback',
         f'-Dexpect_default_static={str(default_static).lower()}',
         f'-Drequest_static={str(request_static).lower()}',
@@ -53,13 +54,11 @@ def run_case(source_dir, work_dir, case):
     for target_name in ('pcre2-8', 'pcre2-posix'):
         actual_types = {
             target['type'] for target in targets
-            if target['subproject'] == 'pcre2' and target['name'] == target_name
+            if target['subproject'] == 'pcre2' and target['name'] in (target_name, target_name + '-static')
         }
         if actual_types != expected_types:
-            raise RuntimeError(
-                f'{name}: {target_name} produced {actual_types}, '
-                f'expected {expected_types}'
-            )
+            raise RuntimeError(f'{name}: {target_name} produced {actual_types}, '
+                               f'expected {expected_types}')
 
 
 def main():
@@ -72,7 +71,13 @@ def main():
         shutil.copytree(fixture_dir, source_dir)
         subprojects_dir = source_dir / 'subprojects'
         subprojects_dir.mkdir()
-        (subprojects_dir / 'pcre2').symlink_to(source_root, target_is_directory=True)
+        pcre2_source = subprojects_dir / 'pcre2'
+        pcre2_source.mkdir()
+        for entry in source_root.iterdir():
+            if entry.is_file() and not entry.name.startswith('.'):
+                shutil.copy2(entry, pcre2_source / entry.name)
+        for directory in ('src', 'meson', 'doc'):
+            shutil.copytree(source_root / directory, pcre2_source / directory)
         for case in CASES:
             run_case(source_dir, work_dir, case)
 

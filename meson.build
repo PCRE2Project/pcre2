@@ -16,6 +16,12 @@ cc = meson.get_compiler('c')
 fs = import('fs')
 host_is_windows = host_machine.system() == 'windows'
 msvc_like = cc.get_id() in ['msvc', 'clang-cl', 'intel-cl']
+# Meson recognizes feature-version guards in if statements, not ternaries.
+if meson.version().version_compare('>=1.12.0')
+  meson_default = default()
+else
+  meson_default = []
+endif
 
 if msvc_like
   add_project_arguments('-D_CRT_SECURE_NO_DEPRECATE', '-D_CRT_SECURE_NO_WARNINGS', language: 'c')
@@ -34,9 +40,12 @@ subdir('meson/FindEditline')
 # Configuration checks
 # -----------------------------------------------------------------------------
 
+# Feature macros are 1 when enabled and undefined otherwise, as documented in
+# config.h.generic and emitted by config-cmake.h.in. set10() would define disabled
+# features to 0, which is not equivalent for the source's #ifdef checks.
 config = configuration_data()
 foreach header : ['assert.h', 'dirent.h', 'sys/stat.h', 'sys/types.h', 'unistd.h', 'windows.h']
-  config.set('HAVE_' + header.underscorify().to_upper(), cc.check_header(header))
+  config.set('HAVE_' + header.underscorify().to_upper(), cc.check_header(header) ? 1 : false)
 endforeach
 
 # Check whether any system-wide extensions need to be enabled, in order for
@@ -45,15 +54,15 @@ subdir('meson/PCRE2UseSystemExtensions')
 
 config.set(
   'HAVE_MEMFD_CREATE',
-  cc.has_function('memfd_create', prefix: '#include <sys/mman.h>', args: system_extension_args),
+  cc.has_function('memfd_create', prefix: '#include <sys/mman.h>', args: system_extension_args) ? 1 : false,
 )
 config.set(
   'HAVE_SECURE_GETENV',
-  cc.has_function('secure_getenv', prefix: '#include <stdlib.h>', args: system_extension_args),
+  cc.has_function('secure_getenv', prefix: '#include <stdlib.h>', args: system_extension_args) ? 1 : false,
 )
 config.set(
   'HAVE_SETRLIMIT',
-  cc.has_function('setrlimit', prefix: '#include <sys/resource.h>', args: system_extension_args),
+  cc.has_function('setrlimit', prefix: '#include <sys/resource.h>', args: system_extension_args) ? 1 : false,
 )
 
 config.set(
@@ -71,7 +80,7 @@ config.set(
   }
   ''',
     name: 'standard C atomics',
-  ),
+  ) ? 1 : false,
 )
 
 config.set(
@@ -86,7 +95,7 @@ config.set(
   }
   ''',
     name: 'realpath',
-  ),
+  ) ? 1 : false,
 )
 
 config.set(
@@ -95,7 +104,7 @@ config.set(
     'int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }',
     werror: true,
     name: '__attribute__((uninitialized))',
-  ),
+  ) ? 1 : false,
 )
 
 have_visibility = false
@@ -114,7 +123,7 @@ endif
 # compiler-specific visibility flags for a CMake-style consistency check.
 config.set('PCRE2_EXPORT', have_visibility ? '__attribute__ ((visibility ("default")))' : '')
 
-config.set('HAVE_BUILTIN_ASSUME', cc.links('int main(void) { __assume(1); return 0; }', name: '__assume'))
+config.set('HAVE_BUILTIN_ASSUME', cc.links('int main(void) { __assume(1); return 0; }', name: '__assume') ? 1 : false)
 
 config.set(
   'HAVE_BUILTIN_MUL_OVERFLOW',
@@ -124,7 +133,7 @@ config.set(
   int main(void) { int a, b; size_t m; __builtin_mul_overflow(a, b, &m); return 0; }
   ''',
     name: '__builtin_mul_overflow',
-  ),
+  ) ? 1 : false,
 )
 
 config.set(
@@ -132,7 +141,7 @@ config.set(
   cc.links(
     'int main(int c, char *v[]) { if (c) __builtin_unreachable(); return (int)(*v[0]); }',
     name: '__builtin_unreachable',
-  ),
+  ) ? 1 : false,
 )
 
 # Detect support for linker scripts.
@@ -201,9 +210,9 @@ if not build_8 and not build_16 and not build_32
   error('At least one PCRE2 code unit width must be enabled.')
 endif
 
-config.set('SUPPORT_PCRE2_8', build_8)
-config.set('SUPPORT_PCRE2_16', build_16)
-config.set('SUPPORT_PCRE2_32', build_32)
+config.set('SUPPORT_PCRE2_8', build_8 ? 1 : false)
+config.set('SUPPORT_PCRE2_16', build_16 ? 1 : false)
+config.set('SUPPORT_PCRE2_32', build_32 ? 1 : false)
 
 if build_grep and not build_8
   error('PCRE2_BUILD_PCRE2_8 must be enabled for pcre2grep')
@@ -214,20 +223,20 @@ if editline_dep.found() and readline_dep.found()
   error('Only one of PCRE2_SUPPORT_LIBREADLINE and PCRE2_SUPPORT_LIBEDIT can be enabled.')
 endif
 
-config.set('BSR_ANYCRLF', get_option('pcre2_support_bsr_anycrlf'))
-config.set('NEVER_BACKSLASH_C', get_option('pcre2_never_backslash_c'))
-config.set('SUPPORT_UNICODE', get_option('pcre2_support_unicode'))
+config.set('BSR_ANYCRLF', get_option('pcre2_support_bsr_anycrlf') ? 1 : false)
+config.set('NEVER_BACKSLASH_C', get_option('pcre2_never_backslash_c') ? 1 : false)
+config.set('SUPPORT_UNICODE', get_option('pcre2_support_unicode') ? 1 : false)
 
-config.set('SUPPORT_JIT', jit_enabled)
+config.set('SUPPORT_JIT', jit_enabled ? 1 : false)
 thread_dep = dependency('threads', required: jit_enabled)
-config.set('SLJIT_PROT_EXECUTABLE_ALLOCATOR', get_option('pcre2_support_jit_sealloc'))
-config.set('SUPPORT_PCRE2GREP_JIT', get_option('pcre2grep_support_jit'))
-config.set('SUPPORT_PCRE2GREP_CALLOUT', get_option('pcre2grep_support_callout'))
+config.set('SLJIT_PROT_EXECUTABLE_ALLOCATOR', get_option('pcre2_support_jit_sealloc') ? 1 : false)
+config.set('SUPPORT_PCRE2GREP_JIT', get_option('pcre2grep_support_jit') ? 1 : false)
+config.set('SUPPORT_PCRE2GREP_CALLOUT', get_option('pcre2grep_support_callout') ? 1 : false)
 config.set(
   'SUPPORT_PCRE2GREP_CALLOUT_FORK',
-  get_option('pcre2grep_support_callout') and get_option('pcre2grep_support_callout_fork'),
+  (get_option('pcre2grep_support_callout') and get_option('pcre2grep_support_callout_fork')) ? 1 : false,
 )
-config.set('SUPPORT_VALGRIND', get_option('pcre2_support_valgrind'))
+config.set('SUPPORT_VALGRIND', get_option('pcre2_support_valgrind') ? 1 : false)
 
 if get_option('pcre2_fuzz_support') and not build_8
   error('Fuzzer support requires PCRE2_BUILD_PCRE2_8.')
@@ -240,27 +249,27 @@ if get_option('pcre2_diff_fuzz_support')
     error('Differential fuzzing requires PCRE2_SUPPORT_JIT.')
   endif
 endif
-config.set('SUPPORT_DIFF_FUZZ', get_option('pcre2_diff_fuzz_support'))
+config.set('SUPPORT_DIFF_FUZZ', get_option('pcre2_diff_fuzz_support') ? 1 : false)
 
-config.set('DISABLE_PERCENT_ZT', get_option('pcre2_disable_percent_zt'))
+config.set('DISABLE_PERCENT_ZT', get_option('pcre2_disable_percent_zt') ? 1 : false)
 
 pcre2test_deps = []
 pcre2grep_deps = []
-config.set('SUPPORT_LIBREADLINE', readline_dep.found())
+config.set('SUPPORT_LIBREADLINE', readline_dep.found() ? 1 : false)
 if readline_dep.found()
   pcre2test_deps += readline_dep
 endif
-config.set('SUPPORT_LIBEDIT', editline_dep.found())
-config.set('HAVE_EDITLINE_READLINE_H', editline_header == 'editline/readline.h')
-config.set('HAVE_EDIT_READLINE_READLINE_H', editline_header == 'edit/readline/readline.h')
+config.set('SUPPORT_LIBEDIT', editline_dep.found() ? 1 : false)
+config.set('HAVE_EDITLINE_READLINE_H', editline_header == 'editline/readline.h' ? 1 : false)
+config.set('HAVE_EDIT_READLINE_READLINE_H', editline_header == 'edit/readline/readline.h' ? 1 : false)
 if editline_dep.found()
   pcre2test_deps += editline_dep
 endif
-config.set('SUPPORT_LIBZ', zlib_dep.found())
+config.set('SUPPORT_LIBZ', zlib_dep.found() ? 1 : false)
 if zlib_dep.found()
   pcre2grep_deps += zlib_dep
 endif
-config.set('SUPPORT_LIBBZ2', bzip2_dep.found())
+config.set('SUPPORT_LIBBZ2', bzip2_dep.found() ? 1 : false)
 if bzip2_dep.found()
   pcre2grep_deps += bzip2_dep
 endif
@@ -270,9 +279,9 @@ config.set('NEWLINE_DEFAULT', newline_values[get_option('pcre2_newline')])
 
 rebuild_chartables = get_option('pcre2_rebuild_chartables')
 ebcdic = get_option('pcre2_ebcdic') or get_option('pcre2_ebcdic_nl25') or get_option('pcre2_ebcdic_ignoring_compiler')
-config.set('EBCDIC', ebcdic)
-config.set('EBCDIC_NL25', get_option('pcre2_ebcdic_nl25'))
-config.set('EBCDIC_IGNORING_COMPILER', get_option('pcre2_ebcdic_ignoring_compiler'))
+config.set('EBCDIC', ebcdic ? 1 : false)
+config.set('EBCDIC_NL25', get_option('pcre2_ebcdic_nl25') ? 1 : false)
+config.set('EBCDIC_IGNORING_COMPILER', get_option('pcre2_ebcdic_ignoring_compiler') ? 1 : false)
 
 if ebcdic
   if not get_option('pcre2_ebcdic_ignoring_compiler')
@@ -454,7 +463,8 @@ foreach width : ['8', '16', '32']
       include_directories: pcre2_includes,
       dependencies: private_deps,
       c_args: width_args + ['-DPCRE2_STATIC'],
-      name_suffix: msvc_like ? 'lib' : [],
+      name_prefix: msvc_like ? '' : meson_default,
+      name_suffix: msvc_like ? 'lib' : meson_default,
       gnu_symbol_visibility: 'hidden',
       install: true,
     )
@@ -534,7 +544,8 @@ if build_8
       include_directories: pcre2_includes,
       dependencies: pcre2_8_static_dep,
       c_args: common_c_args + ['-DPCRE2_CODE_UNIT_WIDTH=8', '-DPCRE2_STATIC'],
-      name_suffix: msvc_like ? 'lib' : [],
+      name_prefix: msvc_like ? '' : meson_default,
+      name_suffix: msvc_like ? 'lib' : meson_default,
       gnu_symbol_visibility: 'hidden',
       install: true,
     )
@@ -750,7 +761,7 @@ if get_option('pcre2_build_tests')
       workdir: meson.project_build_root(),
       timeout: -1,
     )
-    if build_grep and not meson.is_cross_build()
+    if build_grep and not meson.is_cross_build() and not ebcdic
       test(
         'pcre2_grep_test',
         test_runner,
@@ -765,7 +776,6 @@ if get_option('pcre2_build_tests')
         ],
         depends: [pcre2test, pcre2grep],
         workdir: meson.project_build_root(),
-        should_fail: ebcdic,
         timeout: -1,
       )
     endif

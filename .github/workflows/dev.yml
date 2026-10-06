@@ -96,8 +96,8 @@ jobs:
           ./maint/RunManifestTest.ps1 install-dir maint/manifest-install-windows meson
           ./maint/RunSymbolTest.ps1 install-dir/bin maint
 
-      - name: Test Windows manifest filtering
-        if: runner.os == 'Windows'
+      - name: Test manifest filtering
+        if: runner.os != 'Linux'
         run: python maint/meson-tests/check-build.py BuildTests.test_install_manifests
 
       - name: Check Meson static/shared implementation
@@ -380,7 +380,7 @@ jobs:
           echo "set man-db/auto-update false" | debconf-communicate && dpkg-reconfigure man-db
           export DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
           apt-get -qq update
-          apt-get -qq install -y git build-essential cmake zlib1g-dev libbz2-dev libreadline-dev
+          apt-get -qq install -y git build-essential cmake zlib1g-dev libbz2-dev libreadline-dev python3
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

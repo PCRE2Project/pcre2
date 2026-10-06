@@ -320,7 +320,8 @@ wrapper commands for the main harness support whitespace-separated arguments,
 but not quoting or whitespace within individual arguments. If a required wrapper
 is not configured, the main harness is omitted and Meson skips the executable tests.
 The grep tests are omitted for all cross builds because their harness does not
-yet support a simulator. Cross builds that can run directly need no wrapper.
+yet support a simulator. They are also omitted for EBCDIC builds. Cross builds
+that can run directly need no wrapper.
 
 PCRE2's Meson options use lower-case names and can be inspected with
 `meson configure build`. For example, the 16-bit and 32-bit libraries and JIT
@@ -365,13 +366,42 @@ builds, Meson includes these in the ordinary link flags too. The --static option
 does not itself force the linker to select a static library. Build-tree metadata
 is available in meson-uninstalled without installing the libraries.
 
+On Windows, use a Visual Studio developer command prompt for MSVC (or pass
+--vsenv to Meson). Static MSVC libraries are named pcre2-8-static.lib, and shared
+libraries have pcre2-8.dll and pcre2-8.lib; the other widths and POSIX library
+follow the same convention. Debug builds append "d" before the extension;
+debugoptimized builds do not. DLLs and programs install to bindir, while static
+and import libraries install to libdir. Installed programs find their DLLs in
+the same directory; other consumers must put bindir on PATH or deploy the DLLs
+beside their executable.
+
+For MSVC consumers, pkg-config --msvc-syntax provides compiler and linker flags.
+A static-only installation supplies PCRE2_STATIC and the -static library names.
+When both variants are installed, the .pc files describe the shared variant,
+even with --static: that switch neither substitutes the MSVC archive names nor
+changes the Windows import/export definitions. Use a static-only installation,
+an explicit Meson subproject dependency with static: true, or manually select
+the -static libraries and define PCRE2_STATIC (without PCRE2POSIX_SHARED).
+
+Meson installs generated program and DLL PDBs alongside their binaries in
+debug and debugoptimized builds by default. Unlike CMake's INSTALL_MSVC_PDB
+option, this follows Meson's native policy; -Dstrip=true omits installed PDBs.
+Static libraries embed their debug information and do not install separate PDBs.
+Meson does not implement CMake's legacy MinGW NON_STANDARD_LIB_PREFIX and
+NON_STANDARD_LIB_SUFFIX switches; MinGW targets use Meson's native names.
+The installed pcre2-config script requires a Unix shell; native MSVC consumers
+should use pkg-config or Meson subproject dependencies instead.
+
 Meson's project and subproject dependency versions include any -DEV or -RC
 suffix. pkg-config versions use ~DEV or ~RC instead, so prereleases sort before
 the final release. As in CMake, pcre2-config --version reports just MAJOR.MINOR.
 
-Installed shared-library permissions and ELF symlink layouts follow each build
-system's native conventions. These differences are intentional; packagers may
-normalize them if their distribution requires it.
+Installed shared-library permissions and symlink layouts follow each build
+system's native conventions. On macOS, Meson installs libpcre2-8.0.dylib as the
+real library with libpcre2-8.dylib linking to it; the other widths and POSIX
+library follow the same convention. The full current and compatibility
+versions are recorded in the Mach-O metadata, not the filename. These
+differences are intentional; packagers may normalize them if required.
 
 As with CMake, configuration removes src/config.h and src/pcre2.h left by an
 in-source Autotools build, so that they cannot override the generated headers.

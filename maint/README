@@ -105,11 +105,27 @@ meson-tests
   Run `python3 maint/meson-tests/check-build.py` for release-version updates,
   stale-header cleanup, clean-tree test dependencies, harness executable paths,
   cross-build wrappers, configuration-probe and validation parity with CMake,
+  exact configuration-header values (including undefined disabled features),
   symbol visibility without version scripts, optional dependency discovery,
   installed package contracts, and install-manifest filtering. The pkg-config
   checks cover native thread dependencies, installed/uninstalled static and
   shared consumers, and development/RC/final version ordering from all three
   build systems.
+
+  `BuildTests.test_configuration_header_values` compares Meson and CMake headers
+  against the macro contracts in src/config.h.generic, covering defaults,
+  enabled/disabled features, EBCDIC, numeric zero, and unevaluated expressions.
+
+  From an MSVC developer command prompt with Meson, Ninja, pkg-config (or
+  pkgconf), CMake and PowerShell on PATH, run:
+    python maint/meson-tests/check-build.py -v BuildTests.test_msvc_install_matrix BuildTests.test_msvc_install_layout
+  These check all nine static/shared/both and debug/release/debugoptimized
+  combinations, all code-unit widths, JIT and the main test suites, installed
+  and relocated consumers, DLL exports, manifests, PDB policy, custom install
+  directories, and installation-layout parity with CMake. The dual-build
+  pkg-config checks intentionally verify shared linkage even with --static.
+  check-library-options.py also runs on Windows; it tests native subproject
+  propagation and both default linkage choices without requiring symlinks.
 
   The Meson portability helpers are named after their counterparts in cmake/.
   Keep the order and meaning of their checks in sync, including the negative
@@ -175,6 +191,9 @@ RunManifestTest.ps1
   the equivalent links via the SONAME. Shared-library permissions are adjusted
   for Autoconf and Meson, which install executable .so files. These native
   permission and symlink differences are intentional, not installation bugs.
+  On macOS, Meson installs the major-version dylib as a regular file with an
+  unversioned symlink, rather than the full-version dylib and two symlinks in
+  the shared manifest. Only Meson's expected listing is adjusted for this.
 
 RunSymbolTest
 RunSymbolTest.ps1

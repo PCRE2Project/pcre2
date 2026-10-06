@@ -53,6 +53,7 @@ cmake_files=''
 libtool_files=''
 symlink_targets=''
 library_permissions=''
+darwin_libraries=''
 if [ "$producer" != "cmake" ]; then
   cmake_files='/\/lib\/cmake(\/pcre2)?$/d; /\/lib\/cmake\/pcre2\/pcre2-(config(-version)?|targets(-release)?)\.cmake$/d'
   library_permissions='/\/libpcre2-(8|16|32|posix)\.so(\.[0-9]+)+$/s/^-rw-r--r-- /-rwxr-xr-x /'
@@ -61,12 +62,18 @@ if [ "$producer" != "autoconf" ]; then
   libtool_files='/\/lib\/libpcre2-(8|16|32|posix)\.la$/d'
   symlink_targets='/\/libpcre2-(8|16|32|posix)\.so -> /s/(\.so\.[0-9]+)\.[0-9]+\.[0-9]+$/\1/'
 fi
+if [ "$producer" = "meson" ]; then
+  # Meson installs the major-version dylib directly, not a full-version file
+  # with an additional major-version symlink.
+  darwin_libraries='/^l[^ ]* .*\/libpcre2-(8|16|32|posix)\.[0-9]+\.dylib -> /d; /^-[^ ]* .*\/libpcre2-(8|16|32|posix)\.[0-9]+\.[0-9]+\.[0-9]+\.dylib$/s/(\.[0-9]+)\.[0-9]+\.[0-9]+\.dylib$/\1.dylib/'
+fi
 
 $sed -E \
   -e "$cmake_files" \
   -e "$libtool_files" \
   -e "$symlink_targets" \
   -e "$library_permissions" \
+  -e "$darwin_libraries" \
   -e "s/pcre2-targets-release\.cmake/pcre2-targets-$build_type.cmake/" \
   "$expected_manifest" > "$expected_file"
 
