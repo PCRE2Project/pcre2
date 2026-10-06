@@ -2109,4 +2109,4 @@ SEE ALSO
        Copyright © 1997-2024 University of Cambridge.
 
 
-PCRE2 10.49-DEV                 22 August 2026                    PCRE2TEST(1)
+PCRE2 10.50-DEV                 22 August 2026                    PCRE2TEST(1)

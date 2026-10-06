@@ -43,6 +43,12 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* Assertion macros */
 
+/* Helper macro for static (compile-time) assertions. Can be used inside
+functions, or at the top-level of a file. */
+#define STATIC_ASSERT_JOIN(a, b) a##b
+#define STATIC_ASSERT(cond, msg) \
+  typedef int STATIC_ASSERT_JOIN(static_assertion_, msg)[(cond) ? 1 : -1]
+
 #ifdef PCRE2_DEBUG
 
 #if defined(HAVE_ASSERT_H) && !defined(NDEBUG)
@@ -178,6 +184,37 @@ This macro should be used with no following semicolon, and ideally with a commen
 
 #ifndef PCRE2_FALLTHROUGH
 #define PCRE2_FALLTHROUGH
+#endif
+
+/* This macro can be used as an attribute to custom printf-like
+functions. By using it, the compiler will check that the format string
+and the parameters passed to the function are actually compatible. */
+
+#ifndef PCRE2_FORMAT_PRINTF
+#if (defined(__GNUC__) || defined(__clang__)) && defined(__has_attribute)
+#if __has_attribute(format)
+
+/* On Windows, the printf dialect varies according to the MSVCRT version
+being targetted, which is wretched, and MinGW provides its own macro for this. */
+#ifdef __MINGW32__
+#include <stdio.h>
+#ifdef __MINGW_PRINTF_FORMAT
+#define PCRE2_FORMAT_PRINTF(fmt_idx, arg_idx) \
+    __attribute__((format(__MINGW_PRINTF_FORMAT, fmt_idx, arg_idx)))
+#endif
+#endif /* __MINGW32__ */
+
+#ifndef PCRE2_FORMAT_PRINTF
+#define PCRE2_FORMAT_PRINTF(fmt_idx, arg_idx) \
+    __attribute__((format(printf, fmt_idx, arg_idx)))
+#endif
+
+#endif /* __has_attribute(format) */
+#endif /* (__GNUC__ || __clang__) && __has_attribute */
+#endif /* !PCRE2_FORMAT_PRINTF */
+
+#ifndef PCRE2_FORMAT_PRINTF
+#define PCRE2_FORMAT_PRINTF(fmt_idx, arg_idx)
 #endif
 
 #endif /* PCRE2_UTIL_H_IDEMPOTENT_GUARD */

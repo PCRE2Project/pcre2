@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#! /usr/bin/env python3
 
 # Run pcre2grep tests. The assumption is that the PCRE2 tests check the library
 # itself. What we are checking here is the file handling and options that are
@@ -1294,23 +1294,30 @@ if supports("callout scripts in patterns are supported"):
     print("Testing pcre2grep script callouts")
 
     # On Windows, we don't have a convenient echo binary, so it's built into
-    # pcre2test for convenience.
-    callout_echo = "/bin/echo" if os.name != "nt" else f"{pcre2test}|-echo"
+    # pcre2test for convenience. Elsewhere pcre2grep runs the script with
+    # execv(), which does not search PATH, so it must be an absolute path.
+    # /bin/echo is not present everywhere (NixOS, for example, keeps only
+    # /bin/sh there), so use the first echo in an absolute PATH directory.
+    if os.name == "nt":
+        echo_prog = f"{pcre2test}|-echo"
+    else:
+        absolute_path = os.pathsep.join(d for d in os.environ.get("PATH", "").split(os.pathsep) if os.path.isabs(d))
+        echo_prog = shutil.which("echo", path=absolute_path) or "/bin/echo"
 
     write_test_output(b"--- Test 1 ---\n", append=False)
     output([
-        *pcre2grep_args, f'(T)(..(.))(?C"{callout_echo}|Arg1: [$1] [$2] [$3]|Arg2: $|${{1}}$| ($4) ($14) ($0)")()',
+        *pcre2grep_args, f'(T)(..(.))(?C"{echo_prog}|Arg1: [$1] [$2] [$3]|Arg2: $|${{1}}$| ($4) ($14) ($0)")()',
         srcdir / "testdata" / "grepinputv"
     ])
     write_test_output(b"--- Test 2 ---\n")
     output([
-        *pcre2grep_args, f'(T)(..(.))()()()()()()()(..)(?C"{callout_echo}|Arg1: [$11] [${{11}}]")',
+        *pcre2grep_args, f'(T)(..(.))()()()()()()()(..)(?C"{echo_prog}|Arg1: [$11] [${{11}}]")',
         srcdir / "testdata" / "grepinputv"
     ])
     write_test_output(b"--- Test 3 ---\n")
     output([*pcre2grep_args, '(T)(?C"|$0:$1$n")', srcdir / "testdata" / "grepinputv"])
     write_test_output(b"--- Test 4 ---\n")
-    output([*pcre2grep_args, f'(T)(?C"{callout_echo}|$0:$1$n")', srcdir / "testdata" / "grepinputv"])
+    output([*pcre2grep_args, f'(T)(?C"{echo_prog}|$0:$1$n")', srcdir / "testdata" / "grepinputv"])
     write_test_output(b"--- Test 5 ---\n")
     output([*pcre2grep_args, '(T)(?C"|$1$n")(*F)', srcdir / "testdata" / "grepinputv"])
     write_test_output(b"--- Test 6 ---\n")
@@ -1324,7 +1331,7 @@ if supports("callout scripts in patterns are supported"):
         write_test_output(b"--- Test 1 ---\n", append=False)
         output([*pcre2grep_args, "-u", '(T)(?C"|$0:$x{a6}$n")', srcdir / "testdata" / "grepinputv"])
         write_test_output(b"--- Test 2 ---\n")
-        output([*pcre2grep_args, "-u", f'(T)(?C"{callout_echo}|$0:$x{{a6}}$n")', srcdir / "testdata" / "grepinputv"])
+        output([*pcre2grep_args, "-u", f'(T)(?C"{echo_prog}|$0:$x{{a6}}$n")', srcdir / "testdata" / "grepinputv"])
         if not compare(srcdir / "testdata" /
                        ("grepoutputCNU" if supports_nonfork_callouts else "grepoutputCU"), "testtrygrep"):
             sys.exit(1)

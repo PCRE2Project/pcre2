@@ -2,12 +2,12 @@
 .\"     Title: pcre2demo
 .\"    Author: [see the "AUTHOR(S)" section]
 .\" Generator: Asciidoctor 2.0.26
-.\"      Date: 14 September 2026
+.\"      Date: 03 October 2026
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2DEMO" "3" "14 September 2026" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2DEMO" "3" "03 October 2026" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -107,29 +107,6 @@ need to be modified. */
 \fBint\fP
 main(\fBint\fP argc, \fBchar\fP **argv)
 {
-  \fBpcre2_code\fP *re;
-  /* PCRE2_SPTR is a pointer to unsigned code units of the appropriate width
-  (in this case, 8 bits). */
-  \fBPCRE2_SPTR\fP pattern;
-  \fBPCRE2_SPTR\fP subject;
-  \fBPCRE2_SPTR\fP name_table;
-
-  \fBint\fP errornumber;
-  \fBint\fP find_all, caseless_match;
-  \fBint\fP i;
-  \fBint\fP rc;
-
-  \fBuint32_t\fP namecount;
-  \fBuint32_t\fP name_entry_size;
-
-  \fBPCRE2_SIZE\fP erroroffset;
-  \fBPCRE2_SIZE\fP *ovector;
-  \fBPCRE2_SIZE\fP ovector_last[2];
-  \fBPCRE2_SIZE\fP subject_length;
-
-  \fBpcre2_match_data\fP *match_data;
-
-
   /*************************************************************************
   * First, sort out the command line. Options:\&                             *
   * \- "\-g" to request repeated matching to find all occurrences,\&           *
@@ -140,21 +117,22 @@ main(\fBint\fP argc, \fBchar\fP **argv)
   *\&   present.\&                                                             *
   *************************************************************************/
 
-  find_all = 0;
-  caseless_match = 0;
-  \fBfor\fP (i = 1; i < argc; i++)
+  \fBint\fP find_all = 0;
+  \fBint\fP caseless_match = 0;
+  \fBint\fP argi;
+  \fBfor\fP (argi = 1; argi < argc; argi++)
   {
-    \fBif\fP (strcmp(argv[i], "\-g") == 0)
+    \fBif\fP (strcmp(argv[argi], "\-g") == 0)
     {
       find_all = 1;
     }
-    \fBelse\fP \fBif\fP (strcmp(argv[i], "\-i") == 0)
+    \fBelse\fP \fBif\fP (strcmp(argv[argi], "\-i") == 0)
     {
       caseless_match = \fBPCRE2_CASELESS\fP;
     }
-    \fBelse\fP \fBif\fP (argv[i][0] == \*(Aq\-\*(Aq)
+    \fBelse\fP \fBif\fP (argv[argi][0] == \*(Aq\-\*(Aq)
     {
-      printf("Unrecognised option %s\(rsn", argv[i]);
+      printf("Unrecognised option %s\(rsn", argv[argi]);
       \fBreturn\fP 1;
     }
     \fBelse\fP
@@ -166,7 +144,7 @@ main(\fBint\fP argc, \fBchar\fP **argv)
   /* After the options, we require exactly two arguments, which are the
   pattern, and the subject string. */
 
-  \fBif\fP (argc \- i != 2)
+  \fBif\fP (argc \- argi != 2)
   {
     printf("Exactly two arguments required: a regex and a subject string\(rsn");
     \fBreturn\fP 1;
@@ -175,11 +153,12 @@ main(\fBint\fP argc, \fBchar\fP **argv)
   /* Pattern and subject are char arguments, so they can be straightforwardly
   cast to PCRE2_SPTR because we are working in 8\-bit code units. The subject
   length is cast to PCRE2_SIZE for completeness, though PCRE2_SIZE is in fact
-  defined to be size_t. */
+  defined to be size_t. PCRE2_SPTR is a pointer to unsigned code units of the
+  appropriate width (in this case, 8 bits).*/
 
-  pattern = (\fBPCRE2_SPTR\fP)argv[i];
-  subject = (\fBPCRE2_SPTR\fP)argv[i + 1];
-  subject_length = (\fBPCRE2_SIZE\fP)strlen((\fBchar\fP *)subject);
+  \fBPCRE2_SPTR\fP pattern = (\fBPCRE2_SPTR\fP)argv[argi];
+  \fBPCRE2_SPTR\fP subject = (\fBPCRE2_SPTR\fP)argv[argi + 1];
+  \fBPCRE2_SIZE\fP subject_length = (\fBPCRE2_SIZE\fP)strlen((\fBchar\fP *)subject);
 
 
   /*************************************************************************
@@ -187,12 +166,15 @@ main(\fBint\fP argc, \fBchar\fP **argv)
   * any errors that are detected.\&                                          *
   *************************************************************************/
 
-  re = pcre2_compile(pattern,\&               // the pattern
-                     \fBPCRE2_ZERO_TERMINATED\fP, // the pattern is null\-terminated
-                     caseless_match,\&        // possibly enable caseless
-                     &errornumber,\&          // for error number
-                     &erroroffset,\&          // for error offset
-                     \fBNULL\fP);\&                 // use default compile context
+  \fBint\fP errornumber;
+  \fBPCRE2_SIZE\fP erroroffset;
+  \fBpcre2_code\fP *re =
+      pcre2_compile(pattern,\&               // the pattern
+                    \fBPCRE2_ZERO_TERMINATED\fP, // the pattern is null\-terminated
+                    caseless_match,\&        // possibly enable caseless
+                    &errornumber,\&          // for error number
+                    &erroroffset,\&          // for error offset
+                    \fBNULL\fP);\&                 // use default compile context
 
   /* Compilation failed: print the error message and exit. */
 
@@ -219,17 +201,18 @@ main(\fBint\fP argc, \fBchar\fP **argv)
   * PCRE2_SIZE match_data_size = pcre2_get_match_data_size(match_data);\&    *
   *************************************************************************/
 
-  match_data = pcre2_match_data_create_from_pattern(re, \fBNULL\fP);
+  \fBpcre2_match_data\fP *match_data =
+      pcre2_match_data_create_from_pattern(re, \fBNULL\fP);
 
   /* Now run the match. */
 
-  rc = pcre2_match(re,\&             // the compiled pattern
-                   subject,\&        // the subject string
-                   subject_length, // the length of the subject
-                   0,\&              // start at offset 0 in the subject
-                   0,\&              // default options
-                   match_data,\&     // block for storing the result
-                   \fBNULL\fP);\&          // use default match context
+  \fBint\fP rc = pcre2_match(re,\&             // the compiled pattern
+                       subject,\&        // the subject string
+                       subject_length, // the length of the subject
+                       0,\&              // start at offset 0 in the subject
+                       0,\&              // default options
+                       match_data,\&     // block for storing the result
+                       \fBNULL\fP);\&          // use default match context
 
   /* Matching failed: handle error cases */
 
@@ -256,7 +239,7 @@ main(\fBint\fP argc, \fBchar\fP **argv)
   /* Match succeeded. Get a pointer to the output vector, where string offsets
   are stored. */
 
-  ovector = pcre2_get_ovector_pointer(match_data);
+  \fBPCRE2_SIZE\fP *ovector = pcre2_get_ovector_pointer(match_data);
   printf("Match succeeded at offset %d\(rsn", (\fBint\fP)ovector[0]);
 
 
@@ -295,7 +278,7 @@ main(\fBint\fP argc, \fBchar\fP **argv)
   /* Show substrings stored in the output vector by number. Obviously, in a
   real application you might want to do things other than print them. */
 
-  \fBfor\fP (i = 0; i < rc; i++)
+  \fBfor\fP (\fBint\fP i = 0; i < rc; i++)
   {
     \fBPCRE2_SPTR\fP substring_start = subject + ovector[2 * i];
     \fBPCRE2_SIZE\fP substring_length = ovector[2 * i + 1] \- ovector[2 * i];
@@ -313,6 +296,9 @@ main(\fBint\fP argc, \fBchar\fP **argv)
   /* See if there are any named substrings, and if so, show them by name.
   First we have to extract the count of named parentheses from the pattern. */
 
+  \fBuint32_t\fP namecount;
+  \fBPCRE2_SPTR\fP name_table;
+  \fBuint32_t\fP name_entry_size;
   (\fBvoid\fP)pcre2_pattern_info(
       re,\&                   // the compiled pattern
       \fBPCRE2_INFO_NAMECOUNT\fP, // get the number of named substrings
@@ -324,7 +310,6 @@ main(\fBint\fP argc, \fBchar\fP **argv)
   }
   \fBelse\fP
   {
-    \fBPCRE2_SPTR\fP tabptr;
     printf("Named substrings\(rsn");
 
     /* Before we can access the substrings, we must extract the table for
@@ -343,8 +328,8 @@ main(\fBint\fP argc, \fBchar\fP **argv)
     name, and the substring itself. In the 8\-bit library the number is held in
     two bytes, most significant first. */
 
-    tabptr = name_table;
-    \fBfor\fP (i = 0; i < namecount; i++)
+    \fBPCRE2_SPTR\fP tabptr = name_table;
+    \fBfor\fP (\fBuint32_t\fP i = 0; i < namecount; i++)
     {
       \fBint\fP n = (tabptr[0] << 8) | tabptr[1];
       printf("(%d) %*s: %.*s\(rsn", n, name_entry_size \- 3, tabptr + 2,
@@ -374,6 +359,7 @@ main(\fBint\fP argc, \fBchar\fP **argv)
 
   /* Loop for second and subsequent matches */
 
+  \fBPCRE2_SIZE\fP ovector_last[2];
   ovector_last[0] = ovector[0];
   ovector_last[1] = ovector[1];
 
@@ -472,7 +458,7 @@ main(\fBint\fP argc, \fBchar\fP **argv)
     /* As before, show substrings stored in the output vector by number, and
     then also any named substrings. */
 
-    \fBfor\fP (i = 0; i < rc; i++)
+    \fBfor\fP (\fBint\fP i = 0; i < rc; i++)
     {
       \fBPCRE2_SPTR\fP substring_start = subject + ovector[2 * i];
       \fBsize_t\fP substring_length = ovector[2 * i + 1] \- ovector[2 * i];
@@ -488,7 +474,7 @@ main(\fBint\fP argc, \fBchar\fP **argv)
     {
       \fBPCRE2_SPTR\fP tabptr = name_table;
       printf("Named substrings\(rsn");
-      \fBfor\fP (i = 0; i < namecount; i++)
+      \fBfor\fP (\fBuint32_t\fP i = 0; i < namecount; i++)
       {
         \fBint\fP n = (tabptr[0] << 8) | tabptr[1];
         printf("(%d) %*s: %.*s\(rsn", n, name_entry_size \- 3, tabptr + 2,

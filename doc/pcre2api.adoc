@@ -5,7 +5,7 @@
 :description: PCRE2's native API
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 08 December 2025
 :revdate: 08 December 2025
 :toc: right
@@ -69,6 +69,9 @@ uint32_t pcre2_get_ovector_count(pcre2_match_data *match_data);
 PCRE2_SIZE *pcre2_get_ovector_pointer(pcre2_match_data *match_data);
 
 PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *match_data);
+
+PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data,
+                             PCRE2_SIZE *lengthptr);
 ----
 
 == PCRE2 native API general context functions
@@ -98,7 +101,7 @@ pcre2_compile_context *pcre2_compile_context_copy(
 
 void pcre2_compile_context_free(pcre2_compile_context *ccontext);
 
-int pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *length);
+int pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *value);
 
 int pcre2_get_max_pattern_length(pcre2_compile_context *ccontext,
                                  PCRE2_SIZE *length);
@@ -704,10 +707,14 @@ reasonable size, and at the same time to keep the API extensible, "uncommon"
 parameters are passed to certain functions in a "context" instead of
 directly. A context is just a block of memory that holds the parameter values.
 Applications that do not need to adjust any of the context parameters can pass
-const:NULL when a context pointer is required.
+const:NULL to operations that accept a context to select their defaults. The
+context setter and getter functions require a non-const:NULL context.
+Getter output pointers must also be non-const:NULL.
 
-There are three different types of context: a general context that is relevant
-for several PCRE2 operations, a compile-time context, and a match-time context.
+The main API uses a general context that is relevant for several PCRE2
+operations, a compile-time context, and a match-time context. The experimental
+pattern conversion API also has a conversion context, described in
+xref:pcre2convert.adoc[`pcre2convert`].
 
 === The general context
 
@@ -798,16 +805,18 @@ void pcre2_compile_context_free(pcre2_compile_context *ccontext);
 
 A compile context is created with default values for its parameters. These can
 be changed by calling the following functions, which return 0 on success, or
-const:PCRE2_ERROR_BADDATA if invalid data is detected.
+const:PCRE2_ERROR_BADDATA if invalid data is detected. The function
+func:pcre2_set_optimize() returns const:PCRE2_ERROR_BADOPTION for an invalid
+arg:directive argument.
 
 The following functions get, respectively, the convention for processing [.regex]`\R`,
 the maximum pattern length, the newline convention, and the maximum depth of
-nested parentheses. They return 0 on success or const:PCRE2_ERROR_NULL if either
-argument is const:NULL.
+nested parentheses. They return 0 and require both arguments to be
+non-const:NULL.
 
 [source,c,role=prototype]
 ----
-int pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *length);
+int pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *value);
 
 int pcre2_get_max_pattern_length(pcre2_compile_context *ccontext,
                                  PCRE2_SIZE *length);
@@ -840,9 +849,11 @@ int pcre2_set_character_tables(pcre2_compile_context *ccontext,
                                const uint8_t *tables);
 ----
 
-The value must be the result of a call to func:pcre2_maketables(), whose only
-argument is a general context. This function builds a set of character tables
-in the current locale.
+The value may be const:NULL to select the default tables; the result of
+func:pcre2_maketables(); or another valid set of PCRE2 character tables.
+The func:pcre2_maketables() function takes a general context and builds tables
+in the current locale. Supplied tables must remain valid while the context or
+patterns compiled with them are in use.
 
 [source,c,role=prototype]
 ----
@@ -883,6 +894,11 @@ more memory, an error is generated. This facility is provided so that
 applications that accept patterns from external sources can limit the amount of
 memory they use. The default is the largest number that a type:PCRE2_SIZE variable
 can hold, which is effectively unlimited.
+
+This limit excludes the fixed, platform-dependent compiled-pattern header.
+Therefore, const:PCRE2_INFO_SIZE can report a larger total allocation. This limit
+does not restrict temporary compilation workspace, JIT code, or separate character
+tables.
 
 [source,c,role=prototype]
 ----
@@ -1095,8 +1111,8 @@ be changed by calling the following functions, which return 0 on success, or
 const:PCRE2_ERROR_BADDATA if invalid data is detected.
 
 The following functions get, respectively, the backtracking heap limit, match
-limit, depth limit, and offset limit. They return 0 on success or
-const:PCRE2_ERROR_NULL if either argument is const:NULL.
+limit, depth limit, and offset limit. They return 0 and require both arguments
+to be non-const:NULL.
 
 [source,c,role=prototype]
 ----
@@ -1341,7 +1357,7 @@ is placed. If const:NULL is passed, the function returns the amount of memory th
 needed for the requested information. For calls that return numerical values,
 the value is in bytes; when requesting these values, arg:where should point
 to appropriately aligned memory. For calls that return strings, the required
-length is given in code units, not counting the terminating zero.
+length is given in code units, including the terminating zero.
 
 When requesting information, the returned value from func:pcre2_config() is
 non-negative on success, or the negative error code const:PCRE2_ERROR_BADOPTION if
@@ -1461,7 +1477,7 @@ const:PCRE2_CONFIG_STACKRECURSE::
 const:PCRE2_CONFIG_TABLES_LENGTH::
       The output is a type:uint32_t integer that gives the length of PCRE2's character
       processing tables in bytes. For details of these tables see the
-      section on locale support
+      section <<locale-support>>
       below.
 
 const:PCRE2_CONFIG_UNICODE_VERSION::
@@ -1489,6 +1505,7 @@ const:PCRE2_CONFIG_VERSION::
       code units used is returned. This is the length of the string plus one unit for
       the terminating zero.
 
+[[compiling-a-pattern]]
 == Compiling a pattern
 
 [source,c,role=prototype]
@@ -2068,8 +2085,8 @@ This option has two effects. Firstly, it change the way PCRE2 processes [.regex]
 default, only ASCII characters are recognized, but if const:PCRE2_UCP is set, Unicode
 properties are used to classify characters. There are some PCRE2_EXTRA
 options (see below) that add finer control to this behaviour. More details are
-given in the section on
-generic character types
+given in the section
+xref:pcre2pattern.adoc#generic-character-types[Generic character types]
 in the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 page.
@@ -2318,6 +2335,7 @@ patterns to be analyzed, and for one-off matches and simple patterns the
 benefit of faster execution might be offset by a much slower compilation time.
 Most (but not all) patterns can be optimized by the JIT compiler.
 
+[[locale-support]]
 == Locale support
 
 [source,c,role=prototype]
@@ -2487,7 +2505,7 @@ the first significant item in every top-level branch is one of the following:
 [.regex]`+^+`  ::: unless const:PCRE2_MULTILINE is set
 [.regex]`\A`   ::: always
 [.regex]`\G`   ::: always
-[.regex]`+.*+` ::: sometimes -- see below
+[.regex]`+.*+` ::: sometimes --- see below
 --
 
 +
@@ -2700,7 +2718,7 @@ const:PCRE2_INFO_NAMETABLE returns a pointer to the first entry of the table. Th
 +
 The names are in alphabetical order. If [.regex]`+(?|+` is used to create multiple capture
 groups with the same number, as described in the
-section on duplicate group numbers
+section xref:pcre2pattern.adoc#duplicate-group-numbers[Duplicate group numbers]
 in the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 page, the groups may be given the same name, but there is only one entry in the
@@ -2716,7 +2734,7 @@ later capture groups may have lower numbers.
 +
 As a simple example of the name/number table, consider the following pattern
 after compilation by the 8-bit library (assume const:PCRE2_EXTENDED is set, so white
-space -- including newlines -- is ignored):
+space --- including newlines --- is ignored):
 
 +
 [source,regex]
@@ -2862,10 +2880,10 @@ same allocator that was used for the compiled pattern (custom or default).
 
 A match data block can be used many times, with the same or different compiled
 patterns. You can extract information from a match data block after a match
-operation has finished, using functions that are described in the sections on
-matched strings
+operation has finished, using functions that are described in the sections
+<<matched-strings>>
 and
-other match data
+<<other-match-information>>
 below.
 
 When a call of func:pcre2_match() fails, valid data is available in the match
@@ -3236,6 +3254,7 @@ does [.regex]`\s`, even though it includes CR and LF in the characters that it m
 Notwithstanding the above, anomalous effects may still occur when CRLF is a
 valid newline sequence and explicit [.regex]`\r` or [.regex]`\n` escapes appear in the pattern.
 
+[[matched-strings]]
 == How func:pcre2_match() returns a string and captured substrings
 
 [source,c,role=prototype]
@@ -3331,12 +3350,30 @@ had. After a failed match attempt, the contents of the ovector are unchanged.
 PCRE2_SPTR pcre2_get_mark(pcre2_match_data *match_data);
 
 PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *match_data);
+
+PCRE2_SPTR pcre2_get_subject(pcre2_match_data *match_data,
+                             PCRE2_SIZE *lengthptr);
 ----
 
 As well as the offsets in the ovector, other information about a match is
 retained in the match data block and can be retrieved by the above functions in
 appropriate circumstances. If they are called at other times, the result is
 undefined.
+
+After a successful match, a partial match (const:PCRE2_ERROR_PARTIAL), or a
+failure to match (const:PCRE2_ERROR_NOMATCH), func:pcre2_get_subject() returns
+the subject pointer that was passed to the matching function. For a successful
+match with const:PCRE2_COPY_MATCHED_SUBJECT, it returns a pointer to a copy of
+the subject that is owned by the match data block instead (except for
+func:pcre2_jit_match() which ignores const:PCRE2_COPY_MATCHED_SUBJECT). The copy
+is exactly the same length as the subject that was passed to the matching
+function and is additionally zero-terminated. The copy is freed when the match
+data block is reused for another match or is freed. If there is any match error
+other than const:PCRE2_ERROR_NOMATCH or const:PCRE2_ERROR_PARTIAL,
+func:pcre2_get_subject() may return const:NULL. If the arg:lengthptr argument
+is not const:NULL, it receives the length in code units of the string which is
+returned, excluding the terminating zero (the subject string may contain
+embedded NUL characters).
 
 After a successful match, a partial match (const:PCRE2_ERROR_PARTIAL), or a failure
 to match (const:PCRE2_ERROR_NOMATCH), a mark name may be available. The function
@@ -3495,14 +3532,22 @@ auxiliary) can be obtained by calling func:pcre2_get_error_message(). The code
 is passed as the first argument, with the remaining two arguments specifying a
 code unit buffer and its length in code units, into which the text message is
 placed. The message is returned in code units of the appropriate width for the
-library that is being used.
+library that is being used. An error code of zero is also recognized.
 
 The returned message is terminated with a trailing zero, and the function
 returns the number of code units used, excluding the trailing zero. If the
 error number is unknown, the negative error code const:PCRE2_ERROR_BADDATA is
-returned. If the buffer is too small, the message is truncated (but still with
-a trailing zero), and the negative error code const:PCRE2_ERROR_NOMEMORY is returned.
+returned without changing the buffer, even when arg:bufflen is zero.
+If the buffer is too small, the message is truncated (but still with
+a trailing zero, assuming arg:bufflen is not zero), and the negative error code
+const:PCRE2_ERROR_NOMEMORY is returned.
+With a recognized code and zero capacity, no output is written. The buffer
+pointer may be const:NULL only when its capacity is zero.
 None of the messages is very long; a buffer size of 120 code units is ample.
+
+No arithmetic (including unary negation) should ever be performed on error codes
+by clients. For any PCRE2 function that returns error codes, that code should be
+handled as-is.
 
 [[iterating-over-matches]]
 == Iterating over all matches
@@ -3786,7 +3831,7 @@ set, const:PCRE2_ERROR_UNSET is returned.
 ====
 If the pattern uses the [.regex]`+(?|+` feature to set up multiple
 capture groups with the same number, as described in the
-section on duplicate group numbers
+section xref:pcre2pattern.adoc#duplicate-group-numbers[Duplicate group numbers]
 in the
 xref:pcre2pattern.adoc[`pcre2pattern`]
 page, you cannot use names to distinguish the different capture groups, because
@@ -4134,11 +4179,18 @@ const:PCRE2_ERROR_NOMEMORY::
       default.
 
 const:PCRE2_ERROR_NULL::
-      is returned if const:PCRE2_SUBSTITUTE_MATCHED is set but the
-      arg:match_data argument is const:NULL; or if the arg:subject or arg:replacement
-      or arg:buffer argument is const:NULL. However, a const:NULL arg:replacement
-      argument is allowed if the arg:rlength argument is zero; and similarly for
-      arg:subject with zero arg:length and arg:buffer with zero arg:blength.
+      is returned if arg:code or arg:blength is const:NULL; or if
+      const:PCRE2_SUBSTITUTE_MATCHED is set but the arg:match_data argument is
+      const:NULL; or if the arg:subject or arg:replacement or arg:buffer
+      argument is const:NULL. However, a const:NULL arg:replacement argument is
+      allowed if the arg:rlength argument is zero; and similarly for arg:subject
+      with zero arg:length and arg:buffer with zero arg:blength.
+
+const:PCRE2_ERROR_BADMAGIC::
+      the magic number in the compiled code was not recognized.
+
+const:PCRE2_ERROR_BADMODE::
+      the pattern was compiled for a different code unit width.
 
 const:PCRE2_ERROR_BADREPLACEMENT::
       is used for miscellaneous syntax errors in the

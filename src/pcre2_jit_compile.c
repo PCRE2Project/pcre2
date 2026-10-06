@@ -15006,11 +15006,12 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
 
   OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL1, STR_PTR, 0);
   OP1(SLJIT_MOV, SLJIT_R0, 0, ARGUMENTS, 0);
-  OP2(SLJIT_SUB, SLJIT_R1, 0, STACK_LIMIT, 0, SLJIT_IMM, STACK_GROWTH_RATE);
-  OP1(SLJIT_MOV, SLJIT_R0, 0, SLJIT_MEM1(SLJIT_R0), SLJIT_OFFSETOF(jit_arguments, stack));
   OP1(SLJIT_MOV, STACK_LIMIT, 0, TMP2, 0);
+  OP1(SLJIT_MOV, SLJIT_R1, 0, STACK_TOP, 0);
+  OP1(SLJIT_MOV, SLJIT_R2, 0, SLJIT_IMM, STACK_GROWTH_RATE);
+  OP1(SLJIT_MOV, SLJIT_R0, 0, SLJIT_MEM1(SLJIT_R0), SLJIT_OFFSETOF(jit_arguments, stack));
 
-  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS2(W, W, W), SLJIT_IMM,
+  sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS3(W, W, W, W), SLJIT_IMM,
                    SLJIT_FUNC_ADDR(sljit_stack_resize));
 
   jump = CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
@@ -15263,6 +15264,12 @@ pcre2_jit_compile(pcre2_code *code, uint32_t options)
 
   if (code == NULL)
     return PCRE2_ERROR_NULL;
+
+  if (re->magic_number != MAGIC_NUMBER)
+    return PCRE2_ERROR_BADMAGIC;
+
+  if ((re->flags & (PCRE2_CODE_UNIT_WIDTH / 8)) == 0)
+    return PCRE2_ERROR_BADMODE;
 
   if ((options & ~PUBLIC_JIT_COMPILE_OPTIONS) != 0)
     return PCRE2_ERROR_JIT_BADOPTION;

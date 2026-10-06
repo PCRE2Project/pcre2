@@ -4,10 +4,10 @@
 .\" Generator: Asciidoctor 2.0.26
 .\"      Date: 24 March 2017
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_GET_ERROR_MESSAGE" "3" "24 March 2017" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_GET_ERROR_MESSAGE" "3" "24 March 2017" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -52,11 +52,11 @@ errors are negative numbers. The arguments are:
 .TP 10
 \fIerrorcode\fP
 .ad l
-an error code (positive or negative)
+an error code (positive or negative), or zero for no error
 .TP 10
 \fIbuffer\fP
 .ad l
-where to put the message
+where to put the message; may be \fBNULL\fP only when \fIbufflen\fP is zero
 .TP 10
 \fIbufflen\fP
 .ad l
@@ -69,8 +69,13 @@ the length of the buffer (code units)
 The function returns the length of the message in code units, excluding the
 trailing zero, or the negative error code \fBPCRE2_ERROR_NOMEMORY\fP if the buffer is
 too small. In this case, the returned message is truncated (but still with a
-trailing zero). If \fIerrorcode\fP does not contain a recognized error code
-number, the negative value \fBPCRE2_ERROR_BADDATA\fP is returned.
+trailing zero, assuming \fIbufflen\fP is not zero).
+With a recognized code and zero capacity, no output is written and
+\fBPCRE2_ERROR_NOMEMORY\fP is returned.
+.sp
+If \fIerrorcode\fP is neither zero nor a recognized error code
+number, the negative value \fBPCRE2_ERROR_BADDATA\fP is returned without changing
+the buffer, even when \fIbufflen\fP is zero.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

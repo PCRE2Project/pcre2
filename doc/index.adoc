@@ -174,6 +174,9 @@ in the library.
 |xref:pcre2_get_startchar.adoc[pcre2_get_startchar]
 |Get the starting character offset
 
+|xref:pcre2_get_subject.adoc[pcre2_get_subject]
+|Get a match subject pointer
+
 |xref:pcre2_jit_compile.adoc[pcre2_jit_compile]
 |Process a compiled pattern with the JIT compiler
 

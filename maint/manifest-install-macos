@@ -13,23 +13,23 @@ drwxr-xr-x install-dir/lib/cmake/pcre2
 -rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-config.cmake
 -rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-targets-release.cmake
 -rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-targets.cmake
--rwxr-xr-x install-dir/lib/libpcre2-16.0.16.0.dylib
-lrwxr-xr-x install-dir/lib/libpcre2-16.0.dylib -> libpcre2-16.0.16.0.dylib
+-rwxr-xr-x install-dir/lib/libpcre2-16.0.17.0.dylib
+lrwxr-xr-x install-dir/lib/libpcre2-16.0.dylib -> libpcre2-16.0.17.0.dylib
 -rw-r--r-- install-dir/lib/libpcre2-16.a
 lrwxr-xr-x install-dir/lib/libpcre2-16.dylib -> libpcre2-16.0.dylib
 -rwxr-xr-x install-dir/lib/libpcre2-16.la
--rwxr-xr-x install-dir/lib/libpcre2-32.0.16.0.dylib
-lrwxr-xr-x install-dir/lib/libpcre2-32.0.dylib -> libpcre2-32.0.16.0.dylib
+-rwxr-xr-x install-dir/lib/libpcre2-32.0.17.0.dylib
+lrwxr-xr-x install-dir/lib/libpcre2-32.0.dylib -> libpcre2-32.0.17.0.dylib
 -rw-r--r-- install-dir/lib/libpcre2-32.a
 lrwxr-xr-x install-dir/lib/libpcre2-32.dylib -> libpcre2-32.0.dylib
 -rwxr-xr-x install-dir/lib/libpcre2-32.la
--rwxr-xr-x install-dir/lib/libpcre2-8.0.16.0.dylib
-lrwxr-xr-x install-dir/lib/libpcre2-8.0.dylib -> libpcre2-8.0.16.0.dylib
+-rwxr-xr-x install-dir/lib/libpcre2-8.0.17.0.dylib
+lrwxr-xr-x install-dir/lib/libpcre2-8.0.dylib -> libpcre2-8.0.17.0.dylib
 -rw-r--r-- install-dir/lib/libpcre2-8.a
 lrwxr-xr-x install-dir/lib/libpcre2-8.dylib -> libpcre2-8.0.dylib
 -rwxr-xr-x install-dir/lib/libpcre2-8.la
--rwxr-xr-x install-dir/lib/libpcre2-posix.3.0.8.dylib
-lrwxr-xr-x install-dir/lib/libpcre2-posix.3.dylib -> libpcre2-posix.3.0.8.dylib
+-rwxr-xr-x install-dir/lib/libpcre2-posix.3.0.10.dylib
+lrwxr-xr-x install-dir/lib/libpcre2-posix.3.dylib -> libpcre2-posix.3.0.10.dylib
 -rw-r--r-- install-dir/lib/libpcre2-posix.a
 lrwxr-xr-x install-dir/lib/libpcre2-posix.dylib -> libpcre2-posix.3.dylib
 -rwxr-xr-x install-dir/lib/libpcre2-posix.la
@@ -87,6 +87,7 @@ drwxr-xr-x install-dir/share/doc/pcre2/html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_get_ovector_pointer.html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_get_parens_nest_limit.html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_get_startchar.html
+-rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_get_subject.html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_jit_compile.html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_jit_free_unused_memory.html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2_jit_match.html
@@ -204,6 +205,7 @@ drwxr-xr-x install-dir/share/man/man3
 -rw-r--r-- install-dir/share/man/man3/pcre2_get_ovector_pointer.3
 -rw-r--r-- install-dir/share/man/man3/pcre2_get_parens_nest_limit.3
 -rw-r--r-- install-dir/share/man/man3/pcre2_get_startchar.3
+-rw-r--r-- install-dir/share/man/man3/pcre2_get_subject.3
 -rw-r--r-- install-dir/share/man/man3/pcre2_jit_compile.3
 -rw-r--r-- install-dir/share/man/man3/pcre2_jit_free_unused_memory.3
 -rw-r--r-- install-dir/share/man/man3/pcre2_jit_match.3

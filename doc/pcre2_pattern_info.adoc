@@ -4,7 +4,7 @@
 :manpurpose: extract information about a pattern
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 14 February 2019
 :revdate: 14 February 2019
 

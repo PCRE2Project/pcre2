@@ -4,7 +4,7 @@
 :manpurpose: process a compiled pattern with the JIT compiler
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 22 August 2024
 :revdate: 22 August 2024
 
@@ -40,11 +40,11 @@ more of the following bits:
 
 [.options]
 const:PCRE2_JIT_COMPLETE::
-	compile code for full matching
+  compile code for full matching
 const:PCRE2_JIT_PARTIAL_SOFT::
-	compile code for soft partial matching
+  compile code for soft partial matching
 const:PCRE2_JIT_PARTIAL_HARD::
-	compile code for hard partial matching
+  compile code for hard partial matching
 
 There is also an obsolete option called const:PCRE2_JIT_INVALID_UTF, which has been
 superseded by the func:pcre2_compile() option const:PCRE2_MATCH_INVALID_UTF. The old

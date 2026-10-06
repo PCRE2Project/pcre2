@@ -4,10 +4,10 @@
 .\" Generator: Asciidoctor 2.0.26
 .\"      Date: 19 January 2024
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2SERIALIZE" "3" "19 January 2024" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2SERIALIZE" "3" "19 January 2024" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -87,7 +87,7 @@ means converting the pattern to a stream of bytes. A single byte stream may
 contain any number of compiled patterns, but they must all use the same
 character tables. A single copy of the tables is included in the byte stream
 (its size is 1088 bytes). For more details of character tables, see the
-section on locale support
+section Locale support
 in the
 \f(CRpcre2api\fP
 documentation.
@@ -188,6 +188,10 @@ patterns:
 .fam
 .fi
 .ss \n[.ss] 0
+.sp
+The count query performs the same header checks as decoding. Both readers
+accept a trusted, intact byte stream at any byte alignment. Neither accepts a
+length argument or validates that all of the required bytes are present.
 .sp
 The pcre2_serialize_decode() function reads a byte stream and recreates
 the compiled patterns in new memory blocks, setting pointers to them in a

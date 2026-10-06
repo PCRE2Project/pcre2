@@ -19227,7 +19227,7 @@ Failed: error -75: disallowed use of \K in lookaround
  0: 
 \= Expect error     
     abc\=null_subject
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
 
 //replace=[20]
     abc\=null_replacement
@@ -19244,7 +19244,7 @@ Failed: error -51: NULL argument passed with non-zero length
 /X*/g,replace=xy
 \= Expect error
     >X<\=null_replacement
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
 
 /X+/replace=[20]
     >XX<\=null_replacement
@@ -19277,11 +19277,11 @@ Failed: error -48: no more memory: 4 code units are needed
 Failed: error -48: no more memory
 \= Expect PCRE2_ERROR_NULL (NULL output buffer with a non-zero length)
     xay\=replace=[10]b,null_substitute_buffer
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
     xay\=replace=b,null_substitute_buffer
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
     xay\=replace=[10]b,null_substitute_buffer,substitute_overflow_length
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
 
 # --------- 
 
@@ -23616,7 +23616,7 @@ Failed: error 217 at offset 27: expected capture group number or name
 # Test that a memory leak has been fixed
 /x/replace=r,substitute_matched
     x\=null_subject
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
 
 # Test that a couple of double frees have been fixed
 /foo/replace=bar,substitute_matched
@@ -23651,7 +23651,7 @@ Failed: error -51: NULL argument passed with non-zero length
     foo\=zero_terminate
  1: <foo>
     \=null_subject,zero_terminate
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
     foo|bar\=offset=1
  2: f<oo>|<bar>
 
@@ -23663,7 +23663,7 @@ Failed: error -51: NULL argument passed with non-zero length
     foo\=zero_terminate
  1: <foo>
     \=null_subject,zero_terminate
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
     foo|bar\=offset=1
  2: f<oo>|<bar>
 
@@ -23675,21 +23675,21 @@ Failed: error -51: NULL argument passed with non-zero length
     foo\=zero_terminate
  1: <foo>
     \=null_subject,zero_terminate
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
     foo|bar\=offset=1
  2: f<oo>|<bar>
 
 /\w+|^$/replace=<$&>,global,substitute_matched,null_substitute_match_data
     :::
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
     \=null_subject
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
     foo\=zero_terminate
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
     \=null_subject,zero_terminate
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
     foo|bar\=offset=1
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
 
 # Now some NULL context tests
 
@@ -23707,9 +23707,9 @@ Failed: error -51: NULL argument passed with non-zero length
     foo\=null_context,substitute_matched
  1: <foo>
     :::\=null_context,null_substitute_match_data,substitute_matched
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
     foo\=null_context,null_substitute_match_data,substitute_matched
-Failed: error -51: NULL argument passed with non-zero length
+Failed: error -51: NULL argument passed
 
 # Failed matches: no-match; partial; other failure (callout-triggered)
 
@@ -23842,7 +23842,7 @@ Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
 Error -2: partial match
 Error -1: no match
-Error 0: PCRE2_ERROR_BADDATA (unknown error number)
+Error 0: no error
 Error 100: no error
 Error 101: \ at end of pattern
 Error 191: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode

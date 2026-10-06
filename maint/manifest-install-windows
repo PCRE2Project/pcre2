@@ -78,6 +78,7 @@ d---- .\install-dir\share\doc\pcre2\html
 -a--- .\install-dir\share\doc\pcre2\html\pcre2_get_ovector_pointer.html
 -a--- .\install-dir\share\doc\pcre2\html\pcre2_get_parens_nest_limit.html
 -a--- .\install-dir\share\doc\pcre2\html\pcre2_get_startchar.html
+-a--- .\install-dir\share\doc\pcre2\html\pcre2_get_subject.html
 -a--- .\install-dir\share\doc\pcre2\html\pcre2_jit_compile.html
 -a--- .\install-dir\share\doc\pcre2\html\pcre2_jit_free_unused_memory.html
 -a--- .\install-dir\share\doc\pcre2\html\pcre2_jit_match.html
@@ -195,6 +196,7 @@ d---- .\install-dir\share\man\man3
 -a--- .\install-dir\share\man\man3\pcre2_get_ovector_pointer.3
 -a--- .\install-dir\share\man\man3\pcre2_get_parens_nest_limit.3
 -a--- .\install-dir\share\man\man3\pcre2_get_startchar.3
+-a--- .\install-dir\share\man\man3\pcre2_get_subject.3
 -a--- .\install-dir\share\man\man3\pcre2_jit_compile.3
 -a--- .\install-dir\share\man\man3\pcre2_jit_free_unused_memory.3
 -a--- .\install-dir\share\man\man3\pcre2_jit_match.3

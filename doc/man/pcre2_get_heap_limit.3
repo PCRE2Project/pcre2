@@ -4,10 +4,10 @@
 .\" Generator: Asciidoctor 2.0.26
 .\"      Date: 11 September 2026
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_GET_HEAP_LIMIT" "3" "11 September 2026" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_GET_HEAP_LIMIT" "3" "11 September 2026" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -44,7 +44,7 @@ pcre2_get_heap_limit \- get the match backtracking heap limit
 .SH "DESCRIPTION"
 .sp
 This function gets the backtracking heap limit from a match context. The result
-is zero for success or \fBPCRE2_ERROR_NULL\fP if either argument is \fBNULL\fP.
+is zero. Both arguments must be non\-\fBNULL\fP.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

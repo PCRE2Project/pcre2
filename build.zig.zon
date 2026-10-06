@@ -1,6 +1,6 @@
 .{
     .name = .pcre2,
-    .version = "10.49.0-DEV",
+    .version = "10.50.0-DEV",
 
     // Do NOT change this for new releases.
     // DO change this if making a fork of PCRE2 which is used by any Zig clients.
@@ -9,8 +9,8 @@
     .minimum_zig_version = "0.16.0",
     .dependencies = .{
         .sljit = .{
-            .url = "git+https://github.com/zherczeg/sljit.git#3908d4c1d46764b7f86e172411e28cec3d0d601c",
-            .hash = "N-V-__8AADdmRgCXao0bw8GE9H7E5EZ3Cd4gYYRKrKvQwlgq",
+            .url = "git+https://github.com/zherczeg/sljit.git#39c508d1b8fbae332d60c7450db20236913089da",
+            .hash = "N-V-__8AAJKHRgASTeo7mC7l-wELv3p26lEV64ek-DphGZlJ",
             .lazy = true,
         },
     },

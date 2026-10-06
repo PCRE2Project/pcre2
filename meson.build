@@ -6,7 +6,7 @@ project(
   'PCRE2',
   'c',
   # This line is updated by UpdateRelease.py
-  version: '10.49-DEV',
+  version: '10.50-DEV',
   license: 'BSD-3-Clause WITH PCRE2-exception',
   meson_version: '>=1.6.0',
   default_options: ['c_std=gnu11,c11,gnu99,c99', 'default_library=static'],
@@ -315,7 +315,7 @@ pcre2_prerelease = project_version_parts.length() > 1 ? '-' + project_version_pa
 
 # These lines are updated by UpdateRelease.py
 pcre2_date = '2026-11-31'
-libtool_versions = {'posix': '3:8:0', '8': '16:0:16', '16': '16:0:16', '32': '16:0:16'}
+libtool_versions = {'posix': '3:10:0', '8': '17:0:17', '16': '17:0:17', '32': '17:0:17'}
 
 lib_versions = {}
 lib_soversions = {}

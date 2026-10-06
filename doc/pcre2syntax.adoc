@@ -5,7 +5,7 @@
 :description: Syntax quick-reference summary
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 14 October 2025
 :revdate: 14 October 2025
 :toc: right

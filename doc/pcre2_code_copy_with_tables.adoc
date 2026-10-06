@@ -4,7 +4,7 @@
 :manpurpose: copy a compiled pattern and its character tables
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 16 January 2017
 :revdate: 16 January 2017
 

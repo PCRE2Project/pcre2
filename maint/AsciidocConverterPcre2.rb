@@ -1,14 +1,26 @@
 # frozen_string_literal: true
 
 # PCRE2's Asciidoctor extension defines a small semantic inline vocabulary and
-# backend-specific presentation for manpage output. Keep the extension
+# backend-specific presentation for HTML and manpage output. Keep the extension
 # backend-neutral until conversion so all outputs consume the same AST.
 require 'asciidoctor/converter/manpage'
 require 'asciidoctor/extensions'
+require 'asciidoctor-html5s'
 # Decode Asciidoctor's special-character substitutions before Rouge lexing.
 require 'cgi'
 # Supply lexical tokens for terminal highlighting of C source blocks.
 require 'rouge'
+
+class Pcre2DocumentDefaults < Asciidoctor::Extensions::Preprocessor
+  def process(document, reader)
+    document.set_attribute 'lang', 'en' unless document.attr? 'lang'
+    document.set_attribute 'source-highlighter', 'rouge' unless document.attr? 'source-highlighter'
+    if document.basebackend? 'html'
+      document.set_attribute 'nofooter' unless document.attr? 'nofooter'
+    end
+    reader
+  end
+end
 
 # Base processor for short API macros such as `func:pcre2_match()`. Each macro
 # becomes a monospaced quoted node with a semantic role; converters decide how
@@ -78,13 +90,18 @@ class Pcre2CharacterInlineMacro < Pcre2ApiInlineMacro
   end
 end
 
-# Install the API macros globally for documents loaded with this extension.
+# Install defaults and API macros for documents loaded with this extension.
 Asciidoctor::Extensions.register do
+  preprocessor Pcre2DocumentDefaults
   inline_macro Pcre2FunctionInlineMacro
   inline_macro Pcre2TypeInlineMacro
   inline_macro Pcre2ConstantInlineMacro
   inline_macro Pcre2ArgumentInlineMacro
   inline_macro Pcre2CharacterInlineMacro
+end
+
+class Pcre2HtmlConverter < Asciidoctor::Html5s::Converter
+  register_for 'html5'
 end
 
 # Preserve PCRE2's established terminal layout while adding description-list,
@@ -164,6 +181,89 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
     result << %(.PP
 .ad l)
     result.join "\n"
+  end
+
+  def convert_ulist(node)
+    result = []
+    result << %(.sp
+.B #{manify node.title}
+.br) if node.title?
+    spaced = node.items.any?(&:blocks?)
+    node.items.each_with_index do |item, index|
+      # Keep compact lists together, but space every item if any item has
+      # attached blocks so the list uses consistent vertical rhythm.
+      result << '.sp' if index.zero? || spaced
+      result << %[.RS 4
+.ie n \\{\\
+\\h'-04'\\(bu\\h'+03'\\c
+.\\}
+.el \\{\\
+.  sp -1
+.  IP \\(bu 2.3
+.\\}#{(list_text = manify item.text, whitespace: :normalize).empty? ? '' : "\n#{list_text}"}]
+      if item.blocks?
+        item_content = item.content
+        item_content = item_content.slice 4, item_content.length if list_text.empty? && (item_content.start_with? %(.sp\n))
+        result << item_content
+      end
+      result << '.RE'
+    end
+    result.join "\n"
+  end
+
+  def convert_olist(node)
+    result = []
+    result << %(.sp
+.B #{manify node.title}
+.br) if node.title?
+    spaced = node.items.any?(&:blocks?)
+    start = (node.attr 'start', 1).to_i
+    node.items.each_with_index do |item, index|
+      result << '.sp' if index.zero? || spaced
+      numeral = ordered_list_numeral(index + start, node.style)
+      result << %(.RS 4
+.ie n \\{\\
+\\h'-04' #{numeral}.\\h'+01'\\c
+.\\}
+.el \\{\\
+.  sp -1
+.  IP " #{numeral}." 4.2
+.\\}#{(list_text = manify item.text, whitespace: :normalize).empty? ? '' : "\n#{list_text}"})
+      if item.blocks?
+        item_content = item.content
+        item_content = item_content.slice 4, item_content.length if list_text.empty? && (item_content.start_with? %(.sp\n))
+        result << item_content
+      end
+      result << '.RE'
+    end
+    result.join "\n"
+  end
+
+  def ordered_list_numeral(number, style)
+    return number.to_s unless number.positive?
+
+    case style
+    when 'loweralpha'
+      alpha_list_numeral(number).downcase
+    when 'upperalpha'
+      alpha_list_numeral(number)
+    when 'lowerroman'
+      Asciidoctor::Helpers.int_to_roman(number).downcase
+    when 'upperroman'
+      Asciidoctor::Helpers.int_to_roman(number)
+    else
+      number.to_s
+    end
+  end
+
+  def alpha_list_numeral(number)
+    result = +''
+    while number > 0
+      number -= 1
+      result.prepend((65 + (number % 26)).chr)
+      number /= 26
+    end
+    result
   end
 
   # Flatten nested font changes into independent runs because roff's `\fP`

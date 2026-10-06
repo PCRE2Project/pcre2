@@ -4,10 +4,10 @@
 .\" Generator: Asciidoctor 2.0.26
 .\"      Date: 09 June 2024
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_SET_MAX_PATTERN_COMPILED_LENGTH" "3" "09 June 2024" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_SET_MAX_PATTERN_COMPILED_LENGTH" "3" "09 June 2024" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -49,6 +49,10 @@ context. The result is always zero. If a pattern that is passed to
 pcre2_compile() referencing this context needs more memory, an error is
 generated. The default is the largest number that a \fBPCRE2_SIZE\fP variable can
 hold, which is effectively unlimited.
+.sp
+The limit excludes the fixed, platform\-dependent compiled\-pattern header, which
+is included in the total size returned by \fBPCRE2_INFO_SIZE\fP. It is not a
+limit on temporary compilation workspace, JIT code, or separate character tables.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

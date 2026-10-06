@@ -4,10 +4,10 @@
 .\" Generator: Asciidoctor 2.0.26
 .\"      Date: 08 August 2026
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2JIT" "3" "08 August 2026" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2JIT" "3" "08 August 2026" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -61,7 +61,6 @@ platforms:
 .\}
 ARM 32\-bit (v7, and Thumb2)
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -72,7 +71,6 @@ ARM 32\-bit (v7, and Thumb2)
 .\}
 ARM 64\-bit
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -83,7 +81,6 @@ ARM 64\-bit
 .\}
 DEC Alpha 64\-bit
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -94,7 +91,6 @@ DEC Alpha 64\-bit
 .\}
 IBM s390x 64 bit
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -105,7 +101,6 @@ IBM s390x 64 bit
 .\}
 Intel x86 32\-bit and 64\-bit
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -116,7 +111,6 @@ Intel x86 32\-bit and 64\-bit
 .\}
 LoongArch 64 bit
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -127,7 +121,6 @@ LoongArch 64 bit
 .\}
 MIPS 32\-bit and 64\-bit
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -138,7 +131,6 @@ MIPS 32\-bit and 64\-bit
 .\}
 Power PC 32\-bit and 64\-bit
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -222,8 +214,7 @@ At present, it is not possible to free JIT compiled code except when the entire
 compiled pattern is freed by calling pcre2_code_free().
 .sp
 In some circumstances you may need to call additional functions. These are
-described in the section entitled
-"Controlling the JIT stack"
+described in the section CONTROLLING THE JIT STACK
 below.
 .sp
 There are some pcre2_match() options that are not supported by JIT, and
@@ -232,8 +223,7 @@ below.
 In both cases, matching automatically falls back to the interpretive code. If
 you want to know whether JIT was actually used for a particular match, you
 should arrange for a JIT callback function to be set up as described in the
-section entitled
-"Controlling the JIT stack"
+section CONTROLLING THE JIT STACK
 below, even if you do not need to supply a non\-default JIT stack. Such a
 callback function is called whenever JIT code is about to be obeyed. If the
 match\-time options are not right for JIT execution, the callback function is
@@ -291,8 +281,7 @@ in a conditional group.
 When a pattern is matched using JIT, the return values are the same as those
 given by the interpretive pcre2_match() code, with the addition of one
 new error code: \fBPCRE2_ERROR_JIT_STACKLIMIT\fP. This means that the memory used for
-the JIT stack was insufficient. See
-"Controlling the JIT stack"
+the JIT stack was insufficient. See the section CONTROLLING THE JIT STACK
 below for a discussion of JIT stack usage.
 .sp
 The error code \fBPCRE2_ERROR_MATCHLIMIT\fP is returned by the JIT code if searching
@@ -307,8 +296,7 @@ By default, it uses 32KiB on the machine stack. However, some large or
 complicated patterns need more than this. The error \fBPCRE2_ERROR_JIT_STACKLIMIT\fP
 is given when there is not enough stack. Three functions are provided for
 managing blocks of memory for use as JIT stacks. There is further discussion
-about the use of JIT stacks in the section entitled
-"JIT stack FAQ"
+about the use of JIT stacks in the section JIT STACK FAQ
 below.
 .sp
 The pcre2_jit_stack_create() function creates a JIT stack. Its arguments
@@ -351,7 +339,6 @@ If \fIcallback\fP is \fBNULL\fP and \fIdata\fP is \fBNULL\fP, an internal 32KiB 
 on the machine stack is used. This is the default when a match
 context is created.
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 2.\h'+01'\c
@@ -364,7 +351,6 @@ If \fIcallback\fP is \fBNULL\fP and \fIdata\fP is not \fBNULL\fP, \fIdata\fP mus
 a pointer to a valid JIT stack, the result of calling
 pcre2_jit_stack_create().
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 3.\h'+01'\c

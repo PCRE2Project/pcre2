@@ -4,10 +4,10 @@
 .\" Generator: Asciidoctor 2.0.26
 .\"      Date: 03 September 2025
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_CONFIG" "3" "03 September 2025" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_CONFIG" "3" "03 September 2025" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -63,7 +63,7 @@ Points to where to put the information
 .sp
 If \fIwhere\fP is \fBNULL\fP, the function returns the amount of memory needed for
 the requested information. When the information is a string, the value is in
-code units; for other types of data it is in bytes.
+code units including the terminating zero; for other types of data it is in bytes.
 .sp
 If \fIwhere\fP is not \fBNULL\fP, for \fBPCRE2_CONFIG_JITTARGET\fP,
 \fBPCRE2_CONFIG_UNICODE_VERSION\fP, and \fBPCRE2_CONFIG_VERSION\fP it must point to a
@@ -88,7 +88,6 @@ Indicates what \f(CR\(rsR\fP matches by default:
 .\}
 \fBPCRE2_BSR_UNICODE\fP
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -154,7 +153,6 @@ Code for the default newline sequence:
 .\}
 \fBPCRE2_NEWLINE_CR\fP
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -165,7 +163,6 @@ Code for the default newline sequence:
 .\}
 \fBPCRE2_NEWLINE_LF\fP
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -176,7 +173,6 @@ Code for the default newline sequence:
 .\}
 \fBPCRE2_NEWLINE_CRLF\fP
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -187,7 +183,6 @@ Code for the default newline sequence:
 .\}
 \fBPCRE2_NEWLINE_ANY\fP
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -198,7 +193,6 @@ Code for the default newline sequence:
 .\}
 \fBPCRE2_NEWLINE_ANYCRLF\fP
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -223,6 +217,10 @@ Obsolete: use \fBPCRE2_CONFIG_DEPTHLIMIT\fP
 .ad l
 Obsolete: always returns 0
 .TP 26
+\fBPCRE2_CONFIG_TABLES_LENGTH\fP
+.ad l
+Length of the character processing tables in bytes
+.TP 26
 \fBPCRE2_CONFIG_UNICODE\fP
 .ad l
 Availability of Unicode support
@@ -242,9 +240,9 @@ The PCRE2 version (a string)
 .sp
 The function yields a non\-negative value on success or the negative value
 \fBPCRE2_ERROR_BADOPTION\fP otherwise. This is also the result for the
-\fBPCRE2_CONFIG_JITTARGET\fP code if JIT support is not available. When a string is
-requested, the function returns the number of code units used, including the
-terminating zero.
+\fBPCRE2_CONFIG_JITTARGET\fP code if JIT support is not available. When a numerical
+value is written, the function returns zero. When a string is requested, the
+function returns the number of code units used, including the terminating zero.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

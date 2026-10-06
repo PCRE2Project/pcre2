@@ -90,33 +90,33 @@ pcre2_maketables(pcre2_general_context *gcontext)
 #define charfn_from(c) (c)
 #endif /* PCRE2_DFTABLES */
 
-  int i;
-  uint8_t *p;
-
   if (yield == NULL)
     return NULL;
-  p = yield;
+
+  uint8_t *p = yield;
 
   /* First comes the lower casing table */
 
-  for (i = 0; i < 256; i++)
+  for (int i = 0; i < 256; i++)
   {
     int c = charfn_from(tolower(charfn_to(i)));
     /* LCOV_EXCL_START - toupper/tolower are specified to return unsigned-char
-       values or EOF in the supported locales. */
-    if (c >= 256) c = i;
+    values or EOF in the supported locales. */
+    if (c >= 256)
+      c = i;
     /* LCOV_EXCL_STOP */
     *p++ = c;
   }
 
   /* Next the case-flipping table */
 
-  for (i = 0; i < 256; i++)
+  for (int i = 0; i < 256; i++)
   {
     int c = charfn_from(islower(charfn_to(i)) ? toupper(charfn_to(i)) : tolower(charfn_to(i)));
     /* LCOV_EXCL_START - toupper/tolower are specified to return unsigned-char
-       values or EOF in the supported locales. */
-    if (c >= 256) c = i;
+    values or EOF in the supported locales. */
+    if (c >= 256)
+      c = i;
     /* LCOV_EXCL_STOP */
     *p++ = c;
   }
@@ -135,7 +135,7 @@ pcre2_maketables(pcre2_general_context *gcontext)
   test for alnum specially. */
 
   memset(p, 0, cbit_length);
-  for (i = 0; i < 256; i++)
+  for (int i = 0; i < 256; i++)
   {
     if (isdigit(charfn_to(i)))
       p[cbit_digit + i / 8] |= 1u << (i & 7);
@@ -168,7 +168,7 @@ pcre2_maketables(pcre2_general_context *gcontext)
   comments within regexes. However, Perl changed at release 5.18, so PCRE1
   changed at release 8.34 and it's always been this way for PCRE2. */
 
-  for (i = 0; i < 256; i++)
+  for (int i = 0; i < 256; i++)
   {
     int x = 0;
     if (isspace(charfn_to(i)))
@@ -194,6 +194,8 @@ pcre2_maketables(pcre2_general_context *gcontext)
 PCRE2_EXP_DEFN void PCRE2_CALL_CONVENTION
 pcre2_maketables_free(pcre2_general_context *gcontext, const uint8_t *tables)
 {
+  if (tables == NULL)
+    return;
   if (gcontext != NULL)
     gcontext->memctl.free((void *)tables, gcontext->memctl.memory_data);
   else

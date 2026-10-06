@@ -5,7 +5,7 @@
 :description: Experimental foreign pattern conversion functions
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 14 November 2023
 :revdate: 14 November 2023
 :toc: right
@@ -46,7 +46,9 @@ memory management within the conversion functions.
 There are only two parameters in the convert context at present. Both apply
 only to glob conversions. The escape character defaults to grave accent under
 Windows, otherwise backslash. It can be set to zero, meaning no escape
-character, or to any punctuation character with a code point less than 256.
+character, or to an ASCII punctuation character (or its EBCDIC equivalent),
+except `!`, `*`, `-`, `:`, `?`, `[`, `]`, and `^`. These characters are reserved
+for glob wildcard or character-class syntax and cannot be used as escapes.
 The separator character defaults to backslash under Windows, otherwise forward
 slash. It can be set to forward slash, backslash, or dot.
 

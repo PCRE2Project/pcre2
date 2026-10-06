@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.26">
-<meta name="description" content="A demonstration C program that uses the PCRE2 library">
-<title>pcre2demo(3)</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
-<style>
-/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="A demonstration C program that uses the PCRE2 library"><title>pcre2demo(3)</title><style>/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
 /* Uncomment the following line when using as a custom stylesheet */
 /* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
 html{font-family:sans-serif;-webkit-text-size-adjust:100%}
@@ -432,28 +421,129 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .sect1+.sect1{border:0}
 #footer{background:none}
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
-@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
-</style>
-</head>
-<body class="manpage">
-<div id="header">
-<h1>pcre2demo(3) Manual Page</h1>
-<h2>Name</h2>
-<div class="sectionbody">
-<p>pcre2demo - a demonstration C program for PCRE2</p>
-</div>
-</div>
-<div id="content">
-<div class="sect1">
-<h2 id="_source_code">Source Code</h2>
-<div class="sectionbody">
-<div class="listingblock wide">
-<div class="content">
-<pre class="highlight"><code class="language-c" data-lang="c">/*************************************************
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}</style>
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge, pre.rouge .w {
+  color: #24292f;
+  background-color: #f6f8fa;
+}
+pre.rouge .k, pre.rouge .kd, pre.rouge .kn, pre.rouge .kp, pre.rouge .kr, pre.rouge .kt, pre.rouge .kv {
+  color: #cf222e;
+}
+pre.rouge .gr {
+  color: #f6f8fa;
+}
+pre.rouge .gd {
+  color: #82071e;
+  background-color: #ffebe9;
+}
+pre.rouge .nb {
+  color: #953800;
+}
+pre.rouge .nc {
+  color: #953800;
+}
+pre.rouge .no {
+  color: #953800;
+}
+pre.rouge .nn {
+  color: #953800;
+}
+pre.rouge .sr {
+  color: #116329;
+}
+pre.rouge .na {
+  color: #116329;
+}
+pre.rouge .nt {
+  color: #116329;
+}
+pre.rouge .gi {
+  color: #116329;
+  background-color: #dafbe1;
+}
+pre.rouge .ges {
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .kc {
+  color: #0550ae;
+}
+pre.rouge .l, pre.rouge .ld, pre.rouge .m, pre.rouge .mb, pre.rouge .mf, pre.rouge .mh, pre.rouge .mi, pre.rouge .il, pre.rouge .mo, pre.rouge .mx {
+  color: #0550ae;
+}
+pre.rouge .sb {
+  color: #0550ae;
+}
+pre.rouge .bp {
+  color: #0550ae;
+}
+pre.rouge .ne {
+  color: #0550ae;
+}
+pre.rouge .nl {
+  color: #0550ae;
+}
+pre.rouge .py {
+  color: #0550ae;
+}
+pre.rouge .nv, pre.rouge .vc, pre.rouge .vg, pre.rouge .vi, pre.rouge .vm {
+  color: #0550ae;
+}
+pre.rouge .o, pre.rouge .ow {
+  color: #0550ae;
+}
+pre.rouge .gh {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre.rouge .s, pre.rouge .sa, pre.rouge .sc, pre.rouge .dl, pre.rouge .sd, pre.rouge .s2, pre.rouge .se, pre.rouge .sh, pre.rouge .sx, pre.rouge .s1, pre.rouge .ss {
+  color: #0a3069;
+}
+pre.rouge .nd {
+  color: #8250df;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #8250df;
+}
+pre.rouge .err {
+  color: #f6f8fa;
+  background-color: #82071e;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cm, pre.rouge .cp, pre.rouge .cpf, pre.rouge .c1, pre.rouge .cs {
+  color: #6e7781;
+}
+pre.rouge .gl {
+  color: #6e7781;
+}
+pre.rouge .gt {
+  color: #6e7781;
+}
+pre.rouge .ni {
+  color: #24292f;
+}
+pre.rouge .si {
+  color: #24292f;
+}
+pre.rouge .ge {
+  color: #24292f;
+  font-style: italic;
+}
+pre.rouge .gs {
+  color: #24292f;
+  font-weight: bold;
+}
+</style></head><body class="manpage"><header><h1>pcre2demo(3)</h1><div class="details"><time id="revdate" datetime="2026-10-03">03 October 2026</time></div></header><div id="content"><section class="doc-section level-1"><h2 id="_source_code">Source Code</h2><div class="listing-block wide"><pre class="rouge highlight"><code data-lang="c"><span class="cm">/*************************************************
 *           PCRE2 DEMONSTRATION PROGRAM          *
-*************************************************/
+*************************************************/</span>
 
-/* This is a demonstration program to illustrate a straightforward way of
+<span class="cm">/* This is a demonstration program to illustrate a straightforward way of
 using the PCRE2 regular expression library from a C program. See the
 pcre2sample documentation for a short discussion ("man pcre2sample" if you
 have the PCRE2 man pages installed). PCRE2 is a revised API for the library,
@@ -489,61 +579,38 @@ Building under Windows:
 
 If you want to statically link this program against a non-dll .a file, you
 must define PCRE2_STATIC before including pcre2.h, so in this environment,
-uncomment the following line. */
+uncomment the following line. */</span>
 
-/* #define PCRE2_STATIC */
+<span class="cm">/* #define PCRE2_STATIC */</span>
 
-/* The PCRE2_CODE_UNIT_WIDTH macro must be defined before including pcre2.h.
+<span class="cm">/* The PCRE2_CODE_UNIT_WIDTH macro must be defined before including pcre2.h.
 For a program that uses only one code unit width, setting it to 8, 16, or 32
 makes it possible to use generic function names such as pcre2_compile(). Note
 that just changing 8 to 16 (for example) is not sufficient to convert this
 program to process 16-bit characters. Even in a fully 16-bit environment,
 where string-handling functions such as strcmp() and printf() work with 16-bit
 characters, the code for handling the table of named substrings will still
-need to be modified. */
+need to be modified. */</span>
 
-#define PCRE2_CODE_UNIT_WIDTH 8
+<span class="cp">#define PCRE2_CODE_UNIT_WIDTH 8
+</span>
+<span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;pcre2.h&gt;</span><span class="cp">
+</span>
 
-#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
-#include &lt;pcre2.h&gt;
-
-
-/***************************************************************************
+<span class="cm">/***************************************************************************
 * Here is the program. The API includes the concept of "contexts" for      *
 * setting up unusual interface requirements for compiling and matching,    *
 * such as custom memory managers and non-standard newline definitions.     *
 * This program does not do any of this, so it makes no use of contexts,    *
 * always passing NULL where a context could be given.                      *
-***************************************************************************/
+***************************************************************************/</span>
 
-int
-main(int argc, char **argv)
-{
-  pcre2_code *re;
-  /* PCRE2_SPTR is a pointer to unsigned code units of the appropriate width
-  (in this case, 8 bits). */
-  PCRE2_SPTR pattern;
-  PCRE2_SPTR subject;
-  PCRE2_SPTR name_table;
-
-  int errornumber;
-  int find_all, caseless_match;
-  int i;
-  int rc;
-
-  uint32_t namecount;
-  uint32_t name_entry_size;
-
-  PCRE2_SIZE erroroffset;
-  PCRE2_SIZE *ovector;
-  PCRE2_SIZE ovector_last[2];
-  PCRE2_SIZE subject_length;
-
-  pcre2_match_data *match_data;
-
-
-  /*************************************************************************
+<span class="kt">int</span>
+<span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="cm">/*************************************************************************
   * First, sort out the command line. Options:                             *
   * - "-g" to request repeated matching to find all occurrences,           *
   *   like Perl's /g option. We set the variable find_all to a non-zero    *
@@ -551,75 +618,80 @@ main(int argc, char **argv)
   * - "-i" to request caseless matching, like Perl's /i option.  We set    *
   *   the variable caseless_match to PCRE2_CASELESS if the -i option is    *
   *   present.                                                             *
-  *************************************************************************/
+  *************************************************************************/</span>
 
-  find_all = 0;
-  caseless_match = 0;
-  for (i = 1; i &lt; argc; i++)
-  {
-    if (strcmp(argv[i], "-g") == 0)
-    {
-      find_all = 1;
-    }
-    else if (strcmp(argv[i], "-i") == 0)
-    {
-      caseless_match = PCRE2_CASELESS;
-    }
-    else if (argv[i][0] == '-')
-    {
-      printf("Unrecognised option %s\n", argv[i]);
-      return 1;
-    }
-    else
-    {
-      break;
-    }
-  }
+  <span class="kt">int</span> <span class="n">find_all</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">caseless_match</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">argi</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">argi</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">argi</span> <span class="o">&lt;</span> <span class="n">argc</span><span class="p">;</span> <span class="n">argi</span><span class="o">++</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="n">argi</span><span class="p">],</span> <span class="s">"-g"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">find_all</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="n">argi</span><span class="p">],</span> <span class="s">"-i"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">caseless_match</span> <span class="o">=</span> <span class="n">PCRE2_CASELESS</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="n">argi</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">'-'</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"Unrecognised option %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="n">argi</span><span class="p">]);</span>
+      <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
 
-  /* After the options, we require exactly two arguments, which are the
-  pattern, and the subject string. */
+  <span class="cm">/* After the options, we require exactly two arguments, which are the
+  pattern, and the subject string. */</span>
 
-  if (argc - i != 2)
-  {
-    printf("Exactly two arguments required: a regex and a subject string\n");
-    return 1;
-  }
+  <span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">-</span> <span class="n">argi</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Exactly two arguments required: a regex and a subject string</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
 
-  /* Pattern and subject are char arguments, so they can be straightforwardly
+  <span class="cm">/* Pattern and subject are char arguments, so they can be straightforwardly
   cast to PCRE2_SPTR because we are working in 8-bit code units. The subject
   length is cast to PCRE2_SIZE for completeness, though PCRE2_SIZE is in fact
-  defined to be size_t. */
+  defined to be size_t. PCRE2_SPTR is a pointer to unsigned code units of the
+  appropriate width (in this case, 8 bits).*/</span>
 
-  pattern = (PCRE2_SPTR)argv[i];
-  subject = (PCRE2_SPTR)argv[i + 1];
-  subject_length = (PCRE2_SIZE)strlen((char *)subject);
+  <span class="n">PCRE2_SPTR</span> <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="n">PCRE2_SPTR</span><span class="p">)</span><span class="n">argv</span><span class="p">[</span><span class="n">argi</span><span class="p">];</span>
+  <span class="n">PCRE2_SPTR</span> <span class="n">subject</span> <span class="o">=</span> <span class="p">(</span><span class="n">PCRE2_SPTR</span><span class="p">)</span><span class="n">argv</span><span class="p">[</span><span class="n">argi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>
+  <span class="n">PCRE2_SIZE</span> <span class="n">subject_length</span> <span class="o">=</span> <span class="p">(</span><span class="n">PCRE2_SIZE</span><span class="p">)</span><span class="n">strlen</span><span class="p">((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">subject</span><span class="p">);</span>
 
 
-  /*************************************************************************
+  <span class="cm">/*************************************************************************
   * Now we are going to compile the regular expression pattern, and handle *
   * any errors that are detected.                                          *
-  *************************************************************************/
+  *************************************************************************/</span>
 
-  re = pcre2_compile(pattern,               // the pattern
-                     PCRE2_ZERO_TERMINATED, // the pattern is null-terminated
-                     caseless_match,        // possibly enable caseless
-                     &amp;errornumber,          // for error number
-                     &amp;erroroffset,          // for error offset
-                     NULL);                 // use default compile context
+  <span class="kt">int</span> <span class="n">errornumber</span><span class="p">;</span>
+  <span class="n">PCRE2_SIZE</span> <span class="n">erroroffset</span><span class="p">;</span>
+  <span class="n">pcre2_code</span> <span class="o">*</span><span class="n">re</span> <span class="o">=</span>
+      <span class="n">pcre2_compile</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span>               <span class="c1">// the pattern</span>
+                    <span class="n">PCRE2_ZERO_TERMINATED</span><span class="p">,</span> <span class="c1">// the pattern is null-terminated</span>
+                    <span class="n">caseless_match</span><span class="p">,</span>        <span class="c1">// possibly enable caseless</span>
+                    <span class="o">&amp;</span><span class="n">errornumber</span><span class="p">,</span>          <span class="c1">// for error number</span>
+                    <span class="o">&amp;</span><span class="n">erroroffset</span><span class="p">,</span>          <span class="c1">// for error offset</span>
+                    <span class="nb">NULL</span><span class="p">);</span>                 <span class="c1">// use default compile context</span>
 
-  /* Compilation failed: print the error message and exit. */
+  <span class="cm">/* Compilation failed: print the error message and exit. */</span>
 
-  if (re == NULL)
-  {
-    PCRE2_UCHAR buffer[256];
-    pcre2_get_error_message(errornumber, buffer, sizeof(buffer));
-    printf("PCRE2 compilation failed at offset %d: %s\n", (int)erroroffset,
-           buffer);
-    return 1;
-  }
+  <span class="k">if</span> <span class="p">(</span><span class="n">re</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">PCRE2_UCHAR</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+    <span class="n">pcre2_get_error_message</span><span class="p">(</span><span class="n">errornumber</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">));</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"PCRE2 compilation failed at offset %d: %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">erroroffset</span><span class="p">,</span>
+           <span class="n">buffer</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
 
 
-  /*************************************************************************
+  <span class="cm">/*************************************************************************
   * If the compilation succeeded, we call PCRE2 again, in order to do a    *
   * pattern match against the subject string. This does just ONE match. If *
   * further matching is needed, it will be done below. Before running the  *
@@ -630,203 +702,207 @@ main(int argc, char **argv)
   * a number of bytes, you can find it like this:                          *
   *                                                                        *
   * PCRE2_SIZE match_data_size = pcre2_get_match_data_size(match_data);    *
-  *************************************************************************/
+  *************************************************************************/</span>
 
-  match_data = pcre2_match_data_create_from_pattern(re, NULL);
+  <span class="n">pcre2_match_data</span> <span class="o">*</span><span class="n">match_data</span> <span class="o">=</span>
+      <span class="n">pcre2_match_data_create_from_pattern</span><span class="p">(</span><span class="n">re</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
 
-  /* Now run the match. */
+  <span class="cm">/* Now run the match. */</span>
 
-  rc = pcre2_match(re,             // the compiled pattern
-                   subject,        // the subject string
-                   subject_length, // the length of the subject
-                   0,              // start at offset 0 in the subject
-                   0,              // default options
-                   match_data,     // block for storing the result
-                   NULL);          // use default match context
+  <span class="kt">int</span> <span class="n">rc</span> <span class="o">=</span> <span class="n">pcre2_match</span><span class="p">(</span><span class="n">re</span><span class="p">,</span>             <span class="c1">// the compiled pattern</span>
+                       <span class="n">subject</span><span class="p">,</span>        <span class="c1">// the subject string</span>
+                       <span class="n">subject_length</span><span class="p">,</span> <span class="c1">// the length of the subject</span>
+                       <span class="mi">0</span><span class="p">,</span>              <span class="c1">// start at offset 0 in the subject</span>
+                       <span class="mi">0</span><span class="p">,</span>              <span class="c1">// default options</span>
+                       <span class="n">match_data</span><span class="p">,</span>     <span class="c1">// block for storing the result</span>
+                       <span class="nb">NULL</span><span class="p">);</span>          <span class="c1">// use default match context</span>
 
-  /* Matching failed: handle error cases */
+  <span class="cm">/* Matching failed: handle error cases */</span>
 
-  if (rc &lt; 0)
-  {
-    switch (rc)
-    {
-    case PCRE2_ERROR_NOMATCH:
-      printf("No match\n");
-      break;
-      /*
+  <span class="k">if</span> <span class="p">(</span><span class="n">rc</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="n">rc</span><span class="p">)</span>
+    <span class="p">{</span>
+    <span class="k">case</span> <span class="n">PCRE2_ERROR_NOMATCH</span><span class="p">:</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"No match</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+      <span class="k">break</span><span class="p">;</span>
+      <span class="cm">/*
       Handle other special cases if you like
-      */
-    default:
-      printf("Matching error %d\n", rc);
-      break;
-    }
-    /* Release memory used for the match data and the compiled pattern. */
-    pcre2_match_data_free(match_data);
-    pcre2_code_free(re);
-    return 1;
-  }
+      */</span>
+    <span class="nl">default:</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"Matching error %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">rc</span><span class="p">);</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="cm">/* Release memory used for the match data and the compiled pattern. */</span>
+    <span class="n">pcre2_match_data_free</span><span class="p">(</span><span class="n">match_data</span><span class="p">);</span>
+    <span class="n">pcre2_code_free</span><span class="p">(</span><span class="n">re</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
 
-  /* Match succeeded. Get a pointer to the output vector, where string offsets
-  are stored. */
+  <span class="cm">/* Match succeeded. Get a pointer to the output vector, where string offsets
+  are stored. */</span>
 
-  ovector = pcre2_get_ovector_pointer(match_data);
-  printf("Match succeeded at offset %d\n", (int)ovector[0]);
+  <span class="n">PCRE2_SIZE</span> <span class="o">*</span><span class="n">ovector</span> <span class="o">=</span> <span class="n">pcre2_get_ovector_pointer</span><span class="p">(</span><span class="n">match_data</span><span class="p">);</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"Match succeeded at offset %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
 
 
-  /*************************************************************************
+  <span class="cm">/*************************************************************************
   * We have found the first match within the subject string. If the output *
   * vector wasn't big enough, say so. Then output any substrings that were *
   * captured.                                                              *
-  *************************************************************************/
+  *************************************************************************/</span>
 
-  /* The output vector wasn't big enough. This should not happen, because we
-  used pcre2_match_data_create_from_pattern() above. */
+  <span class="cm">/* The output vector wasn't big enough. This should not happen, because we
+  used pcre2_match_data_create_from_pattern() above. */</span>
 
-  if (rc == 0)
-    printf("ovector was not big enough for all the captured substrings\n");
+  <span class="k">if</span> <span class="p">(</span><span class="n">rc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"ovector was not big enough for all the captured substrings</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
 
-  /* Since release 10.38 PCRE2 has locked out the use of \K in lookaround
+  <span class="cm">/* Since release 10.38 PCRE2 has locked out the use of \K in lookaround
   assertions. This is the recommended behaviour. However, the option
   PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK allows applications to re-enable the old
   behaviour. If that is set, it is possible to run patterns such as /(?=.\K)/
   that use \K in an assertion to set the start of a match later than its end.
   In this demonstration program, we show how to detect this case, although it
-  cannot arise because the option is never set. */
+  cannot arise because the option is never set. */</span>
 
-  if (ovector[0] &gt; ovector[1])
-  {
-    printf(
-        "\\K was used in an assertion to set the match start after its end.\n"
-        "From end to start the match was: %.*s\n",
-        (int)(ovector[0] - ovector[1]), (char *)(subject + ovector[1]));
-    printf("Run abandoned\n");
-    pcre2_match_data_free(match_data);
-    pcre2_code_free(re);
-    return 1;
-  }
+  <span class="k">if</span> <span class="p">(</span><span class="n">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+  <span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span>
+        <span class="s">"</span><span class="se">\\</span><span class="s">K was used in an assertion to set the match start after its end.</span><span class="se">\n</span><span class="s">"</span>
+        <span class="s">"From end to start the match was: %.*s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+        <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)(</span><span class="n">subject</span> <span class="o">+</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">1</span><span class="p">]));</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Run abandoned</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+    <span class="n">pcre2_match_data_free</span><span class="p">(</span><span class="n">match_data</span><span class="p">);</span>
+    <span class="n">pcre2_code_free</span><span class="p">(</span><span class="n">re</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
 
-  /* Show substrings stored in the output vector by number. Obviously, in a
-  real application you might want to do things other than print them. */
+  <span class="cm">/* Show substrings stored in the output vector by number. Obviously, in a
+  real application you might want to do things other than print them. */</span>
 
-  for (i = 0; i &lt; rc; i++)
-  {
-    PCRE2_SPTR substring_start = subject + ovector[2 * i];
-    PCRE2_SIZE substring_length = ovector[2 * i + 1] - ovector[2 * i];
-    printf("%2d: %.*s\n", i, (int)substring_length, (char *)substring_start);
-  }
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">rc</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">PCRE2_SPTR</span> <span class="n">substring_start</span> <span class="o">=</span> <span class="n">subject</span> <span class="o">+</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span><span class="p">];</span>
+    <span class="n">PCRE2_SIZE</span> <span class="n">substring_length</span> <span class="o">=</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span><span class="p">];</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"%2d: %.*s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">substring_length</span><span class="p">,</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">substring_start</span><span class="p">);</span>
+  <span class="p">}</span>
 
 
-  /**************************************************************************
+  <span class="cm">/**************************************************************************
   * That concludes the basic part of this demonstration program. We have    *
   * compiled a pattern, and performed a single match. The code that follows *
   * shows first how to access named substrings, and then how to code for    *
   * repeated matches on the same subject.                                   *
-  **************************************************************************/
+  **************************************************************************/</span>
 
-  /* See if there are any named substrings, and if so, show them by name.
-  First we have to extract the count of named parentheses from the pattern. */
+  <span class="cm">/* See if there are any named substrings, and if so, show them by name.
+  First we have to extract the count of named parentheses from the pattern. */</span>
 
-  (void)pcre2_pattern_info(
-      re,                   // the compiled pattern
-      PCRE2_INFO_NAMECOUNT, // get the number of named substrings
-      &amp;namecount);          // where to put the answer
+  <span class="kt">uint32_t</span> <span class="n">namecount</span><span class="p">;</span>
+  <span class="n">PCRE2_SPTR</span> <span class="n">name_table</span><span class="p">;</span>
+  <span class="kt">uint32_t</span> <span class="n">name_entry_size</span><span class="p">;</span>
+  <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">pcre2_pattern_info</span><span class="p">(</span>
+      <span class="n">re</span><span class="p">,</span>                   <span class="c1">// the compiled pattern</span>
+      <span class="n">PCRE2_INFO_NAMECOUNT</span><span class="p">,</span> <span class="c1">// get the number of named substrings</span>
+      <span class="o">&amp;</span><span class="n">namecount</span><span class="p">);</span>          <span class="c1">// where to put the answer</span>
 
-  if (namecount == 0)
-  {
-    printf("No named substrings\n");
-  }
-  else
-  {
-    PCRE2_SPTR tabptr;
-    printf("Named substrings\n");
+  <span class="k">if</span> <span class="p">(</span><span class="n">namecount</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"No named substrings</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">else</span>
+  <span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Named substrings</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
 
-    /* Before we can access the substrings, we must extract the table for
-    translating names to numbers, and the size of each entry in the table. */
+    <span class="cm">/* Before we can access the substrings, we must extract the table for
+    translating names to numbers, and the size of each entry in the table. */</span>
 
-    (void)pcre2_pattern_info(re,                   // the compiled pattern
-                             PCRE2_INFO_NAMETABLE, // address of the table
-                             &amp;name_table);         // where to put the answer
+    <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">pcre2_pattern_info</span><span class="p">(</span><span class="n">re</span><span class="p">,</span>                   <span class="c1">// the compiled pattern</span>
+                             <span class="n">PCRE2_INFO_NAMETABLE</span><span class="p">,</span> <span class="c1">// address of the table</span>
+                             <span class="o">&amp;</span><span class="n">name_table</span><span class="p">);</span>         <span class="c1">// where to put the answer</span>
 
-    (void)pcre2_pattern_info(
-        re,                       // the compiled pattern
-        PCRE2_INFO_NAMEENTRYSIZE, // size of each entry in the table
-        &amp;name_entry_size);        // where to put the answer
+    <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">pcre2_pattern_info</span><span class="p">(</span>
+        <span class="n">re</span><span class="p">,</span>                       <span class="c1">// the compiled pattern</span>
+        <span class="n">PCRE2_INFO_NAMEENTRYSIZE</span><span class="p">,</span> <span class="c1">// size of each entry in the table</span>
+        <span class="o">&amp;</span><span class="n">name_entry_size</span><span class="p">);</span>        <span class="c1">// where to put the answer</span>
 
-    /* Now we can scan the table and, for each entry, print the number, the
+    <span class="cm">/* Now we can scan the table and, for each entry, print the number, the
     name, and the substring itself. In the 8-bit library the number is held in
-    two bytes, most significant first. */
+    two bytes, most significant first. */</span>
 
-    tabptr = name_table;
-    for (i = 0; i &lt; namecount; i++)
-    {
-      int n = (tabptr[0] &lt;&lt; 8) | tabptr[1];
-      printf("(%d) %*s: %.*s\n", n, name_entry_size - 3, tabptr + 2,
-             (int)(ovector[2 * n + 1] - ovector[2 * n]),
-             subject + ovector[2 * n]);
-      tabptr += name_entry_size;
-    }
-  }
+    <span class="n">PCRE2_SPTR</span> <span class="n">tabptr</span> <span class="o">=</span> <span class="n">name_table</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">namecount</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">tabptr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="n">tabptr</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"(%d) %*s: %.*s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">name_entry_size</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span> <span class="n">tabptr</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+             <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span><span class="p">]),</span>
+             <span class="n">subject</span> <span class="o">+</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span><span class="p">]);</span>
+      <span class="n">tabptr</span> <span class="o">+=</span> <span class="n">name_entry_size</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
 
 
-  /*************************************************************************
+  <span class="cm">/*************************************************************************
   * If the "-g" option was given on the command line, we want to continue  *
   * to search for additional matches in the subject string, in a similar   *
   * way to the /g option in Perl. This turns out to be trickier than you   *
   * might think because of the possibility of matching an empty string.    *
   *                                                                        *
   * To help with this task, PCRE2 provides the pcre2_next_match() helper.  *
-  *************************************************************************/
+  *************************************************************************/</span>
 
-  if (!find_all) // Check for -g
-  {
-    /* Release the memory that was used for the match data and the pattern. */
-    pcre2_match_data_free(match_data);
-    pcre2_code_free(re);
-    return 0; // Exit the program.
-  }
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">find_all</span><span class="p">)</span> <span class="c1">// Check for -g</span>
+  <span class="p">{</span>
+    <span class="cm">/* Release the memory that was used for the match data and the pattern. */</span>
+    <span class="n">pcre2_match_data_free</span><span class="p">(</span><span class="n">match_data</span><span class="p">);</span>
+    <span class="n">pcre2_code_free</span><span class="p">(</span><span class="n">re</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// Exit the program.</span>
+  <span class="p">}</span>
 
-  /* Loop for second and subsequent matches */
+  <span class="cm">/* Loop for second and subsequent matches */</span>
 
-  ovector_last[0] = ovector[0];
-  ovector_last[1] = ovector[1];
+  <span class="n">PCRE2_SIZE</span> <span class="n">ovector_last</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+  <span class="n">ovector_last</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+  <span class="n">ovector_last</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
 
-  for (;;)
-  {
-    PCRE2_SIZE start_offset;
-    uint32_t options;
+  <span class="k">for</span> <span class="p">(;;)</span>
+  <span class="p">{</span>
+    <span class="n">PCRE2_SIZE</span> <span class="n">start_offset</span><span class="p">;</span>
+    <span class="kt">uint32_t</span> <span class="n">options</span><span class="p">;</span>
 
-    /* After each successful match, we use pcre2_next_match() to obtain the
-    match parameters for subsequent match attempts. */
+    <span class="cm">/* After each successful match, we use pcre2_next_match() to obtain the
+    match parameters for subsequent match attempts. */</span>
 
-    if (!pcre2_next_match(match_data, &amp;start_offset, &amp;options))
-      break;
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pcre2_next_match</span><span class="p">(</span><span class="n">match_data</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">start_offset</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">))</span>
+      <span class="k">break</span><span class="p">;</span>
 
-    /* Run the next matching operation */
+    <span class="cm">/* Run the next matching operation */</span>
 
-    rc = pcre2_match(re,             // the compiled pattern
-                     subject,        // the subject string
-                     subject_length, // the length of the subject
-                     start_offset,   // starting offset in the subject
-                     options,        // options
-                     match_data,     // block for storing the result
-                     NULL);          // use default match context
+    <span class="n">rc</span> <span class="o">=</span> <span class="n">pcre2_match</span><span class="p">(</span><span class="n">re</span><span class="p">,</span>             <span class="c1">// the compiled pattern</span>
+                     <span class="n">subject</span><span class="p">,</span>        <span class="c1">// the subject string</span>
+                     <span class="n">subject_length</span><span class="p">,</span> <span class="c1">// the length of the subject</span>
+                     <span class="n">start_offset</span><span class="p">,</span>   <span class="c1">// starting offset in the subject</span>
+                     <span class="n">options</span><span class="p">,</span>        <span class="c1">// options</span>
+                     <span class="n">match_data</span><span class="p">,</span>     <span class="c1">// block for storing the result</span>
+                     <span class="nb">NULL</span><span class="p">);</span>          <span class="c1">// use default match context</span>
 
-    /* If this match attempt fails, exit the loop for subsequent matches. */
+    <span class="cm">/* If this match attempt fails, exit the loop for subsequent matches. */</span>
 
-    if (rc == PCRE2_ERROR_NOMATCH)
-      break;
+    <span class="k">if</span> <span class="p">(</span><span class="n">rc</span> <span class="o">==</span> <span class="n">PCRE2_ERROR_NOMATCH</span><span class="p">)</span>
+      <span class="k">break</span><span class="p">;</span>
 
-    /* Other matching errors are not recoverable. */
+    <span class="cm">/* Other matching errors are not recoverable. */</span>
 
-    if (rc &lt; 0)
-    {
-      printf("Matching error %d\n", rc);
-      pcre2_match_data_free(match_data);
-      pcre2_code_free(re);
-      return 1;
-    }
+    <span class="k">if</span> <span class="p">(</span><span class="n">rc</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"Matching error %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">rc</span><span class="p">);</span>
+      <span class="n">pcre2_match_data_free</span><span class="p">(</span><span class="n">match_data</span><span class="p">);</span>
+      <span class="n">pcre2_code_free</span><span class="p">(</span><span class="n">re</span><span class="p">);</span>
+      <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
 
-    /* This demonstration program depends on pcre2_next_match() to ensure that
+    <span class="cm">/* This demonstration program depends on pcre2_next_match() to ensure that
     the loop for second and subsequent matches does not run forever. However,
     it would be robust practice for a production application to verify this.
     The following block of code shows how to do this. This error case is not
@@ -837,93 +913,86 @@ main(int argc, char **argv)
     advanced, or that we have an empty match touching the end of a previous
     non-empty match. See the API documentation for guidance if your
     application uses PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK and searches for
-    multiple matches. */
+    multiple matches. */</span>
 
-    if (!(ovector[1] &gt; ovector_last[1] ||
-          (ovector[1] == ovector[0] &amp;&amp; ovector_last[1] &gt; ovector_last[0] &amp;&amp;
-           ovector[1] == ovector_last[1])))
-    {
-      printf(
-          "\\K was used in an assertion to yield non-advancing matches.\n");
-      printf("Run abandoned\n");
-      pcre2_match_data_free(match_data);
-      pcre2_code_free(re);
-      return 1;
-    }
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">ovector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ovector_last</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">||</span>
+          <span class="p">(</span><span class="n">ovector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">ovector_last</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ovector_last</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;&amp;</span>
+           <span class="n">ovector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">ovector_last</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+    <span class="p">{</span>
+      <span class="n">printf</span><span class="p">(</span>
+          <span class="s">"</span><span class="se">\\</span><span class="s">K was used in an assertion to yield non-advancing matches.</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"Run abandoned</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+      <span class="n">pcre2_match_data_free</span><span class="p">(</span><span class="n">match_data</span><span class="p">);</span>
+      <span class="n">pcre2_code_free</span><span class="p">(</span><span class="n">re</span><span class="p">);</span>
+      <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
 
-    ovector_last[0] = ovector[0];
-    ovector_last[1] = ovector[1];
+    <span class="n">ovector_last</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="n">ovector_last</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
 
-    /* Match succeeded. */
+    <span class="cm">/* Match succeeded. */</span>
 
-    printf("\nMatch succeeded again at offset %d\n", (int)ovector[0]);
+    <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">Match succeeded again at offset %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
 
-    /* The match succeeded, but the output vector wasn't big enough. This
-    should not happen. */
+    <span class="cm">/* The match succeeded, but the output vector wasn't big enough. This
+    should not happen. */</span>
 
-    if (rc == 0)
-      printf("ovector was not big enough for all the captured substrings\n");
+    <span class="k">if</span> <span class="p">(</span><span class="n">rc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"ovector was not big enough for all the captured substrings</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
 
-    /* We guard against patterns such as /(?=.\K)/ that use \K in an assertion
+    <span class="cm">/* We guard against patterns such as /(?=.\K)/ that use \K in an assertion
     to set the start of a match later than its end. As explained above, this
     case should not occur because this demonstration program does not set the
     PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK option, however, we do include code
-    showing how to detect it. */
+    showing how to detect it. */</span>
 
-    if (ovector[0] &gt; ovector[1])
-    {
-      printf("\\K was used in an assertion to set the match start after its "
-             "end.\n"
-             "From end to start the match was: %.*s\n",
-             (int)(ovector[0] - ovector[1]), (char *)(subject + ovector[1]));
-      printf("Run abandoned\n");
-      pcre2_match_data_free(match_data);
-      pcre2_code_free(re);
-      return 1;
-    }
+    <span class="k">if</span> <span class="p">(</span><span class="n">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="p">{</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\\</span><span class="s">K was used in an assertion to set the match start after its "</span>
+             <span class="s">"end.</span><span class="se">\n</span><span class="s">"</span>
+             <span class="s">"From end to start the match was: %.*s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+             <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)(</span><span class="n">subject</span> <span class="o">+</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">1</span><span class="p">]));</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"Run abandoned</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+      <span class="n">pcre2_match_data_free</span><span class="p">(</span><span class="n">match_data</span><span class="p">);</span>
+      <span class="n">pcre2_code_free</span><span class="p">(</span><span class="n">re</span><span class="p">);</span>
+      <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
 
-    /* As before, show substrings stored in the output vector by number, and
-    then also any named substrings. */
+    <span class="cm">/* As before, show substrings stored in the output vector by number, and
+    then also any named substrings. */</span>
 
-    for (i = 0; i &lt; rc; i++)
-    {
-      PCRE2_SPTR substring_start = subject + ovector[2 * i];
-      size_t substring_length = ovector[2 * i + 1] - ovector[2 * i];
-      printf("%2d: %.*s\n", i, (int)substring_length,
-             (char *)substring_start);
-    }
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">rc</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">PCRE2_SPTR</span> <span class="n">substring_start</span> <span class="o">=</span> <span class="n">subject</span> <span class="o">+</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span><span class="p">];</span>
+      <span class="kt">size_t</span> <span class="n">substring_length</span> <span class="o">=</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">i</span><span class="p">];</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"%2d: %.*s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">substring_length</span><span class="p">,</span>
+             <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">substring_start</span><span class="p">);</span>
+    <span class="p">}</span>
 
-    if (namecount == 0)
-    {
-      printf("No named substrings\n");
-    }
-    else
-    {
-      PCRE2_SPTR tabptr = name_table;
-      printf("Named substrings\n");
-      for (i = 0; i &lt; namecount; i++)
-      {
-        int n = (tabptr[0] &lt;&lt; 8) | tabptr[1];
-        printf("(%d) %*s: %.*s\n", n, name_entry_size - 3, tabptr + 2,
-               (int)(ovector[2 * n + 1] - ovector[2 * n]),
-               subject + ovector[2 * n]);
-        tabptr += name_entry_size;
-      }
-    }
-  } // End of loop to find second and subsequent matches
+    <span class="k">if</span> <span class="p">(</span><span class="n">namecount</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"No named substrings</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+      <span class="n">PCRE2_SPTR</span> <span class="n">tabptr</span> <span class="o">=</span> <span class="n">name_table</span><span class="p">;</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"Named substrings</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">namecount</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+      <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">tabptr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="n">tabptr</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"(%d) %*s: %.*s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">name_entry_size</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span> <span class="n">tabptr</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+               <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span><span class="p">]),</span>
+               <span class="n">subject</span> <span class="o">+</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span><span class="p">]);</span>
+        <span class="n">tabptr</span> <span class="o">+=</span> <span class="n">name_entry_size</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span> <span class="c1">// End of loop to find second and subsequent matches</span>
 
-  printf("\n");
+  <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
 
-  pcre2_match_data_free(match_data);
-  pcre2_code_free(re);
-  return 0;
-}
+  <span class="n">pcre2_match_data_free</span><span class="p">(</span><span class="n">match_data</span><span class="p">);</span>
+  <span class="n">pcre2_code_free</span><span class="p">(</span><span class="n">re</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 
-/* End of pcre2demo.c */</code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-</body>
-</html>
+<span class="cm">/* End of pcre2demo.c */</span></code></pre></div></section></div></body></html>

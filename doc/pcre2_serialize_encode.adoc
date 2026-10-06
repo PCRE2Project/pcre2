@@ -4,7 +4,7 @@
 :manpurpose: serialize compiled patterns for save/restore
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 13 August 2018
 :revdate: 13 August 2018
 

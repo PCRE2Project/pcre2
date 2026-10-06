@@ -28,6 +28,19 @@ jobs:
           sudo apt-get -qq update
           sudo apt-get -qq install -y hugo
 
+      # Install Asciidoctor, the semantic HTML converter, and the Rouge source highlighter
+      - name: Install Asciidoctor, HTML5s, and Rouge
+        run: |
+          sudo apt update
+          sudo apt install -y ruby ruby-dev
+          gem install --user-install asciidoctor asciidoctor-html5s rouge
+          export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
+          export PATH="$GEM_HOME/bin:$PATH"
+          echo "Ruby version: $(ruby -v)"
+          echo "Asciidoctor version: $(asciidoctor --version)"
+          echo "Rouge version: $(rouge --version)"
+          echo "$GEM_HOME/bin" >> "$GITHUB_PATH"
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -64,4 +77,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

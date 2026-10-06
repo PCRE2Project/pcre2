@@ -4,10 +4,10 @@
 .\" Generator: Asciidoctor 2.0.26
 .\"      Date: 12 July 2017
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_SET_GLOB_ESCAPE" "3" "12 July 2017" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_SET_GLOB_ESCAPE" "3" "12 July 2017" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -46,8 +46,10 @@ pcre2_set_glob_escape \- set glob escape character
 This function is part of an experimental set of pattern conversion functions.
 It sets the escape character that is used when converting globs. The second
 argument must either be zero (meaning there is no escape character) or a
-punctuation character whose code point is less than 256. The default is grave
-accent if running under Windows, otherwise backslash. The result of the
+supported punctuation character. These are the ASCII punctuation characters
+(or their EBCDIC equivalents), except \f(CR!\fP, \f(CR*\fP, \f(CR\-\fP, \f(CR:\fP, \f(CR?\fP, \f(CR[\fP, \f(CR]\fP, and \f(CR^\fP,
+which are reserved for glob wildcard or character\-class syntax.
+The default is grave accent if running under Windows, otherwise backslash. The result of the
 function is zero for success or \fBPCRE2_ERROR_BADDATA\fP if the second argument is
 invalid.
 .sp

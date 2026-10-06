@@ -306,6 +306,7 @@ needs to be when compiling one of the libraries). */
 #include "pcre2.h"
 #include "pcre2posix.h"
 #include "pcre2_internal.h"
+#include "pcre2_util.h"
 
 /* We need access to some of the data tables that PCRE2 uses. The previous
 definition of PCRE2_PCRE2TEST makes some minor changes in the files. The
@@ -1201,6 +1202,8 @@ colour_end(FILE *f)
 }
 
 /* cfprintf is like fprintf but takes a colour to wrap its output. */
+
+PCRE2_FORMAT_PRINTF(3, 4)
 static int
 cfprintf(int clr, FILE *file, const char *fmt, ...)
 {
@@ -2459,7 +2462,7 @@ show_controls(int clr, uint32_t controls, uint32_t controls2, const char *before
   cfprintf(
       clr, outfile,
       "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%"
-      "s%s%s%s%s%s%s",
+      "s%s%s%s%s%s%s%s",
       before, ((controls & CTL_AFTERTEXT) != 0) ? " aftertext" : "",
       ((controls & CTL_ALLAFTERTEXT) != 0) ? " allaftertext" : "",
       ((controls & CTL_ALLCAPTURES) != 0) ? " allcaptures" : "",
@@ -3418,17 +3421,17 @@ c_option(const char *arg)
   printf("  \\C is %ssupported\n", optval ? "not " : "");
   printf("  Internal link size\n");
   (void)pcre2_config(PCRE2_CONFIG_LINKSIZE, &optval);
-  printf("    Requested = %d\n", optval);
+  printf("    Requested = %lu\n", (unsigned long)optval);
   (void)pcre2_config(PCRE2_CONFIG_EFFECTIVE_LINKSIZE, &optval);
-  printf("    Effective = %d\n", optval);
+  printf("    Effective = %lu\n", (unsigned long)optval);
   (void)pcre2_config(PCRE2_CONFIG_PARENSLIMIT, &optval);
-  printf("  Parentheses nest limit = %d\n", optval);
+  printf("  Parentheses nest limit = %lu\n", (unsigned long)optval);
   (void)pcre2_config(PCRE2_CONFIG_HEAPLIMIT, &optval);
-  printf("  Default heap limit = %d kibibytes\n", optval);
+  printf("  Default heap limit = %lu kibibytes\n", (unsigned long)optval);
   (void)pcre2_config(PCRE2_CONFIG_MATCHLIMIT, &optval);
-  printf("  Default match limit = %d\n", optval);
+  printf("  Default match limit = %lu\n", (unsigned long)optval);
   (void)pcre2_config(PCRE2_CONFIG_DEPTHLIMIT, &optval);
-  printf("  Default depth limit = %d\n", optval);
+  printf("  Default depth limit = %lu\n", (unsigned long)optval);
 
 #if defined SUPPORT_LIBREADLINE
   printf("  pcre2test has libreadline support\n");

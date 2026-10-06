@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -e
+
 # Script to prepare the files for building a PCRE2 release. It does some
 # processing of the documentation and detrails files.
 
@@ -48,13 +50,11 @@ echo Processing documentation
 
 echo "Making pcre2demo.adoc"
 ../maint/AsciidocDemo.rb
-if [ $? != 0 ] ; then exit 1; fi
 
 # Generate the HTML documentation index from the manpage metadata.
 
 echo "Making index.adoc"
 ../maint/AsciidocIndex.rb
-if [ $? != 0 ] ; then exit 1; fi
 
 # Verify the version number in AsciiDoc manpages and render them before their
 # generated manpages are needed by the text and warning checks below.
@@ -71,7 +71,7 @@ done
 
 echo "Making HTML and manpage documentation"
 mkdir -p html
-rm -r html/*
+find html -mindepth 1 -delete
 mkdir -p man
 rm -f man/*
 cp ../README html/README.txt
@@ -80,9 +80,10 @@ cp ../NON-AUTOTOOLS-BUILD html/NON-AUTOTOOLS-BUILD.txt
 for file in *.adoc ; do
   if [ "$file" = "index.adoc" ] ; then
     echo "  Making index.html"
-    asciidoctor --failure-level WARN -v --backend html5 --attribute nofooter \
+    asciidoctor --failure-level WARN -v \
+      --require ../maint/AsciidocConverterPcre2.rb \
+      --backend html5 \
       --out-file html/index.html index.adoc
-    if [ $? != 0 ] ; then exit 1; fi
     continue
   fi
 
@@ -94,7 +95,6 @@ for file in *.adoc ; do
   fi
   echo "  Making $base.$section and $base.html"
   ../maint/AsciidocRender "$file" "man/$base.$section" "html/$base.html"
-  if [ $? != 0 ] ; then exit 1; fi
 done
 
 # Make Text form of the documentation. It needs some mangling to make it
@@ -143,7 +143,10 @@ done
 echo "Validating man pages"
 if man --help 2>/dev/null | grep -q warnings ; then
   for file in man/*.1 man/*.3 ; do
-    MAN_OUT=`MANROFFSEQ='' MANWIDTH=$MANPAGE_WIDTH man --warnings=w,all -E UTF-8 -l -Tutf8 -Z "$file" 2>&1 >/dev/null`
+    if ! MAN_OUT=$(MANROFFSEQ='' MANWIDTH=$MANPAGE_WIDTH man --warnings=w,all -E UTF-8 -l -Tutf8 -Z "$file" 2>&1 >/dev/null) ; then
+      printf "Running man failed:\n%s\n" "$MAN_OUT" >&2
+      exit 1
+    fi
     if [ "$MAN_OUT" != "" ]; then
       printf "Running man generated warnings:\n%s\n" "$MAN_OUT"
       exit 1
@@ -277,8 +280,7 @@ perl maint/CheckTxt "${txt_files[@]}"
 perl maint/CheckTxt -ascii "${c_files[@]}"
 perl maint/CheckTxt -crlf "${crlf_files[@]}"
 
-SLJIT_COMMIT=$(git rev-parse HEAD:deps/sljit 2>/dev/null)
-if [ -z "$SLJIT_COMMIT" ] ; then
+if ! SLJIT_COMMIT=$(git rev-parse HEAD:deps/sljit 2>/dev/null) || [ -z "$SLJIT_COMMIT" ] ; then
   echo "Warning: could not find deps/sljit in the tree; not updating build.zig.zon"
 elif grep -q "sljit.git#$SLJIT_COMMIT" build.zig.zon ; then
   echo "SLJIT pinned in build.zig.zon to $SLJIT_COMMIT"
@@ -287,7 +289,6 @@ elif ! command -v zig >/dev/null 2>&1 ; then
 else
   echo "Updating SLJIT pin in build.zig.zon to $SLJIT_COMMIT"
   zig fetch --save=sljit "git+https://github.com/zherczeg/sljit.git#$SLJIT_COMMIT"
-  if [ $? != 0 ] ; then exit 1; fi
 fi
 
 # Verify the version number in the Bazel file

@@ -614,8 +614,8 @@ memory control. */
 
 /* WARNING: if this is ever changed, code in pcre2_substitute.c will have to be
 changed because it builds a general context "by hand" in order to avoid the
-malloc() call in pcre2_general_context)_create(). There is also code in
-pcre2_match.c that makes the same assumption. */
+malloc() call in pcre2_general_context_create(). There is also a cast in
+pcre2_match_data_create_from_pattern() that makes the same assumption. */
 
 typedef struct pcre2_real_general_context {
   pcre2_memctl memctl;

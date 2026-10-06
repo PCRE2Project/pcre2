@@ -84,6 +84,8 @@ there will be many irrelevant consequential errors. */
 #include <stdlib.h>
 #include <string.h>
 
+#include "pcre2_util.h"
+
 /* Macros to make boolean values more obvious. The #ifndef is to pacify
 compiler warnings in environments where these macros are defined elsewhere.
 Unfortunately, there is no way to do the same for the typedef. */
@@ -93,12 +95,6 @@ typedef int BOOL;
 #define FALSE 0
 #define TRUE  1
 #endif
-
-/* Helper macro for static (compile-time) assertions. Can be used inside
-functions, or at the top-level of a file. */
-#define STATIC_ASSERT_JOIN(a, b) a##b
-#define STATIC_ASSERT(cond, msg) \
-  typedef int STATIC_ASSERT_JOIN(static_assertion_, msg)[(cond) ? 1 : -1]
 
 /* Valgrind (memcheck) support */
 
@@ -2348,8 +2344,6 @@ extern BOOL _pcre2_xclass(uint32_t, PCRE2_SPTR, const uint8_t *, BOOL);
 extern BOOL _pcre2_eclass(uint32_t, PCRE2_SPTR, PCRE2_SPTR, const uint8_t *, BOOL);
 
 #endif /* PCRE2_CODE_UNIT_WIDTH */
-
-#include "pcre2_util.h"
 
 #endif /* PCRE2_INTERNAL_H_IDEMPOTENT_GUARD */
 

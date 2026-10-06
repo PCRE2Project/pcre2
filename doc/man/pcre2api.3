@@ -4,10 +4,10 @@
 .\" Generator: Asciidoctor 2.0.26
 .\"      Date: 08 December 2025
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2API" "3" "08 December 2025" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2API" "3" "08 December 2025" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -93,6 +93,9 @@ document for an overview of all the PCRE2 documentation.
 \fBPCRE2_SIZE\fP *pcre2_get_ovector_pointer(\fBpcre2_match_data\fP *\fImatch_data\fP);
 
 \fBPCRE2_SIZE\fP pcre2_get_startchar(\fBpcre2_match_data\fP *\fImatch_data\fP);
+
+\fBPCRE2_SPTR\fP pcre2_get_subject(\fBpcre2_match_data\fP *\fImatch_data\fP,
+                             \fBPCRE2_SIZE\fP *\fIlengthptr\fP);
 .fam
 .fi
 .ss \n[.ss] 0
@@ -126,7 +129,7 @@ document for an overview of all the PCRE2 documentation.
 
 \fBvoid\fP pcre2_compile_context_free(\fBpcre2_compile_context\fP *\fIccontext\fP);
 
-\fBint\fP pcre2_get_bsr(\fBpcre2_compile_context\fP *\fIccontext\fP, \fBuint32_t\fP *\fIlength\fP);
+\fBint\fP pcre2_get_bsr(\fBpcre2_compile_context\fP *\fIccontext\fP, \fBuint32_t\fP *\fIvalue\fP);
 
 \fBint\fP pcre2_get_max_pattern_length(\fBpcre2_compile_context\fP *\fIccontext\fP,
                                  \fBPCRE2_SIZE\fP *\fIlength\fP);
@@ -575,7 +578,6 @@ been matched by pcre2_match(). They are:
 .\}
 pcre2_substring_copy_byname()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -586,7 +588,6 @@ pcre2_substring_copy_byname()
 .\}
 pcre2_substring_copy_bynumber()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -597,7 +598,6 @@ pcre2_substring_copy_bynumber()
 .\}
 pcre2_substring_get_byname()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -608,7 +608,6 @@ pcre2_substring_get_byname()
 .\}
 pcre2_substring_get_bynumber()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -619,7 +618,6 @@ pcre2_substring_get_bynumber()
 .\}
 pcre2_substring_list_get()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -630,7 +628,6 @@ pcre2_substring_list_get()
 .\}
 pcre2_substring_length_byname()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -641,7 +638,6 @@ pcre2_substring_length_byname()
 .\}
 pcre2_substring_length_bynumber()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -652,7 +648,6 @@ pcre2_substring_length_bynumber()
 .\}
 pcre2_substring_nametable_scan()
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -841,10 +836,14 @@ reasonable size, and at the same time to keep the API extensible, "uncommon"
 parameters are passed to certain functions in a "context" instead of
 directly. A context is just a block of memory that holds the parameter values.
 Applications that do not need to adjust any of the context parameters can pass
-\fBNULL\fP when a context pointer is required.
+\fBNULL\fP to operations that accept a context to select their defaults. The
+context setter and getter functions require a non\-\fBNULL\fP context.
+Getter output pointers must also be non\-\fBNULL\fP.
 .sp
-There are three different types of context: a general context that is relevant
-for several PCRE2 operations, a compile\-time context, and a match\-time context.
+The main API uses a general context that is relevant for several PCRE2
+operations, a compile\-time context, and a match\-time context. The experimental
+pattern conversion API also has a conversion context, described in
+\f(CRpcre2convert\fP.
 .SS "The general context"
 .sp
 At present, this context just contains pointers to (and data for) external
@@ -928,7 +927,6 @@ following compile\-time parameters:
 .\}
 What \f(CR\(rsR\fP matches (Unicode newlines or CR, LF, CRLF only)
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -939,7 +937,6 @@ What \f(CR\(rsR\fP matches (Unicode newlines or CR, LF, CRLF only)
 .\}
 PCRE2\(cqs character tables
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -950,7 +947,6 @@ PCRE2\(cqs character tables
 .\}
 The newline character sequence
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -961,7 +957,6 @@ The newline character sequence
 .\}
 The compile time nested parentheses limit
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -972,7 +967,6 @@ The compile time nested parentheses limit
 .\}
 The maximum length of the pattern string
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -983,7 +977,6 @@ The maximum length of the pattern string
 .\}
 The extra options bits (none set by default)
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -1017,17 +1010,19 @@ A compile context is created, copied, and freed by the following functions:
 .sp
 A compile context is created with default values for its parameters. These can
 be changed by calling the following functions, which return 0 on success, or
-\fBPCRE2_ERROR_BADDATA\fP if invalid data is detected.
+\fBPCRE2_ERROR_BADDATA\fP if invalid data is detected. The function
+pcre2_set_optimize() returns \fBPCRE2_ERROR_BADOPTION\fP for an invalid
+\fIdirective\fP argument.
 .sp
 The following functions get, respectively, the convention for processing \f(CR\(rsR\fP,
 the maximum pattern length, the newline convention, and the maximum depth of
-nested parentheses. They return 0 on success or \fBPCRE2_ERROR_NULL\fP if either
-argument is \fBNULL\fP.
+nested parentheses. They return 0 and require both arguments to be
+non\-\fBNULL\fP.
 .sp
 .ss \n[.ss]
 .nf
 .fam C
-\fBint\fP pcre2_get_bsr(\fBpcre2_compile_context\fP *\fIccontext\fP, \fBuint32_t\fP *\fIlength\fP);
+\fBint\fP pcre2_get_bsr(\fBpcre2_compile_context\fP *\fIccontext\fP, \fBuint32_t\fP *\fIvalue\fP);
 
 \fBint\fP pcre2_get_max_pattern_length(\fBpcre2_compile_context\fP *\fIccontext\fP,
                                  \fBPCRE2_SIZE\fP *\fIlength\fP);
@@ -1068,9 +1063,11 @@ pcre2_dfa_match().
 .fi
 .ss \n[.ss] 0
 .sp
-The value must be the result of a call to pcre2_maketables(), whose only
-argument is a general context. This function builds a set of character tables
-in the current locale.
+The value may be \fBNULL\fP to select the default tables; the result of
+pcre2_maketables(); or another valid set of PCRE2 character tables.
+The pcre2_maketables() function takes a general context and builds tables
+in the current locale. Supplied tables must remain valid while the context or
+patterns compiled with them are in use.
 .sp
 .ss \n[.ss]
 .nf
@@ -1120,6 +1117,11 @@ more memory, an error is generated. This facility is provided so that
 applications that accept patterns from external sources can limit the amount of
 memory they use. The default is the largest number that a \fBPCRE2_SIZE\fP variable
 can hold, which is effectively unlimited.
+.sp
+This limit excludes the fixed, platform\-dependent compiled\-pattern header.
+Therefore, \fBPCRE2_INFO_SIZE\fP can report a larger total allocation. This limit
+does not restrict temporary compilation workspace, JIT code, or separate character
+tables.
 .sp
 .ss \n[.ss]
 .nf
@@ -1337,7 +1339,6 @@ A match context is required if you want to:
 .\}
 Set up a callout function
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -1348,7 +1349,6 @@ Set up a callout function
 .\}
 Set an offset limit for matching an unanchored pattern
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -1359,7 +1359,6 @@ Set an offset limit for matching an unanchored pattern
 .\}
 Change the limit on the amount of heap used when matching
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -1370,7 +1369,6 @@ Change the limit on the amount of heap used when matching
 .\}
 Change the backtracking match limit
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -1381,7 +1379,6 @@ Change the backtracking match limit
 .\}
 Change the backtracking depth limit
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -1417,8 +1414,8 @@ be changed by calling the following functions, which return 0 on success, or
 \fBPCRE2_ERROR_BADDATA\fP if invalid data is detected.
 .sp
 The following functions get, respectively, the backtracking heap limit, match
-limit, depth limit, and offset limit. They return 0 on success or
-\fBPCRE2_ERROR_NULL\fP if either argument is \fBNULL\fP.
+limit, depth limit, and offset limit. They return 0 and require both arguments
+to be non\-\fBNULL\fP.
 .sp
 .ss \n[.ss]
 .nf
@@ -1698,7 +1695,7 @@ is placed. If \fBNULL\fP is passed, the function returns the amount of memory th
 needed for the requested information. For calls that return numerical values,
 the value is in bytes; when requesting these values, \fIwhere\fP should point
 to appropriately aligned memory. For calls that return strings, the required
-length is given in code units, not counting the terminating zero.
+length is given in code units, including the terminating zero.
 .sp
 When requesting information, the returned value from pcre2_config() is
 non\-negative on success, or the negative error code \fBPCRE2_ERROR_BADOPTION\fP if
@@ -1858,7 +1855,7 @@ This parameter is obsolete and should not be used in new code. The output is a
 .ad l
 The output is a \fBuint32_t\fP integer that gives the length of PCRE2\(cqs character
 processing tables in bytes. For details of these tables see the
-section on locale support
+section LOCALE SUPPORT
 below.
 .TP 26
 \fBPCRE2_CONFIG_UNICODE_VERSION\fP
@@ -2087,7 +2084,6 @@ makes PCRE2\(cqs behaviour more like ECMAScript (JavaScript). When it is set:
 \f(CR\(rsU\fP matches an upper case \f(CRU\fP character; by default \f(CR\(rsU\fP causes a compile
 time error (Perl uses \f(CR\(rsU\fP to upper case subsequent characters).
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 2.\h'+01'\c
@@ -2101,7 +2097,6 @@ hexadecimal digits, in which case the hexadecimal number defines the code point
 to match. By default, \f(CR\(rsu\fP causes a compile time error (Perl uses it to upper
 case the following character).
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 3.\h'+01'\c
@@ -2515,8 +2510,8 @@ This option has two effects. Firstly, it change the way PCRE2 processes \f(CR\(r
 default, only ASCII characters are recognized, but if \fBPCRE2_UCP\fP is set, Unicode
 properties are used to classify characters. There are some PCRE2_EXTRA
 options (see below) that add finer control to this behaviour. More details are
-given in the section on
-generic character types
+given in the section
+Generic character types
 in the
 \f(CRpcre2pattern\fP
 page.
@@ -2986,66 +2981,61 @@ following are true:
 .sp
 .RS 4
 .ie n \{\
-\h'-04' 1.\h'+01'\c
+\h'-04' a.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 1." 4.2
+.  IP " a." 4.2
 .\}
 \f(CR.*\fP is not in an atomic group
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 2.\h'+01'\c
+\h'-04' b.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 2." 4.2
+.  IP " b." 4.2
 .\}
 \f(CR.*\fP is not in a capture group that is the subject of a backreference
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 3.\h'+01'\c
+\h'-04' c.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 3." 4.2
+.  IP " c." 4.2
 .\}
 \fBPCRE2_DOTALL\fP is in force for \f(CR.*\fP
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 4.\h'+01'\c
+\h'-04' d.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 4." 4.2
+.  IP " d." 4.2
 .\}
 Neither \f(CR(*PRUNE)\fP nor \f(CR(*SKIP)\fP appears in the pattern
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 5.\h'+01'\c
+\h'-04' e.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 5." 4.2
+.  IP " e." 4.2
 .\}
 \fBPCRE2_NO_DOTSTAR_ANCHOR\fP is not set
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 6.\h'+01'\c
+\h'-04' f.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 6." 4.2
+.  IP " f." 4.2
 .\}
 Dotstar anchoring has not been disabled with \fBPCRE2_DOTSTAR_ANCHOR_OFF\fP
 .RE
@@ -3244,7 +3234,7 @@ The map consists of a number of fixed\-size entries. \fBPCRE2_INFO_NAMECOUNT\fP 
 .sp
 The names are in alphabetical order. If \f(CR(?|\fP is used to create multiple capture
 groups with the same number, as described in the
-section on duplicate group numbers
+section Duplicate group numbers
 in the
 \f(CRpcre2pattern\fP
 page, the groups may be given the same name, but there is only one entry in the
@@ -3439,10 +3429,10 @@ same allocator that was used for the compiled pattern (custom or default).
 .sp
 A match data block can be used many times, with the same or different compiled
 patterns. You can extract information from a match data block after a match
-operation has finished, using functions that are described in the sections on
-matched strings
+operation has finished, using functions that are described in the sections
+HOW pcre2_match() RETURNS A STRING AND CAPTURED SUBSTRINGS
 and
-other match data
+OTHER INFORMATION ABOUT A MATCH
 below.
 .sp
 When a call of pcre2_match() fails, valid data is available in the match
@@ -3936,6 +3926,9 @@ had. After a failed match attempt, the contents of the ovector are unchanged.
 \fBPCRE2_SPTR\fP pcre2_get_mark(\fBpcre2_match_data\fP *\fImatch_data\fP);
 
 \fBPCRE2_SIZE\fP pcre2_get_startchar(\fBpcre2_match_data\fP *\fImatch_data\fP);
+
+\fBPCRE2_SPTR\fP pcre2_get_subject(\fBpcre2_match_data\fP *\fImatch_data\fP,
+                             \fBPCRE2_SIZE\fP *\fIlengthptr\fP);
 .fam
 .fi
 .ss \n[.ss] 0
@@ -3944,6 +3937,21 @@ As well as the offsets in the ovector, other information about a match is
 retained in the match data block and can be retrieved by the above functions in
 appropriate circumstances. If they are called at other times, the result is
 undefined.
+.sp
+After a successful match, a partial match (\fBPCRE2_ERROR_PARTIAL\fP), or a
+failure to match (\fBPCRE2_ERROR_NOMATCH\fP), pcre2_get_subject() returns
+the subject pointer that was passed to the matching function. For a successful
+match with \fBPCRE2_COPY_MATCHED_SUBJECT\fP, it returns a pointer to a copy of
+the subject that is owned by the match data block instead (except for
+pcre2_jit_match() which ignores \fBPCRE2_COPY_MATCHED_SUBJECT\fP). The copy
+is exactly the same length as the subject that was passed to the matching
+function and is additionally zero\-terminated. The copy is freed when the match
+data block is reused for another match or is freed. If there is any match error
+other than \fBPCRE2_ERROR_NOMATCH\fP or \fBPCRE2_ERROR_PARTIAL\fP,
+pcre2_get_subject() may return \fBNULL\fP. If the \fIlengthptr\fP argument
+is not \fBNULL\fP, it receives the length in code units of the string which is
+returned, excluding the terminating zero (the subject string may contain
+embedded NUL characters).
 .sp
 After a successful match, a partial match (\fBPCRE2_ERROR_PARTIAL\fP), or a failure
 to match (\fBPCRE2_ERROR_NOMATCH\fP), a mark name may be available. The function
@@ -4136,14 +4144,22 @@ auxiliary) can be obtained by calling pcre2_get_error_message(). The code
 is passed as the first argument, with the remaining two arguments specifying a
 code unit buffer and its length in code units, into which the text message is
 placed. The message is returned in code units of the appropriate width for the
-library that is being used.
+library that is being used. An error code of zero is also recognized.
 .sp
 The returned message is terminated with a trailing zero, and the function
 returns the number of code units used, excluding the trailing zero. If the
 error number is unknown, the negative error code \fBPCRE2_ERROR_BADDATA\fP is
-returned. If the buffer is too small, the message is truncated (but still with
-a trailing zero), and the negative error code \fBPCRE2_ERROR_NOMEMORY\fP is returned.
+returned without changing the buffer, even when \fIbufflen\fP is zero.
+If the buffer is too small, the message is truncated (but still with
+a trailing zero, assuming \fIbufflen\fP is not zero), and the negative error code
+\fBPCRE2_ERROR_NOMEMORY\fP is returned.
+With a recognized code and zero capacity, no output is written. The buffer
+pointer may be \fBNULL\fP only when its capacity is zero.
 None of the messages is very long; a buffer size of 120 code units is ample.
+.sp
+No arithmetic (including unary negation) should ever be performed on error codes
+by clients. For any PCRE2 function that returns error codes, that code should be
+handled as\-is.
 .SH "ITERATING OVER ALL MATCHES"
 .sp
 .ss \n[.ss]
@@ -4212,34 +4228,32 @@ ensure this are that either:
 .sp
 .RS 4
 .ie n \{\
-\h'-04' 1.\h'+01'\c
+\h'-04' a.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 1." 4.2
+.  IP " a." 4.2
 .\}
 pcre2_next_match() returns 0 (false); or
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 2.\h'+01'\c
+\h'-04' b.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 2." 4.2
+.  IP " b." 4.2
 .\}
 the returned \f(CR*pstart_offset\fP is strictly greater than the previous
 \f(CRstart_offset\fP; or
 .RE
-.sp
 .RS 4
 .ie n \{\
-\h'-04' 3.\h'+01'\c
+\h'-04' c.\h'+01'\c
 .\}
 .el \{\
 .  sp -1
-.  IP " 3." 4.2
+.  IP " c." 4.2
 .\}
 if the previous match was a successful match of the empty string, the returned
 \f(CR*pstart_offset\fP is equal to the previous \f(CRovector[1]\fP, and \f(CR*poptions\fP
@@ -4489,7 +4503,7 @@ set, \fBPCRE2_ERROR_UNSET\fP is returned.
 .sp
 If the pattern uses the \f(CR(?|\fP feature to set up multiple
 capture groups with the same number, as described in the
-section on duplicate group numbers
+section Duplicate group numbers
 in the
 \f(CRpcre2pattern\fP
 page, you cannot use names to distinguish the different capture groups, because
@@ -4898,11 +4912,20 @@ default.
 .TP 24
 \fBPCRE2_ERROR_NULL\fP
 .ad l
-is returned if \fBPCRE2_SUBSTITUTE_MATCHED\fP is set but the
-\fImatch_data\fP argument is \fBNULL\fP; or if the \fIsubject\fP or \fIreplacement\fP
-or \fIbuffer\fP argument is \fBNULL\fP. However, a \fBNULL\fP \fIreplacement\fP
-argument is allowed if the \fIrlength\fP argument is zero; and similarly for
-\fIsubject\fP with zero \fIlength\fP and \fIbuffer\fP with zero \fIblength\fP.
+is returned if \fIcode\fP or \fIblength\fP is \fBNULL\fP; or if
+\fBPCRE2_SUBSTITUTE_MATCHED\fP is set but the \fImatch_data\fP argument is
+\fBNULL\fP; or if the \fIsubject\fP or \fIreplacement\fP or \fIbuffer\fP
+argument is \fBNULL\fP. However, a \fBNULL\fP \fIreplacement\fP argument is
+allowed if the \fIrlength\fP argument is zero; and similarly for \fIsubject\fP
+with zero \fIlength\fP and \fIbuffer\fP with zero \fIblength\fP.
+.TP 24
+\fBPCRE2_ERROR_BADMAGIC\fP
+.ad l
+the magic number in the compiled code was not recognized.
+.TP 24
+\fBPCRE2_ERROR_BADMODE\fP
+.ad l
+the pattern was compiled for a different code unit width.
 .TP 24
 \fBPCRE2_ERROR_BADREPLACEMENT\fP
 .ad l

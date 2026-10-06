@@ -4,10 +4,10 @@
 .\" Generator: Asciidoctor 2.0.26
 .\"      Date: 25 October 2025
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2PATTERN" "3" "25 October 2025" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2PATTERN" "3" "25 October 2025" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -894,7 +894,7 @@ Unicode is discouraged.
 .sp
 By default, characters whose code points are greater than 127 never match \f(CR\(rsd\fP,
 \f(CR\(rss\fP, or \f(CR\(rsw\fP, and always match \f(CR\(rsD\fP, \f(CR\(rsS\fP, and \f(CR\(rsW\fP, although this may be different
-for characters in the range 128\(em255 when locale\-specific matching is happening.
+for characters in the range 128\(en255 when locale\-specific matching is happening.
 These escape sequences retain their original meanings from before Unicode
 support was available, mainly for efficiency reasons. If the \fBPCRE2_UCP\fP option
 is set, the behaviour is changed so that Unicode properties are used to
@@ -1588,7 +1588,6 @@ additional characters according to the following rules for ending a cluster:
 .\}
 End at the end of the subject string.
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 2.\h'+01'\c
@@ -1599,7 +1598,6 @@ End at the end of the subject string.
 .\}
 Do not end between CR and LF; otherwise end after any control character.
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 3.\h'+01'\c
@@ -1613,7 +1611,6 @@ are of five types: L, V, T, LV, and LVT. An L character may be followed by an
 L, V, LV, or LVT character; an LV or V character may be followed by a V or T
 character; an LVT or T character may be followed only by a T character.
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 4.\h'+01'\c
@@ -1626,7 +1623,6 @@ Do not end before extending characters or spacing marks or the zero\-width
 joiner (ZWJ) character. Characters with the "mark" property always have the
 "extend" grapheme breaking property.
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 5.\h'+01'\c
@@ -1637,7 +1633,6 @@ joiner (ZWJ) character. Characters with the "mark" property always have the
 .\}
 Do not end after prepend characters.
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 6.\h'+01'\c
@@ -1652,7 +1647,6 @@ Extended_Pictographic property, optionally followed by one or more characters
 with the Extend property, followed by the ZWJ character, followed by another
 Extended_Pictographic character.
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 7.\h'+01'\c
@@ -1665,7 +1659,6 @@ Do not break within emoji flag sequences. That is, do not break between
 regional indicator (RI) characters if there are an odd number of RI characters
 before the break point.
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04' 8.\h'+01'\c
@@ -2086,8 +2079,7 @@ or immediately after a range. For example, \f(CR[b\-d\-z]\fP matches letters in 
 b to d, a hyphen character, or z.
 .sp
 There is some special treatment for alphabetic ranges in EBCDIC environments;
-see the section
-"EBCDIC environments"
+see the section EBCDIC ENVIRONMENTS
 below.
 .sp
 Perl treats a hyphen as a literal if it appears before or after a POSIX class
@@ -2262,7 +2254,7 @@ Letters.
 .TP 11
 \f(CR[:ascii:]\fP
 .ad l
-Character codes 0\(em127.
+Character codes 0\(en127.
 .TP 11
 \f(CR[:blank:]\fP
 .ad l
@@ -2335,7 +2327,7 @@ supported, and an error is given if they are encountered.
 .sp
 By default, characters with values greater than 127 do not match any of the
 POSIX character classes, although this may be different for characters in the
-range 128\(em255 when locale\-specific matching is happening. However, in UCP mode,
+range 128\(en255 when locale\-specific matching is happening. However, in UCP mode,
 unless certain options are set (see below), some of the classes are changed so
 that Unicode character properties are used. This is achieved by replacing
 POSIX classes with other sequences, as follows:
@@ -2400,16 +2392,16 @@ properties, except for:
 .sp
 .RS 4
 .PD 0
-.TP 7
+.TP 20
 \f(CRU+061C\fP
 .ad l
 Arabic Letter Mark
-.TP 7
+.TP 20
 \f(CRU+180E\fP
 .ad l
 Mongolian Vowel Separator
-.TP 7
-\f(CRU+2066\fP \(em \f(CRU+2069\fP
+.TP 20
+\f(CRU+2066\fP\(en\f(CRU+2069\fP
 .ad l
 Various "isolates"
 .PD
@@ -2961,7 +2953,7 @@ duplicate numbers this is the one with the lowest number.
 .sp
 If you use a named reference in a condition
 test (see the
-section about conditions
+section CONDITIONAL GROUPS
 below), either to check whether a capture group has matched, or to check for
 recursion, all groups with the same name are tested. If the condition is true
 for any one of them, the overall condition is true. This is the same behaviour
@@ -2984,7 +2976,6 @@ items:
 .\}
 a literal data character
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -2995,7 +2986,6 @@ a literal data character
 .\}
 the dot metacharacter
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -3006,7 +2996,6 @@ the dot metacharacter
 .\}
 the \f(CR\(rsC\fP escape sequence
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -3017,7 +3006,6 @@ the \f(CR\(rsC\fP escape sequence
 .\}
 the \f(CR\(rsR\fP escape sequence
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -3028,7 +3016,6 @@ the \f(CR\(rsR\fP escape sequence
 .\}
 the \f(CR\(rsX\fP escape sequence
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -3039,7 +3026,6 @@ the \f(CR\(rsX\fP escape sequence
 .\}
 any escape sequence that matches a single character
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -3050,7 +3036,6 @@ any escape sequence that matches a single character
 .\}
 a character class
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -3061,7 +3046,6 @@ a character class
 .\}
 a backreference
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -3072,7 +3056,6 @@ a backreference
 .\}
 a parenthesized group (including lookaround assertions)
 .RE
-.sp
 .RS 4
 .ie n \{\
 \h'-04'\(bu\h'+03'\c
@@ -4981,8 +4964,7 @@ the start\-of\-match optimizations by setting the \fBPCRE2_NO_START_OPTIMIZE\fP 
 when calling pcre2_compile(), by calling pcre2_set_optimize() with a
 \fBPCRE2_START_OPTIMIZE_OFF\fP directive, or by starting the pattern with
 \f(CR(*NO_START_OPT)\fP. There is more discussion of this option in the section
-entitled
-"Compiling a pattern"
+Compiling a pattern
 in the
 \f(CRpcre2api\fP
 documentation.
@@ -5533,10 +5515,10 @@ are covered in this section.
 When PCRE2 is compiled in EBCDIC mode, \f(CR\(rsN{U+\fP\fIhhh...\fP\f(CR}\fP is not supported. \f(CR\(rsa\fP, \f(CR\(rse\fP,
 \f(CR\(rsf\fP, \f(CR\(rsn\fP, \f(CR\(rsr\fP, and \f(CR\(rst\fP generate the appropriate EBCDIC code values. The \f(CR\(rsc\fP
 escape is processed as specified for Perl in the \f(CRperlebcdic\fP document. The
-only characters that are allowed after \f(CR\(rsc\fP are A\(emZ, a\(emz, or one of @, [, \(rs, ],
+only characters that are allowed after \f(CR\(rsc\fP are A\(enZ, a\(enz, or one of @, [, \(rs, ],
 ^, _, or ?. Any other character provokes a compile\-time error. The sequence
 \f(CR\(rsc@\fP encodes character code 0; after \f(CR\(rsc\fP the letters (in either case) encode
-characters 1\(em26 (\f(CR0x01\fP to \f(CR0x1A\fP); [, \(rs, ], ^, and _ encode characters 27\(em31
+characters 1\(en26 (\f(CR0x01\fP to \f(CR0x1A\fP); [, \(rs, ], ^, and _ encode characters 27\(en31
 (\f(CR0x1B\fP to \f(CR0x1F\fP), and \f(CR\(rsc?\fP becomes either 255 (\f(CR0xFF\fP) or 95 (\f(CR0x5F\fP).
 .sp
 Thus, apart from \f(CR\(rsc?\fP, these escapes generate the same character code values as

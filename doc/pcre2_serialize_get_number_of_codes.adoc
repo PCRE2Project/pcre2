@@ -4,7 +4,7 @@
 :manpurpose: get number of serialized compiled patterns
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 13 August 2018
 :revdate: 13 August 2018
 
@@ -27,11 +27,13 @@ codes:
 
 [.errors]
 const:PCRE2_ERROR_BADMAGIC::
-	mismatch of id bytes in arg:bytes
+  mismatch of id bytes in arg:bytes
 const:PCRE2_ERROR_BADMODE::
-	mismatch of variable unit size or PCRE version
+  mismatch of variable unit size or PCRE version
+const:PCRE2_ERROR_BADSERIALIZEDDATA::
+  other sanity check failure
 const:PCRE2_ERROR_NULL::
-	the argument is const:NULL
+  the argument is const:NULL
 
 const:PCRE2_ERROR_BADMAGIC may mean that the data is corrupt, or that it was compiled
 on a system with different endianness.

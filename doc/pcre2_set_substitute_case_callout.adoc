@@ -4,7 +4,7 @@
 :manpurpose: set a substitution case callout function
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 26 December 2024
 :revdate: 26 December 2024
 

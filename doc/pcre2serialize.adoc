@@ -5,7 +5,7 @@
 :description: Serializing functions for saving precompiled patterns
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 19 January 2024
 :revdate: 19 January 2024
 :toc: right
@@ -67,7 +67,7 @@ means converting the pattern to a stream of bytes. A single byte stream may
 contain any number of compiled patterns, but they must all use the same
 character tables. A single copy of the tables is included in the byte stream
 (its size is 1088 bytes). For more details of character tables, see the
-section on locale support
+section xref:pcre2api.adoc#locale-support[Locale support]
 in the
 xref:pcre2api.adoc[`pcre2api`]
 documentation.
@@ -148,6 +148,10 @@ patterns:
 uint8_t *bytes = <serialized data>;
 int32_t number_of_codes = pcre2_serialize_get_number_of_codes(bytes);
 ----
+
+The count query performs the same header checks as decoding. Both readers
+accept a trusted, intact byte stream at any byte alignment. Neither accepts a
+length argument or validates that all of the required bytes are present.
 
 The func:pcre2_serialize_decode() function reads a byte stream and recreates
 the compiled patterns in new memory blocks, setting pointers to them in a

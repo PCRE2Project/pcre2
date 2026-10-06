@@ -539,6 +539,73 @@ No match
 /a`*b/convert_glob_escape=x
 ** Invalid glob escape 'x'
 
+# Glob syntax characters cannot be used as escapes.
+
+/a*b/convert_glob_escape=!
+** Invalid glob escape '!'
+
+/a*b/convert_glob_escape=*
+** Invalid glob escape '*'
+
+/a*b/convert_glob_escape=-
+** Invalid glob escape '-'
+
+/a*b/convert_glob_escape=:
+** Invalid glob escape ':'
+
+/a*b/convert_glob_escape=?
+** Invalid glob escape '?'
+
+/a*b/convert_glob_escape=[
+** Invalid glob escape '['
+
+/a*b/convert_glob_escape=]
+** Invalid glob escape ']'
+
+/a*b/convert_glob_escape=^
+** Invalid glob escape '^'
+
+# Supported escapes still quote wildcards and character-class literals.
+
+/a#*b/convert_glob_escape=#
+(?s)\Aa\*b\z
+    a*b
+ 0: a*b
+    axxb
+No match
+
+/[##]/convert_glob_escape=#
+(?s)\A[#]\z
+    #
+ 0: #
+    A
+No match
+
+/[a#-c]/convert_glob_escape=#
+(?s)\A[a\-c]\z
+    -
+ 0: -
+    a
+ 0: a
+    c
+ 0: c
+    b
+No match
+
+/[\^]/convert_glob_escape=\
+(?s)\A[\^]\z
+    ^
+ 0: ^
+    A
+No match
+
+/[`^]/convert_glob_escape=`
+(?s)\A[\^]\z
+    ^
+ 0: ^
+    A
+No match
+
 # Tests of null and empty inputs
 
 /a*b/use_length
@@ -549,15 +616,15 @@ No match
 
 # Error
 /a*b/null_pattern
-** Pattern conversion error at offset 0: NULL argument passed with non-zero length
+** Pattern conversion error at offset 0: NULL argument passed
 
 # Error
 //null_pattern
-** Pattern conversion error at offset 0: NULL argument passed with non-zero length
+** Pattern conversion error at offset 0: NULL argument passed
 
 # Error
 /a*b/use_length,null_pattern
-** Pattern conversion error at offset 0: NULL argument passed with non-zero length
+** Pattern conversion error at offset 0: NULL argument passed
 
 # Kind-of error... pattern conversion succeeds, but it converts to a non-empty
 # pattern, and null_pattern applies to the regex parse afterwards too, which
