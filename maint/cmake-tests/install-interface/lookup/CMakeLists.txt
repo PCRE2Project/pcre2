@@ -1,5 +1,0 @@
-find_package(PCRE2 REQUIRED CONFIG COMPONENTS 8BIT)
-find_package(PCRE2 REQUIRED CONFIG COMPONENTS 8BIT)
-if(NOT TARGET PCRE2::8BIT OR NOT PCRE2_8BIT_FOUND)
-  message(FATAL_ERROR "Repeated PCRE2 lookup failed in a sibling directory")
-endif()

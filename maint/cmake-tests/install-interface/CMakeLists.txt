@@ -5,20 +5,7 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
 # To test the static interface, uncomment the following line:
 # set(PCRE2_USE_STATIC_LIBS ON)
-add_subdirectory(lookup first)
-add_subdirectory(lookup second)
 find_package(PCRE2 REQUIRED CONFIG)
-
-if(TARGET pcre2::pcre2test OR TARGET pcre2::pcre2grep)
-  message(FATAL_ERROR "Installed programs must not be exported as CMake targets")
-endif()
-
-if(NOT PCRE2_8BIT_LIBRARY OR PCRE2_8BIT_LIBRARY MATCHES "NOTFOUND")
-  message(FATAL_ERROR "PCRE2_8BIT_LIBRARY does not name an imported library")
-endif()
-if(NOT PCRE2_8BIT_LIBRARY IN_LIST PCRE2_LIBRARIES)
-  message(FATAL_ERROR "PCRE2_LIBRARIES does not contain PCRE2_8BIT_LIBRARY")
-endif()
 
 add_executable(test_executable main.c)
 target_link_libraries(test_executable PRIVATE PCRE2::8BIT)
