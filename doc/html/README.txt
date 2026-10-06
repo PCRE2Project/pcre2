@@ -563,6 +563,11 @@ single command is used. For example:
 The data is held in *.pc files that are installed in a directory called
 <prefix>/lib/pkgconfig.
 
+All build systems use MAJOR.MINOR for the pkg-config Version field, with ~DEV
+or ~RCn appended for development builds or release candidates. The tilde makes
+prereleases sort before the final release in pkg-config comparisons. Other
+version reporting retains the usual -DEV or -RCn suffix.
+
 
 Shared libraries
 ----------------
@@ -1011,4 +1016,3 @@ The distribution should contain the files listed below.
 ============================
 Last updated: 08 August 2026
 ============================
-
