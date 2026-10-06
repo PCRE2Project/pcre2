@@ -383,12 +383,14 @@ jobs:
               -k /root/pkg.oracle.com.key.pem \
               -c /root/pkg.oracle.com.certificate.pem \
               -G "*" -g https://pkg.oracle.com/solarisstudio/release solarisstudio
-            pkg install developer/build/make developer/build/cmake developer/build/meson developer/build/ninja developer/gcc system/header
+            pkg install developer/build/make developer/build/cmake developer/build/ninja developer/gcc system/header runtime/python-311 library/python/pip-311
             pkg install --accept developerstudio-126/cc
+            python3.11 -m venv /opt/meson
+            /opt/meson/bin/python -m pip install --disable-pip-version-check --upgrade meson
 
           run: |
             set -e
-            PATH=/opt/developerstudio12.6/bin:"$PATH"
+            PATH=/opt/meson/bin:/opt/developerstudio12.6/bin:"$PATH"
             export PATH
 
             NPROC=`nproc 2>/dev/null || echo 2`
@@ -435,6 +437,7 @@ jobs:
             cd ../../build-meson-64
 
             CC="gcc -m64" CXX="g++ -m64" CFLAGS="$CFLAGS_GCC_STYLE" meson setup build --buildtype=release --prefix="`pwd`/install-dir" --libdir=lib -Ddefault_library=both -Dpcre2_build_pcre2_16=true -Dpcre2_build_pcre2_32=true -Dpcre2_build_tests=true -Dpcre2_debug=enabled -Dwerror=true
+            meson --version
             meson compile -C build -j$NPROC
             meson test -C build --print-errorlogs
             meson install -C build

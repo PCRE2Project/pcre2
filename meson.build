@@ -624,6 +624,7 @@ foreach width : ['8', '16', '32']
     # Shared targets do not contribute their dependencies automatically.
     libraries_private: private_deps,
     version: pkg_version,
+    install_dir: get_option('libdir') / 'pkgconfig',
   )
 endforeach
 
@@ -637,6 +638,7 @@ if build_8
     extra_cflags: build_shared ? ['-DPCRE2POSIX_SHARED'] : ['-DPCRE2_STATIC'],
     requires_private: 'libpcre2-8',
     version: pkg_version,
+    install_dir: get_option('libdir') / 'pkgconfig',
   )
 endif
 
@@ -857,6 +859,7 @@ man_pages = [
   'doc/man/pcre2_get_ovector_pointer.3',
   'doc/man/pcre2_get_parens_nest_limit.3',
   'doc/man/pcre2_get_startchar.3',
+  'doc/man/pcre2_get_subject.3',
   'doc/man/pcre2_jit_compile.3',
   'doc/man/pcre2_jit_free_unused_memory.3',
   'doc/man/pcre2_jit_match.3',
