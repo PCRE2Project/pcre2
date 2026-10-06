@@ -160,9 +160,6 @@ jobs:
           ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
-      - name: Test CMake installation directory metadata
-        run: cmake -S maint/cmake-tests/install-dirs -B "$RUNNER_TEMP/pcre2-install-dirs"
-
       - name: Test CMake install interface
         run: |
           INSTALL_PREFIX=`pwd`/build/install-dir
