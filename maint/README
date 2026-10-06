@@ -88,7 +88,9 @@ LintMan
 
 manifest-*
   Data files used to verify the contents of the distribution tarball and
-  `make install` file lists.
+  installed file lists. Each manifest-install-<platform> is shared by Autoconf,
+  CMake, and Meson. It includes CMake package metadata and Autoconf's libtool
+  archives; RunManifestTest filters the entries not provided by each producer.
 
 ManyConfigTests
   A shell script that runs "configure, make, test" a number of times with
@@ -98,6 +100,22 @@ meson-tests
   Meson projects and Python runners that check static/shared implementation
   details, native subproject dependencies, and Meson consumption of installed
   CMake packages.
+
+  Run `python3 maint/meson-tests/check-build.py` for release-version updates,
+  stale-header cleanup, clean-tree test dependencies, harness executable paths,
+  cross-build wrappers, configuration-probe and validation parity with CMake,
+  symbol visibility without version scripts, optional dependency discovery,
+  installed package contracts, and install-manifest filtering. The pkg-config
+  checks cover native thread dependencies, installed/uninstalled static and
+  shared consumers, and development/RC/final version ordering from all three
+  build systems.
+
+  The Meson portability helpers are named after their counterparts in cmake/.
+  Keep the order and meaning of their checks in sync, including the negative
+  and wildcard version-script probes.
+  FindReadline and FindEditline correspond to the CMake finders in cmake/;
+  FindBZip2 supplements package discovery with the library names from CMake's
+  built-in finder. zlib already has a native Meson system-library fallback.
 
 UpdateAlways
   A shell script to ensure that all auto-generated outputs are ready for
@@ -142,6 +160,20 @@ RunManifestTest
 RunManifestTest.ps1
   Scripts to generate and verify a list of files against an expected 'manifest'
   detailing what the directory should contain.
+
+  The shell script takes <dir> <manifest> [<build type>] [<producer>], with
+  release and cmake as the defaults. The PowerShell script takes
+  <dir> <manifest> [<producer>]. Producers are autoconf, cmake, and meson.
+  Autoconf and Meson exclude the four CMake package files and their directories;
+  CMake and Meson exclude the four libtool .la files. Unexpected installed files
+  are never filtered out.
+
+  Pass the installed prefix, e.g. install-dir/usr/local for an Autoconf
+  DESTDIR installation. The shell script maps it to the manifest's root.
+  Unix manifests use Autoconf's direct .so symlinks; CMake and Meson expect
+  the equivalent links via the SONAME. Shared-library permissions are adjusted
+  for Autoconf and Meson, which install executable .so files. These native
+  permission and symlink differences are intentional, not installation bugs.
 
 RunSymbolTest
 RunSymbolTest.ps1

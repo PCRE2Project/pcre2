@@ -10,7 +10,7 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 add_compile_definitions($<$<CONFIG:Debug>:PARENT_PROJECT_MACRO>)
 
 if(NOT PCRE2_SOURCE_DIR)
-	message(FATAL_ERROR "PCRE2_SOURCE_DIR must name the PCRE2 source directory")
+  message(FATAL_ERROR "PCRE2_SOURCE_DIR must name the PCRE2 source directory")
 endif()
 add_subdirectory("${PCRE2_SOURCE_DIR}" pcre2)
 

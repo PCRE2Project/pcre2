@@ -302,13 +302,25 @@ Building PCRE2 with Meson
 -------------------------
 
 Meson 1.6 or later can configure and build PCRE2 on Linux, macOS, Windows, and
-other supported platforms. Meson uses a separate build directory. A normal
-build, test, and installation can be run as follows:
+other supported platforms. On Solaris, use GCC rather than Oracle Developer
+Studio. Meson uses a separate build directory. A normal build, test, and
+installation can be run as follows:
 
   meson setup build
   meson compile -C build
   meson test -C build
   meson install -C build
+
+For cross-compilation, pass Meson's standard --cross-file option at setup.
+Set [binaries] exe_wrapper to a simulator command (such as qemu), and set
+[properties] needs_exe_wrapper = true if Meson's automatic detection needs
+overriding. The main test harness uses MESON_EXE_WRAPPER as its default --sim
+command; the POSIX and JIT tests are wrapped by Meson itself. As with --sim,
+wrapper commands for the main harness support whitespace-separated arguments,
+but not quoting or whitespace within individual arguments. If a required wrapper
+is not configured, the main harness is omitted and Meson skips the executable tests.
+The grep tests are omitted for all cross builds because their harness does not
+yet support a simulator. Cross builds that can run directly need no wrapper.
 
 PCRE2's Meson options use lower-case names and can be inspected with
 `meson configure build`. For example, the 16-bit and 32-bit libraries and JIT
@@ -320,17 +332,50 @@ support can be enabled at setup time:
 Meson's standard `default_library` option selects `static`, `shared`, or `both`;
 PCRE2 defaults to a static library. When both variants are built,
 `default_both_libraries` selects which one is used by PCRE2's programs and by
-an unqualified subproject dependency. Static and shared PCRE2 libraries are
-compiled separately so that each receives the correct visibility definitions.
+an unqualified subproject dependency. Its native default is shared, unlike
+CMake's static selection when both variants are built. Meson's `b_staticpic`
+also retains its native default of true, unlike CMake's PCRE2_STATIC_PIC option.
+Static and shared PCRE2 libraries are compiled separately so that each receives
+the correct visibility definitions.
+
+As in CMake, C11 is preferred, with C99 as a fallback. Compiler extensions are
+enabled where supported; Meson's c_std option can override this choice.
+
+The optional zlib, bzip2, readline, and libedit dependencies can be found through
+package metadata or the compiler's library and header search paths. Readline's
+terminal-library dependencies are detected when needed, as in the CMake build.
+Set the corresponding pcre2_support_lib* feature option to enabled to require a
+dependency, disabled to omit it, or auto to use it if available. Only one of
+readline and libedit may be enabled. zlib uses Meson's built-in dependency finder.
 
 PCRE2 can also be used as a Meson subproject. A parent project can place it in
 `subprojects/pcre2` and request, for example,
 `dependency('libpcre2-8', fallback: 'pcre2')`. The corresponding dependency
 names for the other interfaces are `libpcre2-16`, `libpcre2-32`, and
 `libpcre2-posix`; Meson's `static` keyword can request a particular available
-library variant. An installed Meson build also provides pkg-config files and
-CMake package metadata for non-Meson consumers.
+library variant. All three build systems install pkg-config files for consumers
+of installed libraries. Only the CMake build additionally installs CMake package
+metadata; consumers requiring `find_package(PCRE2 CONFIG)` should use a
+CMake-built installation.
 
+Meson generates pkg-config metadata from its library targets, including native
+thread dependencies when JIT is enabled. In shared and both-library builds,
+static-link dependencies are reported by `pkg-config --static`; for static-only
+builds, Meson includes these in the ordinary link flags too. The --static option
+does not itself force the linker to select a static library. Build-tree metadata
+is available in meson-uninstalled without installing the libraries.
+
+Meson's project and subproject dependency versions include any -DEV or -RC
+suffix. pkg-config versions use ~DEV or ~RC instead, so prereleases sort before
+the final release. As in CMake, pcre2-config --version reports just MAJOR.MINOR.
+
+Installed shared-library permissions and ELF symlink layouts follow each build
+system's native conventions. These differences are intentional; packagers may
+normalize them if their distribution requires it.
+
+As with CMake, configuration removes src/config.h and src/pcre2.h left by an
+in-source Autotools build, so that they cannot override the generated headers.
+Do not configure both build systems concurrently in the same source tree.
 
 Building PCRE2 on Windows with CMake
 ------------------------------------
@@ -513,4 +558,3 @@ to learn whether it still works (or if anyone still uses it).
 =============================
 Last updated: 17 October 2025
 =============================
-

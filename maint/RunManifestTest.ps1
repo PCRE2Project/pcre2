@@ -1,5 +1,5 @@
 # Script to test a directory listing. We use this to verify that the list of
-# files installed by "make install" or "cmake --install" matches what we expect.
+# files installed by Autoconf, CMake, or Meson matches what we expect.
 
 param (
   [Parameter(Mandatory=$true)]
@@ -8,6 +8,7 @@ param (
   [Parameter(Mandatory=$true)]
   [string]$manifestName,
 
+  [ValidateSet("autoconf", "cmake", "meson")]
   [string]$producer = "cmake"
 )
 
@@ -24,14 +25,18 @@ $installedFiles = Get-ChildItem -Recurse -Force -Path $inputDir |
 $null = New-Item -Force $base -Value (($installedFiles | Out-String) -replace "`r`n", "`n")
 
 $expectedFiles = Get-Content -Path $manifestName -Raw
-if ($producer -eq "meson") {
-  $expectedFiles = $expectedFiles.Replace("pcre2-config-version.cmake", "PCRE2ConfigVersion.cmake")
-  $expectedFiles = $expectedFiles.Replace("pcre2-config.cmake", "PCRE2Config.cmake")
-  $expectedFiles = (($expectedFiles.TrimEnd() -split "`n") |
-    Sort-Object {[System.BitConverter]::ToString([system.Text.Encoding]::UTF8.GetBytes($_.Substring($_.IndexOf(" ") + 1)))} |
-    Out-String) -replace "`r`n", "`n"
-}
 $actualFiles = Get-Content -Path $base -Raw
+
+if ($producer -ne "cmake") {
+  $expectedFiles = ($expectedFiles -split "`n" | Where-Object {
+    $_ -notmatch '[\\/]lib[\\/]cmake([\\/]pcre2([\\/]pcre2-(config(-version)?|targets(-release)?)\.cmake)?)?\r?$'
+  }) -join "`n"
+}
+if ($producer -ne "autoconf") {
+  $expectedFiles = ($expectedFiles -split "`n" | Where-Object {
+    $_ -notmatch '[\\/]lib[\\/]libpcre2-(8|16|32|posix)\.la\r?$'
+  }) -join "`n"
+}
 
 if ($expectedFiles -ne $actualFiles) {
   Write-Host "===Actual==="

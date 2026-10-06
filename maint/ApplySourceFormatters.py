@@ -149,7 +149,7 @@ def run_gersemi():
 def run_meson_format():
     meson_files = sorted({
         filename
-        for pattern in ('meson.build', 'meson.options', 'maint/meson-tests/**/meson.build',
+        for pattern in ('meson.build', 'meson.options', 'meson/**/meson.build', 'maint/meson-tests/**/meson.build',
                         'maint/meson-tests/**/meson.options')
         for filename in glob.glob(pattern, recursive=True)
     })

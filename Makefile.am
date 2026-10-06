@@ -1185,8 +1185,12 @@ EXTRA_DIST += \
 ## Meson support
 
 EXTRA_DIST += \
-  meson/pcre2-targets-release.cmake.in \
-  meson/pcre2-targets.cmake.in \
+  meson/FindBZip2/meson.build \
+  meson/FindEditline/meson.build \
+  meson/FindReadline/meson.build \
+  meson/PCRE2CheckVscript/meson.build \
+  meson/PCRE2CheckVscript/test-map-file.sym.in \
+  meson/PCRE2UseSystemExtensions/meson.build \
   src/config-meson.h.in \
   meson.build \
   meson.options

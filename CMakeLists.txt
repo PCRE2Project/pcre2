@@ -137,6 +137,11 @@ if(
   set(CMAKE_C_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")
 endif()
 
+# MSVC compiler specific settings
+if(MSVC)
+  add_compile_definitions(_CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS)
+endif()
+
 # The following policies have been set in the PCRE2 CMake file in the past.
 # Since we specify a minimum of CMake 3.15, these are no longer required.
 # cmake_policy(SET CMP0063 NEW)
@@ -199,7 +204,6 @@ if(DEFINED _pcre2_compile_definitions)
   endif()
 endif()
 
-check_symbol_exists(mkostemp stdlib.h HAVE_MKOSTEMP) # glibc 2.7
 check_symbol_exists(memfd_create "sys/mman.h" HAVE_MEMFD_CREATE) # glibc 2.27
 check_symbol_exists(secure_getenv "stdlib.h" HAVE_SECURE_GETENV) # glibc 2.17
 check_symbol_exists(setrlimit "sys/resource.h" HAVE_SETRLIMIT)
@@ -295,13 +299,9 @@ check_c_source_compiles(
 )
 
 # Detect support for linker scripts.
-
 pcre2_check_vscript(HAVE_VSCRIPT VSCRIPT_FLAG HAVE_VSCRIPT_NO_STAR)
 
-# Check whether Intel CET is enabled, and if so, adjust compiler flags. This
-# code was written by PH, trying to imitate the logic from the autotools
-# configuration.
-
+# Check whether Intel CET is enabled, and if so, adjust compiler flags.
 check_c_source_compiles(
   [=[
   #ifndef __CET__
@@ -311,7 +311,6 @@ check_c_source_compiles(
   ]=]
   INTEL_CET_ENABLED
 )
-
 if(INTEL_CET_ENABLED)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mshstk")
 endif()
@@ -573,8 +572,7 @@ if(PCRE2_BUILD_PCRE2_32)
 endif()
 
 if(PCRE2_BUILD_PCRE2GREP AND NOT PCRE2_BUILD_PCRE2_8)
-  message(STATUS "** PCRE2_BUILD_PCRE2_8 must be enabled for the pcre2grep program")
-  set(PCRE2_BUILD_PCRE2GREP OFF)
+  message(FATAL_ERROR "PCRE2_BUILD_PCRE2_8 must be enabled for the pcre2grep program")
 endif()
 
 if(PCRE2_SUPPORT_LIBBZ2)
@@ -798,6 +796,7 @@ file(REMOVE ${PROJECT_SOURCE_DIR}/src/pcre2.h)
 # Release and library version information
 # -----------------------------------------------------------------------------
 
+# These lines are updated by UpdateRelease.py
 set(PCRE2_MAJOR "10")
 set(PCRE2_MINOR "49")
 set(PCRE2_PRERELEASE "-DEV")
@@ -979,16 +978,13 @@ elseif(PCRE2_DEBUG)
   add_compile_definitions("PCRE2_DEBUG")
 endif()
 
-if(MSVC)
-  add_compile_definitions(_CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS)
-endif()
-
 # Make sure to not link debug libs against release libs and vice versa.
 if(WIN32)
   set(CMAKE_DEBUG_POSTFIX "d")
 endif()
 
 set(TARGETS)
+set(PRIVATE_TARGETS)
 set(DLL_PDB_FILES)
 
 # 8-bit library
@@ -1271,6 +1267,8 @@ endif()
 # -----------------------------------------------------------------------------
 
 set(PACKAGE_VERSION "${PCRE2_MAJOR}.${PCRE2_MINOR}")
+# In pkg-config versions, a tilde sorts prereleases before the final release.
+string(REPLACE "-" "~" PCRE2_PKGCONFIG_VERSION "${PACKAGE_VERSION}${PCRE2_PRERELEASE}")
 set(prefix ${CMAKE_INSTALL_PREFIX})
 set(exec_prefix "\${prefix}")
 set(libdir "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
@@ -1337,7 +1335,7 @@ configure_file(pcre2-config.in pcre2-config @ONLY NEWLINE_STYLE LF)
 if(PCRE2_BUILD_PCRE2GREP)
   add_executable(pcre2grep src/pcre2grep.c)
   set_property(TARGET pcre2grep PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8)
-  list(APPEND TARGETS pcre2grep)
+  list(APPEND PRIVATE_TARGETS pcre2grep)
   target_link_libraries(pcre2grep pcre2-posix ${PCRE2GREP_LIBS})
 endif()
 
@@ -1351,7 +1349,7 @@ if(PCRE2_BUILD_TESTS)
   set(PCRE2TEST_SOURCES src/pcre2test.c)
 
   add_executable(pcre2test ${PCRE2TEST_SOURCES})
-  list(APPEND TARGETS pcre2test)
+  list(APPEND PRIVATE_TARGETS pcre2test)
   if(PCRE2_BUILD_PCRE2_8)
     list(APPEND PCRE2TEST_LIBS pcre2-posix pcre2-8)
   endif()
@@ -1503,6 +1501,9 @@ install(
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
+if(PRIVATE_TARGETS)
+  install(TARGETS ${PRIVATE_TARGETS} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 install(EXPORT pcre2-targets DESTINATION ${PCRE2_INSTALL_CMAKEDIR} NAMESPACE pcre2::)
 install(FILES ${pkg_config_files} DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(
@@ -1694,5 +1695,3 @@ if(PCRE2_SHOW_REPORT)
 
   message(STATUS "")
 endif()
-
-# end CMakeLists.txt

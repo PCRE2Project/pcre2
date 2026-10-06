@@ -24,6 +24,8 @@
 
 #mesondefine SUPPORT_LIBBZ2
 #mesondefine SUPPORT_LIBEDIT
+#mesondefine HAVE_EDITLINE_READLINE_H
+#mesondefine HAVE_EDIT_READLINE_READLINE_H
 #mesondefine SUPPORT_LIBREADLINE
 #mesondefine SUPPORT_LIBZ
 

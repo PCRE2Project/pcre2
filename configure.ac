@@ -182,6 +182,10 @@ AC_SUBST(PCRE2_MINOR)
 AC_SUBST(PCRE2_PRERELEASE)
 AC_SUBST(PCRE2_DATE)
 
+# In pkg-config versions, a tilde sorts prereleases before the final release.
+PCRE2_PKGCONFIG_VERSION=`echo "$PACKAGE_VERSION" | sed 's/-/~/g'`
+AC_SUBST(PCRE2_PKGCONFIG_VERSION)
+
 # Set a more sensible default value for $(htmldir).
 if test "x$htmldir" = 'x${docdir}'
 then

@@ -94,14 +94,18 @@ jobs:
       - name: Check installation
         if: runner.os != 'Windows'
         run: |
-          maint/RunManifestTest install-dir maint/manifest-cmakeinstall-${{ matrix.manifest }} release meson
+          maint/RunManifestTest install-dir maint/manifest-install-${{ matrix.manifest }} release meson
           maint/RunSymbolTest install-dir/lib maint
 
       - name: Check installation
         if: runner.os == 'Windows'
         run: |
-          ./maint/RunManifestTest.ps1 install-dir maint/manifest-cmakeinstall-windows meson
+          ./maint/RunManifestTest.ps1 install-dir maint/manifest-install-windows meson
           ./maint/RunSymbolTest.ps1 install-dir/bin maint
+
+      - name: Test Windows manifest filtering
+        if: runner.os == 'Windows'
+        run: python maint/meson-tests/check-build.py BuildTests.test_install_manifests
 
       - name: Check Meson static/shared implementation
         if: runner.os == 'Linux'
@@ -111,11 +115,9 @@ jobs:
         if: runner.os == 'Linux'
         run: python maint/meson-tests/check-library-options.py
 
-      - name: Test installed CMake package with Meson
-        run: python maint/meson-tests/check-installed-cmake-package.py install-dir
-
-      - name: Test installed CMake package with CMake
-        run: python maint/cmake-tests/check-interface.py install install-dir --generator Ninja --build-type Release
+      - name: Test Meson configuration and installed interfaces
+        if: runner.os == 'Linux'
+        run: python maint/meson-tests/check-build.py
 
   meson-old:
     name: Meson 1.6.1
@@ -147,6 +149,11 @@ jobs:
 
       - name: Test Meson subproject interface
         run: python maint/meson-tests/check-library-options.py
+
+      - name: Test Meson configuration and package parity
+        run: |
+          python -m pip install --disable-pip-version-check 'cmake>=3.28,<3.29'
+          python maint/meson-tests/check-build.py
 
   canary:
     # Tests with: Debug & assertions; link-size=4; libedit
@@ -267,7 +274,7 @@ jobs:
         run: |
           cd build
           cmake --install . --prefix install-dir
-          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux
+          ../maint/RunManifestTest install-dir ../maint/manifest-install-linux
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
       - name: Test installed CMake package with Meson
@@ -313,7 +320,7 @@ jobs:
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
-          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunManifestTest install-dir/usr/local maint/manifest-install-linux release autoconf
           maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   passenger:
@@ -365,7 +372,7 @@ jobs:
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
-          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunManifestTest install-dir/usr/local maint/manifest-install-linux release autoconf
           maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   greatawk:
@@ -400,7 +407,7 @@ jobs:
         run: |
           cd build
           cmake --install . --prefix install-dir
-          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux relwithdebinfo
+          ../maint/RunManifestTest install-dir ../maint/manifest-install-linux relwithdebinfo
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
       - name: Test installed CMake package with CMake
@@ -455,7 +462,7 @@ jobs:
         run: |
           cd build
           cmake --install . --prefix install-dir
-          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux minsizerel
+          ../maint/RunManifestTest install-dir ../maint/manifest-install-linux minsizerel
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   bat:

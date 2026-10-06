@@ -81,7 +81,7 @@ jobs:
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
-          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunManifestTest install-dir/usr/local maint/manifest-install-linux release autoconf
           maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   alpine:
@@ -128,7 +128,7 @@ jobs:
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
-          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunManifestTest install-dir/usr/local maint/manifest-install-linux release autoconf
           maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   macos:
@@ -160,7 +160,7 @@ jobs:
         run: |
           cd build
           cmake --install . --prefix install-dir
-          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-macos
+          ../maint/RunManifestTest install-dir ../maint/manifest-install-macos
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
       - name: Test installed CMake package with CMake
@@ -211,7 +211,7 @@ jobs:
         run: |
           cd build
           cmake --install . --config Release --prefix install-dir
-          ../maint/RunManifestTest.ps1 install-dir ../maint/manifest-cmakeinstall-windows
+          ../maint/RunManifestTest.ps1 install-dir ../maint/manifest-install-windows
           ../maint/RunSymbolTest.ps1 install-dir/bin ../maint/
 
       - name: Test installed CMake package with CMake
@@ -261,7 +261,7 @@ jobs:
             (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
-            maint/RunManifestTest install-dir maint/manifest-makeinstall-freebsd
+            maint/RunManifestTest install-dir/usr/local maint/manifest-install-freebsd release autoconf
             maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake =="
@@ -272,7 +272,7 @@ jobs:
             make -j$NPROC
             ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
-            ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-freebsd
+            ../maint/RunManifestTest install-dir ../maint/manifest-install-freebsd
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
             echo "== Meson =="
@@ -282,7 +282,7 @@ jobs:
             meson compile -C build -j$NPROC
             meson test -C build --print-errorlogs
             meson install -C build
-            maint/RunManifestTest install-dir maint/manifest-cmakeinstall-freebsd release meson
+            maint/RunManifestTest install-dir maint/manifest-install-freebsd release meson
             maint/RunSymbolTest install-dir/lib/ maint/
 
   openbsd:
@@ -329,7 +329,7 @@ jobs:
             make install "DESTDIR=`pwd`/install-dir"
             # I don't really know enough about OpenBSD to say whether the unusually-numbered .so files
             # with no symlinks are correct or not.
-            # maint/RunManifestTest install-dir maint/manifest-makeinstall-openbsd
+            # maint/RunManifestTest install-dir/usr/local maint/manifest-install-openbsd release autoconf
             # maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake =="
@@ -340,7 +340,7 @@ jobs:
             make -j$NPROC
             ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
-            # ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-openbsd
+            # ../maint/RunManifestTest install-dir ../maint/manifest-install-openbsd
             # ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   solaris:
@@ -369,7 +369,7 @@ jobs:
       - name: Build & test
         uses: vmactions/solaris-vm@96d8d976f9e67d82ec6c7e8ce9c1060731f9e21c # v1.3.9
         with:
-          envs: 'CFLAGS_SOLARIS_CC CMAKE_FLAGS'
+          envs: 'CFLAGS_SOLARIS_CC CFLAGS_GCC_STYLE CMAKE_FLAGS'
           usesh: true
           # Seriously! Solaris is the only OS to actually ship without a C
           # compiler, and not even to provide a simple download to get one!
@@ -383,7 +383,7 @@ jobs:
               -k /root/pkg.oracle.com.key.pem \
               -c /root/pkg.oracle.com.certificate.pem \
               -G "*" -g https://pkg.oracle.com/solarisstudio/release solarisstudio
-            pkg install developer/build/make developer/build/cmake developer/build/meson developer/build/ninja system/header
+            pkg install developer/build/make developer/build/cmake developer/build/meson developer/build/ninja developer/gcc system/header
             pkg install --accept developerstudio-126/cc
 
           run: |
@@ -406,7 +406,7 @@ jobs:
             (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
-            maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
+            maint/RunManifestTest install-dir/usr/local maint/manifest-install-solaris release autoconf
             maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== Autoconf, 64-bit =="
@@ -417,7 +417,7 @@ jobs:
             (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
-            maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
+            maint/RunManifestTest install-dir/usr/local maint/manifest-install-solaris release autoconf
             maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake, 64-bit =="
@@ -428,17 +428,17 @@ jobs:
             make
             ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
-            ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-solaris
+            ../maint/RunManifestTest install-dir ../maint/manifest-install-solaris
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
             echo "== Meson, 64-bit =="
             cd ../../build-meson-64
 
-            CC="cc -m64" CFLAGS="$CFLAGS_SOLARIS_CC" meson setup build --buildtype=release --prefix="`pwd`/install-dir" --libdir=lib -Ddefault_library=both -Dpcre2_build_pcre2_16=true -Dpcre2_build_pcre2_32=true -Dpcre2_build_tests=true -Dpcre2_debug=enabled -Dwerror=true
+            CC="gcc -m64" CXX="g++ -m64" CFLAGS="$CFLAGS_GCC_STYLE" meson setup build --buildtype=release --prefix="`pwd`/install-dir" --libdir=lib -Ddefault_library=both -Dpcre2_build_pcre2_16=true -Dpcre2_build_pcre2_32=true -Dpcre2_build_tests=true -Dpcre2_debug=enabled -Dwerror=true
             meson compile -C build -j$NPROC
             meson test -C build --print-errorlogs
             meson install -C build
-            maint/RunManifestTest install-dir maint/manifest-cmakeinstall-solaris release meson
+            maint/RunManifestTest install-dir maint/manifest-install-solaris release meson
             maint/RunSymbolTest install-dir/lib/ maint/
 
   zos:

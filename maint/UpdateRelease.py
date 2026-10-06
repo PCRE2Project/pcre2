@@ -19,6 +19,17 @@ def update_adoc_version(filename):
     update_file(filename, r'(?m)^:mansource: PCRE2 .*$', ':mansource: PCRE2 %s' % CURRENT_RELEASE)
 
 
+def update_meson_library_versions(match):
+    content = match.group()
+    for library in ('posix', '8', '16', '32'):
+        version = VERSION_INFO['libpcre2_%s_version' % library]
+        pattern = r"('%s'\s*:\s*')[^']*(')" % library
+        content, count = re.subn(pattern, lambda entry: entry[1] + version + entry[2], content)
+        if count != 1:
+            raise ValueError('Expected exactly one %s entry in Meson libtool_versions' % library)
+    return content
+
+
 print('Updating CMakeLists.txt')
 cmake_versions = {
     'PCRE2_MAJOR': 'pcre2_major',
@@ -35,16 +46,11 @@ for variable, configure_name in cmake_versions.items():
                 'set(%s "%s")' % (variable, VERSION_INFO[configure_name]))
 
 print('Updating meson.build')
-update_file('meson.build', r"(?m)^  version: '.*',$",
-            "  version: '%s.%s'," % (VERSION_INFO['pcre2_major'], VERSION_INFO['pcre2_minor']))
-update_file('meson.build', r"(?m)^pcre2_prerelease = '.*'$",
-            "pcre2_prerelease = '%s'" % VERSION_INFO['pcre2_prerelease'])
-update_file('meson.build', r"(?m)^pcre2_date = '.*'$",
-            "pcre2_date = '%s'" % VERSION_INFO['pcre2_date'])
-for library in ('posix', '8', '16', '32'):
-    configure_name = 'libpcre2_%s_version' % library
-    update_file('meson.build', r"(?m)^  '%s': '.*',$" % library,
-                "  '%s': '%s'," % (library, VERSION_INFO[configure_name]))
+update_file('meson.build', r"(?s)(\bproject\s*\(\s*'PCRE2'\s*,.*?\bversion\s*:\s*')[^']*(')",
+            lambda match: match[1] + CURRENT_RELEASE + match[2])
+update_file('meson.build', r"(?m)(^pcre2_date[ \t]*=[ \t]*')[^']*(')",
+            lambda match: match[1] + VERSION_INFO['pcre2_date'] + match[2])
+update_file('meson.build', r'(?m)^libtool_versions[ \t]*=[ \t]*\{[^}]*\}', update_meson_library_versions)
 
 print('Updating AsciiDoc sources')
 for filename in glob.glob('doc/*.adoc'):

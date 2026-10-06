@@ -13,22 +13,26 @@ drwxr-xr-x install-dir/lib/cmake/pcre2
 -rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-config.cmake
 -rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-targets-release.cmake
 -rw-r--r-- install-dir/lib/cmake/pcre2/pcre2-targets.cmake
+-rwxr-xr-x install-dir/lib/libpcre2-16.0.16.0.dylib
+lrwxr-xr-x install-dir/lib/libpcre2-16.0.dylib -> libpcre2-16.0.16.0.dylib
 -rw-r--r-- install-dir/lib/libpcre2-16.a
-lrwxrwxrwx install-dir/lib/libpcre2-16.so -> libpcre2-16.so.0
-lrwxrwxrwx install-dir/lib/libpcre2-16.so.0 -> libpcre2-16.so.0.16.0
--rwxr-xr-x install-dir/lib/libpcre2-16.so.0.16.0
+lrwxr-xr-x install-dir/lib/libpcre2-16.dylib -> libpcre2-16.0.dylib
+-rwxr-xr-x install-dir/lib/libpcre2-16.la
+-rwxr-xr-x install-dir/lib/libpcre2-32.0.16.0.dylib
+lrwxr-xr-x install-dir/lib/libpcre2-32.0.dylib -> libpcre2-32.0.16.0.dylib
 -rw-r--r-- install-dir/lib/libpcre2-32.a
-lrwxrwxrwx install-dir/lib/libpcre2-32.so -> libpcre2-32.so.0
-lrwxrwxrwx install-dir/lib/libpcre2-32.so.0 -> libpcre2-32.so.0.16.0
--rwxr-xr-x install-dir/lib/libpcre2-32.so.0.16.0
+lrwxr-xr-x install-dir/lib/libpcre2-32.dylib -> libpcre2-32.0.dylib
+-rwxr-xr-x install-dir/lib/libpcre2-32.la
+-rwxr-xr-x install-dir/lib/libpcre2-8.0.16.0.dylib
+lrwxr-xr-x install-dir/lib/libpcre2-8.0.dylib -> libpcre2-8.0.16.0.dylib
 -rw-r--r-- install-dir/lib/libpcre2-8.a
-lrwxrwxrwx install-dir/lib/libpcre2-8.so -> libpcre2-8.so.0
-lrwxrwxrwx install-dir/lib/libpcre2-8.so.0 -> libpcre2-8.so.0.16.0
--rwxr-xr-x install-dir/lib/libpcre2-8.so.0.16.0
+lrwxr-xr-x install-dir/lib/libpcre2-8.dylib -> libpcre2-8.0.dylib
+-rwxr-xr-x install-dir/lib/libpcre2-8.la
+-rwxr-xr-x install-dir/lib/libpcre2-posix.3.0.8.dylib
+lrwxr-xr-x install-dir/lib/libpcre2-posix.3.dylib -> libpcre2-posix.3.0.8.dylib
 -rw-r--r-- install-dir/lib/libpcre2-posix.a
-lrwxrwxrwx install-dir/lib/libpcre2-posix.so -> libpcre2-posix.so.3
-lrwxrwxrwx install-dir/lib/libpcre2-posix.so.3 -> libpcre2-posix.so.3.0.8
--rwxr-xr-x install-dir/lib/libpcre2-posix.so.3.0.8
+lrwxr-xr-x install-dir/lib/libpcre2-posix.dylib -> libpcre2-posix.3.dylib
+-rwxr-xr-x install-dir/lib/libpcre2-posix.la
 drwxr-xr-x install-dir/lib/pkgconfig
 -rw-r--r-- install-dir/lib/pkgconfig/libpcre2-16.pc
 -rw-r--r-- install-dir/lib/pkgconfig/libpcre2-32.pc

@@ -135,12 +135,6 @@ option(
 option('pcre2_show_report', type: 'boolean', value: true, description: 'Show the final configuration report')
 option('pcre2_build_pcre2grep', type: 'boolean', value: true, description: 'Build pcre2grep')
 option('pcre2_build_tests', type: 'boolean', value: true, description: 'Build the tests')
-option(
-  'pcre2_install_cmakedir',
-  type: 'string',
-  value: '',
-  description: 'Install path for PCRE2 CMake config files; defaults to libdir/cmake/pcre2.',
-)
 option('pcre2_symvers', type: 'boolean', value: true, description: 'Enable library symbol versioning')
 option(
   'pcre2_support_libbz2',
