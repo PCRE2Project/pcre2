@@ -989,6 +989,7 @@ if(WIN32)
 endif()
 
 set(TARGETS)
+set(PRIVATE_TARGETS)
 set(DLL_PDB_FILES)
 
 # 8-bit library
@@ -1345,7 +1346,7 @@ configure_file(pcre2-config.in pcre2-config @ONLY NEWLINE_STYLE LF)
 if(PCRE2_BUILD_PCRE2GREP)
   add_executable(pcre2grep src/pcre2grep.c)
   set_property(TARGET pcre2grep PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8)
-  list(APPEND TARGETS pcre2grep)
+  list(APPEND PRIVATE_TARGETS pcre2grep)
   target_link_libraries(pcre2grep pcre2-posix ${PCRE2GREP_LIBS})
 endif()
 
@@ -1359,7 +1360,7 @@ if(PCRE2_BUILD_TESTS)
   set(PCRE2TEST_SOURCES src/pcre2test.c)
 
   add_executable(pcre2test ${PCRE2TEST_SOURCES})
-  list(APPEND TARGETS pcre2test)
+  list(APPEND PRIVATE_TARGETS pcre2test)
   if(PCRE2_BUILD_PCRE2_8)
     list(APPEND PCRE2TEST_LIBS pcre2-posix pcre2-8)
   endif()
@@ -1511,6 +1512,9 @@ install(
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
+if(PRIVATE_TARGETS)
+  install(TARGETS ${PRIVATE_TARGETS} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 install(EXPORT pcre2-targets DESTINATION ${PCRE2_INSTALL_CMAKEDIR} NAMESPACE pcre2::)
 install(FILES ${pkg_config_files} DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(
