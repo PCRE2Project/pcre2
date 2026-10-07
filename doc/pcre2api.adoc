@@ -1186,7 +1186,14 @@ int pcre2_set_offset_limit(pcre2_match_context *mcontext,
 
 The arg:offset_limit parameter limits how far an unanchored search can
 advance in the subject string. The default value is const:PCRE2_UNSET. The
-func:pcre2_match() and func:pcre2_dfa_match() functions return
+value const:PCRE2_UNSET removes the limit; any other value must not exceed the
+subject length in code units. func:pcre2_match() and func:pcre2_dfa_match()
+return const:PCRE2_ERROR_BADOFFSETLIMITVALUE if this requirement is not met.
+When the subject length is specified as const:PCRE2_ZERO_TERMINATED, the limit
+is checked against the actual string length. A limit equal to the subject
+length is permitted. The setter itself does not check this condition.
+
+For a valid limit, func:pcre2_match() and func:pcre2_dfa_match() return
 const:PCRE2_ERROR_NOMATCH if a match with a starting point before or at the given
 offset is not found. The func:pcre2_substitute() function makes no more
 substitutions.
@@ -3461,6 +3468,14 @@ const:PCRE2_ERROR_BADMODE::
 
 const:PCRE2_ERROR_BADOFFSET::
       The value of arg:start_offset was greater than the length of the subject.
+
+const:PCRE2_ERROR_BADOFFSETLIMIT::
+      A non-default offset limit was set without compiling the pattern with
+      const:PCRE2_USE_OFFSET_LIMIT.
+
+const:PCRE2_ERROR_BADOFFSETLIMITVALUE::
+      The offset limit in the match context was greater than the length of the
+      subject and was not const:PCRE2_UNSET.
 
 const:PCRE2_ERROR_BADOPTION::
       An unrecognized bit was set in the arg:options argument.

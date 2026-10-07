@@ -1252,7 +1252,15 @@ PCRE2 CONTEXTS
 
        The offset_limit parameter limits how far an unanchored search can
        advance in the subject string. The default value is PCRE2_UNSET. The
-       pcre2_match() and pcre2_dfa_match() functions return
+       value PCRE2_UNSET removes the limit; any other value must not exceed
+       the subject length in code units. pcre2_match() and pcre2_dfa_match()
+       return PCRE2_ERROR_BADOFFSETLIMITVALUE if this requirement is not met.
+       When the subject length is specified as PCRE2_ZERO_TERMINATED, the
+       limit is checked against the actual string length. A limit equal to the
+       subject length is permitted. The setter itself does not check this
+       condition.
+
+       For a valid limit, pcre2_match() and pcre2_dfa_match() return
        PCRE2_ERROR_NOMATCH if a match with a starting point before or at the
        given offset is not found. The pcre2_substitute() function makes no
        more substitutions.
@@ -3860,6 +3868,14 @@ ERROR RETURNS FROM pcre2_match()
                                     32-bit library function.
            PCRE2_ERROR_BADOFFSET    The value of start_offset was greater than
                                     the length of the subject.
+           PCRE2_ERROR_BADOFFSETLIMIT
+                                    A non-default offset limit was set without
+                                    compiling the pattern with
+                                    PCRE2_USE_OFFSET_LIMIT.
+           PCRE2_ERROR_BADOFFSETLIMITVALUE
+                                    The offset limit in the match context was
+                                    greater than the length of the subject and
+                                    was not PCRE2_UNSET.
            PCRE2_ERROR_BADOPTION    An unrecognized bit was set in the options
                                     argument.
            PCRE2_ERROR_BADUTFOFFSET The UTF code unit sequence that was passed
@@ -6734,6 +6750,10 @@ JIT FAST PATH API
        results. In the absence of PCRE2_MATCH_INVALID_UTF you should call
        pcre2_jit_match() in UTF mode only if you are sure the subject is
        valid.
+
+       Similarly, a non-default offset limit must not exceed the subject
+       length. pcre2_match() checks this condition before dispatching to JIT,
+       but callers of pcre2_jit_match() must ensure it themselves.
 
        Bypassing the sanity checks and the pcre2_match() wrapping can give
        speedups of more than 10%.

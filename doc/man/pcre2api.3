@@ -1504,7 +1504,14 @@ below.
 .sp
 The \fIoffset_limit\fP parameter limits how far an unanchored search can
 advance in the subject string. The default value is \fBPCRE2_UNSET\fP. The
-pcre2_match() and pcre2_dfa_match() functions return
+value \fBPCRE2_UNSET\fP removes the limit; any other value must not exceed the
+subject length in code units. pcre2_match() and pcre2_dfa_match()
+return \fBPCRE2_ERROR_BADOFFSETLIMITVALUE\fP if this requirement is not met.
+When the subject length is specified as \fBPCRE2_ZERO_TERMINATED\fP, the limit
+is checked against the actual string length. A limit equal to the subject
+length is permitted. The setter itself does not check this condition.
+.sp
+For a valid limit, pcre2_match() and pcre2_dfa_match() return
 \fBPCRE2_ERROR_NOMATCH\fP if a match with a starting point before or at the given
 offset is not found. The pcre2_substitute() function makes no more
 substitutions.
@@ -4057,6 +4064,16 @@ the 8\-bit library is passed to a 16\-bit or 32\-bit library function.
 \fBPCRE2_ERROR_BADOFFSET\fP
 .ad l
 The value of \fIstart_offset\fP was greater than the length of the subject.
+.TP 25
+\fBPCRE2_ERROR_BADOFFSETLIMIT\fP
+.ad l
+A non\-default offset limit was set without compiling the pattern with
+\fBPCRE2_USE_OFFSET_LIMIT\fP.
+.TP 25
+\fBPCRE2_ERROR_BADOFFSETLIMITVALUE\fP
+.ad l
+The offset limit in the match context was greater than the length of the
+subject and was not \fBPCRE2_UNSET\fP.
 .TP 25
 \fBPCRE2_ERROR_BADOPTION\fP
 .ad l

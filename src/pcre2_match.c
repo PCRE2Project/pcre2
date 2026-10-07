@@ -7807,6 +7807,9 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
 
   if (start_offset > length)
     return match_data->rc = PCRE2_ERROR_BADOFFSET;
+  if (mcontext != NULL && mcontext->offset_limit != PCRE2_UNSET &&
+      mcontext->offset_limit > length)
+    return match_data->rc = PCRE2_ERROR_BADOFFSETLIMITVALUE;
 
   /* Check that the first field in the block is the magic number. */
 

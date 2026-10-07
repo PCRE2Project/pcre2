@@ -430,6 +430,10 @@ or loop or give wrong results. In the absence of const:PCRE2_MATCH_INVALID_UTF y
 should call func:pcre2_jit_match() in UTF mode only if you are sure the
 subject is valid.
 
+Similarly, a non-default offset limit must not exceed the subject length.
+func:pcre2_match() checks this condition before dispatching to JIT, but callers
+of func:pcre2_jit_match() must ensure it themselves.
+
 Bypassing the sanity checks and the func:pcre2_match() wrapping can give
 speedups of more than 10%.
 

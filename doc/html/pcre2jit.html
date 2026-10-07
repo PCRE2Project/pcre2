@@ -839,6 +839,9 @@ set for <code class="function">pcre2_compile()</code>, the result is undefined. 
 or loop or give wrong results. In the absence of <code class="constant">PCRE2_MATCH_INVALID_UTF</code> you
 should call <code class="function">pcre2_jit_match()</code> in UTF mode only if you are sure the
 subject is valid.</p>
+<p>Similarly, a non-default offset limit must not exceed the subject length.
+<code class="function">pcre2_match()</code> checks this condition before dispatching to JIT, but callers
+of <code class="function">pcre2_jit_match()</code> must ensure it themselves.</p>
 <p>Bypassing the sanity checks and the <code class="function">pcre2_match()</code> wrapping can give
 speedups of more than 10%.</p></section>
 <section class="doc-section level-1"><h2 id="_see_also">See also</h2><p><a href="pcre2api.html"><code>pcre2api</code></a>, <a href="pcre2unicode.html"><code>pcre2unicode</code></a>.</p>
