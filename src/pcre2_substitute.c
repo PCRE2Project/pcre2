@@ -885,9 +885,9 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   match data block. We create an internal match_data block in two cases: (a) an
   external one is not supplied (and we are not starting from an existing match);
   (b) an existing match is to be used for the first substitution. In the latter
-  case, we copy the existing match into the internal block, except for any cached
-  heap frame size and pointer. This ensures that no changes are made to the
-  external match data block. */
+  case, we copy the existing match into the internal block, retaining its new
+  allocator and clearing any cached heap frame size and pointer. This ensures
+  that no changes are made to the external match data block. */
 
   /* WARNING: In both cases below a general context is constructed "by hand"
   because calling pcre2_general_context_create() involves a memory allocation. If
@@ -916,6 +916,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
       return PCRE2_ERROR_NOMEMORY;
     memcpy(internal_match_data, match_data,
            offsetof(pcre2_match_data, ovector) + 2 * pairs * sizeof(PCRE2_SIZE));
+    internal_match_data->memctl = gcontext.memctl;
     internal_match_data->heapframes = NULL;
     internal_match_data->heapframes_size = 0;
     /* Ensure that the subject is not freed when internal_match_data is */
