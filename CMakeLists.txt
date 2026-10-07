@@ -1271,7 +1271,9 @@ endif()
 # Package metadata
 # -----------------------------------------------------------------------------
 
-set(PACKAGE_VERSION "${PCRE2_MAJOR}.${PCRE2_MINOR}")
+set(PACKAGE_VERSION "${PCRE2_MAJOR}.${PCRE2_MINOR}${PCRE2_PRERELEASE}")
+# In pkg-config versions, a tilde sorts prereleases before the final release.
+string(REPLACE "-" "~" PCRE2_PKGCONFIG_VERSION "${PCRE2_MAJOR}.${PCRE2_MINOR}${PCRE2_PRERELEASE}")
 set(prefix ${CMAKE_INSTALL_PREFIX})
 set(exec_prefix "\${prefix}")
 if(IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}")
