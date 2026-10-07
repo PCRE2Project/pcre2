@@ -81,8 +81,8 @@ jobs:
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
-          maint/RunManifestTest install-dir/usr/local maint/manifest-install-linux release autoconf
-          maint/RunSymbolTest install-dir/usr/local/lib/ maint/
+          ruby maint/RunManifestTest.rb install-dir/usr/local maint/manifest-install-linux autoconf
+          ruby maint/RunSymbolTest.rb install-dir/usr/local/lib/ maint/
 
   alpine:
     name: alpine
@@ -128,7 +128,7 @@ jobs:
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
-          maint/RunManifestTest install-dir/usr/local maint/manifest-install-linux release autoconf
+          maint/RunManifestTest install-dir/usr/local maint/manifest-install-linux autoconf
           maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   macos:
@@ -160,8 +160,8 @@ jobs:
         run: |
           cd build
           cmake --install . --prefix install-dir
-          ../maint/RunManifestTest install-dir ../maint/manifest-install-macos
-          ../maint/RunSymbolTest install-dir/lib/ ../maint/
+          ruby ../maint/RunManifestTest.rb install-dir ../maint/manifest-install-macos cmake
+          ruby ../maint/RunSymbolTest.rb install-dir/lib/ ../maint/
 
       - name: Test installed CMake package with CMake
         run: python3 maint/cmake-tests/check-interface.py install build/install-dir --build-type Release
@@ -211,8 +211,8 @@ jobs:
         run: |
           cd build
           cmake --install . --config Release --prefix install-dir
-          ../maint/RunManifestTest.ps1 install-dir ../maint/manifest-install-windows
-          ../maint/RunSymbolTest.ps1 install-dir/bin ../maint/
+          ruby ../maint/RunManifestTest.rb install-dir ../maint/manifest-install-windows cmake
+          ruby ../maint/RunSymbolTest.rb install-dir/bin ../maint/
 
       - name: Test installed CMake package with CMake
         run: python maint/cmake-tests/check-interface.py install build/install-dir --build-type Release --architecture ${{ matrix.arch }}
@@ -261,7 +261,7 @@ jobs:
             (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
-            maint/RunManifestTest install-dir/usr/local maint/manifest-install-freebsd release autoconf
+            maint/RunManifestTest install-dir/usr/local maint/manifest-install-freebsd autoconf
             maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake =="
@@ -272,7 +272,7 @@ jobs:
             make -j$NPROC
             ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
-            ../maint/RunManifestTest install-dir ../maint/manifest-install-freebsd
+            ../maint/RunManifestTest install-dir ../maint/manifest-install-freebsd cmake
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
             echo "== Meson =="
@@ -282,7 +282,7 @@ jobs:
             meson compile -C build -j$NPROC
             meson test -C build --print-errorlogs
             meson install -C build
-            maint/RunManifestTest install-dir maint/manifest-install-freebsd release meson
+            maint/RunManifestTest install-dir maint/manifest-install-freebsd meson
             maint/RunSymbolTest install-dir/lib/ maint/
 
   openbsd:
@@ -329,7 +329,7 @@ jobs:
             make install "DESTDIR=`pwd`/install-dir"
             # I don't really know enough about OpenBSD to say whether the unusually-numbered .so files
             # with no symlinks are correct or not.
-            # maint/RunManifestTest install-dir/usr/local maint/manifest-install-openbsd release autoconf
+            # maint/RunManifestTest install-dir/usr/local maint/manifest-install-openbsd autoconf
             # maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake =="
@@ -340,7 +340,7 @@ jobs:
             make -j$NPROC
             ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
-            # ../maint/RunManifestTest install-dir ../maint/manifest-install-openbsd
+            # ../maint/RunManifestTest install-dir ../maint/manifest-install-openbsd cmake
             # ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   solaris:
@@ -408,7 +408,7 @@ jobs:
             (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
-            maint/RunManifestTest install-dir/usr/local maint/manifest-install-solaris release autoconf
+            maint/RunManifestTest install-dir/usr/local maint/manifest-install-solaris autoconf
             maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== Autoconf, 64-bit =="
@@ -419,7 +419,7 @@ jobs:
             (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
-            maint/RunManifestTest install-dir/usr/local maint/manifest-install-solaris release autoconf
+            maint/RunManifestTest install-dir/usr/local maint/manifest-install-solaris autoconf
             maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake, 64-bit =="
@@ -430,7 +430,7 @@ jobs:
             make
             ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
-            ../maint/RunManifestTest install-dir ../maint/manifest-install-solaris
+            ../maint/RunManifestTest install-dir ../maint/manifest-install-solaris cmake
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
             echo "== Meson, 64-bit =="
@@ -441,7 +441,7 @@ jobs:
             meson compile -C build -j$NPROC
             meson test -C build --print-errorlogs
             meson install -C build
-            maint/RunManifestTest install-dir maint/manifest-install-solaris release meson
+            maint/RunManifestTest install-dir maint/manifest-install-solaris meson
             maint/RunSymbolTest install-dir/lib/ maint/
 
   zos:
@@ -548,7 +548,7 @@ jobs:
           # Budge the directory, so we don't bake the version number into the
           # `manifest-tarball` file:
           mv tarball-dir/pcre2-* tarball-dir/pcre2-SNAPSHOT
-          maint/RunManifestTest tarball-dir maint/manifest-tarball
+          ruby maint/RunManifestTest.rb tarball-dir maint/manifest-tarball tarball
 
       - name: Upload to GitHub artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

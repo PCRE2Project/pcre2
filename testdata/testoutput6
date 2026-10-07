@@ -7692,7 +7692,11 @@ No match
 
 /abc/use_offset_limit
     1234abcde\=offset_limit=100
- 0: abc
+Failed: error -77: bad offset limit value
+    1234abcde\=offset_limit=4294967294
+Failed: error -77: bad offset limit value
+    1234abcde\=offset_limit=4294967294,offset=4
+Failed: error -77: bad offset limit value
     1234abcde\=offset_limit=9
  0: abc
     1234abcde\=offset_limit=4

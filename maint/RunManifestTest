@@ -10,20 +10,20 @@ LANG=C
 LC_ALL=C
 export LANG LC_ALL
 
-if [ "$1" = "" -o "$2" = "" ] ; then
-  echo "Usage: $0 <dir> <manifest name> [<build type>] [<producer>]" >&2
+if [ "$1" = "" -o "$2" = "" -o "$3" = "" ] ; then
+  echo "Usage: $0 <dir> <manifest name> <producer> [<build type>]" >&2
   exit 1
 fi
 
 input_dir="$1"
 expected_manifest="$2"
-build_type="${3:-release}"
-producer="${4:-cmake}"
+producer="$3"
+build_type="${4:-release}"
 
 case "$producer" in
-  autoconf|cmake|meson) ;;
+  autoconf|cmake|meson|tarball) ;;
   *)
-    echo "Unknown producer: $producer (expected autoconf, cmake, or meson)" >&2
+    echo "Unknown producer: $producer (expected autoconf, cmake, meson, or tarball)" >&2
     exit 1
     ;;
 esac

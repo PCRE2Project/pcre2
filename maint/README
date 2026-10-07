@@ -150,9 +150,27 @@ RunCoverage
   the GitHub CI actions, and can also be run by a developer locally.
 
 RunManifestTest
-RunManifestTest.ps1
-  Scripts to generate and verify a list of files against an expected 'manifest'
-  detailing what the directory should contain.
+RunManifestTest.rb
+  Checks an installation or unpacked tarball against its file manifest,
+  including file types, permissions and symlink targets. All platforms use
+  ls-style modes, forward-slash paths and bytewise path ordering, starting with
+  the root directory. Run:
+    ruby maint/RunManifestTest.rb <dir> <manifest> <producer> [<build type>]
+  where producer is autoconf, cmake, or tarball; build type defaults to release.
+  Only the expected manifest is adjusted for build-system differences.
+
+  The shell script is for platforms run in CI which don't (easily) have Ruby.
+
+RunSymbolTest
+RunSymbolTest.rb
+  Checks the exports of all four shared libraries against maint/manifest-lib*.so.
+  Run:
+    ruby maint/RunSymbolTest.rb <library dir> <manifest dir>
+  Uses the installed lib directory on Unix or bin directory on Windows. Requires
+  nm on Linux/macOS, llvm-nm on FreeBSD, elfdump on Solaris, or Visual Studio's
+  dumpbin on Windows (located through PATH or vswhere).
+
+  The shell script is for platforms run in CI which don't (easily) have Ruby.
 
   The shell script takes <dir> <manifest> [<build type>] [<producer>], with
   release and cmake as the defaults. The PowerShell script takes

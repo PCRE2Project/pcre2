@@ -4907,6 +4907,8 @@
 
 /abc/use_offset_limit
     1234abcde\=offset_limit=100
+    1234abcde\=offset_limit=4294967294
+    1234abcde\=offset_limit=4294967294,offset=4
     1234abcde\=offset_limit=9
     1234abcde\=offset_limit=4
     1234abcde\=offset_limit=4,offset=4
