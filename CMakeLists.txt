@@ -105,6 +105,10 @@
 # 2025-03-27 Theodore used standard CMake constructs to export the library's
 #            targets.
 
+# -----------------------------------------------------------------------------
+# Project setup
+# -----------------------------------------------------------------------------
+
 message(STATUS "Using CMake version ${CMAKE_VERSION} (${CMAKE_COMMAND})")
 
 # Increased minimum to 3.15 to allow use of string(REPEAT).
@@ -133,6 +137,11 @@ if(
   set(CMAKE_C_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")
 endif()
 
+# MSVC compiler specific settings
+if(MSVC)
+  add_compile_definitions(_CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS)
+endif()
+
 # The following policies have been set in the PCRE2 CMake file in the past.
 # Since we specify a minimum of CMake 3.15, these are no longer required.
 # cmake_policy(SET CMP0063 NEW)
@@ -143,13 +152,18 @@ endif()
 # setting CMAKE_MODULE_PATH on the command line.
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+# -----------------------------------------------------------------------------
 # External packages
+# -----------------------------------------------------------------------------
+
 find_package(BZip2)
 find_package(ZLIB)
 find_package(Readline)
 find_package(Editline)
 
+# -----------------------------------------------------------------------------
 # Configuration checks
+# -----------------------------------------------------------------------------
 
 include(CheckCSourceCompiles)
 include(CheckFunctionExists)
@@ -286,13 +300,9 @@ check_c_source_compiles(
 )
 
 # Detect support for linker scripts.
-
 pcre2_check_vscript(HAVE_VSCRIPT VSCRIPT_FLAG HAVE_VSCRIPT_NO_STAR)
 
-# Check whether Intel CET is enabled, and if so, adjust compiler flags. This
-# code was written by PH, trying to imitate the logic from the autotools
-# configuration.
-
+# Check whether Intel CET is enabled, and if so, adjust compiler flags.
 check_c_source_compiles(
   [=[
   #ifndef __CET__
@@ -302,12 +312,13 @@ check_c_source_compiles(
   ]=]
   INTEL_CET_ENABLED
 )
-
 if(INTEL_CET_ENABLED)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mshstk")
 endif()
 
+# -----------------------------------------------------------------------------
 # User-configurable options
+# -----------------------------------------------------------------------------
 #
 # Note: CMakeSetup displays these in alphabetical order, regardless of
 # the order we use here.
@@ -532,7 +543,9 @@ if(Readline_FOUND)
   option(PCRE2_SUPPORT_LIBREADLINE "Enable support for linking pcre2test with libreadline." ON)
 endif()
 
-# Prepare build configuration
+# -----------------------------------------------------------------------------
+# Build configuration
+# -----------------------------------------------------------------------------
 
 include_directories(${PROJECT_BINARY_DIR}/interface ${PROJECT_BINARY_DIR}/src ${PROJECT_SOURCE_DIR}/src)
 
@@ -781,8 +794,11 @@ endif()
 file(REMOVE ${PROJECT_SOURCE_DIR}/src/config.h)
 file(REMOVE ${PROJECT_SOURCE_DIR}/src/pcre2.h)
 
+# -----------------------------------------------------------------------------
 # Release and library version information
+# -----------------------------------------------------------------------------
 
+# These lines are updated by UpdateRelease.py
 set(PCRE2_MAJOR "10")
 set(PCRE2_MINOR "50")
 set(PCRE2_PRERELEASE "-DEV")
@@ -816,7 +832,9 @@ parse_lib_version(LIBPCRE2_8)
 parse_lib_version(LIBPCRE2_16)
 parse_lib_version(LIBPCRE2_32)
 
-# Output files
+# -----------------------------------------------------------------------------
+# Generated files
+# -----------------------------------------------------------------------------
 
 configure_file(src/config-cmake.h.in ${PROJECT_BINARY_DIR}/src/config.h @ONLY)
 
@@ -838,7 +856,9 @@ if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
   configure_file(src/libpcre2-posix.sym.in ${PROJECT_BINARY_DIR}/src/libpcre2-posix.sym @ONLY)
 endif()
 
+# -----------------------------------------------------------------------------
 # Character table generation
+# -----------------------------------------------------------------------------
 
 if(REBUILD_CHARTABLES)
   add_executable(pcre2_dftables src/pcre2_dftables.c)
@@ -870,7 +890,9 @@ else()
   )
 endif()
 
+# -----------------------------------------------------------------------------
 # Source code
+# -----------------------------------------------------------------------------
 
 set(PCRE2_HEADERS ${PROJECT_BINARY_DIR}/interface/pcre2.h)
 
@@ -912,6 +934,9 @@ set(
 set(PCRE2POSIX_HEADERS ${PROJECT_BINARY_DIR}/interface/pcre2posix.h)
 set(PCRE2POSIX_SOURCES src/pcre2posix.c)
 
+# It's possible that some users may still make use of the facility to place
+# their own resource files in the PCRE2 source directory to customize the DLLs.
+
 if(MINGW AND BUILD_SHARED_LIBS)
   if(EXISTS ${PROJECT_SOURCE_DIR}/pcre2.rc)
     add_custom_command(
@@ -946,7 +971,9 @@ if(MSVC AND BUILD_SHARED_LIBS)
   endif()
 endif()
 
-# Build setup
+# -----------------------------------------------------------------------------
+# Libraries
+# -----------------------------------------------------------------------------
 
 add_compile_definitions(HAVE_CONFIG_H)
 
@@ -954,10 +981,6 @@ if(PCRE2_DEBUG STREQUAL "IfDebugBuild")
   add_compile_definitions("$<$<CONFIG:Debug>:PCRE2_DEBUG>")
 elseif(PCRE2_DEBUG)
   add_compile_definitions("PCRE2_DEBUG")
-endif()
-
-if(MSVC)
-  add_compile_definitions(_CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
 # Make sure to not link debug libs against release libs and vice versa.
@@ -1243,7 +1266,9 @@ if(PCRE2_BUILD_PCRE2_32)
   endif()
 endif()
 
-# Generate pkg-config files
+# -----------------------------------------------------------------------------
+# Package metadata
+# -----------------------------------------------------------------------------
 
 set(PACKAGE_VERSION "${PCRE2_MAJOR}.${PCRE2_MINOR}")
 set(prefix ${CMAKE_INSTALL_PREFIX})
@@ -1313,7 +1338,9 @@ endif()
 
 configure_file(pcre2-config.in pcre2-config @ONLY NEWLINE_STYLE LF)
 
+# -----------------------------------------------------------------------------
 # Executables
+# -----------------------------------------------------------------------------
 
 if(PCRE2_BUILD_PCRE2GREP)
   add_executable(pcre2grep src/pcre2grep.c)
@@ -1322,7 +1349,9 @@ if(PCRE2_BUILD_PCRE2GREP)
   target_link_libraries(pcre2grep pcre2-posix ${PCRE2GREP_LIBS})
 endif()
 
+# -----------------------------------------------------------------------------
 # Testing
+# -----------------------------------------------------------------------------
 
 if(PCRE2_BUILD_TESTS)
   enable_testing()
@@ -1437,7 +1466,9 @@ MESSAGE(\" \")
   endif()
 endif()
 
-# Fuzzer support: build pcre2fuzzcheck binaries
+# -----------------------------------------------------------------------------
+# Fuzzer support
+# -----------------------------------------------------------------------------
 
 if(PCRE2_FUZZ_SUPPORT)
   if(PCRE2_BUILD_PCRE2_8)
@@ -1467,7 +1498,9 @@ if(PCRE2_FUZZ_SUPPORT)
   endif()
 endif()
 
+# -----------------------------------------------------------------------------
 # Installation
+# -----------------------------------------------------------------------------
 
 set(CMAKE_INSTALL_ALWAYS 1)
 
@@ -1525,6 +1558,10 @@ install(FILES ${html} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2/html)
 if(MSVC AND INSTALL_MSVC_PDB)
   install(FILES ${DLL_PDB_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS Debug RelWithDebInfo)
 endif()
+
+# -----------------------------------------------------------------------------
+# Configuration summary
+# -----------------------------------------------------------------------------
 
 # Help, only for nice output
 if(BUILD_STATIC_LIBS)
@@ -1665,5 +1702,3 @@ if(PCRE2_SHOW_REPORT)
 
   message(STATUS "")
 endif()
-
-# end CMakeLists.txt
