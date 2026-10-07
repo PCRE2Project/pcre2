@@ -15811,7 +15811,11 @@ Failed: error 160 at offset 12: (*VERB) not recognized or malformed
 
 /abc/use_offset_limit
     1234abcde\=offset_limit=100
- 0: abc
+Failed: error -77: bad offset limit value
+    1234abcde\=offset_limit=4294967294
+Failed: error -77: bad offset limit value
+    1234abcde\=offset_limit=4294967294,offset=4
+Failed: error -77: bad offset limit value
     1234abcde\=offset_limit=9
  0: abc
     1234abcde\=offset_limit=4
@@ -15839,6 +15843,8 @@ No match
 \= Expect error
     1234abcde\=offset_limit=4
 Failed: error -56: offset limit set without PCRE2_USE_OFFSET_LIMIT
+    1234abcde\=offset_limit=100
+Failed: error -77: bad offset limit value
 
 /^\w/m,use_offset_limit
     \n..\naa\=offset_limit=3

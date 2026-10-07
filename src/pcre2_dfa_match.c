@@ -3807,6 +3807,12 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     rc = PCRE2_ERROR_BADOFFSET;
     goto EXIT;
   }
+  if (mcontext != NULL && mcontext->offset_limit != PCRE2_UNSET &&
+      mcontext->offset_limit > length)
+  {
+    rc = PCRE2_ERROR_BADOFFSETLIMITVALUE;
+    goto EXIT;
+  }
 
   /* Partial matching and PCRE2_ENDANCHORED are currently not allowed at the same
   time. */
