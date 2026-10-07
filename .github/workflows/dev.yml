@@ -157,8 +157,8 @@ jobs:
         run: |
           cd build
           cmake --install . --prefix install-dir
-          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux
-          ../maint/RunSymbolTest install-dir/lib/ ../maint/
+          ruby ../maint/RunManifestTest.rb install-dir ../maint/manifest-install-linux cmake
+          ruby ../maint/RunSymbolTest.rb install-dir/lib/ ../maint/
 
       - name: Test CMake install interface
         run: |
@@ -238,7 +238,7 @@ jobs:
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
-          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunManifestTest install-dir/usr/local maint/manifest-install-linux autoconf
           maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   passenger:
@@ -297,7 +297,7 @@ jobs:
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
-          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunManifestTest install-dir/usr/local maint/manifest-install-linux autoconf
           maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   greatawk:
@@ -332,7 +332,7 @@ jobs:
         run: |
           cd build
           cmake --install . --prefix install-dir
-          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux relwithdebinfo
+          ../maint/RunManifestTest install-dir ../maint/manifest-install-linux cmake relwithdebinfo
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
       - name: Test CMake install interface
@@ -425,8 +425,8 @@ jobs:
         run: |
           cd build
           cmake --install . --prefix install-dir
-          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-linux minsizerel
-          ../maint/RunSymbolTest install-dir/lib/ ../maint/
+          ruby ../maint/RunManifestTest.rb install-dir ../maint/manifest-install-linux cmake minsizerel
+          ruby ../maint/RunSymbolTest.rb install-dir/lib/ ../maint/
 
   bat:
     # Tests with: MSVC 32-bit, and a variety of CMake options. Windows has "bat" files.

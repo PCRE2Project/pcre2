@@ -67,7 +67,7 @@ update_file('build.zig.zon', r'(?m)^    \.version = ".*?"', '    .version = "%s"
 
 # Install manifests
 print('Updating install manifests')
-for filename in sorted(glob.glob('maint/manifest-*install-*')):
+for filename in sorted(glob.glob('maint/manifest-install-*')):
     if filename.endswith('-windows'):
         continue
 
