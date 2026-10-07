@@ -308,6 +308,9 @@ if not Path(pcre2test).is_file() or not os.access(pcre2test, os.X_OK):
     print(f"** {pcre2test} does not exist or is not executable.")
     sys.exit(1)
 
+# Do not search PATH for a bare executable filename.
+pcre2test = os.path.abspath(pcre2test)
+
 # Find the test data
 
 if testdatatar:

@@ -345,6 +345,12 @@ if [ ! -x "$pcre2test" ] ; then
   exit 1
 fi
 
+# Do not search PATH for a bare executable filename.
+case "$pcre2test" in
+  */*) ;;
+  *) pcre2test="./$pcre2test";;
+esac
+
 # Find the test data
 
 if [ -n "$srcdir" ] ; then
