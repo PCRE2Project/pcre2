@@ -42,6 +42,11 @@ CleanTxt
   A Perl script to clean up the nroff output in PCRE2 man pages, used by
   UpdateAlways.
 
+cmake-tests
+  CMake projects that exercise PCRE2 as a build-tree dependency and as an
+  installed package. The check-interface.py runner builds and runs both static
+  and shared consumers and verifies their dynamic library dependencies.
+
 Detrail
   A Perl script to remove trailing whitespace from PCRE2 files, used by
   UpdateAlways.

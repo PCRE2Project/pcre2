@@ -160,49 +160,11 @@ jobs:
           ruby ../maint/RunManifestTest.rb install-dir ../maint/manifest-install-linux cmake
           ruby ../maint/RunSymbolTest.rb install-dir/lib/ ../maint/
 
-      - name: Test CMake install interface
-        run: |
-          INSTALL_PREFIX=`pwd`/build/install-dir
-          cd maint/cmake-tests/install-interface
+      - name: Test installed CMake package with CMake
+        run: python3 maint/cmake-tests/check-interface.py install build/install-dir --generator Ninja --build-type Release
 
-          for useStaticLibs in ON OFF; do
-            echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
-            rm -rf build
-            cmake -GNinja $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
-            (cd build; ninja)
-            ./build/test_executable
-            ldd ./build/test_executable
-            if [ $useStaticLibs = ON ]; then
-              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
-            else
-              # Test that the shared library is actually linked in
-              (ldd ./build/test_executable | grep -q "$INSTALL_PREFIX/lib/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
-            fi
-          done
-
-      - name: Test CMake build interface
-        run: |
-          BUILD_DIR=`pwd`
-          cp -rp maint/cmake-tests/build-interface ../cmake-tests-build-interface
-          cd ../cmake-tests-build-interface
-          ln -s "$BUILD_DIR" pcre2
-
-          for buildLibs in "ON;OFF" "OFF;ON"; do
-            static=`echo $buildLibs | cut -d';' -f1`
-            shared=`echo $buildLibs | cut -d';' -f2`
-            echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
-            rm -rf build
-            cmake -GNinja $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
-            (cd build; ninja)
-            ./build/test_executable
-            ldd ./build/test_executable
-            if [ $static = ON ]; then
-              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
-            else
-              # Test that the shared library is actually linked in
-              (ldd ./build/test_executable | grep -q "`pwd`/build/pcre2/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
-            fi
-          done
+      - name: Test CMake build-tree interface
+        run: python3 maint/cmake-tests/check-interface.py build-tree . --generator Ninja --build-type Debug
 
   dodo:
     # Tests with: Autoconf on oldest supported Ubuntu (in non-extended support)
@@ -312,7 +274,7 @@ jobs:
           echo "set man-db/auto-update false" | debconf-communicate && dpkg-reconfigure man-db
           export DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
           apt-get -qq update
-          apt-get -qq install -y git build-essential cmake zlib1g-dev libbz2-dev libreadline-dev
+          apt-get -qq install -y git build-essential cmake zlib1g-dev libbz2-dev libreadline-dev python3
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -335,49 +297,11 @@ jobs:
           ../maint/RunManifestTest install-dir ../maint/manifest-install-linux cmake relwithdebinfo
           ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
-      - name: Test CMake install interface
-        run: |
-          INSTALL_PREFIX=`pwd`/build/install-dir
-          cd maint/cmake-tests/install-interface
+      - name: Test installed CMake package with CMake
+        run: python3 maint/cmake-tests/check-interface.py install build/install-dir --build-type RelWithDebInfo
 
-          for useStaticLibs in ON OFF; do
-            echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
-            rm -rf build
-            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
-            (cd build; make)
-            ./build/test_executable
-            ldd ./build/test_executable
-            if [ $useStaticLibs = ON ]; then
-              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
-            else
-              # Test that the shared library is actually linked in
-              (ldd ./build/test_executable | grep -q "$INSTALL_PREFIX/lib/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
-            fi
-          done
-
-      - name: Test CMake build interface
-        run: |
-          BUILD_DIR=`pwd`
-          cp -rp maint/cmake-tests/build-interface ../cmake-tests-build-interface
-          cd ../cmake-tests-build-interface
-          ln -s "$BUILD_DIR" pcre2
-
-          for buildLibs in "ON;OFF" "OFF;ON"; do
-            static=`echo $buildLibs | cut -d';' -f1`
-            shared=`echo $buildLibs | cut -d';' -f2`
-            echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
-            rm -rf build
-            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
-            (cd build; make)
-            ./build/test_executable
-            ldd ./build/test_executable
-            if [ $static = ON ]; then
-              (ldd ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
-            else
-              # Test that the shared library is actually linked in
-              (ldd ./build/test_executable | grep -q "`pwd`/build/pcre2/libpcre2-8.so.0") || (echo "Error: Shared library not linked in" && exit 1)
-            fi
-          done
+      - name: Test CMake build-tree interface
+        run: python3 maint/cmake-tests/check-interface.py build-tree . --build-type Debug
 
   wasp:
     # Tests with: French locale; oldest supported CMake; no JIT; -Os; libreadline
