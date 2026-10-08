@@ -572,7 +572,8 @@ if(PCRE2_BUILD_PCRE2_32)
 endif()
 
 if(PCRE2_BUILD_PCRE2GREP AND NOT PCRE2_BUILD_PCRE2_8)
-  message(FATAL_ERROR "PCRE2_BUILD_PCRE2_8 must be enabled for the pcre2grep program")
+  message(STATUS "** PCRE2_BUILD_PCRE2_8 must be enabled for the pcre2grep program")
+  set(PCRE2_BUILD_PCRE2GREP OFF)
 endif()
 
 if(PCRE2_SUPPORT_LIBBZ2)

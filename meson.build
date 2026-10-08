@@ -215,7 +215,8 @@ config.set('SUPPORT_PCRE2_16', build_16 ? 1 : false)
 config.set('SUPPORT_PCRE2_32', build_32 ? 1 : false)
 
 if build_grep and not build_8
-  error('PCRE2_BUILD_PCRE2_8 must be enabled for pcre2grep')
+  message('PCRE2_BUILD_PCRE2_8 must be enabled for pcre2grep; disabling pcre2grep.')
+  build_grep = false
 endif
 
 # The dependency finders have already checked explicitly requested libraries.
@@ -660,7 +661,7 @@ pcre2_config_data = {
   'includedir': fs.is_absolute(get_option('includedir')) ? get_option('includedir') : '${prefix}/' + get_option(
     'includedir',
   ),
-  'PACKAGE_VERSION': pcre2_version,
+  'PACKAGE_VERSION': meson.project_version(),
   'enable_pcre2_8': build_8 ? 'yes' : 'no',
   'enable_pcre2_16': build_16 ? 'yes' : 'no',
   'enable_pcre2_32': build_32 ? 'yes' : 'no',

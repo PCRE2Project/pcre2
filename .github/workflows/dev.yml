@@ -721,16 +721,9 @@ jobs:
         run: meson install -C build
 
       - name: Check installation
-        if: runner.os != 'Windows'
         run: |
-          maint/RunManifestTest install-dir maint/manifest-install-${{ matrix.manifest }} release meson
-          maint/RunSymbolTest install-dir/lib maint
-
-      - name: Check installation
-        if: runner.os == 'Windows'
-        run: |
-          ./maint/RunManifestTest.ps1 install-dir maint/manifest-install-windows meson
-          ./maint/RunSymbolTest.ps1 install-dir/bin maint
+          ruby maint/RunManifestTest.rb install-dir maint/manifest-install-${{ matrix.manifest }} meson
+          ruby maint/RunSymbolTest.rb install-dir/${{ runner.os == 'Windows' && 'bin' || 'lib' }} maint
 
       - name: Test Meson subproject interface
         run: python maint/meson-tests/check-library-options.py
@@ -766,8 +759,8 @@ jobs:
 
       - name: Check installation
         run: |
-          maint/RunManifestTest install-dir maint/manifest-install-linux release meson
-          maint/RunSymbolTest install-dir/lib maint
+          ruby maint/RunManifestTest.rb install-dir maint/manifest-install-linux meson
+          ruby maint/RunSymbolTest.rb install-dir/lib maint
 
       - name: Test Meson subproject interface
         run: python maint/meson-tests/check-library-options.py

@@ -100,15 +100,7 @@ ManyConfigTests
 meson-tests
   A small consumer that uses PCRE2 as a Meson subproject. Run
   `python3 maint/meson-tests/check-library-options.py` to configure, build and
-  run it with static and shared libraries. On Windows, the runner uses Meson's
-  --vsenv option to activate the MSVC environment.
-
-  The Meson portability helpers are named after their counterparts in cmake/.
-  Keep the order and meaning of their checks in sync, including the negative
-  and wildcard version-script probes.
-  FindReadline and FindEditline correspond to the CMake finders in cmake/;
-  FindBZip2 supplements package discovery with the library names from CMake's
-  built-in finder. zlib already has a native Meson system-library fallback.
+  run it with static and shared libraries.
 
 UpdateAlways
   A shell script to ensure that all auto-generated outputs are ready for
@@ -156,10 +148,25 @@ RunManifestTest.rb
   ls-style modes, forward-slash paths and bytewise path ordering, starting with
   the root directory. Run:
     ruby maint/RunManifestTest.rb <dir> <manifest> <producer> [<build type>]
-  where producer is autoconf, cmake, or tarball; build type defaults to release.
-  Only the expected manifest is adjusted for build-system differences.
+  where producer is autoconf, cmake, meson, or tarball; build type defaults to
+  release. Only the expected manifest is adjusted for build-system differences.
 
   The shell script is for platforms run in CI which don't (easily) have Ruby.
+  It takes the same arguments as the Ruby script.
+
+  Autoconf and Meson exclude the four CMake package files and their directories;
+  CMake and Meson exclude the four libtool .la files. Unexpected installed files
+  are never filtered out.
+
+  Pass the installed prefix, e.g. install-dir/usr/local for an Autoconf
+  DESTDIR installation. Both scripts map it to the manifest's root.
+  Unix manifests use Autoconf's direct .so symlinks; CMake and Meson expect
+  the equivalent links via the SONAME. Shared-library permissions are adjusted
+  for Autoconf and Meson, which install executable .so files. These native
+  permission and symlink differences are acceptable, not installation bugs.
+  On macOS, Meson installs the major-version dylib as a regular file with an
+  unversioned symlink, rather than the full-version dylib and two symlinks in
+  the shared manifest. Only Meson's expected listing is adjusted for this.
 
 RunSymbolTest
 RunSymbolTest.rb
@@ -171,28 +178,6 @@ RunSymbolTest.rb
   dumpbin on Windows (located through PATH or vswhere).
 
   The shell script is for platforms run in CI which don't (easily) have Ruby.
-
-  The shell script takes <dir> <manifest> [<build type>] [<producer>], with
-  release and cmake as the defaults. The PowerShell script takes
-  <dir> <manifest> [<producer>]. Producers are autoconf, cmake, and meson.
-  Autoconf and Meson exclude the four CMake package files and their directories;
-  CMake and Meson exclude the four libtool .la files. Unexpected installed files
-  are never filtered out.
-
-  Pass the installed prefix, e.g. install-dir/usr/local for an Autoconf
-  DESTDIR installation. The shell script maps it to the manifest's root.
-  Unix manifests use Autoconf's direct .so symlinks; CMake and Meson expect
-  the equivalent links via the SONAME. Shared-library permissions are adjusted
-  for Autoconf and Meson, which install executable .so files. These native
-  permission and symlink differences are intentional, not installation bugs.
-  On macOS, Meson installs the major-version dylib as a regular file with an
-  unversioned symlink, rather than the full-version dylib and two symlinks in
-  the shared manifest. Only Meson's expected listing is adjusted for this.
-
-RunSymbolTest
-RunSymbolTest.ps1
-  Scripts to verify the exported symbols of installed shared libraries against
-  the manifest-libpcre2-*.so files.
 
 Unicode.tables
   The files in this directory were downloaded from the Unicode web site. They

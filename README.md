@@ -80,7 +80,7 @@ git clone https://github.com/PCRE2Project/pcre2.git ./pcre2 \
 # If using the JIT, remember to fetch the Git submodule:
 (cd ./pcre2; git submodule update --init)
 
-# Build with CMake (Meson is equally supported):
+# Now let's build PCRE2:
 (cd ./pcre2; \
     cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug \
         -DPCRE2_SUPPORT_JIT=ON -B build; \
