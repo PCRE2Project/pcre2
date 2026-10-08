@@ -89,11 +89,18 @@ LintMan
 
 manifest-*
   Data files used to verify the contents of the distribution tarball and
-  `make install` file lists.
+  installed file lists. Each manifest-install-<platform> is shared by Autoconf,
+  CMake, and Meson. It includes CMake package metadata and Autoconf's libtool
+  archives; RunManifestTest filters the entries not provided by each producer.
 
 ManyConfigTests
   A shell script that runs "configure, make, test" a number of times with
   different configuration settings.
+
+meson-tests
+  A small consumer that uses PCRE2 as a Meson subproject. Run
+  `python3 maint/meson-tests/check-library-options.py` to configure, build and
+  run it with static and shared libraries.
 
 UpdateAlways
   A shell script to ensure that all auto-generated outputs are ready for
@@ -141,10 +148,25 @@ RunManifestTest.rb
   ls-style modes, forward-slash paths and bytewise path ordering, starting with
   the root directory. Run:
     ruby maint/RunManifestTest.rb <dir> <manifest> <producer> [<build type>]
-  where producer is autoconf, cmake, or tarball; build type defaults to release.
-  Only the expected manifest is adjusted for build-system differences.
+  where producer is autoconf, cmake, meson, or tarball; build type defaults to
+  release. Only the expected manifest is adjusted for build-system differences.
 
   The shell script is for platforms run in CI which don't (easily) have Ruby.
+  It takes the same arguments as the Ruby script.
+
+  Autoconf and Meson exclude the four CMake package files and their directories;
+  CMake and Meson exclude the four libtool .la files. Unexpected installed files
+  are never filtered out.
+
+  Pass the installed prefix, e.g. install-dir/usr/local for an Autoconf
+  DESTDIR installation. Both scripts map it to the manifest's root.
+  Unix manifests use Autoconf's direct .so symlinks; CMake and Meson expect
+  the equivalent links via the SONAME. Shared-library permissions are adjusted
+  for Autoconf and Meson, which install executable .so files. These native
+  permission and symlink differences are acceptable, not installation bugs.
+  On macOS, Meson installs the major-version dylib as a regular file with an
+  unversioned symlink, rather than the full-version dylib and two symlinks in
+  the shared manifest. Only Meson's expected listing is adjusted for this.
 
 RunSymbolTest
 RunSymbolTest.rb

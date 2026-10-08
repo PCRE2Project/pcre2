@@ -24,6 +24,8 @@ on:
         - fruitbat
         - ptarmigan
         - coelacanth
+        - bison
+        - wisent
         - zebrilus
         - bee
   push:
@@ -675,6 +677,93 @@ jobs:
         run: qemu-${{ matrix.config.qemu }} ./pcre2posix_test -v
 
       # RunGrepTest is skipped as it does not have a "-sim" flag yet.
+
+  bison:
+    # Tests with: meson. Bison sounds like 'boson'.
+    name: Meson release (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'bison')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux
+            os: ubuntu-latest
+            manifest: linux
+          - name: macOS
+            os: macos-latest
+            manifest: macos
+          - name: Windows
+            os: windows-latest
+            manifest: windows
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+
+      - name: Install Meson
+        run: |
+          python -m pip install --disable-pip-version-check --upgrade meson
+          meson --version
+          ninja --version
+
+      - name: Configure
+        run: meson setup build ${{ runner.os == 'Windows' && '--vsenv' || '' }} --buildtype=release --prefix="${{ github.workspace }}/install-dir" --libdir=lib -Ddefault_library=both -Dpcre2_build_pcre2_16=true -Dpcre2_build_pcre2_32=true -Dpcre2_build_tests=true -Dpcre2_debug=enabled -Dpcre2_support_jit=enabled -Dwerror=true
+
+      - name: Build
+        run: meson compile -C build
+
+      - name: Test
+        run: meson test -C build --print-errorlogs
+
+      - name: Install
+        run: meson install -C build
+
+      - name: Check installation
+        run: |
+          ruby maint/RunManifestTest.rb install-dir maint/manifest-install-${{ matrix.manifest }} meson
+          ruby maint/RunSymbolTest.rb install-dir/${{ runner.os == 'Windows' && 'bin' || 'lib' }} maint
+
+      - name: Test Meson subproject interface
+        run: python maint/meson-tests/check-library-options.py
+
+  wisent:
+    # Wisent is a nearly-extinct species of bison.
+    name: Meson 1.6
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'wisent')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+
+      - name: Install Meson 1.6.1
+        run: |
+          python -m pip install --disable-pip-version-check meson==1.6.1
+          meson --version | grep '^1\.6\.1$'
+          ninja --version
+
+      - name: Configure
+        run: meson setup build --buildtype=release --prefix="${{ github.workspace }}/install-dir" --libdir=lib -Ddefault_library=both -Dpcre2_build_pcre2_16=true -Dpcre2_build_pcre2_32=true -Dpcre2_build_tests=true -Dpcre2_support_jit=enabled -Dwerror=true
+
+      - name: Build
+        run: meson compile -C build
+
+      - name: Test
+        run: meson test -C build --print-errorlogs
+
+      - name: Install
+        run: meson install -C build
+
+      - name: Check installation
+        run: |
+          ruby maint/RunManifestTest.rb install-dir maint/manifest-install-linux meson
+          ruby maint/RunSymbolTest.rb install-dir/lib maint
+
+      - name: Test Meson subproject interface
+        run: python maint/meson-tests/check-library-options.py
 
   zebrilus:
     # Tests with: Zig compiler. A "zebrilus" is known as a "zigzag heron".

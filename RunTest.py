@@ -38,6 +38,9 @@
 #
 # RunTest 3 -sim "qemu-arm -s 8388608"
 #
+# MESON_EXE_WRAPPER supplies the default simulator when running under Meson;
+# --sim overrides it. Simulator commands use whitespace splitting, not quoting.
+#
 # For backwards compatibility, -nojit, -valgrind, -valgrind-log, and -sim may
 # be given without the leading "-" character.
 #
@@ -200,7 +203,7 @@ def checkresult(returncode, suffix, opts, bits):
 # ------ Test setup ------
 
 arg8 = arg16 = arg32 = nojit = bigstack = malloc = False
-sim = []
+sim = os.environ.get("MESON_EXE_WRAPPER", "").split()
 skip = []
 valgrind = []
 globalopts = ["-q"]

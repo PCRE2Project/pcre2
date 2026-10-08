@@ -43,21 +43,58 @@ def installed_files(input_dir, root_path)
 end
 
 def expected_files(lines, producer, build_type)
-  # Only transform the expected side. Unexpected installed files must remain
-  # visible, even when they belong to a different build system.
+  # The common install manifests include both CMake and libtool metadata. Adjust
+  # only the expected listing: unexpected installed files must still fail the
+  # check, even if another build system would legitimately install them.
   lines.each_with_object([]) do |line, result|
+    # An unpacked distribution has its own exact manifest, not an install layout.
     if producer != 'tarball'
       if producer != 'cmake'
+        # Only CMake installs find_package(CONFIG) metadata and exported targets.
+        # Autoconf and Meson provide pkg-config metadata, but not these CMake files.
+        #
+        # NOTE: This CMake style is actually rather frustrating, because it exposes
+        # CMake-specific metadata into the package's public installation layout.
+        # Linux distributions probably should *not* distribute these files as a
+        # result. The pkg-config metadata is more neutral.
         next if line.match?(%r{/lib/cmake(?:/pcre2)?$})
         next if line.match?(%r{/lib/cmake/pcre2/pcre2-(?:config(?:-version)?|targets(?:-release)?)\.cmake$})
+
+        # The manifests use CMake's native ELF shared-library modes, which can be
+        # 0644. Autoconf and Meson install the real .so files as 0755 instead.
+        # Accept these native defaults; only real files, not symlinks, are adjusted.
+        #
+        # NOTE: There's a story here about why ELF permissions differ between
+        # systems. Debian insists that shared libraries should not be executable,
+        # whereas Fedora/RPM required them to be executable. So, there is no one
+        # right answer on Linux, and the different build systems land in different
+        # camps. For now, we are simply documenting and accepting whatever CMake,
+        # Autoconf, and Meson do on Ubuntu (our CI base system).
         line = line.sub(/\A-rw-r--r-- /, '-rwxr-xr-x ') if line.match?(%r{/libpcre2-(?:8|16|32|posix)\.so(?:\.\d+)+$})
       end
       if producer != 'autoconf'
+        # Only Autoconf's libtool build installs .la archives containing link metadata.
         next if line.match?(%r{/lib/libpcre2-(?:8|16|32|posix)\.la$})
+        # The manifests use Autoconf's direct unversioned .so -> full-version file
+        # link. CMake and Meson instead link via the SONAME (.so.N) symlink.
+        # Both layouts resolve to the same library; retain each producer's convention.
         if line.match?(%r{/libpcre2-(?:8|16|32|posix)\.so -> })
           line = line.sub(/(\.so\.\d+)\.\d+\.\d+$/, '\1')
         end
       end
+      if producer == 'meson'
+        # On macOS, Autoconf and CMake install a full-version dylib plus major-version
+        # and unversioned symlinks. Meson's major-version file is real, so remove the
+        # major-version symlink entry and rename the full-version file entry.
+        # The unversioned link stays; current/compatibility versions remain in the
+        # Mach-O metadata rather than requiring a full-version filename.
+        next if line.match?(%r{\Al[^ ]* .*/libpcre2-(?:8|16|32|posix)\.\d+\.dylib -> })
+        if line.match?(%r{\A-[^ ]* .*/libpcre2-(?:8|16|32|posix)\.\d+\.\d+\.\d+\.dylib$})
+          line = line.sub(/(\.\d+)\.\d+\.\d+\.dylib$/, '\1.dylib')
+        end
+      end
+      # The manifests list CMake's Release export. Other configurations use the
+      # lower-case build_type in the filename, for example relwithdebinfo.
       line = line.gsub('pcre2-targets-release.cmake', "pcre2-targets-#{build_type}.cmake")
     end
     result << line
@@ -69,12 +106,14 @@ def main
     abort "Usage: ruby #{$PROGRAM_NAME} <dir> <manifest name> <producer> [<build type>]"
   end
   input_dir, manifest, producer, build_type = ARGV
-  abort "Unknown producer: #{producer} (expected autoconf, cmake, tarball)" unless %w[autoconf cmake tarball].include?(producer)
+  abort "Unknown producer: #{producer} (expected autoconf, cmake, meson, or tarball)" unless %w[autoconf cmake meson tarball].include?(producer)
 
   lines = File.readlines(manifest, encoding: 'UTF-8').map(&:chomp)
   abort "Empty manifest: #{manifest}" if lines.empty?
   # Anchor the listing at the manifest's root, regardless of the real install
   # prefix or DESTDIR. All manifests include this first directory entry.
+  # For example, an Autoconf install staged at install-dir/usr/local must have
+  # the same manifest paths as a CMake or Meson install at install-dir.
   _mode, root_path = lines.first.split(' ', 2)
   abort "Missing root path in #{manifest}" unless root_path
   actual = installed_files(input_dir, root_path)

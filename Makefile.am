@@ -1186,6 +1186,19 @@ EXTRA_DIST += \
   src/config-cmake.h.in \
   CMakeLists.txt
 
+## Meson support
+
+EXTRA_DIST += \
+  meson/FindBZip2/meson.build \
+  meson/FindEditline/meson.build \
+  meson/FindReadline/meson.build \
+  meson/PCRE2CheckVscript/meson.build \
+  meson/PCRE2CheckVscript/test-map-file.sym.in \
+  meson/PCRE2UseSystemExtensions/meson.build \
+  src/config-meson.h.in \
+  meson.build \
+  meson.options
+
 ## Set the special make and Automake targets. We could very easily simply
 ## redefine these targets to append prerequisites to them, rather than
 ## collecting the prerequisites in variables. However, there is an annoying
