@@ -77,8 +77,8 @@ if not Path(pcre2test).is_file() or not os.access(pcre2test, os.X_OK):
     print(f"** {pcre2test} does not exist or is not executable.")
     sys.exit(1)
 
-# Support relative paths for pcre2test and pcre2grep; these are referenced after
-# changing directory to srcdir.
+# Use absolute paths to avoid PATH searches for bare executable filenames and
+# keep relative paths valid after changing directory to srcdir.
 
 pcre2grep = str(Path(pcre2grep).resolve())
 pcre2test = str(Path(pcre2test).resolve())

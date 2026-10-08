@@ -206,6 +206,14 @@ The main ways of building PCRE2 are:
     make
     ```
 
+3. Via Meson (Linux/Windows/macOS, and others)
+
+    ```
+    cd pcre2/
+    meson setup build .
+    meson compile -C build
+    ```
+
 See ["Platforms"](#platforms) below for links to more detailed build documentation.
 
 ## API Overview
@@ -248,7 +256,7 @@ PCRE2 is tested continuously on x86 (i686 and amd64), ARM 32- and 64-bit (armv7 
 
 Other systems are likely to work (including mobile, embedded platforms, and commercial UNIX systems), but these are not tested continuously by the PCRE2 maintainers. Users are encouraged to run the full PCRE2 test suite when compiling for any new platform. We are aware of working ports to VMS and z/OS (PCRE2 supports EBCDIC).
 
-PCRE2 releases support CMake for building, and for UNIX platforms include a `./configure` script built by Autoconf. Build files for the Bazel build system and `zig build` are also included. Integrating PCRE2 with other systems can be done by including the `.c` files in an existing project.
+PCRE2 releases support CMake and Meson for building, and for UNIX platforms include a `./configure` script built by Autoconf. Build files for the Bazel build system and `zig build` are also included. Integrating PCRE2 with other systems can be done by including the `.c` files in an existing project.
 
 Please see the files [README](./README) and [NON-AUTOTOOLS-BUILD](./NON-AUTOTOOLS-BUILD) for full build documentation, as well as the man pages, including [`man pcre2/doc/pcre2build.3`](https://www.pcre2.org/doc/pcre2build/).
 

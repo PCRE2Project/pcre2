@@ -9,6 +9,7 @@ This document contains the following sections:
   Linking programs in Windows environments
   Calling conventions in Windows environments
   Comments about Win32 builds
+  Building PCRE2 with Meson
   Building PCRE2 on Windows with CMake
   Building PCRE2 on Windows with Visual Studio
   Testing with Python
@@ -28,14 +29,13 @@ configure/make (autotools) build system, as found in many Unix-like
 environments. The README file contains information about the options for
 "configure".
 
-There is also support for CMake, which some users prefer, especially in Windows
-environments, though it can also be run in Unix-like environments. See the
-section entitled "Building PCRE2 on Windows with CMake" below.
+There is also support for building with CMake or Meson. See the sections about
+these build systems below.
 
 Versions of src/config.h and src/pcre2.h are distributed in the PCRE2 tarballs
 under the names src/config.h.generic and src/pcre2.h.generic. These are
-provided for those who build PCRE2 without using "configure" or CMake. If you
-use "configure" or CMake, the .generic versions are not used.
+provided for those who build PCRE2 without using "configure", CMake, or Meson.
+These build systems generate the headers instead of using the .generic versions.
 
 
 Generic instructions for the PCRE2 C libraries
@@ -44,12 +44,11 @@ Generic instructions for the PCRE2 C libraries
 There are three possible PCRE2 libraries, each handling data with a specific
 code unit width: 8, 16, or 32 bits. You can build any combination of them. The
 following are generic instructions for building a PCRE2 C library "by hand". If
-you are going to use CMake, this section does not apply to you; you can skip
-ahead to the CMake section. Note that the settings concerned with 8-bit,
-16-bit, and 32-bit code units relate to the type of data string that PCRE2
-processes. They are NOT referring to the underlying operating system bit width.
-You do not have to do anything special to compile in a 64-bit environment, for
-example.
+you are going to use CMake or Meson, this section does not apply to you. Note
+that the settings concerned with 8-bit, 16-bit, and 32-bit code units relate to
+the type of data string that PCRE2 processes. They are NOT referring to the
+underlying operating system bit width. You do not have to do anything special
+to compile in a 64-bit environment, for example.
 
  (1) Copy or rename the file src/config.h.generic as src/config.h, and edit the
      macro settings that it contains to whatever is appropriate for your
@@ -299,6 +298,107 @@ newline option that includes LF as a valid newline, it may be necessary to
 change the line terminators in the test files to get some of the tests to work.
 
 
+Building PCRE2 with Meson
+-------------------------
+
+Meson 1.6 or later can configure and build PCRE2 on Linux, macOS, Windows, and
+other supported platforms. Note that Meson's own list of supported platforms
+and compilers is not the same as CMake's. Meson uses a separate build directory.
+A normal build, test, and installation can be run as follows:
+
+  meson setup build
+  meson compile -C build
+  meson test -C build
+  meson install -C build
+
+For cross-compilation, pass Meson's standard --cross-file option at setup.
+Set `[binaries] exe_wrapper` to a simulator command (such as qemu), and set
+`[properties] needs_exe_wrapper = true` if Meson's automatic detection needs
+overriding. The main test harness uses MESON_EXE_WRAPPER as its default --sim
+command; the POSIX and JIT tests are wrapped by Meson itself. As with --sim,
+wrapper commands for the main harness support whitespace-separated arguments,
+but not quoting or whitespace within individual arguments. If a required wrapper
+is not configured, the main harness is omitted and Meson skips the executable
+tests. Cross builds that can run directly need no wrapper.
+
+PCRE2's Meson options use lower-case names and can be inspected with
+`meson configure build`. For example, the 16-bit and 32-bit libraries and JIT
+support can be enabled at setup time:
+
+  meson setup build -Dpcre2_build_pcre2_16=true \
+    -Dpcre2_build_pcre2_32=true -Dpcre2_support_jit=enabled
+
+Meson's standard `default_library` option selects `static`, `shared`, or `both`;
+PCRE2 defaults to a static library. When both variants are built,
+`default_both_libraries` selects which one is used by PCRE2's programs and by
+an unqualified subproject dependency. Its native default is shared, unlike
+CMake's static selection when both variants are built. Meson's `b_staticpic`
+also retains its native default of true, unlike CMake's PCRE2_STATIC_PIC option.
+Static and shared PCRE2 libraries are compiled separately so that each receives
+the correct visibility definitions.
+
+As in CMake, C11 is preferred, with C99 as a fallback. Compiler extensions are
+enabled where supported; Meson's c_std option can override this choice.
+
+The optional zlib, bzip2, readline, and libedit dependencies can be found
+through package metadata or the compiler's library and header search paths.
+Readline's terminal-library dependencies are detected when needed, as in the
+CMake build. Set the corresponding pcre2_support_lib* feature option to enabled
+to require a dependency, disabled to omit it, or auto to use it if available.
+Only one of readline and libedit may be enabled. zlib uses Meson's built-in
+dependency finder.
+
+PCRE2 can also be used as a Meson subproject. A parent project can place it in
+`subprojects/pcre2` and request, for example,
+`dependency('libpcre2-8', fallback: 'pcre2')`. The corresponding dependency
+names for the other interfaces are `libpcre2-16`, `libpcre2-32`, and
+`libpcre2-posix`; Meson's `static` keyword can request a particular available
+library variant. All three build systems install pkg-config files for consumers
+of installed libraries. Only the CMake build additionally installs CMake package
+metadata; consumers requiring `find_package(PCRE2 CONFIG)` should use a
+CMake-built installation.
+
+Meson generates pkg-config metadata from its library targets, including native
+thread dependencies when JIT is enabled. In shared and both-library builds,
+static-link dependencies are reported by `pkg-config --static`; for static-only
+builds, Meson includes these in the ordinary link flags too. The --static option
+does not itself force the linker to select a static library. Build-tree metadata
+is available in meson-uninstalled without installing the libraries.
+
+On Windows, use a Visual Studio developer command prompt for MSVC (or pass
+--vsenv to Meson). Static MSVC libraries are named pcre2-8-static.lib, and
+shared libraries have pcre2-8.dll and pcre2-8.lib; the other widths and POSIX
+library follow the same convention. Debug builds append "d" before the
+extension; debugoptimized builds do not. DLLs and programs install to bindir,
+while static and import libraries install to libdir. Installed programs find
+their DLLs in the same directory; other consumers must put bindir on PATH or
+deploy the DLLs beside their executable.
+
+For MSVC consumers, pkg-config --msvc-syntax provides compiler and linker flags.
+A static-only installation supplies PCRE2_STATIC and the -static library names.
+When both variants are installed, the .pc files describe the shared variant,
+even with --static: that switch neither substitutes the MSVC archive names nor
+changes the Windows import/export definitions. Use a static-only installation,
+an explicit Meson subproject dependency with static: true, or manually select
+the -static libraries and define PCRE2_STATIC (without PCRE2POSIX_SHARED).
+
+Meson installs generated program and DLL PDBs alongside their binaries in
+debug and debugoptimized builds by default. Unlike CMake's INSTALL_MSVC_PDB
+option, this follows Meson's native policy; -Dstrip=true omits installed PDBs.
+Static libraries embed their debug information and do not install separate PDBs.
+Meson does not implement CMake's legacy MinGW NON_STANDARD_LIB_PREFIX and
+NON_STANDARD_LIB_SUFFIX switches; MinGW targets use Meson's native names.
+The installed pcre2-config script requires a Unix shell; native MSVC consumers
+should use pkg-config or Meson subproject dependencies instead.
+
+Installed shared-library permissions and symlink layouts follow each build
+system's native conventions. On macOS, Meson installs libpcre2-8.0.dylib as the
+real library with libpcre2-8.dylib linking to it; the other widths and POSIX
+library follow the same convention. The full current and compatibility
+versions are recorded in the Mach-O metadata, not the filename. These
+differences are intentional; packagers may normalize them if required.
+
+
 Building PCRE2 on Windows with CMake
 ------------------------------------
 
@@ -480,4 +580,3 @@ to learn whether it still works (or if anyone still uses it).
 =============================
 Last updated: 17 October 2025
 =============================
-

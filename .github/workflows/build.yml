@@ -81,8 +81,8 @@ jobs:
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
-          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
-          maint/RunSymbolTest install-dir/usr/local/lib/ maint/
+          ruby maint/RunManifestTest.rb install-dir/usr/local maint/manifest-install-linux autoconf
+          ruby maint/RunSymbolTest.rb install-dir/usr/local/lib/ maint/
 
   alpine:
     name: alpine
@@ -128,7 +128,7 @@ jobs:
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
-          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunManifestTest install-dir/usr/local maint/manifest-install-linux autoconf
           maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   macos:
@@ -160,52 +160,14 @@ jobs:
         run: |
           cd build
           cmake --install . --prefix install-dir
-          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-macos
-          ../maint/RunSymbolTest install-dir/lib/ ../maint/
+          ruby ../maint/RunManifestTest.rb install-dir ../maint/manifest-install-macos cmake
+          ruby ../maint/RunSymbolTest.rb install-dir/lib/ ../maint/
 
-      - name: Test CMake install interface
-        run: |
-          INSTALL_PREFIX=`pwd`/build/install-dir
-          cd maint/cmake-tests/install-interface
+      - name: Test installed CMake package with CMake
+        run: python3 maint/cmake-tests/check-interface.py install build/install-dir --build-type Release
 
-          for useStaticLibs in ON OFF; do
-            echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
-            rm -rf build
-            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
-            (cd build; make)
-            ./build/test_executable
-            otool -L ./build/test_executable
-            if [ $useStaticLibs = ON ]; then
-              (otool -L ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in otool output" && exit 1)
-            else
-              # Test that the shared library is actually linked in
-              (otool -L ./build/test_executable | grep -q "@rpath/libpcre2-8.0.dylib") || (echo "Error: Shared library not linked in" && exit 1)
-            fi
-          done
-
-      - name: Test CMake build interface
-        run: |
-          BUILD_DIR=`pwd`
-          cp -rp maint/cmake-tests/build-interface ../cmake-tests-build-interface
-          cd ../cmake-tests-build-interface
-          ln -s "$BUILD_DIR" pcre2
-
-          for buildLibs in "ON;OFF" "OFF;ON"; do
-            static=`echo $buildLibs | cut -d';' -f1`
-            shared=`echo $buildLibs | cut -d';' -f2`
-            echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
-            rm -rf build
-            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
-            (cd build; make)
-            ./build/test_executable
-            otool -L ./build/test_executable
-            if [ $static = ON ]; then
-              (otool -L ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
-            else
-              # Test that the shared library is actually linked in
-              (otool -L ./build/test_executable | grep -q "@rpath/libpcre2-8.0.dylib") || (echo "Error: Shared library not linked in" && exit 1)
-            fi
-          done
+      - name: Test CMake build-tree interface
+        run: python3 maint/cmake-tests/check-interface.py build-tree . --build-type Debug
 
   windows:
     name: Windows
@@ -249,68 +211,14 @@ jobs:
         run: |
           cd build
           cmake --install . --config Release --prefix install-dir
-          ../maint/RunManifestTest.ps1 install-dir ../maint/manifest-cmakeinstall-windows
-          ../maint/RunSymbolTest.ps1 install-dir/bin ../maint/
+          ruby ../maint/RunManifestTest.rb install-dir ../maint/manifest-install-windows cmake
+          ruby ../maint/RunSymbolTest.rb install-dir/bin ../maint/
 
-      - name: Test CMake install interface
-        run: |
-          $INSTALL_PREFIX = (pwd).Path + "\build\install-dir"
-          cd maint/cmake-tests/install-interface
+      - name: Test installed CMake package with CMake
+        run: python maint/cmake-tests/check-interface.py install build/install-dir --build-type Release --architecture ${{ matrix.arch }}
 
-          $vswhere = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
-          $dumpbin = & $vswhere -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe | Select-Object -First 1
-
-          foreach ($useStaticLibs in @("ON", "OFF")) {
-            echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
-            if (Test-Path build) { rm -Recurse -Force build }
-            cmake $CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=$INSTALL_PREFIX" "-DPCRE2_USE_STATIC_LIBS=$useStaticLibs" -B build -A ${{ matrix.arch }}
-            cmake --build build --config Release
-            ./build/Release/test_executable.exe
-            & $dumpbin /dependents ./build/Release/test_executable.exe
-            if ($useStaticLibs -eq "ON") {
-                if ((& $dumpbin /dependents ./build/Release/test_executable.exe | Out-String).Contains("pcre2")) {
-                  Write-Error "Error: PCRE2 found in dumpbin output"
-                  exit 1
-                }
-            } else {
-              # Test that the shared library is actually linked in
-              if (-not ((& $dumpbin /dependents ./build/Release/test_executable.exe | Out-String).Contains("pcre2-8.dll"))) {
-                Write-Error "Error: Shared library not linked in"
-                exit 1
-              }
-            }
-          }
-
-      - name: Test CMake build interface
-        run: |
-          $BUILD_DIR = (pwd).Path
-          cp -Recurse -Path maint/cmake-tests/build-interface ../cmake-tests-build-interface
-          cd ../cmake-tests-build-interface
-          New-Item -ItemType SymbolicLink -Path "pcre2" -Target "$BUILD_DIR"
-
-          $vswhere = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
-          $dumpbin = & $vswhere -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe | Select-Object -First 1
-
-          foreach ($buildLibs in @(@{static="ON"; shared="OFF"}, @{static="OFF"; shared="ON"})) {
-            echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$($buildLibs.static) =="
-            if (Test-Path build) { rm -Recurse -Force build }
-            cmake $CMAKE_FLAGS "-DBUILD_STATIC_LIBS=$($buildLibs.static)" "-DBUILD_SHARED_LIBS=$($buildLibs.shared)" -B build -A ${{ matrix.arch }}
-            cmake --build build --config Debug
-            ./build/Debug/test_executable.exe
-            & $dumpbin /dependents ./build/Debug/test_executable.exe
-            if ($buildLibs.static -eq "ON") {
-                if ((& $dumpbin /dependents ./build/Debug/test_executable.exe | Out-String).Contains("pcre2")) {
-                  Write-Error "Error: PCRE2 found in dumpbin output"
-                  exit 1
-                }
-            } else {
-              # Test that the shared library is actually linked in
-              if (-not ((& $dumpbin /dependents ./build/Debug/test_executable.exe | Out-String).Contains("pcre2-8d.dll"))) {
-                Write-Error "Error: Shared library not linked in"
-                exit 1
-              }
-            }
-          }
+      - name: Test CMake build-tree interface
+        run: python maint/cmake-tests/check-interface.py build-tree . --build-type Debug --architecture ${{ matrix.arch }}
 
   freebsd:
     name: FreeBSD
@@ -334,7 +242,7 @@ jobs:
           usesh: true
           prepare: |
             set -e
-            pkg install -y cmake
+            pkg install -y cmake meson
 
           run: |
             set -e
@@ -343,6 +251,7 @@ jobs:
 
             cp -rp . ../build-autoconf
             cp -rp . ../build-cmake
+            cp -rp . ../build-meson
 
             echo "== Autoconf =="
             cd ../build-autoconf
@@ -352,7 +261,7 @@ jobs:
             (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
-            maint/RunManifestTest install-dir maint/manifest-makeinstall-freebsd
+            maint/RunManifestTest install-dir/usr/local maint/manifest-install-freebsd autoconf
             maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake =="
@@ -363,8 +272,18 @@ jobs:
             make -j$NPROC
             ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
-            ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-freebsd
+            ../maint/RunManifestTest install-dir ../maint/manifest-install-freebsd cmake
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
+
+            echo "== Meson =="
+            cd ../../build-meson
+
+            CFLAGS="$CFLAGS_GCC_STYLE" meson setup build --buildtype=release --prefix="`pwd`/install-dir" --libdir=lib -Ddefault_library=both -Dpcre2_build_pcre2_16=true -Dpcre2_build_pcre2_32=true -Dpcre2_build_tests=true -Dpcre2_debug=enabled -Dpcre2_support_jit=enabled -Dwerror=true
+            meson compile -C build -j$NPROC
+            meson test -C build --print-errorlogs
+            meson install -C build
+            maint/RunManifestTest install-dir maint/manifest-install-freebsd meson
+            maint/RunSymbolTest install-dir/lib/ maint/
 
   openbsd:
     name: OpenBSD
@@ -410,7 +329,7 @@ jobs:
             make install "DESTDIR=`pwd`/install-dir"
             # I don't really know enough about OpenBSD to say whether the unusually-numbered .so files
             # with no symlinks are correct or not.
-            # maint/RunManifestTest install-dir maint/manifest-makeinstall-openbsd
+            # maint/RunManifestTest install-dir/usr/local maint/manifest-install-openbsd autoconf
             # maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake =="
@@ -421,7 +340,7 @@ jobs:
             make -j$NPROC
             ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
-            # ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-openbsd
+            # ../maint/RunManifestTest install-dir ../maint/manifest-install-openbsd cmake
             # ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   solaris:
@@ -450,7 +369,7 @@ jobs:
       - name: Build & test
         uses: vmactions/solaris-vm@87d3c436511cef802cd1637f86f73b1a97715c8c # v1.4.1
         with:
-          envs: 'CFLAGS_SOLARIS_CC CMAKE_FLAGS'
+          envs: 'CFLAGS_SOLARIS_CC CFLAGS_GCC_STYLE CMAKE_FLAGS'
           usesh: true
           # Seriously! Solaris is the only OS to actually ship without a C
           # compiler, and not even to provide a simple download to get one!
@@ -464,12 +383,14 @@ jobs:
               -k /root/pkg.oracle.com.key.pem \
               -c /root/pkg.oracle.com.certificate.pem \
               -G "*" -g https://pkg.oracle.com/solarisstudio/release solarisstudio
-            pkg install developer/build/make developer/build/cmake system/header
+            pkg install developer/build/make developer/build/cmake developer/build/ninja developer/gcc system/header runtime/python-311 library/python/pip-311
             pkg install --accept developerstudio-126/cc
+            python3.11 -m venv /opt/meson
+            /opt/meson/bin/python -m pip install --disable-pip-version-check --upgrade meson
 
           run: |
             set -e
-            PATH=/opt/developerstudio12.6/bin:"$PATH"
+            PATH=/opt/meson/bin:/opt/developerstudio12.6/bin:"$PATH"
             export PATH
 
             NPROC=`nproc 2>/dev/null || echo 2`
@@ -477,6 +398,7 @@ jobs:
             cp -rp . ../build-autoconf-32
             cp -rp . ../build-autoconf-64
             cp -rp . ../build-cmake-64
+            cp -rp . ../build-meson-64
 
             echo "== Autoconf, 32-bit =="
             cd ../build-autoconf-32
@@ -486,7 +408,7 @@ jobs:
             (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
-            maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
+            maint/RunManifestTest install-dir/usr/local maint/manifest-install-solaris autoconf
             maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== Autoconf, 64-bit =="
@@ -497,7 +419,7 @@ jobs:
             (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
-            maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
+            maint/RunManifestTest install-dir/usr/local maint/manifest-install-solaris autoconf
             maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake, 64-bit =="
@@ -508,8 +430,19 @@ jobs:
             make
             ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
-            ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-solaris
+            ../maint/RunManifestTest install-dir ../maint/manifest-install-solaris cmake
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
+
+            echo "== Meson, 64-bit =="
+            cd ../../build-meson-64
+
+            CC="gcc -m64" CXX="g++ -m64" CFLAGS="$CFLAGS_GCC_STYLE" meson setup build --buildtype=release --prefix="`pwd`/install-dir" --libdir=lib -Ddefault_library=both -Dpcre2_build_pcre2_16=true -Dpcre2_build_pcre2_32=true -Dpcre2_build_tests=true -Dpcre2_debug=enabled -Dwerror=true
+            meson --version
+            meson compile -C build -j$NPROC
+            meson test -C build --print-errorlogs
+            meson install -C build
+            maint/RunManifestTest install-dir maint/manifest-install-solaris meson
+            maint/RunSymbolTest install-dir/lib/ maint/
 
   zos:
     name: z/OS
@@ -615,7 +548,7 @@ jobs:
           # Budge the directory, so we don't bake the version number into the
           # `manifest-tarball` file:
           mv tarball-dir/pcre2-* tarball-dir/pcre2-SNAPSHOT
-          maint/RunManifestTest tarball-dir maint/manifest-tarball
+          ruby maint/RunManifestTest.rb tarball-dir maint/manifest-tarball tarball
 
       - name: Upload to GitHub artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

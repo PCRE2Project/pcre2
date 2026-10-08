@@ -53,8 +53,8 @@ if [ ! -x "$pcre2test" ] ; then
   exit 1
 fi
 
-# Support relative paths for pcre2test and pcre2grep; these are referenced after
-# changing directory to srcdir.
+# Use absolute paths to avoid PATH searches for bare executable filenames and
+# keep relative paths valid after changing directory to srcdir.
 
 case "$pcre2grep" in
   /*) ;;

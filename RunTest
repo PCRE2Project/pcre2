@@ -38,6 +38,9 @@
 #
 # RunTest 3 -sim "qemu-arm -s 8388608"
 #
+# MESON_EXE_WRAPPER supplies the default simulator when running under Meson;
+# --sim overrides it. Simulator commands use whitespace splitting, not quoting.
+#
 # For backwards compatibility, -nojit, -valgrind, -valgrind-log, and -sim may
 # be given without the leading "-" character.
 #
@@ -221,7 +224,7 @@ arg32=
 nojit=
 bigstack=
 malloc=
-sim=
+sim=${MESON_EXE_WRAPPER:-}
 skip=
 valgrind=
 vjs=
@@ -344,6 +347,12 @@ if [ ! -x "$pcre2test" ] ; then
   echo "** $pcre2test does not exist or is not executable."
   exit 1
 fi
+
+# Do not search PATH for a bare executable filename.
+case "$pcre2test" in
+  */*) ;;
+  *) pcre2test="./$pcre2test";;
+esac
 
 # Find the test data
 

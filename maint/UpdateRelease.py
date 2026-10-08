@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 # Script to update all the hardcoded release numbers in the source tree.
-#  - CMake build metadata.
+#  - CMake and Meson build metadata.
 #  - AsciiDoc documentation sources.
 #  - Bazel MODULE file.
 #  - Zig package manifest.
@@ -18,6 +18,17 @@ from UpdateCommon import update_file, CURRENT_RELEASE, VERSION_INFO
 def update_adoc_version(filename):
     print('  Updating %s' % filename)
     update_file(filename, r'(?m)^:mansource: PCRE2 .*$', ':mansource: PCRE2 %s' % CURRENT_RELEASE)
+
+
+def update_meson_library_versions(match):
+    content = match.group()
+    for library in ('posix', '8', '16', '32'):
+        version = VERSION_INFO['libpcre2_%s_version' % library]
+        pattern = r"('%s'\s*:\s*')[^']*(')" % library
+        content, count = re.subn(pattern, lambda entry: entry[1] + version + entry[2], content)
+        if count != 1:
+            raise ValueError('Expected exactly one %s entry in Meson libtool_versions' % library)
+    return content
 
 
 def libtool_filename_version(library):
@@ -49,6 +60,13 @@ for variable, configure_name in cmake_versions.items():
     update_file('CMakeLists.txt', r'(?m)^set\(%s ".*"\)$' % variable,
                 'set(%s "%s")' % (variable, VERSION_INFO[configure_name]))
 
+print('Updating meson.build')
+update_file('meson.build', r"(?s)(\bproject\s*\(\s*'PCRE2'\s*,.*?\bversion\s*:\s*')[^']*(')",
+            lambda match: match[1] + CURRENT_RELEASE + match[2])
+update_file('meson.build', r"(?m)(^pcre2_date[ \t]*=[ \t]*')[^']*(')",
+            lambda match: match[1] + VERSION_INFO['pcre2_date'] + match[2])
+update_file('meson.build', r'(?m)^libtool_versions[ \t]*=[ \t]*\{[^}]*\}', update_meson_library_versions)
+
 print('Updating AsciiDoc sources')
 for filename in glob.glob('doc/*.adoc'):
     if filename == 'doc/index.adoc':
@@ -67,7 +85,7 @@ update_file('build.zig.zon', r'(?m)^    \.version = ".*?"', '    .version = "%s"
 
 # Install manifests
 print('Updating install manifests')
-for filename in sorted(glob.glob('maint/manifest-*install-*')):
+for filename in sorted(glob.glob('maint/manifest-install-*')):
     if filename.endswith('-windows'):
         continue
 

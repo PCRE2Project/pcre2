@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # Script to test a directory listing. We use this to verify that the list of
-# files installed by "make install" or "cmake --install" matches what we expect.
+# files installed by Autoconf, CMake, or Meson matches what we expect.
 
 set -e
 
@@ -10,17 +10,26 @@ LANG=C
 LC_ALL=C
 export LANG LC_ALL
 
-if [ "$1" = "" -o "$2" = "" ] ; then
-  echo "Usage: $0 <dir> <manifest name> [<build type>]" >&2
+if [ "$1" = "" -o "$2" = "" -o "$3" = "" ] ; then
+  echo "Usage: $0 <dir> <manifest name> <producer> [<build type>]" >&2
   exit 1
 fi
 
 input_dir="$1"
 expected_manifest="$2"
-build_type="${3:-release}"
+producer="$3"
+build_type="${4:-release}"
 
-actual_file=`basename $expected_manifest`.actual
-expected_file=`basename $expected_manifest`.expected
+case "$producer" in
+  autoconf|cmake|meson|tarball) ;;
+  *)
+    echo "Unknown producer: $producer (expected autoconf, cmake, meson, or tarball)" >&2
+    exit 1
+    ;;
+esac
+
+actual_file=`basename "$expected_manifest"`.actual
+expected_file=`basename "$expected_manifest"`.expected
 
 sed=sed
 # Helper for Solaris
@@ -28,19 +37,65 @@ if [ -f /usr/bin/gsed ] ; then
   sed=/usr/bin/gsed
 fi
 
-find "$input_dir" -print | \
-  sort | \
-  xargs -n1 -- ls -l -d -n | \
-  $sed -E -e 's/ {2,}/ /g' | \
-  cut -d' ' -f '1,9-' \
-  > "$actual_file"
+# Compare relative to the installed prefix, independently of DESTDIR staging.
+# For example, an Autoconf install staged at install-dir/usr/local must have
+# the same manifest paths as a CMake or Meson install at install-dir.
+read -r root_mode root_path < "$expected_manifest"
+(
+  cd "$input_dir"
+  find . -print | \
+    sort | \
+    xargs -n1 -- ls -l -d -n | \
+    $sed -E -e 's/ {2,}/ /g' | \
+    cut -d' ' -f '1,9-' | \
+    $sed -E -e "s@^([^ ]* )\.@\1$root_path@"
+) > "$actual_file"
 
-# The CMake install is a bit annoying now. Its installed files are actually
-# dependent on the build type. So, if the build type is not "release", we need
-# to modify the expected manifest to match the actual one. 
-cat "$expected_manifest" | \
-  $sed -E -e "s/pcre2-targets-release.cmake/pcre2-targets-$build_type.cmake/" \
-  > "$expected_file"
+# The common install manifests include both CMake and libtool metadata. Adjust
+# only the expected listing: unexpected installed files must still fail the
+# check, even if another build system would legitimately install them.
+cmake_files=''
+libtool_files=''
+symlink_targets=''
+library_permissions=''
+darwin_libraries=''
+if [ "$producer" != "cmake" ]; then
+  # Only CMake installs find_package(CONFIG) metadata and exported targets.
+  # Autoconf and Meson provide pkg-config metadata, but not these CMake files.
+  cmake_files='/\/lib\/cmake(\/pcre2)?$/d; /\/lib\/cmake\/pcre2\/pcre2-(config(-version)?|targets(-release)?)\.cmake$/d'
+  # The manifests use CMake's native ELF shared-library modes, which can be
+  # 0644. Autoconf and Meson install the real .so files as 0755 instead.
+  # Accept these native defaults; only real files, not symlinks, are adjusted.
+  library_permissions='/\/libpcre2-(8|16|32|posix)\.so(\.[0-9]+)+$/s/^-rw-r--r-- /-rwxr-xr-x /'
+fi
+if [ "$producer" != "autoconf" ]; then
+  # Only Autoconf's libtool build installs .la archives containing link metadata.
+  libtool_files='/\/lib\/libpcre2-(8|16|32|posix)\.la$/d'
+  # The manifests use Autoconf's direct unversioned .so -> full-version file
+  # link. CMake and Meson instead link via the SONAME (.so.N) symlink.
+  # Both layouts resolve to the same library; retain each producer's convention.
+  symlink_targets='/\/libpcre2-(8|16|32|posix)\.so -> /s/(\.so\.[0-9]+)\.[0-9]+\.[0-9]+$/\1/'
+fi
+if [ "$producer" = "meson" ]; then
+  # On macOS, Autoconf and CMake install a full-version dylib plus major-version
+  # and unversioned symlinks. Meson's major-version file is real, so remove the
+  # major-version symlink entry and rename the full-version file entry.
+  # The unversioned link stays; current/compatibility versions remain in the
+  # Mach-O metadata rather than requiring a full-version filename.
+  darwin_libraries='/^l[^ ]* .*\/libpcre2-(8|16|32|posix)\.[0-9]+\.dylib -> /d; /^-[^ ]* .*\/libpcre2-(8|16|32|posix)\.[0-9]+\.[0-9]+\.[0-9]+\.dylib$/s/(\.[0-9]+)\.[0-9]+\.[0-9]+\.dylib$/\1.dylib/'
+fi
+
+# The final substitution selects CMake's configuration-specific export file.
+# The manifests list Release; build_type supplies a lower-case name such as
+# relwithdebinfo for other configurations.
+$sed -E \
+  -e "$cmake_files" \
+  -e "$libtool_files" \
+  -e "$symlink_targets" \
+  -e "$library_permissions" \
+  -e "$darwin_libraries" \
+  -e "s/pcre2-targets-release\.cmake/pcre2-targets-$build_type.cmake/" \
+  "$expected_manifest" > "$expected_file"
 
 if ! diff -u "$expected_file" "$actual_file"; then
   echo "Installed files differ from expected"
