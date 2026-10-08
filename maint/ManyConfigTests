@@ -10,8 +10,8 @@
 # tests, in order to run those that are giving errors. The following options
 # do this:
 #
-# -noasan         skip the test that uses -fsanitize=address
-# -nousan         skip the test that uses -fsanitize=undefined
+# -noasan         skip the tests that use -fsanitize=address
+# -nousan         skip the tests that use -fsanitize=undefined
 # -nodebug        skip the test that uses --enable-debug
 # -nojit          skip all JIT tests
 # -nojitmain      skip non-valgrind JIT tests
@@ -277,8 +277,8 @@ testtotal=`expr 17 \* $usemain + \
   1 \* $usemain \* $usedebug + \
   1 \* $usetmp + 1 \* $usetmpjit + \
   1 \* $ISGCC \* $usemain + \
-  1 \* $ISGCC \* $usemain \* $useasan + \
-  1 \* $ISGCC \* $usemain \* $useusan + \
+  2 \* $ISGCC \* $usemain \* $useasan + \
+  2 \* $ISGCC \* $usemain \* $useusan + \
   13 \* $usejit + \
   2 \* $useebcdic + \
   1 \* $useebcdicjit + \
@@ -307,10 +307,11 @@ else
 fi
 
 # If gcc is in use, run a maximally configured test with -O2, because that can
-# throw up warnings that are not detected with -O0. Then run a second test with
-# -fsanitize=address, which also may throw up new warnings as well as checking
-# things at runtime. Finally, run another test using -fsanitize=undefined
-# -std-gnu99 to check for runtime actions that are not well defined.
+# throw up warnings that are not detected with -O0. Then run a second set of
+# tests with -fsanitize=address, which also may throw up new warnings as well
+# as checking things at runtime. Finally, test some link sizes using
+# -fsanitize=undefined -std=gnu99 to check for runtime actions that are not well
+# defined.
 
 if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
   echo "---------- Maximally configured test with -O2 ----------"
@@ -325,16 +326,20 @@ if [ $ISGCC -ne 0 -a $usemain -ne 0 ]; then
 # PIE options are also set.
     CFLAGS="$OFLAGS $SAVECFLAGS -no-pie -fno-PIE -fsanitize=address"
     echo "CFLAGS=$CFLAGS"
-    opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32"
-    runtest
+    for link_size in 2 4; do # largest and smallest link sizes
+      opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32 --with-link-size=$link_size"
+      runtest
+    done
   fi
 # This also seems to be the case for sanitize undefined.
   if [ $useusan -ne 0 ]; then
     echo "------- Maximally configured test with -fsanitize=undefined -fno-sanitize=alignment -std=gnu99 -------"
     CFLAGS="$OFLAGS $SAVECFLAGS -no-pie -fno-PIE -fsanitize=undefined -fno-sanitize=alignment -std=gnu99"
     echo "CFLAGS=$CFLAGS"
-    opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32"
-    runtest
+    for link_size in 2 4; do # largest and smallest link sizes
+      opts="--disable-shared $enable_jit --enable-pcre2-16 --enable-pcre2-32 --with-link-size=$link_size"
+      runtest
+    done
   fi
   CFLAGS="$SAVECFLAGS"
 fi

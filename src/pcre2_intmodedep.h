@@ -107,7 +107,12 @@ easier to maintain, the storing and loading of offsets from the compiled code
 unit string is now handled by the macros that are defined here.
 
 The macros are controlled by the value of LINK_SIZE. This defaults to 2, but
-values of 3 or 4 are also supported. */
+values of 3 or 4 are also supported.
+
+GET and GET2 cast every code unit to unsigned int, including single-code-unit
+reads. The casts must precede any shifts: otherwise, integer promotion can
+convert code units to signed int, and shifting into the sign bit would be
+undefined behaviour. Casting the result of the shift is too late. */
 
 #ifndef CONFIGURED_LINK_SIZE
 #if LINK_SIZE == 2
@@ -127,14 +132,15 @@ values of 3 or 4 are also supported. */
 
 #if CONFIGURED_LINK_SIZE == 2
 #define PUT(a, n, d)     (a[n] = (PCRE2_UCHAR)((d) >> 8)), (a[(n) + 1] = (PCRE2_UCHAR)((d) & 255))
-#define GET(a, n)        (unsigned int)(((a)[n] << 8) | (a)[(n) + 1])
+#define GET(a, n)        (((unsigned int)(a)[n] << 8) | (unsigned int)(a)[(n) + 1])
 #define MAX_PATTERN_SIZE (1 << 16)
 
 #elif CONFIGURED_LINK_SIZE == 3
 #define PUT(a, n, d)                                                         \
   (a[n] = (PCRE2_UCHAR)((d) >> 16)), (a[(n) + 1] = (PCRE2_UCHAR)((d) >> 8)), \
       (a[(n) + 2] = (PCRE2_UCHAR)((d) & 255))
-#define GET(a, n)        (unsigned int)(((a)[n] << 16) | ((a)[(n) + 1] << 8) | (a)[(n) + 2])
+#define GET(a, n) \
+  (((unsigned int)(a)[n] << 16) | ((unsigned int)(a)[(n) + 1] << 8) | (unsigned int)(a)[(n) + 2])
 #define MAX_PATTERN_SIZE (1 << 24)
 
 #elif CONFIGURED_LINK_SIZE == 4
@@ -142,7 +148,8 @@ values of 3 or 4 are also supported. */
   (a[n] = (PCRE2_UCHAR)((d) >> 24)), (a[(n) + 1] = (PCRE2_UCHAR)((d) >> 16)), \
       (a[(n) + 2] = (PCRE2_UCHAR)((d) >> 8)), (a[(n) + 3] = (PCRE2_UCHAR)((d) & 255))
 #define GET(a, n) \
-  (unsigned int)(((a)[n] << 24) | ((a)[(n) + 1] << 16) | ((a)[(n) + 2] << 8) | (a)[(n) + 3])
+  (((unsigned int)(a)[n] << 24) | ((unsigned int)(a)[(n) + 1] << 16) | \
+   ((unsigned int)(a)[(n) + 2] << 8) | (unsigned int)(a)[(n) + 3])
 #define MAX_PATTERN_SIZE (1 << 30) /* Keep it positive */
 
 #endif
@@ -156,14 +163,14 @@ values of 3 or 4 are also supported. */
 #undef LINK_SIZE
 #define LINK_SIZE        1
 #define PUT(a, n, d)     (a[n] = (PCRE2_UCHAR)(d))
-#define GET(a, n)        (a[n])
+#define GET(a, n)        ((unsigned int)(a)[n])
 #define MAX_PATTERN_SIZE (1 << 16)
 
 #elif CONFIGURED_LINK_SIZE == 3 || CONFIGURED_LINK_SIZE == 4
 #undef LINK_SIZE
 #define LINK_SIZE        2
 #define PUT(a, n, d)     (a[n] = (PCRE2_UCHAR)((d) >> 16)), (a[(n) + 1] = (PCRE2_UCHAR)((d) & 65535))
-#define GET(a, n)        (unsigned int)(((a)[n] << 16) | (a)[(n) + 1])
+#define GET(a, n)        (((unsigned int)(a)[n] << 16) | (unsigned int)(a)[(n) + 1])
 #define MAX_PATTERN_SIZE (1 << 30) /* Keep it positive */
 
 #endif
@@ -174,8 +181,8 @@ values of 3 or 4 are also supported. */
 #elif PCRE2_CODE_UNIT_WIDTH == 32
 #undef LINK_SIZE
 #define LINK_SIZE        1
-#define PUT(a, n, d)     (a[n] = (d))
-#define GET(a, n)        (a[n])
+#define PUT(a, n, d)     (a[n] = (PCRE2_UCHAR)(d))
+#define GET(a, n)        ((unsigned int)(a)[n])
 #define MAX_PATTERN_SIZE (1 << 30) /* Keep it positive */
 
 #else
@@ -186,24 +193,21 @@ values of 3 or 4 are also supported. */
 /* --------------- Other mode-specific macros ----------------- */
 
 /* PCRE uses some other (at least) 16-bit quantities that do not change when
-the size of offsets changes. There are used for repeat counts and for other
+the size of offsets changes. These are used for repeat counts and for other
 things such as capturing parenthesis numbers in back references.
 
 Define the number of code units required to hold a 16-bit count/offset, and
-macros to load and store such a value. For reasons that I do not understand,
-the expression in the 8-bit GET2 macro is treated by gcc as a signed
-expression, even when a is declared as unsigned. It seems that any kind of
-arithmetic results in a signed value. Hence the cast. */
+macros to load and store such a value. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 #define IMM2_SIZE     2
-#define GET2(a, n)    (unsigned int)(((a)[n] << 8) | (a)[(n) + 1])
-#define PUT2(a, n, d) a[n] = (d) >> 8, a[(n) + 1] = (d) & 255
+#define GET2(a, n)    (((unsigned int)(a)[n] << 8) | (unsigned int)(a)[(n) + 1])
+#define PUT2(a, n, d) (a[n] = (PCRE2_UCHAR)((d) >> 8)), (a[(n) + 1] = (PCRE2_UCHAR)((d) & 255))
 
 #elif PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
 #define IMM2_SIZE     1
-#define GET2(a, n)    a[n]
-#define PUT2(a, n, d) a[n] = d
+#define GET2(a, n)    ((unsigned int)(a)[n])
+#define PUT2(a, n, d) (a[n] = (PCRE2_UCHAR)(d))
 #endif
 
 /* Other macros that are different for 8-bit mode. The MAX_255 macro checks
