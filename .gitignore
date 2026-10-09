@@ -117,6 +117,8 @@ src/libpcre2-32.sym
 src/libpcre2-posix.sym
 src/stamp-h1
 
+CMakeUserPresets.json
+
 /bazel-*
 *.bazel.lock
 
@@ -128,7 +130,6 @@ zig-cache/
 # Folders that may be used by individual developers, without appearing in git
 # status output.
 .vscode/
-.devcontainer/
 .personal/
 
 # End

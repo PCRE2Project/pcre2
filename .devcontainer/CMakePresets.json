@@ -1,0 +1,92 @@
+{
+  "version": 11,
+  "configurePresets": [
+    {
+      "name": "devcontainer-debug",
+      "displayName": "Debug - Default",
+      "description": "Project standard build using Clang",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-cmake",
+      "warnings": {
+        "deprecated": true,
+        "dev": true,
+        "uninitialized": true
+      },
+      "errors": {
+        "deprecated": true,
+        "dev": true
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_C_FLAGS": "-Wall -Wextra -pedantic -Wshadow -Wno-overlength-strings -Wimplicit-fallthrough",
+        "CMAKE_COMPILE_WARNING_AS_ERROR": "ON",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "PCRE2_BUILD_PCRE2_16": "ON",
+        "PCRE2_BUILD_PCRE2_32": "ON",
+        "PCRE2_SUPPORT_JIT": "ON",
+        "PCRE2_SUPPORT_LIBREADLINE": "ON",
+        "PCRE2_SUPPORT_VALGRIND": "ON"
+      }
+    },
+    {
+      "name": "devcontainer-asan-ubsan",
+      "displayName": "Debug (ASan + UBSan)",
+      "description": "Debug build with Clang's AddressSanitizer and UndefinedBehaviorSanitizer",
+      "inherits": "devcontainer-debug",
+      "binaryDir": "${sourceDir}/build-cmake-asan-ubsan",
+      "cacheVariables": {
+        "CMAKE_C_FLAGS": "-Wall -Wextra -pedantic -Wshadow -Wno-overlength-strings -Wimplicit-fallthrough -fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-integer-overflow,unsigned-shift-base,function -fno-omit-frame-pointer",
+        "PCRE2_SUPPORT_VALGRIND": null
+      }
+    },
+    {
+      "name": "devcontainer-coverage",
+      "displayName": "Debug (Clang coverage)",
+      "description": "Debug build with Clang coverage instrumentation and assertions disabled, matching the coverage CI job",
+      "inherits": "devcontainer-debug",
+      "binaryDir": "${sourceDir}/build-cmake-coverage",
+      "cacheVariables": {
+        "CMAKE_C_FLAGS": "-Wall -Wextra -pedantic -Wshadow -Wno-overlength-strings -Wimplicit-fallthrough -fprofile-instr-generate -fcoverage-mapping",
+        "PCRE2_DEBUG": "OFF",
+        "PCRE2_SUPPORT_LIBZ": "ON",
+        "PCRE2_SUPPORT_LIBBZ2": "ON",
+        "PCRE2_SUPPORT_LIBEDIT": "OFF",
+        "PCRE2_SUPPORT_LIBREADLINE": "ON",
+        "PCRE2_SUPPORT_VALGRIND": "OFF"
+      }
+    },
+    {
+      "name": "devcontainer-gcc",
+      "displayName": "Debug (GCC)",
+      "description": "Debug build using GCC",
+      "inherits": "devcontainer-debug",
+      "binaryDir": "${sourceDir}/build-cmake-gcc",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "devcontainer-debug",
+      "displayName": "Debug - Default",
+      "configurePreset": "devcontainer-debug"
+    },
+    {
+      "name": "devcontainer-asan-ubsan",
+      "displayName": "Debug (ASan + UBSan)",
+      "configurePreset": "devcontainer-asan-ubsan"
+    },
+    {
+      "name": "devcontainer-coverage",
+      "displayName": "Debug (Clang coverage)",
+      "configurePreset": "devcontainer-coverage"
+    },
+    {
+      "name": "devcontainer-gcc",
+      "displayName": "Debug (GCC)",
+      "configurePreset": "devcontainer-gcc"
+    }
+  ]
+}
