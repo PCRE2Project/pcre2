@@ -8791,6 +8791,8 @@ compile_branch(uint32_t *optionsptr, uint32_t *xoptionsptr, PCRE2_UCHAR **codept
 
       groupsetfirstcu = FALSE;
       cb->had_recurse = TRUE;
+      if (meta_arg == 0)
+        cb->had_whole_pattern_recurse = TRUE;
       if (firstcuflags == REQ_UNSET)
         firstcuflags = REQ_NONE;
       zerofirstcu = firstcu;
@@ -11128,6 +11130,7 @@ pcre2_compile(PCRE2_SPTR pattern, PCRE2_SIZE patlen, uint32_t options, int *erro
   cb.external_options = options;
   cb.groupinfo = stack_groupinfo;
   cb.had_recurse = FALSE;
+  cb.had_whole_pattern_recurse = FALSE;
   cb.lastcapture = 0;
   cb.max_lookbehind = 0;                              // Max encountered
   cb.max_varlookbehind = ccontext->max_varlookbehind; // Limit

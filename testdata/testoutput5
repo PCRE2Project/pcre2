@@ -3950,6 +3950,67 @@ No match
         End
 ------------------------------------------------------------------
 
+# Whole-pattern recursion may backtrack through terminal iterators.
+
+/(?:b(?R)a|a+)/B
+------------------------------------------------------------------
+        Bra
+        Bra
+        b
+        Recurse
+        a
+        Alt
+        a+
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    baa
+ 0: baa
+    bbaaa
+ 0: bbaaa
+    baaa
+ 0: baaa
+
+/(?:b(?0)a|a+)/B
+------------------------------------------------------------------
+        Bra
+        Bra
+        b
+        Recurse
+        a
+        Alt
+        a+
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    baa
+ 0: baa
+
+# Local subroutine calls do not re-enter the whole pattern.
+
+/(?<r>b(?&r)a|x)a+/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        b
+        Recurse
+        a
+        Alt
+        x
+        Ket
+        a++
+        Ket
+        End
+------------------------------------------------------------------
+    xaa
+ 0: xaa
+ 1: x
+    bxaaa
+ 0: bxaaa
+ 1: bxa
+
 # End auto-possessification tests
 
 /\w+/B,utf,ucp,auto_callout
