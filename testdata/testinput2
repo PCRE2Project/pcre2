@@ -5498,6 +5498,26 @@ a)"xI
 /a(*ACCEPT)x|aa/endanchored
     aaa
 
+# Check bumpalong after a control verb aborts a lazy leading repeat.
+
+/a+?(*THEN)/endanchored
+    aa
+    aaa
+    aaaa
+
+/a+?(*THEN)\z/
+    aaaa
+
+/a+?(*PRUNE)/endanchored
+    aaaa
+
+/a+?(*SKIP)/endanchored
+    aaaa
+
+/a+?(*COMMIT)/endanchored
+\= Expect no match
+    aaaa
+
 # Check auto-anchoring when there is a group that is never obeyed at
 # the start of a branch.
 
