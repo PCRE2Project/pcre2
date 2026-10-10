@@ -15,6 +15,10 @@ Version 10.50 xx-xxx-2026
 the configured header installation directory and handle absolute header and
 library installation directories.
 
+2. (#1034) Fixed auto-possessification of terminal iterators when the whole
+pattern is called recursively, which could prevent valid matches requiring
+backtracking after the recursive call.
+
 
 Version 10.49 28-September-2026
 -------------------------------

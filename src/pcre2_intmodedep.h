@@ -870,6 +870,7 @@ typedef struct compile_block {
   BOOL had_accept;                          // (*ACCEPT) encountered
   BOOL had_pruneorskip;                     // (*PRUNE) or (*SKIP) encountered
   BOOL had_recurse;                         // Had a pattern recursion or subroutine call
+  BOOL had_whole_pattern_recurse;           // Had a recursion to group 0
   BOOL dupnames;                            // Duplicate names exist
   compile_data *first_data;                 // First item in the compile data list
   compile_data *last_data;                  // Last item in the compile data list
