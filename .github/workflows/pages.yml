@@ -1,15 +1,10 @@
 name: Deploy Pages
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: [ 'Sync' ]
-    types:
-      - completed
-    branches: [ main ]
   push:
-    branches: [ pages ]
+    branches: [ main ]
   pull_request:
-    branches: [ pages ]
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -43,8 +38,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: pages
 
       - name: Setup Pages
         id: pages
@@ -63,7 +56,7 @@ jobs:
   Deploy:
     needs: Build
 
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/pages'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     permissions:
       pages: write      # to deploy to Pages

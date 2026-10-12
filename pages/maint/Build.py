@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import subprocess
 import shutil
 import re
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(f"{script_dir}/../../maint")
-from UpdateCommon import CURRENT_RELEASE
+maint_dir = os.path.abspath(f"{script_dir}/../../maint")
+CURRENT_RELEASE = subprocess.check_output(
+    ["ruby", "-I", maint_dir, "-r", "UpdateCommon", "-e", "puts Pcre2Maintenance::CURRENT_RELEASE"],
+    text=True,
+).strip()
 
 print(f"Building site for release {CURRENT_RELEASE}")
 
