@@ -5498,6 +5498,17 @@ a)"xI
 /a(*ACCEPT)x|aa/endanchored
     aaa
 
+/a+?(*THEN)/endanchored
+    aa
+    aaaa
+
+/a+?b|a+?(*THEN)/endanchored
+    aaxaa
+    aaxaab
+
+/a+?(?:b(*THEN)c|c(*THEN)b)/endanchored
+    aaabcaaacbaaabc
+
 # Check auto-anchoring when there is a group that is never obeyed at
 # the start of a branch.
 

@@ -17066,6 +17066,22 @@ No match
     aaa
  0: a
 
+/a+?(*THEN)/endanchored
+    aa
+ 0: a
+    aaaa
+ 0: a
+
+/a+?b|a+?(*THEN)/endanchored
+    aaxaa
+ 0: a
+    aaxaab
+ 0: aab
+
+/a+?(?:b(*THEN)c|c(*THEN)b)/endanchored
+    aaabcaaacbaaabc
+ 0: aaabc
+
 # Check auto-anchoring when there is a group that is never obeyed at
 # the start of a branch.
 
