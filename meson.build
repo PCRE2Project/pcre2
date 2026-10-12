@@ -5,7 +5,7 @@
 project(
   'PCRE2',
   'c',
-  # This line is updated by UpdateRelease.py
+  # This line is updated by UpdateRelease.rb
   version: '10.50-DEV',
   license: 'BSD-3-Clause WITH PCRE2-exception',
   meson_version: '>=1.6.0',
@@ -323,7 +323,7 @@ pcre2_major = pcre2_version.split('.')[0]
 pcre2_minor = pcre2_version.split('.')[1]
 pcre2_prerelease = project_version_parts.length() > 1 ? '-' + project_version_parts[1] : ''
 
-# These lines are updated by UpdateRelease.py
+# These lines are updated by UpdateRelease.rb
 pcre2_date = '2026-11-31'
 libtool_versions = {'posix': '3:10:0', '8': '17:0:17', '16': '17:0:17', '32': '17:0:17'}
 

@@ -797,7 +797,7 @@ file(REMOVE ${PROJECT_SOURCE_DIR}/src/pcre2.h)
 # Release and library version information
 # -----------------------------------------------------------------------------
 
-# These lines are updated by UpdateRelease.py
+# These lines are updated by UpdateRelease.rb
 set(PCRE2_MAJOR "10")
 set(PCRE2_MINOR "50")
 set(PCRE2_PRERELEASE "-DEV")

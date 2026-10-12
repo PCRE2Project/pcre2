@@ -20,10 +20,6 @@ top directory.
 Files in the maint directory
 ============================
 
-132html
-  A Perl script to convert man pages to HTML (.1 and .3 files "two" HTML),
-  used by UpdateAlways.
-
 AsciidocMarkup.md
   Design goals and authoring conventions for semantic markup in
   doc/pcre2api.adoc, including HTML and manpage requirements.
@@ -34,22 +30,10 @@ AsciidocRender
   output. Rendering requires the Asciidoctor, asciidoctor-html5s, and Rouge Ruby
   gems.
 
-CheckMan
-  A Perl script to validate the syntax in PCRE2 man pages, used by
-  UpdateAlways.
-
-CleanTxt
-  A Perl script to clean up the nroff output in PCRE2 man pages, used by
-  UpdateAlways.
-
 cmake-tests
   CMake projects that exercise PCRE2 as a build-tree dependency and as an
   installed package. The check-interface.py runner builds and runs both static
   and shared consumers and verifies their dynamic library dependencies.
-
-Detrail
-  A Perl script to remove trailing whitespace from PCRE2 files, used by
-  UpdateAlways.
 
 GenerateCommon.py
   A Python module containing data and functions that are used by the other
@@ -102,20 +86,25 @@ meson-tests
   `python3 maint/meson-tests/check-library-options.py` to configure, build and
   run it with static and shared libraries.
 
-UpdateAlways
-  A shell script to ensure that all auto-generated outputs are ready for
-  release.
+UpdateCommon.rb
+  A Ruby module containing shared helpers used by other scripts.
+
+UpdateAlways.rb
+  A Ruby script to ensure that all auto-generated outputs are ready for
+  release. It renders and validates documentation, cleans nroff text, removes
+  trailing whitespace, and checks text encoding. Pass "doc" to process only
+  documentation. Test data is deliberately excluded from whitespace cleanup.
 
   It should be run often (by CI on each commit) to ensure that the repository
   is in a clean and consistent state.
 
-UpdateDates.py
-UpdateRelease.py
-  Python scripts to be run less frequently than UpdateAlways. These should only
+UpdateDates.rb
+UpdateRelease.rb
+  Ruby scripts to be run less frequently than UpdateAlways.rb. These should only
   be needed immediately before a release, when finalising the repository.
-  UpdateDates.py checks in the last-updated times on documentation pages.
-  UpdateRelease.py is needed after any change to the release number or libtool
-  library versions in configure.ac.
+  UpdateDates.rb updates the last-updated times on documentation pages, ignoring
+  commits marked #noupdate. UpdateRelease.rb is needed after any change to the
+  release number or libtool library versions in configure.ac.
 
 pcre2_chartables.c.non-standard
   This is a set of character tables that came from a Windows system. It has
@@ -371,9 +360,9 @@ new release.
   git add -u src/config.h.generic src/pcre2.h.generic
   git commit -m"Automatic update of .generic files"
 
-  maint/UpdateRelease.py
-  maint/UpdateDates.py
-  maint/UpdateAlways
+  maint/UpdateRelease.rb
+  maint/UpdateDates.rb
+  maint/UpdateAlways.rb
   git add -u
   git commit -m"Automatic update of doc files #noupdate"
   ```
