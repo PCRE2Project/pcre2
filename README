@@ -520,7 +520,6 @@ system. The following are installed (file names are all relative to the
 
   Text file documentation (share/doc/pcre2):
     AUTHORS.md
-    COPYING
     ChangeLog
     LICENCE.md
     NEWS
@@ -925,7 +924,6 @@ The distribution should contain the files listed below.
   HACKING                  some notes about the internals of PCRE2
   INSTALL                  generic installation instructions
   LICENCE.md               conditions for the use of PCRE2
-  COPYING                  the same, using GNU's standard name
   SECURITY.md              information on reporting vulnerabilities
   SUPPORT-LIFECYCLE.md     information on the support policy
   Makefile.in              ) template for Unix Makefile, which is built by

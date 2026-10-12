@@ -3,7 +3,6 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/AUTHORS.md
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/BUILD.bazel
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/CMakeLists.txt
--rw-r--r-- tarball-dir/pcre2-SNAPSHOT/COPYING
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/ChangeLog
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/HACKING
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/INSTALL

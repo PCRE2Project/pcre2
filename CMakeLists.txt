@@ -1544,7 +1544,6 @@ file(
   GLOB txts
   ${PROJECT_SOURCE_DIR}/doc/*.txt
   AUTHORS.md
-  COPYING
   ChangeLog
   LICENCE.md
   NEWS

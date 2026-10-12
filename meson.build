@@ -948,7 +948,6 @@ install_man(man_pages)
 
 install_data(
   'AUTHORS.md',
-  'COPYING',
   'ChangeLog',
   'LICENCE.md',
   'NEWS',

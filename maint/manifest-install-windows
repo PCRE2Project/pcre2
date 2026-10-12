@@ -34,7 +34,6 @@ drwxr-xr-x install-dir/share
 drwxr-xr-x install-dir/share/doc
 drwxr-xr-x install-dir/share/doc/pcre2
 -rw-r--r-- install-dir/share/doc/pcre2/AUTHORS.md
--rw-r--r-- install-dir/share/doc/pcre2/COPYING
 -rw-r--r-- install-dir/share/doc/pcre2/ChangeLog
 -rw-r--r-- install-dir/share/doc/pcre2/LICENCE.md
 -rw-r--r-- install-dir/share/doc/pcre2/NEWS

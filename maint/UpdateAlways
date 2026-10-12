@@ -173,7 +173,6 @@ txt_files=(
   AUTHORS.md
   BUILD.bazel
   CMakeLists.txt
-  COPYING
   ChangeLog
   HACKING
   INSTALL

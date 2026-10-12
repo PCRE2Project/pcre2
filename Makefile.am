@@ -17,7 +17,6 @@ PHONY_TARGETS=
 
 dist_doc_DATA = \
   AUTHORS.md \
-  COPYING \
   ChangeLog \
   LICENCE.md \
   NEWS \
