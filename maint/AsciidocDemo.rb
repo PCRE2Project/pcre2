@@ -15,6 +15,7 @@ module Pcre2AsciidocDemo
     output_path = repository.join('doc/pcre2demo.adoc')
 
     date, status = Open3.capture2(
+      Pcre2Maintenance::C_LOCALE,
       'git', '-C', repository.to_s, 'log', '-n1',
       '--date=format:%d %B %Y', '--format=%cd', '--', source_path.to_s
     )

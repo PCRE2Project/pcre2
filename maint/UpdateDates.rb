@@ -21,7 +21,7 @@ module Pcre2UpdateDates
   def self.last_date(filename)
     # Ignore commits marked #noupdate, which contain generated changes rather
     # than an edit to the source document itself.
-    date = capture!('git', 'log', '-n1', '--date=format:%d %B %Y', '--format=%cd',
+    date = capture!(Pcre2Maintenance::C_LOCALE, 'git', 'log', '-n1', '--date=format:%d %B %Y', '--format=%cd',
       '--grep', '#noupdate', '--invert-grep', '--', filename).strip
     raise "No Git date found for #{filename}" if date.empty?
     date
@@ -38,7 +38,7 @@ module Pcre2UpdateDates
       date = last_date(filename)
       update_file(filename, ADOC_DATE) { |_, match| ":#{match[1]}: #{date}" }
       if filename.start_with?('doc/pcre2_')
-        raise "Pattern unexpectedly found in #{filename}" if File.read(filename).match?(LAST_UPDATED)
+        raise "Pattern unexpectedly found in #{filename}" if File.read(filename, encoding: Encoding::UTF_8).match?(LAST_UPDATED)
       else
         update_file(filename, LAST_UPDATED, "Last updated: #{date}")
       end

@@ -9,6 +9,7 @@ require 'fileutils'
 require 'open3'
 
 require_relative 'UpdateCommon'
+require_relative 'AsciidocConverterPcre2'
 require_relative 'AsciidocDemo'
 require_relative 'AsciidocIndex'
 
@@ -164,7 +165,8 @@ module Pcre2UpdateAlways
 
   # Render a generated manpage to cleaned plain text.
   def render_man_to_text(manpage)
-    nroff_output_to_plain_text(capture!('nroff', '-c', '-t', '-Kutf8', '-Tutf8',
+    # nroff must not replace ASCII hyphens with Unicode hyphens; forcing C locale ensures this.
+    nroff_output_to_plain_text(capture!(Pcre2Maintenance::C_LOCALE, 'nroff', '-c', '-t', '-Kutf8', '-Tutf8',
       "-rLL=#{MANPAGE_WIDTH}n", '-man', "man/#{manpage}"))
   end
 
@@ -208,11 +210,11 @@ module Pcre2UpdateAlways
   # Verify that man can process every generated page without warnings.
   def validate_manpages
     puts 'Validating man pages'
-    raise 'man-db does not support warnings' unless capture!('man', '--help').include?('warnings')
+    raise 'man-db does not support warnings' unless capture!(Pcre2Maintenance::C_LOCALE, 'man', '--help').include?('warnings')
 
     Dir.glob('man/*.{1,3}').each do |file|
       _, warnings, status = Open3.capture3(
-        {'MANROFFSEQ' => '', 'MANWIDTH' => MANPAGE_WIDTH.to_s},
+        Pcre2Maintenance::C_LOCALE.merge('MANROFFSEQ' => '', 'MANWIDTH' => MANPAGE_WIDTH.to_s),
         'man', '--warnings=w,all', '-E', 'UTF-8', '-l', '-Tutf8', '-Z', file
       )
       raise "Running man failed for #{file}:\n#{warnings}" unless status.success?
@@ -235,7 +237,7 @@ module Pcre2UpdateAlways
       sources = Dir.glob('*.adoc')
       sources.each do |file|
         next if file == 'index.adoc'
-        unless File.read(file).lines.any? { |line| line.chomp == ":mansource: PCRE2 #{Pcre2Maintenance::CURRENT_RELEASE}" }
+        unless File.read(file, encoding: Encoding::UTF_8).lines.any? { |line| line.chomp == ":mansource: PCRE2 #{Pcre2Maintenance::CURRENT_RELEASE}" }
           raise "Version number in #{file} does not match current release"
         end
       end
@@ -246,20 +248,7 @@ module Pcre2UpdateAlways
       FileUtils.cp('../README', 'html/README.txt')
       FileUtils.cp('../NON-AUTOTOOLS-BUILD', 'html/NON-AUTOTOOLS-BUILD.txt')
 
-      sources.each do |file|
-        if file == 'index.adoc'
-          puts '  Making index.html'
-          run!('asciidoctor', '--failure-level', 'WARN', '-v', '--require',
-            '../maint/AsciidocConverterPcre2.rb', '--backend', 'html5',
-            '--out-file', 'html/index.html', file)
-          next
-        end
-        section = File.read(file)[/^:manvolnum: (.+)$/, 1]
-        raise "Invalid manpage section in #{file}" unless %w[1 3].include?(section)
-        base = File.basename(file, '.adoc')
-        puts "  Making #{base}.#{section} and #{base}.html"
-        run!('../maint/AsciidocRender', file, "man/#{base}.#{section}", "html/#{base}.html")
-      end
+      Pcre2AsciidocConverter.run(sources)
 
       # Make tidy plain-text manuals for online reading. Concatenate the main
       # section-three manuals but omit individual function pages and pcre2demo.
@@ -308,7 +297,7 @@ module Pcre2UpdateAlways
     commit = capture!('git', 'rev-parse', 'HEAD:deps/sljit').strip
     raise 'deps/sljit has no commit' if commit.empty?
 
-    if File.read('build.zig.zon').include?("sljit.git##{commit}")
+    if File.read('build.zig.zon', encoding: Encoding::UTF_8).include?("sljit.git##{commit}")
       puts "SLJIT pinned in build.zig.zon to #{commit}"
     else
       puts "Updating SLJIT pin in build.zig.zon to #{commit}"
@@ -319,9 +308,6 @@ module Pcre2UpdateAlways
   # Regenerate release-maintained files, optionally limiting work to documentation.
   def update_always(arguments)
     raise ArgumentError, 'Usage: maint/UpdateAlways.rb [doc]' unless arguments.empty? || arguments == ['doc']
-
-    # nroff must not replace ASCII hyphens with Unicode hyphens.
-    ENV['LANG'] = ENV['LC_ALL'] = 'C'
 
     update_documentation
     return if arguments == ['doc']
@@ -341,7 +327,7 @@ module Pcre2UpdateAlways
 
     # TODO validate build.zig.zon's version number too, and CMake/meson.
     # Generally check that UpdateRelease has been run!
-    unless File.read('MODULE.bazel').include?("version = \"#{Pcre2Maintenance::CURRENT_RELEASE}\"")
+    unless File.read('MODULE.bazel', encoding: Encoding::UTF_8).include?("version = \"#{Pcre2Maintenance::CURRENT_RELEASE}\"")
       raise 'Version number in MODULE.bazel does not match current release'
     end
 

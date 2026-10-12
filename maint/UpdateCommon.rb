@@ -6,10 +6,11 @@ require 'open3'
 
 module Pcre2Maintenance
   ROOT = File.expand_path('..', __dir__)
+  C_LOCALE = {'LANG' => 'C', 'LC_ALL' => 'C'}.freeze
 
   # Extract release and ABI version definitions from a configure.ac file.
   def self.version_info
-    entries = File.read(File.join(ROOT, 'configure.ac')).scan(
+    entries = File.read(File.join(ROOT, 'configure.ac'), encoding: Encoding::UTF_8).scan(
       /m4_define\((pcre2_(?:major|minor|prerelease|date)|libpcre2_(?:posix|8|16|32)_version), *\[(.*?)\]\)/
     )
     raise 'Duplicate version definitions in configure.ac' unless entries.map(&:first).uniq.length == entries.length

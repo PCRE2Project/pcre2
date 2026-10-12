@@ -25,10 +25,8 @@ AsciidocMarkup.md
   doc/pcre2api.adoc, including HTML and manpage requirements.
 
 AsciidocConverterPcre2.rb
-AsciidocRender
-  Custom Asciidoctor converters and the wrapper that renders HTML and manpage
-  output. Rendering requires the Asciidoctor, asciidoctor-html5s, and Rouge Ruby
-  gems.
+  Custom Asciidoctor extensions that render HTML and manpage output. Rendering
+  requires the Asciidoctor, asciidoctor-html5s, and Rouge Ruby gems.
 
 cmake-tests
   CMake projects that exercise PCRE2 as a build-tree dependency and as an

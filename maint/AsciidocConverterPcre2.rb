@@ -1,8 +1,10 @@
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 # PCRE2's Asciidoctor extension defines a small semantic inline vocabulary and
 # backend-specific presentation for HTML and manpage output. Keep the extension
 # backend-neutral until conversion so all outputs consume the same AST.
+require 'asciidoctor'
 require 'asciidoctor/converter/manpage'
 require 'asciidoctor/extensions'
 require 'asciidoctor-html5s'
@@ -429,4 +431,39 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
     following = tokens.drop(index + 1).find {|token, text| token.qualname != 'Text' || !text.strip.empty? }
     following && following[1].start_with?('(')
   end
+end
+
+module Pcre2AsciidocConverter
+  module_function
+
+  # Convert AsciiDoc sources into their HTML and manpage outputs.
+  def run(inputs)
+    logger = Asciidoctor::LoggerManager.logger
+    logger.level = Logger::Severity::DEBUG
+
+    inputs.each do |input|
+      base = File.basename(input, '.adoc')
+      directory = File.dirname(input)
+      if base == 'index'
+        Asciidoctor.convert_file input, backend: 'html5', safe: :unsafe, mkdirs: true,
+          to_file: File.join(directory, 'html', "#{base}.html")
+        next
+      end
+
+      section = File.read(input, encoding: Encoding::UTF_8)[/^:manvolnum: (.+)$/, 1]
+      raise "Invalid manpage section in #{input}" unless section
+
+      Asciidoctor.convert_file input, backend: 'manpage', safe: :unsafe, mkdirs: true,
+        to_file: File.join(directory, 'man', "#{base}.#{section}")
+      Asciidoctor.convert_file input, backend: 'html5', safe: :unsafe, mkdirs: true,
+        to_file: File.join(directory, 'html', "#{base}.html")
+    end
+
+    raise 'Asciidoctor generated warnings' if logger.max_severity && logger.max_severity >= Logger::Severity::WARN
+  end
+end
+
+if $PROGRAM_NAME == __FILE__
+  inputs = ARGV.empty? ? Dir.glob('*.adoc').sort : ARGV
+  Pcre2AsciidocConverter.run(inputs)
 end
