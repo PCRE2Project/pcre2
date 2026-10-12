@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<link rel="icon" type="image/png" href="{{ "favicon-96x96.png" | relURL }}" sizes="96x96" />
+	<link rel="icon" type="image/svg+xml" href="{{ "favicon.svg" | relURL }}" />
+	<link rel="shortcut icon" href="{{ "favicon.ico" | relURL }}" />
+
+	<title>{{ if not .IsHome }}{{ .Title }} | {{ end }}{{ .Site.Title }}</title>
+
+	<link rel="stylesheet" href="{{ "css/style.css" | relURL }}" type="text/css" media="all" />
+	<link rel="stylesheet" href="{{ "css/syntax.css" | relURL }}" type="text/css" media="all" />
+
+	<meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc" />
+	<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff" />
+
+	<script src="{{ "js/init-pagefind.js" | relURL }}" type="module"></script>
+
+</head>
+
+<body>
