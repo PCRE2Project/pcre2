@@ -27,6 +27,17 @@ AsciidocMarkup.md
 AsciidocConverterPcre2.rb
   Custom Asciidoctor extensions that render HTML and manpage output. Rendering
   requires the Asciidoctor, asciidoctor-html5s, and Rouge Ruby gems.
+  Pass --embedded --output-dir DIR to batch-render HTML fragments for Hugo;
+  the default generates full HTML documents and manpages. The site build uses
+  the sources directly, never doc/html, and does not invoke Hugo's Asciidoctor CLI.
+
+Asciidoc.css
+  Offline HTML shell styles, concatenated with pages/static/css/document.css
+  into doc/html/css/pcre2.css. Both outputs bundle local Fira fonts and their
+  licence. Edit the shared CSS for typography and colours in both consumers.
+
+AsciidocTest.rb
+  Converter regression tests. Run ruby maint/AsciidocTest.rb.
 
 cmake-tests
   CMake projects that exercise PCRE2 as a build-tree dependency and as an

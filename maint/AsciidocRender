@@ -38,3 +38,4 @@ script_dir=$(cd "$(dirname "$0")" && pwd)
 mkdir -p "$(dirname "$man_output")" "$(dirname "$html_output")"
 asciidoctor --failure-level WARN -v --require "$script_dir/AsciidocConverterPcre2.rb" --backend manpage --out-file "$man_output" "$input"
 asciidoctor --failure-level WARN -v --require "$script_dir/AsciidocConverterPcre2.rb" --backend html5 --out-file "$html_output" "$input"
+ruby -r "$script_dir/AsciidocConverterPcre2" -e 'Pcre2AsciidocConverter.copy_html_assets(ARGV.fetch(0))' "$(dirname "$html_output")"

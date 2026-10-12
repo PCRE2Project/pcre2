@@ -142,6 +142,18 @@ dist_html_DATA = \
   doc/html/pcre2test.html \
   doc/html/pcre2unicode.html
 
+dist_htmlcss_DATA = doc/html/css/pcre2.css
+htmlcssdir = $(htmldir)/css
+dist_htmlfonts_DATA = \
+  doc/html/fonts/OFL.txt \
+  doc/html/fonts/fira-mono-v14-latin_latin-ext-500.woff2 \
+  doc/html/fonts/fira-mono-v14-latin_latin-ext-regular.woff2 \
+  doc/html/fonts/fira-sans-v17-latin_latin-ext-600.woff2 \
+  doc/html/fonts/fira-sans-v17-latin_latin-ext-600italic.woff2 \
+  doc/html/fonts/fira-sans-v17-latin_latin-ext-italic.woff2 \
+  doc/html/fonts/fira-sans-v17-latin_latin-ext-regular.woff2
+htmlfontsdir = $(htmldir)/fonts
+
 dist_man_MANS = \
   doc/man/pcre2-config.1 \
   doc/man/pcre2.3 \

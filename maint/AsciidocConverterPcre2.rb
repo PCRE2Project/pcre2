@@ -7,11 +7,14 @@
 require 'asciidoctor'
 require 'asciidoctor/converter/manpage'
 require 'asciidoctor/extensions'
+require 'asciidoctor/syntax_highlighter/rouge'
 require 'asciidoctor-html5s'
 # Decode Asciidoctor's special-character substitutions before Rouge lexing.
 require 'cgi'
 # Supply lexical tokens for terminal highlighting of C source blocks.
 require 'rouge'
+require 'optparse'
+require 'fileutils'
 
 class Pcre2DocumentDefaults < Asciidoctor::Extensions::Preprocessor
   def process(document, reader)
@@ -19,6 +22,10 @@ class Pcre2DocumentDefaults < Asciidoctor::Extensions::Preprocessor
     document.set_attribute 'source-highlighter', 'rouge' unless document.attr? 'source-highlighter'
     if document.basebackend? 'html'
       document.set_attribute 'nofooter' unless document.attr? 'nofooter'
+      document.set_attribute 'stylesheet', 'css/pcre2.css'
+      document.set_attribute 'linkcss'
+      document.delete_attribute 'copycss'
+      document.set_attribute 'docrole', 'offline-manual'
     end
     reader
   end
@@ -174,8 +181,108 @@ Asciidoctor::Extensions.register do
   inline_macro Pcre2MacroValueInlineMacro
 end
 
+# Token colours are part of our shared stylesheet, not Rouge's theme.
+class Pcre2RougeAdapter < Asciidoctor::SyntaxHighlighter::RougeAdapter
+  register_for 'rouge'
+
+  def docinfo?(_location)
+    false
+  end
+
+  def write_stylesheet?(_document)
+    false
+  end
+end
+
+module Pcre2ListLayout
+  MIN_DLIST_WIDTH = 7
+  MAX_DLIST_WIDTH = 26
+
+  module_function
+
+  def spaced?(node)
+    items = node.context == :dlist ? node.items.map(&:last).compact : node.items
+    items.any?(&:blocks?)
+  end
+
+  def label_width(node, terms)
+    return node.attr('width').to_i if node.attr?('width')
+
+    lengths = terms.map { |term| term.gsub(/<[^>]+>/, '').length }
+    fitting = lengths.select { |length| length + 1 <= MAX_DLIST_WIDTH }
+    fitting.length > lengths.length / 2 ? [fitting.max + 1, MIN_DLIST_WIDTH].max : MIN_DLIST_WIDTH
+  end
+end
+
 class Pcre2HtmlConverter < Asciidoctor::Html5s::Converter
   register_for 'html5'
+
+  def ulist(node, _opts = {})
+    html_list(node, :ul)
+  end
+
+  def olist(node, _opts = {})
+    html_list(node, :ol)
+  end
+
+  def inline_anchor(node, opts = {})
+    if node.type == :xref && node.document.attr?('pcre2-site') &&
+        node.attr('path') && node.attr('refid').split('#', 2).first == 'index'
+      prefix = node.document.attr('relfileprefix', '')
+      fragment = node.attr('fragment')
+      node.target = "#{prefix.empty? ? './' : prefix}#{fragment ? "##{fragment}" : ''}"
+    end
+    super
+  end
+
+  def dlist(node, _opts = {})
+    node.extend(Asciidoctor::Html5s::Converter::Helpers)
+    terms_and_descriptions = node.items.map { |terms, description| [terms.map(&:text).join(', '), description] }
+    width = Pcre2ListLayout.label_width(node, terms_and_descriptions.map(&:first))
+    entries = terms_and_descriptions.map do |text, description|
+      term = node.html_tag(:dt, {}, text)
+      body = description ? node.html_tag(:dd, {}, node.print_item_content(description)) : ''
+      long = CGI.unescapeHTML(text.gsub(/<[^>]+>/, '')).length + 1 > width
+      node.html_tag(:div, {class: ['dlist-item', ('long-term' if long || node.style == 'qanda')]}, term + body)
+    end.join
+    attributes = list_attributes(node).merge(style: "--term-width: #{width / 2.0}em",
+      role: ('doc-qna' if node.style == 'qanda'))
+    list = node.html_tag(:dl, attributes, entries)
+    titled_list(node, list)
+  end
+
+  def html_list(node, tag)
+    node.extend(Asciidoctor::Html5s::Converter::Helpers)
+    checklist = tag == :ul && node.option?('checklist')
+    entries = node.items.map do |item|
+      content = node.print_item_content(item)
+      if checklist && item.attr?(:checkbox)
+        content = node.html_tag(:input, {type: 'checkbox', disabled: 'disabled',
+          checked: ('checked' if item.attr?(:checked)), class: 'task-list-item-checkbox'}) + content
+      end
+      node.html_tag(:li, {id: item.id, class: item.role}, content)
+    end.join
+    attributes = list_attributes(node)
+    attributes[:class] << 'task-list' if checklist
+    if tag == :ol
+      attributes.merge!(start: node.attr(:start), type: node.list_marker_keyword,
+        reversed: ('reversed' if node.option?('reversed')))
+    end
+    list = node.html_tag(tag, attributes, entries)
+    titled_list(node, list)
+  end
+
+  def list_attributes(node)
+    {id: node.id, class: [node.style, node.role,
+                         Pcre2ListLayout.spaced?(node) ? 'spaced' : 'compact']}
+  end
+
+  def titled_list(node, list)
+    return list unless node.title?
+
+    title = node.html_tag(:h6, {class: 'block-title'}, node.title)
+    node.html_tag(:section, {class: "#{node.context} list-block"}, title + list)
+  end
 end
 
 # Preserve PCRE2's established terminal layout while adding description-list,
@@ -183,8 +290,6 @@ end
 # `ESC_BS`, inherited from the stock converter, protects intended roff escapes
 # until `manify` performs its final escape and fake-markup cleanup pass.
 class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
-  MIN_DLIST_WIDTH = 7
-  MAX_DLIST_WIDTH = 26
   PROTECTED_FONT_MARKER_RX = %r(</?#{Regexp.escape ESC_BS}f(B|I|\(CR|P)>)
 
   # Replace the stock manpage converter for documents using this extension.
@@ -212,20 +317,8 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
       term = terms.map(&:text).join(', ')
       [term, description]
     end
-    width = if node.attr?('width')
-      node.attr('width').to_i
-    else
-      lengths = terms_and_descriptions.map {|term, _| term.gsub(/<[^>]+>/, '').length }
-      fitting_lengths = lengths.select {|length| length + 1 <= MAX_DLIST_WIDTH }
-      if fitting_lengths.length > lengths.length / 2
-        [fitting_lengths.max + 1, MIN_DLIST_WIDTH].max
-      else
-        MIN_DLIST_WIDTH
-      end
-    end
-    spaced = terms_and_descriptions.any? do |_, description|
-      description && description.blocks?
-    end
+    width = Pcre2ListLayout.label_width(node, terms_and_descriptions.map(&:first))
+    spaced = Pcre2ListLayout.spaced?(node)
     # `.sp` retains normal separation from preceding prose, `.RS 4` indents the
     # whole list by four ens, and `.PD 0` suppresses inter-item paragraph
     # distance for lists whose descriptions contain no additional blocks.
@@ -262,7 +355,7 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
     result << %(.sp
 .B #{manify node.title}
 .br) if node.title?
-    spaced = node.items.any?(&:blocks?)
+    spaced = Pcre2ListLayout.spaced?(node)
     node.items.each_with_index do |item, index|
       # Keep compact lists together, but space every item if any item has
       # attached blocks so the list uses consistent vertical rhythm.
@@ -290,7 +383,7 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
     result << %(.sp
 .B #{manify node.title}
 .br) if node.title?
-    spaced = node.items.any?(&:blocks?)
+    spaced = Pcre2ListLayout.spaced?(node)
     start = (node.attr 'start', 1).to_i
     node.items.each_with_index do |item, index|
       result << '.sp' if index.zero? || spaced
@@ -508,34 +601,63 @@ end
 module Pcre2AsciidocConverter
   module_function
 
+  def copy_html_assets(directory)
+    site = File.expand_path('../pages/static', __dir__)
+    FileUtils.mkdir_p(File.join(directory, 'css'))
+    FileUtils.mkdir_p(File.join(directory, 'fonts'))
+    shared = File.read(File.join(site, 'css/document.css'), encoding: Encoding::UTF_8)
+    offline = File.read(File.join(__dir__, 'Asciidoc.css'), encoding: Encoding::UTF_8)
+    File.write(File.join(directory, 'css/pcre2.css'), shared + "\n" + offline, encoding: Encoding::UTF_8)
+    FileUtils.cp(Dir.glob(File.join(site, 'fonts/*.{woff2,txt}')), File.join(directory, 'fonts'))
+  end
+
   # Convert AsciiDoc sources into their HTML and manpage outputs.
-  def run(inputs)
+  def run(inputs, embedded: false, output_dir: nil)
+    raise ArgumentError, 'Embedded HTML requires an output directory' if embedded && !output_dir
+
     logger = Asciidoctor::LoggerManager.logger
     logger.level = Logger::Severity::DEBUG
 
     inputs.each do |input|
       base = File.basename(input, '.adoc')
       directory = File.dirname(input)
-      if base == 'index'
+      if embedded
         Asciidoctor.convert_file input, backend: 'html5', safe: :unsafe, mkdirs: true,
-          to_file: File.join(directory, 'html', "#{base}.html")
+          header_footer: false,
+          attributes: {'notitle' => '', 'pcre2-site' => '', 'relfilesuffix' => '/',
+                       'relfileprefix' => base == 'index' ? '' : '../'},
+          to_file: File.join(output_dir, "#{base}.html")
         next
       end
 
-      section = File.read(input, encoding: Encoding::UTF_8)[/^:manvolnum: (.+)$/, 1]
-      raise "Invalid manpage section in #{input}" unless section
+      unless base == 'index'
+        section = File.read(input, encoding: Encoding::UTF_8)[/^:manvolnum: (.+)$/, 1]
+        raise "Invalid manpage section in #{input}" unless section
 
-      Asciidoctor.convert_file input, backend: 'manpage', safe: :unsafe, mkdirs: true,
-        to_file: File.join(directory, 'man', "#{base}.#{section}")
+        Asciidoctor.convert_file input, backend: 'manpage', safe: :unsafe, mkdirs: true,
+          to_file: File.join(directory, 'man', "#{base}.#{section}")
+      end
       Asciidoctor.convert_file input, backend: 'html5', safe: :unsafe, mkdirs: true,
-        to_file: File.join(directory, 'html', "#{base}.html")
+        to_file: File.join(output_dir || File.join(directory, 'html'), "#{base}.html")
     end
 
     raise 'Asciidoctor generated warnings' if logger.max_severity && logger.max_severity >= Logger::Severity::WARN
+
+    unless embedded
+      directories = inputs.map { |input| output_dir || File.join(File.dirname(input), 'html') }.uniq
+      directories.each { |directory| copy_html_assets(directory) }
+    end
   end
 end
 
 if $PROGRAM_NAME == __FILE__
+  options = {}
+  OptionParser.new do |parser|
+    parser.banner = "Usage: #{$PROGRAM_NAME} [--embedded --output-dir DIR] [input.adoc ...]"
+    parser.on('--embedded', 'Render HTML fragments for Hugo, without manpages') { options[:embedded] = true }
+    parser.on('--output-dir DIR', 'Write HTML to DIR') { |directory| options[:output_dir] = directory }
+  end.parse!
   inputs = ARGV.empty? ? Dir.glob('*.adoc').sort : ARGV
-  Pcre2AsciidocConverter.run(inputs)
+  abort 'No AsciiDoc sources found' if inputs.empty?
+  Pcre2AsciidocConverter.run(inputs, **options)
 end

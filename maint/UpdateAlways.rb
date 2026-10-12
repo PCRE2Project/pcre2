@@ -70,7 +70,10 @@ module Pcre2UpdateAlways
     cmake/*.in
     cmake/COPYING-CMAKE-SCRIPTS
     configure.ac
-    doc/html/*
+    doc/html/*.html
+    doc/html/*.txt
+    doc/html/css/*.css
+    doc/html/fonts/*.txt
     doc/man/*
     doc/p*
     libpcre2-16.pc.in
@@ -244,7 +247,7 @@ module Pcre2UpdateAlways
 
       puts 'Making HTML and manpage documentation'
       FileUtils.mkdir_p(%w[html man])
-      FileUtils.rm(Dir.glob('{html,man}/*'))
+      FileUtils.rm_r(Dir.glob('{html,man}/*'))
       FileUtils.cp('../README', 'html/README.txt')
       FileUtils.cp('../NON-AUTOTOOLS-BUILD', 'html/NON-AUTOTOOLS-BUILD.txt')
 

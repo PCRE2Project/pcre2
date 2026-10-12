@@ -46,19 +46,48 @@ conditionals, or `pass:[]` workarounds.
 
 HTML rendering uses the `asciidoctor-html5s` gem through `Pcre2HtmlConverter`,
 registered as the `html5` backend in `maint/AsciidocConverterPcre2.rb`. The
-subclass is reserved for PCRE2-specific overrides. It produces semantic HTML
-with fewer presentation wrappers; the default Asciidoctor CSS is not compatible
-with all of its markup. The gem's typography substitutions apply to both HTML
+subclass adds list layout semantics to the backend's HTML. It produces semantic
+HTML with fewer presentation wrappers; PCRE2 owns the stylesheet rather than
+using the default Asciidoctor styling. The gem's typography substitutions apply to both HTML
 and manpages: `--` becomes an en dash and `---` becomes an em dash in ordinary
 prose. The manpage converter remains separate.
 
 The extension supplies shared defaults before the document header is parsed:
-`lang=en`, `source-highlighter=rouge`, and, for HTML only, `nofooter`. Document
+`lang=en`, `source-highlighter=rouge`, and, for HTML only, `nofooter`,
+`stylesheet=css/pcre2.css`, `linkcss`, and `docrole=offline-manual`. Document
 headers can override or unset these defaults, and CLI/API attribute locks are
 respected. HTML uses Asciidoctor's Rouge integration; the manpage converter
-continues to highlight C source independently. Rendering commands specify only
-the input, backend, extension, output, and `--failure-level WARN` to reject
-documentation warnings.
+continues to highlight C source independently. Rouge supplies HTML token classes,
+but its stock stylesheet is disabled; token colours live in our shared CSS.
+Rendering rejects documentation warnings.
+
+### The two HTML consumers
+
+`pages/maint/Build.py` calls `maint/AsciidocConverterPcre2.rb --embedded
+--output-dir content/doc` with all `doc/*.adoc` sources in one Ruby process.
+Asciidoctor calls this **embedded** mode (`header_footer: false`); **standalone**
+mode means a complete HTML document, and is used for distributed manuals instead.
+The site builder adds Hugo front matter and renames the index to `_index.html`.
+Hugo consumes only HTML and Markdown, never AsciiDoc or `doc/html`. The source
+header is suppressed in fragments because Hugo supplies the page title. TOCs
+and footnotes remain in the fragment. `relfilesuffix=/` and a per-document
+`relfileprefix` produce relative directory-style links for the site, while the
+offline renderer keeps relative `.html` links. The site converter maps references
+to `index.adoc` to the documentation section root, including any fragment.
+
+`maint/UpdateAlways.rb doc` generates complete documents and copies local assets
+into `doc/html/css` and `doc/html/fonts`. `maint/AsciidocRender` also copies these
+assets when rendering a single document. Offline HTML requires no network access.
+The shared source is `pages/static/css/document.css`: colours, local Fira fonts,
+ragged-right text without automatic hyphenation, block rhythm, lists, tables,
+admonitions, TOCs, and Rouge colours. `pages/static/css/style.css` contains only
+the site shell; `maint/Asciidoc.css` supplies the offline shell. The generated
+`doc/html/css/pcre2.css` concatenates the shared and offline styles. Edit the
+sources, not generated CSS. The Fira font licence is bundled with both outputs.
+
+Run `ruby maint/AsciidocTest.rb` for converter regression tests. Build the full
+site with `HUGO_BASE_URL=https://example.org/pcre2/ python3 pages/maint/Build.py`
+(requires Ruby gems, Hugo, and Node/npm for Pagefind).
 
 ## Inline public API vocabulary
 
@@ -372,7 +401,13 @@ useful label width from the distribution of visible term lengths, using a
 compact fallback when a strict majority do not fit within its maximum. Lists
 whose item bodies contain additional blocks have normal paragraph spacing;
 simple lists are compact. A numeric `width` attribute may override the
-calculation when a particular list needs it.
+calculation when a particular list needs it. HTML uses the same width heuristic
+and exports `compact` or `spaced` on the `dl`, `ul`, or `ol` itself, including
+nested lists. Each definition-list entry groups its term and description in a
+`div.dlist-item`; aliases share one term separated by commas. Flexbox puts short
+terms beside descriptions, long terms above them, and stacks all terms on small
+screens. Inter-item spacing in a `spaced` list equals paragraph spacing; a
+`compact` list has none.
 
 Use `::` for a top-level term and `:::` for a nested description list. A group
 of consecutive terms may share the description attached to the final term.

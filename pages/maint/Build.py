@@ -8,9 +8,10 @@ import re
 script_dir = os.path.dirname(os.path.abspath(__file__))
 maint_dir = os.path.abspath(f"{script_dir}/../../maint")
 CURRENT_RELEASE = subprocess.check_output(
-    ["ruby", "-I", maint_dir, "-r", "UpdateCommon", "-e", "puts Pcre2Maintenance::CURRENT_RELEASE"],
+    ["ruby", "-r", f"{maint_dir}/UpdateCommon",
+     "-e", "print Pcre2Maintenance::CURRENT_RELEASE"],
     text=True,
-).strip()
+)
 
 print(f"Building site for release {CURRENT_RELEASE}")
 
@@ -43,30 +44,31 @@ doc_pages = sorted(
     entry.path for entry in os.scandir('../doc')
     if entry.is_file() and entry.name.endswith('.adoc')
 )
+subprocess.run(
+    ["ruby", f"{maint_dir}/AsciidocConverterPcre2.rb",
+     "--embedded", "--output-dir", "content/doc", *doc_pages],
+    check=True,
+)
 for file in doc_pages:
     base = os.path.splitext(os.path.basename(file))[0]
     is_index = base == 'index'
-    output_name = '_index.adoc' if is_index else f'{base}.adoc'
+    output_name = '_index.html' if is_index else f'{base}.html'
     title = 'Manual pages' if is_index else base
-    relfileprefix = '' if is_index else '../'
 
-    with open(file, 'r') as infile:
-        lines = infile.readlines()
-    if not lines or not lines[0].startswith('= '):
-        raise ValueError(f"AsciiDoc document {file} does not start with a title")
+    rendered_file = f'content/doc/{base}.html'
+    with open(rendered_file, 'r', encoding='utf-8') as infile:
+        content = infile.read()
+    if is_index:
+        os.rename(rendered_file, f'content/doc/{output_name}')
 
-    lines[1:1] = [
-        ':outfilesuffix: /\n',
-        f':relfileprefix: {relfileprefix}\n',
-    ]
-
-    with open(f'content/doc/{output_name}', 'w') as outfile:
+    with open(f'content/doc/{output_name}', 'w', encoding='utf-8') as outfile:
         outfile.write(f"""+++
 title = "{title}"
+markup = "html"
 +++
 
 """)
-        outfile.writelines(lines)
+        outfile.write(content)
 
 # Import the project pages
 
@@ -129,10 +131,6 @@ commands = [
 ]
 
 build_env = {**os.environ, "HUGO_PARAMS_release": CURRENT_RELEASE}
-ruby_load_path = os.path.abspath(f"{script_dir}/../../maint")
-if "RUBYLIB" in build_env:
-    ruby_load_path += os.pathsep + build_env["RUBYLIB"]
-build_env["RUBYLIB"] = ruby_load_path
 
 for command in commands:
     result = subprocess.run(command, env=build_env)

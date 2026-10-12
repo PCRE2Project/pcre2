@@ -43,6 +43,16 @@ drwxr-xr-x install-dir/share/doc/pcre2
 drwxr-xr-x install-dir/share/doc/pcre2/html
 -rw-r--r-- install-dir/share/doc/pcre2/html/NON-AUTOTOOLS-BUILD.txt
 -rw-r--r-- install-dir/share/doc/pcre2/html/README.txt
+drwxr-xr-x install-dir/share/doc/pcre2/html/css
+-rw-r--r-- install-dir/share/doc/pcre2/html/css/pcre2.css
+drwxr-xr-x install-dir/share/doc/pcre2/html/fonts
+-rw-r--r-- install-dir/share/doc/pcre2/html/fonts/OFL.txt
+-rw-r--r-- install-dir/share/doc/pcre2/html/fonts/fira-mono-v14-latin_latin-ext-500.woff2
+-rw-r--r-- install-dir/share/doc/pcre2/html/fonts/fira-mono-v14-latin_latin-ext-regular.woff2
+-rw-r--r-- install-dir/share/doc/pcre2/html/fonts/fira-sans-v17-latin_latin-ext-600.woff2
+-rw-r--r-- install-dir/share/doc/pcre2/html/fonts/fira-sans-v17-latin_latin-ext-600italic.woff2
+-rw-r--r-- install-dir/share/doc/pcre2/html/fonts/fira-sans-v17-latin_latin-ext-italic.woff2
+-rw-r--r-- install-dir/share/doc/pcre2/html/fonts/fira-sans-v17-latin_latin-ext-regular.woff2
 -rw-r--r-- install-dir/share/doc/pcre2/html/index.html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2-config.html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2.html

@@ -1,0 +1,27 @@
+.offline-manual {
+  max-width: var(--content-width);
+  margin-inline: auto;
+  padding: 2rem var(--content-gutter) 4rem;
+  border-top: 4px solid var(--colour-primary-bright);
+}
+
+.offline-manual > header {
+  margin-bottom: 2rem;
+}
+
+.offline-manual .details {
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.offline-manual .toc {
+  margin-top: 1.5rem;
+}
+
+@media print {
+  .offline-manual {
+    max-width: none;
+    padding: 0;
+    border: none;
+  }
+}

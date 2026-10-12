@@ -83,6 +83,16 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/doc
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/doc/html
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/NON-AUTOTOOLS-BUILD.txt
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/README.txt
+drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/doc/html/css
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/css/pcre2.css
+drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/doc/html/fonts
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/fonts/OFL.txt
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/fonts/fira-mono-v14-latin_latin-ext-500.woff2
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/fonts/fira-mono-v14-latin_latin-ext-regular.woff2
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/fonts/fira-sans-v17-latin_latin-ext-600.woff2
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/fonts/fira-sans-v17-latin_latin-ext-600italic.woff2
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/fonts/fira-sans-v17-latin_latin-ext-italic.woff2
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/fonts/fira-sans-v17-latin_latin-ext-regular.woff2
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/index.html
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/pcre2-config.html
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/doc/html/pcre2.html
