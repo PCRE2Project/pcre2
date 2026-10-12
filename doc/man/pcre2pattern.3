@@ -2740,7 +2740,7 @@ the ((?:red|white) (king|queen))
 .fi
 .ss \n[.ss] 0
 .sp
-the captured substrings are \f(CRwhite queen\fP and \f(CRqueen\fP, and are numbered 1 and 2. The maximum number of capture groups is 65535.
+the captured substrings are \f(CRwhite queen\fP and \f(CRqueen\fP, and are numbered 1 and 2. The maximum number of capture groups is 65,535.
 .sp
 As a convenient shorthand, if any option settings are required at the start of
 a non\-capturing group, the option letters may appear between the \f(CR?\fP and the
@@ -3070,7 +3070,7 @@ a subroutine call (recursive or otherwise)
 If a quantifier does not follow a repeatable item, an error occurs. The
 general repetition quantifier specifies a minimum and maximum number of
 permitted matches by giving two numbers in curly brackets (braces), separated
-by a comma. The numbers must be less than 65536, and the first must be less
+by a comma. The numbers must be no greater than 65,535, and the first must be less
 than or equal to the second. For example,
 .sp
 .ss \n[.ss]
@@ -3791,7 +3791,7 @@ If every top\-level alternative matches a fixed length, for example
 .fi
 .ss \n[.ss] 0
 .sp
-there is a limit of 65535 characters to the lengths, which do not have to be
+there is a limit of 65,535 characters to the lengths, which do not have to be
 the same, as this example demonstrates. This is the only kind of lookbehind
 supported by PCRE2 versions earlier than 10.43 and by the alternative matching
 function pcre2_dfa_match().
@@ -4863,7 +4863,7 @@ documentation.
 .SS "Callouts with numerical arguments"
 .sp
 If you just want to have a means of identifying different callout points, put a
-number less than 256 after the letter C. For example, this pattern has two
+number no greater than 255 after the letter C. For example, this pattern has two
 callout points:
 .sp
 .ss \n[.ss]
@@ -4935,7 +4935,7 @@ skipped, and #\-comments are recognized, exactly as in the rest of the pattern.
 \fBPCRE2_EXTENDED\fP and \fBPCRE2_EXTENDED_MORE\fP do not affect verb names unless
 \fBPCRE2_ALT_VERBNAMES\fP is also set.
 .sp
-The maximum length of a name is 255 in the 8\-bit library and 65535 in the
+The maximum length of a name is 255 in the 8\-bit library and 65,535 in the
 16\-bit and 32\-bit libraries. If the name is empty, that is, if the closing
 parenthesis immediately follows the colon, the effect is as if the colon were
 not there. Any number of these verbs may occur in a pattern. Except for

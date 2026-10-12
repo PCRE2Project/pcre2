@@ -628,7 +628,7 @@ treated as plain text. The standard input is always so treated. If a file with
 a <code>.gz</code> or <code>.bz2</code> extension is not in fact compressed, it is read as a
 plain text file. When input is from a compressed .gz or .bz2 file, the
 <code>--line-buffered</code> option is ignored.</p></section>
-<section class="doc-section level-1"><h2 id="_binary_files">Binary files</h2><p>By default, a file that contains a binary zero byte within the first 1024 bytes
+<section class="doc-section level-1"><h2 id="_binary_files">Binary files</h2><p>By default, a file that contains a binary zero byte within the first 1KiB
 is identified as a binary file, and is processed specially. However, if the
 newline type is specified as NUL, that is, the line terminator is a binary
 zero, the test for a binary file is not applied. See the <code>--binary-files</code>

@@ -65,7 +65,7 @@ pattern matching.
 .sp
 Within a regular expression, \f(CR(?C\fP\fIarg\fP\f(CR)\fP indicates a point at which the external
 function is to be called. Different callout points can be identified by putting
-a number less than 256 after the letter C. The default value is zero.
+a number no greater than 255 after the letter C. The default value is zero.
 Alternatively, the argument may be a delimited string. The starting delimiter
 must be one of \f(CR\*(Aq\fP, \f(CR"\fP, \f(CR^\fP, \f(CR%\fP, \f(CR#\fP, \f(CR$\fP, \f(CR{\fP and the ending delimiter is the same as the
 start, except for \f(CR{\fP, where the ending delimiter is \f(CR}\fP. If the ending delimiter

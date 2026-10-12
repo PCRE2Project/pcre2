@@ -423,7 +423,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}</style></head><body class="manpage toc2 toc-right"><header><h1>pcre2limits(3)</h1><div class="details"><time id="revdate" datetime="2025-09-03">03 September 2025</time></div><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Table of Contents</h2><ol class="toc-list level-1"><li><a href="#_size_and_other_limitations">Size and other limitations</a></li></ol></nav></header><div id="content"><section class="doc-section level-1"><h2 id="_size_and_other_limitations">Size and other limitations</h2><p>There are some size limitations in PCRE2 but it is hoped that they will never
 in practice be relevant.</p>
-<p>The maximum size of a compiled pattern is approximately 64 thousand code units
+<p>The maximum size of a compiled pattern is 65,535 code units
 for the 8-bit and 16-bit libraries if PCRE2 is compiled with the default
 internal linkage size, which is 2 bytes for these libraries. If you want to
 process regular expressions that are truly enormous, you can compile PCRE2 with
@@ -441,15 +441,15 @@ largest number a <code class="type">PCRE2_SIZE</code> variable can hold. <code c
 integer type, usually defined as <code class="type">size_t</code>. Its maximum value (that is
 <code class="c">~(PCRE2_SIZE)0</code>) is reserved as a special indicator for zero-terminated strings
 and unset offsets.</p>
-<p>All values in repeating quantifiers must be less than 65536.</p>
+<p>All values in repeating quantifiers must be no greater than 65,535.</p>
 <p>There are two different limits that apply to branches of lookbehind assertions.
 If every branch in such an assertion matches a fixed number of characters,
-the maximum length of any branch is 65535 characters. If any branch matches a
+the maximum length of any branch is 65,535 characters. If any branch matches a
 variable number of characters, then the maximum matching length for every
 branch is limited. The default limit is set at compile time, defaulting to 255,
 but can be changed by the calling program.</p>
 <p>There is no limit to the number of parenthesized groups, but there can be no
-more than 65535 capture groups, and there is a limit to the depth of nesting of
+more than 65,535 capture groups, and there is a limit to the depth of nesting of
 parenthesized subpatterns of all kinds. This is imposed in order to limit the
 amount of system stack used at compile time. The default limit can be specified
 when PCRE2 is built; if not, the default is set to 250. An application can
@@ -457,11 +457,10 @@ change this limit by calling <code class="function">pcre2_set_parens_nest_limit(
 a compile context.</p>
 <p>The maximum length of the name for a named capture group as well as the number
 of such groups is configurable at build time. The maximum length for the name
-defaults to
-128 code units, and the maximum number of such groups to
-10000.</p>
+defaults to 128 code units, and the maximum number of such
+groups to 10,000.</p>
 <p>The maximum length of a name in a <code class="regex">(*MARK)</code>, <code class="regex">(*PRUNE)</code>, <code class="regex">(*SKIP)</code>, or <code class="regex">(*THEN)</code> verb
-is 255 code units for the 8-bit library and 65535 code units for the 16-bit and
+is 255 code units for the 8-bit library and 65,535 code units for the 16-bit and
 32-bit libraries.</p>
 <p>The maximum length of a string argument to a callout is the largest number a
 32-bit unsigned integer can hold.</p>

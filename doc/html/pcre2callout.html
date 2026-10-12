@@ -563,7 +563,7 @@ documentation; the rest of this document is concerned with callouts during
 pattern matching.</p>
 <p>Within a regular expression, <code class="regex">(?C<em>arg</em>)</code> indicates a point at which the external
 function is to be called. Different callout points can be identified by putting
-a number less than 256 after the letter C. The default value is zero.
+a number no greater than 255 after the letter C. The default value is zero.
 Alternatively, the argument may be a delimited string. The starting delimiter
 must be one of <code class="regex">'</code>, <code class="regex">"</code>, <code class="regex">^</code>, <code class="regex">%</code>, <code class="regex">#</code>, <code class="regex">$</code>, <code class="regex">{</code> and the ending delimiter is the same as the
 start, except for <code class="regex">{</code>, where the ending delimiter is <code class="regex">}</code>. If the ending delimiter

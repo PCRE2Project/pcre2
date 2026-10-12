@@ -1612,7 +1612,7 @@ is also used in this case (but in a different way) to limit how long the
 matching can continue.
 .sp
 The default value for the limit can be set when PCRE2 is built; the default is
-10 million, which handles all but the most extreme cases. A value for the match
+10,000,000, which handles all but the most extreme cases. A value for the match
 limit may also be supplied by an item at the start of a pattern of the form
 .sp
 .ss \n[.ss]
@@ -1788,7 +1788,7 @@ for details.
 .sp
 The default value of 2 for the 8\-bit and 16\-bit libraries is sufficient for all
 but the most massive patterns, since it allows the size of the compiled pattern
-to be up to 65535 code units. Larger values allow larger regular expressions to
+to be up to 65,535 code units. Larger values allow larger regular expressions to
 be compiled by those two libraries, but at the expense of slower matching.
 .RE
 .TP 26
@@ -3417,8 +3417,8 @@ large enough to hold as many as are expected.
 A minimum of at least 1 pair is imposed by pcre2_match_data_create(), so
 it is always possible to return the overall matched string in the case of
 pcre2_match() or the longest match in the case of
-pcre2_dfa_match(). The maximum number of pairs is 65535; if the first
-argument of pcre2_match_data_create() is greater than this, 65535 is
+pcre2_dfa_match(). The maximum number of pairs is 65,535; if the first
+argument of pcre2_match_data_create() is greater than this, 65,535 is
 used.
 .sp
 The second argument of pcre2_match_data_create() is a pointer to a
@@ -5427,7 +5427,7 @@ This return is given if pcre2_dfa_match() runs out of space in the
 When a recursion or subroutine call is processed, the matching function calls
 itself recursively, using private memory for the \fIovector\fP and \fIworkspace\fP.
 This error is given if the internal \fIovector\fP is not large enough. This should be
-extremely rare, as a vector of size 1000 is used.
+extremely rare, as a vector of size 1,000 is used.
 .TP 24
 \fBPCRE2_ERROR_DFA_BADRESTART\fP
 .ad l

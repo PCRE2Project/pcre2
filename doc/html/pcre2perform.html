@@ -560,7 +560,7 @@ example, the very simple pattern</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">((ab){1,1000}c){1,3}</code></pre></div>
 <p>uses over 50KiB when compiled using the 8-bit library. When PCRE2 is
 compiled with its default internal pointer size of two bytes, the size limit on
-a compiled pattern is 65535 code units in the 8-bit and 16-bit libraries, and
+a compiled pattern is 65,535 code units in the 8-bit and 16-bit libraries, and
 this is reached with the above pattern if the outer repetition is increased
 from 3 to 4. PCRE2 can be compiled to use larger internal pointers and thus
 handle larger compiled patterns, but it is better to try to rewrite your
@@ -594,7 +594,7 @@ frames are always held in heap memory. An initial heap allocation is obtained
 the first time any match data block is passed to <code class="function">pcre2_match()</code>. This is
 remembered with the match data block and re-used if that block is used for
 another match. It is freed when the match data block itself is freed.</p>
-<p>The size of the initial block is the larger of 20KiB or ten times the pattern&#8217;s
+<p>The size of the initial block is the larger of 20KiB or 10 times the pattern&#8217;s
 frame size, unless the heap limit is less than this, in which case the heap
 limit is used. If the initial block proves to be too small during matching, it
 is replaced by a larger block, subject to the heap limit. The heap limit is

@@ -1435,7 +1435,7 @@ matching that goes on for a very long time, and so the <code class="parameter">m
 is also used in this case (but in a different way) to limit how long the
 matching can continue.</p>
 <p>The default value for the limit can be set when PCRE2 is built; the default is
-10 million, which handles all but the most extreme cases. A value for the match
+10,000,000, which handles all but the most extreme cases. A value for the match
 limit may also be supplied by an item at the start of a pattern of the form</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(*LIMIT_MATCH=<em>ddd</em>)</code></pre></div>
 <p>where <em>ddd</em> is a decimal number. However, such a setting is ignored unless <em>ddd</em> is
@@ -1535,7 +1535,7 @@ library supports and can be higher. See <code class="constant">PCRE2_CONFIG_EFFE
 for details.</p>
 <p>The default value of 2 for the 8-bit and 16-bit libraries is sufficient for all
 but the most massive patterns, since it allows the size of the compiled pattern
-to be up to 65535 code units. Larger values allow larger regular expressions to
+to be up to 65,535 code units. Larger values allow larger regular expressions to
 be compiled by those two libraries, but at the expense of slower matching.</p></dd><dt><code class="constant">PCRE2_CONFIG_MATCHLIMIT</code></dt><dd>The output is a <code class="type">uint32_t</code> integer that gives the default match limit for
 <code class="function">pcre2_match()</code>. Further details are given with
 <code class="function">pcre2_set_match_limit()</code> above.</dd><dt><code class="constant">PCRE2_CONFIG_NEWLINE</code></dt><dd><p>The output is a <code class="type">uint32_t</code> integer whose value specifies the default character
@@ -2398,8 +2398,8 @@ large enough to hold as many as are expected.</p>
 <p>A minimum of at least 1 pair is imposed by <code class="function">pcre2_match_data_create()</code>, so
 it is always possible to return the overall matched string in the case of
 <code class="function">pcre2_match()</code> or the longest match in the case of
-<code class="function">pcre2_dfa_match()</code>. The maximum number of pairs is 65535; if the first
-argument of <code class="function">pcre2_match_data_create()</code> is greater than this, 65535 is
+<code class="function">pcre2_dfa_match()</code>. The maximum number of pairs is 65,535; if the first
+argument of <code class="function">pcre2_match_data_create()</code> is greater than this, 65,535 is
 used.</p>
 <p>The second argument of <code class="function">pcre2_match_data_create()</code> is a pointer to a
 general context, which can specify custom memory management for obtaining the
@@ -3632,7 +3632,7 @@ matching.</dd><dt><code class="constant">PCRE2_ERROR_DFA_WSSIZE</code></dt><dd>T
 <code class="parameter">workspace</code> vector.</dd><dt><code class="constant">PCRE2_ERROR_DFA_RECURSE</code></dt><dd>When a recursion or subroutine call is processed, the matching function calls
 itself recursively, using private memory for the <code class="parameter">ovector</code> and <code class="parameter">workspace</code>.
 This error is given if the internal <code class="parameter">ovector</code> is not large enough. This should be
-extremely rare, as a vector of size 1000 is used.</dd><dt><code class="constant">PCRE2_ERROR_DFA_BADRESTART</code></dt><dd>When <code class="function">pcre2_dfa_match()</code> is called with the <code class="constant">PCRE2_DFA_RESTART</code> option,
+extremely rare, as a vector of size 1,000 is used.</dd><dt><code class="constant">PCRE2_ERROR_DFA_BADRESTART</code></dt><dd>When <code class="function">pcre2_dfa_match()</code> is called with the <code class="constant">PCRE2_DFA_RESTART</code> option,
 some plausibility checks are made on the contents of the workspace, which
 should contain data about the previous partial match. If any of these checks
 fail, this error is given.</dd></dl></div></section></section>

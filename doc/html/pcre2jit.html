@@ -704,14 +704,14 @@ should use. Its arguments are as follows:</p>
 passed to a matching function, its information determines which JIT stack is
 used. If this argument is <code class="constant">NULL</code>, the function returns immediately, without doing
 anything. There are three cases for the values of the other two options:</p>
-<div class="olist arabic"><ol class="arabic"><li>If <code class="parameter">callback</code> is <code class="constant">NULL</code> and <code class="parameter">data</code> is <code class="constant">NULL</code>, an internal 32KiB block
+<div class="olist arabic"><ol class="arabic"><li>If <code class="parameter">callback</code> is <code class="constant">NULL</code> and <code class="parameter">data</code> is <code class="constant">NULL</code>, an internal block of 32KiB
 on the machine stack is used. This is the default when a match
 context is created.</li><li>If <code class="parameter">callback</code> is <code class="constant">NULL</code> and <code class="parameter">data</code> is not <code class="constant">NULL</code>, <code class="parameter">data</code> must be
 a pointer to a valid JIT stack, the result of calling
 <code class="function">pcre2_jit_stack_create()</code>.</li><li>If <code class="parameter">callback</code> is not <code class="constant">NULL</code>, it must point to a function that is
 called with <code class="parameter">data</code> as an argument at the start of matching, in
 order to set up a JIT stack. If the return from the callback
-function is <code class="constant">NULL</code>, the internal 32KiB stack is used; otherwise the
+function is <code class="constant">NULL</code>, the internal stack of 32KiB is used; otherwise the
 return value must be a valid JIT stack, the result of calling
 <code class="function">pcre2_jit_stack_create()</code>.</li></ol></div>
 <p>A callback function is obeyed whenever JIT code is about to be run; it is not

@@ -1,13 +1,10 @@
 PCRE2GREP(1)                         PCRE2                        PCRE2GREP(1)
 
-
 NAME
        pcre2grep - a grep with Perl-compatible regular expressions
 
-
 SYNOPSIS
        pcre2grep [options] [long options] [pattern] [path1 path2 ...]
-
 
 DESCRIPTION
        pcre2grep searches files for character patterns, in the same way as
@@ -110,7 +107,6 @@ DESCRIPTION
        the value to set a locale when calling the PCRE2 library. The --locale
        option can be used to override this.
 
-
 SUPPORT FOR COMPRESSED FILES
        Compile-time options for pcre2grep can set it up to use libz or libbz2
        for reading compressed files whose names end in .gz or .bz2,
@@ -122,21 +118,18 @@ SUPPORT FOR COMPRESSED FILES
        as a plain text file. When input is from a compressed .gz or .bz2 file,
        the --line-buffered option is ignored.
 
-
 BINARY FILES
        By default, a file that contains a binary zero byte within the first
-       1024 bytes is identified as a binary file, and is processed specially.
+       1KiB is identified as a binary file, and is processed specially.
        However, if the newline type is specified as NUL, that is, the line
        terminator is a binary zero, the test for a binary file is not applied.
        See the --binary-files option for a means of changing the way binary
        files are handled.
 
-
 BINARY ZEROS IN PATTERNS
        Patterns passed from the command line are strings that are terminated
        by a binary zero, so cannot contain internal zeros. However, patterns
        that are read from a file via the -f option may contain binary zeros.
-
 
 OPTIONS
        The order in which some of the options appear can affect the output.
@@ -947,13 +940,11 @@ OPTIONS
                        The option does not apply to file names in error
                        messages.
 
-
 ENVIRONMENT VARIABLES
        The environment variables LC_ALL and LC_CTYPE are examined, in that
        order, for a locale. The first one that is set is used. This can be
        overridden by the --locale option. If no locale is set, the PCRE2
        library’s default (usually the "C" locale) is used.
-
 
 NEWLINES
        The -N (--newline) option allows pcre2grep to scan files with newline
@@ -978,7 +969,6 @@ NEWLINES
        other operating systems, and for all messages to the standard error
        stream, \n is used.
 
-
 OPTIONS COMPATIBILITY WITH GNU GREP
        Many of the short and long forms of pcre2grep's options are the same as
        in the GNU grep program. Any long option of the form --xxx-regexp (GNU
@@ -996,7 +986,6 @@ OPTIONS COMPATIBILITY WITH GNU GREP
        which the -i option applies. If both the -c and -l options are given,
        GNU grep lists only file names, without counts, but pcre2grep gives the
        counts as well.
-
 
 OPTIONS WITH DATA
        There are four different ways in which an option with data can be
@@ -1028,7 +1017,6 @@ OPTIONS WITH DATA
        these options does have data, it must be given in the first form, using
        an equals character. Otherwise pcre2grep will assume that it has no
        data.
-
 
 USING PCRE2’S CALLOUT FACILITY
        pcre2grep has, by default, support for calling external programs or
@@ -1110,7 +1098,6 @@ USING PCRE2’S CALLOUT FACILITY
        local matching failure occurs and the matcher backtracks in the normal
        way.
 
-
 MATCHING ERRORS
        It is possible to supply a regular expression that takes a very long
        time to fail to match certain lines. Such patterns normally involve
@@ -1126,7 +1113,6 @@ MATCHING ERRORS
        memory used during matching; see the discussion of --heap-limit and
        --depth-limit above.
 
-
 DIAGNOSTICS
        Exit status is 0 if any matches were found, 1 if no matches were found,
        and 2 for syntax errors, overlong lines, non-existent or inaccessible
@@ -1137,7 +1123,6 @@ DIAGNOSTICS
        When run under VMS, the return code is placed in the symbol
        PCRE2GREP_RC because VMS does not distinguish between exit(0) and
        exit(1).
-
 
 SEE ALSO
        pcre2pattern, pcre2syntax, pcre2callout, pcre2unicode.
@@ -1150,6 +1135,5 @@ SEE ALSO
    Revision
        Last updated: 24 January 2025
        Copyright © 1997-2023 University of Cambridge.
-
 
 PCRE2 10.50-DEV                 24 January 2025                   PCRE2GREP(1)

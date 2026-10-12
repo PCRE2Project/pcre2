@@ -1660,7 +1660,7 @@ does not do any capturing, and is not counted when computing the number of any
 subsequent capture groups. For example, if the string <code class="subject">the white queen</code>
 is matched against the pattern</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">the ((?:red|white) (king|queen))</code></pre></div>
-<p>the captured substrings are <code class="subject">white queen</code> and <code class="subject">queen</code>, and are numbered 1 and 2. The maximum number of capture groups is 65535.</p>
+<p>the captured substrings are <code class="subject">white queen</code> and <code class="subject">queen</code>, and are numbered 1 and 2. The maximum number of capture groups is 65,535.</p>
 <p>As a convenient shorthand, if any option settings are required at the start of
 a non-capturing group, the option letters may appear between the <code class="regex">?</code> and the
 <code class="regex">:</code> (see the section <a href="#groups">Groups</a>).</p></section>
@@ -1785,7 +1785,7 @@ items:</p>
 <p>If a quantifier does not follow a repeatable item, an error occurs. The
 general repetition quantifier specifies a minimum and maximum number of
 permitted matches by giving two numbers in curly brackets (braces), separated
-by a comma. The numbers must be less than 65536, and the first must be less
+by a comma. The numbers must be no greater than 65,535, and the first must be less
 than or equal to the second. For example,</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">z{2,4}</code></pre></div>
 <p>matches <code class="subject">zz</code>, <code class="subject">zzz</code>, or <code class="subject">zzzz</code>. A closing brace on its own is not a special
@@ -2150,7 +2150,7 @@ a lookbehind assertion are restricted such that there must be a known maximum
 to the lengths of all the strings it matches. There are two cases:</p>
 <p>If every top-level alternative matches a fixed length, for example</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(?&lt;=colour|color)</code></pre></div>
-<p>there is a limit of 65535 characters to the lengths, which do not have to be
+<p>there is a limit of 65,535 characters to the lengths, which do not have to be
 the same, as this example demonstrates. This is the only kind of lookbehind
 supported by PCRE2 versions earlier than 10.43 and by the alternative matching
 function <code class="function">pcre2_dfa_match()</code>.</p>
@@ -2724,7 +2724,7 @@ programming interface to the callout function, are given in the
 <a href="pcre2callout.html"><code>pcre2callout</code></a>
 documentation.</p>
 <section class="doc-section level-2"><h3 id="_callouts_with_numerical_arguments">Callouts with numerical arguments</h3><p>If you just want to have a means of identifying different callout points, put a
-number less than 256 after the letter C. For example, this pattern has two
+number no greater than 255 after the letter C. For example, this pattern has two
 callout points:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(?C1)abc(?C2)def</code></pre></div>
 <p>If the <code class="constant">PCRE2_AUTO_CALLOUT</code> flag is passed to <code class="function">pcre2_compile()</code>, numerical
@@ -2764,7 +2764,7 @@ and <code class="regex">\E</code>. In addition to backslash processing, if the <
 skipped, and #-comments are recognized, exactly as in the rest of the pattern.
 <code class="constant">PCRE2_EXTENDED</code> and <code class="constant">PCRE2_EXTENDED_MORE</code> do not affect verb names unless
 <code class="constant">PCRE2_ALT_VERBNAMES</code> is also set.</p>
-<p>The maximum length of a name is 255 in the 8-bit library and 65535 in the
+<p>The maximum length of a name is 255 in the 8-bit library and 65,535 in the
 16-bit and 32-bit libraries. If the name is empty, that is, if the closing
 parenthesis immediately follows the colon, the effect is as if the colon were
 not there. Any number of these verbs may occur in a pattern. Except for

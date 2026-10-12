@@ -687,7 +687,7 @@ library.</p></section>
 another (for example, from an opening parenthesis to an alternation
 metacharacter). By default, in the 8-bit and 16-bit libraries, two-byte values
 are used for these offsets, leading to a maximum size for a compiled pattern of
-around 64 thousand code units. This is sufficient to handle all but the most
+65,535 code units. This is sufficient to handle all but the most
 gigantic patterns. Nevertheless, some people do want to process truly enormous
 patterns, so it is possible to compile PCRE2 to use three-byte or four-byte
 offsets by adding a setting such as</p>
@@ -702,7 +702,7 @@ its main loop. Putting a limit on this counter controls the amount of computing
 resource used by a single call to <code class="function">pcre2_match()</code>. The limit can be changed
 at run time, as described in the
 <a href="pcre2api.html"><code>pcre2api</code></a>
-documentation. The default is 10 million, but this can be changed by adding a
+documentation. The default is 10,000,000, but this can be changed by adding a
 setting such as</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">--with-match-limit</span><span class="o">=</span>500000</code></pre></div>
 <p>to the <code>configure</code> command. This setting also applies to the
@@ -714,7 +714,7 @@ search tree), the more memory is needed. There is an upper limit, specified in
 kibibytes (units of 1024 bytes). This limit can be changed at run time, as
 described in the
 <a href="pcre2api.html"><code>pcre2api</code></a>
-documentation. The default limit (in effect unlimited) is 20 million. You can
+documentation. The default limit (in effect unlimited) is 20,000,000. You can
 change this by a setting such as</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">--with-heap-limit</span><span class="o">=</span>500</code></pre></div>
 <p>which limits the amount of heap to 500 KiB. This limit applies only to

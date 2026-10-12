@@ -552,14 +552,14 @@ passed to a matching function. The arguments of this function are:</p>
 <div class="dlist parameters"><dl><dt><code class="parameter">mcontext</code></dt><dd>a pointer to a match context</dd><dt><code class="parameter">callback</code></dt><dd>a callback function</dd><dt><code class="parameter">callback_data</code></dt><dd>a JIT stack or a value to be passed to the callback</dd></dl></div>
 <p>If <code class="parameter">mcontext</code> is <code class="constant">NULL</code>, the function returns immediately, without doing
 anything.</p>
-<p>If <code class="parameter">callback</code> is <code class="constant">NULL</code> and <code class="parameter">callback_data</code> is <code class="constant">NULL</code>, an internal 32KiB
-block on the machine stack is used.</p>
+<p>If <code class="parameter">callback</code> is <code class="constant">NULL</code> and <code class="parameter">callback_data</code> is <code class="constant">NULL</code>, an internal block of 32KiB
+on the machine stack is used.</p>
 <p>If <code class="parameter">callback</code> is <code class="constant">NULL</code> and <code class="parameter">callback_data</code> is not <code class="constant">NULL</code>,
 <code class="parameter">callback_data</code> must be a valid JIT stack, the result of calling
 <code class="function">pcre2_jit_stack_create()</code>.</p>
 <p>If <code class="parameter">callback</code> not <code class="constant">NULL</code>, it is called with <code class="parameter">callback_data</code> as an
 argument at the start of matching, in order to set up a JIT stack. If the
-result is <code class="constant">NULL</code>, the internal 32KiB stack is used; otherwise the return value
+result is <code class="constant">NULL</code>, the internal stack of 32KiB is used; otherwise the return value
 must be a valid JIT stack, the result of calling
 <code class="function">pcre2_jit_stack_create()</code>.</p>
 <p>You may safely use the same JIT stack for multiple patterns, as long as they

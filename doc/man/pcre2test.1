@@ -419,9 +419,9 @@ The program handles any number of tests, each of which consists of a set of
 input lines. Each set starts with a regular expression pattern, followed by any
 number of subject lines to be matched against that pattern. In between sets of
 test data, command lines that begin with # may appear. This file format, with
-some restrictions, can also be processed by the \f(CRperltest.sh\fP script that
+some restrictions, can also be processed by the \f(CRPerlTest.sh\fP script that
 is distributed with PCRE2 as a means of checking that the behaviour of PCRE2
-and Perl is the same. For a specification of \f(CRperltest.sh\fP, see the
+and Perl is the same. For a specification of \f(CRPerlTest.sh\fP, see the
 comments near its beginning. See also the #perltest command below.
 .sp
 When the input is a terminal, \f(CRpcre2test\fP prompts for each line of input,
@@ -554,10 +554,10 @@ patterns. Modifiers on a pattern can change these settings.
 .fi
 .ss \n[.ss] 0
 .sp
-This line is used in test files that can also be processed by \f(CRperltest.sh\fP
+This line is used in test files that can also be processed by \f(CRPerlTest.sh\fP
 to confirm that Perl gives the same results as PCRE2. Subsequent tests are
 checked for the use of \f(CRpcre2test\fP features that are incompatible with the
-\f(CRperltest.sh\fP script.
+\f(CRPerlTest.sh\fP script.
 .sp
 Patterns must use \*(Aq/\*(Aq as their delimiter, and only certain modifiers are
 supported. Comment lines, #pattern commands, and #subject commands that set or
@@ -566,7 +566,7 @@ unset "mark" are recognized and acted on. The #perltest, #forbid_utf, and
 are silently ignored. All other command lines are ignored, but give a warning
 message. The \f(CR#perltest\fP command helps detect tests that are accidentally
 put in the wrong file or use the wrong delimiter. For more details of the
-\f(CRperltest.sh\fP script see the comments it contains.
+\f(CRPerlTest.sh\fP script see the comments it contains.
 .sp
 .ss \n[.ss]
 .nf
@@ -1422,7 +1422,7 @@ maximum length (in characters) that it can match. There is a limit on this,
 whose default can be set at build time, with an ultimate default of 255. The
 \f(CRmax_varlookbehind\fP modifier uses the pcre2_set_max_varlookbehind()
 function to change the limit. Lookbehinds whose branches each match a fixed
-length are limited to 65535 characters per branch.
+length are limited to 65,535 characters per branch.
 .SS "Specifying wide characters in 16\-bit and 32\-bit modes"
 .sp
 In 16\-bit and 32\-bit modes, all input is automatically treated as UTF\-8 and
@@ -3121,7 +3121,7 @@ width and \fBPCRE2_SIZE\fP type. Before compiled patterns can be saved they must
 serialized, that is, converted to a stream of bytes. A single byte stream may
 contain any number of compiled patterns, but they must all use the same
 character tables. A single copy of the tables is included in the byte stream
-(its size is 1088 bytes).
+(its size is 1,088 bytes).
 .sp
 The functions whose names begin with \f(CRpcre2_serialize_\fP are used
 for serializing and de\-serializing. They are described in the

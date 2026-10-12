@@ -1,15 +1,12 @@
 PCRE2-CONFIG(1)                      PCRE2                     PCRE2-CONFIG(1)
 
-
 NAME
        pcre2-config - program to return PCRE2 configuration
-
 
 SYNOPSIS
        pcre2-config [--prefix] [--exec-prefix] [--version]
                     [--libs8] [--libs16] [--libs32] [--libs-posix]
                     [--cflags] [--cflags-posix]
-
 
 DESCRIPTION
        pcre2-config returns the configuration of the installed PCRE2 libraries
@@ -18,7 +15,6 @@ DESCRIPTION
        respectively, and are not available for libraries that have not been
        built. If an unavailable option is encountered, the "usage" information
        is output.
-
 
 OPTIONS
            --prefix       Writes the directory prefix used in the PCRE2
@@ -53,7 +49,6 @@ OPTIONS
                           POSIX API wrapper library (this may include some -I
                           options, but is blank on many systems).
 
-
 SEE ALSO
        pcre2.
 
@@ -64,6 +59,5 @@ SEE ALSO
 
    Revision
        Last updated: 22 February 2025
-
 
 PCRE2 10.50-DEV                22 February 2025                PCRE2-CONFIG(1)

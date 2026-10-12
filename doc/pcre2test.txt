@@ -1,9 +1,7 @@
 PCRE2TEST(1)                         PCRE2                        PCRE2TEST(1)
 
-
 NAME
        pcre2test - a program for testing Perl-compatible regular expressions
-
 
 SYNOPSIS
        pcre2test [options] [input file [output file]]
@@ -29,7 +27,6 @@ SYNOPSIS
        here, some without much justification, but many of them are unlikely to
        be of use except when testing the libraries.
 
-
 PCRE2’S 8-BIT, 16-BIT AND 32-BIT LIBRARIES
        Different versions of the PCRE2 library can be built to support
        character strings that are encoded in 8-bit, 16-bit, or 32-bit code
@@ -45,7 +42,6 @@ PCRE2’S 8-BIT, 16-BIT AND 32-BIT LIBRARIES
        structures are given in generic form, for example, pcre2_compile(). The
        actual names used in the libraries have a suffix _8, _16, or _32, as
        appropriate.
-
 
 INPUT ENCODING
        Input to pcre2test is processed line by line, either by calling the C
@@ -87,7 +83,6 @@ INPUT ENCODING
        if any character is preceded by the byte 0xff (which is an invalid byte
        in UTF-8) 0x80000000 is added to the character’s value. For subject
        strings, using an escape sequence is preferable.
-
 
 COMMAND LINE OPTIONS
            -8                     If the 8-bit library has been built, this
@@ -320,7 +315,6 @@ COMMAND LINE OPTIONS
            -version               Output the PCRE2 version number and then
                                   exit.
 
-
 DESCRIPTION
        If pcre2test is given two filename arguments, it reads from the first
        and writes to the second. If the first name is "-", input is taken from
@@ -339,9 +333,9 @@ DESCRIPTION
        followed by any number of subject lines to be matched against that
        pattern. In between sets of test data, command lines that begin with #
        may appear. This file format, with some restrictions, can also be
-       processed by the perltest.sh script that is distributed with PCRE2 as a
+       processed by the PerlTest.sh script that is distributed with PCRE2 as a
        means of checking that the behaviour of PCRE2 and Perl is the same. For
-       a specification of perltest.sh, see the comments near its beginning.
+       a specification of PerlTest.sh, see the comments near its beginning.
        See also the #perltest command below.
 
        When the input is a terminal, pcre2test prompts for each line of input,
@@ -361,7 +355,6 @@ DESCRIPTION
        An empty line or the end of the file signals the end of the subject
        lines for a test, at which point a new pattern or command line is
        expected if there is still input to be read.
-
 
 COMMAND LINES
        In between sets of test data, a line that begins with # is interpreted
@@ -437,9 +430,9 @@ COMMAND LINES
        #perltest
 
        This line is used in test files that can also be processed by
-       perltest.sh to confirm that Perl gives the same results as PCRE2.
+       PerlTest.sh to confirm that Perl gives the same results as PCRE2.
        Subsequent tests are checked for the use of pcre2test features that are
-       incompatible with the perltest.sh script.
+       incompatible with the PerlTest.sh script.
 
        Patterns must use '/' as their delimiter, and only certain modifiers
        are supported. Comment lines, #pattern commands, and #subject commands
@@ -448,7 +441,7 @@ COMMAND LINES
        relevant pcre2test files, are silently ignored. All other command lines
        are ignored, but give a warning message. The #perltest command helps
        detect tests that are accidentally put in the wrong file or use the
-       wrong delimiter. For more details of the perltest.sh script see the
+       wrong delimiter. For more details of the PerlTest.sh script see the
        comments it contains.
 
        #pop [<modifiers>]
@@ -481,7 +474,6 @@ COMMAND LINES
        pcre2test’s exit code to a boolean value. The CONDITION may also be
        preceded by "!".
 
-
 MODIFIER SYNTAX
        Modifier lists are used with both pattern and subject lines. Items in a
        list are separated by commas followed by optional white space. Trailing
@@ -506,7 +498,6 @@ MODIFIER SYNTAX
        This is a pattern line whose modifier list starts with two one-letter
        modifiers (/i and /g). The lower-case abbreviated modifiers are the
        same as used in Perl.
-
 
 PATTERN SYNTAX
        A pattern line must start with one of the following characters (common
@@ -543,7 +534,6 @@ PATTERN SYNTAX
        regular expression.
 
        A pattern can be followed by a modifier list (details below).
-
 
 SUBJECT LINE SYNTAX
        Before each subject line is passed to pcre2_match(), pcre2_dfa_match(),
@@ -632,7 +622,6 @@ SUBJECT LINE SYNTAX
        that follow are treated as literals, with no special treatment of
        backslashes. No replication is possible, and any subject modifiers must
        be set as defaults by a #subject command.
-
 
 PATTERN MODIFIERS
        There are several types of modifier that can appear in pattern lines.
@@ -887,7 +876,7 @@ PATTERN MODIFIERS
        limit on this, whose default can be set at build time, with an ultimate
        default of 255. The max_varlookbehind modifier uses the
        pcre2_set_max_varlookbehind() function to change the limit. Lookbehinds
-       whose branches each match a fixed length are limited to 65535
+       whose branches each match a fixed length are limited to 65,535
        characters per branch.
 
    Specifying wide characters in 16-bit and 32-bit modes
@@ -1180,7 +1169,6 @@ PATTERN MODIFIERS
        used to specify the escape and separator characters for glob
        processing, overriding the defaults, which are operating-system
        dependent.
-
 
 SUBJECT MODIFIERS
        The modifiers that can appear in subject lines and the #subject command
@@ -1697,7 +1685,6 @@ SUBJECT MODIFIERS
        length is set by starting the replacement string with "[NUM]" as
        described in "Testing the substitution function" above.
 
-
 THE ALTERNATIVE MATCHING FUNCTION
        By default, pcre2test uses the standard PCRE2 matching function,
        pcre2_match() to match each subject line. PCRE2 also supports an
@@ -1710,7 +1697,6 @@ THE ALTERNATIVE MATCHING FUNCTION
        subject. If, however, the dfa_shortest modifier is set, processing
        stops after the first match is found. This is always the shortest
        possible match.
-
 
 DEFAULT OUTPUT FROM pcre2test
        This section describes the output when the normal matching function,
@@ -1793,7 +1779,6 @@ DEFAULT OUTPUT FROM pcre2test
        newlines can be included in a subject by means of the \n escape (or \r,
        \r\n, etc., depending on the newline sequence setting).
 
-
 OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION
        When the alternative matching function, pcre2_dfa_match(), is used, the
        output consists of a list of all the matches that start at the first
@@ -1830,7 +1815,6 @@ OUTPUT FROM THE ALTERNATIVE MATCHING FUNCTION
        so the modifiers that are concerned with captured substrings are not
        relevant.
 
-
 RESTARTING AFTER A PARTIAL MATCH
        When the alternative matching function has given the
        PCRE2_ERROR_PARTIAL return, indicating that the subject partially
@@ -1845,7 +1829,6 @@ RESTARTING AFTER A PARTIAL MATCH
 
        For further information about partial matching, see the pcre2partial
        documentation.
-
 
 CALLOUTS
        If the pattern contains any callout requests, pcre2test's callout
@@ -2010,7 +1993,6 @@ CALLOUTS
        complicated regular expressions. For further information about
        callouts, see the pcre2callout documentation.
 
-
 NON-PRINTING CHARACTERS
        When pcre2test is outputting text in the compiled version of a pattern,
        bytes other than 32-126 are always treated as non-printing characters
@@ -2022,7 +2004,6 @@ NON-PRINTING CHARACTERS
        isprint() function is used to distinguish printing and non-printing
        characters.
 
-
 SAVING AND RESTORING COMPILED PATTERNS
        It is possible to save compiled patterns on disc or elsewhere, and
        reload them later, subject to a number of restrictions. JIT data cannot
@@ -2033,7 +2014,7 @@ SAVING AND RESTORING COMPILED PATTERNS
        converted to a stream of bytes. A single byte stream may contain any
        number of compiled patterns, but they must all use the same character
        tables. A single copy of the tables is included in the byte stream (its
-       size is 1088 bytes).
+       size is 1,088 bytes).
 
        The functions whose names begin with pcre2_serialize_ are used for
        serializing and de-serializing. They are described in the
@@ -2094,7 +2075,6 @@ SAVING AND RESTORING COMPILED PATTERNS
        makes current a copy of the topmost stack pattern, leaving the original
        still on the stack.
 
-
 SEE ALSO
        pcre2, pcre2api, pcre2callout, pcre2jit, pcre2matching, pcre2partial,
        pcre2pattern, pcre2serialize.
@@ -2107,6 +2087,5 @@ SEE ALSO
    Revision
        Last updated: 22 August 2026
        Copyright © 1997-2024 University of Cambridge.
-
 
 PCRE2 10.50-DEV                 22 August 2026                    PCRE2TEST(1)
