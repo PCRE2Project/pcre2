@@ -54,9 +54,11 @@ module Pcre2UpdateAlways
     Makefile.am
     NEWS
     NON-AUTOTOOLS-BUILD
+    PerlTest.sh
     README
     RunGrepTest
     RunGrepTest.py
+    RunPerlTest
     RunTest
     RunTest.py
     SECURITY.md
@@ -79,7 +81,6 @@ module Pcre2UpdateAlways
     m4/pcre2_visibility.m4
     m4/pcre2_zos.m4
     pcre2-config.in
-    perltest.sh
     src/libpcre2-*.sym.in
   ].freeze
 

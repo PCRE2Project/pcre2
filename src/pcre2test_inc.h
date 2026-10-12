@@ -2253,7 +2253,7 @@ process_pattern(void)
   uint8_t *serialized_bytes;
   PCRE2_SIZE serialized_size;
 
-  /* The perltest.sh script supports only / as a delimiter. */
+  /* The PerlTest.sh script supports only / as a delimiter. */
 
   if (restrict_for_perl_test && delimiter != '/')
   {

@@ -310,9 +310,9 @@ The program handles any number of tests, each of which consists of a set of
 input lines. Each set starts with a regular expression pattern, followed by any
 number of subject lines to be matched against that pattern. In between sets of
 test data, command lines that begin with # may appear. This file format, with
-some restrictions, can also be processed by the `perltest.sh` script that
+some restrictions, can also be processed by the `PerlTest.sh` script that
 is distributed with PCRE2 as a means of checking that the behaviour of PCRE2
-and Perl is the same. For a specification of `perltest.sh`, see the
+and Perl is the same. For a specification of `PerlTest.sh`, see the
 comments near its beginning. See also the #perltest command below.
 
 When the input is a terminal, `pcre2test` prompts for each line of input,
@@ -418,10 +418,10 @@ patterns. Modifiers on a pattern can change these settings.
 #perltest
 ....
 
-This line is used in test files that can also be processed by `perltest.sh`
+This line is used in test files that can also be processed by `PerlTest.sh`
 to confirm that Perl gives the same results as PCRE2. Subsequent tests are
 checked for the use of `pcre2test` features that are incompatible with the
-`perltest.sh` script.
+`PerlTest.sh` script.
 
 Patterns must use '/' as their delimiter, and only certain modifiers are
 supported. Comment lines, #pattern commands, and #subject commands that set or
@@ -430,7 +430,7 @@ unset "mark" are recognized and acted on. The #perltest, #forbid_utf, and
 are silently ignored. All other command lines are ignored, but give a warning
 message. The `+#perltest+` command helps detect tests that are accidentally
 put in the wrong file or use the wrong delimiter. For more details of the
-`perltest.sh` script see the comments it contains.
+`PerlTest.sh` script see the comments it contains.
 
 ....
 #pop [<modifiers>]

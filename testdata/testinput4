@@ -5,7 +5,7 @@
 
 # WARNING: Use only / as the pattern delimiter. Although pcre2test supports
 # a number of delimiters, all those other than / give problems with the
-# perltest.sh script.
+# PerlTest.sh script.
 
 #newline_default lf anycrlf any
 #perltest

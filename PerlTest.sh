@@ -23,7 +23,7 @@
 # add the locale=tr_TR.utf8 modifier to the pattern and -locale to perltest,
 # or invoke something like (the specific names of the locale might vary):
 #
-#   ./perltest.sh -utf8 -locale=tr_TR.utf8 some-file
+#   ./PerlTest.sh -utf8 -locale=tr_TR.utf8 some-file
 #
 # If the -locale argument has no setting, a suitable default locale is used
 # when possible and reported at startup, it can be always overriden using the
@@ -45,7 +45,7 @@ spc=""
 
 if [ $# -gt 0 -a "$1" = "-perl" ] ; then
   if [ $# -lt 2 ] ; then
-    echo "perltest.sh: Missing perl command after -perl"
+    echo "PerlTest.sh: Missing perl command after -perl" >&2
     exit 1
   fi
   shift
@@ -134,7 +134,7 @@ fi
 # be used for perltest as well as for pcre2test. The output from this script
 # should be same as from pcre2test, apart from the initial identifying banner.
 #
-# The other testinput files are not suitable for feeding to perltest.sh,
+# The other testinput files are not suitable for feeding to PerlTest.sh,
 # because they make use of the special modifiers that pcre2test uses for
 # testing features of PCRE2. Some of these files also contain malformed regular
 # expressions, in order to check that PCRE2 diagnoses them correctly.
@@ -507,6 +507,6 @@ for (;;)
 close(OUTFILE) if $outfile eq "OUTFILE";
 
 PERLEND
-) | $perl $perlarg - $@
+) | $perl $perlarg - "$@"
 
 # End

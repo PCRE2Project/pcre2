@@ -431,7 +431,7 @@ jobs:
       - name: Test
         run: |
           perl -v
-          maint/RunPerlTest
+          ./RunPerlTest
 
   chaffinch:
     # Job to verify that the CMake "unity" build (single-file / jumbo build) passes.

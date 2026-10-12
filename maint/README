@@ -280,13 +280,13 @@ new release.
   - If new build options have been added, ensure that they are added to the
     CMake files as well as to the Autoconf files.
 
-  - Run perltest.sh on the test data for tests 1 and 4. The output should match
+  - Run PerlTest.sh on the test data for tests 1 and 4. The output should match
     the PCRE2 test output, apart from the version identification at the start of
     each test. Sometimes there are other differences in test 4 if PCRE2 and Perl
-    are using different Unicode releases. The other tests are not
-    Perl-compatible (they use various PCRE2-specific features or options). The
-    maint/RunPerlTest shell script can be used to do this testing in Unix-like
-    environment.
+    are using different Unicode releases. Tests 26 and 27 are also
+    Perl-compatible when Perl uses the matching Unicode version. The
+    RunPerlTest shell script in the repository root runs these tests and
+    compares their output in Unix-like environments.
 
   - Check the external testing tools. CodeQL & Clang Static Analyzer report
     their results to the GitHub "Security" dashboard. Coverity has its own

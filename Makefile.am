@@ -883,6 +883,10 @@ endif # WITH_GCOV
 TESTS += RunTest
 dist_noinst_SCRIPTS += RunTest RunTest.py
 
+## The Perl-comparison tests.
+
+dist_noinst_SCRIPTS += PerlTest.sh RunPerlTest
+
 ## When the 8-bit library is configured, pcre2grep will have been built.
 
 if WITH_PCRE2_8
@@ -1002,8 +1006,7 @@ EXTRA_DIST += \
   testdata/testoutputheap-16 \
   testdata/testoutputheap-32 \
   testdata/testoutputheap-8 \
-  testdata/valgrind-jit.supp \
-  perltest.sh
+  testdata/valgrind-jit.supp
 
 # RunTest and RunGrepTest should clean up after themselves, but just in case
 # they don't, add their working files to CLEANFILES.

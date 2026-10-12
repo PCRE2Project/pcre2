@@ -12,9 +12,11 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/Makefile.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/NEWS
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/NON-AUTOTOOLS-BUILD
+-rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/PerlTest.sh
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/README
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/RunGrepTest
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/RunGrepTest.py
+-rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/RunPerlTest
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/RunTest
 -rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/RunTest.py
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/SECURITY.md
@@ -471,7 +473,6 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/patches
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/patches/pcre2-10.48-Write-serialization-padding.patch
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/patches/pcre2-10.49-Fix-large-stack-allocation.patch
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/pcre2-config.in
--rwxr-xr-x tarball-dir/pcre2-SNAPSHOT/perltest.sh
 drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/config-cmake.h.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/config-meson.h.in
