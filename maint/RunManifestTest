@@ -39,6 +39,12 @@ expected_temp="$expected_file.$$"
 
 trap 'rm -f "$expected_temp"' 0 1 2 15
 
+sed=sed
+# Solaris' native sed does not support all the expressions used below.
+if [ -f /usr/bin/gsed ]; then
+  sed=/usr/bin/gsed
+fi
+
 # Compare relative to the installed prefix, independently of DESTDIR staging.
 # For example, an Autoconf install staged at install-dir/usr/local must have
 # the same manifest paths as a CMake or Meson install at install-dir.
@@ -50,21 +56,21 @@ read -r root_mode root_path < "$expected_manifest"
     while IFS= read -r path; do
       ls -l -d -n "$path"
     done | \
-    sed -e 's/  */ /g' -e 's/^\(..........\). /\1 /' | \
+    "$sed" -e 's/  */ /g' -e 's/^\(..........\). /\1 /' | \
     cut -d' ' -f '1,9-' | \
-    sed -e "s@^\([^ ]* \)\.@\1$root_path@"
+    "$sed" -e "s@^\([^ ]* \)\.@\1$root_path@"
 ) > "$actual_file"
 
 transform_expected()
 {
-  sed "$@" "$expected_file" > "$expected_temp"
+  "$sed" "$@" "$expected_file" > "$expected_temp"
   mv "$expected_temp" "$expected_file"
 }
 
 library_tuple()
 {
   library="$1"
-  tuple=$(sed -n "s/^m4_define(libpcre2_${library}_version,[[:space:]]*\[\([^]]*\)\]).*/\1/p" "$configure_ac")
+  tuple=$("$sed" -n "s/^m4_define(libpcre2_${library}_version,[[:space:]]*\[\([^]]*\)\]).*/\1/p" "$configure_ac")
   [ -n "$tuple" ] || die "Missing libpcre2_${library}_version in $configure_ac"
   case "$tuple" in
     *'
@@ -76,7 +82,7 @@ library_tuple()
 library_filename_versions()
 {
   original_tuple="$1"
-  tuple=$(printf '%s\n' "$original_tuple" | sed 's/[[:space:]]//g')
+  tuple=$(printf '%s\n' "$original_tuple" | "$sed" 's/[[:space:]]//g')
   IFS=: read -r current revision age extra <<EOF
 $tuple
 EOF
@@ -154,7 +160,7 @@ if [ "$producer" != "tarball" ]; then
       -e "s/@LIB_${placeholder_library}_SONAME@/$library_soname/g"
   done
 
-  if sed -n '/@LIB_/p; /@CMAKE_BUILD@/p' "$expected_file" | grep . >/dev/null; then
+  if "$sed" -n '/@LIB_/p; /@CMAKE_BUILD@/p' "$expected_file" | grep . >/dev/null; then
     die "Unexpanded placeholders in $expected_file"
   fi
 fi
