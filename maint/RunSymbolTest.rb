@@ -41,7 +41,7 @@ def solaris_symbols(versions_output, symbols_output)
   symbols_output.each_line do |line|
     next unless line.match?(/^\s*\[\d+\]/)
     fields = line.split
-    abort "Unrecognized elfdump symbol: #{line}" if fields.length < 8
+    abort "Unrecognized elfdump symbol: #{line}" if fields.length < 9
     version, section, name = fields.values_at(6, 7, 8)
     next if section == 'UNDEF' # Includes the unnamed null symbol.
     abort "Missing name in elfdump symbol: #{line}" unless name

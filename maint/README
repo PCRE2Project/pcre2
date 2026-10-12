@@ -143,13 +143,6 @@ RunManifestTest.rb
 
   Pass the installed prefix, e.g. install-dir/usr/local for an Autoconf
   DESTDIR installation. Both scripts map it to the manifest's root.
-  Unix manifests use Autoconf's direct .so symlinks; CMake and Meson expect
-  the equivalent links via the SONAME. Shared-library permissions are adjusted
-  for Autoconf and Meson, which install executable .so files. These native
-  permission and symlink differences are acceptable, not installation bugs.
-  On macOS, Meson installs the major-version dylib as a regular file with an
-  unversioned symlink, rather than the full-version dylib and two symlinks in
-  the shared manifest. Only Meson's expected listing is adjusted for this.
 
 RunSymbolTest
 RunSymbolTest.rb

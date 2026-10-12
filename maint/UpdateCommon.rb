@@ -5,6 +5,8 @@
 require 'open3'
 
 module Pcre2Maintenance
+  LibraryFilenameVersion = Struct.new(:version, :soname, keyword_init: true)
+
   ROOT = File.expand_path('..', __dir__)
   C_LOCALE = {'LANG' => 'C', 'LC_ALL' => 'C'}.freeze
 
@@ -24,6 +26,30 @@ module Pcre2Maintenance
   CURRENT_RELEASE = "#{VERSION_INFO.fetch('pcre2_major')}.#{VERSION_INFO.fetch('pcre2_minor')}#{VERSION_INFO.fetch('pcre2_prerelease')}"
 
   module_function
+
+  # Return the filename version and SONAME for each library from its libtool
+  # current:revision:age definition.
+  def library_filename_versions
+    VERSION_INFO.each_with_object({}) do |(definition, value), versions|
+      match = /\Alibpcre2_(posix|8|16|32)_version\z/.match(definition)
+      next unless match
+
+      components = value.split(':', -1).map(&:strip)
+      unless components.length == 3 && components.all? {|component| component.match?(/\A\d+\z/) }
+        raise "Invalid libtool version for #{definition}: #{value.inspect}"
+      end
+
+      current, revision, age = components.map(&:to_i)
+      raise "Invalid libtool version for #{definition}: current is less than age" if current < age
+
+      library = match[1].upcase
+      soname = current - age
+      versions[library] = LibraryFilenameVersion.new(
+        version: "#{soname}.#{age}.#{revision}",
+        soname: soname.to_s
+      ).freeze
+    end.freeze
+  end
 
   # Update every match in a UTF-8 file. A missing match is an error: it usually
   # means that the source format changed and the maintenance script needs work.

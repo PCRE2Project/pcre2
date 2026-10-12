@@ -4,8 +4,7 @@
 # Update all hardcoded release numbers in the source tree:
 # - CMake and Meson build metadata;
 # - AsciiDoc documentation sources;
-# - the Bazel MODULE file and Zig package manifest; and
-# - installed library filenames in platform manifests.
+# - the Bazel MODULE file and Zig package manifest.
 #
 # This script is run from the repository root.
 
@@ -24,14 +23,6 @@ module Pcre2UpdateRelease
     'LIBPCRE2_16_VERSION' => 'libpcre2_16_version',
     'LIBPCRE2_32_VERSION' => 'libpcre2_32_version'
   }.freeze
-
-  # Convert a libtool current:revision:age value to an installed filename version.
-  def self.libtool_filename_version(version)
-    raise "Invalid libtool version: #{version}" unless version.match?(/\A\d+:\d+:\d+\z/)
-    current, revision, age = version.split(':').map(&:to_i)
-    raise "Invalid libtool version: current is less than age (#{version})" if current < age
-    "#{current - age}.#{age}.#{revision}"
-  end
 
   # Update all release-version metadata from the current configure.ac values.
   def self.run
@@ -80,23 +71,6 @@ module Pcre2UpdateRelease
     zig_version = release.sub(/\A(\d+\.\d+)(.*)\z/, '\1.0\2')
     update_file('build.zig.zon', /^    \.version = ".*?"/, "    .version = \"#{zig_version}\"")
 
-    # Install manifests
-    puts 'Updating install manifests'
-    Dir.glob('maint/manifest-install-*').each do |filename|
-      next if filename.end_with?('-windows')
-      puts "  Updating #{filename}"
-      %w[8 16 32 posix].each do |library|
-        version = libtool_filename_version(info.fetch("libpcre2_#{library}_version"))
-        if filename.end_with?('-macos')
-          pattern = /libpcre2-#{library}\.\d+\.\d+\.\d+\.dylib/
-          replacement = "libpcre2-#{library}.#{version}.dylib"
-        else
-          pattern = /libpcre2-#{library}\.so\.\d+\.\d+\.\d+/
-          replacement = "libpcre2-#{library}.so.#{version}"
-        end
-        update_file(filename, pattern, replacement)
-      end
-    end
   end
 end
 

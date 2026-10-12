@@ -9,7 +9,7 @@ LANG=C
 LC_ALL=C
 export LANG LC_ALL
 
-if [ "$1" = "" -o "$2" = "" ] ; then
+if [ "$#" -ne 2 ]; then
   echo "Usage: $0 <so_dir> <manifest_dir>" >&2
   exit 1
 fi
@@ -80,7 +80,7 @@ fi
 for so_name in "libpcre2-8" "libpcre2-16" "libpcre2-32" "libpcre2-posix"; do
   expected_file="$manifest_dir/manifest-$so_name.so"
   so_file="$input_dir/$so_name.$so_ext"
-  base=`basename $expected_file`
+  base=$(basename "$expected_file")
 
   $nm "$so_file" | \
     $sed -E -e 's/^[0-9a-fA-F]* *//g' | \
