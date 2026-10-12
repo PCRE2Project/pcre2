@@ -108,6 +108,27 @@ The allocator calls [.c]`malloc()`.
 Do not put inline macros inside source blocks. The block's language and role
 carry the semantics there.
 
+## Default values and limits
+
+Use `macroval:NAME` (without trailing `[]`) for numerical defaults and
+implementation limits in prose, for example `macroval:MAX_NAME_SIZE` and
+`macroval:MAX_VARLOOKBEHIND`. It produces a decimal number with thousands
+separators in both HTML and manpages. Use `macroval:bytes,NAME` when the value
+is in bytes: it uses exact binary units through GiB, or writes ` bytes` for a
+value that is not an exact multiple of 1024. Values in other units, such as
+`HEAP_LIMIT` in KiB, must retain their unit in surrounding prose.
+
+`Pcre2MacroValueInlineMacro` in `maint/AsciidocConverterPcre2.rb` lists the
+supported names and reads their values from the C sources and
+`src/config.h.generic`, not from a locally configured build. Every value must
+be a unique, direct numeric `#define`; name a source constant rather than
+extracting an expression or an unnamed limit. Unknown names, missing
+definitions, and ambiguous definitions fail rendering instead of leaving stale
+numbers in the output.
+
+Keep literal numbers in examples, historical descriptions, character codes,
+encoding widths, and recommendations that are not implementation limits.
+
 ## Inline code roles
 
 Use constrained monospace spans with a prefix role. Do not use postfix role

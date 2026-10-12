@@ -199,7 +199,7 @@ when JIT matching is used.
 == Controlling the JIT stack
 
 When the compiled JIT code runs, it needs a block of memory to use as a stack.
-By default, it uses 32KiB on the machine stack. However, some large or
+By default, it uses macroval:bytes,MACHINE_STACK_SIZE on the machine stack. However, some large or
 complicated patterns need more than this. The error const:PCRE2_ERROR_JIT_STACKLIMIT
 is given when there is not enough stack. Three functions are provided for
 managing blocks of memory for use as JIT stacks. There is further discussion
@@ -231,7 +231,7 @@ passed to a matching function, its information determines which JIT stack is
 used. If this argument is const:NULL, the function returns immediately, without doing
 anything. There are three cases for the values of the other two options:
 
-. If arg:callback is const:NULL and arg:data is const:NULL, an internal 32KiB block
+. If arg:callback is const:NULL and arg:data is const:NULL, an internal block of macroval:bytes,MACHINE_STACK_SIZE
     on the machine stack is used. This is the default when a match
     context is created.
 
@@ -242,7 +242,7 @@ anything. There are three cases for the values of the other two options:
 . If arg:callback is not const:NULL, it must point to a function that is
     called with arg:data as an argument at the start of matching, in
     order to set up a JIT stack. If the return from the callback
-    function is const:NULL, the internal 32KiB stack is used; otherwise the
+    function is const:NULL, the internal stack of macroval:bytes,MACHINE_STACK_SIZE is used; otherwise the
     return value must be a valid JIT stack, the result of calling
     func:pcre2_jit_stack_create().
 

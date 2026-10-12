@@ -75,7 +75,7 @@ that is obtained at the start of processing. If an input file contains very
 long lines, a larger buffer may be needed; this is handled by automatically
 extending the buffer, up to the limit specified by `--max-buffer-size`. The
 default values for these parameters can be set when `pcre2grep` is
-built; if nothing is specified, the defaults are set to 20KiB and 1MiB
+built; if nothing is specified, the defaults are set to macroval:bytes,PCRE2GREP_BUFSIZE and macroval:bytes,PCRE2GREP_MAX_BUFSIZE
 respectively. An error occurs if a line is too long and the buffer can no
 longer be expanded.
 
@@ -86,7 +86,7 @@ small, fewer than requested "before" and "after" lines may be output.
 When matching with a multiline pattern, the size of the buffer must be at least
 half of the maximum match expected or the pattern might fail to match.
 
-Patterns can be no longer than 8KiB or const:BUFSIZ bytes, whichever is the greater.
+Patterns can be no longer than macroval:bytes,PCRE2GREP_MAXPATLEN_MIN or const:BUFSIZ bytes, whichever is the greater.
 BUFSIZ is defined in `+<stdio.h>+`. When there is more than one pattern
 (specified by the use of `-e` and/or `-f`), each pattern is applied to
 each line in the order in which they are defined, except that all the `-e`
@@ -135,7 +135,7 @@ plain text file. When input is from a compressed .gz or .bz2 file, the
 
 == Binary files
 
-By default, a file that contains a binary zero byte within the first 1024 bytes
+By default, a file that contains a binary zero byte within the first macroval:bytes,PCRE2GREP_BINARY_CHECK_SIZE
 is identified as a binary file, and is processed specially. However, if the
 newline type is specified as NUL, that is, the line terminator is a binary
 zero, the test for a binary file is not applied. See the `--binary-files`
@@ -706,7 +706,7 @@ otherwise empty line. This option is mutually exclusive with `--output`,
 
 `-o__number__`, `--only-matching=__number__`::
 Show only the part of the line that matched the capturing parentheses of the
-given number. Up to 50 capturing parentheses are supported by default. This
+given number. Up to macroval:PCRE2GREP_DEFAULT_CAPTURE_MAX capturing parentheses are supported by default. This
 limit can be changed via the `--om-capture` option. A pattern may contain
 any number of capturing parentheses, but only those whose number is within the
 limit can be accessed by `-o`. An error occurs if the number specified by
@@ -730,7 +730,7 @@ but one option).
 
 `--om-capture=__number__`::
 Set the number of capturing parentheses that can be accessed by `-o`. The
-default is 50.
+default is macroval:PCRE2GREP_DEFAULT_CAPTURE_MAX.
 
 `--om-separator=__text__`::
 Specify a separating string for multiple occurrences of `-o`. The default
@@ -1022,7 +1022,7 @@ repeats, for example: [.regex]`(a{plus})*\d` when matched against a line of [.su
 digit. The PCRE2 matching function has a resource limit that causes it to abort
 in these circumstances. If this happens, `pcre2grep` outputs an error
 message and the line that caused the problem to the standard error stream. If
-there are more than 20 such errors, `pcre2grep` gives up.
+there are more than macroval:PCRE2GREP_MAX_ERRORS such errors, `pcre2grep` gives up.
 
 The `--match-limit` option of `pcre2grep` can be used to set the
 overall resource limit. There are also other limits that affect the amount of

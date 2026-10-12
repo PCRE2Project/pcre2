@@ -65,10 +65,6 @@ FetchUcd.sh
 FilterCoverage.py
   A small helper used by the RunCoverage script.
 
-LintMan
-  A Perl script to check and update magic numbers in the documentation that
-  correspond to configurable settings in the codebase.
-
 manifest-*
   Data files used to verify the contents of the distribution tarball and
   installed file lists. Each manifest-install-<platform> is shared by Autoconf,

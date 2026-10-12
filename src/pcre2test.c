@@ -209,20 +209,21 @@ claim to be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 #endif
 #endif
 
+#define PCRE2TEST_DEFAULT_OVECCOUNT   15         /* Default ovector count */
+#define PCRE2TEST_LOOPREPEAT          500000     /* Default loop count for timing */
+#define PCRE2TEST_PARENS_NEST_DEFAULT 220        /* Default parentheses nest limit */
+#define PCRE2TEST_REPLACE_BUFFSIZE    256        /* Code units for replacement buffer */
+
 #define CFORE_UNSET                UINT32_MAX /* Unset value for startend/cfail/cerror fields */
 #define CONVERT_UNSET              UINT32_MAX /* Unset value for convert_type/convert_length fields */
 #define MOD_STR_UNSET              UINT8_MAX  /* Sentinel length for unset string options */
 #define DFA_WS_DIMENSION           1000       /* Size of DFA workspace */
-#define DEFAULT_OVECCOUNT          15         /* Default ovector count */
 #define JUNK_OFFSET                0xdeadbeef /* For initializing ovector */
 #define LOCALESIZE                 32         /* Size of locale name */
-#define LOOPREPEAT                 500000     /* Default loop count for timing */
 #define MALLOCLISTSIZE             20         /* For remembering mallocs */
-#define PARENS_NEST_DEFAULT        220        /* Default parentheses nest limit */
 #define PATSTACKSIZE               20         /* Pattern stack for save/restore testing */
 #define REPLACE_MODSIZE            100        /* Field for reading 8-bit replacement */
 #define SUBSTITUTE_SUBJECT_MODSIZE 100        /* Field for reading 8-bit subject for substitute */
-#define REPLACE_BUFFSIZE           256        /* Code units for replacement buffer */
 
 /* Default JIT compile options */
 
@@ -675,7 +676,7 @@ datctl_zero(datctl *d)
   memset(d, 0, sizeof(datctl));
   d->replacement[0] = MOD_STR_UNSET;
   d->substitute_subject[0] = MOD_STR_UNSET;
-  d->oveccount = DEFAULT_OVECCOUNT;
+  d->oveccount = PCRE2TEST_DEFAULT_OVECCOUNT;
   d->copy_numbers[0] = -1;
   d->get_numbers[0] = -1;
   d->startend[0] = d->startend[1] = CFORE_UNSET;
@@ -4007,7 +4008,7 @@ main(int argc, char **argv)
       }
       else
       {
-        timeitm = LOOPREPEAT;
+        timeitm = PCRE2TEST_LOOPREPEAT;
       }
 
       if (both)
@@ -4146,7 +4147,7 @@ main(int argc, char **argv)
   /* Initialize things that cannot be done until we know which test mode we are
   running in. */
 
-  max_oveccount = DEFAULT_OVECCOUNT;
+  max_oveccount = PCRE2TEST_DEFAULT_OVECCOUNT;
 
   /* Initialise the globals for the current mode. */
 

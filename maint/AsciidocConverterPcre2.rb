@@ -29,7 +29,7 @@ end
 # that role is presented instead of the macro injecting backend-specific text.
 class Pcre2ApiInlineMacro < Asciidoctor::Extensions::InlineMacroProcessor
   use_dsl
-  using_format :short
+  format :short
 
   def process(parent, target, _attributes)
     create_inline parent, :quoted, target,
@@ -92,6 +92,77 @@ class Pcre2CharacterInlineMacro < Pcre2ApiInlineMacro
   end
 end
 
+class Pcre2MacroValueInlineMacro < Asciidoctor::Extensions::InlineMacroProcessor
+  use_dsl
+  named :macroval
+  format :short
+  match /macroval:((?:bytes,)?[A-Za-z0-9_]+)/
+
+  DEFINITIONS = {
+    'config.h.generic' => %w[
+      HEAP_LIMIT MATCH_LIMIT MAX_NAME_COUNT MAX_NAME_SIZE
+      MAX_VARLOOKBEHIND PARENS_NEST_LIMIT PCRE2GREP_BUFSIZE PCRE2GREP_MAX_BUFSIZE
+    ],
+    'pcre2_compile.c' => %w[MAX_GROUP_NUMBER MAX_REPEAT_COUNT],
+    'pcre2_dfa_match.c' => %w[DFA_RECURSE_OVECTOR DFA_WORKSPACE_MIN],
+    'pcre2_internal.h' => %w[
+      MAX_CALLOUT_NUMBER MAX_OVECTOR_COUNT START_FRAMES_COUNT START_FRAMES_SIZE TABLES_LENGTH
+    ],
+    'pcre2_intmodedep.h' => %w[
+      DEFAULT_MAX_PATTERN_SIZE_8_16 LOOKBEHIND_MAX MAX_MARK_8 MAX_MARK_16_32
+    ],
+    'pcre2_jit_compile.c' => %w[MACHINE_STACK_SIZE],
+    'pcre2grep.c' => %w[
+      PCRE2GREP_BINARY_CHECK_SIZE PCRE2GREP_DEFAULT_CAPTURE_MAX
+      PCRE2GREP_MAX_ERRORS PCRE2GREP_MAXPATLEN_MIN
+    ],
+    'pcre2test.c' => %w[PCRE2TEST_DEFAULT_OVECCOUNT PCRE2TEST_LOOPREPEAT PCRE2TEST_PARENS_NEST_DEFAULT PCRE2TEST_REPLACE_BUFFSIZE]
+  }.freeze
+
+  def self.read_integers(file, names)
+    source = File.read(File.expand_path("../src/#{file}", __dir__), encoding: Encoding::UTF_8)
+    names.to_h do |name|
+      pattern = /^#define #{name}\s+(\d+)[uU]?(?=\s|$)/
+      matches = source.scan(pattern)
+      raise "Expected one definition for #{name} in #{file}" unless matches.length == 1
+      [name, Integer(matches.first.first, 0)]
+    end
+  end
+
+  def self.format_integer(value)
+    value.to_s.gsub(/(?<=\d)(?=(?:\d{3})+\z)/, ',')
+  end
+
+  def self.format_value(value, unit)
+    return format_integer(value) if unit.nil?
+
+    prefixes = ['', 'Ki', 'Mi', 'Gi']
+    prefix_index = 0
+    while value.positive? && prefix_index < prefixes.length - 1 && (value % 1024).zero?
+      value /= 1024
+      prefix_index += 1
+    end
+    suffix = prefix_index.zero? ? ' bytes' : "#{prefixes[prefix_index]}B"
+    "#{format_integer(value)}#{suffix}"
+  end
+
+  def self.values
+    @values ||= begin
+      values = {}
+      DEFINITIONS.each do |file, names|
+        values.merge! read_integers(file, names)
+      end
+      values.freeze
+    end
+  end
+
+  def process(parent, target, _attributes)
+    unit, name = target.start_with?('bytes,') ? target.split(',', 2) : [nil, target]
+    value = self.class.values.fetch(name) { raise "Unknown macroval:#{name}" }
+    create_inline parent, :quoted, self.class.format_value(value, unit)
+  end
+end
+
 # Install defaults and API macros for documents loaded with this extension.
 Asciidoctor::Extensions.register do
   preprocessor Pcre2DocumentDefaults
@@ -100,6 +171,7 @@ Asciidoctor::Extensions.register do
   inline_macro Pcre2ConstantInlineMacro
   inline_macro Pcre2ArgumentInlineMacro
   inline_macro Pcre2CharacterInlineMacro
+  inline_macro Pcre2MacroValueInlineMacro
 end
 
 class Pcre2HtmlConverter < Asciidoctor::Html5s::Converter

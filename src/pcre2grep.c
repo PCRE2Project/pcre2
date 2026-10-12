@@ -137,12 +137,15 @@ be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 
 typedef int BOOL;
 
-#define DEFAULT_CAPTURE_MAX 50
+#define PCRE2GREP_DEFAULT_CAPTURE_MAX 50
+#define PCRE2GREP_MAXPATLEN_MIN       8192
+#define PCRE2GREP_MAX_ERRORS          20
+#define PCRE2GREP_BINARY_CHECK_SIZE   1024
 
-#if BUFSIZ > 8192
+#if BUFSIZ > PCRE2GREP_MAXPATLEN_MIN
 #define MAXPATLEN BUFSIZ
 #else
-#define MAXPATLEN 8192
+#define MAXPATLEN PCRE2GREP_MAXPATLEN_MIN
 #endif
 
 #define FNBUFSIZ  2048
@@ -276,7 +279,7 @@ static pcre2_match_data *match_data, *match_data_pair[2];
 static PCRE2_SIZE *offsets, *offsets_pair[2];
 static int match_data_toggle;
 static uint32_t offset_size;
-static uint32_t capture_max = DEFAULT_CAPTURE_MAX;
+static uint32_t capture_max = PCRE2GREP_DEFAULT_CAPTURE_MAX;
 
 static BOOL all_matches = FALSE;
 static BOOL case_restrict = FALSE;
@@ -2039,7 +2042,7 @@ match_patterns(char *matchptr, PCRE2_SIZE length, unsigned int options, PCRE2_SI
     if (rc == PCRE2_ERROR_MATCHLIMIT || rc == PCRE2_ERROR_DEPTHLIMIT ||
         rc == PCRE2_ERROR_HEAPLIMIT || rc == PCRE2_ERROR_JIT_STACKLIMIT)
       resource_error = TRUE;
-    if (error_count++ > 20)
+    if (error_count++ > PCRE2GREP_MAX_ERRORS)
     {
       fprintf(stderr, "pcre2grep: Too many errors - abandoned.\n");
       pcre2grep_exit(2);
@@ -2919,7 +2922,8 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
   if (binary_files != BIN_TEXT)
   {
     if (endlinetype != PCRE2_NEWLINE_NUL)
-      binary = memchr(main_buffer, 0, (bufflength > 1024) ? 1024 : bufflength) != NULL;
+      binary = memchr(main_buffer, 0,
+        (bufflength > PCRE2GREP_BINARY_CHECK_SIZE) ? PCRE2GREP_BINARY_CHECK_SIZE : bufflength) != NULL;
     if (binary && binary_files == BIN_NOMATCH)
       return 1;
   }

@@ -79,6 +79,7 @@ zero in order to simply clear the previous macros. */
 #undef MAX_255
 #undef MAX_MARK
 #undef MAX_PATTERN_SIZE
+#undef DEFAULT_MAX_PATTERN_SIZE_8_16
 #undef MAX_UTF_SINGLE_CU
 #undef NOT_FIRSTCU
 #undef PUT
@@ -125,6 +126,12 @@ undefined behaviour. Casting the result of the shift is too late. */
 #error LINK_SIZE must be 2, 3, or 4
 #endif
 #endif /* CONFIGURED_LINK_SIZE */
+
+/* The macros below define MAX_PATTERN_SIZE conditionally. For the sake of
+documentation only, this is the value used by almost all consumers (8-bit or
+16-bit, and LINK_SIZE at its default value). */
+
+#define DEFAULT_MAX_PATTERN_SIZE_8_16 65535
 
 /* ------------------- 8-bit support  ------------------ */
 
@@ -220,7 +227,8 @@ check is needed before accessing these tables. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 #define MAX_255(c)                   TRUE
-#define MAX_MARK                     ((1u << 8) - 1)
+#define MAX_MARK_8                   255u
+#define MAX_MARK                     MAX_MARK_8
 #define TABLE_GET(c, table, default) ((table)[c])
 #ifdef SUPPORT_UNICODE
 #define SUPPORT_WIDE_CHARS
@@ -230,12 +238,21 @@ check is needed before accessing these tables. */
 #endif /* SUPPORT_UNICODE */
 
 #elif PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
-#define CHMAX_255(c) ((c) <= 255u)
-#define MAX_255(c)   ((c) <= 255u)
-#define MAX_MARK     ((1u << 16) - 1)
+#define CHMAX_255(c)   ((c) <= 255u)
+#define MAX_255(c)     ((c) <= 255u)
+#define MAX_MARK_16_32 65535u
+#define MAX_MARK       MAX_MARK_16_32
 #define SUPPORT_WIDE_CHARS
 #define TABLE_GET(c, table, default) (MAX_255(c) ? ((table)[c]) : (default))
 #endif
+
+/* LOOKBEHIND_MAX specifies the largest lookbehind that is supported.
+(OP_REVERSE and OP_VREVERSE in a pattern have 16-bit arguments in 8-bit and
+16-bit modes, so we require these values to fit in a 16-bit field.) Its value
+could be made-dependent, and be larger for the 32-bit library. */
+
+#undef LOOKBEHIND_MAX
+#define LOOKBEHIND_MAX 65535
 
 
 /* ----------------- Character-handling macros ----------------- */
@@ -675,16 +692,10 @@ typedef struct pcre2_real_convert_context {
 defined specially because it is required in pcre2_serialize_decode() when
 copying the size from possibly unaligned memory into a variable of the same
 type. Use a macro rather than a typedef to avoid compiler warnings when this
-file is included multiple times by pcre2test. LOOKBEHIND_MAX specifies the
-largest lookbehind that is supported. (OP_REVERSE and OP_VREVERSE in a pattern
-have 16-bit arguments in 8-bit and 16-bit modes, so we need no more than a
-16-bit field here.) */
+file is included multiple times by pcre2test. */
 
 #undef CODE_BLOCKSIZE_TYPE
 #define CODE_BLOCKSIZE_TYPE PCRE2_SIZE
-
-#undef LOOKBEHIND_MAX
-#define LOOKBEHIND_MAX ((int)UINT16_MAX)
 
 typedef struct pcre2_real_code {
   pcre2_memctl memctl;            // Memory control fields

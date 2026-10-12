@@ -44,7 +44,7 @@ pattern matching.
 
 Within a regular expression, [.regex]`(?C__arg__)` indicates a point at which the external
 function is to be called. Different callout points can be identified by putting
-a number less than 256 after the letter C. The default value is zero.
+a number no greater than macroval:MAX_CALLOUT_NUMBER after the letter C. The default value is zero.
 Alternatively, the argument may be a delimited string. The starting delimiter
 must be one of [.regex]`'`, [.regex]`"`, [.regex]`^`, [.regex]`%`, [.regex]`#`, [.regex]`$`, [.regex]`{` and the ending delimiter is the same as the
 start, except for [.regex]`{`, where the ending delimiter is [.regex]`}`. If the ending delimiter
@@ -57,7 +57,7 @@ two callout points:
 ----
 
 If the const:PCRE2_AUTO_CALLOUT option bit is set when a pattern is compiled, PCRE2
-automatically inserts callouts, all with number 255, before each item in the
+automatically inserts callouts, all with number macroval:MAX_CALLOUT_NUMBER, before each item in the
 pattern except for immediately before or after an explicit callout. For
 example, if const:PCRE2_AUTO_CALLOUT is used with the pattern
 
@@ -267,8 +267,8 @@ remove any of the existing fields.
 === Fields for numerical callouts
 
 For a numerical callout, arg:callout_string is const:NULL, and arg:callout_number
-contains the number of the callout, in the range 0-255. This is the number
-that follows [.regex]`+(?C+` for callouts that part of the pattern; it is 255 for
+contains the number of the callout, in the range 0-macroval:MAX_CALLOUT_NUMBER. This is the number
+that follows [.regex]`+(?C+` for callouts that part of the pattern; it is macroval:MAX_CALLOUT_NUMBER for
 automatically generated callouts.
 
 === Fields for string callouts

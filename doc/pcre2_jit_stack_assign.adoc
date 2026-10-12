@@ -38,8 +38,8 @@ arg:callback_data::
 If arg:mcontext is const:NULL, the function returns immediately, without doing
 anything.
 
-If arg:callback is const:NULL and arg:callback_data is const:NULL, an internal 32KiB
-block on the machine stack is used.
+If arg:callback is const:NULL and arg:callback_data is const:NULL, an internal block of macroval:bytes,MACHINE_STACK_SIZE
+on the machine stack is used.
 
 If arg:callback is const:NULL and arg:callback_data is not const:NULL,
 arg:callback_data must be a valid JIT stack, the result of calling
@@ -47,7 +47,7 @@ func:pcre2_jit_stack_create().
 
 If arg:callback not const:NULL, it is called with arg:callback_data as an
 argument at the start of matching, in order to set up a JIT stack. If the
-result is const:NULL, the internal 32KiB stack is used; otherwise the return value
+result is const:NULL, the internal stack of macroval:bytes,MACHINE_STACK_SIZE is used; otherwise the return value
 must be a valid JIT stack, the result of calling
 func:pcre2_jit_stack_create().
 

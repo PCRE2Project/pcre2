@@ -908,7 +908,7 @@ int pcre2_set_max_varlookbehind(pcre2_compile_context *ccontext,
 
 This sets a maximum length for the number of characters matched by a
 variable-length lookbehind assertion. The default is set when PCRE2 is built,
-with the ultimate default being 255, the same as Perl. Lookbehind assertions
+with the ultimate default being macroval:MAX_VARLOOKBEHIND, the same as Perl. Lookbehind assertions
 without a bounding length are not supported.
 
 [source,c,role=prototype]
@@ -941,7 +941,7 @@ int pcre2_set_parens_nest_limit(pcre2_compile_context *ccontext,
                                 uint32_t limit);
 ----
 
-This parameter adjusts the limit, set when PCRE2 is built (default 250), on the
+This parameter adjusts the limit, set when PCRE2 is built (default macroval:PARENS_NEST_LIMIT), on the
 depth of parenthesis nesting in a pattern. This limit stops rogue patterns
 using up too much system stack when being compiled. The limit applies to
 parentheses of all kinds, not just capturing parentheses.
@@ -1285,7 +1285,7 @@ is also used in this case (but in a different way) to limit how long the
 matching can continue.
 
 The default value for the limit can be set when PCRE2 is built; the default is
-10 million, which handles all but the most extreme cases. A value for the match
+macroval:MATCH_LIMIT, which handles all but the most extreme cases. A value for the match
 limit may also be supplied by an item at the start of a pattern of the form
 
 [source,regex,subs=normal]
@@ -1441,7 +1441,7 @@ for details.
 +
 The default value of 2 for the 8-bit and 16-bit libraries is sufficient for all
 but the most massive patterns, since it allows the size of the compiled pattern
-to be up to 65535 code units. Larger values allow larger regular expressions to
+to be up to macroval:DEFAULT_MAX_PATTERN_SIZE_8_16 code units. Larger values allow larger regular expressions to
 be compiled by those two libraries, but at the expense of slower matching.
 
 const:PCRE2_CONFIG_MATCHLIMIT::
@@ -1473,7 +1473,7 @@ const:PCRE2_CONFIG_PARENSLIMIT::
       The output is a type:uint32_t integer that gives the maximum depth of nesting
       of parentheses (of any kind) in a pattern. This limit is imposed to cap the
       amount of system stack used when a pattern is compiled. It is specified when
-      PCRE2 is built; the default is 250. This limit does not take into account the
+      PCRE2 is built; the default is macroval:PARENS_NEST_LIMIT. This limit does not take into account the
       stack that may already be used by the calling application. For finer control
       over compilation stack usage, see func:pcre2_set_compile_recursion_guard().
 
@@ -1739,7 +1739,7 @@ in the rest of the pattern.
 const:PCRE2_AUTO_CALLOUT::
 
 If this bit is set, func:pcre2_compile() automatically inserts callout items,
-all with number 255, before each pattern item, except immediately before or
+all with number macroval:MAX_CALLOUT_NUMBER, before each pattern item, except immediately before or
 after an explicit callout in the pattern. For discussion of the callout
 facility, see the
 xref:pcre2callout.adoc[`pcre2callout`]
@@ -2868,8 +2868,8 @@ large enough to hold as many as are expected.
 A minimum of at least 1 pair is imposed by func:pcre2_match_data_create(), so
 it is always possible to return the overall matched string in the case of
 func:pcre2_match() or the longest match in the case of
-func:pcre2_dfa_match(). The maximum number of pairs is 65535; if the first
-argument of func:pcre2_match_data_create() is greater than this, 65535 is
+func:pcre2_dfa_match(). The maximum number of pairs is macroval:MAX_OVECTOR_COUNT; if the first
+argument of func:pcre2_match_data_create() is greater than this, macroval:MAX_OVECTOR_COUNT is
 used.
 
 The second argument of func:pcre2_match_data_create() is a pointer to a
@@ -4484,7 +4484,7 @@ arguments are used in the same way as for func:pcre2_match(), so their
 description is not repeated here.
 
 The two additional arguments provide workspace for the function. The workspace
-vector should contain at least 20 elements. It is used for keeping track of
+vector should contain at least macroval:DFA_WORKSPACE_MIN elements. It is used for keeping track of
 multiple paths through the pattern tree. More workspace is needed for patterns
 and subjects where there are a lot of potential matches.
 
@@ -4633,7 +4633,7 @@ const:PCRE2_ERROR_DFA_RECURSE::
       When a recursion or subroutine call is processed, the matching function calls
       itself recursively, using private memory for the arg:ovector and arg:workspace.
       This error is given if the internal arg:ovector is not large enough. This should be
-      extremely rare, as a vector of size 1000 is used.
+      extremely rare, as a vector of size macroval:DFA_RECURSE_OVECTOR is used.
 
 const:PCRE2_ERROR_DFA_BADRESTART::
       When func:pcre2_dfa_match() is called with the const:PCRE2_DFA_RESTART option,

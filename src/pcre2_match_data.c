@@ -55,8 +55,8 @@ pcre2_match_data_create(uint32_t oveccount, pcre2_general_context *gcontext)
 {
   if (oveccount < 1)
     oveccount = 1;
-  if (oveccount > UINT16_MAX)
-    oveccount = UINT16_MAX;
+  if (oveccount > MAX_OVECTOR_COUNT)
+    oveccount = MAX_OVECTOR_COUNT;
 
   pcre2_match_data *yield =
       PRIV(memctl_malloc)(offsetof(pcre2_match_data, ovector) + 2 * oveccount * sizeof(PCRE2_SIZE),

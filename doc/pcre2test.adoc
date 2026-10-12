@@ -275,7 +275,7 @@ times per compile or match. When JIT is used, separate times are given for the
 initial compile and the JIT compile. You can control the number of iterations
 that are used for timing by following `-t` with a number (as a separate
 item on the command line). For example, "-t 1000" iterates 1000 times. The
-default is to iterate 500,000 times.
+default is to iterate macroval:PCRE2TEST_LOOPREPEAT times.
 
 `-tm`::
 This is like `-t` except that it times only the matching phase, not the
@@ -908,10 +908,10 @@ below), the REG_PEND extension is used to pass the pattern's length.
 
 Variable lookbehind assertions are supported only if, for each one, there is a
 maximum length (in characters) that it can match. There is a limit on this,
-whose default can be set at build time, with an ultimate default of 255. The
+whose default can be set at build time, with an ultimate default of macroval:MAX_VARLOOKBEHIND. The
 `max_varlookbehind` modifier uses the func:pcre2_set_max_varlookbehind()
 function to change the limit. Lookbehinds whose branches each match a fixed
-length are limited to 65535 characters per branch.
+length are limited to macroval:LOOKBEHIND_MAX characters per branch.
 
 === Specifying wide characters in 16-bit and 32-bit modes
 
@@ -1049,7 +1049,7 @@ Memory allocation (JIT code): 1910
 The `parens_nest_limit` modifier sets a limit on the depth of nested
 parentheses in a pattern. Breaching the limit causes a compilation error.
 The default for the library is set when PCRE2 is built, but `pcre2test`
-sets its own default of 220, which is required for running the standard test
+sets its own default of macroval:PCRE2TEST_PARENS_NEST_DEFAULT, which is required for running the standard test
 suite.
 
 === Limiting the pattern length
@@ -1554,7 +1554,7 @@ simple example of a substitution test:
  2: =xxx=xxx=
 ....
 
-Subject and replacement strings should be kept relatively short (fewer than 256
+Subject and replacement strings should be kept relatively short (fewer than macroval:PCRE2TEST_REPLACE_BUFFSIZE
 characters) for substitution tests, as fixed-size buffers are used. To make it
 easy to test for buffer overflow, if the replacement string starts with a
 number in square brackets, that number is passed to func:pcre2_substitute() as
@@ -1655,7 +1655,7 @@ characters.
 The `jitstack` modifier provides a way of setting the maximum stack size
 that is used by the just-in-time optimization code. It is ignored if JIT
 optimization is not being used. The value is a number of kibibytes (units of
-1024 bytes). Setting zero reverts to the default of 32KiB. Providing a stack
+1024 bytes). Setting zero reverts to the default of macroval:bytes,MACHINE_STACK_SIZE. Providing a stack
 that is larger than the default is necessary only for very complicated
 patterns. If `jitstack` is set non-zero on a subject line it overrides any
 value that was set on the pattern.
@@ -1755,7 +1755,7 @@ for the pattern; if not, an error is generated.
 The `ovector` modifier applies only to the subject line in which it
 appears, though of course it can also be used to set a default in a
 `+#subject+` command. It specifies the number of pairs of offsets that are
-available for storing matching information. The default is 15.
+available for storing matching information. The default is macroval:PCRE2TEST_DEFAULT_OVECCOUNT.
 
 A value of zero is useful when testing the POSIX API because it causes
 [.c]`regexec()` to be called with a const:NULL capture vector. When not testing the
@@ -1986,7 +1986,7 @@ one circumflex is output if the start and current positions are the same, or if
 the current position precedes the start position, which can happen if the
 callout is in a lookbehind assertion.
 
-Callouts numbered 255 are assumed to be automatic callouts, inserted as a
+Callouts numbered macroval:MAX_CALLOUT_NUMBER are assumed to be automatic callouts, inserted as a
 result of the `auto_callout` pattern modifier. In this case, instead of
 showing the callout number, the offset in the pattern, preceded by a plus, is
 output. For example:
@@ -2159,7 +2159,7 @@ width and type:PCRE2_SIZE type. Before compiled patterns can be saved they must 
 serialized, that is, converted to a stream of bytes. A single byte stream may
 contain any number of compiled patterns, but they must all use the same
 character tables. A single copy of the tables is included in the byte stream
-(its size is 1088 bytes).
+(its size is macroval:bytes,TABLES_LENGTH).
 
 The functions whose names begin with [.c]`pcre2_serialize_` are used
 for serializing and de-serializing. They are described in the

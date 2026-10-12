@@ -126,7 +126,7 @@ static int patstacknext = 0;
 static PCRE2_UCHAR *rep_in_buffer = NULL;
 static size_t rep_in_buffer_size = REPLACE_MODSIZE; // Code units
 static PCRE2_UCHAR *rep_out_buffer = NULL;
-static size_t rep_out_buffer_size = REPLACE_BUFFSIZE; // Code units
+static size_t rep_out_buffer_size = PCRE2TEST_REPLACE_BUFFSIZE; // Code units
 
 
 
@@ -2672,7 +2672,7 @@ process_pattern(void)
       prmsg(&msg, "max_pattern_length");
     if (pat_context->max_pattern_compiled_length != PCRE2_UNSET)
       prmsg(&msg, "max_pattern_compiled_length");
-    if (pat_context->parens_nest_limit != PARENS_NEST_DEFAULT)
+    if (pat_context->parens_nest_limit != PCRE2TEST_PARENS_NEST_DEFAULT)
       prmsg(&msg, "parens_nest_limit");
 
     if (msg[0] == 0)
@@ -3788,7 +3788,7 @@ callout_function(pcre2_callout_block *cb, void *callout_data_ptr)
     strings, show the number here. A callout with a string argument has been
     displayed above. */
 
-    if (cb->callout_number == 255)
+    if (cb->callout_number == MAX_CALLOUT_NUMBER)
     {
       fprintf(outfile, "%+3d ", (int)cb->pattern_position);
       if (cb->pattern_position > 99)
@@ -6074,7 +6074,7 @@ init_globals(void)
   /* Set a default parentheses nest limit that is large enough to run the
   standard tests (this also exercises the function). */
 
-  pcre2_set_parens_nest_limit(default_pat_context, PARENS_NEST_DEFAULT);
+  pcre2_set_parens_nest_limit(default_pat_context, PCRE2TEST_PARENS_NEST_DEFAULT);
 }
 
 /* Frees the global variables used for the current test mode. */
@@ -6776,10 +6776,11 @@ unittest(void)
 
     test_match_data = pcre2_match_data_create(100000, test_gen_context);
     ASSERT(test_match_data != NULL, "pcre2_match_data_create(100000)");
-    ASSERT(pcre2_get_ovector_count(test_match_data) == 65535,
+    ASSERT(pcre2_get_ovector_count(test_match_data) == MAX_OVECTOR_COUNT,
            "pcre2_get_ovector_count(UINT32_MAX) <= UINT16_MAX)");
     ASSERT(pcre2_get_match_data_size(test_match_data) ==
-               offsetof(pcre2_match_data, ovector) + 2 * (PCRE2_SIZE)65535 * sizeof(PCRE2_SIZE),
+               offsetof(pcre2_match_data, ovector) +
+               2 * (PCRE2_SIZE)MAX_OVECTOR_COUNT * sizeof(PCRE2_SIZE),
            "pcre2_get_match_data_size(clamped count)");
 
     rc = pcre2_jit_match(test_compiled_code, subject_abcz, 4, 0, PCRE2_NO_JIT, test_match_data,

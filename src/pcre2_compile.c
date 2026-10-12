@@ -3154,13 +3154,13 @@ manage_callouts(PCRE2_SPTR ptr, uint32_t **pcalloutptr, BOOL auto_callout, uint3
   else
   {
     if (previous_callout == NULL || previous_callout != parsed_pattern - 4 ||
-        previous_callout[3] != 255)
+        previous_callout[3] != MAX_CALLOUT_NUMBER)
     {
       previous_callout = parsed_pattern; // Set up new automatic callout
       parsed_pattern += 4;
       previous_callout[0] = META_CALLOUT_NUMBER;
       previous_callout[2] = 0;
-      previous_callout[3] = 255;
+      previous_callout[3] = MAX_CALLOUT_NUMBER;
     }
 
     previous_callout[1] = (uint32_t)(ptr - cb->start_pattern);
@@ -5719,7 +5719,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
         callout, abolish it. */
 
         if (previous_callout != NULL && (options & PCRE2_AUTO_CALLOUT) != 0 &&
-            previous_callout == parsed_pattern - 4 && parsed_pattern[-1] == 255)
+            previous_callout == parsed_pattern - 4 && parsed_pattern[-1] == MAX_CALLOUT_NUMBER)
           parsed_pattern = previous_callout;
 
         /* Save for updating next pattern item length, and skip one item before
@@ -5780,7 +5780,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
         }
 
         /* Handle a callout with an optional numerical argument, which must be
-        less than or equal to 255. A missing argument gives 0. */
+        less than or equal to MAX_CALLOUT_NUMBER. A missing argument gives 0. */
 
         else
         {
@@ -5790,7 +5790,7 @@ parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions, BOOL *has_lookb
           while (ptr < ptrend && IS_DIGIT(*ptr))
           {
             n = n * 10 + (*ptr++ - CHAR_0);
-            if (n > 255)
+            if (n > MAX_CALLOUT_NUMBER)
             {
               errorcode = ERR38;
               goto FAILED;

@@ -329,9 +329,12 @@ finding the minimum heap requirement for a match. */
 
 #define OVEC_UNIT (sizeof(PCRE2_SIZE) / sizeof(int))
 
+#define DFA_RECURSE_OVECTOR 1000
+#define DFA_WORKSPACE_MIN   20
+
 #define RWS_BASE_SIZE  (DFA_START_RWS_SIZE / sizeof(int)) /* Stack vector */
 #define RWS_RSIZE      1000                               /* Work size for recursion */
-#define RWS_OVEC_RSIZE (1000 * OVEC_UNIT)                 /* Ovector for recursion */
+#define RWS_OVEC_RSIZE (DFA_RECURSE_OVECTOR * OVEC_UNIT)  /* Ovector for recursion */
 #define RWS_OVEC_OSIZE (2 * OVEC_UNIT)                    /* Ovector in other cases */
 
 /* This structure is at the start of each workspace block. */
@@ -3796,7 +3799,7 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     length = PRIV(strlen)(subject);
   }
 
-  if (wscount < 20)
+  if (wscount < DFA_WORKSPACE_MIN)
   {
     rc = PCRE2_ERROR_DFA_WSSIZE;
     goto EXIT;

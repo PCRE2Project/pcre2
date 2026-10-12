@@ -52,7 +52,7 @@ example, the very simple pattern
 
 uses over 50KiB when compiled using the 8-bit library. When PCRE2 is
 compiled with its default internal pointer size of two bytes, the size limit on
-a compiled pattern is 65535 code units in the 8-bit and 16-bit libraries, and
+a compiled pattern is macroval:DEFAULT_MAX_PATTERN_SIZE_8_16 code units in the 8-bit and 16-bit libraries, and
 this is reached with the above pattern if the outer repetition is increased
 from 3 to 4. PCRE2 can be compiled to use larger internal pointers and thus
 handle larger compiled patterns, but it is better to try to rewrite your
@@ -98,7 +98,7 @@ the first time any match data block is passed to func:pcre2_match(). This is
 remembered with the match data block and re-used if that block is used for
 another match. It is freed when the match data block itself is freed.
 
-The size of the initial block is the larger of 20KiB or ten times the pattern's
+The size of the initial block is the larger of macroval:bytes,START_FRAMES_SIZE or macroval:START_FRAMES_COUNT times the pattern's
 frame size, unless the heap limit is less than this, in which case the heap
 limit is used. If the initial block proves to be too small during matching, it
 is replaced by a larger block, subject to the heap limit. The heap limit is

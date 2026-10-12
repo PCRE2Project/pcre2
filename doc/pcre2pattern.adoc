@@ -1796,7 +1796,7 @@ is matched against the pattern
 the ((?:red|white) (king|queen))
 ----
 
-the captured substrings are [.subject]`white queen` and [.subject]`queen`, and are numbered 1 and 2. The maximum number of capture groups is 65535.
+the captured substrings are [.subject]`white queen` and [.subject]`queen`, and are numbered 1 and 2. The maximum number of capture groups is macroval:MAX_GROUP_NUMBER.
 
 As a convenient shorthand, if any option settings are required at the start of
 a non-capturing group, the option letters may appear between the [.regex]`?` and the
@@ -1871,7 +1871,7 @@ using the Python syntax. PCRE2 supports both the Perl and the Python syntax.
 
 In PCRE2, a capture group can be named in one of three ways: [.regex]`(?<__name__>...)` or
 [.regex]`(?'__name__'...)` as in Perl, or [.regex]`(?P<__name__>...)` as in Python. Names may be up to
-128 code units long. When const:PCRE2_UTF is not set, they may contain only ASCII
+macroval:MAX_NAME_SIZE code units long. When const:PCRE2_UTF is not set, they may contain only ASCII
 alphanumeric characters and underscores, but must start with a non-digit. When
 const:PCRE2_UTF is set, the syntax of group names is extended to allow any Unicode
 letter or Unicode decimal digit. In other words, group names must match one of
@@ -2002,7 +2002,7 @@ items:
 If a quantifier does not follow a repeatable item, an error occurs. The
 general repetition quantifier specifies a minimum and maximum number of
 permitted matches by giving two numbers in curly brackets (braces), separated
-by a comma. The numbers must be less than 65536, and the first must be less
+by a comma. The numbers must be no greater than macroval:MAX_REPEAT_COUNT, and the first must be less
 than or equal to the second. For example,
 
 [source,regex]
@@ -2609,7 +2609,7 @@ If every top-level alternative matches a fixed length, for example
 (?<=colour|color)
 ----
 
-there is a limit of 65535 characters to the lengths, which do not have to be
+there is a limit of macroval:LOOKBEHIND_MAX characters to the lengths, which do not have to be
 the same, as this example demonstrates. This is the only kind of lookbehind
 supported by PCRE2 versions earlier than 10.43 and by the alternative matching
 function func:pcre2_dfa_match().
@@ -2624,7 +2624,7 @@ for example
 ----
 
 The maximum matching length for any branch of the lookbehind is limited to a
-value set by the calling program (default 255 characters). Unlimited repetition
+value set by the calling program (default macroval:MAX_VARLOOKBEHIND characters). Unlimited repetition
 (for example [.regex]`+\d*+`) is not supported. In some cases, the escape sequence [.regex]`+\K+`
 (see above)
 can be used instead of a lookbehind assertion at the start of a pattern to get
@@ -3549,7 +3549,7 @@ documentation.
 === Callouts with numerical arguments
 
 If you just want to have a means of identifying different callout points, put a
-number less than 256 after the letter C. For example, this pattern has two
+number no greater than macroval:MAX_CALLOUT_NUMBER after the letter C. For example, this pattern has two
 callout points:
 
 [source,regex]
@@ -3559,7 +3559,7 @@ callout points:
 
 If the const:PCRE2_AUTO_CALLOUT flag is passed to func:pcre2_compile(), numerical
 callouts are automatically installed before each item in the pattern. They are
-all numbered 255. If there is a conditional group in the pattern whose
+all numbered macroval:MAX_CALLOUT_NUMBER. If there is a conditional group in the pattern whose
 condition is an assertion, an additional callout is inserted just before the
 condition. An explicit callout may also be set at this position, as in this
 example:
@@ -3614,7 +3614,7 @@ skipped, and #-comments are recognized, exactly as in the rest of the pattern.
 const:PCRE2_EXTENDED and const:PCRE2_EXTENDED_MORE do not affect verb names unless
 const:PCRE2_ALT_VERBNAMES is also set.
 
-The maximum length of a name is 255 in the 8-bit library and 65535 in the
+The maximum length of a name is macroval:MAX_MARK_8 in the 8-bit library and macroval:MAX_MARK_16_32 in the
 16-bit and 32-bit libraries. If the name is empty, that is, if the closing
 parenthesis immediately follows the colon, the effect is as if the colon were
 not there. Any number of these verbs may occur in a pattern. Except for

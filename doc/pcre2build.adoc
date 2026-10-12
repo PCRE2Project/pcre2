@@ -279,7 +279,7 @@ Within a compiled pattern, offset values are used to point from one part to
 another (for example, from an opening parenthesis to an alternation
 metacharacter). By default, in the 8-bit and 16-bit libraries, two-byte values
 are used for these offsets, leading to a maximum size for a compiled pattern of
-around 64 thousand code units. This is sufficient to handle all but the most
+macroval:DEFAULT_MAX_PATTERN_SIZE_8_16 code units. This is sufficient to handle all but the most
 gigantic patterns. Nevertheless, some people do want to process truly enormous
 patterns, so it is possible to compile PCRE2 to use three-byte or four-byte
 offsets by adding a setting such as
@@ -302,7 +302,7 @@ its main loop. Putting a limit on this counter controls the amount of computing
 resource used by a single call to func:pcre2_match(). The limit can be changed
 at run time, as described in the
 xref:pcre2api.adoc[`pcre2api`]
-documentation. The default is 10 million, but this can be changed by adding a
+documentation. The default is macroval:MATCH_LIMIT, but this can be changed by adding a
 setting such as
 
 [source,shell]
@@ -320,7 +320,7 @@ search tree), the more memory is needed. There is an upper limit, specified in
 kibibytes (units of 1024 bytes). This limit can be changed at run time, as
 described in the
 xref:pcre2api.adoc[`pcre2api`]
-documentation. The default limit (in effect unlimited) is 20 million. You can
+documentation. The default limit (in effect unlimited) is macroval:HEAP_LIMIT. You can
 change this by a setting such as
 
 [source,shell]
@@ -360,7 +360,7 @@ The limit does not apply to JIT matching.
 
 Lookbehind assertions in which one or more branches can match a variable number
 of characters are supported only if there is a maximum matching length for each
-top-level branch. There is a limit to this maximum that defaults to 255
+top-level branch. There is a limit to this maximum that defaults to macroval:MAX_VARLOOKBEHIND
 characters. You can alter this default by a setting such as
 
 [source,shell]
@@ -510,12 +510,12 @@ they are not.
 
 `pcre2grep` uses an internal buffer to hold a "window" on the file it is
 scanning, in order to be able to output "before" and "after" lines when it
-finds a match. The default starting size of the buffer is 20KiB. The buffer
+finds a match. The default starting size of the buffer is macroval:bytes,PCRE2GREP_BUFSIZE. The buffer
 itself is three times this size, but because of the way it is used for holding
 "before" lines, the longest line that is guaranteed to be processable is the
 notional buffer size. If a longer line is encountered, `pcre2grep`
 automatically expands the buffer, up to a specified maximum size, whose default
-is 1MiB or the starting size, whichever is the larger. You can change the
+is macroval:bytes,PCRE2GREP_MAX_BUFSIZE or the starting size, whichever is the larger. You can change the
 default parameter values by adding, for example,
 
 [source,shell]

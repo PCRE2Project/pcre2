@@ -471,8 +471,8 @@ Each top-level branch of a lookbehind must have a limit for the number of
 characters it matches. If any branch can match a variable number of characters,
 the maximum for each branch is limited to a value set by the caller of
 func:pcre2_compile() or defaulted. The default is set when PCRE2 is built
-(ultimate default 255). If every branch matches a fixed number of characters,
-the limit for each branch is 65535 characters.
+(ultimate default macroval:MAX_VARLOOKBEHIND). If every branch matches a fixed number of characters,
+the limit for each branch is macroval:LOOKBEHIND_MAX characters.
 
 == Non-atomic lookaround assertions
 
