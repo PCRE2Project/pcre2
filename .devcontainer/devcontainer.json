@@ -1,0 +1,93 @@
+{
+  "name": "Default PCRE2 container",
+  "build": { "dockerfile": "Dockerfile" },
+
+  // Check out the submodule and any other post-checkout setup.
+  "postCreateCommand": ["${containerWorkspaceFolder}/.devcontainer/post-create.sh"],
+  "waitFor": "postCreateCommand",
+
+  // Configure extension features.
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // Configure tool-specific properties.
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      "extensions": [
+        "asciidoctor.asciidoctor-vscode",
+        "bazelbuild.vscode-bazel",
+        "EditorConfig.EditorConfig",
+        "github.vscode-github-actions",
+        // "ionutvmi.vscode-commands-executor",
+        "mesonbuild.mesonbuild",
+        "ms-python.python",
+        "ms-vscode.cmake-tools",
+        "ms-vscode.cpp-devtools",
+        "ms-vscode.cpptools",
+        "ms-vscode.hexeditor",
+        "ms-vscode.makefile-tools",
+        "redhat.vscode-yaml",
+        "shopify.ruby-lsp",
+        "ziglang.vscode-zig"
+      ],
+      "settings": {
+        "[c]": {
+          "editor.rulers": [
+            { "column": 80, "color": "#666666" },
+            { "column": 100, "color": "#ae0000" }
+          ]
+        },
+        "[python][ruby]": {
+          "editor.rulers": [
+            { "column": 80, "color": "#666666" },
+            { "column": 120, "color": "#ae0000" }
+          ]
+        },
+        "[meson][cmake]": {
+          "editor.rulers": [
+            { "column": 80, "color": "#666666" },
+            { "column": 120, "color": "#ae0000" }
+          ]
+        },
+        "editor.rulers": [
+          { "column": 78, "color": "#666666" },
+          { "column": 80, "color": "#cccccc" }
+        ],
+        "files.associations": {
+          "*.c.dist": "c",
+          "*.c.ebcdic-*": "c",
+          "*.c.non-standard": "c",
+          "*.h.generic": "c",
+          "*.h.in": "c"
+        },
+        "bazel.workspaceTree.enable": false,
+        "bazel.codeLens.enable": false,
+        "bazel.languageSupport.enable": false,
+        "C_Cpp.clang_format_style": "file:${workspaceFolder}/maint/formatting/.clang-format",
+        "C_Cpp.clang_format_path": "/usr/bin/clang-format-22",
+        "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+        // "cmake.configureOnOpen": false,
+        "cmake.useCMakePresets": "always",
+        "mesonbuild.configureOnOpen": false,
+        "mesonbuild.buildFolder": "${workspaceFolder}/build-meson",
+        "mesonbuild.downloadLanguageServer": false,
+        "mesonbuild.modifySettings": false,
+        // "vscode-commands-executor.startupRules": [
+        //   {
+        //     "conditions": ["hasFile: CMakeUserPresets.json"],
+        //     "commands": [
+        //       // Wait for CMake Tools activation before calling its preset setter.
+        //       { "id": "cmake.activeConfigurePresetName" },
+        //       { "id": "cmake.setConfigurePreset", "args": ["devcontainer-debug"] },
+        //       { "id": "cmake.configure" },
+        //       { "id": "cmake.build" }
+        //     ]
+        //   }
+        // ],
+        "zig.path": "/usr/local/bin/zig"
+      }
+    }
+  }
+}
