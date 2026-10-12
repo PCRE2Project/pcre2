@@ -305,6 +305,41 @@ module Pcre2UpdateAlways
     end
   end
 
+  # Verify the non-document release numbers maintained by UpdateRelease.
+  def validate_release_numbers
+    release = Pcre2Maintenance::CURRENT_RELEASE
+    info = Pcre2Maintenance::VERSION_INFO
+    cmake_release_components = {
+      'PCRE2_MAJOR' => 'pcre2_major',
+      'PCRE2_MINOR' => 'pcre2_minor',
+      'PCRE2_PRERELEASE' => 'pcre2_prerelease'
+    }
+
+    cmake = File.read('CMakeLists.txt', encoding: Encoding::UTF_8)
+    cmake_release_components.each do |variable, configure_name|
+      expected = info.fetch(configure_name)
+      unless cmake.match?(/^set\(#{variable} "#{Regexp.escape(expected)}"\)$/)
+        raise "Version number in CMakeLists.txt does not match current release"
+      end
+    end
+
+    meson = File.read('meson.build', encoding: Encoding::UTF_8)
+    unless meson.match?(/^\s*version:\s*'#{Regexp.escape(release)}',$/)
+      raise 'Version number in meson.build does not match current release'
+    end
+
+    module_bazel = File.read('MODULE.bazel', encoding: Encoding::UTF_8)
+    unless module_bazel.match?(/^\s+version = "#{Regexp.escape(release)}",$/)
+      raise 'Version number in MODULE.bazel does not match current release'
+    end
+
+    zig_release = release.sub(/\A(\d+\.\d+)(.*)\z/, '\1.0\2')
+    zig = File.read('build.zig.zon', encoding: Encoding::UTF_8)
+    unless zig.match?(/^\s+\.version = "#{Regexp.escape(zig_release)}",$/)
+      raise 'Version number in build.zig.zon does not match current release'
+    end
+  end
+
   # Regenerate release-maintained files, optionally limiting work to documentation.
   def update_always(arguments)
     raise ArgumentError, 'Usage: maint/UpdateAlways.rb [doc]' unless arguments.empty? || arguments == ['doc']
@@ -325,11 +360,7 @@ module Pcre2UpdateAlways
 
     update_sljit_zig_dependency
 
-    # TODO validate build.zig.zon's version number too, and CMake/meson.
-    # Generally check that UpdateRelease has been run!
-    unless File.read('MODULE.bazel', encoding: Encoding::UTF_8).include?("version = \"#{Pcre2Maintenance::CURRENT_RELEASE}\"")
-      raise 'Version number in MODULE.bazel does not match current release'
-    end
+    validate_release_numbers
 
     puts 'Done'
   end
