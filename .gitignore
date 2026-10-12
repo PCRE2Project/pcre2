@@ -3,8 +3,6 @@
 build/
 build-*/
 
-pages/
-
 *.a
 *.gcda
 *.gcno

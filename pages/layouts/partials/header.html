@@ -4,6 +4,7 @@
 
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="color-scheme" content="light dark" />
 
 	<link rel="icon" type="image/png" href="{{ "favicon-96x96.png" | relURL }}" sizes="96x96" />
 	<link rel="icon" type="image/svg+xml" href="{{ "favicon.svg" | relURL }}" />
@@ -11,6 +12,8 @@
 
 	<title>{{ if not .IsHome }}{{ .Title }} | {{ end }}{{ .Site.Title }}</title>
 
+	{{ $documentCSS := resources.Get "css/document.css" }}
+	<link rel="stylesheet" href="{{ $documentCSS.RelPermalink }}" type="text/css" media="all" />
 	<link rel="stylesheet" href="{{ "css/style.css" | relURL }}" type="text/css" media="all" />
 	<link rel="stylesheet" href="{{ "css/syntax.css" | relURL }}" type="text/css" media="all" />
 

@@ -1223,16 +1223,19 @@ The permitted values of \fIdirective\fP are as follows:
 .sp
 .RS 4
 .PD
-.TP 7
+.TP 25
 \fBPCRE2_OPTIMIZATION_FULL\fP
 .ad l
 Enable all optional performance optimizations. This is the default value.
-.TP 7
+.TP 25
 \fBPCRE2_OPTIMIZATION_NONE\fP
 .ad l
 Disable all optional performance optimizations.
-.TP 7
-\fBPCRE2_AUTO_POSSESS\fP, \fBPCRE2_AUTO_POSSESS_OFF\fP
+.TP 25
+\fBPCRE2_AUTO_POSSESS\fP
+.PD 0
+.TP 25
+\fBPCRE2_AUTO_POSSESS_OFF\fP
 .ad l
 Enable/disable "auto\-possessification" of variable quantifiers such as \f(CR*\fP and \f(CR+\fP.
 This optimization, for example, turns \f(CRa+b\fP into
@@ -1241,8 +1244,12 @@ backtracks into \f(CRa+\fP that can never be successful. However, if callouts ar
 use, auto\-possessification means that some callouts are never taken. You can
 disable this optimization if you want the matching functions to do a full,
 unoptimized search and run all the callouts.
-.TP 7
-\fBPCRE2_DOTSTAR_ANCHOR\fP, \fBPCRE2_DOTSTAR_ANCHOR_OFF\fP
+.PD
+.TP 25
+\fBPCRE2_DOTSTAR_ANCHOR\fP
+.PD 0
+.TP 25
+\fBPCRE2_DOTSTAR_ANCHOR_OFF\fP
 .ad l
 Enable/disable an optimization that is applied when \f(CR.*\fP is the first significant
 item in a top\-level branch of a pattern, and all the other branches also start
@@ -1251,14 +1258,18 @@ with \f(CR.*\fP or with \f(CR\(rsA\fP or \f(CR\(rsG\fP or \f(CR^\fP. Such a patt
 \f(CR^\fP items. Otherwise, the fact that any match must start either at the start of
 the subject or following a newline is remembered. Like other optimizations,
 this can cause callouts to be skipped.
-.RS 7
+.RS 25
 .sp
 Dotstar anchor optimization is automatically disabled for \f(CR.*\fP if it is inside an
 atomic group or a capture group that is the subject of a backreference, or if
 the pattern contains \f(CR(*PRUNE)\fP or \f(CR(*SKIP)\fP.
 .RE
-.TP 7
-\fBPCRE2_START_OPTIMIZE\fP, \fBPCRE2_START_OPTIMIZE_OFF\fP
+.PD
+.TP 25
+\fBPCRE2_START_OPTIMIZE\fP
+.PD 0
+.TP 25
+\fBPCRE2_START_OPTIMIZE_OFF\fP
 .ad l
 Enable/disable optimizations which cause matching functions to scan the subject
 string for specific code unit values before attempting a match. For example, if
@@ -1271,7 +1282,7 @@ Also, when callouts or \f(CR(*MARK)\fP items are in use, these "start\-up" optim
 can cause them to be skipped if the pattern is never actually used. The start\-up
 optimizations are in effect a pre\-scan of the subject that takes place before
 the pattern is run.
-.RS 7
+.RS 25
 .sp
 Disabling start\-up optimizations ensures that in cases where the result is "no
 match", the callouts do occur, and that items such as \f(CR(*COMMIT)\fP and \f(CR(*MARK)\fP are
@@ -1321,6 +1332,7 @@ that is returned is \f(CR1\fP. In this case, the optimizations do not affect the
 overall match result, which is still "no match", but they do affect the
 auxiliary information that is returned.
 .RE
+.PD
 .PD
 .RE
 .PP
@@ -2939,7 +2951,13 @@ are as follows:
 .RS 4
 .PD
 .TP 25
-\fBPCRE2_INFO_ALLOPTIONS\fP, \fBPCRE2_INFO_ARGOPTIONS\fP, \fBPCRE2_INFO_EXTRAOPTIONS\fP
+\fBPCRE2_INFO_ALLOPTIONS\fP
+.PD 0
+.TP 25
+\fBPCRE2_INFO_ARGOPTIONS\fP
+.PD 0
+.TP 25
+\fBPCRE2_INFO_EXTRAOPTIONS\fP
 .ad l
 .RS 25
 .sp
@@ -3050,6 +3068,7 @@ Dotstar anchoring has not been disabled with \fBPCRE2_DOTSTAR_ANCHOR_OFF\fP
 For patterns that are auto\-anchored, the \fBPCRE2_ANCHORED\fP bit is set in the
 options returned for \fBPCRE2_INFO_ALLOPTIONS\fP.
 .RE
+.PD
 .TP 25
 \fBPCRE2_INFO_BACKREFMAX\fP
 .ad l
@@ -3222,7 +3241,13 @@ should point to a \fBuint32_t\fP variable. The value is a lower bound to the
 length of any matching string. There may not be any strings of that length that
 do actually match, but every string that does match is at least that long.
 .TP 25
-\fBPCRE2_INFO_NAMECOUNT\fP, \fBPCRE2_INFO_NAMEENTRYSIZE\fP, \fBPCRE2_INFO_NAMETABLE\fP
+\fBPCRE2_INFO_NAMECOUNT\fP
+.PD 0
+.TP 25
+\fBPCRE2_INFO_NAMEENTRYSIZE\fP
+.PD 0
+.TP 25
+\fBPCRE2_INFO_NAMETABLE\fP
 .ad l
 PCRE2 supports the use of named as well as numbered capturing parentheses. The
 names are just an additional way of identifying the parentheses, which still
@@ -3285,6 +3310,7 @@ When writing code to extract data from named capture groups using the
 name\-to\-number map, remember that the length of the entries is likely to be
 different for each compiled pattern.
 .RE
+.PD
 .TP 25
 \fBPCRE2_INFO_NEWLINE\fP
 .ad l
@@ -3770,7 +3796,10 @@ Your program may crash or loop indefinitely or give wrong results.
 .RE
 .RE
 .TP 23
-\fBPCRE2_PARTIAL_HARD\fP, \fBPCRE2_PARTIAL_SOFT\fP
+\fBPCRE2_PARTIAL_HARD\fP
+.PD 0
+.TP 23
+\fBPCRE2_PARTIAL_SOFT\fP
 .ad l
 These options turn on the partial matching feature. A partial match occurs if
 the end of the subject string is reached successfully, but there are not enough
@@ -3797,6 +3826,7 @@ examples, in the
 \f(CRpcre2partial\fP
 documentation.
 .RE
+.PD
 .PD
 .RE
 .PP
@@ -5279,7 +5309,9 @@ description is not repeated here.
 .RS 4
 .PD 0
 .TP 19
-\fBPCRE2_PARTIAL_HARD\fP, \fBPCRE2_PARTIAL_SOFT\fP
+\fBPCRE2_PARTIAL_HARD\fP
+.TP 19
+\fBPCRE2_PARTIAL_SOFT\fP
 .ad l
 These have the same general effect as they do for pcre2_match(), but the
 details are slightly different. When \fBPCRE2_PARTIAL_HARD\fP is set for

@@ -46,19 +46,102 @@ conditionals, or `pass:[]` workarounds.
 
 HTML rendering uses the `asciidoctor-html5s` gem through `Pcre2HtmlConverter`,
 registered as the `html5` backend in `maint/AsciidocConverterPcre2.rb`. The
-subclass is reserved for PCRE2-specific overrides. It produces semantic HTML
-with fewer presentation wrappers; the default Asciidoctor CSS is not compatible
-with all of its markup. The gem's typography substitutions apply to both HTML
+subclass adds list layout semantics to the backend's HTML. It produces semantic
+HTML with fewer presentation wrappers; PCRE2 owns the stylesheet rather than
+using the default Asciidoctor styling. The gem's typography substitutions apply to both HTML
 and manpages: `--` becomes an en dash and `---` becomes an em dash in ordinary
 prose. The manpage converter remains separate.
 
 The extension supplies shared defaults before the document header is parsed:
-`lang=en`, `source-highlighter=rouge`, and, for HTML only, `nofooter`. Document
+`lang=en`, `source-highlighter=rouge`, and, for HTML only, `nofooter`,
+`stylesheet=css/pcre2.css`, `linkcss`, and `docrole=offline-manual`. Document
 headers can override or unset these defaults, and CLI/API attribute locks are
 respected. HTML uses Asciidoctor's Rouge integration; the manpage converter
-continues to highlight C source independently. Rendering commands specify only
-the input, backend, extension, output, and `--failure-level WARN` to reject
-documentation warnings.
+continues to highlight C source independently. Rouge supplies HTML token classes,
+but its stock stylesheet is disabled; token colours live in our shared CSS.
+Rendering rejects documentation warnings.
+
+### The two HTML consumers
+
+`pages/maint/Build.py` calls `maint/AsciidocConverterPcre2.rb --embedded
+--output-dir content/doc` with all `doc/*.adoc` sources in one Ruby process.
+Asciidoctor calls this **embedded** mode (`header_footer: false`); **standalone**
+mode means a complete HTML document, and is used for distributed manuals instead.
+The site builder adds Hugo front matter and renames the index to `_index.html`.
+Hugo consumes only HTML and Markdown, never AsciiDoc or `doc/html`. The source
+stock header is suppressed in fragments; the HTML postprocessor supplies the
+manual title (using the site's page name), source version and revision date.
+Hugo still supplies the site shell and browser page title. TOCs and footnotes
+remain in the fragment.
+
+A Nokogiri HTML5 DOM pass normalizes local anchor `href` attributes after
+conversion, including authored links, linked images and raw HTML, not just
+Asciidoctor xrefs. Known flat manual links become `./target.html` offline,
+`./target/` from the Hugo manual index, or `./../target/` between Hugo manuals.
+Index links become the Hugo documentation section root, including any query or
+fragment. Sibling pages need the parent step because Hugo adds a directory level
+for each manual. Same-page fragments, absolute URLs, mailto and root-relative
+links are untouched. Unrelated local files retain their path and suffix.
+Do not change correct source xrefs or URLs to accommodate either output.
+
+`maint/UpdateAlways.rb doc` generates complete documents and bundles CSS in
+`doc/html/css`. Standalone HTML requires no network access and does not ship
+font assets: it prefers installed Fira fonts, with sans-serif and monospace
+fallback stacks. Shared light/dark SVG sources in `doc/assets/images` are mounted
+by Hugo and copied into `doc/html/images`. Standalone manuals have a minimal
+Index/homepage navbar, an index-page banner, and a full-width footer band.
+Both sites provide color-scheme and theme-color metadata.
+
+The shared source is `doc/assets/css/document.css`: colours, font stacks,
+ragged-right text without automatic hyphenation, block rhythm, lists, tables,
+admonitions, TOCs, and Rouge colours. This is deliberately a global typography
+and reset stylesheet, not isolated to `.prose`: plain HTML establishes the same
+norms in both consumers. Font sizes use `rem`; line heights and vertical spacing
+use the root line height (`rlh`, 24px at the 16px root). Horizontal indents use a
+16px `--tab`, usually in pairs. Semantic document sections use `display: contents`
+within `.prose`; homepage/layout sections are not flattened. First-heading
+spacing explicitly accounts for the retained DOM ancestry.
+Ordinary Goldmark lists use the default non-compact spacing; definition lists
+remain stacked. Asciidoctor definition labels use separate lines for aliases,
+with the last short label aligned to the description's first baseline. A common
+double-tab indent is selected using the existing label-width heuristic;
+`--tab-width` is an integer tab count. The browser wraps long terms above the
+description, without a `long-term` classification. An 8px minimum column gap
+prevents touching text; wrapped descriptions also have a half-line vertical gap
+and retain the same indent. Extremely
+narrow columns cap that indent at half the available width.
+Manpages retain their existing width heuristic and formatting, except that
+multi-term labels now appear on separate lines rather than comma-joined.
+
+Native tables fill the reading column, preserve Asciidoctor column proportions,
+wrap long cell content, and have consistent padding and striping. Asciidoctor's
+table wrapper retains scrolling for exceptionally wide content. Rouge and Chroma highlighting
+remain separate for now.
+
+`pages/static/css/style.css` owns the Hugo shell and its local `@font-face`
+declarations; the font licence stays on the Hugo site only. Fonts come from
+Mozilla Fira commit `fd8c8c0a3d353cd99e8ca1662942d165e6961407`.
+Fira Sans uses genuine 400/600/700 weights in light mode and 350 (Book)/500/600
+in dark mode and print, with matching italic faces. Mono uses its actual
+400/500/700 weights. Synthetic weight is disabled; Mono may synthesize italic.
+`doc/assets/css/standalone.css` supplies the standalone shell. Each shell owns
+its width and outer gutters; brand tokens and content rhythm are shared. Title
+decoration belongs to the shared styles, with `.document-title` for shells that
+add small, neutral, right-aligned metadata below a heading. Each shell supplies
+its own print layout and responsive TOC placement: an inline TOC on narrow
+screens and in print, and a sticky, scrollable sidebar when the reading column
+and TOC fit at 1180px or wider.
+Hugo mounts the shared source as an asset; the generated `doc/html/css/pcre2.css`
+concatenates the shared and standalone styles. Edit the sources, not generated
+CSS. The tarball includes the CSS sources but installs only the generated bundle.
+
+Run `ruby maint/AsciidocTest.rb` for converter regression tests. Build the full
+site with `HUGO_BASE_URL=https://example.org/pcre2/ python3 pages/maint/Build.py`
+(requires Ruby gems, Hugo, and Node/npm for Pagefind).
+Run `python3 pages/maint/TestStyles.py` for rendered style regression tests
+(also requires the Python `playwright` package and `python3 -m playwright install
+--with-deps chromium`). It builds isolated Asciidoctor and Goldmark fixtures and checks
+desktop/mobile, light/dark, print, asset ownership, and shell/content behavior.
 
 ## Inline public API vocabulary
 
@@ -372,7 +455,13 @@ useful label width from the distribution of visible term lengths, using a
 compact fallback when a strict majority do not fit within its maximum. Lists
 whose item bodies contain additional blocks have normal paragraph spacing;
 simple lists are compact. A numeric `width` attribute may override the
-calculation when a particular list needs it.
+calculation when a particular list needs it. HTML uses the same width heuristic
+and exports `compact` or `spaced` on the `dl`, `ul`, or `ol` itself, including
+nested lists. Each definition-list entry groups its term and description in a
+`div.dlist-item`; aliases share one term separated by commas. Flexbox puts short
+terms beside descriptions, long terms above them, and stacks all terms on small
+screens. Inter-item spacing in a `spaced` list equals paragraph spacing; a
+`compact` list has none.
 
 Use `::` for a top-level term and `:::` for a nested description list. A group
 of consecutive terms may share the description attached to the final term.

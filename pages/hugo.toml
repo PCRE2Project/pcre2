@@ -3,11 +3,21 @@ languageCode = 'en-us'
 title = 'PCRE2 - Perl-Compatible Regular Expressions'
 disableKinds = ["taxonomy", "term", "rss"]
 
+[module]
+  [[module.mounts]]
+    source = 'assets'
+    target = 'assets'
+  [[module.mounts]]
+    source = '../doc/assets/css/document.css'
+    target = 'assets/css/document.css'
+  [[module.mounts]]
+    source = 'static'
+    target = 'static'
+  [[module.mounts]]
+    source = '../doc/assets/images'
+    target = 'static/images'
+
 [markup]
-  [markup.asciidocExt]
-    extensions = ['AsciidocConverterPcre2']
-    failureLevel = 'warn'
-    preserveTOC = true
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true
@@ -16,8 +26,7 @@ disableKinds = ["taxonomy", "term", "rss"]
 
 [security]
   [security.exec]
-    allow = ['^asciidoctor$']
-    osEnv = ['(?i)^(PATH|PATHEXT|APPDATA|TMP|TEMP|TERM|RUBYLIB)$']
+    allow = []
 
 [params]
   release = 'Unknown'

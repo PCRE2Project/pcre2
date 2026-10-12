@@ -1,61 +1,20 @@
 :root {
-  --colour-fg: #262626;
-  --colour-bg: #fdfdfd;
-  --colour-primary-bright: #0085cc;
-  --colour-primary-muted: #006094;
-  --colour-neutral-1: #888888;
-  --colour-neutral-2: #aaaaaa;
-  --colour-neutral-3: #cccccc;
-  --colour-pre: #f6f8fa;
-  --bg-dots: url(../images/dots-light.svg);
-  --bg-nav: url(../images/pcre2-hero-light.svg);
-
   --content-width: 850px;
   --content-gutter: 16px;
+  --toc-width: 240px;
+  --bg-dots: url(../images/dots-light.svg);
+  --bg-nav: url(../images/pcre2-hero-light.svg);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --colour-fg: #f0f6fc;
-    --colour-bg: #0d1417;
-    --colour-primary-bright: #33b8ff;
-    --colour-primary-muted: #0075b4;
-    --colour-neutral-1: #888888;
-    --colour-neutral-2: #666666;
-    --colour-neutral-3: #444444;
-    --colour-pre: #151b23;
     --bg-dots: url(../images/dots-dark.svg);
     --bg-nav: url(../images/pcre2-hero-dark.svg);
   }
 }
 
-:root, body, p, h1, h2, h3, h4, h5, h6, pre, blockquote, ul, ol, dl, li, dd, dt {
-  margin: 0;
-  padding: 0;
-}
-
 html {
   background-color: var(--colour-primary-bright);
-}
-
-body {
-  color: var(--colour-fg);
-  background-color: var(--colour-bg);
-  overflow-wrap: break-word;
-}
-
-body, input {
-  font-family: 'Fira Sans', Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif;
-}
-
-pre {
-  text-align: start;
-}
-
-pre, code, kbd {
-  font-family: 'Fira Mono', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
-  overflow-wrap: initial;
-  hyphens: initial;
 }
 
 input[type="text"] {
@@ -72,44 +31,11 @@ input[type="text"] {
   }
 }
 
-hr {
-  border: none;
-  border-top: 1px solid var(--colour-neutral-3);
-  margin: 16px 0 15px 0;
-}
-
-details {
-  padding-left: 24px;
-}
-summary {
-  cursor: pointer;
-  list-style-position: outside;
-}
-
-a {
-  color: var(--colour-primary-muted);
-}
-a:hover, a:focus {
-  color: var(--colour-primary-bright);
-}
-
-@media (prefers-color-scheme: dark) {
-  a {
-    color: var(--colour-primary-bright);
-  }
-  a:hover, a:focus {
-    color: var(--colour-primary-muted);
-  }
-}
-
 body {
   min-height: 100vh;
   width: 100%;
   display: flex;
   flex-direction: column;
-  font-size: 16px;
-  line-height: 24px;
-
   & > * {
     padding: 0 var(--content-gutter);
     & > * {
@@ -120,129 +46,19 @@ body {
   }
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
-}
-
-h1 {
-  font-size: 32px;
-  line-height: 48px;
-}
-h2 {
-  font-size: 24px;
-  line-height: 36px;
-  margin: 32px 0 16px;
-}
-h3 {
-  font-size: 20px;
-  line-height: 30px;
-  margin: 24px 0 12px;
-}
-h4 {
-  font-size: 18px;
-  line-height: 24px;
-  margin: 16px 0 8px;
-}
-:is(h2, h3, h4):first-child {
-  margin-top: 0;
-}
-
-h1, .man-h1, .guide-h1 {
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--colour-neutral-3);
-  margin: 0 0 32px;
-}
-
-:is(p, pre, blockquote, ul, ol, table):not(:first-child) {
-  margin: 16px 0;
-}
-
-:is(li, dt):not(:first-child) {
-  margin: 16px 0 0;
-}
-
-dt {
-  font-weight: 600;
-}
-ol, ul, dd {
-  padding-left: 32px;
-}
-
-pre {
-  padding: 8px;
-  background: var(--colour-pre);
-  border: 1px solid var(--colour-neutral-3);
-  border-radius: 2px;
-  overflow-x: auto;
-}
 .pre {
   border: 1px solid var(--colour-neutral-3);
   border-radius: 2px;
 }
 
-strong, b {
-  font-weight: 600;
-}
-:is(pre, code) :is(strong, b) {
-  font-weight: 500;
-}
-
-img {
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-table, caption, tbody, tfoot, thead, tr, th, td {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font: inherit;
-  vertical-align: baseline;
-}
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-  border-top: 1px solid var(--colour-neutral-3);
-}
-td, th {
-  padding: 8px 16px 8px 8px;
-}
-tr {
-  border-bottom: 1px solid var(--colour-neutral-3);
-}
-thead tr {
-  background-color: var(--colour-pre);
-}
-thead + tbody tr:first-child {
-  border-top: 2px solid var(--colour-neutral-2);
-}
-tbody tr:nth-child(odd) {
-  background-color: var(--colour-pre);
-}
-thead + tbody tr {
-  &:nth-child(odd) {
-    background-color: transparent;
-  }
-  &:nth-child(even) {
-    background-color: var(--colour-pre);
-  }
-}
-th {
-  font-weight: 600;
-
-  pre, code {
-    font-weight: 500;
-  }
-}
-
-header {
+body > header {
   background-color: var(--colour-primary-bright);
   box-shadow: 0px 0px 2px 1px var(--colour-neutral-2);
   position: relative;
   z-index: 1;
 }
 
-nav {
+body > header nav {
   padding-top: 12px;
   margin-bottom: 12px;
   display: flex;
@@ -570,28 +386,25 @@ nav {
   }
 }
 
-.man-h1, .guide-h1 {
+.guide-h1 {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
   align-items: baseline;
   flex-wrap: wrap;
 
-  & > h1 {
-    padding-bottom: 0;
-    border-bottom: none;
-    margin-bottom: 0;
-    min-width: 0;
-    flex-grow: 1;
-  }
-
   & > :not(:first-child) {
-    text-transform: uppercase;
-    font-size: 12px;
-    line-height: 20px;
-    padding-left: 24px;
+    font-size: 0.875rem;
+    line-height: 1rlh;
+    padding-left: calc(2 * var(--tab));
+    color: var(--colour-neutral-1);
     text-align: end;
   }
+}
+
+.guide-h1 > h1 {
+  min-width: 0;
+  flex-grow: 1;
 }
 
 .guide-content {
@@ -599,70 +412,152 @@ nav {
   line-height: 1.5em;
 }
 
-main {
-  hyphens: auto;
-  text-align: justify;
+main > div {
+  padding: 1rlh 0 2rlh;
 }
 
-main > div {
-  padding: 32px 0;
+.document-layout > .prose { min-width: 0; }
+
+@media (min-width: 1180px) {
+  .document-page:has([role="doc-toc"]) {
+    max-width: calc(var(--content-width) + var(--toc-width) + 2 * var(--tab));
+  }
+  .document-layout:has([role="doc-toc"]) {
+    display: grid;
+    grid-template-columns: minmax(0, var(--content-width)) var(--toc-width);
+    column-gap: calc(2 * var(--tab));
+    align-items: start;
+  }
+  .document-layout > .prose { grid-area: 1 / 1; }
+  .document-layout > [role="doc-toc"] {
+    grid-area: 1 / 2;
+    position: sticky;
+    top: 0.5rlh;
+    max-height: calc(100vh - 1rlh);
+    overflow: auto;
+    box-sizing: border-box;
+  }
+  .document-page:has([role="doc-toc"]) > .document-title { max-width: var(--content-width); }
 }
 
 .footer-glue {
   flex-grow: 1;
 }
 
-footer {
-  height: 32px;
+body > footer {
+  height: 1rlh;
   background-color: var(--colour-primary-bright);
   box-shadow: 0px 0px 2px 1px var(--colour-neutral-2);
 }
 
-/* fira-sans-regular - latin_latin-ext */
+@media print {
+  html { background: var(--colour-bg); }
+  body { min-height: 0; }
+  body > header, body > footer, .footer-glue, .index-intro {
+    display: none;
+  }
+  body > main {
+    padding: 0;
+  }
+  main > div {
+    max-width: none;
+    padding: 0;
+  }
+  .guide-content { font-size: 1rem; }
+  .document-layout:has([role="doc-toc"]) { display: block; }
+  .document-layout > [role="doc-toc"] { position: static; max-height: none; overflow: visible; }
+  .document-page:has([role="doc-toc"]) > .document-title { max-width: none; }
+}
+
 @font-face {
   font-display: swap;
   font-family: 'Fira Sans';
   font-style: normal;
   font-weight: 400;
-  src: url('../fonts/fira-sans-v17-latin_latin-ext-regular.woff2') format('woff2');
+  src: url('../fonts/FiraSans-Regular.woff2') format('woff2');
 }
-/* fira-sans-italic - latin_latin-ext */
 @font-face {
   font-display: swap;
   font-family: 'Fira Sans';
   font-style: italic;
   font-weight: 400;
-  src: url('../fonts/fira-sans-v17-latin_latin-ext-italic.woff2') format('woff2');
+  src: url('../fonts/FiraSans-Italic.woff2') format('woff2');
 }
-/* fira-sans-600 - latin_latin-ext */
 @font-face {
   font-display: swap;
   font-family: 'Fira Sans';
   font-style: normal;
   font-weight: 600;
-  src: url('../fonts/fira-sans-v17-latin_latin-ext-600.woff2') format('woff2');
+  src: url('../fonts/FiraSans-SemiBold.woff2') format('woff2');
 }
-/* fira-sans-600italic - latin_latin-ext */
 @font-face {
   font-display: swap;
   font-family: 'Fira Sans';
   font-style: italic;
   font-weight: 600;
-  src: url('../fonts/fira-sans-v17-latin_latin-ext-600italic.woff2') format('woff2');
+  src: url('../fonts/FiraSans-SemiBoldItalic.woff2') format('woff2');
 }
-/* fira-mono-regular - latin_latin-ext */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-display: swap;
   font-family: 'Fira Mono';
   font-style: normal;
   font-weight: 400;
-  src: url('../fonts/fira-mono-v14-latin_latin-ext-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../fonts/FiraMono-Regular.woff2') format('woff2');
 }
-/* fira-mono-500 - latin_latin-ext */
 @font-face {
-  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-display: swap;
   font-family: 'Fira Mono';
   font-style: normal;
   font-weight: 500;
-  src: url('../fonts/fira-mono-v14-latin_latin-ext-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('../fonts/FiraMono-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 350;
+  src: url('../fonts/FiraSans-Book.woff2') format('woff2');
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Fira Sans';
+  font-style: italic;
+  font-weight: 350;
+  src: url('../fonts/FiraSans-BookItalic.woff2') format('woff2');
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../fonts/FiraSans-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Fira Sans';
+  font-style: italic;
+  font-weight: 500;
+  src: url('../fonts/FiraSans-MediumItalic.woff2') format('woff2');
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../fonts/FiraSans-Bold.woff2') format('woff2');
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Fira Sans';
+  font-style: italic;
+  font-weight: 700;
+  src: url('../fonts/FiraSans-BoldItalic.woff2') format('woff2');
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Fira Mono';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../fonts/FiraMono-Bold.woff2') format('woff2');
 }

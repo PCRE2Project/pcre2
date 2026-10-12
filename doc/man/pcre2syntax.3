@@ -1239,20 +1239,36 @@ Any Unicode newline sequence
 .sp
 .RS 4
 .PD 0
-.TP 7
-\f(CR(?=...)\fP, \f(CR(*pla:...)\fP, \f(CR(*positive_lookahead:...)\fP
+.TP 26
+\f(CR(?=...)\fP
+.TP 26
+\f(CR(*pla:...)\fP
+.TP 26
+\f(CR(*positive_lookahead:...)\fP
 .ad l
 Positive lookahead
-.TP 7
-\f(CR(?!...)\fP, \f(CR(*nla:...)\fP, \f(CR(*negative_lookahead:...)\fP
+.TP 26
+\f(CR(?!...)\fP
+.TP 26
+\f(CR(*nla:...)\fP
+.TP 26
+\f(CR(*negative_lookahead:...)\fP
 .ad l
 Negative lookahead
-.TP 7
-\f(CR(?<=...)\fP, \f(CR(*plb:...)\fP, \f(CR(*positive_lookbehind:...)\fP
+.TP 26
+\f(CR(?<=...)\fP
+.TP 26
+\f(CR(*plb:...)\fP
+.TP 26
+\f(CR(*positive_lookbehind:...)\fP
 .ad l
 Positive lookbehind
-.TP 7
-\f(CR(?<!...)\fP, \f(CR(*nlb:...)\fP, \f(CR(*negative_lookbehind:...)\fP
+.TP 26
+\f(CR(?<!...)\fP
+.TP 26
+\f(CR(*nlb:...)\fP
+.TP 26
+\f(CR(*negative_lookbehind:...)\fP
 .ad l
 Negative lookbehind
 .PD
@@ -1272,13 +1288,21 @@ These assertions are specific to PCRE2 and are not Perl\-compatible.
 .sp
 .RS 4
 .PD 0
-.TP 7
-\f(CR(?*...)\fP, \f(CR(*napla:...)\fP, \f(CR(*non_atomic_positive_lookahead:...)\fP
+.TP 13
+\f(CR(?*...)\fP
+.TP 13
+\f(CR(*napla:...)\fP
+.TP 13
+\f(CR(*non_atomic_positive_lookahead:...)\fP
 .ad l
 Synonyms for non\-atomic
 positive lookahead
-.TP 7
-\f(CR(?<*...)\fP, \f(CR(*naplb:...)\fP, \f(CR(*non_atomic_positive_lookbehind:...)\fP
+.TP 13
+\f(CR(?<*...)\fP
+.TP 13
+\f(CR(*naplb:...)\fP
+.TP 13
+\f(CR(*non_atomic_positive_lookbehind:...)\fP
 .ad l
 Synonyms for non\-atomic
 positive lookbehind
@@ -1338,13 +1362,17 @@ Name
 .sp
 .RS 4
 .PD 0
-.TP 7
-\f(CR(*script_run:...)\fP, \f(CR(*sr:...)\fP
+.TP 25
+\f(CR(*script_run:...)\fP
+.TP 25
+\f(CR(*sr:...)\fP
 .ad l
 Script run; can be
 backtracked into
-.TP 7
-\f(CR(*atomic_script_run:...)\fP, \f(CR(*asr:...)\fP
+.TP 25
+\f(CR(*atomic_script_run:...)\fP
+.TP 25
+\f(CR(*asr:...)\fP
 .ad l
 Atomic script run
 .PD
@@ -1478,13 +1506,21 @@ the recursion (this feature is not supported by Perl).
 .sp
 .RS 4
 .PD 0
-.TP 7
+.TP 24
 \f(CR(?R(\fP\fIgrouplist\fP\f(CR))\fP
 .ad l
 Recurse whole pattern, returning capture groups
 (PCRE2 extension)
-.TP 7
-\f(CR(?\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?+\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?\-\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?&\fP\fIname\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?P>\fP\fIname\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
+.TP 24
+\f(CR(?\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
+.TP 24
+\f(CR(?+\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
+.TP 24
+\f(CR(?\-\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
+.TP 24
+\f(CR(?&\fP\fIname\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
+.TP 24
+\f(CR(?P>\fP\fIname\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
 .ad l
 Call subroutine, returning capture groups
 (PCRE2 extension)

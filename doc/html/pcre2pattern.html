@@ -1,558 +1,17 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Specification of the regular expressions supported by PCRE2"><title>pcre2pattern(3)</title><style>/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
-/* Uncomment the following line when using as a custom stylesheet */
-/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
-html{font-family:sans-serif;-webkit-text-size-adjust:100%}
-a{background:none}
-a:focus{outline:thin dotted}
-a:active,a:hover{outline:0}
-h1{font-size:2em;margin:.67em 0}
-b,strong{font-weight:bold}
-abbr{font-size:.9em}
-abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
-dfn{font-style:italic}
-hr{height:0}
-mark{background:#ff0;color:#000}
-code,kbd,pre,samp{font-family:monospace;font-size:1em}
-pre{white-space:pre-wrap}
-q{quotes:"\201C" "\201D" "\2018" "\2019"}
-small{font-size:80%}
-sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
-sup{top:-.5em}
-sub{bottom:-.25em}
-img{border:0}
-svg:not(:root){overflow:hidden}
-figure{margin:0}
-audio,video{display:inline-block}
-audio:not([controls]){display:none;height:0}
-fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
-legend{border:0;padding:0}
-button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
-button,input{line-height:normal}
-button,select{text-transform:none}
-button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
-button[disabled],html input[disabled]{cursor:default}
-input[type=checkbox],input[type=radio]{padding:0}
-button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
-textarea{overflow:auto;vertical-align:top}
-table{border-collapse:collapse;border-spacing:0}
-*,::before,::after{box-sizing:border-box}
-html,body{font-size:100%}
-body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
-a:hover{cursor:pointer}
-img,object,embed{max-width:100%;height:auto}
-object,embed{height:100%}
-img{-ms-interpolation-mode:bicubic}
-.left{float:left!important}
-.right{float:right!important}
-.text-left{text-align:left!important}
-.text-right{text-align:right!important}
-.text-center{text-align:center!important}
-.text-justify{text-align:justify!important}
-.hide{display:none}
-img,object,svg{display:inline-block;vertical-align:middle}
-textarea{height:auto;min-height:50px}
-select{width:100%}
-.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
-div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
-a{color:#2156a5;text-decoration:underline;line-height:inherit}
-a:hover,a:focus{color:#1d4b8f}
-a img{border:0}
-p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
-p aside{font-size:.875em;line-height:1.35;font-style:italic}
-h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
-h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
-h1{font-size:2.125em}
-h2{font-size:1.6875em}
-h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
-h4,h5{font-size:1.125em}
-h6{font-size:1em}
-hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
-em,i{font-style:italic;line-height:inherit}
-strong,b{font-weight:bold;line-height:inherit}
-small{font-size:60%;line-height:inherit}
-code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
-ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
-ul,ol{margin-left:1.5em}
-ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.circle{list-style-type:circle}
-ul.disc{list-style-type:disc}
-ul.square{list-style-type:square}
-ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
-ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
-dl dt{margin-bottom:.3125em;font-weight:bold}
-dl dd{margin-bottom:1.25em}
-blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
-blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
-@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
-h1{font-size:2.75em}
-h2{font-size:2.3125em}
-h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
-h4{font-size:1.4375em}}
-table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
-table thead,table tfoot{background:#f7f8f7}
-table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
-table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
-table tr.even,table tr.alt{background:#f8f8f7}
-table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
-h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
-h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
-.center{margin-left:auto;margin-right:auto}
-.stretch{width:100%}
-.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
-.clearfix::after,.float-group::after{clear:both}
-:not(pre).nobreak{word-wrap:normal}
-:not(pre).nowrap{white-space:nowrap}
-:not(pre).pre-wrap{white-space:pre-wrap}
-:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
-pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
-pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
-em em{font-style:normal}
-strong strong{font-weight:400}
-.keyseq{color:rgba(51,51,51,.8)}
-kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
-.keyseq kbd:first-child{margin-left:0}
-.keyseq kbd:last-child{margin-right:0}
-.menuseq,.menuref{color:#000}
-.menuseq b:not(.caret),.menuref{font-weight:inherit}
-.menuseq{word-spacing:-.02em}
-.menuseq b.caret{font-size:1.25em;line-height:.8}
-.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
-b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
-b.button::before{content:"[";padding:0 3px 0 2px}
-b.button::after{content:"]";padding:0 2px 0 3px}
-p a>code:hover{color:rgba(0,0,0,.9)}
-#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
-#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
-#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
-#content{margin-top:1.25em}
-#content::before{content:none}
-#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
-#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
-#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
-#header .details span:first-child{margin-left:-.125em}
-#header .details span.email a{color:rgba(0,0,0,.85)}
-#header .details br{display:none}
-#header .details br+span::before{content:"\00a0\2013\00a0"}
-#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
-#header .details br+span#revremark::before{content:"\00a0|\00a0"}
-#header #revnumber{text-transform:capitalize}
-#header #revnumber::after{content:"\00a0"}
-#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
-#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
-#toc>ul{margin-left:.125em}
-#toc ul.sectlevel0>li>a{font-style:italic}
-#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
-#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
-#toc li{line-height:1.3334;margin-top:.3334em}
-#toc a{text-decoration:none}
-#toc a:active{text-decoration:underline}
-#toctitle{color:#7a2518;font-size:1.2em}
-@media screen and (min-width:768px){#toctitle{font-size:1.375em}
-body.toc2{padding-left:15em;padding-right:0}
-body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
-#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
-#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
-#toc.toc2>ul{font-size:.9em;margin-bottom:0}
-#toc.toc2 ul ul{margin-left:0;padding-left:1em}
-#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
-body.toc2.toc-right{padding-left:0;padding-right:15em}
-body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
-@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
-#toc.toc2{width:20em}
-#toc.toc2 #toctitle{font-size:1.375em}
-#toc.toc2>ul{font-size:.95em}
-#toc.toc2 ul ul{padding-left:1.25em}
-body.toc2.toc-right{padding-left:0;padding-right:20em}}
-#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
-#content #toc>:first-child{margin-top:0}
-#content #toc>:last-child{margin-bottom:0}
-#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
-#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
-#content{margin-bottom:.625em}
-.sect1{padding-bottom:.625em}
-@media screen and (min-width:768px){#content{margin-bottom:1.25em}
-.sect1{padding-bottom:1.25em}}
-.sect1:last-child{padding-bottom:0}
-.sect1+.sect1{border-top:1px solid #e7e7e9}
-#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
-#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
-#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
-#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
-#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
-details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
-details{margin-left:1.25rem}
-details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
-details>summary::-webkit-details-marker{display:none}
-details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
-details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
-details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
-.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
-table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
-.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
-.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
-.admonitionblock>table td.icon{text-align:center;width:80px}
-.admonitionblock>table td.icon img{max-width:none}
-.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
-.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
-.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
-.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
-.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
-@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
-@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
-.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
-.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
-.listingblock>.content{position:relative}
-.listingblock pre>code{display:block}
-.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
-.listingblock:hover code[data-lang]::before{display:block}
-.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
-.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
-.listingblock pre.highlightjs{padding:0}
-.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
-.listingblock pre.prettyprint{border-width:0}
-.prettyprint{background:#f7f7f8}
-pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
-pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
-pre.prettyprint li code[data-lang]::before{opacity:1}
-pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
-table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
-table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
-table.linenotable td.code{padding-left:.75em}
-table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
-pre.pygments span.linenos{display:inline-block;margin-right:.75em}
-.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
-.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
-.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
-.quoteblock blockquote{margin:0;padding:0;border:0}
-.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
-.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
-.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
-.verseblock{margin:0 1em 1.25em}
-.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
-.verseblock pre strong{font-weight:400}
-.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
-.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
-.quoteblock .attribution br,.verseblock .attribution br{display:none}
-.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
-.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
-.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
-.quoteblock.abstract{margin:0 1em 1.25em;display:block}
-.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
-.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
-.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
-.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
-.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
-p.tableblock:last-child{margin-bottom:0}
-td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
-td.tableblock>.content>:last-child{margin-bottom:-1.25em}
-table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
-table.grid-all>*>tr>*{border-width:1px}
-table.grid-cols>*>tr>*{border-width:0 1px}
-table.grid-rows>*>tr>*{border-width:1px 0}
-table.frame-all{border-width:1px}
-table.frame-ends{border-width:1px 0}
-table.frame-sides{border-width:0 1px}
-table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
-table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
-table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
-table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
-table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
-th.halign-left,td.halign-left{text-align:left}
-th.halign-right,td.halign-right{text-align:right}
-th.halign-center,td.halign-center{text-align:center}
-th.valign-top,td.valign-top{vertical-align:top}
-th.valign-bottom,td.valign-bottom{vertical-align:bottom}
-th.valign-middle,td.valign-middle{vertical-align:middle}
-table thead th,table tfoot th{font-weight:bold}
-tbody tr th{background:#f7f8f7}
-tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
-p.tableblock>code:only-child{background:none;padding:0}
-p.tableblock{font-size:1em}
-ol{margin-left:1.75em}
-ul li ol{margin-left:1.5em}
-dl dd{margin-left:1.125em}
-dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
-li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
-ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
-ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
-ul.unstyled,ol.unstyled{margin-left:0}
-li>p:empty:only-child::before{content:"";display:inline-block}
-ul.checklist>li>p:first-child{margin-left:-1em}
-ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
-ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
-ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
-ul.inline>li{margin-left:1.25em}
-.unstyled dl dt{font-weight:400;font-style:normal}
-ol.arabic{list-style-type:decimal}
-ol.decimal{list-style-type:decimal-leading-zero}
-ol.loweralpha{list-style-type:lower-alpha}
-ol.upperalpha{list-style-type:upper-alpha}
-ol.lowerroman{list-style-type:lower-roman}
-ol.upperroman{list-style-type:upper-roman}
-ol.lowergreek{list-style-type:lower-greek}
-.hdlist>table,.colist>table{border:0;background:none}
-.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
-td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
-td.hdlist1{font-weight:bold;padding-bottom:1.25em}
-td.hdlist2{word-wrap:anywhere}
-.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
-.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
-.colist td:not([class]):first-child img{max-width:none}
-.colist td:not([class]):last-child{padding:.25em 0}
-.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
-.imageblock.left{margin:.25em .625em 1.25em 0}
-.imageblock.right{margin:.25em 0 1.25em .625em}
-.imageblock>.title{margin-bottom:0}
-.imageblock.thumb,.imageblock.th{border-width:6px}
-.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
-.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
-.image.left{margin-right:.625em}
-.image.right{margin-left:.625em}
-a.image{text-decoration:none;display:inline-block}
-a.image object{pointer-events:none}
-sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
-sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
-#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
-#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
-#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
-#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
-#footnotes .footnote:last-of-type{margin-bottom:0}
-#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
-div.unbreakable{page-break-inside:avoid}
-.big{font-size:larger}
-.small{font-size:smaller}
-.underline{text-decoration:underline}
-.overline{text-decoration:overline}
-.line-through{text-decoration:line-through}
-.aqua{color:#00bfbf}
-.aqua-background{background:#00fafa}
-.black{color:#000}
-.black-background{background:#000}
-.blue{color:#0000bf}
-.blue-background{background:#0000fa}
-.fuchsia{color:#bf00bf}
-.fuchsia-background{background:#fa00fa}
-.gray{color:#606060}
-.gray-background{background:#7d7d7d}
-.green{color:#006000}
-.green-background{background:#007d00}
-.lime{color:#00bf00}
-.lime-background{background:#00fa00}
-.maroon{color:#600000}
-.maroon-background{background:#7d0000}
-.navy{color:#000060}
-.navy-background{background:#00007d}
-.olive{color:#606000}
-.olive-background{background:#7d7d00}
-.purple{color:#600060}
-.purple-background{background:#7d007d}
-.red{color:#bf0000}
-.red-background{background:#fa0000}
-.silver{color:#909090}
-.silver-background{background:#bcbcbc}
-.teal{color:#006060}
-.teal-background{background:#007d7d}
-.white{color:#bfbfbf}
-.white-background{background:#fafafa}
-.yellow{color:#bfbf00}
-.yellow-background{background:#fafa00}
-span.icon>.fa{cursor:default}
-a span.icon>.fa{cursor:inherit}
-.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
-.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
-.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
-.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
-.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
-.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
-.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
-.conum[data-value] *{color:#fff!important}
-.conum[data-value]+b{display:none}
-.conum[data-value]::after{content:attr(data-value)}
-pre .conum[data-value]{position:relative;top:-.125em}
-b.conum *{color:inherit!important}
-.conum:not([data-value]):empty{display:none}
-dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
-h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
-p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
-p{margin-bottom:1.25rem}
-.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
-.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
-.print-only{display:none!important}
-@page{margin:1.25cm .75cm}
-@media print{*{box-shadow:none!important;text-shadow:none!important}
-html{font-size:80%}
-a{color:inherit!important;text-decoration:underline!important}
-a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
-a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
-abbr[title]{border-bottom:1px dotted}
-abbr[title]::after{content:" (" attr(title) ")"}
-pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
-thead{display:table-header-group}
-svg{max-width:100%}
-p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
-h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
-#header,#content,#footnotes,#footer{max-width:none}
-#toc,.sidebarblock,.exampleblock>.content{background:none!important}
-#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
-body.book #header{text-align:center}
-body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
-body.book #header .details{border:0!important;display:block;padding:0!important}
-body.book #header .details span:first-child{margin-left:0!important}
-body.book #header .details br{display:block}
-body.book #header .details br+span::before{content:none!important}
-body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
-body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
-.listingblock code[data-lang]::before{display:block}
-#footer{padding:0 .9375em}
-.hide-on-print{display:none!important}
-.print-only{display:block!important}
-.hide-for-print{display:none!important}
-.show-for-print{display:inherit!important}}
-@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
-.sect1{padding:0!important}
-.sect1+.sect1{border:0}
-#footer{background:none}
-#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
-@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}</style>
-<style>
-pre.rouge table td { padding: 5px; }
-pre.rouge table pre { margin: 0; }
-pre.rouge, pre.rouge .w {
-  color: #24292f;
-  background-color: #f6f8fa;
-}
-pre.rouge .k, pre.rouge .kd, pre.rouge .kn, pre.rouge .kp, pre.rouge .kr, pre.rouge .kt, pre.rouge .kv {
-  color: #cf222e;
-}
-pre.rouge .gr {
-  color: #f6f8fa;
-}
-pre.rouge .gd {
-  color: #82071e;
-  background-color: #ffebe9;
-}
-pre.rouge .nb {
-  color: #953800;
-}
-pre.rouge .nc {
-  color: #953800;
-}
-pre.rouge .no {
-  color: #953800;
-}
-pre.rouge .nn {
-  color: #953800;
-}
-pre.rouge .sr {
-  color: #116329;
-}
-pre.rouge .na {
-  color: #116329;
-}
-pre.rouge .nt {
-  color: #116329;
-}
-pre.rouge .gi {
-  color: #116329;
-  background-color: #dafbe1;
-}
-pre.rouge .ges {
-  font-weight: bold;
-  font-style: italic;
-}
-pre.rouge .kc {
-  color: #0550ae;
-}
-pre.rouge .l, pre.rouge .ld, pre.rouge .m, pre.rouge .mb, pre.rouge .mf, pre.rouge .mh, pre.rouge .mi, pre.rouge .il, pre.rouge .mo, pre.rouge .mx {
-  color: #0550ae;
-}
-pre.rouge .sb {
-  color: #0550ae;
-}
-pre.rouge .bp {
-  color: #0550ae;
-}
-pre.rouge .ne {
-  color: #0550ae;
-}
-pre.rouge .nl {
-  color: #0550ae;
-}
-pre.rouge .py {
-  color: #0550ae;
-}
-pre.rouge .nv, pre.rouge .vc, pre.rouge .vg, pre.rouge .vi, pre.rouge .vm {
-  color: #0550ae;
-}
-pre.rouge .o, pre.rouge .ow {
-  color: #0550ae;
-}
-pre.rouge .gh {
-  color: #0550ae;
-  font-weight: bold;
-}
-pre.rouge .gu {
-  color: #0550ae;
-  font-weight: bold;
-}
-pre.rouge .s, pre.rouge .sa, pre.rouge .sc, pre.rouge .dl, pre.rouge .sd, pre.rouge .s2, pre.rouge .se, pre.rouge .sh, pre.rouge .sx, pre.rouge .s1, pre.rouge .ss {
-  color: #0a3069;
-}
-pre.rouge .nd {
-  color: #8250df;
-}
-pre.rouge .nf, pre.rouge .fm {
-  color: #8250df;
-}
-pre.rouge .err {
-  color: #f6f8fa;
-  background-color: #82071e;
-}
-pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cm, pre.rouge .cp, pre.rouge .cpf, pre.rouge .c1, pre.rouge .cs {
-  color: #6e7781;
-}
-pre.rouge .gl {
-  color: #6e7781;
-}
-pre.rouge .gt {
-  color: #6e7781;
-}
-pre.rouge .ni {
-  color: #24292f;
-}
-pre.rouge .si {
-  color: #24292f;
-}
-pre.rouge .ge {
-  color: #24292f;
-  font-style: italic;
-}
-pre.rouge .gs {
-  color: #24292f;
-  font-weight: bold;
-}
-</style></head><body class="manpage toc2 toc-right"><header><h1>pcre2pattern(3)</h1><div class="details"><time id="revdate" datetime="2025-10-25">25 October 2025</time></div><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Table of Contents</h2><ol class="toc-list level-1"><li><a href="#_pcre2_regular_expression_details">PCRE2 regular expression details</a></li><li><a href="#_ebcdic_character_codes">EBCDIC character codes</a></li><li><a href="#_special_start_of_pattern_items">Special start-of-pattern items</a><ol class="toc-list level-2"><li><a href="#_utf_support">UTF support</a></li><li><a href="#_unicode_property_support">Unicode property support</a></li><li><a href="#_locking_out_empty_string_matching">Locking out empty string matching</a></li><li><a href="#_disabling_auto_possessification">Disabling auto-possessification</a></li><li><a href="#_disabling_start_up_optimizations">Disabling start-up optimizations</a></li><li><a href="#_disabling_automatic_anchoring">Disabling automatic anchoring</a></li><li><a href="#_disabling_jit_compilation">Disabling JIT compilation</a></li><li><a href="#_setting_match_resource_limits">Setting match resource limits</a></li><li><a href="#newline-conventions">Newline conventions</a></li><li><a href="#specifying-r-matches">Specifying what <code class="regex">\R</code> matches</a></li></ol></li><li><a href="#_characters_and_metacharacters">Characters and metacharacters</a></li><li><a href="#_backslash">Backslash</a><ol class="toc-list level-2"><li><a href="#non-printing-characters">Non-printing characters</a></li><li><a href="#_octal_escapes_and_back_references">Octal escapes and back references</a></li><li><a href="#_perl_rules_for_non_class_backslash_1_9">Perl rules for non-class backslash 1-9</a></li><li><a href="#_python_rules_for_non_class_backslash_1_9">Python rules for non-class backslash 1-9</a></li><li><a href="#_constraints_on_character_values">Constraints on character values</a></li><li><a href="#_escape_sequences_in_character_classes">Escape sequences in character classes</a></li><li><a href="#_unsupported_escape_sequences">Unsupported escape sequences</a></li><li><a href="#_absolute_and_relative_backreferences">Absolute and relative backreferences</a></li><li><a href="#_absolute_and_relative_subroutine_calls">Absolute and relative subroutine calls</a></li><li><a href="#generic-character-types">Generic character types</a></li><li><a href="#newline-sequences">Newline sequences</a></li><li><a href="#_unicode_character_properties">Unicode character properties</a></li><li><a href="#_script_properties_for_p_and_p">Script properties for <code class="regex">\p</code> and <code class="regex">\P</code></a></li><li><a href="#_the_general_category_property_for_p_and_p">The general category property for <code class="regex">\p</code> and <code class="regex">\P</code></a></li><li><a href="#_binary_yesno_properties_for_p_and_p">Binary (yes/no) properties for <code class="regex">\p</code> and <code class="regex">\P</code></a></li><li><a href="#_the_bidi_class_property_for_p_and_p">The Bidi_Class property for <code class="regex">\p</code> and <code class="regex">\P</code></a></li><li><a href="#_extended_grapheme_clusters">Extended grapheme clusters</a></li><li><a href="#_pcre2s_additional_properties">PCRE2&#8217;s additional properties</a></li><li><a href="#_resetting_the_match_start">Resetting the match start</a></li><li><a href="#_simple_assertions">Simple assertions</a></li></ol></li><li><a href="#circumflex-and-dollar">Circumflex and dollar</a></li><li><a href="#_full_stop_period_dot_and_n">Full stop (period, dot) and <code class="regex">\n</code></a></li><li><a href="#_matching_a_single_code_unit">Matching a single code unit</a></li><li><a href="#_square_brackets_and_character_classes">Square brackets and character classes</a></li><li><a href="#_perl_extended_character_classes">Perl extended character classes</a></li><li><a href="#_uts18_extended_character_classes">UTS#18 extended character classes</a></li><li><a href="#_posix_character_classes">POSIX character classes</a></li><li><a href="#_compatibility_feature_for_word_boundaries">Compatibility feature for word boundaries</a></li><li><a href="#_vertical_bar_pipe">Vertical bar (pipe)</a></li><li><a href="#internal-option-setting">Internal option setting</a></li><li><a href="#groups">Groups</a></li><li><a href="#duplicate-group-numbers">Duplicate group numbers</a></li><li><a href="#named-capture-groups">Named capture groups</a></li><li><a href="#_repetition">Repetition</a></li><li><a href="#_atomic_grouping_and_possessive_quantifiers">Atomic grouping and possessive quantifiers</a></li><li><a href="#_backreferences">Backreferences</a><ol class="toc-list level-2"><li><a href="#_recursive_backreferences">Recursive backreferences</a></li></ol></li><li><a href="#_assertions">Assertions</a><ol class="toc-list level-2"><li><a href="#_alphabetic_assertion_names">Alphabetic assertion names</a></li><li><a href="#_lookahead_assertions">Lookahead assertions</a></li><li><a href="#_lookbehind_assertions">Lookbehind assertions</a></li><li><a href="#_using_multiple_assertions">Using multiple assertions</a></li></ol></li><li><a href="#non-atomic-assertions">Non-atomic assertions</a></li><li><a href="#scan-substring-assertions">Scan substring assertions</a></li><li><a href="#_script_runs">Script runs</a></li><li><a href="#conditional-groups">Conditional groups</a><ol class="toc-list level-2"><li><a href="#_checking_for_a_used_capture_group_by_number">Checking for a used capture group by number</a></li><li><a href="#_checking_for_a_used_capture_group_by_name">Checking for a used capture group by name</a></li><li><a href="#checking-pattern-recursion">Checking for pattern recursion</a></li><li><a href="#defining-capture-groups">Defining capture groups for use by reference only</a></li><li><a href="#_checking_the_pcre2_version">Checking the PCRE2 version</a></li><li><a href="#_assertion_conditions">Assertion conditions</a></li></ol></li><li><a href="#_comments">Comments</a></li><li><a href="#recursive-patterns">Recursive patterns</a><ol class="toc-list level-2"><li><a href="#_differences_in_recursion_processing_between_pcre2_and_perl">Differences in recursion processing between PCRE2 and Perl</a></li><li><a href="#groups-as-subroutines">Groups as subroutines</a></li><li><a href="#_recursion_and_subroutines_with_returned_capture_groups">Recursion and subroutines with returned capture groups</a></li><li><a href="#_oniguruma_subroutine_syntax">Oniguruma subroutine syntax</a></li></ol></li><li><a href="#_callouts">Callouts</a><ol class="toc-list level-2"><li><a href="#_callouts_with_numerical_arguments">Callouts with numerical arguments</a></li><li><a href="#_callouts_with_string_arguments">Callouts with string arguments</a></li></ol></li><li><a href="#_backtracking_control">Backtracking control</a><ol class="toc-list level-2"><li><a href="#_optimizations_that_affect_backtracking_verbs">Optimizations that affect backtracking verbs</a></li><li><a href="#_verbs_that_act_immediately">Verbs that act immediately</a></li><li><a href="#_recording_which_path_was_taken">Recording which path was taken</a></li><li><a href="#_verbs_that_act_after_backtracking">Verbs that act after backtracking</a></li><li><a href="#_more_than_one_backtracking_verb">More than one backtracking verb</a></li><li><a href="#_backtracking_verbs_in_repeated_groups">Backtracking verbs in repeated groups</a></li><li><a href="#_backtracking_verbs_in_assertions">Backtracking verbs in assertions</a></li><li><a href="#backtracking-verbs-in-subroutines">Backtracking verbs in subroutines</a></li></ol></li><li><a href="#ebcdic-environments">EBCDIC environments</a><ol class="toc-list level-2"><li><a href="#_escape_sequences">Escape sequences</a></li><li><a href="#_character_classes">Character classes</a></li></ol></li><li><a href="#_see_also">See also</a></li></ol></nav></header><div id="content"><section class="doc-section level-1"><h2 id="_pcre2_regular_expression_details">PCRE2 regular expression details</h2><p>The syntax and semantics of the regular expressions that are supported by PCRE2
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Specification of the regular expressions supported by PCRE2"><title>pcre2pattern(3)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2pattern(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2025-10-25">25 Oct 2025</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Table of Contents</h2><ol class="toc-list level-1"><li><a href="#_pcre2_regular_expression_details">PCRE2 regular expression details</a></li><li><a href="#_ebcdic_character_codes">EBCDIC character codes</a></li><li><a href="#_special_start_of_pattern_items">Special start-of-pattern items</a><ol class="toc-list level-2"><li><a href="#_utf_support">UTF support</a></li><li><a href="#_unicode_property_support">Unicode property support</a></li><li><a href="#_locking_out_empty_string_matching">Locking out empty string matching</a></li><li><a href="#_disabling_auto_possessification">Disabling auto-possessification</a></li><li><a href="#_disabling_start_up_optimizations">Disabling start-up optimizations</a></li><li><a href="#_disabling_automatic_anchoring">Disabling automatic anchoring</a></li><li><a href="#_disabling_jit_compilation">Disabling JIT compilation</a></li><li><a href="#_setting_match_resource_limits">Setting match resource limits</a></li><li><a href="#newline-conventions">Newline conventions</a></li><li><a href="#specifying-r-matches">Specifying what <code class="regex">\R</code> matches</a></li></ol></li><li><a href="#_characters_and_metacharacters">Characters and metacharacters</a></li><li><a href="#_backslash">Backslash</a><ol class="toc-list level-2"><li><a href="#non-printing-characters">Non-printing characters</a></li><li><a href="#_octal_escapes_and_back_references">Octal escapes and back references</a></li><li><a href="#_perl_rules_for_non_class_backslash_1_9">Perl rules for non-class backslash 1-9</a></li><li><a href="#_python_rules_for_non_class_backslash_1_9">Python rules for non-class backslash 1-9</a></li><li><a href="#_constraints_on_character_values">Constraints on character values</a></li><li><a href="#_escape_sequences_in_character_classes">Escape sequences in character classes</a></li><li><a href="#_unsupported_escape_sequences">Unsupported escape sequences</a></li><li><a href="#_absolute_and_relative_backreferences">Absolute and relative backreferences</a></li><li><a href="#_absolute_and_relative_subroutine_calls">Absolute and relative subroutine calls</a></li><li><a href="#generic-character-types">Generic character types</a></li><li><a href="#newline-sequences">Newline sequences</a></li><li><a href="#_unicode_character_properties">Unicode character properties</a></li><li><a href="#_script_properties_for_p_and_p">Script properties for <code class="regex">\p</code> and <code class="regex">\P</code></a></li><li><a href="#_the_general_category_property_for_p_and_p">The general category property for <code class="regex">\p</code> and <code class="regex">\P</code></a></li><li><a href="#_binary_yesno_properties_for_p_and_p">Binary (yes/no) properties for <code class="regex">\p</code> and <code class="regex">\P</code></a></li><li><a href="#_the_bidi_class_property_for_p_and_p">The Bidi_Class property for <code class="regex">\p</code> and <code class="regex">\P</code></a></li><li><a href="#_extended_grapheme_clusters">Extended grapheme clusters</a></li><li><a href="#_pcre2s_additional_properties">PCRE2’s additional properties</a></li><li><a href="#_resetting_the_match_start">Resetting the match start</a></li><li><a href="#_simple_assertions">Simple assertions</a></li></ol></li><li><a href="#circumflex-and-dollar">Circumflex and dollar</a></li><li><a href="#_full_stop_period_dot_and_n">Full stop (period, dot) and <code class="regex">\n</code></a></li><li><a href="#_matching_a_single_code_unit">Matching a single code unit</a></li><li><a href="#_square_brackets_and_character_classes">Square brackets and character classes</a></li><li><a href="#_perl_extended_character_classes">Perl extended character classes</a></li><li><a href="#_uts18_extended_character_classes">UTS#18 extended character classes</a></li><li><a href="#_posix_character_classes">POSIX character classes</a></li><li><a href="#_compatibility_feature_for_word_boundaries">Compatibility feature for word boundaries</a></li><li><a href="#_vertical_bar_pipe">Vertical bar (pipe)</a></li><li><a href="#internal-option-setting">Internal option setting</a></li><li><a href="#groups">Groups</a></li><li><a href="#duplicate-group-numbers">Duplicate group numbers</a></li><li><a href="#named-capture-groups">Named capture groups</a></li><li><a href="#_repetition">Repetition</a></li><li><a href="#_atomic_grouping_and_possessive_quantifiers">Atomic grouping and possessive quantifiers</a></li><li><a href="#_backreferences">Backreferences</a><ol class="toc-list level-2"><li><a href="#_recursive_backreferences">Recursive backreferences</a></li></ol></li><li><a href="#_assertions">Assertions</a><ol class="toc-list level-2"><li><a href="#_alphabetic_assertion_names">Alphabetic assertion names</a></li><li><a href="#_lookahead_assertions">Lookahead assertions</a></li><li><a href="#_lookbehind_assertions">Lookbehind assertions</a></li><li><a href="#_using_multiple_assertions">Using multiple assertions</a></li></ol></li><li><a href="#non-atomic-assertions">Non-atomic assertions</a></li><li><a href="#scan-substring-assertions">Scan substring assertions</a></li><li><a href="#_script_runs">Script runs</a></li><li><a href="#conditional-groups">Conditional groups</a><ol class="toc-list level-2"><li><a href="#_checking_for_a_used_capture_group_by_number">Checking for a used capture group by number</a></li><li><a href="#_checking_for_a_used_capture_group_by_name">Checking for a used capture group by name</a></li><li><a href="#checking-pattern-recursion">Checking for pattern recursion</a></li><li><a href="#defining-capture-groups">Defining capture groups for use by reference only</a></li><li><a href="#_checking_the_pcre2_version">Checking the PCRE2 version</a></li><li><a href="#_assertion_conditions">Assertion conditions</a></li></ol></li><li><a href="#_comments">Comments</a></li><li><a href="#recursive-patterns">Recursive patterns</a><ol class="toc-list level-2"><li><a href="#_differences_in_recursion_processing_between_pcre2_and_perl">Differences in recursion processing between PCRE2 and Perl</a></li><li><a href="#groups-as-subroutines">Groups as subroutines</a></li><li><a href="#_recursion_and_subroutines_with_returned_capture_groups">Recursion and subroutines with returned capture groups</a></li><li><a href="#_oniguruma_subroutine_syntax">Oniguruma subroutine syntax</a></li></ol></li><li><a href="#_callouts">Callouts</a><ol class="toc-list level-2"><li><a href="#_callouts_with_numerical_arguments">Callouts with numerical arguments</a></li><li><a href="#_callouts_with_string_arguments">Callouts with string arguments</a></li></ol></li><li><a href="#_backtracking_control">Backtracking control</a><ol class="toc-list level-2"><li><a href="#_optimizations_that_affect_backtracking_verbs">Optimizations that affect backtracking verbs</a></li><li><a href="#_verbs_that_act_immediately">Verbs that act immediately</a></li><li><a href="#_recording_which_path_was_taken">Recording which path was taken</a></li><li><a href="#_verbs_that_act_after_backtracking">Verbs that act after backtracking</a></li><li><a href="#_more_than_one_backtracking_verb">More than one backtracking verb</a></li><li><a href="#_backtracking_verbs_in_repeated_groups">Backtracking verbs in repeated groups</a></li><li><a href="#_backtracking_verbs_in_assertions">Backtracking verbs in assertions</a></li><li><a href="#backtracking-verbs-in-subroutines">Backtracking verbs in subroutines</a></li></ol></li><li><a href="#ebcdic-environments">EBCDIC environments</a><ol class="toc-list level-2"><li><a href="#_escape_sequences">Escape sequences</a></li><li><a href="#_character_classes">Character classes</a></li></ol></li><li><a href="#_see_also">See also</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_pcre2_regular_expression_details">PCRE2 regular expression details</h2><p>The syntax and semantics of the regular expressions that are supported by PCRE2
 are described in detail below. There is a quick-reference syntax summary in the
-<a href="pcre2syntax.html"><code>pcre2syntax</code></a>
+<a href="./pcre2syntax.html"><code>pcre2syntax</code></a>
 page. PCRE2 tries to match Perl syntax and semantics as closely as it can.
 PCRE2 also supports some alternative regular expression syntax that does not
 conflict with the Perl syntax in order to provide some compatibility with
 regular expressions in Python, .NET, and Oniguruma. There are in addition some
 options that enable alternative syntax and semantics that are not the same as
 in Perl.</p>
-<p>Perl&#8217;s regular expressions are described in its own documentation, and regular
+<p>Perl’s regular expressions are described in its own documentation, and regular
 expressions in general are covered in a number of books, some of which have
-copious examples. Jeffrey Friedl&#8217;s "Mastering Regular Expressions", published
-by O&#8217;Reilly, covers regular expressions in great detail. This description of
-PCRE2&#8217;s regular expressions is intended as reference material.</p>
+copious examples. Jeffrey Friedl’s "Mastering Regular Expressions", published
+by O’Reilly, covers regular expressions in great detail. This description of
+PCRE2’s regular expressions is intended as reference material.</p>
 <p>This document discusses the regular expression patterns that are supported by
 PCRE2 when its main matching function, <code class="function">pcre2_match()</code>, is used. PCRE2 also
 has an alternative matching function, <code class="function">pcre2_dfa_match()</code>, which matches
@@ -560,7 +19,7 @@ using a different algorithm that is not Perl-compatible. Some of the features
 discussed below are not available when DFA matching is used. The advantages and
 disadvantages of the alternative function, and how it differs from the normal
 function, are discussed in the
-<a href="pcre2matching.html"><code>pcre2matching</code></a>
+<a href="./pcre2matching.html"><code>pcre2matching</code></a>
 page.</p></section>
 <section class="doc-section level-1"><h2 id="_ebcdic_character_codes">EBCDIC character codes</h2><p>Most computers use ASCII or Unicode for encoding characters, and PCRE2 assumes
 this by default. However, it can be compiled to run in an environment that uses
@@ -586,7 +45,7 @@ or <code class="constant">PCRE2_MATCH_INVALID_UTF</code> options, or the pattern
 sequence <code class="regex">(*UTF)</code>, which is equivalent to setting the relevant <code class="constant">PCRE2_UTF</code>. How
 setting a UTF mode affects pattern matching is mentioned in several places
 below. There is also a summary of features in the
-<a href="pcre2unicode.html"><code>pcre2unicode</code></a>
+<a href="./pcre2unicode.html"><code>pcre2unicode</code></a>
 page.</p>
 <p>Some applications that allow their users to supply patterns may wish to
 restrict them to non-UTF data for security reasons. If the <code class="constant">PCRE2_NEVER_UTF</code>
@@ -615,13 +74,13 @@ the <code class="constant">PCRE2_NO_AUTO_POSSESS</code> option, or calling <code
 a <code class="constant">PCRE2_AUTO_POSSESS_OFF</code> directive. This stops PCRE2 from making quantifiers
 possessive when what follows cannot match the repeated item. For example, by
 default <code class="regex">a+b</code> is treated as <code class="regex">a++b</code>. For more details, see the
-<a href="pcre2api.html"><code>pcre2api</code></a>
+<a href="./pcre2api.html"><code>pcre2api</code></a>
 documentation.</p></section>
 <section class="doc-section level-2"><h3 id="_disabling_start_up_optimizations">Disabling start-up optimizations</h3><p>If a pattern starts with <code class="regex">(*NO_START_OPT)</code>, it has the same effect as setting the
 <code class="constant">PCRE2_NO_START_OPTIMIZE</code> option, or calling <code class="function">pcre2_set_optimize()</code> with
 a <code class="constant">PCRE2_START_OPTIMIZE_OFF</code> directive. This disables several optimizations for
 quickly reaching "no match" results. For more details, see the
-<a href="pcre2api.html"><code>pcre2api</code></a>
+<a href="./pcre2api.html"><code>pcre2api</code></a>
 documentation.</p></section>
 <section class="doc-section level-2"><h3 id="_disabling_automatic_anchoring">Disabling automatic anchoring</h3><p>If a pattern starts with <code class="regex">(*NO_DOTSTAR_ANCHOR)</code>, it has the same effect as
 setting the <code class="constant">PCRE2_NO_DOTSTAR_ANCHOR</code> option, or
@@ -629,7 +88,7 @@ calling <code class="function">pcre2_set_optimize()</code> with a <code class="c
 This disables optimizations that apply to patterns whose top-level branches
 all start with <code class="regex">.*</code> (match any number of arbitrary characters). For more details,
 see the
-<a href="pcre2api.html"><code>pcre2api</code></a>
+<a href="./pcre2api.html"><code>pcre2api</code></a>
 documentation.</p></section>
 <section class="doc-section level-2"><h3 id="_disabling_jit_compilation">Disabling JIT compilation</h3><p>If a pattern that starts with <code class="regex">(*NO_JIT)</code> is successfully compiled, an attempt by
 the application to apply the JIT optimization by calling
@@ -668,14 +127,14 @@ depth limit controls the depth of such recursion.</p></section>
 strings: a single CR (carriage return) character, a single LF (linefeed)
 character, the two-character sequence CRLF, any of the three preceding, any
 Unicode newline sequence, or the NUL character (binary zero). The
-<a href="pcre2api.html"><code>pcre2api</code></a>
+<a href="./pcre2api.html"><code>pcre2api</code></a>
 page has
 further discussion
 about newlines, and shows how to set the newline convention when calling
 <code class="function">pcre2_compile()</code>.</p>
 <p>It is also possible to specify a newline convention by starting a pattern
 string with one of the following sequences:</p>
-<div class="dlist"><dl><dt><code class="regex">(*CR)</code></dt><dd>Carriage return</dd><dt><code class="regex">(*LF)</code></dt><dd>Linefeed</dd><dt><code class="regex">(*CRLF)</code></dt><dd>Carriage return, followed by linefeed</dd><dt><code class="regex">(*ANYCRLF)</code></dt><dd>Any of the three above</dd><dt><code class="regex">(*ANY)</code></dt><dd>All Unicode newline sequences</dd><dt><code class="regex">(*NUL)</code></dt><dd>The NUL character (binary zero)</dd></dl></div>
+<dl class="compact" style="--tab-width: 8"><div class="dlist-item"><dt><span><code class="regex">(*CR)</code></span></dt><dd>Carriage return</dd></div><div class="dlist-item"><dt><span><code class="regex">(*LF)</code></span></dt><dd>Linefeed</dd></div><div class="dlist-item"><dt><span><code class="regex">(*CRLF)</code></span></dt><dd>Carriage return, followed by linefeed</dd></div><div class="dlist-item"><dt><span><code class="regex">(*ANYCRLF)</code></span></dt><dd>Any of the three above</dd></div><div class="dlist-item"><dt><span><code class="regex">(*ANY)</code></span></dt><dd>All Unicode newline sequences</dd></div><div class="dlist-item"><dt><span><code class="regex">(*NUL)</code></span></dt><dd>The NUL character (binary zero)</dd></div></dl>
 <p>These override the default and the options given to the compiling function. For
 example, on a Unix system where LF is the default newline sequence, the pattern</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(*CR)a.b</code></pre></div>
@@ -720,7 +179,7 @@ for themselves but instead are interpreted in some special way.</p>
 anywhere in the pattern except within square brackets, and those that are
 recognized within square brackets. Outside square brackets, the metacharacters
 are as follows:</p>
-<div class="dlist"><dl><dt><code class="regex">\</code>    </dt><dd>general escape character with several uses</dd><dt><code class="regex">^</code>    </dt><dd>assert start of string (or line, in multiline mode)</dd><dt><code class="regex">$</code>    </dt><dd>assert end of string (or line, in multiline mode)</dd><dt><code class="regex">.</code>    </dt><dd>match any character except newline (by default)</dd><dt><code class="regex">[</code>    </dt><dd>start character class definition</dd><dt><code class="regex">|</code> </dt><dd>start of alternative branch</dd><dt><code class="regex">(</code>    </dt><dd>start group or control verb</dd><dt><code class="regex">)</code>    </dt><dd>end group or control verb</dd><dt><code class="regex">*</code>    </dt><dd>0 or more quantifier</dd><dt><code class="regex">&#43;</code> </dt><dd>1 or more quantifier; also "possessive quantifier"</dd><dt><code class="regex">?</code>    </dt><dd>0 or 1 quantifier; also quantifier minimizer</dd><dt><code class="regex">{</code>    </dt><dd>potential start of min/max quantifier</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">\</code>    </span></dt><dd>general escape character with several uses</dd></div><div class="dlist-item"><dt><span><code class="regex">^</code>    </span></dt><dd>assert start of string (or line, in multiline mode)</dd></div><div class="dlist-item"><dt><span><code class="regex">$</code>    </span></dt><dd>assert end of string (or line, in multiline mode)</dd></div><div class="dlist-item"><dt><span><code class="regex">.</code>    </span></dt><dd>match any character except newline (by default)</dd></div><div class="dlist-item"><dt><span><code class="regex">[</code>    </span></dt><dd>start character class definition</dd></div><div class="dlist-item"><dt><span><code class="regex">|</code> </span></dt><dd>start of alternative branch</dd></div><div class="dlist-item"><dt><span><code class="regex">(</code>    </span></dt><dd>start group or control verb</dd></div><div class="dlist-item"><dt><span><code class="regex">)</code>    </span></dt><dd>end group or control verb</dd></div><div class="dlist-item"><dt><span><code class="regex">*</code>    </span></dt><dd>0 or more quantifier</dd></div><div class="dlist-item"><dt><span><code class="regex">+</code> </span></dt><dd>1 or more quantifier; also "possessive quantifier"</dd></div><div class="dlist-item"><dt><span><code class="regex">?</code>    </span></dt><dd>0 or 1 quantifier; also quantifier minimizer</dd></div><div class="dlist-item"><dt><span><code class="regex">{</code>    </span></dt><dd>potential start of min/max quantifier</dd></div></dl>
 <p>Brace characters <code class="regex">{</code> and <code class="regex">}</code> are also used to enclose data for constructions such
 as <code class="regex">\g{2}</code> or <code class="regex">\k{<em>name</em>}</code>. In almost all uses of braces, space and/or horizontal
 tab characters that follow <code class="regex">{</code> or precede <code class="regex">}</code> are allowed and are ignored. In the
@@ -731,7 +190,7 @@ does not ignore such white space; it causes the item to be interpreted as
 literal.</p>
 <p>Part of a pattern that is in square brackets is called a "character class". In
 a character class the only metacharacters are:</p>
-<div class="dlist"><dl><dt><code class="regex">\</code></dt><dd>general escape character</dd><dt><code class="regex">^</code></dt><dd>negate the class, but only if the first character</dd><dt><code class="regex">-</code></dt><dd>indicates character range</dd><dt><code class="regex">[</code></dt><dd>POSIX character class (if followed by POSIX syntax)</dd><dt><code class="regex">]</code></dt><dd>terminates the character class</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">\</code></span></dt><dd>general escape character</dd></div><div class="dlist-item"><dt><span><code class="regex">^</code></span></dt><dd>negate the class, but only if the first character</dd></div><div class="dlist-item"><dt><span><code class="regex">-</code></span></dt><dd>indicates character range</dd></div><div class="dlist-item"><dt><span><code class="regex">[</code></span></dt><dd>POSIX character class (if followed by POSIX syntax)</dd></div><div class="dlist-item"><dt><span><code class="regex">]</code></span></dt><dd>terminates the character class</dd></div></dl>
 <p>If a pattern is compiled with the <code class="constant">PCRE2_EXTENDED</code> option, most white space in
 the pattern, other than in a character class, within a <code class="regex">\Q...\E</code> sequence, or
 between a <code class="regex">#</code> outside a character class and the next newline, inclusive, is
@@ -784,7 +243,7 @@ non-printing characters in a pattern, but when a pattern is being prepared by
 text editing, it is often easier to use one of the following escape sequences
 instead of the binary character it represents. In an ASCII or Unicode
 environment, these escapes are as follows:</p>
-<div class="dlist"><dl><dt><code class="regex">\a</code>                  </dt><dd>alarm, that is, the BEL character (<code class="character">0x07</code>)</dd><dt><code class="regex">\c<em>x</em></code>             </dt><dd>"control-<em>x</em>", where <em>x</em> is a non-control ASCII character</dd><dt><code class="regex">\e</code>                  </dt><dd>escape (<code class="character">0x1B</code>)</dd><dt><code class="regex">\f</code>                  </dt><dd>form feed (<code class="character">0x0C</code>)</dd><dt><code class="regex">\n</code>                  </dt><dd>linefeed (<code class="character">0x0A</code>)</dd><dt><code class="regex">\r</code>                  </dt><dd>carriage return (<code class="character">0x0D</code>) (but see below)</dd><dt><code class="regex">\t</code>                  </dt><dd>tab (<code class="character">0x09</code>)</dd><dt><code class="regex">\0<em>dd</em></code>            </dt><dd>character with octal code 0<em>dd</em></dd><dt><code class="regex">\<em>ddd</em></code>  </dt><dd>character with octal code <em>ddd</em>, or back reference</dd><dt><code class="regex">\o{<em>ddd..</em>}</code>       </dt><dd>character with octal code <em>ddd..</em></dd><dt><code class="regex">\x<em>hh</em></code>            </dt><dd>character with hex code <em>hh</em></dd><dt><code class="regex">\x{<em>hhh..</em>}</code>       </dt><dd>character with hex code <em>hhh..</em></dd><dt><code class="regex">\N{U+<em>hhh..</em>}</code>     </dt><dd>character with Unicode hex code point <em>hhh..</em></dd></dl></div>
+<dl class="compact" style="--tab-width: 14"><div class="dlist-item"><dt><span><code class="regex">\a</code>                  </span></dt><dd>alarm, that is, the BEL character (<code class="character">0x07</code>)</dd></div><div class="dlist-item"><dt><span><code class="regex">\c<em>x</em></code>             </span></dt><dd>"control-<em>x</em>", where <em>x</em> is a non-control ASCII character</dd></div><div class="dlist-item"><dt><span><code class="regex">\e</code>                  </span></dt><dd>escape (<code class="character">0x1B</code>)</dd></div><div class="dlist-item"><dt><span><code class="regex">\f</code>                  </span></dt><dd>form feed (<code class="character">0x0C</code>)</dd></div><div class="dlist-item"><dt><span><code class="regex">\n</code>                  </span></dt><dd>linefeed (<code class="character">0x0A</code>)</dd></div><div class="dlist-item"><dt><span><code class="regex">\r</code>                  </span></dt><dd>carriage return (<code class="character">0x0D</code>) (but see below)</dd></div><div class="dlist-item"><dt><span><code class="regex">\t</code>                  </span></dt><dd>tab (<code class="character">0x09</code>)</dd></div><div class="dlist-item"><dt><span><code class="regex">\0<em>dd</em></code>            </span></dt><dd>character with octal code 0<em>dd</em></dd></div><div class="dlist-item"><dt><span><code class="regex">\<em>ddd</em></code>  </span></dt><dd>character with octal code <em>ddd</em>, or back reference</dd></div><div class="dlist-item"><dt><span><code class="regex">\o{<em>ddd..</em>}</code>       </span></dt><dd>character with octal code <em>ddd..</em></dd></div><div class="dlist-item"><dt><span><code class="regex">\x<em>hh</em></code>            </span></dt><dd>character with hex code <em>hh</em></dd></div><div class="dlist-item"><dt><span><code class="regex">\x{<em>hhh..</em>}</code>       </span></dt><dd>character with hex code <em>hhh..</em></dd></div><div class="dlist-item"><dt><span><code class="regex">\N{U+<em>hhh..</em>}</code>     </span></dt><dd>character with Unicode hex code point <em>hhh..</em></dd></div></dl>
 <p>A description of how back references work is given
 later,
 following the discussion of
@@ -792,8 +251,8 @@ parenthesized groups.</p>
 <p>By default, after <code class="regex">\x</code> that is not followed by {, one or two hexadecimal
 digits are read (letters can be in upper or lower case). If the character that
 follows <code class="regex">\x</code> is neither { nor a hexadecimal digit, an error occurs. This is
-different from Perl&#8217;s default behaviour, which generates a NUL character, but
-is in line with the behaviour of Perl&#8217;s 'strict' mode in re.</p>
+different from Perl’s default behaviour, which generates a NUL character, but
+is in line with the behaviour of Perl’s 'strict' mode in re.</p>
 <p>Any number of hexadecimal digits may appear between <code class="regex">\x{</code> and <code class="regex">}</code>. If a character
 other than a hexadecimal digit appears between <code class="regex">\x{</code> and <code class="regex">}</code>, or if there is no
 terminating <code class="regex">}</code>, an error occurs.</p>
@@ -845,10 +304,10 @@ itself an octal digit.</p>
 to three octal digits are read to generate a code point. Any subsequent digits
 stand for themselves. The sequences <code class="regex">\8</code> and <code class="regex">\9</code> are treated as the literal
 characters <code class="subject">8</code> and <code class="subject">9</code>.</p>
-<p>Outside a character class, Perl&#8217;s handling of a backslash followed by a digit
+<p>Outside a character class, Perl’s handling of a backslash followed by a digit
 other than 0 is complicated by ambiguity, and Perl has changed over time,
 causing PCRE2 also to change. From PCRE2 release 10.45 there is an option
-called <code class="constant">PCRE2_EXTRA_PYTHON_OCTAL</code> that causes PCRE2 to use Python&#8217;s unambiguous
+called <code class="constant">PCRE2_EXTRA_PYTHON_OCTAL</code> that causes PCRE2 to use Python’s unambiguous
 rules. The next two subsections describe the two sets of rules.</p>
 <p>For greater clarity and unambiguity, it is best to avoid following backslash by a
 digit greater than zero. Instead, use <code class="regex">\o{...}</code> or <code class="regex">\x{...}</code>
@@ -859,7 +318,7 @@ number is less than 10, begins with the digit 8 or 9, or if there are at least
 that many previous capture groups in the expression, the entire sequence is
 taken as a back reference. Otherwise, up to three octal digits are read to form
 a character code. For example:</p>
-<div class="dlist"><dl><dt><code class="regex">\040</code>  </dt><dd>is another way of writing an ASCII space</dd><dt><code class="regex">\40</code>   </dt><dd>is the same, provided there are fewer than 40 previous capture groups</dd><dt><code class="regex">\7</code>    </dt><dd>is always a backreference</dd><dt><code class="regex">\11</code>   </dt><dd>might be a backreference, or another way of writing a tab</dd><dt><code class="regex">\011</code>  </dt><dd>is always a tab</dd><dt><code class="regex">\0113</code> </dt><dd>is a tab followed by the character "3"</dd><dt><code class="regex">\113</code>  </dt><dd>might be a backreference, otherwise the character with octal code 113</dd><dt><code class="regex">\377</code>  </dt><dd>might be a backreference, otherwise the value 255 (decimal)</dd><dt><code class="regex">\81</code>   </dt><dd>is always a backreference</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">\040</code>  </span></dt><dd>is another way of writing an ASCII space</dd></div><div class="dlist-item"><dt><span><code class="regex">\40</code>   </span></dt><dd>is the same, provided there are fewer than 40 previous capture groups</dd></div><div class="dlist-item"><dt><span><code class="regex">\7</code>    </span></dt><dd>is always a backreference</dd></div><div class="dlist-item"><dt><span><code class="regex">\11</code>   </span></dt><dd>might be a backreference, or another way of writing a tab</dd></div><div class="dlist-item"><dt><span><code class="regex">\011</code>  </span></dt><dd>is always a tab</dd></div><div class="dlist-item"><dt><span><code class="regex">\0113</code> </span></dt><dd>is a tab followed by the character "3"</dd></div><div class="dlist-item"><dt><span><code class="regex">\113</code>  </span></dt><dd>might be a backreference, otherwise the character with octal code 113</dd></div><div class="dlist-item"><dt><span><code class="regex">\377</code>  </span></dt><dd>might be a backreference, otherwise the value 255 (decimal)</dd></div><div class="dlist-item"><dt><span><code class="regex">\81</code>   </span></dt><dd>is always a backreference</dd></div></dl>
 <p>Note that octal values of 100 or greater that are specified using this syntax
 must not be introduced by a leading zero, because no more than three octal
 digits are ever read.</p></section>
@@ -873,7 +332,7 @@ the pattern. An error is generated for a reference to a non-existent capturing
 group.</p></section>
 <section class="doc-section level-2"><h3 id="_constraints_on_character_values">Constraints on character values</h3><p>Characters that are specified using octal or hexadecimal numbers are
 limited to certain values, as follows:</p>
-<div class="dlist"><dl><dt>8-bit non-UTF mode</dt><dd>No greater than <code class="character">0xff</code></dd><dt>16-bit non-UTF mode</dt><dd>No greater than <code class="character">0xffff</code></dd><dt>32-bit non-UTF mode</dt><dd>No greater than <code class="character">0xffffffff</code></dd><dt>All UTF modes</dt><dd>No greater than <code class="character">0x10ffff</code> and a valid code point</dd></dl></div>
+<dl class="compact" style="--tab-width: 14"><div class="dlist-item"><dt><span>8-bit non-UTF mode</span></dt><dd>No greater than <code class="character">0xff</code></dd></div><div class="dlist-item"><dt><span>16-bit non-UTF mode</span></dt><dd>No greater than <code class="character">0xffff</code></dd></div><div class="dlist-item"><dt><span>32-bit non-UTF mode</span></dt><dd>No greater than <code class="character">0xffffffff</code></dd></div><div class="dlist-item"><dt><span>All UTF modes</span></dt><dd>No greater than <code class="character">0x10ffff</code> and a valid code point</dd></div></dl>
 <p>Invalid Unicode code points are all those in the range <code class="character">0xd800</code> to <code class="character">0xdfff</code> (the
 so-called "surrogate" code points). The check for these can be disabled by the
 caller of <code class="function">pcre2_compile()</code> by setting the option
@@ -907,7 +366,7 @@ synonymous. The former is a backreference; the latter is a
 subroutine
 call.</p></section>
 <section class="doc-section level-2"><h3 id="generic-character-types">Generic character types</h3><p>Another use of backslash is for specifying generic character types:</p>
-<div class="dlist"><dl><dt><code class="regex">\d</code></dt><dd>Any decimal digit.</dd><dt><code class="regex">\D</code></dt><dd>Any character that is not a decimal digit.</dd><dt><code class="regex">\h</code></dt><dd>Any horizontal white space character.</dd><dt><code class="regex">\H</code></dt><dd>Any character that is not a horizontal white space character.</dd><dt><code class="regex">\N</code></dt><dd>Any character that is not a newline.</dd><dt><code class="regex">\s</code></dt><dd>Any white space character.</dd><dt><code class="regex">\S</code></dt><dd>Any character that is not a white space character.</dd><dt><code class="regex">\v</code></dt><dd>Any vertical white space character.</dd><dt><code class="regex">\V</code></dt><dd>Any character that is not a vertical white space character.</dd><dt><code class="regex">\w</code></dt><dd>Any "word" character.</dd><dt><code class="regex">\W</code></dt><dd>Any "non-word" character.</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">\d</code></span></dt><dd>Any decimal digit.</dd></div><div class="dlist-item"><dt><span><code class="regex">\D</code></span></dt><dd>Any character that is not a decimal digit.</dd></div><div class="dlist-item"><dt><span><code class="regex">\h</code></span></dt><dd>Any horizontal white space character.</dd></div><div class="dlist-item"><dt><span><code class="regex">\H</code></span></dt><dd>Any character that is not a horizontal white space character.</dd></div><div class="dlist-item"><dt><span><code class="regex">\N</code></span></dt><dd>Any character that is not a newline.</dd></div><div class="dlist-item"><dt><span><code class="regex">\s</code></span></dt><dd>Any white space character.</dd></div><div class="dlist-item"><dt><span><code class="regex">\S</code></span></dt><dd>Any character that is not a white space character.</dd></div><div class="dlist-item"><dt><span><code class="regex">\v</code></span></dt><dd>Any vertical white space character.</dd></div><div class="dlist-item"><dt><span><code class="regex">\V</code></span></dt><dd>Any character that is not a vertical white space character.</dd></div><div class="dlist-item"><dt><span><code class="regex">\w</code></span></dt><dd>Any "word" character.</dd></div><div class="dlist-item"><dt><span><code class="regex">\W</code></span></dt><dd>Any "non-word" character.</dd></div></dl>
 <p>The <code class="regex">\N</code> escape sequence has the same meaning as
 the <code class="regex">.</code> metacharacter
 when <code class="constant">PCRE2_DOTALL</code> is not set, but setting <code class="constant">PCRE2_DOTALL</code> does not change the
@@ -927,24 +386,24 @@ vary if locale-specific matching is taking place. For example, in some locales
 the "non-breaking space" character (<code class="character">0xA0</code>) is recognized as white space, and in
 others the VT character is not.</p>
 <p>A "word" character is an underscore or any character that is a letter or digit.
-By default, the definition of letters and digits is controlled by PCRE2&#8217;s
+By default, the definition of letters and digits is controlled by PCRE2’s
 low-valued character tables, and may vary if locale-specific matching is taking
 place (see
 "Locale support"
 in the
-<a href="pcre2api.html"><code>pcre2api</code></a>
+<a href="./pcre2api.html"><code>pcre2api</code></a>
 page). For example, in a French locale such as "fr_FR" in Unix-like systems,
 or "french" in Windows, some character codes greater than 127 are used for
 accented letters, and these are then matched by <code class="regex">\w</code>. The use of locales with
 Unicode is discouraged.</p>
 <p>By default, characters whose code points are greater than 127 never match <code class="regex">\d</code>,
 <code class="regex">\s</code>, or <code class="regex">\w</code>, and always match <code class="regex">\D</code>, <code class="regex">\S</code>, and <code class="regex">\W</code>, although this may be different
-for characters in the range 128&#8211;255 when locale-specific matching is happening.
+for characters in the range 128–255 when locale-specific matching is happening.
 These escape sequences retain their original meanings from before Unicode
 support was available, mainly for efficiency reasons. If the <code class="constant">PCRE2_UCP</code> option
 is set, the behaviour is changed so that Unicode properties are used to
 determine character types, as follows:</p>
-<div class="dlist"><dl><dt><code class="regex">\d</code></dt><dd>Any character that matches <code class="regex">\p{Nd}</code> (decimal digit).</dd><dt><code class="regex">\s</code></dt><dd>Any character that matches <code class="regex">\p{Z}</code>, <code class="regex">\h</code>, or <code class="regex">\v</code>.</dd><dt><code class="regex">\w</code></dt><dd>Any character that matches <code class="regex">\p{L}</code>, <code class="regex">\p{N}</code>, <code class="regex">\p{Mn}</code>, or <code class="regex">\p{Pc}</code>.</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">\d</code></span></dt><dd>Any character that matches <code class="regex">\p{Nd}</code> (decimal digit).</dd></div><div class="dlist-item"><dt><span><code class="regex">\s</code></span></dt><dd>Any character that matches <code class="regex">\p{Z}</code>, <code class="regex">\h</code>, or <code class="regex">\v</code>.</dd></div><div class="dlist-item"><dt><span><code class="regex">\w</code></span></dt><dd>Any character that matches <code class="regex">\p{L}</code>, <code class="regex">\p{N}</code>, <code class="regex">\p{Mn}</code>, or <code class="regex">\p{Pc}</code>.</dd></div></dl>
 <p>The addition of <code class="regex">\p{Mn}</code> (non-spacing mark) and the replacement of an explicit
 test for underscore with a test for <code class="regex">\p{Pc}</code> (connector punctuation) happened in
 PCRE2 release 10.43. This brings PCRE2 into line with Perl.</p>
@@ -961,9 +420,9 @@ a pattern by means of an internal option setting
 <p>The sequences <code class="regex">\h</code>, <code class="regex">\H</code>, <code class="regex">\v</code>, and <code class="regex">\V</code>, in contrast to the other sequences, which
 match only ASCII characters by default, always match a specific list of code
 points, whether or not <code class="constant">PCRE2_UCP</code> is set. The horizontal space characters are:</p>
-<div class="dlist"><dl><dt><code class="character">U+0009</code></dt><dd>Horizontal tab (HT)</dd><dt><code class="character">U+0020</code></dt><dd>Space</dd><dt><code class="character">U+00A0</code></dt><dd>Non-break space</dd><dt><code class="character">U+1680</code></dt><dd>Ogham space mark</dd><dt><code class="character">U+180E</code></dt><dd>Mongolian vowel separator</dd><dt><code class="character">U+2000</code></dt><dd>En quad</dd><dt><code class="character">U+2001</code></dt><dd>Em quad</dd><dt><code class="character">U+2002</code></dt><dd>En space</dd><dt><code class="character">U+2003</code></dt><dd>Em space</dd><dt><code class="character">U+2004</code></dt><dd>Three-per-em space</dd><dt><code class="character">U+2005</code></dt><dd>Four-per-em space</dd><dt><code class="character">U+2006</code></dt><dd>Six-per-em space</dd><dt><code class="character">U+2007</code></dt><dd>Figure space</dd><dt><code class="character">U+2008</code></dt><dd>Punctuation space</dd><dt><code class="character">U+2009</code></dt><dd>Thin space</dd><dt><code class="character">U+200A</code></dt><dd>Hair space</dd><dt><code class="character">U+202F</code></dt><dd>Narrow no-break space</dd><dt><code class="character">U+205F</code></dt><dd>Medium mathematical space</dd><dt><code class="character">U+3000</code></dt><dd>Ideographic space</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="character">U+0009</code></span></dt><dd>Horizontal tab (HT)</dd></div><div class="dlist-item"><dt><span><code class="character">U+0020</code></span></dt><dd>Space</dd></div><div class="dlist-item"><dt><span><code class="character">U+00A0</code></span></dt><dd>Non-break space</dd></div><div class="dlist-item"><dt><span><code class="character">U+1680</code></span></dt><dd>Ogham space mark</dd></div><div class="dlist-item"><dt><span><code class="character">U+180E</code></span></dt><dd>Mongolian vowel separator</dd></div><div class="dlist-item"><dt><span><code class="character">U+2000</code></span></dt><dd>En quad</dd></div><div class="dlist-item"><dt><span><code class="character">U+2001</code></span></dt><dd>Em quad</dd></div><div class="dlist-item"><dt><span><code class="character">U+2002</code></span></dt><dd>En space</dd></div><div class="dlist-item"><dt><span><code class="character">U+2003</code></span></dt><dd>Em space</dd></div><div class="dlist-item"><dt><span><code class="character">U+2004</code></span></dt><dd>Three-per-em space</dd></div><div class="dlist-item"><dt><span><code class="character">U+2005</code></span></dt><dd>Four-per-em space</dd></div><div class="dlist-item"><dt><span><code class="character">U+2006</code></span></dt><dd>Six-per-em space</dd></div><div class="dlist-item"><dt><span><code class="character">U+2007</code></span></dt><dd>Figure space</dd></div><div class="dlist-item"><dt><span><code class="character">U+2008</code></span></dt><dd>Punctuation space</dd></div><div class="dlist-item"><dt><span><code class="character">U+2009</code></span></dt><dd>Thin space</dd></div><div class="dlist-item"><dt><span><code class="character">U+200A</code></span></dt><dd>Hair space</dd></div><div class="dlist-item"><dt><span><code class="character">U+202F</code></span></dt><dd>Narrow no-break space</dd></div><div class="dlist-item"><dt><span><code class="character">U+205F</code></span></dt><dd>Medium mathematical space</dd></div><div class="dlist-item"><dt><span><code class="character">U+3000</code></span></dt><dd>Ideographic space</dd></div></dl>
 <p>The vertical space characters are:</p>
-<div class="dlist"><dl><dt><code class="character">U+000A</code></dt><dd>Linefeed (LF)</dd><dt><code class="character">U+000B</code></dt><dd>Vertical tab (VT)</dd><dt><code class="character">U+000C</code></dt><dd>Form feed (FF)</dd><dt><code class="character">U+000D</code></dt><dd>Carriage return (CR)</dd><dt><code class="character">U+0085</code></dt><dd>Next line (NEL)</dd><dt><code class="character">U+2028</code></dt><dd>Line separator</dd><dt><code class="character">U+2029</code></dt><dd>Paragraph separator</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="character">U+000A</code></span></dt><dd>Linefeed (LF)</dd></div><div class="dlist-item"><dt><span><code class="character">U+000B</code></span></dt><dd>Vertical tab (VT)</dd></div><div class="dlist-item"><dt><span><code class="character">U+000C</code></span></dt><dd>Form feed (FF)</dd></div><div class="dlist-item"><dt><span><code class="character">U+000D</code></span></dt><dd>Carriage return (CR)</dd></div><div class="dlist-item"><dt><span><code class="character">U+0085</code></span></dt><dd>Next line (NEL)</dd></div><div class="dlist-item"><dt><span><code class="character">U+2028</code></span></dt><dd>Line separator</dd></div><div class="dlist-item"><dt><span><code class="character">U+2029</code></span></dt><dd>Paragraph separator</dd></div></dl>
 <p>In 8-bit, non-UTF-8 mode, only the characters with code points less than 256
 are relevant.</p></section>
 <section class="doc-section level-2"><h3 id="newline-sequences">Newline sequences</h3><p>Outside a character class, by default, the escape sequence <code class="regex">\R</code> matches any
@@ -987,7 +446,7 @@ the default when PCRE2 is built; if this is the case, the other behaviour can
 be requested via the <code class="constant">PCRE2_BSR_UNICODE</code> option. It is also possible to specify
 these settings by starting a pattern string with one of the following
 sequences:</p>
-<div class="dlist"><dl><dt><code class="regex">(*BSR_ANYCRLF)</code></dt><dd>CR, LF, or CRLF only.</dd><dt><code class="regex">(*BSR_UNICODE)</code></dt><dd>Any Unicode newline sequence.</dd></dl></div>
+<dl class="compact" style="--tab-width: 10"><div class="dlist-item"><dt><span><code class="regex">(*BSR_ANYCRLF)</code></span></dt><dd>CR, LF, or CRLF only.</dd></div><div class="dlist-item"><dt><span><code class="regex">(*BSR_UNICODE)</code></span></dt><dd>Any Unicode newline sequence.</dd></div></dl>
 <p>These override the default and the options given to the compiling function.
 Note that these special settings, which are not Perl-compatible, are recognized
 only at the very start of a pattern, and that they must be in upper case. If
@@ -1005,16 +464,16 @@ less than <code class="character">U+0100</code> or <code class="character">U+100
 greater than <code class="character">0x10ffff</code> (the Unicode limit) may be encountered. These are all
 treated as being in the Unknown script and with an unassigned type.</p>
 <p>Matching characters by Unicode property is not fast, because PCRE2 has to do a
-multistage table lookup in order to find a character&#8217;s property. That is why
+multistage table lookup in order to find a character’s property. That is why
 the traditional escape sequences such as <code class="regex">\d</code> and <code class="regex">\w</code> do not use Unicode
 properties in PCRE2 by default, though you can make them do so by setting the
 <code class="constant">PCRE2_UCP</code> option or by starting the pattern with <code class="regex">(*UCP)</code>.</p>
 <p>The extra escape sequences that provide property support are:</p>
-<div class="dlist"><dl><dt><code class="regex">\p{<em>xx</em>}</code>  </dt><dd>a character with the <em>xx</em> property</dd><dt><code class="regex">\P{<em>xx</em>}</code>  </dt><dd>a character without the <em>xx</em> property</dd><dt><code class="regex">\X</code>          </dt><dd>a Unicode extended grapheme cluster</dd></dl></div>
+<dl class="compact" style="--tab-width: 10"><div class="dlist-item"><dt><span><code class="regex">\p{<em>xx</em>}</code>  </span></dt><dd>a character with the <em>xx</em> property</dd></div><div class="dlist-item"><dt><span><code class="regex">\P{<em>xx</em>}</code>  </span></dt><dd>a character without the <em>xx</em> property</dd></div><div class="dlist-item"><dt><span><code class="regex">\X</code>          </span></dt><dd>a Unicode extended grapheme cluster</dd></div></dl>
 <p>For compatibility with Perl, negation can be specified by including a
 circumflex between the opening brace and the property. For example, <code class="regex">\p{^Lu}</code> is
 the same as <code class="regex">\P{Lu}</code>.</p>
-<p>In accordance with Unicode&#8217;s "loose matching" rules, ASCII white space
+<p>In accordance with Unicode’s "loose matching" rules, ASCII white space
 characters, hyphens, and underscores are ignored in the properties represented
 by <em>xx</em> above. As well as the space character, ASCII white space can be
 tab, linefeed, vertical tab, formfeed, or carriage return.</p>
@@ -1061,7 +520,7 @@ sequence are optional; these two examples have the same effect:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">\p{L}
 \pL</code></pre></div>
 <p>The following general category property codes are supported:</p>
-<div class="dlist"><dl><dt><code class="regex">C</code></dt><dd>Other</dd><dt><code class="regex">Cc</code></dt><dd>Control</dd><dt><code class="regex">Cf</code></dt><dd>Format</dd><dt><code class="regex">Cn</code></dt><dd>Unassigned</dd><dt><code class="regex">Co</code></dt><dd>Private use</dd><dt><code class="regex">Cs</code></dt><dd>Surrogate</dd><dt><code class="regex">L</code></dt><dd>Letter</dd><dt><code class="regex">Lc</code></dt><dd>Cased letter</dd><dt><code class="regex">Ll</code></dt><dd>Lower case letter</dd><dt><code class="regex">Lm</code></dt><dd>Modifier letter</dd><dt><code class="regex">Lo</code></dt><dd>Other letter</dd><dt><code class="regex">Lt</code></dt><dd>Title case letter</dd><dt><code class="regex">Lu</code></dt><dd>Upper case letter</dd><dt><code class="regex">M</code></dt><dd>Mark</dd><dt><code class="regex">Mc</code></dt><dd>Spacing mark</dd><dt><code class="regex">Me</code></dt><dd>Enclosing mark</dd><dt><code class="regex">Mn</code></dt><dd>Non-spacing mark</dd><dt><code class="regex">N</code></dt><dd>Number</dd><dt><code class="regex">Nd</code></dt><dd>Decimal number</dd><dt><code class="regex">Nl</code></dt><dd>Letter number</dd><dt><code class="regex">No</code></dt><dd>Other number</dd><dt><code class="regex">P</code></dt><dd>Punctuation</dd><dt><code class="regex">Pc</code></dt><dd>Connector punctuation</dd><dt><code class="regex">Pd</code></dt><dd>Dash punctuation</dd><dt><code class="regex">Pe</code></dt><dd>Close punctuation</dd><dt><code class="regex">Pf</code></dt><dd>Final punctuation</dd><dt><code class="regex">Pi</code></dt><dd>Initial punctuation</dd><dt><code class="regex">Po</code></dt><dd>Other punctuation</dd><dt><code class="regex">Ps</code></dt><dd>Open punctuation</dd><dt><code class="regex">S</code></dt><dd>Symbol</dd><dt><code class="regex">Sc</code></dt><dd>Currency symbol</dd><dt><code class="regex">Sk</code></dt><dd>Modifier symbol</dd><dt><code class="regex">Sm</code></dt><dd>Mathematical symbol</dd><dt><code class="regex">So</code></dt><dd>Other symbol</dd><dt><code class="regex">Z</code></dt><dd>Separator</dd><dt><code class="regex">Zl</code></dt><dd>Line separator</dd><dt><code class="regex">Zp</code></dt><dd>Paragraph separator</dd><dt><code class="regex">Zs</code></dt><dd>Space separator</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">C</code></span></dt><dd>Other</dd></div><div class="dlist-item"><dt><span><code class="regex">Cc</code></span></dt><dd>Control</dd></div><div class="dlist-item"><dt><span><code class="regex">Cf</code></span></dt><dd>Format</dd></div><div class="dlist-item"><dt><span><code class="regex">Cn</code></span></dt><dd>Unassigned</dd></div><div class="dlist-item"><dt><span><code class="regex">Co</code></span></dt><dd>Private use</dd></div><div class="dlist-item"><dt><span><code class="regex">Cs</code></span></dt><dd>Surrogate</dd></div><div class="dlist-item"><dt><span><code class="regex">L</code></span></dt><dd>Letter</dd></div><div class="dlist-item"><dt><span><code class="regex">Lc</code></span></dt><dd>Cased letter</dd></div><div class="dlist-item"><dt><span><code class="regex">Ll</code></span></dt><dd>Lower case letter</dd></div><div class="dlist-item"><dt><span><code class="regex">Lm</code></span></dt><dd>Modifier letter</dd></div><div class="dlist-item"><dt><span><code class="regex">Lo</code></span></dt><dd>Other letter</dd></div><div class="dlist-item"><dt><span><code class="regex">Lt</code></span></dt><dd>Title case letter</dd></div><div class="dlist-item"><dt><span><code class="regex">Lu</code></span></dt><dd>Upper case letter</dd></div><div class="dlist-item"><dt><span><code class="regex">M</code></span></dt><dd>Mark</dd></div><div class="dlist-item"><dt><span><code class="regex">Mc</code></span></dt><dd>Spacing mark</dd></div><div class="dlist-item"><dt><span><code class="regex">Me</code></span></dt><dd>Enclosing mark</dd></div><div class="dlist-item"><dt><span><code class="regex">Mn</code></span></dt><dd>Non-spacing mark</dd></div><div class="dlist-item"><dt><span><code class="regex">N</code></span></dt><dd>Number</dd></div><div class="dlist-item"><dt><span><code class="regex">Nd</code></span></dt><dd>Decimal number</dd></div><div class="dlist-item"><dt><span><code class="regex">Nl</code></span></dt><dd>Letter number</dd></div><div class="dlist-item"><dt><span><code class="regex">No</code></span></dt><dd>Other number</dd></div><div class="dlist-item"><dt><span><code class="regex">P</code></span></dt><dd>Punctuation</dd></div><div class="dlist-item"><dt><span><code class="regex">Pc</code></span></dt><dd>Connector punctuation</dd></div><div class="dlist-item"><dt><span><code class="regex">Pd</code></span></dt><dd>Dash punctuation</dd></div><div class="dlist-item"><dt><span><code class="regex">Pe</code></span></dt><dd>Close punctuation</dd></div><div class="dlist-item"><dt><span><code class="regex">Pf</code></span></dt><dd>Final punctuation</dd></div><div class="dlist-item"><dt><span><code class="regex">Pi</code></span></dt><dd>Initial punctuation</dd></div><div class="dlist-item"><dt><span><code class="regex">Po</code></span></dt><dd>Other punctuation</dd></div><div class="dlist-item"><dt><span><code class="regex">Ps</code></span></dt><dd>Open punctuation</dd></div><div class="dlist-item"><dt><span><code class="regex">S</code></span></dt><dd>Symbol</dd></div><div class="dlist-item"><dt><span><code class="regex">Sc</code></span></dt><dd>Currency symbol</dd></div><div class="dlist-item"><dt><span><code class="regex">Sk</code></span></dt><dd>Modifier symbol</dd></div><div class="dlist-item"><dt><span><code class="regex">Sm</code></span></dt><dd>Mathematical symbol</dd></div><div class="dlist-item"><dt><span><code class="regex">So</code></span></dt><dd>Other symbol</dd></div><div class="dlist-item"><dt><span><code class="regex">Z</code></span></dt><dd>Separator</dd></div><div class="dlist-item"><dt><span><code class="regex">Zl</code></span></dt><dd>Line separator</dd></div><div class="dlist-item"><dt><span><code class="regex">Zp</code></span></dt><dd>Paragraph separator</dd></div><div class="dlist-item"><dt><span><code class="regex">Zs</code></span></dt><dd>Space separator</dd></div></dl>
 <p>Perl originally used the name <code class="regex">L&amp;</code> for the <code class="regex">Lc</code> property. This is still supported
 by Perl, but discouraged. PCRE2 also still supports it. This property matches
 any character that has the <code class="regex">Lu</code>, <code class="regex">Ll</code>, or <code class="regex">Lt</code> property, in other words, any letter
@@ -1075,7 +534,7 @@ character when PCRE2 is not in UTF mode (using the 16-bit or 32-bit library).
 However, they are not valid in Unicode strings and so cannot be tested by PCRE2
 in UTF mode, unless UTF validity checking has been turned off (see the
 discussion of <code class="constant">PCRE2_NO_UTF_CHECK</code> in the
-<a href="pcre2api.html"><code>pcre2api</code></a>
+<a href="./pcre2api.html"><code>pcre2api</code></a>
 page).</p>
 <p>The long synonyms for property names that Perl supports (such as <code class="regex">\p{Letter}</code>)
 are not supported by PCRE2, nor is it permitted to prefix any of these
@@ -1087,9 +546,9 @@ Unicode table.</p></section>
 values are true or false. You can obtain a list of those that are recognized by
 <code class="regex">\p</code> and <code class="regex">\P</code>, along with their abbreviations, by running this command:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">pcre2test <span class="nt">-LP</span></code></pre></div></section>
-<section class="doc-section level-2"><h3 id="_the_bidi_class_property_for_p_and_p">The Bidi_Class property for <code class="regex">\p</code> and <code class="regex">\P</code></h3><div class="dlist"><dl><dt><code class="regex">\p{Bidi_Class:<em>class</em>}</code></dt><dd>Matches a character with the given class.</dd><dt><code class="regex">\p{BC:<em>class</em>}</code></dt><dd>Matches a character with the given class.</dd></dl></div>
+<section class="doc-section level-2"><h3 id="_the_bidi_class_property_for_p_and_p">The Bidi_Class property for <code class="regex">\p</code> and <code class="regex">\P</code></h3><dl class="compact" style="--tab-width: 14"><div class="dlist-item"><dt><span><code class="regex">\p{Bidi_Class:<em>class</em>}</code></span></dt><dd>Matches a character with the given class.</dd></div><div class="dlist-item"><dt><span><code class="regex">\p{BC:<em>class</em>}</code></span></dt><dd>Matches a character with the given class.</dd></div></dl>
 <p>The recognized classes are:</p>
-<div class="dlist"><dl><dt><code class="regex">AL</code></dt><dd>Arabic letter</dd><dt><code class="regex">AN</code></dt><dd>Arabic number</dd><dt><code class="regex">B</code></dt><dd>Paragraph separator</dd><dt><code class="regex">BN</code></dt><dd>Boundary neutral</dd><dt><code class="regex">CS</code></dt><dd>Common separator</dd><dt><code class="regex">EN</code></dt><dd>European number</dd><dt><code class="regex">ES</code></dt><dd>European separator</dd><dt><code class="regex">ET</code></dt><dd>European terminator</dd><dt><code class="regex">FSI</code></dt><dd>First strong isolate</dd><dt><code class="regex">L</code></dt><dd>Left-to-right</dd><dt><code class="regex">LRE</code></dt><dd>Left-to-right embedding</dd><dt><code class="regex">LRI</code></dt><dd>Left-to-right isolate</dd><dt><code class="regex">LRO</code></dt><dd>Left-to-right override</dd><dt><code class="regex">NSM</code></dt><dd>Non-spacing mark</dd><dt><code class="regex">ON</code></dt><dd>Other neutral</dd><dt><code class="regex">PDF</code></dt><dd>Pop directional format</dd><dt><code class="regex">PDI</code></dt><dd>Pop directional isolate</dd><dt><code class="regex">R</code></dt><dd>Right-to-left</dd><dt><code class="regex">RLE</code></dt><dd>Right-to-left embedding</dd><dt><code class="regex">RLI</code></dt><dd>Right-to-left isolate</dd><dt><code class="regex">RLO</code></dt><dd>Right-to-left override</dd><dt><code class="regex">S</code></dt><dd>Segment separator</dd><dt><code class="regex">WS</code></dt><dd>White space</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">AL</code></span></dt><dd>Arabic letter</dd></div><div class="dlist-item"><dt><span><code class="regex">AN</code></span></dt><dd>Arabic number</dd></div><div class="dlist-item"><dt><span><code class="regex">B</code></span></dt><dd>Paragraph separator</dd></div><div class="dlist-item"><dt><span><code class="regex">BN</code></span></dt><dd>Boundary neutral</dd></div><div class="dlist-item"><dt><span><code class="regex">CS</code></span></dt><dd>Common separator</dd></div><div class="dlist-item"><dt><span><code class="regex">EN</code></span></dt><dd>European number</dd></div><div class="dlist-item"><dt><span><code class="regex">ES</code></span></dt><dd>European separator</dd></div><div class="dlist-item"><dt><span><code class="regex">ET</code></span></dt><dd>European terminator</dd></div><div class="dlist-item"><dt><span><code class="regex">FSI</code></span></dt><dd>First strong isolate</dd></div><div class="dlist-item"><dt><span><code class="regex">L</code></span></dt><dd>Left-to-right</dd></div><div class="dlist-item"><dt><span><code class="regex">LRE</code></span></dt><dd>Left-to-right embedding</dd></div><div class="dlist-item"><dt><span><code class="regex">LRI</code></span></dt><dd>Left-to-right isolate</dd></div><div class="dlist-item"><dt><span><code class="regex">LRO</code></span></dt><dd>Left-to-right override</dd></div><div class="dlist-item"><dt><span><code class="regex">NSM</code></span></dt><dd>Non-spacing mark</dd></div><div class="dlist-item"><dt><span><code class="regex">ON</code></span></dt><dd>Other neutral</dd></div><div class="dlist-item"><dt><span><code class="regex">PDF</code></span></dt><dd>Pop directional format</dd></div><div class="dlist-item"><dt><span><code class="regex">PDI</code></span></dt><dd>Pop directional isolate</dd></div><div class="dlist-item"><dt><span><code class="regex">R</code></span></dt><dd>Right-to-left</dd></div><div class="dlist-item"><dt><span><code class="regex">RLE</code></span></dt><dd>Right-to-left embedding</dd></div><div class="dlist-item"><dt><span><code class="regex">RLI</code></span></dt><dd>Right-to-left isolate</dd></div><div class="dlist-item"><dt><span><code class="regex">RLO</code></span></dt><dd>Right-to-left override</dd></div><div class="dlist-item"><dt><span><code class="regex">S</code></span></dt><dd>Segment separator</dd></div><div class="dlist-item"><dt><span><code class="regex">WS</code></span></dt><dd>White space</dd></div></dl>
 <p>As in all property specifications, an equals sign may be used instead of a
 colon and the class names are case-insensitive. Only the short names listed
 above are recognized; PCRE2 does not at present support any long alternatives.</p></section>
@@ -1105,7 +564,7 @@ Instead it introduced various emoji-specific properties. PCRE2 uses only the
 Extended Pictographic property.</p>
 <p><code class="regex">\X</code> always matches at least one character. Then it decides whether to add
 additional characters according to the following rules for ending a cluster:</p>
-<div class="olist arabic"><ol class="arabic"><li>End at the end of the subject string.</li><li>Do not end between CR and LF; otherwise end after any control character.</li><li>Do not break Hangul (a Korean script) syllable sequences. Hangul characters
+<ol class="arabic compact"><li>End at the end of the subject string.</li><li>Do not end between CR and LF; otherwise end after any control character.</li><li>Do not break Hangul (a Korean script) syllable sequences. Hangul characters
 are of five types: L, V, T, LV, and LVT. An L character may be followed by an
 L, V, LV, or LVT character; an LV or V character may be followed by a V or T
 character; an LVT or T character may be followed only by a T character.</li><li>Do not end before extending characters or spacing marks or the zero-width
@@ -1116,13 +575,13 @@ Extended_Pictographic property, optionally followed by one or more characters
 with the Extend property, followed by the ZWJ character, followed by another
 Extended_Pictographic character.</li><li>Do not break within emoji flag sequences. That is, do not break between
 regional indicator (RI) characters if there are an odd number of RI characters
-before the break point.</li><li>Otherwise, end the cluster.</li></ol></div></section>
-<section class="doc-section level-2"><h3 id="_pcre2s_additional_properties">PCRE2&#8217;s additional properties</h3><p>As well as the standard Unicode properties described above, PCRE2 supports four
+before the break point.</li><li>Otherwise, end the cluster.</li></ol></section>
+<section class="doc-section level-2"><h3 id="_pcre2s_additional_properties">PCRE2’s additional properties</h3><p>As well as the standard Unicode properties described above, PCRE2 supports four
 more that make it possible to convert traditional escape sequences such as <code class="regex">\w</code>
 and <code class="regex">\s</code> to use Unicode properties. PCRE2 uses these non-standard, non-Perl
 properties internally when <code class="constant">PCRE2_UCP</code> is set. However, they may also be used
 explicitly. These properties are:</p>
-<div class="dlist"><dl><dt><code class="regex">Xan</code></dt><dd>Any alphanumeric character</dd><dt><code class="regex">Xps</code></dt><dd>Any POSIX space character</dd><dt><code class="regex">Xsp</code></dt><dd>Any Perl space character</dd><dt><code class="regex">Xwd</code></dt><dd>Any Perl "word" character</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">Xan</code></span></dt><dd>Any alphanumeric character</dd></div><div class="dlist-item"><dt><span><code class="regex">Xps</code></span></dt><dd>Any POSIX space character</dd></div><div class="dlist-item"><dt><span><code class="regex">Xsp</code></span></dt><dd>Any Perl space character</dd></div><div class="dlist-item"><dt><span><code class="regex">Xwd</code></span></dt><dd>Any Perl "word" character</dd></div></dl>
 <p><code class="regex">Xan</code> matches characters that have either the <code class="regex">L</code> (letter) or the <code class="regex">N</code> (number)
 property. <code class="regex">Xps</code> matches the characters tab, linefeed, vertical tab, form feed, or
 carriage return, and any other character that has the <code class="regex">Z</code> (separator) property
@@ -1131,7 +590,7 @@ to exclude vertical tab, for Perl compatibility, but Perl changed. <code class="
 the same characters as <code class="regex">Xan</code>, plus those that match <code class="regex">Mn</code> (non-spacing mark) or <code class="regex">Pc</code>
 (connector punctuation, which includes underscore).</p>
 <p>There is another non-standard property, <code class="regex">Xuc</code>, which matches any character that
-can be represented by a Universal Character Name in C&#43;&#43; and other programming
+can be represented by a Universal Character Name in C++ and other programming
 languages. These are the characters $, @, ` (grave accent), and all characters
 with Unicode code points greater than or equal to <code class="character">U+00A0</code>, except for the
 surrogates <code class="character">U+D800</code> to <code class="character">U+DFFF</code>. Note that most base (ASCII) characters are
@@ -1175,7 +634,7 @@ without consuming any characters from the subject string. The use of
 groups for more complicated assertions is described
 below.
 The backslashed assertions are:</p>
-<div class="dlist"><dl><dt><code class="regex">\b</code></dt><dd>Matches at a word boundary.</dd><dt><code class="regex">\B</code></dt><dd>Matches when not at a word boundary.</dd><dt><code class="regex">\A</code></dt><dd>Matches at the start of the subject.</dd><dt><code class="regex">\Z</code></dt><dd>Matches at the end of the subject; also matches before a newline at the end of the subject.</dd><dt><code class="regex">\z</code></dt><dd>Matches only at the end of the subject.</dd><dt><code class="regex">\G</code></dt><dd>Matches at the first matching position in the subject.</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">\b</code></span></dt><dd>Matches at a word boundary.</dd></div><div class="dlist-item"><dt><span><code class="regex">\B</code></span></dt><dd>Matches when not at a word boundary.</dd></div><div class="dlist-item"><dt><span><code class="regex">\A</code></span></dt><dd>Matches at the start of the subject.</dd></div><div class="dlist-item"><dt><span><code class="regex">\Z</code></span></dt><dd>Matches at the end of the subject; also matches before a newline at the end of the subject.</dd></div><div class="dlist-item"><dt><span><code class="regex">\z</code></span></dt><dd>Matches only at the end of the subject.</dd></div><div class="dlist-item"><dt><span><code class="regex">\G</code></span></dt><dd>Matches at the first matching position in the subject.</dd></div></dl>
 <p>Inside a character class, <code class="regex">\b</code> has a different meaning; it matches the backspace
 character. If any other of these assertions appears in a character class, an
 "invalid escape sequence" error is generated.</p>
@@ -1203,10 +662,10 @@ end.</p>
 start point of the matching process, as specified by the <code class="parameter">start_offset</code>
 argument of <code class="function">pcre2_match()</code>. It differs from <code class="regex">\A</code> when the value of
 <code class="parameter">start_offset</code> is non-zero. By calling <code class="function">pcre2_match()</code> multiple times
-with appropriate arguments, you can mimic Perl&#8217;s /g option, and it is in this
+with appropriate arguments, you can mimic Perl’s /g option, and it is in this
 kind of implementation where <code class="regex">\G</code> can be useful.</p>
-<p>Note, however, that PCRE2&#8217;s implementation of <code class="regex">\G</code>, being true at the starting
-character of the matching process, is subtly different from Perl&#8217;s, which
+<p>Note, however, that PCRE2’s implementation of <code class="regex">\G</code>, being true at the starting
+character of the matching process, is subtly different from Perl’s, which
 defines it as true at the end of the previous match. In Perl, these can be
 different when the previously matched string was empty. Because PCRE2 does just
 one match at a time, it cannot reproduce this behaviour.</p>
@@ -1303,7 +762,7 @@ but it is unclear how it can usefully be used.</p>
 with <code class="regex">\C</code> in UTF-8 or UTF-16 mode means that the rest of the string may start
 with a malformed UTF character. This has undefined results, because PCRE2
 assumes that it is matching character by character in a valid UTF string (by
-default it checks the subject string&#8217;s validity at the start of processing
+default it checks the subject string’s validity at the start of processing
 unless the <code class="constant">PCRE2_NO_UTF_CHECK</code> or <code class="constant">PCRE2_MATCH_INVALID_UTF</code> option is used).</p>
 <p>An application can lock out the use of <code class="regex">\C</code> by setting the
 <code class="constant">PCRE2_NEVER_BACKSLASH_C</code> option when compiling a pattern. It is also possible to
@@ -1331,7 +790,7 @@ numbers in each alternative (see
 "Duplicate Group Numbers"
 below). The assertions at the start of each branch check the next UTF-8
 character for values whose encoding uses 1, 2, 3, or 4 bytes, respectively. The
-character&#8217;s individual bytes are then captured by the appropriate number of
+character’s individual bytes are then captured by the appropriate number of
 <code class="regex">\C</code> groups.</p></section>
 <section class="doc-section level-1"><h2 id="_square_brackets_and_character_classes">Square brackets and character classes</h2><p>An opening square bracket introduces a character class, terminated by a closing
 square bracket. A closing square bracket on its own is not special by default.
@@ -1418,8 +877,8 @@ characters in both cases.</p>
 specify a more restricted set of characters than the matching lower case type.
 For example, the class <code class="regex">[^\W_]</code> matches any letter or digit, but not underscore,
 whereas <code class="regex">[\w]</code> includes underscore. A positive character class should be read as
-"something OR something OR &#8230;&#8203;" and a negative class as "NOT something AND NOT
-something AND NOT &#8230;&#8203;".</p>
+"something OR something OR …​" and a negative class as "NOT something AND NOT
+something AND NOT …​".</p>
 <p>The metacharacters that are recognized in character classes are backslash,
 hyphen (when it can be interpreted as specifying a range), circumflex
 (only at the start), and the terminating closing square bracket. An opening
@@ -1430,7 +889,7 @@ below), or a special compatibility feature (see
 "Compatibility feature for word boundaries"
 below. Escaping any non-alphanumeric character in a class turns it into a
 literal, whether or not it would otherwise be a metacharacter.</p></section>
-<section class="doc-section level-1"><h2 id="_perl_extended_character_classes">Perl extended character classes</h2><p>From release 10.45 PCRE2 supports Perl&#8217;s <code class="regex">(?[...])</code> extended character class
+<section class="doc-section level-1"><h2 id="_perl_extended_character_classes">Perl extended character classes</h2><p>From release 10.45 PCRE2 supports Perl’s <code class="regex">(?[...])</code> extended character class
 syntax. This can be used to perform set operations such as intersection on
 character classes.</p>
 <p>The syntax permitted within <code class="regex">(?[...])</code> is quite different to ordinary character
@@ -1452,12 +911,12 @@ unknown escape, as it would be in <code class="regex">[\y]</code>.</p>
 <p>In the extended syntax, <code class="regex">^</code> does not negate a class (except within an
 ordinary class nested inside an extended class); it is instead a binary
 operator.</p>
-<p>The binary operators are <code class="regex">&amp;</code> (intersection), <code class="regex">|</code> or <code class="regex">&#43;</code> (union), <code class="regex">-</code>
+<p>The binary operators are <code class="regex">&amp;</code> (intersection), <code class="regex">|</code> or <code class="regex">+</code> (union), <code class="regex">-</code>
 (subtraction) and <code class="regex">^</code> (symmetric difference). These are left-associative and
 <code class="regex">&amp;</code> has higher (tighter) precedence, while the others have equal lower precedence.
 The one prefix unary operator is <code class="regex">!</code> (complement), with highest
 precedence.</p></section>
-<section class="doc-section level-1"><h2 id="_uts18_extended_character_classes">UTS#18 extended character classes</h2><p>The <code class="constant">PCRE2_ALT_EXTENDED_CLASS</code> option enables an alternative to Perl&#8217;s <code class="regex">(?[...])</code>
+<section class="doc-section level-1"><h2 id="_uts18_extended_character_classes">UTS#18 extended character classes</h2><p>The <code class="constant">PCRE2_ALT_EXTENDED_CLASS</code> option enables an alternative to Perl’s <code class="regex">(?[...])</code>
 syntax, allowing instead extended class behaviour inside ordinary <code class="regex">[...]</code>
 character classes. This altered syntax for <code class="regex">[...]</code> classes is loosely described
 by the Unicode standard UTS#18. The <code class="constant">PCRE2_ALT_EXTENDED_CLASS</code> option does not
@@ -1477,14 +936,14 @@ A literal <code class="regex">-</code> at the start or end of a range must be es
 <code class="regex">[--1]</code> in Perl syntax is the range from hyphen to 1, it must be
 escaped as <code class="regex">[\--1]</code>
 in UTS#18 extended classes.</p>
-<p>Unlike Perl&#8217;s <code class="regex">(?[...])</code> extended classes, the <code class="constant">PCRE2_EXTENDED_MORE</code> option to
+<p>Unlike Perl’s <code class="regex">(?[...])</code> extended classes, the <code class="constant">PCRE2_EXTENDED_MORE</code> option to
 ignore space and tab characters is not automatically enabled for UTS#18
 extended classes, but it is honoured if set.</p>
 <p>Extended UTS#18 classes can be nested, and nested classes are themselves
 extended classes (unlike Perl, where nested classes must be simple classes).
 For example, <code class="regex">[\p{L}&amp;&amp;[\p{Thai}||\p{Greek}]]</code> matches any letter that is in
 the Thai or Greek scripts. Note that this means that no special grouping
-characters (such as the parentheses used in Perl&#8217;s <code class="regex">(?[...])</code> class syntax) are
+characters (such as the parentheses used in Perl’s <code class="regex">(?[...])</code> class syntax) are
 needed.</p>
 <p>Individual class items (literal characters, literal ranges, properties such as
 <code class="regex">\d</code> or <code class="regex">\p{...}</code>, and nested classes) can be combined by juxtaposition or by an
@@ -1498,13 +957,13 @@ is a syntax error. For example, <code class="regex">[A&amp;&amp;B--C]</code> is 
 <code class="regex">[A&amp;&amp;[B--C]]</code> is valid.</p>
 <p>This is an emerging syntax which is being adopted gradually across the regex
 ecosystem: for example JavaScript adopted the <code class="regex">/v</code> flag in ECMAScript 2024;
-Python&#8217;s <code>re</code> module reserves the syntax for future use with a FutureWarning
+Python’s <code>re</code> module reserves the syntax for future use with a FutureWarning
 for unescaped use of <code class="regex">[</code> as a literal within character classes. Due to UTS#18
 providing insufficient guidance, engines interpret the syntax differently.
-Rust&#8217;s <code>regex</code> crate and Python&#8217;s <code>regex</code> PyPi module both implement UTS#18
+Rust’s <code>regex</code> crate and Python’s <code>regex</code> PyPi module both implement UTS#18
 extended classes, but with slight incompatibilities (<code class="regex">[A||B&amp;&amp;C]</code> is parsed as
-<code class="regex">[A||[B&amp;&amp;C]]</code> in Python&#8217;s <code>regex</code> but as <code class="regex">[[A||B]&amp;&amp;C]</code> in Rust&#8217;s <code>regex</code>).</p>
-<p>PCRE2&#8217;s syntax adds syntax restrictions similar to ECMAScript&#8217;s <code class="regex">/v</code> flag, so
+<code class="regex">[A||[B&amp;&amp;C]]</code> in Python’s <code>regex</code> but as <code class="regex">[[A||B]&amp;&amp;C]</code> in Rust’s <code>regex</code>).</p>
+<p>PCRE2’s syntax adds syntax restrictions similar to ECMAScript’s <code class="regex">/v</code> flag, so
 that all the UTS#18 extended classes accepted as valid by PCRE2 have the
 property that they are interpreted either with the same behaviour, or as
 invalid, by all other major engines. Please file an issue if you are aware of
@@ -1515,7 +974,7 @@ this notation, in both ordinary and extended classes. For example,</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">[01[:alpha:]%]</code></pre></div>
 <p>matches <code class="subject">0</code>, <code class="subject">1</code>, any alphabetic character, or <code class="subject">%</code>. The supported class names
 are:</p>
-<div class="dlist"><dl><dt><code class="regex">[:alnum:]</code></dt><dd>Letters and digits.</dd><dt><code class="regex">[:alpha:]</code></dt><dd>Letters.</dd><dt><code class="regex">[:ascii:]</code></dt><dd>Character codes 0&#8211;127.</dd><dt><code class="regex">[:blank:]</code></dt><dd>Space or tab only.</dd><dt><code class="regex">[:cntrl:]</code></dt><dd>Control characters.</dd><dt><code class="regex">[:digit:]</code></dt><dd>Decimal digits (same as <code class="regex">\d</code>).</dd><dt><code class="regex">[:graph:]</code></dt><dd>Printing characters, excluding space.</dd><dt><code class="regex">[:lower:]</code></dt><dd>Lower case letters.</dd><dt><code class="regex">[:print:]</code></dt><dd>Printing characters, including space.</dd><dt><code class="regex">[:punct:]</code></dt><dd>Printing characters, excluding letters, digits, and space.</dd><dt><code class="regex">[:space:]</code></dt><dd>White space (the same as <code class="regex">\s</code> from PCRE2 8.34).</dd><dt><code class="regex">[:upper:]</code></dt><dd>Upper case letters.</dd><dt><code class="regex">[:word:]</code></dt><dd>"Word" characters (same as <code class="regex">\w</code>).</dd><dt><code class="regex">[:xdigit:]</code></dt><dd>Hexadecimal digits.</dd></dl></div>
+<dl class="compact" style="--tab-width: 8"><div class="dlist-item"><dt><span><code class="regex">[:alnum:]</code></span></dt><dd>Letters and digits.</dd></div><div class="dlist-item"><dt><span><code class="regex">[:alpha:]</code></span></dt><dd>Letters.</dd></div><div class="dlist-item"><dt><span><code class="regex">[:ascii:]</code></span></dt><dd>Character codes 0–127.</dd></div><div class="dlist-item"><dt><span><code class="regex">[:blank:]</code></span></dt><dd>Space or tab only.</dd></div><div class="dlist-item"><dt><span><code class="regex">[:cntrl:]</code></span></dt><dd>Control characters.</dd></div><div class="dlist-item"><dt><span><code class="regex">[:digit:]</code></span></dt><dd>Decimal digits (same as <code class="regex">\d</code>).</dd></div><div class="dlist-item"><dt><span><code class="regex">[:graph:]</code></span></dt><dd>Printing characters, excluding space.</dd></div><div class="dlist-item"><dt><span><code class="regex">[:lower:]</code></span></dt><dd>Lower case letters.</dd></div><div class="dlist-item"><dt><span><code class="regex">[:print:]</code></span></dt><dd>Printing characters, including space.</dd></div><div class="dlist-item"><dt><span><code class="regex">[:punct:]</code></span></dt><dd>Printing characters, excluding letters, digits, and space.</dd></div><div class="dlist-item"><dt><span><code class="regex">[:space:]</code></span></dt><dd>White space (the same as <code class="regex">\s</code> from PCRE2 8.34).</dd></div><div class="dlist-item"><dt><span><code class="regex">[:upper:]</code></span></dt><dd>Upper case letters.</dd></div><div class="dlist-item"><dt><span><code class="regex">[:word:]</code></span></dt><dd>"Word" characters (same as <code class="regex">\w</code>).</dd></div><div class="dlist-item"><dt><span><code class="regex">[:xdigit:]</code></span></dt><dd>Hexadecimal digits.</dd></div></dl>
 <p>The default "space" characters are HT (9), LF (10), VT (11), FF (12), CR (13),
 and space (32). If locale-specific matching is taking place, the list of space
 characters may be different; there may be fewer or more of them. "Space" and
@@ -1529,22 +988,22 @@ syntax <code class="regex">[.ch.]</code> and <code class="regex">[=ch=]</code> w
 supported, and an error is given if they are encountered.</p>
 <p>By default, characters with values greater than 127 do not match any of the
 POSIX character classes, although this may be different for characters in the
-range 128&#8211;255 when locale-specific matching is happening. However, in UCP mode,
+range 128–255 when locale-specific matching is happening. However, in UCP mode,
 unless certain options are set (see below), some of the classes are changed so
 that Unicode character properties are used. This is achieved by replacing
 POSIX classes with other sequences, as follows:</p>
-<div class="dlist"><dl><dt><code class="regex">[:alnum:]</code></dt><dd>Becomes <code class="regex">\p{Xan}</code></dd><dt><code class="regex">[:alpha:]</code></dt><dd>Becomes <code class="regex">\p{L}</code></dd><dt><code class="regex">[:blank:]</code></dt><dd>Becomes <code class="regex">\h</code></dd><dt><code class="regex">[:cntrl:]</code></dt><dd>Becomes <code class="regex">\p{Cc}</code></dd><dt><code class="regex">[:digit:]</code></dt><dd>Becomes <code class="regex">\p{Nd}</code></dd><dt><code class="regex">[:lower:]</code></dt><dd>Becomes <code class="regex">\p{Ll}</code></dd><dt><code class="regex">[:space:]</code></dt><dd>Becomes <code class="regex">\p{Xps}</code></dd><dt><code class="regex">[:upper:]</code></dt><dd>Becomes <code class="regex">\p{Lu}</code></dd><dt><code class="regex">[:word:]</code></dt><dd>Becomes <code class="regex">\p{Xwd}</code></dd></dl></div>
+<dl class="compact" style="--tab-width: 8"><div class="dlist-item"><dt><span><code class="regex">[:alnum:]</code></span></dt><dd>Becomes <code class="regex">\p{Xan}</code></dd></div><div class="dlist-item"><dt><span><code class="regex">[:alpha:]</code></span></dt><dd>Becomes <code class="regex">\p{L}</code></dd></div><div class="dlist-item"><dt><span><code class="regex">[:blank:]</code></span></dt><dd>Becomes <code class="regex">\h</code></dd></div><div class="dlist-item"><dt><span><code class="regex">[:cntrl:]</code></span></dt><dd>Becomes <code class="regex">\p{Cc}</code></dd></div><div class="dlist-item"><dt><span><code class="regex">[:digit:]</code></span></dt><dd>Becomes <code class="regex">\p{Nd}</code></dd></div><div class="dlist-item"><dt><span><code class="regex">[:lower:]</code></span></dt><dd>Becomes <code class="regex">\p{Ll}</code></dd></div><div class="dlist-item"><dt><span><code class="regex">[:space:]</code></span></dt><dd>Becomes <code class="regex">\p{Xps}</code></dd></div><div class="dlist-item"><dt><span><code class="regex">[:upper:]</code></span></dt><dd>Becomes <code class="regex">\p{Lu}</code></dd></div><div class="dlist-item"><dt><span><code class="regex">[:word:]</code></span></dt><dd>Becomes <code class="regex">\p{Xwd}</code></dd></div></dl>
 <p>Negated versions, such as <code class="regex">[:^alpha:]</code> use <code class="regex">\P</code> instead of <code class="regex">\p</code>.</p>
 <p>Four other POSIX
 classes are handled specially in UCP mode:</p>
-<div class="dlist"><dl><dt><code class="regex">[:graph:]</code></dt><dd>This matches characters that have glyphs that mark the page when printed. In
+<dl class="spaced" style="--tab-width: 8"><div class="dlist-item"><dt><span><code class="regex">[:graph:]</code></span></dt><dd>This matches characters that have glyphs that mark the page when printed. In
 Unicode property terms, it matches all characters with the L, M, N, P, S, or Cf
-properties, except for:<dl><dt><code class="character">U+061C</code></dt><dd>Arabic Letter Mark</dd><dt><code class="character">U+180E</code></dt><dd>Mongolian Vowel Separator</dd><dt><code class="character">U+2066</code>&#8211;<code class="character">U+2069</code></dt><dd>Various "isolates"</dd></dl></dd><dt><code class="regex">[:print:]</code></dt><dd>This matches the same characters as <code class="regex">[:graph:]</code> plus space characters that are
-not controls, that is, characters with the Zs property.</dd><dt><code class="regex">[:punct:]</code></dt><dd>This matches all characters that have the Unicode P (punctuation) property,
+properties, except for:<dl class="compact" style="--tab-width: 14"><div class="dlist-item"><dt><span><code class="character">U+061C</code></span></dt><dd>Arabic Letter Mark</dd></div><div class="dlist-item"><dt><span><code class="character">U+180E</code></span></dt><dd>Mongolian Vowel Separator</dd></div><div class="dlist-item"><dt><span><code class="character">U+2066</code>–<code class="character">U+2069</code></span></dt><dd>Various "isolates"</dd></div></dl></dd></div><div class="dlist-item"><dt><span><code class="regex">[:print:]</code></span></dt><dd>This matches the same characters as <code class="regex">[:graph:]</code> plus space characters that are
+not controls, that is, characters with the Zs property.</dd></div><div class="dlist-item"><dt><span><code class="regex">[:punct:]</code></span></dt><dd>This matches all characters that have the Unicode P (punctuation) property,
 plus those characters with code points less than 256 that have the S (Symbol)
-property.</dd><dt><code class="regex">[:xdigit:]</code></dt><dd>In addition to the ASCII hexadecimal digits, this also matches the "fullwidth"
+property.</dd></div><div class="dlist-item"><dt><span><code class="regex">[:xdigit:]</code></span></dt><dd>In addition to the ASCII hexadecimal digits, this also matches the "fullwidth"
 versions of those characters, whose Unicode code points start at <code class="character">U+FF10</code>. This
-is a change that was made in PCRE2 release 10.43 for Perl compatibility.</dd></dl></div>
+is a change that was made in PCRE2 release 10.43 for Perl compatibility.</dd></div></dl>
 <p>The other POSIX classes are unchanged by <code class="constant">PCRE2_UCP</code>, and match only characters
 with code points less than 256.</p>
 <p>There are two options that can be used to restrict the POSIX classes to ASCII
@@ -1556,7 +1015,7 @@ for all POSIX classes, including <code class="regex">[:digit:]</code> and <code 
 <section class="doc-section level-1"><h2 id="_compatibility_feature_for_word_boundaries">Compatibility feature for word boundaries</h2><p>In the POSIX.2 compliant library that was included in 4.4BSD Unix, the ugly
 syntax [[:&lt;:]] and [[:&gt;:]] is used for matching "start of word" and "end of
 word". PCRE2 treats these items as follows:</p>
-<div class="dlist"><dl><dt><code class="regex">[[:&lt;:]]</code></dt><dd>Is converted to <code class="regex">\b(?=\w)</code>.</dd><dt><code class="regex">[[:&gt;:]]</code></dt><dd>Is converted to <code class="regex">\b(?&lt;=\w)</code>.</dd></dl></div>
+<dl class="compact" style="--tab-width: 8"><div class="dlist-item"><dt><span><code class="regex">[[:&lt;:]]</code></span></dt><dd>Is converted to <code class="regex">\b(?=\w)</code>.</dd></div><div class="dlist-item"><dt><span><code class="regex">[[:&gt;:]]</code></span></dt><dd>Is converted to <code class="regex">\b(?&lt;=\w)</code>.</dd></div></dl>
 <p>Only these exact character sequences are recognized. A sequence such as
 [a[:&lt;:]b] provokes error for an unrecognized POSIX class name. This support is
 not compatible with Perl. It is provided to help migrations from other
@@ -1581,9 +1040,9 @@ alternative in the group.</p></section>
 <section class="doc-section level-1"><h2 id="internal-option-setting">Internal option setting</h2><p>The settings of several options can be changed within a pattern by a sequence
 of letters enclosed between <code class="regex">(?</code> and <code class="regex">)</code>. The following are Perl-compatible,
 and are described in detail in the
-<a href="pcre2api.html"><code>pcre2api</code></a>
+<a href="./pcre2api.html"><code>pcre2api</code></a>
 documentation. The option letters are:</p>
-<div class="dlist"><dl><dt><code class="regex">i</code></dt><dd>For <code class="constant">PCRE2_CASELESS</code></dd><dt><code class="regex">m</code></dt><dd>For <code class="constant">PCRE2_MULTILINE</code></dd><dt><code class="regex">n</code></dt><dd>For <code class="constant">PCRE2_NO_AUTO_CAPTURE</code></dd><dt><code class="regex">s</code></dt><dd>For <code class="constant">PCRE2_DOTALL</code></dd><dt><code class="regex">x</code></dt><dd>For <code class="constant">PCRE2_EXTENDED</code></dd><dt><code class="regex">xx</code></dt><dd>For <code class="constant">PCRE2_EXTENDED_MORE</code></dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">i</code></span></dt><dd>For <code class="constant">PCRE2_CASELESS</code></dd></div><div class="dlist-item"><dt><span><code class="regex">m</code></span></dt><dd>For <code class="constant">PCRE2_MULTILINE</code></dd></div><div class="dlist-item"><dt><span><code class="regex">n</code></span></dt><dd>For <code class="constant">PCRE2_NO_AUTO_CAPTURE</code></dd></div><div class="dlist-item"><dt><span><code class="regex">s</code></span></dt><dd>For <code class="constant">PCRE2_DOTALL</code></dd></div><div class="dlist-item"><dt><span><code class="regex">x</code></span></dt><dd>For <code class="constant">PCRE2_EXTENDED</code></dd></div><div class="dlist-item"><dt><span><code class="regex">xx</code></span></dt><dd>For <code class="constant">PCRE2_EXTENDED_MORE</code></dd></div></dl>
 <p>For example, <code class="regex">(?im)</code> sets caseless, multiline matching. It is also possible to
 unset these options by preceding the relevant letters with a hyphen, for
 example <code class="regex">(?-im)</code>. The two "extended" options are not independent; unsetting
@@ -1598,7 +1057,7 @@ options to be unset. Letters may follow the circumflex to cause some options to
 be re-instated, but a hyphen may not appear.</p>
 <p>Some PCRE2-specific options can be changed by the same mechanism using these
 pairs or individual letters:</p>
-<div class="dlist"><dl><dt><code class="regex">aD</code></dt><dd>For <code class="constant">PCRE2_EXTRA_ASCII_BSD</code></dd><dt><code class="regex">aS</code></dt><dd>For <code class="constant">PCRE2_EXTRA_ASCII_BSS</code></dd><dt><code class="regex">aW</code></dt><dd>For <code class="constant">PCRE2_EXTRA_ASCII_BSW</code></dd><dt><code class="regex">aP</code></dt><dd>For <code class="constant">PCRE2_EXTRA_ASCII_POSIX</code> and <code class="constant">PCRE2_EXTRA_ASCII_DIGIT</code></dd><dt><code class="regex">aT</code></dt><dd>For <code class="constant">PCRE2_EXTRA_ASCII_DIGIT</code></dd><dt><code class="regex">r</code></dt><dd>For <code class="constant">PCRE2_EXTRA_CASELESS_RESTRICT</code></dd><dt><code class="regex">J</code></dt><dd>For <code class="constant">PCRE2_DUPNAMES</code></dd><dt><code class="regex">U</code></dt><dd>For <code class="constant">PCRE2_UNGREEDY</code></dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">aD</code></span></dt><dd>For <code class="constant">PCRE2_EXTRA_ASCII_BSD</code></dd></div><div class="dlist-item"><dt><span><code class="regex">aS</code></span></dt><dd>For <code class="constant">PCRE2_EXTRA_ASCII_BSS</code></dd></div><div class="dlist-item"><dt><span><code class="regex">aW</code></span></dt><dd>For <code class="constant">PCRE2_EXTRA_ASCII_BSW</code></dd></div><div class="dlist-item"><dt><span><code class="regex">aP</code></span></dt><dd>For <code class="constant">PCRE2_EXTRA_ASCII_POSIX</code> and <code class="constant">PCRE2_EXTRA_ASCII_DIGIT</code></dd></div><div class="dlist-item"><dt><span><code class="regex">aT</code></span></dt><dd>For <code class="constant">PCRE2_EXTRA_ASCII_DIGIT</code></dd></div><div class="dlist-item"><dt><span><code class="regex">r</code></span></dt><dd>For <code class="constant">PCRE2_EXTRA_CASELESS_RESTRICT</code></dd></div><div class="dlist-item"><dt><span><code class="regex">J</code></span></dt><dd>For <code class="constant">PCRE2_DUPNAMES</code></dd></div><div class="dlist-item"><dt><span><code class="regex">U</code></span></dt><dd>For <code class="constant">PCRE2_UNGREEDY</code></dd></div></dl>
 <p>However, except for <code class="regex">r</code>, these are not unset by <code class="regex">(?^)</code>, which is equivalent to
 <code class="regex">(?-imnrsx)</code>. If <code class="regex">a</code> is not followed by any of the upper case letters shown
 above, it sets (or unsets) all the ASCII options.</p>
@@ -1641,7 +1100,7 @@ the <code class="constant">PCRE2_NEVER_UTF</code> or <code class="constant">PCRE
 <code class="regex">(*UTF)</code> and <code class="regex">(*UCP)</code> sequences.</p></aside></section>
 <section class="doc-section level-1"><h2 id="groups">Groups</h2><p>Groups are delimited by parentheses (round brackets), which can be nested.
 Turning part of a pattern into a group does two things:</p>
-<div class="olist arabic"><ol class="arabic"><li><p>It localizes a set of alternatives. For example, the pattern</p><div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">cat(aract|erpillar|)</code></pre></div>
+<ol class="arabic spaced"><li><p>It localizes a set of alternatives. For example, the pattern</p><div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">cat(aract|erpillar|)</code></pre></div>
 <p>matches <code class="subject">cataract</code>, <code class="subject">caterpillar</code>, or <code class="subject">cat</code>. Without the parentheses, it would
 match <code class="subject">cataract</code>, <code class="subject">erpillar</code> or an empty string.</p></li><li><p>It creates a "capture group". This means that, when the whole pattern
 matches, the portion of the subject string that matched the group is passed
@@ -1652,7 +1111,7 @@ numbers for capture groups. For example, if the string <code class="subject">the
 matched against the pattern</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">the ((red|white) (king|queen))</code></pre></div>
 <p>the captured substrings are <code class="subject">red king</code>, <code class="subject">red</code>, and <code class="subject">king</code>, and are numbered 1,
-2, and 3, respectively.</p></li></ol></div>
+2, and 3, respectively.</p></li></ol>
 <p>The fact that plain parentheses fulfil two functions is not always helpful.
 There are often times when grouping is required without capturing. If an
 opening parenthesis is followed by a question mark and a colon, the group
@@ -1691,7 +1150,7 @@ first one in the pattern with the given number. The following pattern matches
 of computing an absolute group number.</p>
 <p>If a
 condition test
-for a group&#8217;s having matched refers to a non-unique number, the test is
+for a group’s having matched refers to a non-unique number, the test is
 true if any group with that number has matched.</p>
 <p>An alternative approach to using this "branch reset" feature is to use
 duplicate named groups, as described in the section <a href="#named-capture-groups">Named capture groups</a>.</p></section>
@@ -1701,14 +1160,14 @@ modified, the numbers may change. To help with this difficulty, PCRE2 supports
 the naming of capture groups. This feature was not added to Perl until release
 5.10. Python had the feature earlier, and PCRE1 introduced it at release 4.0,
 using the Python syntax. PCRE2 supports both the Perl and the Python syntax.</p>
-<p>In PCRE2, a capture group can be named in one of three ways: <code class="regex">(?&lt;<em>name</em>&gt;&#8230;&#8203;)</code> or
-<code class="regex">(?'<em>name</em>'&#8230;&#8203;)</code> as in Perl, or <code class="regex">(?P&lt;<em>name</em>&gt;&#8230;&#8203;)</code> as in Python. Names may be up to
+<p>In PCRE2, a capture group can be named in one of three ways: <code class="regex">(?&lt;<em>name</em>&gt;…​)</code> or
+<code class="regex">(?'<em>name</em>'…​)</code> as in Perl, or <code class="regex">(?P&lt;<em>name</em>&gt;…​)</code> as in Python. Names may be up to
 128 code units long. When <code class="constant">PCRE2_UTF</code> is not set, they may contain only ASCII
 alphanumeric characters and underscores, but must start with a non-digit. When
 <code class="constant">PCRE2_UTF</code> is set, the syntax of group names is extended to allow any Unicode
 letter or Unicode decimal digit. In other words, group names must match one of
 these patterns:</p>
-<div class="dlist"><dl><dt><code class="regex">^[_A-Za-z][_A-Za-z0-9]*\z</code>  </dt><dd>when <code class="constant">PCRE2_UTF</code> is not set</dd><dt><code class="regex">^[<em>\p{L}][</em>\p{L}\p{Nd}]*\z</code> </dt><dd>when <code class="constant">PCRE2_UTF</code> is set</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">^[_A-Za-z][_A-Za-z0-9]*\z</code>  </span></dt><dd>when <code class="constant">PCRE2_UTF</code> is not set</dd></div><div class="dlist-item"><dt><span><code class="regex">^[<em>\p{L}][</em>\p{L}\p{Nd}]*\z</code> </span></dt><dd>when <code class="constant">PCRE2_UTF</code> is set</dd></div></dl>
 <p>References to capture groups from other parts of the pattern, such as
 backreferences,
 recursion,
@@ -1777,11 +1236,11 @@ recursion, all groups with the same name are tested. If the condition is true
 for any one of them, the overall condition is true. This is the same behaviour
 as testing by number. For further details of the interfaces for handling named
 capture groups, see the
-<a href="pcre2api.html"><code>pcre2api</code></a>
+<a href="./pcre2api.html"><code>pcre2api</code></a>
 documentation.</p></section>
 <section class="doc-section level-1"><h2 id="_repetition">Repetition</h2><p>Repetition is specified by quantifiers, which may follow any one of these
 items:</p>
-<div class="ulist"><ul><li>a literal data character</li><li>the dot metacharacter</li><li>the <code class="regex">\C</code> escape sequence</li><li>the <code class="regex">\R</code> escape sequence</li><li>the <code class="regex">\X</code> escape sequence</li><li>any escape sequence that matches a single character</li><li>a character class</li><li>a backreference</li><li>a parenthesized group (including lookaround assertions)</li><li>a subroutine call (recursive or otherwise)</li></ul></div>
+<ul class="compact"><li>a literal data character</li><li>the dot metacharacter</li><li>the <code class="regex">\C</code> escape sequence</li><li>the <code class="regex">\R</code> escape sequence</li><li>the <code class="regex">\X</code> escape sequence</li><li>any escape sequence that matches a single character</li><li>a character class</li><li>a backreference</li><li>a parenthesized group (including lookaround assertions)</li><li>a subroutine call (recursive or otherwise)</li></ul>
 <p>If a quantifier does not follow a repeatable item, an error occurs. The
 general repetition quantifier specifies a minimum and maximum number of
 permitted matches by giving two numbers in curly brackets (braces), separated
@@ -1821,7 +1280,7 @@ below). Except for parenthesized groups, items that have a <code class="regex">{
 omitted from the compiled pattern.</p>
 <p>For convenience, the three most common quantifiers have single-character
 abbreviations:</p>
-<div class="dlist"><dl><dt><code class="regex">*</code></dt><dd>Is equivalent to <code class="regex">{0,}</code>.</dd><dt><code class="regex">+</code></dt><dd>Is equivalent to <code class="regex">{1,}</code>.</dd><dt><code class="regex">?</code></dt><dd>Is equivalent to <code class="regex">{0,1}</code>.</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">*</code></span></dt><dd>Is equivalent to <code class="regex">{0,}</code>.</dd></div><div class="dlist-item"><dt><span><code class="regex">+</code></span></dt><dd>Is equivalent to <code class="regex">{1,}</code>.</dd></div><div class="dlist-item"><dt><span><code class="regex">?</code></span></dt><dd>Is equivalent to <code class="regex">{0,1}</code>.</dd></div></dl>
 <p>It is possible to construct infinite loops by following a group that can match
 no characters with a quantifier that has no upper limit, for example:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(a?)*</code></pre></div>
@@ -1860,7 +1319,7 @@ default behaviour.</p>
 is greater than 1 or with a limited maximum, more memory is required for the
 compiled pattern, in proportion to the size of the minimum or maximum.</p>
 <p>If a pattern starts with <code class="regex">.*</code> or <code class="regex">.{0,}</code> and the <code class="constant">PCRE2_DOTALL</code> option (equivalent
-to Perl&#8217;s <code class="regex">/s</code>) is set, thus allowing the dot to match newlines, the pattern is
+to Perl’s <code class="regex">/s</code>) is set, thus allowing the dot to match newlines, the pattern is
 implicitly anchored, because whatever follows will be tried against every
 character position in the subject string, so there is no point in retrying the
 overall match at any position after the first. PCRE2 normally treats such a
@@ -1900,9 +1359,9 @@ the author of the pattern knows there is no point in carrying on.</p>
 <p>Consider, for example, the pattern <code class="regex">\d+foo</code> when applied to the subject line
 <code class="subject">123456bar</code>.</p>
 <p>After matching all 6 digits and then failing to match <code class="subject">foo</code>, the normal
-action of the matcher is to try again with only 5 digits matching the <code class="regex">\d&#43;</code>
+action of the matcher is to try again with only 5 digits matching the <code class="regex">\d+</code>
 item, and then with 4, and so on, before ultimately failing. "Atomic grouping"
-(a term taken from Jeffrey Friedl&#8217;s book) provides the means for specifying
+(a term taken from Jeffrey Friedl’s book) provides the means for specifying
 that once a group has matched, it is not to be re-evaluated in this way.</p>
 <p>If we use atomic grouping for the previous example, the matcher gives up
 immediately on failing to match <code class="subject">foo</code> the first time. The notation is a kind of
@@ -1920,7 +1379,7 @@ string of characters that an identical standalone pattern would match, if
 anchored at the current point in the subject string.</p>
 <p>Atomic groups are not capture groups. Simple cases such as the above example
 can be thought of as a maximizing repeat that must swallow everything it can.
-So, while both <code class="regex">\d&#43;</code> and <code class="regex">\d+?</code> are prepared to adjust the number of digits they
+So, while both <code class="regex">\d+</code> and <code class="regex">\d+?</code> are prepared to adjust the number of digits they
 match in order to make the rest of the pattern match, <code class="regex">(?&gt;\d+)</code> can only match
 an entire sequence of digits.</p>
 <p>Atomic groups in general can of course contain arbitrarily complicated
@@ -1940,12 +1399,12 @@ quantifier and the equivalent atomic group, though there may be a performance
 difference; possessive quantifiers should be slightly faster.</p>
 <p>The possessive quantifier syntax is an extension to the Perl 5.8 syntax.
 Jeffrey Friedl originated the idea (and the name) in the first edition of his
-book. Mike McCloskey liked it, so implemented it when he built Sun&#8217;s Java
+book. Mike McCloskey liked it, so implemented it when he built Sun’s Java
 package, and PCRE1 copied it from there. It found its way into Perl at release
 5.10.</p>
 <p>PCRE2 has an optimization that automatically "possessifies" certain simple
-pattern constructs. For example, the sequence <code class="regex">A&#43;B</code> is treated as <code class="regex">A&#43;&#43;B</code> because
-there is no point in backtracking into a sequence of A&#8217;s when B must follow.
+pattern constructs. For example, the sequence <code class="regex">A+B</code> is treated as <code class="regex">A++B</code> because
+there is no point in backtracking into a sequence of A’s when B must follow.
 This feature can be disabled by the <code class="constant">PCRE2_NO_AUTO_POSSESS</code> option, by calling
 <code class="function">pcre2_set_optimize()</code> with a <code class="constant">PCRE2_AUTO_POSSESS_OFF</code> directive, or by
 starting the pattern with <code class="regex">(*NO_AUTO_POSSESS)</code>.</p>
@@ -1958,7 +1417,7 @@ digits enclosed in &lt;&gt;, followed by either ! or ?. When it matches, it runs
 quickly. However, if it is applied to</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="text">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</code></pre></div>
 <p>it takes a long time before reporting failure. This is because the string can
-be divided between the internal <code class="regex">\D&#43;</code> repeat and the external <code class="regex">*</code> repeat in a
+be divided between the internal <code class="regex">\D+</code> repeat and the external <code class="regex">*</code> repeat in a
 large number of ways, and all have to be tried. (The example uses <code class="regex">[!?]</code> rather
 than a single character at the end, because both PCRE2 and Perl have an
 optimization that allows for fast failure when a single character is used. They
@@ -2009,7 +1468,7 @@ within themselves.</p>
 <p>The sequence <code class="regex">\g{+1}</code> is a reference to the next capture group that is started
 after this item, and <code class="regex">\g{+2}</code> refers to the one after that, and so on. This kind
 of forward reference can be useful in patterns that repeat. Perl does not
-support the use of <code class="regex">&#43;</code> in this way.</p>
+support the use of <code class="regex">+</code> in this way.</p>
 <p>A backreference matches whatever actually most recently matched the capture
 group in the current subject string, rather than anything at all that matches
 the group (see
@@ -2025,7 +1484,7 @@ capture group is matched caselessly.</p>
 <p>There are several different ways of writing backreferences to named capture
 groups. The .NET syntax is <code class="regex">\k{<em>name</em>}</code>, the Python syntax is <code class="regex">(?=<em>name</em>)</code>, and the
 original Perl syntax is <code class="regex">\k&lt;<em>name</em>&gt;</code> or <code class="regex">\k'<em>name</em>'</code>. All of these are now supported
-by both Perl and PCRE2. Perl 5.10&#8217;s unified backreference syntax, in which <code class="regex">\g</code>
+by both Perl and PCRE2. Perl 5.10’s unified backreference syntax, in which <code class="regex">\g</code>
 can be used for both numeric and named references, is also supported by PCRE2.
 We could rewrite the above example in any of the following ways:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(?&lt;p1&gt;(?i)rah)\s+\k&lt;p1&gt;
@@ -2121,7 +1580,7 @@ specify lookaround assertions. Perl 5.28 introduced some experimental
 alphabetic alternatives which might be easier to remember. They all start with
 <code class="regex">(*</code> instead of <code class="regex">(?</code> and must be written using lower case letters. PCRE2 supports
 the following synonyms:</p>
-<div class="dlist"><dl><dt><code class="regex">(*positive_lookahead:</code></dt><dt><code class="regex">(*pla:</code></dt><dd>Is the same as <code class="regex">(?=</code>.</dd><dt><code class="regex">(*negative_lookahead:</code></dt><dt><code class="regex">(*nla:</code></dt><dd>Is the same as <code class="regex">(?!</code>.</dd><dt><code class="regex">(*positive_lookbehind:</code></dt><dt><code class="regex">(*plb:</code></dt><dd>Is the same as <code class="regex">(?&lt;=</code>.</dd><dt><code class="regex">(*negative_lookbehind:</code></dt><dt><code class="regex">(*nlb:</code></dt><dd>Is the same as <code class="regex">(?&lt;!</code>.</dd></dl></div>
+<dl class="compact" style="--tab-width: 16"><div class="dlist-item"><dt><span><code class="regex">(*positive_lookahead:</code><br><code class="regex">(*pla:</code></span></dt><dd>Is the same as <code class="regex">(?=</code>.</dd></div><div class="dlist-item"><dt><span><code class="regex">(*negative_lookahead:</code><br><code class="regex">(*nla:</code></span></dt><dd>Is the same as <code class="regex">(?!</code>.</dd></div><div class="dlist-item"><dt><span><code class="regex">(*positive_lookbehind:</code><br><code class="regex">(*plb:</code></span></dt><dd>Is the same as <code class="regex">(?&lt;=</code>.</dd></div><div class="dlist-item"><dt><span><code class="regex">(*negative_lookbehind:</code><br><code class="regex">(*nlb:</code></span></dt><dd>Is the same as <code class="regex">(?&lt;!</code>.</dd></div></dl>
 <p>For example, <code class="regex">(*pla:<em>foo</em>)</code> is the same assertion as <code class="regex">(?=<em>foo</em>)</code>. In the following
 sections, the various assertions are described using the original symbolic
 forms.</p></section>
@@ -2197,7 +1656,7 @@ then all but the last two characters, and so on. Once again the search for <code
 covers the entire string, from right to left, so we are no better off. However,
 if the pattern is written as</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">^.*+(?&lt;=abcd)</code></pre></div>
-<p>there can be no backtracking for the <code class="regex">.*&#43;</code> item because of the possessive
+<p>there can be no backtracking for the <code class="regex">.*+</code> item because of the possessive
 quantifier; it can match only the entire string. The subsequent lookbehind
 assertion does a single test on the last four characters. If it fails, the
 match fails immediately. For long strings, this approach makes a significant
@@ -2210,7 +1669,7 @@ string. First there is a check that the previous three characters are all
 digits, and then there is a check that the same three characters are not <code class="subject">999</code>.
 This pattern does <em>not</em> match <code class="subject">foo</code> preceded by six characters, the first
 of which are digits and the last three of which are not <code class="subject">999</code>. For example, it
-doesn&#8217;t match <code class="subject">123abcfoo</code>. A pattern to do that is</p>
+doesn’t match <code class="subject">123abcfoo</code>. A pattern to do that is</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(?&lt;=\d{3}...)(?&lt;!999)foo</code></pre></div>
 <p>This time the first assertion looks at the preceding six characters, checking
 that the first three are digits, and then the second assertion checks that the
@@ -2226,7 +1685,7 @@ characters that are not <code class="subject">999</code>.</p></section></section
 but there is a subsequent matching failure, there is no backtracking into the
 assertion. However, there are some cases where non-atomic positive assertions
 can be useful. PCRE2 provides these using the following syntax:</p>
-<div class="dlist"><dl><dt><code class="regex">(*non_atomic_positive_lookahead:</code></dt><dt><code class="regex">(*napla:</code></dt><dt><code class="regex">(?*</code></dt><dd>Non-atomic positive lookahead.</dd><dt><code class="regex">(*non_atomic_positive_lookbehind:</code></dt><dt><code class="regex">(*naplb:</code></dt><dt><code class="regex">(?&lt;*</code></dt><dd>Non-atomic positive lookbehind.</dd></dl></div>
+<dl class="compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">(*non_atomic_positive_lookahead:</code><br><code class="regex">(*napla:</code><br><code class="regex">(?*</code></span></dt><dd>Non-atomic positive lookahead.</dd></div><div class="dlist-item"><dt><span><code class="regex">(*non_atomic_positive_lookbehind:</code><br><code class="regex">(*naplb:</code><br><code class="regex">(?&lt;*</code></span></dt><dd>Non-atomic positive lookbehind.</dd></div></dl>
 <p>Consider the problem of finding the right-most word in a string that also
 appears earlier in the string, that is, it must appear at least twice in total.
 This pattern returns the required result as captured substring 1:</p>
@@ -2311,9 +1770,9 @@ Unicode script such as Latin or Greek. However, because some scripts are
 commonly used together, and because some diacritical and other marks are used
 with multiple scripts, it is not that simple. There is a full description of
 the rules that PCRE2 uses in the section
-<a href="pcre2unicode.html#script-runs">Script runs</a>
+<a href="./pcre2unicode.html#script-runs">Script runs</a>
 in the
-<a href="pcre2unicode.html"><code>pcre2unicode</code></a>
+<a href="./pcre2unicode.html"><code>pcre2unicode</code></a>
 documentation.</p>
 <p>If part of a pattern is enclosed between <code class="regex">(*script_run:</code> or <code class="regex">(*sr:</code> and a closing
 parenthesis, it fails if the sequence of characters that it matches are not a
@@ -2336,7 +1795,7 @@ digits, underscore, and dots are permitted at the start:</p>
 desirable. The script run can employ an atomic group to prevent this. Because
 this is a common requirement, a shorthand notation is provided by
 <code class="regex">(*atomic_script_run:</code> or <code class="regex">(*asr:</code></p>
-<div class="dlist"><dl><dt><code class="regex">(*asr:...)</code></dt><dd>Is the same as <code class="regex">(*sr:(?&gt;...))</code>.</dd></dl></div>
+<dl class="compact" style="--tab-width: 8"><div class="dlist-item"><dt><span><code class="regex">(*asr:...)</code></span></dt><dd>Is the same as <code class="regex">(*sr:(?&gt;...))</code>.</dd></div></dl>
 <p>Note that the atomic group is inside the script run. Putting it outside would
 not prevent backtracking into the script run pattern.</p>
 <p>Support for script runs is not available if PCRE2 is compiled without Unicode
@@ -2554,7 +2013,7 @@ reference is not inside the parentheses that are referenced. They are always
 non-recursive subroutine
 calls, as described in the section <a href="#groups-as-subroutines">Groups as subroutines</a>.</p>
 <p>An alternative approach is to use named parentheses. The Perl syntax for this
-is <code class="regex">(?&amp;<em>name</em>)</code>; PCRE1&#8217;s earlier syntax <code class="regex">(?P&gt;<em>name</em>)</code> is also supported. We could
+is <code class="regex">(?&amp;<em>name</em>)</code>; PCRE1’s earlier syntax <code class="regex">(?P&gt;<em>name</em>)</code> is also supported. We could
 rewrite the above example as follows:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(?&lt;pn&gt; \( ( [^()]++ | (?&amp;pn) )* \) )</code></pre></div>
 <p>If there is more than one group with the same name, the earliest one is
@@ -2566,12 +2025,12 @@ match. For example, when this pattern is applied to</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa()</code></pre></div>
 <p>it yields "no match" quickly. However, if a possessive quantifier is not used,
 the match runs for a very long time indeed because there are so many different
-ways the <code class="regex">&#43;</code> and <code class="regex">*</code> repeats can carve up the subject, and all have to be tested
+ways the <code class="regex">+</code> and <code class="regex">*</code> repeats can carve up the subject, and all have to be tested
 before failure can be reported.</p>
 <p>At the end of a match, the values of capturing parentheses are those from
 the outermost level. If you want to obtain intermediate values, a callout
 function can be used (see below and the
-<a href="pcre2callout.html"><code>pcre2callout</code></a>
+<a href="./pcre2callout.html"><code>pcre2callout</code></a>
 documentation). If the pattern above is matched against</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(ab(cd)ef)</code></pre></div>
 <p>the value for the inner capturing parentheses (numbered 2) is <code class="subject">ef</code>, which is
@@ -2608,7 +2067,7 @@ typical palindromic phrases, the pattern has to ignore all non-word characters,
 which can be done like this:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">^\W*+((.)\W*+(?1)\W*+\2|\W*+.?)\W*+$</code></pre></div>
 <p>If run with the <code class="constant">PCRE2_CASELESS</code> option, this pattern matches phrases such as <code class="subject">A
-man, a plan, a canal: Panama!</code>. Note the use of the possessive quantifier <code class="regex">*&#43;</code> to
+man, a plan, a canal: Panama!</code>. Note the use of the possessive quantifier <code class="regex">*+</code> to
 avoid backtracking into sequences of non-word characters. Without this, PCRE2
 takes a great deal longer (ten times or more) to match typical phrases, and
 Perl takes so long that you think it has gone into a loop.</p>
@@ -2660,12 +2119,12 @@ capture groups to return. This is a PCRE2 syntax extension not supported by
 Perl. The pattern matching recurses into the referenced expression as described
 above, however, when the recursion returns to the calling expression the
 subgroups captured during the recursion can be retained when the calling
-expression&#8217;s context is restored.</p>
-<p>When used as a subroutine, this allows the subroutine&#8217;s capture groups to
+expression’s context is restored.</p>
+<p>When used as a subroutine, this allows the subroutine’s capture groups to
 be used as return values.</p>
 <p>Only the specific capture groups listed by the caller will be retained, using
 the following syntax:</p>
-<div class="dlist"><dl><dt><code class="regex">(?R(<em>grouplist</em>))</code></dt><dt><code class="regex">(?<em>n</em>(<em>grouplist</em>))</code></dt><dt><code class="regex">(?+<em>n</em>(<em>grouplist</em>))</code></dt><dd>Recurse the whole pattern, returning capture groups.</dd><dt><code class="regex">(?-<em>n</em>(<em>grouplist</em>))</code></dt><dt><code class="regex">(?&amp;<em>name</em>(<em>grouplist</em>))</code></dt><dt><code class="regex">(?P&gt;<em>name</em>(<em>grouplist</em>))</code></dt><dd>Call a subroutine, returning capture groups.</dd></dl></div>
+<dl class="compact" style="--tab-width: 16"><div class="dlist-item"><dt><span><code class="regex">(?R(<em>grouplist</em>))</code><br><code class="regex">(?<em>n</em>(<em>grouplist</em>))</code><br><code class="regex">(?+<em>n</em>(<em>grouplist</em>))</code></span></dt><dd>Recurse the whole pattern, returning capture groups.</dd></div><div class="dlist-item"><dt><span><code class="regex">(?-<em>n</em>(<em>grouplist</em>))</code><br><code class="regex">(?&amp;<em>name</em>(<em>grouplist</em>))</code><br><code class="regex">(?P&gt;<em>name</em>(<em>grouplist</em>))</code></span></dt><dd>Call a subroutine, returning capture groups.</dd></div></dl>
 <p>The list of capture groups <em>grouplist</em> is a comma-separated list of (absolute
 or relative) group numbers, and group names enclosed in single quotes or angle
 brackets.</p>
@@ -2721,7 +2180,7 @@ one side-effect is that sometimes callouts are skipped. If you need all
 possible callouts to happen, you need to set options that disable the relevant
 optimizations. More details, including a complete description of the
 programming interface to the callout function, are given in the
-<a href="pcre2callout.html"><code>pcre2callout</code></a>
+<a href="./pcre2callout.html"><code>pcre2callout</code></a>
 documentation.</p>
 <section class="doc-section level-2"><h3 id="_callouts_with_numerical_arguments">Callouts with numerical arguments</h3><p>If you just want to have a means of identifying different callout points, put a
 number no greater than 255 after the letter C. For example, this pattern has two
@@ -2743,7 +2202,7 @@ ending delimiter is needed within the string, it must be doubled. For
 example:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">(?C'ab ''c'' d')xyz(?C{any text})pqr</code></pre></div>
 <p>The doubling is removed before the string is passed to the callout function.</p></section></section>
-<section class="doc-section level-1"><h2 id="_backtracking_control">Backtracking control</h2><p>There are a number of special "Backtracking Control Verbs" (to use Perl&#8217;s
+<section class="doc-section level-1"><h2 id="_backtracking_control">Backtracking control</h2><p>There are a number of special "Backtracking Control Verbs" (to use Perl’s
 terminology) that modify the behaviour of backtracking during matching. They
 are generally of the form <code class="regex">(*VERB)</code> or <code class="regex">(*VERB:<em>NAME</em>)</code>. Some verbs take either form,
 and may behave differently depending on whether or not a name argument is
@@ -2789,14 +2248,14 @@ the start-of-match optimizations by setting the <code class="constant">PCRE2_NO_
 when calling <code class="function">pcre2_compile()</code>, by calling <code class="function">pcre2_set_optimize()</code> with a
 <code class="constant">PCRE2_START_OPTIMIZE_OFF</code> directive, or by starting the pattern with
 <code class="regex">(*NO_START_OPT)</code>. There is more discussion of this option in the section
-<a href="pcre2api.html#compiling-a-pattern">Compiling a pattern</a>
+<a href="./pcre2api.html#compiling-a-pattern">Compiling a pattern</a>
 in the
-<a href="pcre2api.html"><code>pcre2api</code></a>
+<a href="./pcre2api.html"><code>pcre2api</code></a>
 documentation.</p>
 <p>Experiments with Perl suggest that it too has similar optimizations, and like
 PCRE2, turning them off can change the result of a match.</p></section>
 <section class="doc-section level-2"><h3 id="_verbs_that_act_immediately">Verbs that act immediately</h3><p>The following verbs act as soon as they are encountered.</p>
-<div class="dlist"><dl><dt><code class="regex">(*ACCEPT)</code> or <code class="regex">(*ACCEPT:<em>NAME</em>)</code></dt><dd><p>This verb causes the match to end successfully, skipping the remainder of the
+<dl class="spaced" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="regex">(*ACCEPT)</code> or <code class="regex">(*ACCEPT:<em>NAME</em>)</code></span></dt><dd><p>This verb causes the match to end successfully, skipping the remainder of the
 pattern. However, when it is inside a capture group that is called as a
 subroutine, only that group is ended successfully. Matching then continues
 at the outer level. If <code class="regex">(*ACCEPT)</code> in triggered in a positive assertion, the
@@ -2815,25 +2274,25 @@ the match succeeds. In both cases, all but C is captured. Whereas <code class="r
 (see below) means "fail on backtrack", a repeated <code class="regex">(*ACCEPT)</code> of this type means
 "succeed on backtrack".</p>
 <p>Warning: <code class="regex">(*ACCEPT)</code> should not be used within a script run group, because
-it causes an immediate exit from the group, bypassing the script run checking.</p></dd><dt><code class="regex">(*FAIL)</code> or <code class="regex">(*FAIL:<em>NAME</em>)</code></dt><dd><p>This verb causes a matching failure, forcing backtracking to occur. It may be
+it causes an immediate exit from the group, bypassing the script run checking.</p></dd></div><div class="dlist-item"><dt><span><code class="regex">(*FAIL)</code> or <code class="regex">(*FAIL:<em>NAME</em>)</code></span></dt><dd><p>This verb causes a matching failure, forcing backtracking to occur. It may be
 abbreviated to <code class="regex">(*F)</code>. It is equivalent to <code class="regex">(?!)</code> but easier to read. The Perl
 documentation notes that it is probably useful only when combined with <code class="regex">(?{})</code> or
 <code class="regex">(??{})</code>. Those are, of course, Perl features that are not present in PCRE2. The
 nearest equivalent is the callout feature, as for example in this pattern:</p><div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">a+(?C)(*FAIL)</code></pre></div>
 <p>A match with the string <code class="subject">aaaa</code> always fails, but the callout is taken before
-each backtrack happens (in this example, 10 times).</p></dd></dl></div>
+each backtrack happens (in this example, 10 times).</p></dd></div></dl>
 <p><code class="regex">(*ACCEPT:<em>NAME</em>)</code> and <code class="regex">(*FAIL:<em>NAME</em>)</code> behave the same as <code class="regex">(*MARK:<em>NAME</em>)(*ACCEPT)</code> and
 <code class="regex">(*MARK:<em>NAME</em>)(*FAIL)</code>, respectively, that is, a <code class="regex">(*MARK)</code> is recorded just before
 the verb acts.</p></section>
 <section class="doc-section level-2"><h3 id="_recording_which_path_was_taken">Recording which path was taken</h3><p>There is one verb whose main purpose is to track how a match was arrived at,
 though it also has a secondary use in conjunction with advancing the match
 starting point (see <code class="regex">(*SKIP)</code> below).</p>
-<div class="dlist"><dl><dt><code class="regex">(*MARK:<em>NAME</em>)</code> or <code class="regex">(*:<em>NAME</em>)</code></dt><dd><p>A name is always required with this verb. For all the other backtracking
+<dl class="spaced" style="--tab-width: 16"><div class="dlist-item"><dt><span><code class="regex">(*MARK:<em>NAME</em>)</code> or <code class="regex">(*:<em>NAME</em>)</code></span></dt><dd><p>A name is always required with this verb. For all the other backtracking
 control verbs, a <em>NAME</em> argument is optional.</p><p>When a match succeeds, the name of the last-encountered mark name on the
 matching path is passed back to the caller as described in the section
-<a href="pcre2api.html#other-match-information">Other information about a match</a>
+<a href="./pcre2api.html#other-match-information">Other information about a match</a>
 in
-<a href="pcre2api.html"><code>pcre2api</code></a>
+<a href="./pcre2api.html"><code>pcre2api</code></a>
 documentation. This applies to all instances of <code class="regex">(*MARK)</code> and other verbs,
 including those inside assertions and atomic groups. However, there are
 differences in those cases when <code class="regex">(*MARK)</code> is used in conjunction with <code class="regex">(*SKIP)</code> as
@@ -2869,7 +2328,7 @@ attempts starting at "P" and then with an empty string do not get as far as the
 probably either set the <code class="constant">PCRE2_NO_START_OPTIMIZE</code> option or call
 <code class="function">pcre2_set_optimize()</code> with a <code class="constant">PCRE2_START_OPTIMIZE_OFF</code> directive
 (see above)
-to ensure that the match is always attempted.</p></dd></dl></div></section>
+to ensure that the match is always attempted.</p></dd></div></dl></section>
 <section class="doc-section level-2"><h3 id="_verbs_that_act_after_backtracking">Verbs that act after backtracking</h3><p>The following verbs do nothing when they are encountered. Matching continues
 with what follows, but if there is a subsequent match failure, causing a
 backtrack to the verb, a failure is forced. That is, backtracking cannot pass
@@ -2882,14 +2341,14 @@ ignores the entire group, and seeks a preceding backtracking point.</p>
 reaches them. The behaviour described below is what happens when the verb is
 not in a subroutine or an assertion. Subsequent sections cover these special
 cases.</p>
-<div class="dlist"><dl><dt><code class="regex">(*COMMIT)</code> or <code class="regex">(*COMMIT:<em>NAME</em>)</code></dt><dd><p>This verb causes the whole match to fail outright if there is a later matching
+<dl class="spaced" style="--tab-width: 18"><div class="dlist-item"><dt><span><code class="regex">(*COMMIT)</code> or <code class="regex">(*COMMIT:<em>NAME</em>)</code></span></dt><dd><p>This verb causes the whole match to fail outright if there is a later matching
 failure that causes backtracking to reach it. Even if the pattern is
 unanchored, no further attempts to find a match by advancing the starting point
 take place. If <code class="regex">(*COMMIT)</code> is the only backtracking verb that is encountered,
 once it has been passed <code class="function">pcre2_match()</code> is committed to finding a match at
 the current starting point, or not at all. For example:</p><div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">a+(*COMMIT)b</code></pre></div>
 <p>This matches <code class="subject">xxaab</code> but not <code class="subject">aacaab</code>. It can be thought of as a kind of
-dynamic anchor, or "I&#8217;ve started, so I must finish."</p>
+dynamic anchor, or "I’ve started, so I must finish."</p>
 <p>The behaviour of <code class="regex">(*COMMIT:<em>NAME</em>)</code> is not the same as <code class="regex">(*MARK:<em>NAME</em>)(*COMMIT)</code>. It is
 like <code class="regex">(*MARK:<em>NAME</em>)</code> in that the name is remembered for passing back to the
 caller. However, <code class="regex">(*SKIP:<em>NAME</em>)</code> searches only for names that are set with
@@ -2898,7 +2357,7 @@ caller. However, <code class="regex">(*SKIP:<em>NAME</em>)</code> searches only 
 follows <code class="regex">(*COMMIT)</code> may be triggered first, so merely passing <code class="regex">(*COMMIT)</code> during a
 match does not always guarantee that a match must be at this starting point.</p>
 <p>Note that <code class="regex">(*COMMIT)</code> at the start of a pattern is not the same as an anchor,
-unless PCRE2&#8217;s start-of-match optimizations are turned off, as shown in this
+unless PCRE2’s start-of-match optimizations are turned off, as shown in this
 output from <code>pcre2test</code>:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="text">  re&gt; /(*COMMIT)abc/
 data&gt; xyzabc
@@ -2912,7 +2371,7 @@ optimization skips along the subject to <code class="subject">a</code> before ap
 first set of data. The match attempt then succeeds. The second pattern disables
 the optimization that skips along to the first character. The pattern is now
 applied starting at <code class="subject">x</code>, and so the <code class="regex">(*COMMIT)</code> causes the match to fail without
-trying any other starting points.</p></dd><dt><code class="regex">(*PRUNE)</code> or <code class="regex">(*PRUNE:<em>NAME</em>)</code></dt><dd><p>This verb causes the match to fail at the current starting position in the
+trying any other starting points.</p></dd></div><div class="dlist-item"><dt><span><code class="regex">(*PRUNE)</code> or <code class="regex">(*PRUNE:<em>NAME</em>)</code></span></dt><dd><p>This verb causes the match to fail at the current starting position in the
 subject if there is a later matching failure that causes backtracking to reach
 it. If the pattern is unanchored, the normal "bumpalong" advance to the next
 starting character then happens. Backtracking can occur as usual to the left of
@@ -2924,12 +2383,12 @@ expressed in any other way. In an anchored pattern <code class="regex">(*PRUNE)<
 as <code class="regex">(*COMMIT)</code>.</p><p>The behaviour of <code class="regex">(*PRUNE:<em>NAME</em>)</code> is not the same as <code class="regex">(*MARK:<em>NAME</em>)(*PRUNE)</code>. It is
 like <code class="regex">(*MARK:<em>NAME</em>)</code> in that the name is remembered for passing back to the
 caller. However, <code class="regex">(*SKIP:<em>NAME</em>)</code> searches only for names set with <code class="regex">(*MARK)</code>,
-ignoring those set by other backtracking verbs.</p></dd><dt><code class="regex">(*SKIP)</code></dt><dd><p>This verb, when given without a name, is like <code class="regex">(*PRUNE)</code>, except that if the
+ignoring those set by other backtracking verbs.</p></dd></div><div class="dlist-item"><dt><span><code class="regex">(*SKIP)</code></span></dt><dd><p>This verb, when given without a name, is like <code class="regex">(*PRUNE)</code>, except that if the
 pattern is unanchored, the "bumpalong" advance is not to the next character,
 but to the position in the subject where <code class="regex">(*SKIP)</code> was encountered. <code class="regex">(*SKIP)</code>
 signifies that whatever text was matched leading up to it cannot be part of a
 successful match if there is a later mismatch. Consider:</p><div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">a+(*SKIP)b</code></pre></div>
-<p>If the subject is <code class="subject">aaaac&#8230;&#8203;</code>, after the first match attempt fails (starting at
+<p>If the subject is <code class="subject">aaaac…​</code>, after the first match attempt fails (starting at
 the first character in the string), the starting point skips on to start the
 next attempt at <code class="subject">c</code>. Note that a possessive quantifier does not have the same
 effect as this example; although it would suppress backtracking during the
@@ -2938,7 +2397,7 @@ instead of skipping on to "c".</p>
 <p>If <code class="regex">(*SKIP)</code> is used to specify a new starting position that is the same as the
 starting position of the current match, or (by being inside a lookbehind)
 earlier, the position specified by <code class="regex">(*SKIP)</code> is ignored, and instead the normal
-"bumpalong" occurs.</p></dd><dt><code class="regex">(*SKIP:<em>NAME</em>)</code></dt><dd><p>When <code class="regex">(*SKIP)</code> has an associated name, its behaviour is modified. When such a
+"bumpalong" occurs.</p></dd></div><div class="dlist-item"><dt><span><code class="regex">(*SKIP:<em>NAME</em>)</code></span></dt><dd><p>When <code class="regex">(*SKIP)</code> has an associated name, its behaviour is modified. When such a
 <code class="regex">(*SKIP)</code> is triggered, the previous path through the pattern is searched for the
 most recent <code class="regex">(*MARK)</code> that has the same name. If one is found, the "bumpalong"
 advance is to the subject position that corresponds to that <code class="regex">(*MARK)</code> instead of
@@ -2965,7 +2424,7 @@ matching attempt to start at the second character. This time, the <code class="r
 never seen because <code class="subject">a</code> does not match <code class="subject">b</code>, so the matcher immediately jumps to
 the second branch of the pattern.</p>
 <p>Note that <code class="regex">(*SKIP:<em>NAME</em>)</code> searches only for names set by <code class="regex">(*MARK:<em>NAME</em>)</code>. It ignores
-names that are set by other backtracking verbs.</p></dd><dt><code class="regex">(*THEN)</code> or <code class="regex">(*THEN:<em>NAME</em>)</code></dt><dd><p>This verb causes a skip to the next innermost alternative when backtracking
+names that are set by other backtracking verbs.</p></dd></div><div class="dlist-item"><dt><span><code class="regex">(*THEN)</code> or <code class="regex">(*THEN:<em>NAME</em>)</code></span></dt><dd><p>This verb causes a skip to the next innermost alternative when backtracking
 reaches it. That is, it cancels any further backtracking within the current
 alternative. Its name comes from the observation that it can be used for a
 pattern-based if-then-else block:</p><div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">( COND1 (*THEN) FOO |
@@ -3005,7 +2464,7 @@ character <code class="subject">b</code> is matched, but <code class="subject">c
 backtrack to <code class="regex">.*?</code> as might perhaps be expected from the presence of the |
 character. The conditional group is part of the single alternative that
 comprises the whole pattern, and so the match fails. (If there was a backtrack
-into <code class="regex">.*?</code>, allowing it to match <code class="subject">b</code>, the match would succeed.)</p></dd></dl></div>
+into <code class="regex">.*?</code>, allowing it to match <code class="subject">b</code>, the match would succeed.)</p></dd></div></dl>
 <p>The verbs just described provide four different "strengths" of control when
 subsequent matching fails. <code class="regex">(*THEN)</code> is the weakest, carrying on the match at the
 next alternative. <code class="regex">(*PRUNE)</code> comes next, failing the match at the current
@@ -3020,7 +2479,7 @@ etc. are complex pattern fragments:</p>
 <p>If A matches but B fails, the backtrack to <code class="regex">(*COMMIT)</code> causes the entire match to
 fail. However, if A and B match, but C fails, the backtrack to <code class="regex">(*THEN)</code> causes
 the next alternative (ABD) to be tried. This behaviour is consistent, but is
-not always the same as Perl&#8217;s. It means that if two or more backtracking verbs
+not always the same as Perl’s. It means that if two or more backtracking verbs
 appear in succession, all but the last of them has no effect. Consider this
 example:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">...(*COMMIT)(*PRUNE)...</code></pre></div>
@@ -3072,7 +2531,7 @@ the assertion to be true, without considering any further alternative branches.<
 <section class="doc-section level-2"><h3 id="backtracking-verbs-in-subroutines">Backtracking verbs in subroutines</h3><p>These behaviours occur whether or not the group is called recursively.</p>
 <p><code class="regex">(*ACCEPT)</code> in a group called as a subroutine causes the subroutine match to
 succeed without any further processing. Matching then continues after the
-subroutine call. Perl documents this behaviour. Perl&#8217;s treatment of the other
+subroutine call. Perl documents this behaviour. Perl’s treatment of the other
 verbs in subroutines is different in some cases.</p>
 <p><code class="regex">(*FAIL)</code> in a group called as a subroutine has its normal effect: it forces
 an immediate backtrack.</p>
@@ -3081,17 +2540,17 @@ triggered by being backtracked to in a group called as a subroutine. There is
 then a backtrack at the outer level.</p>
 <p><code class="regex">(*THEN)</code>, when triggered, skips to the next alternative in the innermost
 enclosing group that has alternatives (its normal behaviour). However, if there
-is no such group within the subroutine&#8217;s group, the subroutine match fails and
+is no such group within the subroutine’s group, the subroutine match fails and
 there is a backtrack at the outer level.</p></section></section>
 <section class="doc-section level-1"><h2 id="ebcdic-environments">EBCDIC environments</h2><p>Differences in the way PCRE behaves when it is running in an EBCDIC environment
 are covered in this section.</p>
 <section class="doc-section level-2"><h3 id="_escape_sequences">Escape sequences</h3><p>When PCRE2 is compiled in EBCDIC mode, <code class="regex">\N{U+<em>hhh...</em>}</code> is not supported. <code class="regex">\a</code>, <code class="regex">\e</code>,
 <code class="regex">\f</code>, <code class="regex">\n</code>, <code class="regex">\r</code>, and <code class="regex">\t</code> generate the appropriate EBCDIC code values. The <code class="regex">\c</code>
 escape is processed as specified for Perl in the <code>perlebcdic</code> document. The
-only characters that are allowed after <code class="regex">\c</code> are A&#8211;Z, a&#8211;z, or one of @, [, \, ],
+only characters that are allowed after <code class="regex">\c</code> are A–Z, a–z, or one of @, [, \, ],
 ^, _, or ?. Any other character provokes a compile-time error. The sequence
 <code class="regex">\c@</code> encodes character code 0; after <code class="regex">\c</code> the letters (in either case) encode
-characters 1&#8211;26 (<code class="character">0x01</code> to <code class="character">0x1A</code>); [, \, ], ^, and _ encode characters 27&#8211;31
+characters 1–26 (<code class="character">0x01</code> to <code class="character">0x1A</code>); [, \, ], ^, and _ encode characters 27–31
 (<code class="character">0x1B</code> to <code class="character">0x1F</code>), and <code class="regex">\c?</code> becomes either 255 (<code class="character">0xFF</code>) or 95 (<code class="character">0x5F</code>).</p>
 <p>Thus, apart from <code class="regex">\c?</code>, these escapes generate the same character code values as
 they do in an ASCII or Unicode environment, though the meanings of the values
@@ -3110,12 +2569,12 @@ letters are omitted. For example, <code class="regex">[h-k]</code> matches only 
 though the EBCDIC codes for h and k are <code class="character">0x88</code> and <code class="character">0x92</code>, a range of 11 code
 points. However, if the range is specified numerically, for example,
 <code class="regex">[\x88-\x92]</code> or <code class="regex">[h-\x92]</code>, all code points are included.</p></section></section>
-<section class="doc-section level-1"><h2 id="_see_also">See also</h2><p><a href="pcre2api.html"><code>pcre2api</code></a>, <a href="pcre2callout.html"><code>pcre2callout</code></a>, <a href="pcre2matching.html"><code>pcre2matching</code></a>,
-<a href="pcre2syntax.html"><code>pcre2syntax</code></a>, <a href="pcre2.html"><code>pcre2</code></a>.</p>
+<section class="doc-section level-1"><h2 id="_see_also">See also</h2><p><a href="./pcre2api.html"><code>pcre2api</code></a>, <a href="./pcre2callout.html"><code>pcre2callout</code></a>, <a href="./pcre2matching.html"><code>pcre2matching</code></a>,
+<a href="./pcre2syntax.html"><code>pcre2syntax</code></a>, <a href="./pcre2.html"><code>pcre2</code></a>.</p>
 <h2 id="_author" class="discrete">Author</h2>
 <p>Philip Hazel<br>
 Retired from University Computing Service<br>
 Cambridge, England.</p>
 <h2 id="_revision" class="discrete">Revision</h2>
 <p>Last updated: 25 October 2025<br>
-Copyright &#169; 1997-2024 University of Cambridge.</p></section></div></body></html>
+Copyright © 1997-2024 University of Cambridge.</p></section></article></div></main><footer class="offline-footer"></footer></body></html>

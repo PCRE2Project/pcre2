@@ -1049,97 +1049,127 @@ PCRE2 CONTEXTS
        The permitted values of directive are as follows:
 
 
-           PCRE2_OPTIMIZATION_FULL
-                  Enable all optional performance optimizations. This is the
-                  default value.
+           PCRE2_OPTIMIZATION_FULL  Enable all optional performance
+                                    optimizations. This is the default value.
 
-           PCRE2_OPTIMIZATION_NONE
-                  Disable all optional performance optimizations.
+           PCRE2_OPTIMIZATION_NONE  Disable all optional performance
+                                    optimizations.
 
-           PCRE2_AUTO_POSSESS, PCRE2_AUTO_POSSESS_OFF
-                  Enable/disable "auto-possessification" of variable
-                  quantifiers such as * and +. This optimization, for example,
-                  turns a+b into a++b in order to avoid backtracks into a+
-                  that can never be successful. However, if callouts are in
-                  use, auto-possessification means that some callouts are
-                  never taken. You can disable this optimization if you want
-                  the matching functions to do a full, unoptimized search and
-                  run all the callouts.
+           PCRE2_AUTO_POSSESS
+           PCRE2_AUTO_POSSESS_OFF   Enable/disable "auto-possessification" of
+                                    variable quantifiers such as * and +. This
+                                    optimization, for example, turns a+b into
+                                    a++b in order to avoid backtracks into a+
+                                    that can never be successful. However, if
+                                    callouts are in use, auto-possessification
+                                    means that some callouts are never taken.
+                                    You can disable this optimization if you
+                                    want the matching functions to do a full,
+                                    unoptimized search and run all the
+                                    callouts.
 
-           PCRE2_DOTSTAR_ANCHOR, PCRE2_DOTSTAR_ANCHOR_OFF
-                  Enable/disable an optimization that is applied when .* is
-                  the first significant item in a top-level branch of a
-                  pattern, and all the other branches also start with .* or
-                  with \A or \G or ^. Such a pattern is automatically anchored
-                  if PCRE2_DOTALL is set for all the .* items and
-                  PCRE2_MULTILINE is not set for any ^ items. Otherwise, the
-                  fact that any match must start either at the start of the
-                  subject or following a newline is remembered. Like other
-                  optimizations, this can cause callouts to be skipped.
+           PCRE2_DOTSTAR_ANCHOR
+           PCRE2_DOTSTAR_ANCHOR_OFF Enable/disable an optimization that is
+                                    applied when .* is the first significant
+                                    item in a top-level branch of a pattern,
+                                    and all the other branches also start with
+                                    .* or with \A or \G or ^. Such a pattern
+                                    is automatically anchored if PCRE2_DOTALL
+                                    is set for all the .* items and
+                                    PCRE2_MULTILINE is not set for any ^
+                                    items. Otherwise, the fact that any match
+                                    must start either at the start of the
+                                    subject or following a newline is
+                                    remembered. Like other optimizations, this
+                                    can cause callouts to be skipped.
 
-                  Dotstar anchor optimization is automatically disabled for .*
-                  if it is inside an atomic group or a capture group that is
-                  the subject of a backreference, or if the pattern contains
-                  (*PRUNE) or (*SKIP).
+                                    Dotstar anchor optimization is
+                                    automatically disabled for .* if it is
+                                    inside an atomic group or a capture group
+                                    that is the subject of a backreference, or
+                                    if the pattern contains (*PRUNE) or
+                                    (*SKIP).
 
-           PCRE2_START_OPTIMIZE, PCRE2_START_OPTIMIZE_OFF
-                  Enable/disable optimizations which cause matching functions
-                  to scan the subject string for specific code unit values
-                  before attempting a match. For example, if it is known that
-                  an unanchored match must start with a specific value, the
-                  matching code searches the subject for that value, and fails
-                  immediately if it cannot find it, without actually running
-                  the main matching function. This means that a special item
-                  such as (*COMMIT) at the start of a pattern is not
-                  considered until after a suitable starting point for the
-                  match has been found. Also, when callouts or (*MARK) items
-                  are in use, these "start-up" optimizations can cause them to
-                  be skipped if the pattern is never actually used. The
-                  start-up optimizations are in effect a pre-scan of the
-                  subject that takes place before the pattern is run.
+           PCRE2_START_OPTIMIZE
+           PCRE2_START_OPTIMIZE_OFF Enable/disable optimizations which cause
+                                    matching functions to scan the subject
+                                    string for specific code unit values
+                                    before attempting a match. For example, if
+                                    it is known that an unanchored match must
+                                    start with a specific value, the matching
+                                    code searches the subject for that value,
+                                    and fails immediately if it cannot find
+                                    it, without actually running the main
+                                    matching function. This means that a
+                                    special item such as (*COMMIT) at the
+                                    start of a pattern is not considered until
+                                    after a suitable starting point for the
+                                    match has been found. Also, when callouts
+                                    or (*MARK) items are in use, these
+                                    "start-up" optimizations can cause them to
+                                    be skipped if the pattern is never
+                                    actually used. The start-up optimizations
+                                    are in effect a pre-scan of the subject
+                                    that takes place before the pattern is
+                                    run.
 
-                  Disabling start-up optimizations ensures that in cases where
-                  the result is "no match", the callouts do occur, and that
-                  items such as (*COMMIT) and (*MARK) are considered at every
-                  possible starting position in the subject string.
+                                    Disabling start-up optimizations ensures
+                                    that in cases where the result is "no
+                                    match", the callouts do occur, and that
+                                    items such as (*COMMIT) and (*MARK) are
+                                    considered at every possible starting
+                                    position in the subject string.
 
-                  Disabling start-up optimizations may change the outcome of a
-                  matching operation. Consider the pattern
+                                    Disabling start-up optimizations may
+                                    change the outcome of a matching
+                                    operation. Consider the pattern
 
-                  (*COMMIT)ABC
+                                    (*COMMIT)ABC
 
-                  When this is compiled, PCRE2 records the fact that a match
-                  must start with the character A. Suppose the subject string
-                  is DEFABC. The start-up optimization scans along the
-                  subject, finds A and runs the first match attempt from
-                  there. The (*COMMIT) item means that the pattern must match
-                  the current starting position, which in this case, it does.
-                  However, if the same match is run without start-up
-                  optimizations, the initial scan along the subject string
-                  does not happen. The first match attempt is run starting
-                  from D and when this fails, (*COMMIT) prevents any further
-                  matches being tried, so the overall result is "no match".
+                                    When this is compiled, PCRE2 records the
+                                    fact that a match must start with the
+                                    character A. Suppose the subject string is
+                                    DEFABC. The start-up optimization scans
+                                    along the subject, finds A and runs the
+                                    first match attempt from there. The
+                                    (*COMMIT) item means that the pattern must
+                                    match the current starting position, which
+                                    in this case, it does. However, if the
+                                    same match is run without start-up
+                                    optimizations, the initial scan along the
+                                    subject string does not happen. The first
+                                    match attempt is run starting from D and
+                                    when this fails, (*COMMIT) prevents any
+                                    further matches being tried, so the
+                                    overall result is "no match".
 
-                  Another start-up optimization makes use of a minimum length
-                  for a matching subject, which is recorded when possible.
-                  Consider the pattern
+                                    Another start-up optimization makes use of
+                                    a minimum length for a matching subject,
+                                    which is recorded when possible. Consider
+                                    the pattern
 
-                  (*MARK:1)B(*MARK:2)(X|Y)
+                                    (*MARK:1)B(*MARK:2)(X|Y)
 
-                  The minimum length for a match is two characters. If the
-                  subject is XXBB, the "starting character" optimization skips
-                  XX, then tries to match BB, which is long enough. In the
-                  process, (*MARK:2) is encountered and remembered. When the
-                  match attempt fails, the next B is found, but there is only
-                  one character left, so there are no more attempts, and "no
-                  match" is returned with the "last mark seen" set to 2.
-                  Without start-up optimizations, however, matches are tried
-                  at every possible starting position, including at the end of
-                  the subject, where (*MARK:1) is encountered, but there is no
-                  B, so the "last mark seen" that is returned is 1. In this
-                  case, the optimizations do not affect the overall match
-                  result, which is still "no match", but they do affect the
-                  auxiliary information that is returned.
+                                    The minimum length for a match is two
+                                    characters. If the subject is XXBB, the
+                                    "starting character" optimization skips
+                                    XX, then tries to match BB, which is long
+                                    enough. In the process, (*MARK:2) is
+                                    encountered and remembered. When the match
+                                    attempt fails, the next B is found, but
+                                    there is only one character left, so there
+                                    are no more attempts, and "no match" is
+                                    returned with the "last mark seen" set to
+                                    2. Without start-up optimizations,
+                                    however, matches are tried at every
+                                    possible starting position, including at
+                                    the end of the subject, where (*MARK:1) is
+                                    encountered, but there is no B, so the
+                                    "last mark seen" that is returned is 1. In
+                                    this case, the optimizations do not affect
+                                    the overall match result, which is still
+                                    "no match", but they do affect the
+                                    auxiliary information that is returned.
 
    The match context
        A match context is required if you want to:
@@ -2749,7 +2779,8 @@ INFORMATION ABOUT A COMPILED PATTERN
        are as follows:
 
 
-           PCRE2_INFO_ALLOPTIONS, PCRE2_INFO_ARGOPTIONS,
+           PCRE2_INFO_ALLOPTIONS
+           PCRE2_INFO_ARGOPTIONS
            PCRE2_INFO_EXTRAOPTIONS
 
                                     Return copies of the pattern’s options.
@@ -3028,9 +3059,9 @@ INFORMATION ABOUT A COMPILED PATTERN
                                     match, but every string that does match is
                                     at least that long.
 
-           PCRE2_INFO_NAMECOUNT, PCRE2_INFO_NAMEENTRYSIZE,
-           PCRE2_INFO_NAMETABLE
-                                    PCRE2 supports the use of named as well as
+           PCRE2_INFO_NAMECOUNT
+           PCRE2_INFO_NAMEENTRYSIZE
+           PCRE2_INFO_NAMETABLE     PCRE2 supports the use of named as well as
                                     numbered capturing parentheses. The names
                                     are just an additional way of identifying
                                     the parentheses, which still acquire
@@ -3565,8 +3596,8 @@ MATCHING A PATTERN: THE TRADITIONAL FUNCTION
                                       undefined. Your program may crash or
                                       loop indefinitely or give wrong results.
 
-           PCRE2_PARTIAL_HARD, PCRE2_PARTIAL_SOFT
-                                  These options turn on the partial matching
+           PCRE2_PARTIAL_HARD
+           PCRE2_PARTIAL_SOFT     These options turn on the partial matching
                                   feature. A partial match occurs if the end
                                   of the subject string is reached
                                   successfully, but there are not enough
@@ -4831,8 +4862,8 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
        these are exactly the same as for pcre2_match(), so their description
        is not repeated here.
 
-           PCRE2_PARTIAL_HARD, PCRE2_PARTIAL_SOFT
-                              These have the same general effect as they do
+           PCRE2_PARTIAL_HARD
+           PCRE2_PARTIAL_SOFT These have the same general effect as they do
                               for pcre2_match(), but the details are slightly
                               different. When PCRE2_PARTIAL_HARD is set for
                               pcre2_dfa_match(), it returns
@@ -6305,8 +6336,10 @@ THE CONVERSION FUNCTION
        following POSIX options must be set to define the type of conversion
        that is required:
 
-           PCRE2_CONVERT_GLOB, PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR,
-           PCRE2_CONVERT_GLOB_NO_STARSTAR, PCRE2_CONVERT_POSIX_BASIC,
+           PCRE2_CONVERT_GLOB
+           PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR
+           PCRE2_CONVERT_GLOB_NO_STARSTAR
+           PCRE2_CONVERT_POSIX_BASIC
            PCRE2_CONVERT_POSIX_EXTENDED
                   Details of the conversions are given below. The buffer and
                   blength arguments define how the output is handled:
@@ -7146,11 +7179,13 @@ PARTIAL MATCHING IN PCRE2
        you must also call pcre2_jit_compile() with one or both of these
        options:
 
-           PCRE2_JIT_PARTIAL_HARD, PCRE2_JIT_PARTIAL_SOFT
-                  PCRE2_JIT_COMPLETE should also be set if you are going to
-                  run non-partial matches on the same pattern. Separate code
-                  is compiled for each mode. If the appropriate JIT mode has
-                  not been compiled, interpretive matching code is used.
+           PCRE2_JIT_PARTIAL_HARD
+           PCRE2_JIT_PARTIAL_SOFT PCRE2_JIT_COMPLETE should also be set if you
+                                  are going to run non-partial matches on the
+                                  same pattern. Separate code is compiled for
+                                  each mode. If the appropriate JIT mode has
+                                  not been compiled, interpretive matching
+                                  code is used.
 
        Setting a partial matching option disables two of PCRE2’s standard
        optimization hints. PCRE2 remembers the last literal code unit in a
@@ -9825,14 +9860,14 @@ ASSERTIONS
        They all start with (* instead of (? and must be written using lower
        case letters. PCRE2 supports the following synonyms:
 
-           (*positive_lookahead:, (*pla:
-                  Is the same as (?=.
-           (*negative_lookahead:, (*nla:
-                  Is the same as (?!.
-           (*positive_lookbehind:, (*plb:
-                  Is the same as (?<=.
-           (*negative_lookbehind:, (*nlb:
-                  Is the same as (?<!.
+           (*positive_lookahead:
+           (*pla:                 Is the same as (?=.
+           (*negative_lookahead:
+           (*nla:                 Is the same as (?!.
+           (*positive_lookbehind:
+           (*plb:                 Is the same as (?<=.
+           (*negative_lookbehind:
+           (*nlb:                 Is the same as (?<!.
 
        For example, (*pla:foo) is the same assertion as (?=foo). In the
        following sections, the various assertions are described using the
@@ -9985,10 +10020,12 @@ NON-ATOMIC ASSERTIONS
        non-atomic positive assertions can be useful. PCRE2 provides these
        using the following syntax:
 
-           (*non_atomic_positive_lookahead:, (*napla:, (?*
-                  Non-atomic positive lookahead.
-           (*non_atomic_positive_lookbehind:, (*naplb:, (?<*
-                  Non-atomic positive lookbehind.
+           (*non_atomic_positive_lookahead:
+           (*napla:
+           (?*      Non-atomic positive lookahead.
+           (*non_atomic_positive_lookbehind:
+           (*naplb:
+           (?<*     Non-atomic positive lookbehind.
 
        Consider the problem of finding the right-most word in a string that
        also appears earlier in the string, that is, it must appear at least
@@ -10592,10 +10629,14 @@ RECURSIVE PATTERNS
        Only the specific capture groups listed by the caller will be retained,
        using the following syntax:
 
-           (?R(grouplist)), (?n(grouplist)), (?+n(grouplist))
-                  Recurse the whole pattern, returning capture groups.
-           (?-n(grouplist)), (?&name(grouplist)), (?P>name(grouplist))
-                  Call a subroutine, returning capture groups.
+           (?R(grouplist))
+           (?n(grouplist))
+           (?+n(grouplist))        Recurse the whole pattern, returning
+                                   capture groups.
+           (?-n(grouplist))
+           (?&name(grouplist))
+           (?P>name(grouplist))    Call a subroutine, returning capture
+                                   groups.
 
        The list of capture groups grouplist is a comma-separated list of
        (absolute or relative) group numbers, and group names enclosed in
@@ -12645,14 +12686,20 @@ WHAT \R MATCHES
            (*BSR_UNICODE) Any Unicode newline sequence
 
 LOOKAHEAD AND LOOKBEHIND ASSERTIONS
-           (?=...), (*pla:...), (*positive_lookahead:...)
-                  Positive lookahead
-           (?!...), (*nla:...), (*negative_lookahead:...)
-                  Negative lookahead
-           (?<=...), (*plb:...), (*positive_lookbehind:...)
-                  Positive lookbehind
-           (?<!...), (*nlb:...), (*negative_lookbehind:...)
-                  Negative lookbehind
+           (?=...)
+           (*pla:...)
+           (*positive_lookahead:...) Positive lookahead
+           (?!...)
+           (*nla:...)
+           (*negative_lookahead:...) Negative lookahead
+           (?<=...)
+           (*plb:...)
+           (*positive_lookbehind:...)
+                                     Positive lookbehind
+           (?<!...)
+           (*nlb:...)
+           (*negative_lookbehind:...)
+                                     Negative lookbehind
 
        Each top-level branch of a lookbehind must have a limit for the number
        of characters it matches. If any branch can match a variable number of
@@ -12664,10 +12711,14 @@ LOOKAHEAD AND LOOKBEHIND ASSERTIONS
 NON-ATOMIC LOOKAROUND ASSERTIONS
        These assertions are specific to PCRE2 and are not Perl-compatible.
 
-           (?*...), (*napla:...), (*non_atomic_positive_lookahead:...)
-                  Synonyms for non-atomic positive lookahead
-           (?<*...), (*naplb:...), (*non_atomic_positive_lookbehind:...)
-                  Synonyms for non-atomic positive lookbehind
+           (?*...)
+           (*napla:...)
+           (*non_atomic_positive_lookahead:...)
+                        Synonyms for non-atomic positive lookahead
+           (?<*...)
+           (*naplb:...)
+           (*non_atomic_positive_lookbehind:...)
+                        Synonyms for non-atomic positive lookbehind
 
 SUBSTRING SCAN ASSERTION
        This feature is not Perl-compatible.
@@ -12687,10 +12738,10 @@ SUBSTRING SCAN ASSERTION
            'name'       Name
 
 SCRIPT RUNS
-           (*script_run:...), (*sr:...)
-                  Script run; can be backtracked into
-           (*atomic_script_run:...), (*asr:...)
-                  Atomic script run
+           (*script_run:...)
+           (*sr:...)                Script run; can be backtracked into
+           (*atomic_script_run:...)
+           (*asr:...)               Atomic script run
 
 BACKREFERENCES
            \n             Reference by number (can be ambiguous)
@@ -12727,12 +12778,14 @@ SUBROUTINE REFERENCES (POSSIBLY RECURSIVE)
        subexpression if set during the recursion (this feature is not
        supported by Perl).
 
-           (?R(grouplist))
-                  Recurse whole pattern, returning capture groups (PCRE2
-                  extension)
-           (?n(grouplist)), (?+n(grouplist)), (?-n(grouplist)),
-           (?&name(grouplist)), (?P>name(grouplist))
-                  Call subroutine, returning capture groups (PCRE2 extension)
+           (?R(grouplist))         Recurse whole pattern, returning capture
+                                   groups (PCRE2 extension)
+           (?n(grouplist))
+           (?+n(grouplist))
+           (?-n(grouplist))
+           (?&name(grouplist))
+           (?P>name(grouplist))    Call subroutine, returning capture groups
+                                   (PCRE2 extension)
 
        The comma-separated list grouplist uses the same syntax as
        (*scan_substring:(grouplist)...), and may identify groups in any of the
@@ -13199,48 +13252,58 @@ VALIDITY OF UTF STRINGS
    Errors in UTF-8 strings
        The following negative error codes are given for invalid UTF-8 strings:
 
-           PCRE2_ERROR_UTF8_ERR1, PCRE2_ERROR_UTF8_ERR2,
-           PCRE2_ERROR_UTF8_ERR3, PCRE2_ERROR_UTF8_ERR4, PCRE2_ERROR_UTF8_ERR5
-                  The string ends with a truncated UTF-8 character; the code
-                  specifies how many bytes are missing (1 to 5). Although RFC
-                  3629 restricts UTF-8 characters to be no longer than 4
-                  bytes, the encoding scheme (originally defined by RFC 2279)
-                  allows for up to 6 bytes, and this is checked first; hence
-                  the possibility of 4 or 5 missing bytes.
-           PCRE2_ERROR_UTF8_ERR6, PCRE2_ERROR_UTF8_ERR7,
-           PCRE2_ERROR_UTF8_ERR8, PCRE2_ERROR_UTF8_ERR9,
-           PCRE2_ERROR_UTF8_ERR10
-                  The two most significant bits of the 2nd, 3rd, 4th, 5th, or
-                  6th byte of the character do not have the binary value 0b10
-                  (that is, either the most significant bit is 0, or the next
-                  bit is 1).
-           PCRE2_ERROR_UTF8_ERR11, PCRE2_ERROR_UTF8_ERR12
-                  A character that is valid by the RFC 2279 rules is either 5
-                  or 6 bytes long; these code points are excluded by RFC 3629.
-           PCRE2_ERROR_UTF8_ERR13
-                  A 4-byte character has a value greater than 0x10ffff; these
-                  code points are excluded by RFC 3629.
-           PCRE2_ERROR_UTF8_ERR14
-                  A 3-byte character has a value in the range 0xd800 to
-                  0xdfff; this range of code points are reserved by RFC 3629
-                  for use with UTF-16, and so are excluded from UTF-8.
-           PCRE2_ERROR_UTF8_ERR15, PCRE2_ERROR_UTF8_ERR16,
-           PCRE2_ERROR_UTF8_ERR17, PCRE2_ERROR_UTF8_ERR18,
-           PCRE2_ERROR_UTF8_ERR19
-                  A 2-, 3-, 4-, 5-, or 6-byte character is "overlong", that
-                  is, it codes for a value that can be represented by fewer
-                  bytes, which is invalid. For example, the two bytes 0xc0,
-                  0xae give the value 0x2e, whose correct coding uses just one
-                  byte.
-           PCRE2_ERROR_UTF8_ERR20
-                  The two most significant bits of the first byte of a
-                  character have the binary value 0b10 (that is, the most
-                  significant bit is 1 and the second is 0). Such a byte can
-                  only validly occur as the second or subsequent byte of a
-                  multi-byte character.
-           PCRE2_ERROR_UTF8_ERR21
-                  The first byte of a character has the value 0xfe or 0xff.
-                  These values can never occur in a valid UTF-8 string.
+           PCRE2_ERROR_UTF8_ERR1
+           PCRE2_ERROR_UTF8_ERR2
+           PCRE2_ERROR_UTF8_ERR3
+           PCRE2_ERROR_UTF8_ERR4
+           PCRE2_ERROR_UTF8_ERR5  The string ends with a truncated UTF-8
+                                  character; the code specifies how many bytes
+                                  are missing (1 to 5). Although RFC 3629
+                                  restricts UTF-8 characters to be no longer
+                                  than 4 bytes, the encoding scheme
+                                  (originally defined by RFC 2279) allows for
+                                  up to 6 bytes, and this is checked first;
+                                  hence the possibility of 4 or 5 missing
+                                  bytes.
+           PCRE2_ERROR_UTF8_ERR6
+           PCRE2_ERROR_UTF8_ERR7
+           PCRE2_ERROR_UTF8_ERR8
+           PCRE2_ERROR_UTF8_ERR9
+           PCRE2_ERROR_UTF8_ERR10 The two most significant bits of the 2nd,
+                                  3rd, 4th, 5th, or 6th byte of the character
+                                  do not have the binary value 0b10 (that is,
+                                  either the most significant bit is 0, or the
+                                  next bit is 1).
+           PCRE2_ERROR_UTF8_ERR11
+           PCRE2_ERROR_UTF8_ERR12 A character that is valid by the RFC 2279
+                                  rules is either 5 or 6 bytes long; these
+                                  code points are excluded by RFC 3629.
+           PCRE2_ERROR_UTF8_ERR13 A 4-byte character has a value greater than
+                                  0x10ffff; these code points are excluded by
+                                  RFC 3629.
+           PCRE2_ERROR_UTF8_ERR14 A 3-byte character has a value in the range
+                                  0xd800 to 0xdfff; this range of code points
+                                  are reserved by RFC 3629 for use with
+                                  UTF-16, and so are excluded from UTF-8.
+           PCRE2_ERROR_UTF8_ERR15
+           PCRE2_ERROR_UTF8_ERR16
+           PCRE2_ERROR_UTF8_ERR17
+           PCRE2_ERROR_UTF8_ERR18
+           PCRE2_ERROR_UTF8_ERR19 A 2-, 3-, 4-, 5-, or 6-byte character is
+                                  "overlong", that is, it codes for a value
+                                  that can be represented by fewer bytes,
+                                  which is invalid. For example, the two bytes
+                                  0xc0, 0xae give the value 0x2e, whose
+                                  correct coding uses just one byte.
+           PCRE2_ERROR_UTF8_ERR20 The two most significant bits of the first
+                                  byte of a character have the binary value
+                                  0b10 (that is, the most significant bit is 1
+                                  and the second is 0). Such a byte can only
+                                  validly occur as the second or subsequent
+                                  byte of a multi-byte character.
+           PCRE2_ERROR_UTF8_ERR21 The first byte of a character has the value
+                                  0xfe or 0xff. These values can never occur
+                                  in a valid UTF-8 string.
 
    Errors in UTF-16 strings
        The following negative error codes are given for invalid UTF-16

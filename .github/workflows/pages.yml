@@ -28,7 +28,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y ruby ruby-dev
-          gem install --user-install asciidoctor asciidoctor-html5s rouge
+          gem install --user-install asciidoctor asciidoctor-html5s rouge nokogiri
           export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
           export PATH="$GEM_HOME/bin:$PATH"
           echo "Ruby version: $(ruby -v)"

@@ -3696,20 +3696,28 @@ the following synonyms:
 .sp
 .RS 4
 .PD 0
-.TP 7
-\f(CR(*positive_lookahead:\fP, \f(CR(*pla:\fP
+.TP 23
+\f(CR(*positive_lookahead:\fP
+.TP 23
+\f(CR(*pla:\fP
 .ad l
 Is the same as \f(CR(?=\fP.
-.TP 7
-\f(CR(*negative_lookahead:\fP, \f(CR(*nla:\fP
+.TP 23
+\f(CR(*negative_lookahead:\fP
+.TP 23
+\f(CR(*nla:\fP
 .ad l
 Is the same as \f(CR(?!\fP.
-.TP 7
-\f(CR(*positive_lookbehind:\fP, \f(CR(*plb:\fP
+.TP 23
+\f(CR(*positive_lookbehind:\fP
+.TP 23
+\f(CR(*plb:\fP
 .ad l
 Is the same as \f(CR(?<=\fP.
-.TP 7
-\f(CR(*negative_lookbehind:\fP, \f(CR(*nlb:\fP
+.TP 23
+\f(CR(*negative_lookbehind:\fP
+.TP 23
+\f(CR(*nlb:\fP
 .ad l
 Is the same as \f(CR(?<!\fP.
 .PD
@@ -3951,12 +3959,20 @@ can be useful. PCRE2 provides these using the following syntax:
 .sp
 .RS 4
 .PD 0
-.TP 7
-\f(CR(*non_atomic_positive_lookahead:\fP, \f(CR(*napla:\fP, \f(CR(?*\fP
+.TP 9
+\f(CR(*non_atomic_positive_lookahead:\fP
+.TP 9
+\f(CR(*napla:\fP
+.TP 9
+\f(CR(?*\fP
 .ad l
 Non\-atomic positive lookahead.
-.TP 7
-\f(CR(*non_atomic_positive_lookbehind:\fP, \f(CR(*naplb:\fP, \f(CR(?<*\fP
+.TP 9
+\f(CR(*non_atomic_positive_lookbehind:\fP
+.TP 9
+\f(CR(*naplb:\fP
+.TP 9
+\f(CR(?<*\fP
 .ad l
 Non\-atomic positive lookbehind.
 .PD
@@ -4757,12 +4773,20 @@ the following syntax:
 .sp
 .RS 4
 .PD 0
-.TP 7
-\f(CR(?R(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?+\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
+.TP 24
+\f(CR(?R(\fP\fIgrouplist\fP\f(CR))\fP
+.TP 24
+\f(CR(?\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
+.TP 24
+\f(CR(?+\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
 .ad l
 Recurse the whole pattern, returning capture groups.
-.TP 7
-\f(CR(?\-\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?&\fP\fIname\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP, \f(CR(?P>\fP\fIname\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
+.TP 24
+\f(CR(?\-\fP\fIn\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
+.TP 24
+\f(CR(?&\fP\fIname\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
+.TP 24
+\f(CR(?P>\fP\fIname\fP\f(CR(\fP\fIgrouplist\fP\f(CR))\fP
 .ad l
 Call a subroutine, returning capture groups.
 .PD

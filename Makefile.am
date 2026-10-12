@@ -142,6 +142,15 @@ dist_html_DATA = \
   doc/html/pcre2test.html \
   doc/html/pcre2unicode.html
 
+dist_htmlcss_DATA = doc/html/css/pcre2.css
+htmlcssdir = $(htmldir)/css
+dist_htmlimages_DATA = \
+  doc/html/images/pcre2-header-dark.svg \
+  doc/html/images/pcre2-header-light.svg \
+  doc/html/images/pcre2-hero-dark.svg \
+  doc/html/images/pcre2-hero-light.svg
+htmlimagesdir = $(htmldir)/images
+
 dist_man_MANS = \
   doc/man/pcre2-config.1 \
   doc/man/pcre2.3 \
@@ -311,6 +320,12 @@ EXTRA_DIST += \
 # installed in the system.
 
 EXTRA_DIST += \
+  doc/assets/css/document.css \
+  doc/assets/css/standalone.css \
+  doc/assets/images/pcre2-header-dark.svg \
+  doc/assets/images/pcre2-header-light.svg \
+  doc/assets/images/pcre2-hero-dark.svg \
+  doc/assets/images/pcre2-hero-light.svg \
   doc/index.adoc \
   doc/pcre2-config.adoc \
   doc/pcre2.adoc \
