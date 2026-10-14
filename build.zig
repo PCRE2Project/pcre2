@@ -23,6 +23,7 @@ pub fn build(b: *std.Build) !void {
     const sanitize_c = b.option(std.zig.SanitizeC, "sanitize_c", "whether to build with undefined behaviour sanitizer enabled") orelse .off;
     const codeUnitWidth = b.option(CodeUnitWidth, "code-unit-width", "Sets the code unit width") orelse .@"8";
     const support_jit = b.option(bool, "support_jit", "Enable/disable JIT compiler support") orelse false;
+    const build_tests = b.option(bool, "build_tests", "Build the tests") orelse true;
 
     const sljit_is_checked_out = if (!support_jit)
         false
@@ -231,7 +232,10 @@ pub fn build(b: *std.Build) !void {
     });
 
     pcre2test_mod.linkLibrary(lib);
-    b.installArtifact(pcre2test);
+
+    if (build_tests) {
+        b.installArtifact(pcre2test);
+    }
 
     // pcre2-posix library
     if (codeUnitWidth == CodeUnitWidth.@"8") {
