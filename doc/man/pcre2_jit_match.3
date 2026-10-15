@@ -34,12 +34,12 @@ pcre2_jit_match \- fast path interface to JIT matching
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_jit_match(\fBconst\fP \fBpcre2_code\fP *\fIcode\fP, \fBPCRE2_SPTR\fP \fIsubject\fP,
-                    \fBPCRE2_SIZE\fP \fIlength\fP, \fBPCRE2_SIZE\fP \fIstart_offset\fP,
-                    \fBuint32_t\fP \fIoptions\fP, \fBpcre2_match_data\fP *\fImatch_data\fP,
-                    \fBpcre2_match_context\fP *\fImcontext\fP);
+\f(CRint\fP \f(CBpcre2_jit_match\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR, PCRE2_SPTR\fP \f(CIsubject\fP\f(CR,
+                    PCRE2_SIZE\fP \f(CIlength\fP\f(CR, PCRE2_SIZE\fP \f(CIstart_offset\fP\f(CR,
+                    uint32_t\fP \f(CIoptions\fP\f(CR, pcre2_match_data *\fP\f(CImatch_data\fP\f(CR,
+                    pcre2_match_context *\fP\f(CImcontext\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -48,26 +48,26 @@ pcre2_jit_match \- fast path interface to JIT matching
 This function matches a compiled regular expression that has been successfully
 processed by the JIT compiler against a given subject string, using a matching
 algorithm that is similar to Perl\(cqs. It is a "fast path" interface to JIT, and
-it bypasses some of the sanity checks that pcre2_match() applies.
+it bypasses some of the sanity checks that \f(CBpcre2_match()\fP applies.
 .sp
 In UTF mode, the subject string is not checked for UTF validity. Unless
-\fBPCRE2_MATCH_INVALID_UTF\fP was set when the pattern was compiled, passing an
+\f(CBPCRE2_MATCH_INVALID_UTF\fP was set when the pattern was compiled, passing an
 invalid UTF string results in undefined behaviour. Your program may crash or
-loop or give wrong results. In the absence of \fBPCRE2_MATCH_INVALID_UTF\fP you
-should only call pcre2_jit_match() in UTF mode if you are sure the
+loop or give wrong results. In the absence of \f(CBPCRE2_MATCH_INVALID_UTF\fP you
+should only call \f(CBpcre2_jit_match()\fP in UTF mode if you are sure the
 subject is valid.
 .sp
-The arguments for pcre2_jit_match() are exactly the same as for
-pcre2_match(),
+The arguments for \f(CBpcre2_jit_match()\fP are exactly the same as for
+\f(CBpcre2_match()\fP,
 except that the subject string must be specified with a length;
-\fBPCRE2_ZERO_TERMINATED\fP is not supported.
+\f(CBPCRE2_ZERO_TERMINATED\fP is not supported.
 .sp
-The supported options are \fBPCRE2_NOTBOL\fP, \fBPCRE2_NOTEOL\fP, \fBPCRE2_NOTEMPTY\fP,
-\fBPCRE2_NOTEMPTY_ATSTART\fP, \fBPCRE2_PARTIAL_HARD\fP, and \fBPCRE2_PARTIAL_SOFT\fP. Unsupported
+The supported options are \f(CBPCRE2_NOTBOL\fP, \f(CBPCRE2_NOTEOL\fP, \f(CBPCRE2_NOTEMPTY\fP,
+\f(CBPCRE2_NOTEMPTY_ATSTART\fP, \f(CBPCRE2_PARTIAL_HARD\fP, and \f(CBPCRE2_PARTIAL_SOFT\fP. Unsupported
 options are ignored.
 .sp
-The return values are the same as for pcre2_match() plus
-\fBPCRE2_ERROR_JIT_BADOPTION\fP if a matching mode (partial or complete) is requested
+The return values are the same as for \f(CBpcre2_match()\fP plus
+\f(CBPCRE2_ERROR_JIT_BADOPTION\fP if a matching mode (partial or complete) is requested
 that was not compiled. For details of partial matching, see the
 \f(CRpcre2partial\fP
 page.

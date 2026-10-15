@@ -27,10 +27,10 @@ UTF code units must be enabled explicitly at run time. The version of Unicode
 in use can be discovered by running</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">pcre2test <span class="nt">-C</span></code></pre></div>
 <p>The three libraries contain identical sets of functions, with names ending in
-<code>_8</code>, <code>_16</code>, or <code>_32</code>, respectively (for example, <code class="function">pcre2_compile_8()</code>). However,
-by defining <code class="constant">PCRE2_CODE_UNIT_WIDTH</code> to be 8, 16, or 32, a program that uses just
+<code>_8</code>, <code>_16</code>, or <code>_32</code>, respectively (for example, <code class="function rouge"><span class="nf">pcre2_compile_8()</span></code>). However,
+by defining <code class="constant rouge"><span class="no">PCRE2_CODE_UNIT_WIDTH</span></code> to be 8, 16, or 32, a program that uses just
 one code unit width can be written using generic names such as
-<code class="function">pcre2_compile()</code>, and the documentation is written assuming that this is
+<code class="function rouge"><span class="nf">pcre2_compile()</span></code>, and the documentation is written assuming that this is
 the case.</p>
 <p>In addition to the Perl-compatible matching function, PCRE2 contains an
 alternative function that matches the same compiled patterns in a different
@@ -47,7 +47,7 @@ pages. There is a syntax summary in the
 <a href="./pcre2syntax.html"><code>pcre2syntax</code></a>
 page.</p>
 <p>Some features of PCRE2 can be included, excluded, or changed when the library
-is built. The <code class="function">pcre2_config()</code>
+is built. The <code class="function rouge"><span class="nf">pcre2_config()</span></code>
 function makes it possible for a client to discover which features are
 available. The features themselves are described in the
 <a href="./pcre2build.html"><code>pcre2build</code></a>
@@ -60,43 +60,43 @@ files in the source distribution.</p>
 <p>The libraries contains a number of undocumented internal functions and data
 tables that are used by more than one of the exported external functions, but
 which are not intended for use by external callers. Their names all begin with
-<code class="c">_pcre2</code>, which hopefully will not provoke any name clashes. In some
+<code class="c rouge" data-lang="c"><span class="nv">_pcre2</span></code>, which hopefully will not provoke any name clashes. In some
 environments, it is possible to control which external symbols are exported
 when a shared library is built, and in these cases the undocumented symbols are
 not exported.</p></section>
 <section class="doc-section level-1"><h2 id="_security_considerations">Security considerations</h2><p>If you are using PCRE2 in a non-UTF application that permits users to supply
 arbitrary patterns for compilation, you should be aware of a feature that
 allows users to turn on UTF support from within a pattern. For example, an
-8-bit pattern that begins with <code class="regex">(*UTF)</code> turns on UTF-8 mode, which interprets
+8-bit pattern that begins with <code class="regex rouge"><span class="pcre2-semantic">(*UTF)</span></code> turns on UTF-8 mode, which interprets
 patterns and subjects as strings of UTF-8 code units instead of individual
 8-bit characters. This causes both the pattern and any data against which it is
 matched to be checked for UTF-8 validity. If the data string is very long, such
 a check might use sufficiently many resources as to cause your application to
 lose performance.</p>
 <p>One way of guarding against this possibility is to use the
-<code class="function">pcre2_pattern_info()</code> function to check the compiled pattern’s options for
-<code class="constant">PCRE2_UTF</code>. Alternatively, you can set the <code class="constant">PCRE2_NEVER_UTF</code> option when calling
-<code class="function">pcre2_compile()</code>. This causes a compile time error if the pattern contains
+<code class="function rouge"><span class="nf">pcre2_pattern_info()</span></code> function to check the compiled pattern’s options for
+<code class="constant rouge"><span class="no">PCRE2_UTF</span></code>. Alternatively, you can set the <code class="constant rouge"><span class="no">PCRE2_NEVER_UTF</span></code> option when calling
+<code class="function rouge"><span class="nf">pcre2_compile()</span></code>. This causes a compile time error if the pattern contains
 a UTF-setting sequence.</p>
-<p>The use of Unicode properties for character types such as <code class="regex">\d</code> can also be
-enabled from within the pattern, by specifying <code class="regex">(*UCP)</code>. This feature can be
-disallowed by setting the <code class="constant">PCRE2_NEVER_UCP</code> option.</p>
+<p>The use of Unicode properties for character types such as <code class="regex rouge"><span class="pcre2-semantic">\d</span></code> can also be
+enabled from within the pattern, by specifying <code class="regex rouge"><span class="pcre2-semantic">(*UCP)</span></code>. This feature can be
+disallowed by setting the <code class="constant rouge"><span class="no">PCRE2_NEVER_UCP</span></code> option.</p>
 <p>If your application is one that supports UTF, be aware that validity checking
 can take time. If the same data string is to be matched many times, you can use
-the <code class="constant">PCRE2_NO_UTF_CHECK</code> option for the second and subsequent matches to avoid
+the <code class="constant rouge"><span class="no">PCRE2_NO_UTF_CHECK</span></code> option for the second and subsequent matches to avoid
 running redundant checks.</p>
-<p>The use of the <code class="regex">\C</code> escape sequence in a UTF-8 or UTF-16 pattern can lead to
+<p>The use of the <code class="regex rouge"><span class="pcre2-semantic">\C</span></code> escape sequence in a UTF-8 or UTF-16 pattern can lead to
 problems, because it may leave the current matching point in the middle of a
-multi-code-unit character. The <code class="constant">PCRE2_NEVER_BACKSLASH_C</code> option can be used by an
-application to lock out the use of <code class="regex">\C</code>, causing a compile-time error if it is
-encountered. It is also possible to build PCRE2 with the use of <code class="regex">\C</code> permanently
+multi-code-unit character. The <code class="constant rouge"><span class="no">PCRE2_NEVER_BACKSLASH_C</span></code> option can be used by an
+application to lock out the use of <code class="regex rouge"><span class="pcre2-semantic">\C</span></code>, causing a compile-time error if it is
+encountered. It is also possible to build PCRE2 with the use of <code class="regex rouge"><span class="pcre2-semantic">\C</span></code> permanently
 disabled.</p>
 <p>Another way that performance can be hit is by running a pattern that has a very
 large search tree against a string that will never match. Nested unlimited
 repeats in a pattern are a common example. PCRE2 provides some protection
-against this: see the <code class="function">pcre2_set_match_limit()</code> function in the
+against this: see the <code class="function rouge"><span class="nf">pcre2_set_match_limit()</span></code> function in the
 <a href="./pcre2api.html"><code>pcre2api</code></a>
-page. There is a similar function called <code class="function">pcre2_set_depth_limit()</code> that can
+page. There is a similar function called <code class="function rouge"><span class="nf">pcre2_set_depth_limit()</span></code> that can
 be used to restrict the amount of memory that is used.</p></section>
 <section class="doc-section level-1"><h2 id="_user_documentation">User documentation</h2><p>The user documentation for PCRE2 comprises a number of different sections. In
 the "man" format, each of these is a separate "man page". In the HTML format,

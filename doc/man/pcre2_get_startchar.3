@@ -34,20 +34,20 @@ pcre2_get_startchar \- get the starting character offset
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBPCRE2_SIZE\fP pcre2_get_startchar(\fBpcre2_match_data\fP *\fImatch_data\fP);
+\f(CRPCRE2_SIZE\fP \f(CBpcre2_get_startchar\fP\f(CR(pcre2_match_data *\fP\f(CImatch_data\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
-After a successful call of pcre2_match() that was passed the match block
+After a successful call of \f(CBpcre2_match()\fP that was passed the match block
 that is this function\(cqs argument, this function returns the code unit offset of
 the character at which the successful match started. For a non\-partial match,
 this can be different to the value of \f(CRovector[0]\fP if the pattern contains
-the \f(CR\(rsK\fP escape sequence. After a partial match, however, this value is always
-the same as \f(CRovector[0]\fP because \f(CR\(rsK\fP does not affect the result of a
+the \f(CI\(rsK\fP escape sequence. After a partial match, however, this value is always
+the same as \f(CRovector[0]\fP because \f(CI\(rsK\fP does not affect the result of a
 partial match.
 .sp
 There is a complete description of the PCRE2 native API in the

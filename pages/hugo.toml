@@ -23,6 +23,7 @@ disableKinds = ["taxonomy", "term", "rss"]
       unsafe = true
   [markup.highlight]
     noClasses = false
+    guessSyntax = false
 
 [security]
   [security.exec]

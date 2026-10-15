@@ -1,8 +1,11 @@
 :root {
   --content-width: 850px;
   --content-gutter: 16px;
-  --toc-width: 240px;
+  --toc-width: 350px;
+  --page-columns: minmax(var(--content-gutter), 1fr) minmax(0, var(--content-width)) minmax(var(--content-gutter), 1fr);
 }
+
+html { scrollbar-gutter: stable; }
 
 .offline-manual {
   min-height: 100vh;
@@ -11,16 +14,18 @@
 }
 
 .offline-nav, .offline-footer {
-  background: var(--colour-primary-bright);
+  background: var(--theme-bright);
 }
 
 .offline-nav {
-  padding: 0.5rlh var(--content-gutter);
+  display: grid;
+  grid-template-columns: var(--page-columns);
+  padding: 0.5rlh 0;
 }
 
 .offline-nav nav {
-  max-width: var(--content-width);
-  margin-inline: auto;
+  grid-column: 2;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -65,19 +70,24 @@
 }
 
 .document-page {
-  width: calc(100% - 2 * var(--content-gutter));
-  max-width: var(--content-width);
-  margin-inline: auto;
+  display: grid;
+  grid-template-columns: var(--page-columns);
   padding-block: 1rlh 2rlh;
+}
+
+.document-page > .document-title, .document-page > .document-layout {
+  grid-column: 2;
+  min-width: 0;
 }
 
 .document-layout > .prose { min-width: 0; }
 
-@media (min-width: 1180px) {
-  .document-page:has([role="doc-toc"]) {
-    max-width: calc(var(--content-width) + var(--toc-width) + 2 * var(--tab));
+@media (min-width: 1290px) {
+  .offline-manual:has(> main [role="doc-toc"]) {
+    --page-columns: minmax(var(--content-gutter), 1fr) minmax(0, var(--content-width)) calc(2 * var(--tab)) var(--toc-width) minmax(var(--content-gutter), 1fr);
   }
   .document-layout:has([role="doc-toc"]) {
+    grid-column: 2 / 5;
     display: grid;
     grid-template-columns: minmax(0, var(--content-width)) var(--toc-width);
     column-gap: calc(2 * var(--tab));
@@ -87,19 +97,20 @@
   .document-layout > [role="doc-toc"] {
     grid-area: 1 / 2;
     position: sticky;
+    margin: 0;
     top: 0.5rlh;
     max-height: calc(100vh - 1rlh);
     overflow: auto;
+    scrollbar-gutter: stable;
     box-sizing: border-box;
   }
-  .document-page:has([role="doc-toc"]) > .document-title { max-width: var(--content-width); }
 }
 
 @media print {
+  html { scrollbar-gutter: auto; }
   .offline-manual { min-height: 0; }
   .offline-nav, .offline-footer { display: none; }
-  .document-page, .document-page:has([role="doc-toc"]) { width: 100%; max-width: none; padding: 0; }
+  .document-page { display: block; padding: 0; }
   .document-layout:has([role="doc-toc"]) { display: block; }
-  .document-layout > [role="doc-toc"] { position: static; max-height: none; overflow: visible; }
-  .document-page:has([role="doc-toc"]) > .document-title { max-width: none; }
+  .document-layout > [role="doc-toc"] { position: static; margin-block: 0 1rlh; max-height: none; overflow: visible; scrollbar-gutter: auto; }
 }

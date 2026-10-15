@@ -34,18 +34,18 @@ pcre2_code_free \- free a compiled pattern
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBvoid\fP pcre2_code_free(\fBpcre2_code\fP *\fIcode\fP);
+\f(CRvoid\fP \f(CBpcre2_code_free\fP\f(CR(pcre2_code *\fP\f(CIcode\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
-If \fIcode\fP is \fBNULL\fP, this function does nothing. Otherwise, \fIcode\fP must
+If \f(CIcode\fP is \f(CRNULL\fP, this function does nothing. Otherwise, \f(CIcode\fP must
 point to a compiled pattern. This function frees its memory, including any
 memory used by the JIT compiler. If the compiled pattern was created by a call
-to pcre2_code_copy_with_tables(), the memory for the character tables is
+to \f(CBpcre2_code_copy_with_tables()\fP, the memory for the character tables is
 also freed.
 .sp
 There is a complete description of the PCRE2 native API in the

@@ -34,17 +34,17 @@ pcre2_get_newline \- get the newline convention
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_get_newline(\fBpcre2_compile_context\fP *\fIccontext\fP,
-                      \fBuint32_t\fP *\fInewline\fP);
+\f(CRint\fP \f(CBpcre2_get_newline\fP\f(CR(pcre2_compile_context *\fP\f(CIccontext\fP\f(CR,
+                      uint32_t *\fP\f(CInewline\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function gets the newline convention within a compile context. The result
-is zero. Both arguments must be non\-\fBNULL\fP.
+is zero. Both arguments must be non\-\f(CRNULL\fP.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

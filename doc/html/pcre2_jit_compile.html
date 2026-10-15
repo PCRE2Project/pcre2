@@ -1,33 +1,33 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><title>pcre2_jit_compile(3)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2_jit_compile(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2024-08-22">22 Aug 2024</time></p></header><div class="document-layout"><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_synopsis">Synopsis</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;pcre2.h&gt;</span><span class="cp">
 </span>
-<span class="kt">int</span> <span class="nf">pcre2_jit_compile</span><span class="p">(</span><span class="n">pcre2_code</span> <span class="o">*</span><span class="n">code</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">options</span><span class="p">);</span></code></pre></div></section>
+<span class="kt">int</span> <span class="nf">pcre2_jit_compile</span><span class="p">(</span><span class="kt">pcre2_code</span> <span class="o">*</span><span class="nv">code</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="nv">options</span><span class="p">);</span></code></pre></div></section>
 <section class="doc-section level-1"><h2 id="_description">Description</h2><p>This function requests JIT compilation, which, if the just-in-time compiler is
 available, further processes a compiled pattern into machine code that executes
-much faster than the <code class="function">pcre2_match()</code> interpretive matching function. Full
+much faster than the <code class="function rouge"><span class="nf">pcre2_match()</span></code> interpretive matching function. Full
 details are given in the
 <a href="./pcre2jit.html"><code>pcre2jit</code></a>
 documentation.</p>
 <p>The availability of JIT support can be tested by calling
-<code class="function">pcre2_jit_compile()</code> with a single option <code class="constant">PCRE2_JIT_TEST_ALLOC</code> (the
-<code class="parameter">code</code> argument is ignored, so a <code class="constant">NULL</code> value is accepted). Such a call
+<code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code> with a single option <code class="constant rouge"><span class="no">PCRE2_JIT_TEST_ALLOC</span></code> (the
+<code class="parameter rouge"><span class="nv">code</span></code> argument is ignored, so a <code class="constant rouge"><span class="kc">NULL</span></code> value is accepted). Such a call
 returns zero if JIT is available and has a working allocator. Otherwise
-it returns <code class="constant">PCRE2_ERROR_NOMEMORY</code> if JIT is available but cannot allocate
-executable memory, or <code class="constant">PCRE2_ERROR_JIT_UNSUPPORTED</code> if JIT support is not
+it returns <code class="constant rouge"><span class="no">PCRE2_ERROR_NOMEMORY</span></code> if JIT is available but cannot allocate
+executable memory, or <code class="constant rouge"><span class="no">PCRE2_ERROR_JIT_UNSUPPORTED</span></code> if JIT support is not
 compiled.</p>
 <p>Otherwise, the first argument must be a pointer that was returned by a
-successful call to <code class="function">pcre2_compile()</code>, and the second must contain one or
+successful call to <code class="function rouge"><span class="nf">pcre2_compile()</span></code>, and the second must contain one or
 more of the following bits:</p>
-<dl class="options compact" style="--tab-width: 16"><div class="dlist-item"><dt><span><code class="constant">PCRE2_JIT_COMPLETE</code></span></dt><dd>compile code for full matching</dd></div><div class="dlist-item"><dt><span><code class="constant">PCRE2_JIT_PARTIAL_SOFT</code></span></dt><dd>compile code for soft partial matching</dd></div><div class="dlist-item"><dt><span><code class="constant">PCRE2_JIT_PARTIAL_HARD</code></span></dt><dd>compile code for hard partial matching</dd></div></dl>
-<p>There is also an obsolete option called <code class="constant">PCRE2_JIT_INVALID_UTF</code>, which has been
-superseded by the <code class="function">pcre2_compile()</code> option <code class="constant">PCRE2_MATCH_INVALID_UTF</code>. The old
+<dl class="options compact" style="--tab-width: 16"><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_JIT_COMPLETE</span></code></span></dt><dd>compile code for full matching</dd></div><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_JIT_PARTIAL_SOFT</span></code></span></dt><dd>compile code for soft partial matching</dd></div><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_JIT_PARTIAL_HARD</span></code></span></dt><dd>compile code for hard partial matching</dd></div></dl>
+<p>There is also an obsolete option called <code class="constant rouge"><span class="no">PCRE2_JIT_INVALID_UTF</span></code>, which has been
+superseded by the <code class="function rouge"><span class="nf">pcre2_compile()</span></code> option <code class="constant rouge"><span class="no">PCRE2_MATCH_INVALID_UTF</span></code>. The old
 option is deprecated and may be removed in the future.</p>
 <p>The yield of the function when called with any of the three options above is 0
 for success, or a negative error code otherwise. In particular,
-<code class="constant">PCRE2_ERROR_JIT_BADOPTION</code> is returned if JIT is not supported or if an unknown
-bit is set in <code class="parameter">options</code>. The function can also return <code class="constant">PCRE2_ERROR_NOMEMORY</code>
+<code class="constant rouge"><span class="no">PCRE2_ERROR_JIT_BADOPTION</span></code> is returned if JIT is not supported or if an unknown
+bit is set in <code class="parameter rouge"><span class="nv">options</span></code>. The function can also return <code class="constant rouge"><span class="no">PCRE2_ERROR_NOMEMORY</span></code>
 if JIT is unable to allocate executable memory for the compiler, even if it was
 because of a system security restriction. In a few cases, the function may
-return with <code class="constant">PCRE2_ERROR_JIT_UNSUPPORTED</code> for unsupported features.</p>
+return with <code class="constant rouge"><span class="no">PCRE2_ERROR_JIT_UNSUPPORTED</span></code> for unsupported features.</p>
 <p>There is a complete description of the PCRE2 native API in the
 <a href="./pcre2api.html"><code>pcre2api</code></a>
 page and a description of the POSIX API in the

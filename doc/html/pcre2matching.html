@@ -1,19 +1,19 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Discussion of the two matching algorithms"><title>pcre2matching(3)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2matching(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2025-02-22">22 Feb 2025</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Table of Contents</h2><ol class="toc-list level-1"><li><a href="#_pcre2_matching_algorithms">PCRE2 matching algorithms</a></li><li><a href="#_regular_expressions_as_trees">Regular expressions as trees</a></li><li><a href="#_the_standard_matching_algorithm">The standard matching algorithm</a></li><li><a href="#_the_alternative_matching_algorithm">The alternative matching algorithm</a></li><li><a href="#_advantages_of_the_alternative_algorithm">Advantages of the alternative algorithm</a></li><li><a href="#_disadvantages_of_the_alternative_algorithm">Disadvantages of the alternative algorithm</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_pcre2_matching_algorithms">PCRE2 matching algorithms</h2><p>This document describes the two different algorithms that are available in
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Discussion of the two matching algorithms"><title>pcre2matching(3)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2matching(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2025-02-22">22 Feb 2025</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Contents</h2><ol class="toc-list level-1"><li><a href="#_pcre2_matching_algorithms" title="PCRE2 matching algorithms">PCRE2 matching algorithms</a></li><li><a href="#_regular_expressions_as_trees" title="Regular expressions as trees">Regular expressions as trees</a></li><li><a href="#_the_standard_matching_algorithm" title="The standard matching algorithm">The standard matching algorithm</a></li><li><a href="#_the_alternative_matching_algorithm" title="The alternative matching algorithm">The alternative matching algorithm</a></li><li><a href="#_advantages_of_the_alternative_algorithm" title="Advantages of the alternative algorithm">Advantages of the alternative algorithm</a></li><li><a href="#_disadvantages_of_the_alternative_algorithm" title="Disadvantages of the alternative algorithm">Disadvantages of the alternative algorithm</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_pcre2_matching_algorithms">PCRE2 matching algorithms</h2><p>This document describes the two different algorithms that are available in
 PCRE2 for matching a compiled regular expression against a given subject
-string. The "standard" algorithm is the one provided by the <code class="function">pcre2_match()</code>
+string. The "standard" algorithm is the one provided by the <code class="function rouge"><span class="nf">pcre2_match()</span></code>
 function. This works in the same way as Perl’s matching function, and provides a
 Perl-compatible matching operation. The just-in-time (JIT) optimization that is
 described in the
 <a href="./pcre2jit.html"><code>pcre2jit</code></a>
 documentation is compatible with this function.</p>
-<p>An alternative algorithm is provided by the <code class="function">pcre2_dfa_match()</code> function;
+<p>An alternative algorithm is provided by the <code class="function rouge"><span class="nf">pcre2_dfa_match()</span></code> function;
 it operates in a different way, and is not Perl-compatible. This alternative
 has advantages and disadvantages compared with the standard algorithm, and
 these are described below.</p>
 <p>When there is only one possible way in which a given subject string can match a
 pattern, the two algorithms give the same answer. A difference arises, however,
 when there are multiple possibilities. For example, if the anchored pattern</p>
-<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">^&lt;.*&gt;</code></pre></div>
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex"><span class="pcre2-semantic">^&lt;.*&gt;</span></code></pre></div>
 <p>is matched against the string</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="text">&lt;something&gt; &lt;something else&gt; &lt;something further&gt;</code></pre></div>
 <p>there are three possible answers. The standard algorithm finds only one of
@@ -63,22 +63,22 @@ the output vector in decreasing order of length. There is an option to stop the
 algorithm after the first match (which is necessarily the shortest) is found.</p>
 <p>Note that the size of vector needed to contain all the results depends on the
 number of simultaneous matches, not on the number of capturing parentheses in
-the pattern. Using <code class="function">pcre2_match_data_create_from_pattern()</code> to create the
+the pattern. Using <code class="function rouge"><span class="nf">pcre2_match_data_create_from_pattern()</span></code> to create the
 match data block is therefore not advisable when doing DFA matching.</p>
 <p>Note also that all the matches that are found start at the same point in the
 subject. If the pattern</p>
-<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">cat(er(pillar)?)?</code></pre></div>
-<p>is matched against the string <code class="subject">the caterpillar catchment</code>, the result is the
-three strings <code class="subject">caterpillar</code>, <code class="subject">cater</code>, and <code class="subject">cat</code> that start at the fifth
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="regex"><span class="pcre2-semantic">cat(er(pillar)?)?</span></code></pre></div>
+<p>is matched against the string <code class="subject rouge"><span class="pcre2-semantic">the caterpillar catchment</span></code>, the result is the
+three strings <code class="subject rouge"><span class="pcre2-semantic">caterpillar</span></code>, <code class="subject rouge"><span class="pcre2-semantic">cater</span></code>, and <code class="subject rouge"><span class="pcre2-semantic">cat</span></code> that start at the fifth
 character of the subject. The algorithm does not automatically move on to find
 matches that start at later positions.</p>
 <p>PCRE2’s "auto-possessification" optimization usually applies to character
 repeats at the end of a pattern (as well as internally). For example, the
-pattern <code class="regex">a\d+</code> is compiled as if it were <code class="regex">a\d++</code> because there is no point
+pattern <code class="regex rouge"><span class="pcre2-semantic">a\d+</span></code> is compiled as if it were <code class="regex rouge"><span class="pcre2-semantic">a\d++</span></code> because there is no point
 even considering the possibility of backtracking into the repeated digits. For
 DFA matching, this means that only one possible match is found. If you really
 do want multiple matches in such cases, either use an ungreedy repeat
-(<code class="regex">a\d+?</code>) or set the <code class="constant">PCRE2_NO_AUTO_POSSESS</code> option when compiling.</p>
+(<code class="regex rouge"><span class="pcre2-semantic">a\d+?</span></code>) or set the <code class="constant rouge"><span class="no">PCRE2_NO_AUTO_POSSESS</span></code> option when compiling.</p>
 <p>There are a number of features of PCRE2 regular expressions that are not
 supported or behave differently in the alternative matching function. Those
 that are not supported cause an error if encountered.</p>
@@ -87,8 +87,8 @@ nature of repetition quantifiers is not relevant (though it may affect
 auto-possessification, as just described). During matching, greedy and ungreedy
 quantifiers are treated in exactly the same way. However, possessive
 quantifiers can make a difference when what follows could also match what is
-quantified, for example in a pattern like this:</p><div class="listing-block"><pre class="rouge highlight"><code data-lang="regex">^a++\w!</code></pre></div>
-<p>This pattern matches <code class="subject">aaab!</code> but not <code class="subject">aaa!</code>, which would be matched by a
+quantified, for example in a pattern like this:</p><div class="listing-block"><pre class="rouge highlight"><code data-lang="regex"><span class="pcre2-semantic">^a++\w!</span></code></pre></div>
+<p>This pattern matches <code class="subject rouge"><span class="pcre2-semantic">aaab!</span></code> but not <code class="subject rouge"><span class="pcre2-semantic">aaa!</span></code>, which would be matched by a
 non-possessive quantifier. Similarly, if an atomic group is present, it is
 matched as if it were a standalone pattern at the current point, and the
 longest match is then "locked in" for the rest of the overall pattern.</p></li><li>When dealing with multiple paths through the tree simultaneously, it is not
@@ -96,15 +96,15 @@ straightforward to keep track of captured substrings for the different matching
 possibilities, and PCRE2’s implementation of this algorithm does not attempt to
 do this. This means that no captured substrings are available.</li><li>Because no substrings are captured, a number of related features are not
 available:<ol class="loweralpha compact" type="a"><li>Backreferences;</li><li>Conditional expressions that use a backreference as the condition or test
-for a specific group recursion;</li><li>Script runs;</li><li>Scan substring assertions.</li></ol></li><li>Because many paths through the tree may be active, the <code class="regex">\K</code> escape sequence,
+for a specific group recursion;</li><li>Script runs;</li><li>Scan substring assertions.</li></ol></li><li>Because many paths through the tree may be active, the <code class="regex rouge"><span class="pcre2-semantic">\K</span></code> escape sequence,
 which resets the start of the match when encountered (but may be on some paths
-and not on others), is not supported.</li><li>Callouts are supported, but the value of the <code class="parameter">capture_top</code> field is
-always 1, and the value of the <code class="parameter">capture_last</code> field is always 0.</li><li>The <code class="regex">\C</code> escape sequence, which (in the standard algorithm) always matches a
+and not on others), is not supported.</li><li>Callouts are supported, but the value of the <code class="parameter rouge"><span class="nv">capture_top</span></code> field is
+always 1, and the value of the <code class="parameter rouge"><span class="nv">capture_last</span></code> field is always 0.</li><li>The <code class="regex rouge"><span class="pcre2-semantic">\C</span></code> escape sequence, which (in the standard algorithm) always matches a
 single code unit, even in a UTF mode, is not supported in UTF modes because
 the alternative algorithm moves through the subject string one character (not
-code unit) at a time, for all active paths through the tree.</li><li>Except for <code class="regex">(*FAIL)</code>, the backtracking control verbs such as <code class="regex">(*PRUNE)</code> are not
-supported. <code class="regex">(*FAIL)</code> is supported, and behaves like a failing negative assertion.</li><li>The <code class="constant">PCRE2_MATCH_INVALID_UTF</code> option for <code class="function">pcre2_compile()</code> is not
-supported by <code class="function">pcre2_dfa_match()</code>.</li></ol></section>
+code unit) at a time, for all active paths through the tree.</li><li>Except for <code class="regex rouge"><span class="pcre2-semantic">(*FAIL)</span></code>, the backtracking control verbs such as <code class="regex rouge"><span class="pcre2-semantic">(*PRUNE)</span></code> are not
+supported. <code class="regex rouge"><span class="pcre2-semantic">(*FAIL)</span></code> is supported, and behaves like a failing negative assertion.</li><li>The <code class="constant rouge"><span class="no">PCRE2_MATCH_INVALID_UTF</span></code> option for <code class="function rouge"><span class="nf">pcre2_compile()</span></code> is not
+supported by <code class="function rouge"><span class="nf">pcre2_dfa_match()</span></code>.</li></ol></section>
 <section class="doc-section level-1"><h2 id="_advantages_of_the_alternative_algorithm">Advantages of the alternative algorithm</h2><p>The main advantage of the alternative algorithm is that all possible matches
 (at a single point in the subject) are automatically found, and in particular,
 the longest match is found. To find more than one match at the same point using

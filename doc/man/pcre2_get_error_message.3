@@ -34,10 +34,10 @@ pcre2_get_error_message \- get textual error message for error number
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_get_error_message(\fBint\fP \fIerrorcode\fP, \fBPCRE2_UCHAR\fP *\fIbuffer\fP,
-                            \fBPCRE2_SIZE\fP \fIbufflen\fP);
+\f(CRint\fP \f(CBpcre2_get_error_message\fP\f(CR(int\fP \f(CIerrorcode\fP\f(CR, PCRE2_UCHAR *\fP\f(CIbuffer\fP\f(CR,
+                            PCRE2_SIZE\fP \f(CIbufflen\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -50,15 +50,15 @@ errors are negative numbers. The arguments are:
 .RS 4
 .PD 0
 .TP 10
-\fIerrorcode\fP
+\f(CIerrorcode\fP
 .ad l
 an error code (positive or negative), or zero for no error
 .TP 10
-\fIbuffer\fP
+\f(CIbuffer\fP
 .ad l
-where to put the message; may be \fBNULL\fP only when \fIbufflen\fP is zero
+where to put the message; may be \f(CRNULL\fP only when \f(CIbufflen\fP is zero
 .TP 10
-\fIbufflen\fP
+\f(CIbufflen\fP
 .ad l
 the length of the buffer (code units)
 .PD
@@ -67,15 +67,15 @@ the length of the buffer (code units)
 .ad l
 .sp
 The function returns the length of the message in code units, excluding the
-trailing zero, or the negative error code \fBPCRE2_ERROR_NOMEMORY\fP if the buffer is
+trailing zero, or the negative error code \f(CBPCRE2_ERROR_NOMEMORY\fP if the buffer is
 too small. In this case, the returned message is truncated (but still with a
-trailing zero, assuming \fIbufflen\fP is not zero).
+trailing zero, assuming \f(CIbufflen\fP is not zero).
 With a recognized code and zero capacity, no output is written and
-\fBPCRE2_ERROR_NOMEMORY\fP is returned.
+\f(CBPCRE2_ERROR_NOMEMORY\fP is returned.
 .sp
-If \fIerrorcode\fP is neither zero nor a recognized error code
-number, the negative value \fBPCRE2_ERROR_BADDATA\fP is returned without changing
-the buffer, even when \fIbufflen\fP is zero.
+If \f(CIerrorcode\fP is neither zero nor a recognized error code
+number, the negative value \f(CBPCRE2_ERROR_BADDATA\fP is returned without changing
+the buffer, even when \f(CIbufflen\fP is zero.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

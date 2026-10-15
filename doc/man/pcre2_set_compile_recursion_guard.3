@@ -34,25 +34,25 @@ pcre2_set_compile_recursion_guard \- set up a compile recursion guard function
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_set_compile_recursion_guard(\fBpcre2_compile_context\fP *\fIccontext\fP,
-                                      \fBint\fP (*\fIguard\fP)(\fBuint32_t\fP \fIdepth\fP,
-                                                   \fBvoid\fP *\fIuser_data\fP),
-                                      \fBvoid\fP *\fIuser_data\fP);
+\f(CRint\fP \f(CBpcre2_set_compile_recursion_guard\fP\f(CR(pcre2_compile_context *\fP\f(CIccontext\fP\f(CR,
+                                      int (*\fP\f(CIguard\fP\f(CR)(uint32_t\fP \f(CIdepth\fP\f(CR,
+                                                   void *\fP\f(CIuser_data\fP\f(CR),
+                                      void *\fP\f(CIuser_data\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function defines, within a compile context, a function that is called
-whenever pcre2_compile() starts to compile a parenthesized part of a
+whenever \f(CBpcre2_compile()\fP starts to compile a parenthesized part of a
 pattern. The first argument to the function gives the current depth of
 parenthesis nesting, and the second is user data that is supplied when the
 function is set up. The callout function should return zero if all is well, or
 non\-zero to force an error. This feature is provided so that applications can
 check the available system stack space, in order to avoid running out. The
-result of pcre2_set_compile_recursion_guard() is always zero.
+result of \f(CBpcre2_set_compile_recursion_guard()\fP is always zero.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

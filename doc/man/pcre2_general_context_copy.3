@@ -34,10 +34,10 @@ pcre2_general_context_copy \- copy a general context
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBpcre2_general_context\fP *pcre2_general_context_copy(
-      \fBpcre2_general_context\fP *\fIgcontext\fP);
+\f(CRpcre2_general_context *\fP\f(CBpcre2_general_context_copy\fP\f(CR(
+      pcre2_general_context *\fP\f(CIgcontext\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -45,7 +45,7 @@ pcre2_general_context_copy \- copy a general context
 .sp
 This function makes a new copy of a general context, using the memory
 allocation functions in the context, if set, to get the necessary memory.
-Otherwise \f(CRmalloc()\fP is used. The result is \fBNULL\fP if the memory cannot be
+Otherwise \f(CBmalloc\fP\f(CR()\fP is used. The result is \f(CRNULL\fP if the memory cannot be
 obtained.
 .sp
 There is a complete description of the PCRE2 native API in the

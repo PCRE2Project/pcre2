@@ -34,12 +34,12 @@ pcre2_pattern_convert \- foreign pattern converter
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_pattern_convert(\fBPCRE2_SPTR\fP \fIpattern\fP, \fBPCRE2_SIZE\fP \fIplength\fP,
-                          \fBuint32_t\fP \fIoptions\fP, \fBPCRE2_UCHAR\fP **\fIbuffptr\fP,
-                          \fBPCRE2_SIZE\fP *\fIbufflenptr\fP,
-                          \fBpcre2_convert_context\fP *\fIccontext\fP);
+\f(CRint\fP \f(CBpcre2_pattern_convert\fP\f(CR(PCRE2_SPTR\fP \f(CIpattern\fP\f(CR, PCRE2_SIZE\fP \f(CIplength\fP\f(CR,
+                          uint32_t\fP \f(CIoptions\fP\f(CR, PCRE2_UCHAR **\fP\f(CIbuffptr\fP\f(CR,
+                          PCRE2_SIZE *\fP\f(CIbufflenptr\fP\f(CR,
+                          pcre2_convert_context *\fP\f(CIccontext\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -52,41 +52,41 @@ expression pattern. Its arguments are:
 .RS 4
 .PD 0
 .TP 11
-\fIpattern\fP
+\f(CIpattern\fP
 .ad l
 The foreign pattern
 .TP 11
-\fIplength\fP
+\f(CIplength\fP
 .ad l
-The length of the input pattern or \fBPCRE2_ZERO_TERMINATED\fP
+The length of the input pattern or \f(CBPCRE2_ZERO_TERMINATED\fP
 .TP 11
-\fIoptions\fP
+\f(CIoptions\fP
 .ad l
 Option bits
 .TP 11
-\fIbuffptr\fP
+\f(CIbuffptr\fP
 .ad l
-Pointer to pointer to output buffer, or \fBNULL\fP
+Pointer to pointer to output buffer, or \f(CRNULL\fP
 .TP 11
-\fIbufflenptr\fP
+\f(CIbufflenptr\fP
 .ad l
 Pointer to output length field
 .TP 11
-\fIccontext\fP
+\f(CIccontext\fP
 .ad l
-Pointer to a convert context or \fBNULL\fP
+Pointer to a convert context or \f(CRNULL\fP
 .PD
 .RE
 .PP
 .ad l
 .sp
 The length of the converted pattern (excluding the terminating zero) is
-returned via \fIbufflenptr\fP. If \fIbuffptr\fP is \fBNULL\fP, the function just returns
-the output length. If \fIbuffptr\fP points to a \fBNULL\fP pointer, heap memory is
+returned via \f(CIbufflenptr\fP. If \f(CIbuffptr\fP is \f(CRNULL\fP, the function just returns
+the output length. If \f(CIbuffptr\fP points to a \f(CRNULL\fP pointer, heap memory is
 obtained for the converted pattern, using the allocator in the context if
-present (or else \f(CRmalloc()\fP), and the field pointed to by \fIbuffptr\fP is
-updated. If \fIbuffptr\fP points to a non\-\fBNULL\fP field, that must point to a
-buffer whose size is in the variable pointed to by \fIbufflenptr\fP. This value is
+present (or else \f(CBmalloc\fP\f(CR()\fP), and the field pointed to by \f(CIbuffptr\fP is
+updated. If \f(CIbuffptr\fP points to a non\-\f(CRNULL\fP field, that must point to a
+buffer whose size is in the variable pointed to by \f(CIbufflenptr\fP. This value is
 updated.
 .sp
 The option bits are:
@@ -94,27 +94,27 @@ The option bits are:
 .RS 4
 .PD 0
 .TP 7
-\fBPCRE2_CONVERT_UTF\fP
+\f(CBPCRE2_CONVERT_UTF\fP
 .ad l
 Input is UTF
 .TP 7
-\fBPCRE2_CONVERT_NO_UTF_CHECK\fP
+\f(CBPCRE2_CONVERT_NO_UTF_CHECK\fP
 .ad l
 Do not check UTF validity
 .TP 7
-\fBPCRE2_CONVERT_POSIX_BASIC\fP
+\f(CBPCRE2_CONVERT_POSIX_BASIC\fP
 .ad l
 Convert POSIX basic pattern
 .TP 7
-\fBPCRE2_CONVERT_POSIX_EXTENDED\fP
+\f(CBPCRE2_CONVERT_POSIX_EXTENDED\fP
 .ad l
 Convert POSIX extended pattern
 .TP 7
-\fBPCRE2_CONVERT_GLOB\fP
+\f(CBPCRE2_CONVERT_GLOB\fP
 .TP 7
-\fBPCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR\fP
+\f(CBPCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR\fP
 .TP 7
-\fBPCRE2_CONVERT_GLOB_NO_STARSTAR\fP
+\f(CBPCRE2_CONVERT_GLOB_NO_STARSTAR\fP
 .ad l
 Convert the different types of glob
 .PD
@@ -122,7 +122,7 @@ Convert the different types of glob
 .PP
 .ad l
 .sp
-The return value from pcre2_pattern_convert() is zero on success or a
+The return value from \f(CBpcre2_pattern_convert()\fP is zero on success or a
 non\-zero PCRE2 error code.
 .sp
 The pattern conversion functions are described in the

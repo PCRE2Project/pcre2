@@ -34,10 +34,10 @@ pcre2_convert_context_copy \- copy a convert context
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBpcre2_convert_context\fP *pcre2_convert_context_copy(
-      \fBpcre2_convert_context\fP *\fIccontext\fP);
+\f(CRpcre2_convert_context *\fP\f(CBpcre2_convert_context_copy\fP\f(CR(
+      pcre2_convert_context *\fP\f(CIccontext\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -45,7 +45,7 @@ pcre2_convert_context_copy \- copy a convert context
 .sp
 This function is part of an experimental set of pattern conversion functions.
 It makes a new copy of a convert context, using the memory allocation function
-that was used for the original context. The result is \fBNULL\fP if the memory cannot
+that was used for the original context. The result is \f(CRNULL\fP if the memory cannot
 be obtained.
 .sp
 The pattern conversion functions are described in the

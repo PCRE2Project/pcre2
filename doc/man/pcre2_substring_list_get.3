@@ -34,11 +34,11 @@ pcre2_substring_list_get \- extract all substrings into new memory
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_substring_list_get(\fBpcre2_match_data\fP *\fImatch_data\fP,
-                             \fBPCRE2_UCHAR\fP ***\fIlistptr\fP,
-                             \fBPCRE2_SIZE\fP **\fIlengthsptr\fP);
+\f(CRint\fP \f(CBpcre2_substring_list_get\fP\f(CR(pcre2_match_data *\fP\f(CImatch_data\fP\f(CR,
+                             PCRE2_UCHAR ***\fP\f(CIlistptr\fP\f(CR,
+                             PCRE2_SIZE **\fP\f(CIlengthsptr\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -50,33 +50,33 @@ a second list that contains their lengths (in code units), excluding a
 terminating zero that is added to each of them. All this is done in a single
 block of memory that is obtained using the same memory allocation function that
 was used to get the match data block. The convenience function
-pcre2_substring_list_free() can be used to free it when it is no longer
+\f(CBpcre2_substring_list_free()\fP can be used to free it when it is no longer
 needed. The arguments are:
 .sp
 .RS 4
 .PD 0
 .TP 11
-\fImatch_data\fP
+\f(CImatch_data\fP
 .ad l
 The match data block
 .TP 11
-\fIlistptr\fP
+\f(CIlistptr\fP
 .ad l
 Where to put a pointer to the list
 .TP 11
-\fIlengthsptr\fP
+\f(CIlengthsptr\fP
 .ad l
-Where to put a pointer to the lengths, or \fBNULL\fP
+Where to put a pointer to the lengths, or \f(CRNULL\fP
 .PD
 .RE
 .PP
 .ad l
 .sp
 A pointer to a list of pointers is put in the variable whose address is in
-\fIlistptr\fP. The list is terminated by a \fBNULL\fP pointer. If \fIlengthsptr\fP is
-not \fBNULL\fP, a matching list of lengths is created, and its address is placed in
-\fIlengthsptr\fP. The yield of the function is zero on success or
-\fBPCRE2_ERROR_NOMEMORY\fP if sufficient memory could not be obtained.
+\f(CIlistptr\fP. The list is terminated by a \f(CRNULL\fP pointer. If \f(CIlengthsptr\fP is
+not \f(CRNULL\fP, a matching list of lengths is created, and its address is placed in
+\f(CIlengthsptr\fP. The yield of the function is zero on success or
+\f(CBPCRE2_ERROR_NOMEMORY\fP if sufficient memory could not be obtained.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

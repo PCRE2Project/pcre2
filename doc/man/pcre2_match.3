@@ -34,12 +34,12 @@ pcre2_match \- match a compiled pattern to a subject string (Perl compatible)
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_match(\fBconst\fP \fBpcre2_code\fP *\fIcode\fP, \fBPCRE2_SPTR\fP \fIsubject\fP,
-                \fBPCRE2_SIZE\fP \fIlength\fP, \fBPCRE2_SIZE\fP \fIstart_offset\fP,
-                \fBuint32_t\fP \fIoptions\fP, \fBpcre2_match_data\fP *\fImatch_data\fP,
-                \fBpcre2_match_context\fP *\fImcontext\fP);
+\f(CRint\fP \f(CBpcre2_match\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR, PCRE2_SPTR\fP \f(CIsubject\fP\f(CR,
+                PCRE2_SIZE\fP \f(CIlength\fP\f(CR, PCRE2_SIZE\fP \f(CIstart_offset\fP\f(CR,
+                uint32_t\fP \f(CIoptions\fP\f(CR, pcre2_match_data *\fP\f(CImatch_data\fP\f(CR,
+                pcre2_match_context *\fP\f(CImcontext\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -48,9 +48,9 @@ pcre2_match \- match a compiled pattern to a subject string (Perl compatible)
 This function matches a compiled regular expression against a given subject
 string, using a matching algorithm that is similar to Perl\(cqs. It returns
 offsets to what it has matched and to captured substrings via the
-\fImatch_data\fP block, which can be processed by functions with names that
+\f(CImatch_data\fP block, which can be processed by functions with names that
 start with \f(CRpcre2_get_ovector_...()\fP or \f(CRpcre2_substring_...()\fP. The
-return from pcre2_match() is one more than the highest numbered capturing
+return from \f(CBpcre2_match()\fP is one more than the highest numbered capturing
 pair that has been set (for example, 1 if there are no captures), zero if the
 vector of offsets is too small, or a negative error code for no match and other
 errors. The function arguments are:
@@ -58,33 +58,33 @@ errors. The function arguments are:
 .RS 4
 .PD 0
 .TP 13
-\fIcode\fP
+\f(CIcode\fP
 .ad l
 Points to the compiled pattern
 .TP 13
-\fIsubject\fP
+\f(CIsubject\fP
 .ad l
 Points to the subject string
 .TP 13
-\fIlength\fP
+\f(CIlength\fP
 .ad l
 Length of the subject string
 .TP 13
-\fIstart_offset\fP
+\f(CIstart_offset\fP
 .ad l
 Offset in the subject at which to start matching
 .TP 13
-\fIoptions\fP
+\f(CIoptions\fP
 .ad l
 Option bits
 .TP 13
-\fImatch_data\fP
+\f(CImatch_data\fP
 .ad l
 Points to a match data block, for results
 .TP 13
-\fImcontext\fP
+\f(CImcontext\fP
 .ad l
-Points to a match context, or is \fBNULL\fP
+Points to a match context, or is \f(CRNULL\fP
 .PD
 .RE
 .PP
@@ -153,62 +153,62 @@ Change the backtracking depth limit
 Set custom memory management specifically for the match
 .RE
 .sp
-The \fIlength\fP and \fIstart_offset\fP values are code units, not characters.
-The length may be given as \fBPCRE2_ZERO_TERMINATED\fP for a subject that is
+The \f(CIlength\fP and \f(CIstart_offset\fP values are code units, not characters.
+The length may be given as \f(CBPCRE2_ZERO_TERMINATED\fP for a subject that is
 terminated by a binary zero code unit. The options are:
 .sp
 .RS 4
 .PD 0
 .TP 23
-\fBPCRE2_ANCHORED\fP
+\f(CBPCRE2_ANCHORED\fP
 .ad l
 Match only at the first position
 .TP 23
-\fBPCRE2_COPY_MATCHED_SUBJECT\fP
+\f(CBPCRE2_COPY_MATCHED_SUBJECT\fP
 .ad l
 On success, make a private subject copy
 .TP 23
-\fBPCRE2_DISABLE_RECURSELOOP_CHECK\fP
+\f(CBPCRE2_DISABLE_RECURSELOOP_CHECK\fP
 .ad l
 Only useful in rare cases; use with care
 .TP 23
-\fBPCRE2_ENDANCHORED\fP
+\f(CBPCRE2_ENDANCHORED\fP
 .ad l
 Pattern can match only at end of subject
 .TP 23
-\fBPCRE2_NOTBOL\fP
+\f(CBPCRE2_NOTBOL\fP
 .ad l
 Subject string is not the beginning of a line
 .TP 23
-\fBPCRE2_NOTEOL\fP
+\f(CBPCRE2_NOTEOL\fP
 .ad l
 Subject string is not the end of a line
 .TP 23
-\fBPCRE2_NOTEMPTY\fP
+\f(CBPCRE2_NOTEMPTY\fP
 .ad l
 An empty string is not a valid match
 .TP 23
-\fBPCRE2_NOTEMPTY_ATSTART\fP
+\f(CBPCRE2_NOTEMPTY_ATSTART\fP
 .ad l
 An empty string at the start of the subject is not a valid match
 .TP 23
-\fBPCRE2_NO_JIT\fP
+\f(CBPCRE2_NO_JIT\fP
 .ad l
 Do not use JIT matching
 .TP 23
-\fBPCRE2_NO_UTF_CHECK\fP
+\f(CBPCRE2_NO_UTF_CHECK\fP
 .ad l
 Do not check the subject for UTF validity (only relevant if
-\fBPCRE2_UTF\fP was set at compile time)
+\f(CBPCRE2_UTF\fP was set at compile time)
 .TP 23
-\fBPCRE2_PARTIAL_HARD\fP
+\f(CBPCRE2_PARTIAL_HARD\fP
 .ad l
-Return \fBPCRE2_ERROR_PARTIAL\fP for a partial match even if there is a
+Return \f(CBPCRE2_ERROR_PARTIAL\fP for a partial match even if there is a
 full match
 .TP 23
-\fBPCRE2_PARTIAL_SOFT\fP
+\f(CBPCRE2_PARTIAL_SOFT\fP
 .ad l
-Return \fBPCRE2_ERROR_PARTIAL\fP for a partial match if no full matches
+Return \f(CBPCRE2_ERROR_PARTIAL\fP for a partial match if no full matches
 are found
 .PD
 .RE

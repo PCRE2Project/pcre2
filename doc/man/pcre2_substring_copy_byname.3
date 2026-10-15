@@ -34,12 +34,12 @@ pcre2_substring_copy_byname \- extract named substring into given buffer
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_substring_copy_byname(\fBpcre2_match_data\fP *\fImatch_data\fP,
-                                \fBPCRE2_SPTR\fP \fIstringname\fP,
-                                \fBPCRE2_UCHAR\fP *\fIbuffer\fP,
-                                \fBPCRE2_SIZE\fP *\fIsizeptr\fP);
+\f(CRint\fP \f(CBpcre2_substring_copy_byname\fP\f(CR(pcre2_match_data *\fP\f(CImatch_data\fP\f(CR,
+                                PCRE2_SPTR\fP \f(CIstringname\fP\f(CR,
+                                PCRE2_UCHAR *\fP\f(CIbuffer\fP\f(CR,
+                                PCRE2_SIZE *\fP\f(CIsizeptr\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -51,19 +51,19 @@ by name, into a given buffer. The arguments are:
 .RS 4
 .PD 0
 .TP 11
-\fImatch_data\fP
+\f(CImatch_data\fP
 .ad l
 The match data block for the match
 .TP 11
-\fIstringname\fP
+\f(CIstringname\fP
 .ad l
 Name of the required substring
 .TP 11
-\fIbuffer\fP
+\f(CIbuffer\fP
 .ad l
 Buffer to receive the string
 .TP 11
-\fIsizeptr\fP
+\f(CIsizeptr\fP
 .ad l
 Length of buffer (code units)
 .PD
@@ -71,26 +71,26 @@ Length of buffer (code units)
 .PP
 .ad l
 .sp
-The \fIsizeptr\fP variable is updated to contain the length of the extracted
+The \f(CIsizeptr\fP variable is updated to contain the length of the extracted
 string, excluding the trailing zero. The yield of the function is zero for
 success or one of the following error numbers:
 .sp
 .RS 4
 .PD 0
 .TP 24
-\fBPCRE2_ERROR_NOSUBSTRING\fP
+\f(CBPCRE2_ERROR_NOSUBSTRING\fP
 .ad l
 there are no groups of that name
 .TP 24
-\fBPCRE2_ERROR_UNAVAILABLE\fP
+\f(CBPCRE2_ERROR_UNAVAILABLE\fP
 .ad l
 the ovector was too small for that group
 .TP 24
-\fBPCRE2_ERROR_UNSET\fP
+\f(CBPCRE2_ERROR_UNSET\fP
 .ad l
 the group did not participate in the match
 .TP 24
-\fBPCRE2_ERROR_NOMEMORY\fP
+\f(CBPCRE2_ERROR_NOMEMORY\fP
 .ad l
 the buffer is not big enough
 .PD
@@ -99,7 +99,7 @@ the buffer is not big enough
 .ad l
 .sp
 If there is more than one group with the given name, the first one that is set
-is returned. In this situation \fBPCRE2_ERROR_UNSET\fP means that no group with the
+is returned. In this situation \f(CBPCRE2_ERROR_UNSET\fP means that no group with the
 given name was set.
 .sp
 There is a complete description of the PCRE2 native API in the

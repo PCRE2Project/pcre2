@@ -34,12 +34,12 @@ pcre2_substring_nametable_scan \- find table entries for given string name
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_substring_nametable_scan(\fBconst\fP \fBpcre2_code\fP *\fIcode\fP,
-                                   \fBPCRE2_SPTR\fP \fIstringname\fP,
-                                   \fBPCRE2_SPTR\fP *\fIfirstptr\fP,
-                                   \fBPCRE2_SPTR\fP *\fIlastptr\fP);
+\f(CRint\fP \f(CBpcre2_substring_nametable_scan\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR,
+                                   PCRE2_SPTR\fP \f(CIstringname\fP\f(CR,
+                                   PCRE2_SPTR *\fP\f(CIfirstptr\fP\f(CR,
+                                   PCRE2_SPTR *\fP\f(CIlastptr\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -52,19 +52,19 @@ numbers.
 .RS 4
 .PD 0
 .TP 11
-\fIcode\fP
+\f(CIcode\fP
 .ad l
 Compiled regular expression
 .TP 11
-\fIstringname\fP
+\f(CIstringname\fP
 .ad l
 Name whose entries required
 .TP 11
-\fIfirstptr\fP
+\f(CIfirstptr\fP
 .ad l
 Where to return a pointer to the first entry
 .TP 11
-\fIlastptr\fP
+\f(CIlastptr\fP
 .ad l
 Where to return a pointer to the last entry
 .PD
@@ -72,12 +72,12 @@ Where to return a pointer to the last entry
 .PP
 .ad l
 .sp
-When the name is found in the table, if \fIfirstptr\fP is \fBNULL\fP, the function
+When the name is found in the table, if \f(CIfirstptr\fP is \f(CRNULL\fP, the function
 returns a group number, but if there is more than one matching entry, it is not
-defined which one. Otherwise, when both \fIfirstptr\fP and \fIlastptr\fP have been
+defined which one. Otherwise, when both \f(CIfirstptr\fP and \f(CIlastptr\fP have been
 set, the yield of
 the function is the length of each entry in code units. If the name is not
-found, \fBPCRE2_ERROR_NOSUBSTRING\fP is returned.
+found, \f(CBPCRE2_ERROR_NOSUBSTRING\fP is returned.
 .sp
 There is a complete description of the PCRE2 native API, including the format of
 the table entries, in the

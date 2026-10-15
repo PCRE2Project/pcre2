@@ -1,17 +1,17 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Serializing functions for saving precompiled patterns"><title>pcre2serialize(3)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2serialize(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2024-01-19">19 Jan 2024</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Table of Contents</h2><ol class="toc-list level-1"><li><a href="#_saving_and_re_using_precompiled_pcre2_patterns">Saving and re-using precompiled PCRE2 patterns</a></li><li><a href="#_security_concerns">Security concerns</a></li><li><a href="#_saving_compiled_patterns">Saving compiled patterns</a></li><li><a href="#_re_using_precompiled_patterns">Re-using precompiled patterns</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_saving_and_re_using_precompiled_pcre2_patterns">Saving and re-using precompiled PCRE2 patterns</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int32_t</span> <span class="nf">pcre2_serialize_decode</span><span class="p">(</span><span class="n">pcre2_code</span> <span class="o">**</span><span class="n">codes</span><span class="p">,</span>
-                               <span class="kt">int32_t</span> <span class="n">number_of_codes</span><span class="p">,</span>
-                               <span class="k">const</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">bytes</span><span class="p">,</span>
-                               <span class="n">pcre2_general_context</span> <span class="o">*</span><span class="n">gcontext</span><span class="p">);</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Serializing functions for saving precompiled patterns"><title>pcre2serialize(3)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2serialize(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2024-01-19">19 Jan 2024</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Contents</h2><ol class="toc-list level-1"><li><a href="#_saving_and_re_using_precompiled_pcre2_patterns" title="Saving and re-using precompiled PCRE2 patterns">Saving and re-using precompiled PCRE2 patterns</a></li><li><a href="#_security_concerns" title="Security concerns">Security concerns</a></li><li><a href="#_saving_compiled_patterns" title="Saving compiled patterns">Saving compiled patterns</a></li><li><a href="#_re_using_precompiled_patterns" title="Re-using precompiled patterns">Re-using precompiled patterns</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_saving_and_re_using_precompiled_pcre2_patterns">Saving and re-using precompiled PCRE2 patterns</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int32_t</span> <span class="nf">pcre2_serialize_decode</span><span class="p">(</span><span class="kt">pcre2_code</span> <span class="o">**</span><span class="nv">codes</span><span class="p">,</span>
+                               <span class="kt">int32_t</span> <span class="nv">number_of_codes</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="nv">bytes</span><span class="p">,</span>
+                               <span class="kt">pcre2_general_context</span> <span class="o">*</span><span class="nv">gcontext</span><span class="p">);</span>
 
-<span class="kt">int32_t</span> <span class="nf">pcre2_serialize_encode</span><span class="p">(</span><span class="k">const</span> <span class="n">pcre2_code</span> <span class="o">**</span><span class="n">codes</span><span class="p">,</span>
-                               <span class="kt">int32_t</span> <span class="n">number_of_codes</span><span class="p">,</span>
-                               <span class="kt">uint8_t</span> <span class="o">**</span><span class="n">serialized_bytes</span><span class="p">,</span>
-                               <span class="n">PCRE2_SIZE</span> <span class="o">*</span><span class="n">serialized_size</span><span class="p">,</span>
-                               <span class="n">pcre2_general_context</span> <span class="o">*</span><span class="n">gcontext</span><span class="p">);</span>
+<span class="kt">int32_t</span> <span class="nf">pcre2_serialize_encode</span><span class="p">(</span><span class="k">const</span> <span class="kt">pcre2_code</span> <span class="o">**</span><span class="nv">codes</span><span class="p">,</span>
+                               <span class="kt">int32_t</span> <span class="nv">number_of_codes</span><span class="p">,</span>
+                               <span class="kt">uint8_t</span> <span class="o">**</span><span class="nv">serialized_bytes</span><span class="p">,</span>
+                               <span class="kt">PCRE2_SIZE</span> <span class="o">*</span><span class="nv">serialized_size</span><span class="p">,</span>
+                               <span class="kt">pcre2_general_context</span> <span class="o">*</span><span class="nv">gcontext</span><span class="p">);</span>
 
-<span class="kt">void</span> <span class="nf">pcre2_serialize_free</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">bytes</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">pcre2_serialize_free</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="nv">bytes</span><span class="p">);</span>
 
-<span class="kt">int32_t</span> <span class="nf">pcre2_serialize_get_number_of_codes</span><span class="p">(</span><span class="k">const</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">bytes</span><span class="p">);</span></code></pre></div>
+<span class="kt">int32_t</span> <span class="nf">pcre2_serialize_get_number_of_codes</span><span class="p">(</span><span class="k">const</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="nv">bytes</span><span class="p">);</span></code></pre></div>
 <p>If you are running an application that uses a large number of regular
 expression patterns, it may be useful to store them in a precompiled form
 instead of having to compile them every time the application is run. However,
@@ -19,7 +19,7 @@ if you are using the just-in-time optimization feature, it is not possible to
 save and reload the JIT data, because it is position-dependent. The host on
 which the patterns are reloaded must be running the same version of PCRE2, with
 the same code unit width, and must also have the same endianness, pointer width
-and <code class="type">PCRE2_SIZE</code> type. For example, patterns compiled on a 32-bit system using
+and <code class="type rouge"><span class="kt">PCRE2_SIZE</span></code> type. For example, patterns compiled on a 32-bit system using
 PCRE2’s 16-bit library cannot be reloaded on a 64-bit system, nor can they be
 reloaded using the 8-bit library.</p>
 <p>Note that "serialization" in PCRE2 does not convert compiled patterns to an
@@ -31,7 +31,7 @@ be prepared to recompile patterns from their sources, in order to be immune to
 PCRE2 upgrades.</p></section>
 <section class="doc-section level-1"><h2 id="_security_concerns">Security concerns</h2><p>The facility for saving and restoring compiled patterns is intended for use
 within individual applications. As such, the data supplied to
-<code class="function">pcre2_serialize_decode()</code> is expected to be trusted data, not data from
+<code class="function rouge"><span class="nf">pcre2_serialize_decode()</span></code> is expected to be trusted data, not data from
 arbitrary external sources. There is only some simple consistency checking, not
 complete validation of what is being re-loaded. Corrupted data may cause
 undefined results. For example, if the length field of a pattern in the
@@ -46,92 +46,92 @@ section <a href="./pcre2api.html#locale-support">Locale support</a>
 in the
 <a href="./pcre2api.html"><code>pcre2api</code></a>
 documentation.</p>
-<p>The function <code class="function">pcre2_serialize_encode()</code> creates a serialized byte stream
+<p>The function <code class="function rouge"><span class="nf">pcre2_serialize_encode()</span></code> creates a serialized byte stream
 from a list of compiled patterns. Its first two arguments specify the list,
 being a pointer to a vector of pointers to compiled patterns, and the length of
 the vector. The third and fourth arguments point to variables which are set to
 point to the created byte stream and its length, respectively. The final
 argument is a pointer to a general context, which can be used to specify custom
-memory management functions. If this argument is <code class="constant">NULL</code>, <code class="c">malloc()</code> is used
+memory management functions. If this argument is <code class="constant rouge"><span class="kc">NULL</span></code>, <code class="c rouge" data-lang="c"><span class="nf">malloc</span><span class="p">()</span></code> is used
 to obtain memory for the byte stream. The yield of the function is the number
 of serialized patterns, or one of the following negative error codes:</p>
-<dl class="errors compact" style="--tab-width: 16"><div class="dlist-item"><dt><span><code class="constant">PCRE2_ERROR_BADDATA</code></span></dt><dd>the number of patterns is zero or less</dd></div><div class="dlist-item"><dt><span><code class="constant">PCRE2_ERROR_BADMAGIC</code></span></dt><dd>mismatch of id bytes in one of the patterns</dd></div><div class="dlist-item"><dt><span><code class="constant">PCRE2_ERROR_NOMEMORY</code></span></dt><dd>memory allocation failed</dd></div><div class="dlist-item"><dt><span><code class="constant">PCRE2_ERROR_MIXEDTABLES</code></span></dt><dd>the patterns do not all use the same tables</dd></div><div class="dlist-item"><dt><span><code class="constant">PCRE2_ERROR_NULL</code></span></dt><dd>The 1st, 3rd, or 4th argument is <code class="constant">NULL</code></dd></div></dl>
-<p><code class="constant">PCRE2_ERROR_BADMAGIC</code> means either that a pattern’s code has been corrupted, or
+<dl class="errors compact" style="--tab-width: 16"><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_ERROR_BADDATA</span></code></span></dt><dd>the number of patterns is zero or less</dd></div><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_ERROR_BADMAGIC</span></code></span></dt><dd>mismatch of id bytes in one of the patterns</dd></div><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_ERROR_NOMEMORY</span></code></span></dt><dd>memory allocation failed</dd></div><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_ERROR_MIXEDTABLES</span></code></span></dt><dd>the patterns do not all use the same tables</dd></div><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_ERROR_NULL</span></code></span></dt><dd>The 1st, 3rd, or 4th argument is <code class="constant rouge"><span class="kc">NULL</span></code></dd></div></dl>
+<p><code class="constant rouge"><span class="no">PCRE2_ERROR_BADMAGIC</span></code> means either that a pattern’s code has been corrupted, or
 that a slot in the vector does not point to a compiled pattern.</p>
 <p>Once a set of patterns has been serialized you can save the data in any
 appropriate manner. Here is sample code that compiles two patterns and writes
-them to a file. It assumes that the variable <code class="c">fd</code> refers to a file that is
+them to a file. It assumes that the variable <code class="c rouge" data-lang="c"><span class="nv">fd</span></code> refers to a file that is
 open for output. The error checking that should be present in a real
 application has been omitted for simplicity.</p>
-<div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="n">errorcode</span><span class="p">;</span>
-<span class="kt">uint8_t</span> <span class="o">*</span><span class="n">bytes</span><span class="p">;</span>
-<span class="n">PCRE2_SIZE</span> <span class="n">erroroffset</span><span class="p">;</span>
-<span class="n">PCRE2_SIZE</span> <span class="n">bytescount</span><span class="p">;</span>
-<span class="n">pcre2_code</span> <span class="o">*</span><span class="n">list_of_codes</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
-<span class="n">list_of_codes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pcre2_compile</span><span class="p">(</span><span class="s">"first pattern"</span><span class="p">,</span>
-                                 <span class="n">PCRE2_ZERO_TERMINATED</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
-                                 <span class="o">&amp;</span><span class="n">errorcode</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">erroroffset</span><span class="p">,</span>
-                                 <span class="nb">NULL</span><span class="p">);</span>
-<span class="n">list_of_codes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pcre2_compile</span><span class="p">(</span><span class="s">"second pattern"</span><span class="p">,</span>
-                                 <span class="n">PCRE2_ZERO_TERMINATED</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
-                                 <span class="o">&amp;</span><span class="n">errorcode</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">erroroffset</span><span class="p">,</span>
-                                 <span class="nb">NULL</span><span class="p">);</span>
-<span class="n">errorcode</span> <span class="o">=</span> <span class="n">pcre2_serialize_encode</span><span class="p">(</span><span class="n">list_of_codes</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bytes</span><span class="p">,</span>
-                                   <span class="o">&amp;</span><span class="n">bytescount</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-<span class="n">errorcode</span> <span class="o">=</span> <span class="n">fwrite</span><span class="p">(</span><span class="n">bytes</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bytescount</span><span class="p">,</span> <span class="n">fd</span><span class="p">);</span></code></pre></div>
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nv">errorcode</span><span class="p">;</span>
+<span class="kt">uint8_t</span> <span class="o">*</span><span class="nv">bytes</span><span class="p">;</span>
+<span class="kt">PCRE2_SIZE</span> <span class="nv">erroroffset</span><span class="p">;</span>
+<span class="kt">PCRE2_SIZE</span> <span class="nv">bytescount</span><span class="p">;</span>
+<span class="kt">pcre2_code</span> <span class="o">*</span><span class="nv">list_of_codes</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="nv">list_of_codes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nf">pcre2_compile</span><span class="p">(</span><span class="s">"first pattern"</span><span class="p">,</span>
+                                 <span class="no">PCRE2_ZERO_TERMINATED</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                                 <span class="o">&amp;</span><span class="nv">errorcode</span><span class="p">,</span> <span class="o">&amp;</span><span class="nv">erroroffset</span><span class="p">,</span>
+                                 <span class="kc">NULL</span><span class="p">);</span>
+<span class="nv">list_of_codes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nf">pcre2_compile</span><span class="p">(</span><span class="s">"second pattern"</span><span class="p">,</span>
+                                 <span class="no">PCRE2_ZERO_TERMINATED</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                                 <span class="o">&amp;</span><span class="nv">errorcode</span><span class="p">,</span> <span class="o">&amp;</span><span class="nv">erroroffset</span><span class="p">,</span>
+                                 <span class="kc">NULL</span><span class="p">);</span>
+<span class="nv">errorcode</span> <span class="o">=</span> <span class="nf">pcre2_serialize_encode</span><span class="p">(</span><span class="nv">list_of_codes</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">&amp;</span><span class="nv">bytes</span><span class="p">,</span>
+                                   <span class="o">&amp;</span><span class="nv">bytescount</span><span class="p">,</span> <span class="kc">NULL</span><span class="p">);</span>
+<span class="nv">errorcode</span> <span class="o">=</span> <span class="nf">fwrite</span><span class="p">(</span><span class="nv">bytes</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nv">bytescount</span><span class="p">,</span> <span class="nv">fd</span><span class="p">);</span></code></pre></div>
 <p>Note that the serialized data is binary data that may contain any of the 256
 possible byte values. On systems that make a distinction between binary and
 non-binary data, be sure that the file is opened for binary output.</p>
 <p>Serializing a set of patterns leaves the original data untouched, so they can
 still be used for matching. Their memory must eventually be freed in the usual
-way by calling <code class="function">pcre2_code_free()</code>. When you have finished with the byte
-stream, it too must be freed by calling <code class="function">pcre2_serialize_free()</code>. If this
-function is called with a <code class="constant">NULL</code> argument, it returns immediately without doing
+way by calling <code class="function rouge"><span class="nf">pcre2_code_free()</span></code>. When you have finished with the byte
+stream, it too must be freed by calling <code class="function rouge"><span class="nf">pcre2_serialize_free()</span></code>. If this
+function is called with a <code class="constant rouge"><span class="kc">NULL</span></code> argument, it returns immediately without doing
 anything.</p></section>
 <section class="doc-section level-1"><h2 id="_re_using_precompiled_patterns">Re-using precompiled patterns</h2><p>In order to re-use a set of saved patterns you must first make the serialized
 byte stream available in main memory (for example, by reading from a file). The
 management of this memory block is up to the application. You can use the
-<code class="function">pcre2_serialize_get_number_of_codes()</code> function to find out how many
+<code class="function rouge"><span class="nf">pcre2_serialize_get_number_of_codes()</span></code> function to find out how many
 compiled patterns are in the serialized data without actually decoding the
 patterns:</p>
-<div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">bytes</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">serialized</span> <span class="n">data</span><span class="o">&gt;</span><span class="p">;</span>
-<span class="kt">int32_t</span> <span class="n">number_of_codes</span> <span class="o">=</span> <span class="n">pcre2_serialize_get_number_of_codes</span><span class="p">(</span><span class="n">bytes</span><span class="p">);</span></code></pre></div>
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="kt">uint8_t</span> <span class="o">*</span><span class="nv">bytes</span> <span class="o">=</span> <span class="o">&lt;</span><span class="nv">serialized</span> <span class="nv">data</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="kt">int32_t</span> <span class="nv">number_of_codes</span> <span class="o">=</span> <span class="nf">pcre2_serialize_get_number_of_codes</span><span class="p">(</span><span class="nv">bytes</span><span class="p">);</span></code></pre></div>
 <p>The count query performs the same header checks as decoding. Both readers
 accept a trusted, intact byte stream at any byte alignment. Neither accepts a
 length argument or validates that all of the required bytes are present.</p>
-<p>The <code class="function">pcre2_serialize_decode()</code> function reads a byte stream and recreates
+<p>The <code class="function rouge"><span class="nf">pcre2_serialize_decode()</span></code> function reads a byte stream and recreates
 the compiled patterns in new memory blocks, setting pointers to them in a
 vector. The first two arguments are a pointer to a suitable vector and its
 length, and the third argument points to a byte stream. The final argument is a
 pointer to a general context, which can be used to specify custom memory
-management functions for the decoded patterns. If this argument is <code class="constant">NULL</code>,
-<code class="c">malloc()</code> and <code class="c">free()</code> are used. After deserialization, the byte
+management functions for the decoded patterns. If this argument is <code class="constant rouge"><span class="kc">NULL</span></code>,
+<code class="c rouge" data-lang="c"><span class="nf">malloc</span><span class="p">()</span></code> and <code class="c rouge" data-lang="c"><span class="nf">free</span><span class="p">()</span></code> are used. After deserialization, the byte
 stream is no longer needed and can be discarded.</p>
-<div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="n">pcre2_code</span> <span class="o">*</span><span class="n">list_of_codes</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
-<span class="kt">uint8_t</span> <span class="o">*</span><span class="n">bytes</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">serialized</span> <span class="n">data</span><span class="o">&gt;</span><span class="p">;</span>
-<span class="kt">int32_t</span> <span class="n">number_of_codes</span> <span class="o">=</span>
-    <span class="n">pcre2_serialize_decode</span><span class="p">(</span><span class="n">list_of_codes</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">bytes</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span></code></pre></div>
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="kt">pcre2_code</span> <span class="o">*</span><span class="nv">list_of_codes</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="kt">uint8_t</span> <span class="o">*</span><span class="nv">bytes</span> <span class="o">=</span> <span class="o">&lt;</span><span class="nv">serialized</span> <span class="nv">data</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="kt">int32_t</span> <span class="nv">number_of_codes</span> <span class="o">=</span>
+    <span class="nf">pcre2_serialize_decode</span><span class="p">(</span><span class="nv">list_of_codes</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="nv">bytes</span><span class="p">,</span> <span class="kc">NULL</span><span class="p">);</span></code></pre></div>
 <p>If the vector is not large enough for all the patterns in the byte stream, it
 is filled with those that fit, and the remainder are ignored. The yield of the
 function is the number of decoded patterns, or one of the following negative
 error codes:</p>
-<dl class="errors compact" style="--tab-width: 14"><div class="dlist-item"><dt><span><code class="constant">PCRE2_ERROR_BADDATA</code></span></dt><dd>second argument is zero or less</dd></div><div class="dlist-item"><dt><span><code class="constant">PCRE2_ERROR_BADMAGIC</code></span></dt><dd>mismatch of id bytes in the data</dd></div><div class="dlist-item"><dt><span><code class="constant">PCRE2_ERROR_BADMODE</code></span></dt><dd>mismatch of code unit size or PCRE2 version</dd></div><div class="dlist-item"><dt><span><code class="constant">PCRE2_ERROR_BADSERIALIZEDDATA</code></span></dt><dd>other sanity check failure</dd></div><div class="dlist-item"><dt><span><code class="constant">PCRE2_ERROR_MEMORY</code></span></dt><dd>memory allocation failed</dd></div><div class="dlist-item"><dt><span><code class="constant">PCRE2_ERROR_NULL</code></span></dt><dd>first or third argument is <code class="constant">NULL</code></dd></div></dl>
-<p><code class="constant">PCRE2_ERROR_BADMAGIC</code> may mean that the data is corrupt, or that it was compiled
+<dl class="errors compact" style="--tab-width: 14"><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_ERROR_BADDATA</span></code></span></dt><dd>second argument is zero or less</dd></div><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_ERROR_BADMAGIC</span></code></span></dt><dd>mismatch of id bytes in the data</dd></div><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_ERROR_BADMODE</span></code></span></dt><dd>mismatch of code unit size or PCRE2 version</dd></div><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_ERROR_BADSERIALIZEDDATA</span></code></span></dt><dd>other sanity check failure</dd></div><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_ERROR_MEMORY</span></code></span></dt><dd>memory allocation failed</dd></div><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_ERROR_NULL</span></code></span></dt><dd>first or third argument is <code class="constant rouge"><span class="kc">NULL</span></code></dd></div></dl>
+<p><code class="constant rouge"><span class="no">PCRE2_ERROR_BADMAGIC</span></code> may mean that the data is corrupt, or that it was compiled
 on a system with different endianness.</p>
 <p>Decoded patterns can be used for matching in the usual way, and must be freed
-by calling <code class="function">pcre2_code_free()</code>. However, be aware that there is a potential
+by calling <code class="function rouge"><span class="nf">pcre2_code_free()</span></code>. However, be aware that there is a potential
 race issue if you are using multiple patterns that were decoded from a single
 byte stream in a multithreaded application. A single copy of the character
 tables is used by all the decoded patterns and a reference count is used to
 arrange for its memory to be automatically freed when the last pattern is
 freed, but there is no locking on this reference count. Therefore, if you want
-to call <code class="function">pcre2_code_free()</code> for these patterns in different threads, you
-must arrange your own locking, and ensure that <code class="function">pcre2_code_free()</code> cannot
+to call <code class="function rouge"><span class="nf">pcre2_code_free()</span></code> for these patterns in different threads, you
+must arrange your own locking, and ensure that <code class="function rouge"><span class="nf">pcre2_code_free()</span></code> cannot
 be called by two threads at the same time.</p>
-<p>If a pattern was processed by <code class="function">pcre2_jit_compile()</code> before being
+<p>If a pattern was processed by <code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code> before being
 serialized, the JIT data is discarded and so is no longer available after a
 save/restore cycle. You can, however, process a restored pattern with
-<code class="function">pcre2_jit_compile()</code> if you wish.</p>
+<code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code> if you wish.</p>
 <h2 id="_author" class="discrete">Author</h2>
 <p>Philip Hazel<br>
 Retired from University Computing Service<br>

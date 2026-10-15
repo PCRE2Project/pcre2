@@ -34,16 +34,16 @@ pcre2_serialize_get_number_of_codes \- get number of serialized compiled pattern
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint32_t\fP pcre2_serialize_get_number_of_codes(\fBconst\fP \fBuint8_t\fP *\fIbytes\fP);
+\f(CRint32_t\fP \f(CBpcre2_serialize_get_number_of_codes\fP\f(CR(const uint8_t *\fP\f(CIbytes\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
-The \fIbytes\fP argument must point to a serialized byte stream that was
-originally created by pcre2_serialize_encode() (though it may have been
+The \f(CIbytes\fP argument must point to a serialized byte stream that was
+originally created by \f(CBpcre2_serialize_encode()\fP (though it may have been
 saved on disc or elsewhere in the meantime). The function returns the number of
 serialized patterns in the byte stream, or one of the following negative error
 codes:
@@ -51,27 +51,27 @@ codes:
 .RS 4
 .PD 0
 .TP 21
-\fBPCRE2_ERROR_BADMAGIC\fP
+\f(CBPCRE2_ERROR_BADMAGIC\fP
 .ad l
-mismatch of id bytes in \fIbytes\fP
+mismatch of id bytes in \f(CIbytes\fP
 .TP 21
-\fBPCRE2_ERROR_BADMODE\fP
+\f(CBPCRE2_ERROR_BADMODE\fP
 .ad l
 mismatch of variable unit size or PCRE version
 .TP 21
-\fBPCRE2_ERROR_BADSERIALIZEDDATA\fP
+\f(CBPCRE2_ERROR_BADSERIALIZEDDATA\fP
 .ad l
 other sanity check failure
 .TP 21
-\fBPCRE2_ERROR_NULL\fP
+\f(CBPCRE2_ERROR_NULL\fP
 .ad l
-the argument is \fBNULL\fP
+the argument is \f(CRNULL\fP
 .PD
 .RE
 .PP
 .ad l
 .sp
-\fBPCRE2_ERROR_BADMAGIC\fP may mean that the data is corrupt, or that it was compiled
+\f(CBPCRE2_ERROR_BADMAGIC\fP may mean that the data is corrupt, or that it was compiled
 on a system with different endianness.
 .sp
 There is a complete description of the PCRE2 native API in the

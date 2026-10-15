@@ -34,17 +34,17 @@ pcre2_match_context_copy \- copy a match context
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBpcre2_match_context\fP *pcre2_match_context_copy(
-      \fBpcre2_match_context\fP *\fImcontext\fP);
+\f(CRpcre2_match_context *\fP\f(CBpcre2_match_context_copy\fP\f(CR(
+      pcre2_match_context *\fP\f(CImcontext\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function makes a new copy of a match context, using the memory
-allocation function that was used for the original context. The result is \fBNULL\fP
+allocation function that was used for the original context. The result is \f(CRNULL\fP
 if the memory cannot be obtained.
 .sp
 There is a complete description of the PCRE2 native API in the

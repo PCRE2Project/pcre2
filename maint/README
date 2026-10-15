@@ -39,6 +39,10 @@ AsciidocTest.rb
   Standalone manuals use installed fonts and fallbacks, not bundled fonts.
   Shared light/dark SVGs live in doc/assets/images; Hugo mounts them and the
   standalone renderer copies them into doc/html/images.
+  Rouge and Chroma keep their own lexers but share token styling in document.css.
+  Only typed programming-language source is lexed; regex/subject/repl roles and
+  neutral monospace are styled without parsing. Converter tests also cover
+  typed inline code and roff font/escaping behavior.
 
 cmake-tests
   CMake projects that exercise PCRE2 as a build-tree dependency and as an

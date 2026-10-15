@@ -65,16 +65,16 @@ in use can be discovered by running
 .ss \n[.ss]
 .nf
 .fam C
-pcre2test \-C
+\f(CRpcre2test \-C\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .sp
 The three libraries contain identical sets of functions, with names ending in
-\f(CR_8\fP, \f(CR_16\fP, or \f(CR_32\fP, respectively (for example, pcre2_compile_8()). However,
-by defining \fBPCRE2_CODE_UNIT_WIDTH\fP to be 8, 16, or 32, a program that uses just
+\f(CR_8\fP, \f(CR_16\fP, or \f(CR_32\fP, respectively (for example, \f(CBpcre2_compile_8()\fP). However,
+by defining \f(CBPCRE2_CODE_UNIT_WIDTH\fP to be 8, 16, or 32, a program that uses just
 one code unit width can be written using generic names such as
-pcre2_compile(), and the documentation is written assuming that this is
+\f(CBpcre2_compile()\fP, and the documentation is written assuming that this is
 the case.
 .sp
 In addition to the Perl\-compatible matching function, PCRE2 contains an
@@ -94,7 +94,7 @@ pages. There is a syntax summary in the
 page.
 .sp
 Some features of PCRE2 can be included, excluded, or changed when the library
-is built. The pcre2_config()
+is built. The \f(CBpcre2_config()\fP
 function makes it possible for a client to discover which features are
 available. The features themselves are described in the
 \f(CRpcre2build\fP
@@ -108,7 +108,7 @@ files in the source distribution.
 The libraries contains a number of undocumented internal functions and data
 tables that are used by more than one of the exported external functions, but
 which are not intended for use by external callers. Their names all begin with
-\f(CR_pcre2\fP, which hopefully will not provoke any name clashes. In some
+\f(CI_pcre2\fP, which hopefully will not provoke any name clashes. In some
 environments, it is possible to control which external symbols are exported
 when a shared library is built, and in these cases the undocumented symbols are
 not exported.
@@ -117,7 +117,7 @@ not exported.
 If you are using PCRE2 in a non\-UTF application that permits users to supply
 arbitrary patterns for compilation, you should be aware of a feature that
 allows users to turn on UTF support from within a pattern. For example, an
-8\-bit pattern that begins with \f(CR(*UTF)\fP turns on UTF\-8 mode, which interprets
+8\-bit pattern that begins with \f(CI(*UTF)\fP turns on UTF\-8 mode, which interprets
 patterns and subjects as strings of UTF\-8 code units instead of individual
 8\-bit characters. This causes both the pattern and any data against which it is
 matched to be checked for UTF\-8 validity. If the data string is very long, such
@@ -125,33 +125,33 @@ a check might use sufficiently many resources as to cause your application to
 lose performance.
 .sp
 One way of guarding against this possibility is to use the
-pcre2_pattern_info() function to check the compiled pattern\(cqs options for
-\fBPCRE2_UTF\fP. Alternatively, you can set the \fBPCRE2_NEVER_UTF\fP option when calling
-pcre2_compile(). This causes a compile time error if the pattern contains
+\f(CBpcre2_pattern_info()\fP function to check the compiled pattern\(cqs options for
+\f(CBPCRE2_UTF\fP. Alternatively, you can set the \f(CBPCRE2_NEVER_UTF\fP option when calling
+\f(CBpcre2_compile()\fP. This causes a compile time error if the pattern contains
 a UTF\-setting sequence.
 .sp
-The use of Unicode properties for character types such as \f(CR\(rsd\fP can also be
-enabled from within the pattern, by specifying \f(CR(*UCP)\fP. This feature can be
-disallowed by setting the \fBPCRE2_NEVER_UCP\fP option.
+The use of Unicode properties for character types such as \f(CI\(rsd\fP can also be
+enabled from within the pattern, by specifying \f(CI(*UCP)\fP. This feature can be
+disallowed by setting the \f(CBPCRE2_NEVER_UCP\fP option.
 .sp
 If your application is one that supports UTF, be aware that validity checking
 can take time. If the same data string is to be matched many times, you can use
-the \fBPCRE2_NO_UTF_CHECK\fP option for the second and subsequent matches to avoid
+the \f(CBPCRE2_NO_UTF_CHECK\fP option for the second and subsequent matches to avoid
 running redundant checks.
 .sp
-The use of the \f(CR\(rsC\fP escape sequence in a UTF\-8 or UTF\-16 pattern can lead to
+The use of the \f(CI\(rsC\fP escape sequence in a UTF\-8 or UTF\-16 pattern can lead to
 problems, because it may leave the current matching point in the middle of a
-multi\-code\-unit character. The \fBPCRE2_NEVER_BACKSLASH_C\fP option can be used by an
-application to lock out the use of \f(CR\(rsC\fP, causing a compile\-time error if it is
-encountered. It is also possible to build PCRE2 with the use of \f(CR\(rsC\fP permanently
+multi\-code\-unit character. The \f(CBPCRE2_NEVER_BACKSLASH_C\fP option can be used by an
+application to lock out the use of \f(CI\(rsC\fP, causing a compile\-time error if it is
+encountered. It is also possible to build PCRE2 with the use of \f(CI\(rsC\fP permanently
 disabled.
 .sp
 Another way that performance can be hit is by running a pattern that has a very
 large search tree against a string that will never match. Nested unlimited
 repeats in a pattern are a common example. PCRE2 provides some protection
-against this: see the pcre2_set_match_limit() function in the
+against this: see the \f(CBpcre2_set_match_limit()\fP function in the
 \f(CRpcre2api\fP
-page. There is a similar function called pcre2_set_depth_limit() that can
+page. There is a similar function called \f(CBpcre2_set_depth_limit()\fP that can
 be used to restrict the amount of memory that is used.
 .SH "USER DOCUMENTATION"
 .sp

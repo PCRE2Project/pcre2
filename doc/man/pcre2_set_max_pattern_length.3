@@ -34,10 +34,10 @@ pcre2_set_max_pattern_length \- set the maximum length of a pattern
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_set_max_pattern_length(\fBpcre2_compile_context\fP *\fIccontext\fP,
-                                 \fBPCRE2_SIZE\fP \fIlength\fP);
+\f(CRint\fP \f(CBpcre2_set_max_pattern_length\fP\f(CR(pcre2_compile_context *\fP\f(CIccontext\fP\f(CR,
+                                 PCRE2_SIZE\fP \f(CIlength\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -45,9 +45,9 @@ pcre2_set_max_pattern_length \- set the maximum length of a pattern
 .sp
 This function sets, in a compile context, the maximum text length (in code
 units) of the pattern that can be compiled. The result is always zero. If a
-longer pattern is passed to pcre2_compile() there is an immediate error
+longer pattern is passed to \f(CBpcre2_compile()\fP there is an immediate error
 return. The default is effectively unlimited, being the largest value a
-\fBPCRE2_SIZE\fP variable can hold. Setting this value makes the limit unlimited.
+\f(CRPCRE2_SIZE\fP variable can hold. Setting this value makes the limit unlimited.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

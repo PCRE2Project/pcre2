@@ -34,15 +34,15 @@ pcre2_set_substitute_case_callout \- set a substitution case callout function
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_set_substitute_case_callout(
-      \fBpcre2_match_context\fP *\fImcontext\fP,
-      \fBPCRE2_SIZE\fP (*\fIsubstitute_case_callout\fP)(
-          \fBPCRE2_SPTR\fP \fIinput\fP, \fBPCRE2_SIZE\fP \fIinput_length\fP,
-          \fBPCRE2_UCHAR\fP *\fIoutput\fP, \fBPCRE2_SIZE\fP \fIoutput_capacity\fP,
-          \fBint\fP \fIcase_operation\fP, \fBvoid\fP *\fIsubstitute_case_callout_data\fP),
-      \fBvoid\fP *\fIsubstitute_case_callout_data\fP);
+\f(CRint\fP \f(CBpcre2_set_substitute_case_callout\fP\f(CR(
+      pcre2_match_context *\fP\f(CImcontext\fP\f(CR,\fP
+      \f(CBPCRE2_SIZE\fP \f(CR(*\fP\f(CIsubstitute_case_callout\fP\f(CR)(
+          PCRE2_SPTR\fP \f(CIinput\fP\f(CR, PCRE2_SIZE\fP \f(CIinput_length\fP\f(CR,
+          PCRE2_UCHAR *\fP\f(CIoutput\fP\f(CR, PCRE2_SIZE\fP \f(CIoutput_capacity\fP\f(CR,
+          int\fP \f(CIcase_operation\fP\f(CR, void *\fP\f(CIsubstitute_case_callout_data\fP\f(CR),
+      void *\fP\f(CIsubstitute_case_callout_data\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0

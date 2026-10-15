@@ -34,10 +34,10 @@ pcre2_pattern_info \- extract information about a pattern
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_pattern_info(\fBconst\fP \fBpcre2_code\fP *\fIcode\fP, \fBuint32_t\fP \fIwhat\fP,
-                       \fBvoid\fP *\fIwhere\fP);
+\f(CRint\fP \f(CBpcre2_pattern_info\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR, uint32_t\fP \f(CIwhat\fP\f(CR,
+                       void *\fP\f(CIwhere\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -48,15 +48,15 @@ This function returns information about a compiled pattern. Its arguments are:
 .RS 4
 .PD 0
 .TP 7
-\fIcode\fP
+\f(CIcode\fP
 .ad l
 Pointer to a compiled regular expression pattern
 .TP 7
-\fIwhat\fP
+\f(CIwhat\fP
 .ad l
 What information is required
 .TP 7
-\fIwhere\fP
+\f(CIwhere\fP
 .ad l
 Where to put the information
 .PD
@@ -64,37 +64,37 @@ Where to put the information
 .PP
 .ad l
 .sp
-The recognized values for the \fIwhat\fP argument, and the information they
+The recognized values for the \f(CIwhat\fP argument, and the information they
 request are as follows:
 .sp
 .RS 4
 .PD
 .TP 26
-\fBPCRE2_INFO_ALLOPTIONS\fP
+\f(CBPCRE2_INFO_ALLOPTIONS\fP
 .ad l
 Final options after compiling
 .TP 26
-\fBPCRE2_INFO_ARGOPTIONS\fP
+\f(CBPCRE2_INFO_ARGOPTIONS\fP
 .ad l
-Options passed to pcre2_compile()
+Options passed to \f(CBpcre2_compile()\fP
 .TP 26
-\fBPCRE2_INFO_BACKREFMAX\fP
+\f(CBPCRE2_INFO_BACKREFMAX\fP
 .ad l
 Number of highest backreference
 .TP 26
-\fBPCRE2_INFO_BSR\fP
+\f(CBPCRE2_INFO_BSR\fP
 .ad l
-What \f(CR\(rsR\fP matches:
+What \f(CI\(rsR\fP matches:
 .RS 26
 .sp
 .RS 4
 .PD 0
 .TP 18
-\fBPCRE2_BSR_UNICODE\fP
+\f(CBPCRE2_BSR_UNICODE\fP
 .ad l
 Unicode line endings
 .TP 18
-\fBPCRE2_BSR_ANYCRLF\fP
+\f(CBPCRE2_BSR_ANYCRLF\fP
 .ad l
 CR, LF, or CRLF only
 .PD
@@ -103,25 +103,25 @@ CR, LF, or CRLF only
 .ad l
 .RE
 .TP 26
-\fBPCRE2_INFO_CAPTURECOUNT\fP
+\f(CBPCRE2_INFO_CAPTURECOUNT\fP
 .ad l
 Number of capturing subpatterns
 .TP 26
-\fBPCRE2_INFO_DEPTHLIMIT\fP
+\f(CBPCRE2_INFO_DEPTHLIMIT\fP
 .ad l
 Backtracking depth limit if set,
-otherwise \fBPCRE2_ERROR_UNSET\fP
+otherwise \f(CBPCRE2_ERROR_UNSET\fP
 .TP 26
-\fBPCRE2_INFO_EXTRAOPTIONS\fP
+\f(CBPCRE2_INFO_EXTRAOPTIONS\fP
 .ad l
 Extra options that were passed in the
 compile context
 .TP 26
-\fBPCRE2_INFO_FIRSTBITMAP\fP
+\f(CBPCRE2_INFO_FIRSTBITMAP\fP
 .ad l
-Bitmap of first code units, or \fBNULL\fP
+Bitmap of first code units, or \f(CRNULL\fP
 .TP 26
-\fBPCRE2_INFO_FIRSTCODETYPE\fP
+\f(CBPCRE2_INFO_FIRSTCODETYPE\fP
 .ad l
 Type of start\-of\-match information
 .RS 26
@@ -146,37 +146,37 @@ start of string or after newline
 .ad l
 .RE
 .TP 26
-\fBPCRE2_INFO_FIRSTCODEUNIT\fP
+\f(CBPCRE2_INFO_FIRSTCODEUNIT\fP
 .ad l
 First code unit when type is 1
 .TP 26
-\fBPCRE2_INFO_FRAMESIZE\fP
+\f(CBPCRE2_INFO_FRAMESIZE\fP
 .ad l
 Size of backtracking frame
 .TP 26
-\fBPCRE2_INFO_HASBACKSLASHC\fP
+\f(CBPCRE2_INFO_HASBACKSLASHC\fP
 .ad l
-Return 1 if pattern contains \f(CR\(rsC\fP
+Return 1 if pattern contains \f(CI\(rsC\fP
 .TP 26
-\fBPCRE2_INFO_HASCRORLF\fP
+\f(CBPCRE2_INFO_HASCRORLF\fP
 .ad l
 Return 1 if explicit CR or LF matches
 exist in the pattern
 .TP 26
-\fBPCRE2_INFO_HEAPLIMIT\fP
+\f(CBPCRE2_INFO_HEAPLIMIT\fP
 .ad l
 Heap memory limit if set,
-otherwise \fBPCRE2_ERROR_UNSET\fP
+otherwise \f(CBPCRE2_ERROR_UNSET\fP
 .TP 26
-\fBPCRE2_INFO_JCHANGED\fP
+\f(CBPCRE2_INFO_JCHANGED\fP
 .ad l
-Return 1 if \f(CR(?J)\fP or \f(CR(?\-J)\fP was used
+Return 1 if \f(CI(?J)\fP or \f(CI(?\-J)\fP was used
 .TP 26
-\fBPCRE2_INFO_JITSIZE\fP
+\f(CBPCRE2_INFO_JITSIZE\fP
 .ad l
 Size of JIT compiled code, or 0
 .TP 26
-\fBPCRE2_INFO_LASTCODETYPE\fP
+\f(CBPCRE2_INFO_LASTCODETYPE\fP
 .ad l
 Type of must\-be\-present information
 .RS 26
@@ -197,42 +197,42 @@ code unit is set
 .ad l
 .RE
 .TP 26
-\fBPCRE2_INFO_LASTCODEUNIT\fP
+\f(CBPCRE2_INFO_LASTCODEUNIT\fP
 .ad l
 Last code unit when type is 1
 .TP 26
-\fBPCRE2_INFO_MATCHEMPTY\fP
+\f(CBPCRE2_INFO_MATCHEMPTY\fP
 .ad l
 1 if the pattern can match an
 empty string, 0 otherwise
 .TP 26
-\fBPCRE2_INFO_MATCHLIMIT\fP
+\f(CBPCRE2_INFO_MATCHLIMIT\fP
 .ad l
 Match limit if set,
-otherwise \fBPCRE2_ERROR_UNSET\fP
+otherwise \f(CBPCRE2_ERROR_UNSET\fP
 .TP 26
-\fBPCRE2_INFO_MAXLOOKBEHIND\fP
+\f(CBPCRE2_INFO_MAXLOOKBEHIND\fP
 .ad l
 Length (in characters) of the longest
 lookbehind assertion
 .TP 26
-\fBPCRE2_INFO_MINLENGTH\fP
+\f(CBPCRE2_INFO_MINLENGTH\fP
 .ad l
 Lower bound length of matching strings
 .TP 26
-\fBPCRE2_INFO_NAMECOUNT\fP
+\f(CBPCRE2_INFO_NAMECOUNT\fP
 .ad l
 Number of named subpatterns
 .TP 26
-\fBPCRE2_INFO_NAMEENTRYSIZE\fP
+\f(CBPCRE2_INFO_NAMEENTRYSIZE\fP
 .ad l
 Size of name table entries
 .TP 26
-\fBPCRE2_INFO_NAMETABLE\fP
+\f(CBPCRE2_INFO_NAMETABLE\fP
 .ad l
 Pointer to name table
 .TP 26
-\fBPCRE2_CONFIG_NEWLINE\fP
+\f(CBPCRE2_CONFIG_NEWLINE\fP
 .ad l
 Code for the newline sequence:
 .RS 26
@@ -240,17 +240,17 @@ Code for the newline sequence:
 .RS 4
 .PD 0
 .TP 22
-\fBPCRE2_NEWLINE_CR\fP
+\f(CBPCRE2_NEWLINE_CR\fP
 .TP 22
-\fBPCRE2_NEWLINE_LF\fP
+\f(CBPCRE2_NEWLINE_LF\fP
 .TP 22
-\fBPCRE2_NEWLINE_CRLF\fP
+\f(CBPCRE2_NEWLINE_CRLF\fP
 .TP 22
-\fBPCRE2_NEWLINE_ANY\fP
+\f(CBPCRE2_NEWLINE_ANY\fP
 .TP 22
-\fBPCRE2_NEWLINE_ANYCRLF\fP
+\f(CBPCRE2_NEWLINE_ANYCRLF\fP
 .TP 22
-\fBPCRE2_NEWLINE_NUL\fP
+\f(CBPCRE2_NEWLINE_NUL\fP
 .ad l
 .PD
 .RE
@@ -258,11 +258,11 @@ Code for the newline sequence:
 .ad l
 .RE
 .TP 26
-\fBPCRE2_INFO_RECURSIONLIMIT\fP
+\f(CBPCRE2_INFO_RECURSIONLIMIT\fP
 .ad l
-Obsolete synonym for \fBPCRE2_INFO_DEPTHLIMIT\fP
+Obsolete synonym for \f(CBPCRE2_INFO_DEPTHLIMIT\fP
 .TP 26
-\fBPCRE2_INFO_SIZE\fP
+\f(CBPCRE2_INFO_SIZE\fP
 .ad l
 Size of compiled pattern
 .PD
@@ -270,30 +270,30 @@ Size of compiled pattern
 .PP
 .ad l
 .sp
-If \fIwhere\fP is \fBNULL\fP, the function returns the amount of memory needed for
-the requested information, in bytes. Otherwise, the \fIwhere\fP argument must
-point to an unsigned 32\-bit integer (\fBuint32_t\fP variable), except for the
-following \fIwhat\fP values, when it must point to a variable of the type
+If \f(CIwhere\fP is \f(CRNULL\fP, the function returns the amount of memory needed for
+the requested information, in bytes. Otherwise, the \f(CIwhere\fP argument must
+point to an unsigned 32\-bit integer (\f(CRuint32_t\fP variable), except for the
+following \f(CIwhat\fP values, when it must point to a variable of the type
 shown:
 .sp
 .RS 4
 .PD 0
 .TP 23
-\fBPCRE2_INFO_FIRSTBITMAP\fP
+\f(CBPCRE2_INFO_FIRSTBITMAP\fP
 .ad l
 \f(CRconst uint8_t *\fP
 .TP 23
-\fBPCRE2_INFO_JITSIZE\fP
+\f(CBPCRE2_INFO_JITSIZE\fP
 .ad l
-\fBsize_t\fP
+\f(CRsize_t\fP
 .TP 23
-\fBPCRE2_INFO_NAMETABLE\fP
+\f(CBPCRE2_INFO_NAMETABLE\fP
 .ad l
-\fBPCRE2_SPTR\fP
+\f(CRPCRE2_SPTR\fP
 .TP 23
-\fBPCRE2_INFO_SIZE\fP
+\f(CBPCRE2_INFO_SIZE\fP
 .ad l
-\fBsize_t\fP
+\f(CRsize_t\fP
 .PD
 .RE
 .PP
@@ -304,23 +304,23 @@ The yield of the function is zero on success or:
 .RS 4
 .PD 0
 .TP 22
-\fBPCRE2_ERROR_NULL\fP
+\f(CBPCRE2_ERROR_NULL\fP
 .ad l
-the argument \fIcode\fP is \fBNULL\fP
+the argument \f(CIcode\fP is \f(CRNULL\fP
 .TP 22
-\fBPCRE2_ERROR_BADMAGIC\fP
+\f(CBPCRE2_ERROR_BADMAGIC\fP
 .ad l
 the "magic number" was not found
 .TP 22
-\fBPCRE2_ERROR_BADOPTION\fP
+\f(CBPCRE2_ERROR_BADOPTION\fP
 .ad l
-the value of \fIwhat\fP is invalid
+the value of \f(CIwhat\fP is invalid
 .TP 22
-\fBPCRE2_ERROR_BADMODE\fP
+\f(CBPCRE2_ERROR_BADMODE\fP
 .ad l
 the pattern was compiled in the wrong mode
 .TP 22
-\fBPCRE2_ERROR_UNSET\fP
+\f(CBPCRE2_ERROR_UNSET\fP
 .ad l
 the requested information is not set
 .PD

@@ -34,14 +34,14 @@ pcre2_set_substitute_callout \- set a substitution callout function
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_set_substitute_callout(
-      \fBpcre2_match_context\fP *\fImcontext\fP,
-      \fBint\fP (*\fIsubstitute_callout\fP)(
-          \fBpcre2_substitute_callout_block\fP *\fIcallout_block\fP,
-          \fBvoid\fP *\fIsubstitute_callout_data\fP),
-      \fBvoid\fP *\fIsubstitute_callout_data\fP);
+\f(CRint\fP \f(CBpcre2_set_substitute_callout\fP\f(CR(
+      pcre2_match_context *\fP\f(CImcontext\fP\f(CR,
+      int (*\fP\f(CIsubstitute_callout\fP\f(CR)(
+          pcre2_substitute_callout_block *\fP\f(CIcallout_block\fP\f(CR,
+          void *\fP\f(CIsubstitute_callout_data\fP\f(CR),
+      void *\fP\f(CIsubstitute_callout_data\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0

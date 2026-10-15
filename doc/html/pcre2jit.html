@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Discussion of the just-in-time optimization support"><title>pcre2jit(3)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2jit(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2026-08-08">8 Aug 2026</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Table of Contents</h2><ol class="toc-list level-1"><li><a href="#_pcre2_just_in_time_compiler_support">PCRE2 just-in-time compiler support</a></li><li><a href="#_availability_of_jit_support">Availability of JIT support</a></li><li><a href="#_simple_use_of_jit">Simple use of JIT</a></li><li><a href="#_matching_subjects_containing_invalid_utf">Matching subjects containing invalid UTF</a></li><li><a href="#_unsupported_options_and_pattern_items">Unsupported options and pattern items</a></li><li><a href="#_return_values_from_jit_matching">Return values from JIT matching</a></li><li><a href="#controlling-the-jit-stack">Controlling the JIT stack</a></li><li><a href="#jit-stack-faq">JIT stack FAQ</a></li><li><a href="#_freeing_jit_speculative_memory">Freeing JIT speculative memory</a></li><li><a href="#_example_code">Example code</a></li><li><a href="#_jit_fast_path_api">JIT fast path API</a></li><li><a href="#_see_also">See also</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_pcre2_just_in_time_compiler_support">PCRE2 just-in-time compiler support</h2><p>Just-in-time compiling is a heavyweight optimization that can greatly speed up
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Discussion of the just-in-time optimization support"><title>pcre2jit(3)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2jit(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2026-08-08">8 Aug 2026</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Contents</h2><ol class="toc-list level-1"><li><a href="#_pcre2_just_in_time_compiler_support" title="PCRE2 just-in-time compiler support">PCRE2 just-in-time compiler support</a></li><li><a href="#_availability_of_jit_support" title="Availability of JIT support">Availability of JIT support</a></li><li><a href="#_simple_use_of_jit" title="Simple use of JIT">Simple use of JIT</a></li><li><a href="#_matching_subjects_containing_invalid_utf" title="Matching subjects containing invalid UTF">Matching subjects containing invalid UTF</a></li><li><a href="#_unsupported_options_and_pattern_items" title="Unsupported options and pattern items">Unsupported options and pattern items</a></li><li><a href="#_return_values_from_jit_matching" title="Return values from JIT matching">Return values from JIT matching</a></li><li><a href="#controlling-the-jit-stack" title="Controlling the JIT stack">Controlling the JIT stack</a></li><li><a href="#jit-stack-faq" title="JIT stack FAQ">JIT stack FAQ</a></li><li><a href="#_freeing_jit_speculative_memory" title="Freeing JIT speculative memory">Freeing JIT speculative memory</a></li><li><a href="#_example_code" title="Example code">Example code</a></li><li><a href="#_jit_fast_path_api" title="JIT fast path API">JIT fast path API</a></li><li><a href="#_see_also" title="See also">See also</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_pcre2_just_in_time_compiler_support">PCRE2 just-in-time compiler support</h2><p>Just-in-time compiling is a heavyweight optimization that can greatly speed up
 pattern matching. However, it comes at the cost of extra processing before the
 match is performed, so it is of most benefit when the same pattern is going to
 be matched many times. This does not necessarily mean many calls of a matching
@@ -17,7 +17,7 @@ platforms:</p>
 <ul class="compact"><li>ARM 32-bit (v7, and Thumb2)</li><li>ARM 64-bit</li><li>DEC Alpha 64-bit</li><li>IBM s390x 64 bit</li><li>Intel x86 32-bit and 64-bit</li><li>LoongArch 64 bit</li><li>MIPS 32-bit and 64-bit</li><li>Power PC 32-bit and 64-bit</li><li>RISC-V 32-bit and 64-bit</li></ul>
 <p>If <code>--enable-jit</code> is set on an unsupported platform when building PCRE2, compilation fails.</p>
 <p>A client program can tell if JIT support has been compiled by calling
-<code class="function">pcre2_config()</code> with the <code class="constant">PCRE2_CONFIG_JIT</code> option. The result is one if
+<code class="function rouge"><span class="nf">pcre2_config()</span></code> with the <code class="constant rouge"><span class="no">PCRE2_CONFIG_JIT</span></code> option. The result is one if
 PCRE2 was built with JIT support, and zero otherwise. However, having the JIT
 code available does not guarantee that it will be used for any particular
 match. One reason for this is that there are a number of options and pattern
@@ -25,14 +25,14 @@ items that are
 not supported by JIT
 (see below). Another reason is that in some environments JIT is unable to get
 executable memory in which to build its compiled code. The only guarantee from
-<code class="function">pcre2_config()</code> is that if it returns zero, JIT will definitely <em>not</em>
+<code class="function rouge"><span class="nf">pcre2_config()</span></code> is that if it returns zero, JIT will definitely <em>not</em>
 be used.</p>
 <p>As of release 10.45 there is a more informative way to test for JIT support. If
-<code class="function">pcre2_jit_compile()</code> is called with the single option <code class="constant">PCRE2_JIT_TEST_ALLOC</code>
+<code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code> is called with the single option <code class="constant rouge"><span class="no">PCRE2_JIT_TEST_ALLOC</span></code>
 it returns zero if JIT is available and has a working allocator. Otherwise it
-returns <code class="constant">PCRE2_ERROR_NOMEMORY</code> if JIT is available but cannot allocate executable
-memory, or <code class="constant">PCRE2_ERROR_JIT_UNSUPPORTED</code> if JIT support is not compiled. The
-<code class="parameter">code</code> argument is ignored, so it can be a <code class="constant">NULL</code> value.</p>
+returns <code class="constant rouge"><span class="no">PCRE2_ERROR_NOMEMORY</span></code> if JIT is available but cannot allocate executable
+memory, or <code class="constant rouge"><span class="no">PCRE2_ERROR_JIT_UNSUPPORTED</span></code> if JIT support is not compiled. The
+<code class="parameter rouge"><span class="nv">code</span></code> argument is ignored, so it can be a <code class="constant rouge"><span class="kc">NULL</span></code> value.</p>
 <p>A simple program does not need to check availability in order to use JIT when
 possible. The API is implemented in a way that falls back to the interpretive
 code if JIT is not available or cannot be used for a given match. For programs
@@ -40,45 +40,45 @@ that need the best possible performance, there is a
 "fast path"
 API that is JIT-specific.</p></section>
 <section class="doc-section level-1"><h2 id="_simple_use_of_jit">Simple use of JIT</h2><p>To make use of the JIT support in the simplest way, all you have to do is to
-call <code class="function">pcre2_jit_compile()</code> after successfully compiling a pattern with
-<code class="function">pcre2_compile()</code>. This function has two arguments: the first is the
-compiled pattern pointer that was returned by <code class="function">pcre2_compile()</code>, and the
-second is zero or more of the following option bits: <code class="constant">PCRE2_JIT_COMPLETE</code>,
-<code class="constant">PCRE2_JIT_PARTIAL_HARD</code>, or <code class="constant">PCRE2_JIT_PARTIAL_SOFT</code>.</p>
-<p>If JIT support is not available, a call to <code class="function">pcre2_jit_compile()</code> does
-nothing and returns <code class="constant">PCRE2_ERROR_JIT_BADOPTION</code>. Otherwise, the compiled pattern
+call <code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code> after successfully compiling a pattern with
+<code class="function rouge"><span class="nf">pcre2_compile()</span></code>. This function has two arguments: the first is the
+compiled pattern pointer that was returned by <code class="function rouge"><span class="nf">pcre2_compile()</span></code>, and the
+second is zero or more of the following option bits: <code class="constant rouge"><span class="no">PCRE2_JIT_COMPLETE</span></code>,
+<code class="constant rouge"><span class="no">PCRE2_JIT_PARTIAL_HARD</span></code>, or <code class="constant rouge"><span class="no">PCRE2_JIT_PARTIAL_SOFT</span></code>.</p>
+<p>If JIT support is not available, a call to <code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code> does
+nothing and returns <code class="constant rouge"><span class="no">PCRE2_ERROR_JIT_BADOPTION</span></code>. Otherwise, the compiled pattern
 is passed to the JIT compiler, which turns it into machine code that executes
 much faster than the normal interpretive code, but yields exactly the same
-results. The returned value from <code class="function">pcre2_jit_compile()</code> is zero on success,
+results. The returned value from <code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code> is zero on success,
 or a negative error code.</p>
 <p>There is a limit to the size of pattern that JIT supports, imposed by the size
 of machine stack that it uses. The exact rules are not documented because they
 may change at any time, in particular, when new optimizations are introduced.
-If a pattern is too big, a call to <code class="function">pcre2_jit_compile()</code> returns
-<code class="constant">PCRE2_ERROR_NOMEMORY</code>.</p>
-<p><code class="constant">PCRE2_JIT_COMPLETE</code> requests the JIT compiler to generate code for complete
-matches. If you want to run partial matches using the <code class="constant">PCRE2_PARTIAL_HARD</code> or
-<code class="constant">PCRE2_PARTIAL_SOFT</code> options of <code class="function">pcre2_match()</code>, you should set one or both
-of the other options as well as, or instead of <code class="constant">PCRE2_JIT_COMPLETE</code>. The JIT
+If a pattern is too big, a call to <code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code> returns
+<code class="constant rouge"><span class="no">PCRE2_ERROR_NOMEMORY</span></code>.</p>
+<p><code class="constant rouge"><span class="no">PCRE2_JIT_COMPLETE</span></code> requests the JIT compiler to generate code for complete
+matches. If you want to run partial matches using the <code class="constant rouge"><span class="no">PCRE2_PARTIAL_HARD</span></code> or
+<code class="constant rouge"><span class="no">PCRE2_PARTIAL_SOFT</span></code> options of <code class="function rouge"><span class="nf">pcre2_match()</span></code>, you should set one or both
+of the other options as well as, or instead of <code class="constant rouge"><span class="no">PCRE2_JIT_COMPLETE</span></code>. The JIT
 compiler generates different optimized code for each of the three modes
-(normal, soft partial, hard partial). When <code class="function">pcre2_match()</code> is called, the
+(normal, soft partial, hard partial). When <code class="function rouge"><span class="nf">pcre2_match()</span></code> is called, the
 appropriate code is run if it is available. Otherwise, the pattern is matched
 using interpretive code.</p>
-<p>You can call <code class="function">pcre2_jit_compile()</code> multiple times for the same compiled
+<p>You can call <code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code> multiple times for the same compiled
 pattern. It does nothing if it has previously compiled code for any of the
-option bits. For example, you can call it once with <code class="constant">PCRE2_JIT_COMPLETE</code> and
+option bits. For example, you can call it once with <code class="constant rouge"><span class="no">PCRE2_JIT_COMPLETE</span></code> and
 (perhaps later, when you find you need partial matching) again with
-<code class="constant">PCRE2_JIT_COMPLETE</code> and <code class="constant">PCRE2_JIT_PARTIAL_HARD</code>. This time it will ignore
-<code class="constant">PCRE2_JIT_COMPLETE</code> and just compile code for partial matching. If
-<code class="function">pcre2_jit_compile()</code> is called with no option bits set, it immediately
+<code class="constant rouge"><span class="no">PCRE2_JIT_COMPLETE</span></code> and <code class="constant rouge"><span class="no">PCRE2_JIT_PARTIAL_HARD</span></code>. This time it will ignore
+<code class="constant rouge"><span class="no">PCRE2_JIT_COMPLETE</span></code> and just compile code for partial matching. If
+<code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code> is called with no option bits set, it immediately
 returns zero. This is an alternative way of testing whether JIT support has
 been compiled.</p>
 <p>At present, it is not possible to free JIT compiled code except when the entire
-compiled pattern is freed by calling <code class="function">pcre2_code_free()</code>.</p>
+compiled pattern is freed by calling <code class="function rouge"><span class="nf">pcre2_code_free()</span></code>.</p>
 <p>In some circumstances you may need to call additional functions. These are
 described in the section <a href="#controlling-the-jit-stack">Controlling the JIT stack</a>
 below.</p>
-<p>There are some <code class="function">pcre2_match()</code> options that are not supported by JIT, and
+<p>There are some <code class="function rouge"><span class="nf">pcre2_match()</span></code> options that are not supported by JIT, and
 there are also some pattern items that JIT cannot handle. Details are given
 below.
 In both cases, matching automatically falls back to the interpretive code. If
@@ -91,90 +91,90 @@ match-time options are not right for JIT execution, the callback function is
 not obeyed.</p>
 <p>If the JIT compiler finds an unsupported item, no JIT data is generated. You
 can find out if JIT compilation was successful for a compiled pattern by
-calling <code class="function">pcre2_pattern_info()</code> with the <code class="constant">PCRE2_INFO_JITSIZE</code> option. A
+calling <code class="function rouge"><span class="nf">pcre2_pattern_info()</span></code> with the <code class="constant rouge"><span class="no">PCRE2_INFO_JITSIZE</span></code> option. A
 non-zero result means that JIT compilation was successful. A result of 0 means
 that JIT support is not available, or the pattern was not processed by
-<code class="function">pcre2_jit_compile()</code>, or the JIT compiler was not able to handle the
+<code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code>, or the JIT compiler was not able to handle the
 pattern. Successful JIT compilation does not, however, guarantee the use of JIT
 at match time because there are some match time options that are not supported
 by JIT.</p></section>
-<section class="doc-section level-1"><h2 id="_matching_subjects_containing_invalid_utf">Matching subjects containing invalid UTF</h2><p>When a pattern is compiled with the <code class="constant">PCRE2_UTF</code> option, subject strings are
+<section class="doc-section level-1"><h2 id="_matching_subjects_containing_invalid_utf">Matching subjects containing invalid UTF</h2><p>When a pattern is compiled with the <code class="constant rouge"><span class="no">PCRE2_UTF</span></code> option, subject strings are
 normally expected to be a valid sequence of UTF code units. By default, this is
 checked at the start of matching and an error is generated if invalid UTF is
-detected. The <code class="constant">PCRE2_NO_UTF_CHECK</code> option can be passed to <code class="function">pcre2_match()</code> to
+detected. The <code class="constant rouge"><span class="no">PCRE2_NO_UTF_CHECK</span></code> option can be passed to <code class="function rouge"><span class="nf">pcre2_match()</span></code> to
 skip the check (for improved performance) if you are sure that a subject string
 is valid. If this option is used with an invalid string, the result is
 undefined. The calling program may crash or loop or otherwise misbehave.</p>
 <p>However, a way of running matches on strings that may contain invalid UTF
-sequences is available. Calling <code class="function">pcre2_compile()</code> with the
-<code class="constant">PCRE2_MATCH_INVALID_UTF</code> option has two effects: it tells the interpreter in
-<code class="function">pcre2_match()</code> to support invalid UTF, and, if <code class="function">pcre2_jit_compile()</code>
+sequences is available. Calling <code class="function rouge"><span class="nf">pcre2_compile()</span></code> with the
+<code class="constant rouge"><span class="no">PCRE2_MATCH_INVALID_UTF</span></code> option has two effects: it tells the interpreter in
+<code class="function rouge"><span class="nf">pcre2_match()</span></code> to support invalid UTF, and, if <code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code>
 is subsequently called, the compiled JIT code also supports invalid UTF.
 Details of how this support works, in both the JIT and the interpretive cases,
 is given in the
 <a href="./pcre2unicode.html"><code>pcre2unicode</code></a>
 documentation.</p>
-<p>There is also an obsolete option for <code class="function">pcre2_jit_compile()</code> called
-<code class="constant">PCRE2_JIT_INVALID_UTF</code>, which currently exists only for backward compatibility.
-It is superseded by the <code class="function">pcre2_compile()</code> option <code class="constant">PCRE2_MATCH_INVALID_UTF</code>
+<p>There is also an obsolete option for <code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code> called
+<code class="constant rouge"><span class="no">PCRE2_JIT_INVALID_UTF</span></code>, which currently exists only for backward compatibility.
+It is superseded by the <code class="function rouge"><span class="nf">pcre2_compile()</span></code> option <code class="constant rouge"><span class="no">PCRE2_MATCH_INVALID_UTF</span></code>
 and should no longer be used. It may be removed in future.</p></section>
-<section class="doc-section level-1"><h2 id="_unsupported_options_and_pattern_items">Unsupported options and pattern items</h2><p>The <code class="function">pcre2_match()</code> options that are supported for JIT matching are
-<code class="constant">PCRE2_COPY_MATCHED_SUBJECT</code>, <code class="constant">PCRE2_NOTBOL</code>, <code class="constant">PCRE2_NOTEOL</code>, <code class="constant">PCRE2_NOTEMPTY</code>,
-<code class="constant">PCRE2_NOTEMPTY_ATSTART</code>, <code class="constant">PCRE2_NO_UTF_CHECK</code>, <code class="constant">PCRE2_PARTIAL_HARD</code>, and
-<code class="constant">PCRE2_PARTIAL_SOFT</code>. The <code class="constant">PCRE2_ANCHORED</code> and <code class="constant">PCRE2_ENDANCHORED</code> options are not
+<section class="doc-section level-1"><h2 id="_unsupported_options_and_pattern_items">Unsupported options and pattern items</h2><p>The <code class="function rouge"><span class="nf">pcre2_match()</span></code> options that are supported for JIT matching are
+<code class="constant rouge"><span class="no">PCRE2_COPY_MATCHED_SUBJECT</span></code>, <code class="constant rouge"><span class="no">PCRE2_NOTBOL</span></code>, <code class="constant rouge"><span class="no">PCRE2_NOTEOL</span></code>, <code class="constant rouge"><span class="no">PCRE2_NOTEMPTY</span></code>,
+<code class="constant rouge"><span class="no">PCRE2_NOTEMPTY_ATSTART</span></code>, <code class="constant rouge"><span class="no">PCRE2_NO_UTF_CHECK</span></code>, <code class="constant rouge"><span class="no">PCRE2_PARTIAL_HARD</span></code>, and
+<code class="constant rouge"><span class="no">PCRE2_PARTIAL_SOFT</span></code>. The <code class="constant rouge"><span class="no">PCRE2_ANCHORED</span></code> and <code class="constant rouge"><span class="no">PCRE2_ENDANCHORED</span></code> options are not
 supported at match time.</p>
-<p>If the <code class="constant">PCRE2_NO_JIT</code> option is passed to <code class="function">pcre2_match()</code> it disables the
+<p>If the <code class="constant rouge"><span class="no">PCRE2_NO_JIT</span></code> option is passed to <code class="function rouge"><span class="nf">pcre2_match()</span></code> it disables the
 use of JIT, forcing matching by the interpreter code.</p>
-<p>The only unsupported pattern items are <code class="regex">\C</code> (match a single data unit) when
+<p>The only unsupported pattern items are <code class="regex rouge"><span class="pcre2-semantic">\C</span></code> (match a single data unit) when
 running in a UTF mode, and a callout immediately before an assertion condition
 in a conditional group.</p></section>
 <section class="doc-section level-1"><h2 id="_return_values_from_jit_matching">Return values from JIT matching</h2><p>When a pattern is matched using JIT, the return values are the same as those
-given by the interpretive <code class="function">pcre2_match()</code> code, with the addition of one
-new error code: <code class="constant">PCRE2_ERROR_JIT_STACKLIMIT</code>. This means that the memory used for
+given by the interpretive <code class="function rouge"><span class="nf">pcre2_match()</span></code> code, with the addition of one
+new error code: <code class="constant rouge"><span class="no">PCRE2_ERROR_JIT_STACKLIMIT</span></code>. This means that the memory used for
 the JIT stack was insufficient. See the section <a href="#controlling-the-jit-stack">Controlling the JIT stack</a>
 below for a discussion of JIT stack usage.</p>
-<p>The error code <code class="constant">PCRE2_ERROR_MATCHLIMIT</code> is returned by the JIT code if searching
+<p>The error code <code class="constant rouge"><span class="no">PCRE2_ERROR_MATCHLIMIT</span></code> is returned by the JIT code if searching
 a very large pattern tree goes on for too long, as it is in the same
 circumstance when JIT is not used, but the details of exactly what is counted
-are not the same. The <code class="constant">PCRE2_ERROR_DEPTHLIMIT</code> error code is never returned
+are not the same. The <code class="constant rouge"><span class="no">PCRE2_ERROR_DEPTHLIMIT</span></code> error code is never returned
 when JIT matching is used.</p></section>
 <section class="doc-section level-1"><h2 id="controlling-the-jit-stack">Controlling the JIT stack</h2><p>When the compiled JIT code runs, it needs a block of memory to use as a stack.
 By default, it uses 32KiB on the machine stack. However, some large or
-complicated patterns need more than this. The error <code class="constant">PCRE2_ERROR_JIT_STACKLIMIT</code>
+complicated patterns need more than this. The error <code class="constant rouge"><span class="no">PCRE2_ERROR_JIT_STACKLIMIT</span></code>
 is given when there is not enough stack. Three functions are provided for
 managing blocks of memory for use as JIT stacks. There is further discussion
 about the use of JIT stacks in the section <a href="#jit-stack-faq">JIT stack FAQ</a>
 below.</p>
-<p>The <code class="function">pcre2_jit_stack_create()</code> function creates a JIT stack. Its arguments
+<p>The <code class="function rouge"><span class="nf">pcre2_jit_stack_create()</span></code> function creates a JIT stack. Its arguments
 are a starting size, a maximum size, and a general context (for memory
-allocation functions, or <code class="constant">NULL</code> for standard memory allocation). It returns a
-pointer to an opaque structure of type <code class="type">pcre2_jit_stack</code>, or <code class="constant">NULL</code> if there
-is an error. The <code class="function">pcre2_jit_stack_free()</code> function is used to free a stack
-that is no longer needed. If its argument is <code class="constant">NULL</code>, this function returns
+allocation functions, or <code class="constant rouge"><span class="kc">NULL</span></code> for standard memory allocation). It returns a
+pointer to an opaque structure of type <code class="type rouge"><span class="kt">pcre2_jit_stack</span></code>, or <code class="constant rouge"><span class="kc">NULL</span></code> if there
+is an error. The <code class="function rouge"><span class="nf">pcre2_jit_stack_free()</span></code> function is used to free a stack
+that is no longer needed. If its argument is <code class="constant rouge"><span class="kc">NULL</span></code>, this function returns
 immediately, without doing anything. (For the technically minded: the address
-space is allocated by <code class="c">mmap()</code> or <code class="c">VirtualAlloc()</code>.) A maximum stack size of 512KiB to
+space is allocated by <code class="c rouge" data-lang="c"><span class="nf">mmap</span><span class="p">()</span></code> or <code class="c rouge" data-lang="c"><span class="nf">VirtualAlloc</span><span class="p">()</span></code>.) A maximum stack size of 512KiB to
 1MiB should be more than enough for any pattern.</p>
-<p>The <code class="function">pcre2_jit_stack_assign()</code> function specifies which stack JIT code
+<p>The <code class="function rouge"><span class="nf">pcre2_jit_stack_assign()</span></code> function specifies which stack JIT code
 should use. Its arguments are as follows:</p>
-<div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="n">pcre2_match_context</span>  <span class="o">*</span><span class="n">mcontext</span><span class="p">,</span>
-<span class="n">pcre2_jit_callback</span>    <span class="n">callback</span><span class="p">,</span>
-<span class="kt">void</span>                 <span class="o">*</span><span class="n">data</span></code></pre></div>
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="kt">pcre2_match_context</span>  <span class="o">*</span><span class="nv">mcontext</span><span class="p">,</span>
+<span class="kt">pcre2_jit_callback</span>    <span class="nv">callback</span><span class="p">,</span>
+<span class="kt">void</span>                 <span class="o">*</span><span class="nv">data</span></code></pre></div>
 <p>The first argument is a pointer to a match context. When this is subsequently
 passed to a matching function, its information determines which JIT stack is
-used. If this argument is <code class="constant">NULL</code>, the function returns immediately, without doing
+used. If this argument is <code class="constant rouge"><span class="kc">NULL</span></code>, the function returns immediately, without doing
 anything. There are three cases for the values of the other two options:</p>
-<ol class="arabic compact"><li>If <code class="parameter">callback</code> is <code class="constant">NULL</code> and <code class="parameter">data</code> is <code class="constant">NULL</code>, an internal block of 32KiB
+<ol class="arabic compact"><li>If <code class="parameter rouge"><span class="nv">callback</span></code> is <code class="constant rouge"><span class="kc">NULL</span></code> and <code class="parameter rouge"><span class="nv">data</span></code> is <code class="constant rouge"><span class="kc">NULL</span></code>, an internal block of 32KiB
 on the machine stack is used. This is the default when a match
-context is created.</li><li>If <code class="parameter">callback</code> is <code class="constant">NULL</code> and <code class="parameter">data</code> is not <code class="constant">NULL</code>, <code class="parameter">data</code> must be
+context is created.</li><li>If <code class="parameter rouge"><span class="nv">callback</span></code> is <code class="constant rouge"><span class="kc">NULL</span></code> and <code class="parameter rouge"><span class="nv">data</span></code> is not <code class="constant rouge"><span class="kc">NULL</span></code>, <code class="parameter rouge"><span class="nv">data</span></code> must be
 a pointer to a valid JIT stack, the result of calling
-<code class="function">pcre2_jit_stack_create()</code>.</li><li>If <code class="parameter">callback</code> is not <code class="constant">NULL</code>, it must point to a function that is
-called with <code class="parameter">data</code> as an argument at the start of matching, in
+<code class="function rouge"><span class="nf">pcre2_jit_stack_create()</span></code>.</li><li>If <code class="parameter rouge"><span class="nv">callback</span></code> is not <code class="constant rouge"><span class="kc">NULL</span></code>, it must point to a function that is
+called with <code class="parameter rouge"><span class="nv">data</span></code> as an argument at the start of matching, in
 order to set up a JIT stack. If the return from the callback
-function is <code class="constant">NULL</code>, the internal stack of 32KiB is used; otherwise the
+function is <code class="constant rouge"><span class="kc">NULL</span></code>, the internal stack of 32KiB is used; otherwise the
 return value must be a valid JIT stack, the result of calling
-<code class="function">pcre2_jit_stack_create()</code>.</li></ol>
+<code class="function rouge"><span class="nf">pcre2_jit_stack_create()</span></code>.</li></ol>
 <p>A callback function is obeyed whenever JIT code is about to be run; it is not
-obeyed when <code class="function">pcre2_match()</code> is called with options that are incompatible
+obeyed when <code class="function rouge"><span class="nf">pcre2_match()</span></code> is called with options that are incompatible
 for JIT matching. A callback function can therefore be used to determine
 whether a match operation was executed by JIT or by the interpreter.</p>
 <p>You may safely use the same JIT stack for more than one pattern (either by
@@ -184,11 +184,11 @@ non-sequential matches in one thread is to use callouts: if a callout function
 starts another match, that match must use a different JIT stack to the one used
 for currently suspended match(es).</p>
 <p>In a multithread application, if you do not specify a JIT stack, or if you
-assign or pass back <code class="constant">NULL</code> from a callback, that is thread-safe, because each
+assign or pass back <code class="constant rouge"><span class="kc">NULL</span></code> from a callback, that is thread-safe, because each
 thread has its own machine stack. However, if you assign or pass back a
-non-<code class="constant">NULL</code> JIT stack, this must be a different stack for each thread so that the
+non-<code class="constant rouge"><span class="kc">NULL</span></code> JIT stack, this must be a different stack for each thread so that the
 application is thread-safe.</p>
-<p>Strictly speaking, even more is allowed. You can assign the same non-<code class="constant">NULL</code> stack
+<p>Strictly speaking, even more is allowed. You can assign the same non-<code class="constant rouge"><span class="kc">NULL</span></code> stack
 to a match context that is used by any number of patterns, as long as they are
 not used for matching by multiple threads at the same time. For example, you
 could use the same stack in all compiled patterns, with a global mutex in the
@@ -197,40 +197,40 @@ inefficient solution, and not recommended.</p>
 <p>This is a suggestion for how a multithreaded program that needs to set up
 non-default JIT stacks might operate:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="c1">// During thread initialization</span>
-<span class="n">thread_local_var</span> <span class="o">=</span> <span class="n">pcre2_jit_stack_create</span><span class="p">(...);</span>
+<span class="nv">thread_local_var</span> <span class="o">=</span> <span class="nf">pcre2_jit_stack_create</span><span class="p">(...);</span>
 
 <span class="c1">// During thread exit</span>
-<span class="n">pcre2_jit_stack_free</span><span class="p">(</span><span class="n">thread_local_var</span><span class="p">);</span>
+<span class="nf">pcre2_jit_stack_free</span><span class="p">(</span><span class="nv">thread_local_var</span><span class="p">);</span>
 
 <span class="c1">// Use a one-line callback function</span>
-<span class="k">return</span> <span class="n">thread_local_var</span><span class="p">;</span></code></pre></div>
+<span class="k">return</span> <span class="nv">thread_local_var</span><span class="p">;</span></code></pre></div>
 <p>All the functions described in this section do nothing if JIT is not available.</p></section>
 <section class="doc-section level-1"><h2 id="jit-stack-faq">JIT stack FAQ</h2><ol class="arabic spaced"><li><p><strong>Why do we need JIT stacks?</strong></p><p>PCRE2 (and JIT) is a recursive, depth-first engine, so it needs a stack where
 the local data of the current node is pushed before checking its child nodes.
 Allocating real machine stack on some platforms is difficult. For example, the
 stack chain needs to be updated every time if we extend the stack on PowerPC.
 Although it is possible, its updating time overhead decreases performance. So
-we do the recursion in memory.</p></li><li><p><strong>Why don’t we simply allocate blocks of memory with <code class="c">malloc()</code>?</strong></p><p>Modern operating systems have a nice feature: they can reserve an address space
+we do the recursion in memory.</p></li><li><p><strong>Why don’t we simply allocate blocks of memory with <code class="c rouge" data-lang="c"><span class="nf">malloc</span><span class="p">()</span></code>?</strong></p><p>Modern operating systems have a nice feature: they can reserve an address space
 instead of allocating memory. We can safely allocate memory pages inside this
 address space, so the stack could grow without moving memory data (this is
 important because of pointers). Thus we can allocate 1MiB address space, and
 use only a single memory page (usually 4KiB) if that is enough. However, we can
 still grow up to 1MiB anytime if needed.</p></li><li><p><strong>Who "owns" a JIT stack?</strong></p><p>The owner of the stack is the user program, not the JIT studied pattern or
 anything else. The user program must ensure that if a stack is being used by
-<code class="function">pcre2_match()</code>, (that is, it is assigned to a match context that is passed
+<code class="function rouge"><span class="nf">pcre2_match()</span></code>, (that is, it is assigned to a match context that is passed
 to the pattern currently running), that stack must not be used by any other
 threads (to avoid overwriting the same memory area). The best practice for
 multithreaded programs is to allocate a stack for each thread, and return this
 stack through the JIT callback function.</p></li><li><p><strong>When should a JIT stack be freed?</strong></p><p>You can free a JIT stack at any time, as long as it will not be used by
-<code class="function">pcre2_match()</code> again. When you assign the stack to a match context, only a
+<code class="function rouge"><span class="nf">pcre2_match()</span></code> again. When you assign the stack to a match context, only a
 pointer is set. There is no reference counting or any other magic. You can free
 compiled patterns, contexts, and stacks in any order, anytime.
-Just <em>do not</em> call <code class="function">pcre2_match()</code> with a match context pointing to an
+Just <em>do not</em> call <code class="function rouge"><span class="nf">pcre2_match()</span></code> with a match context pointing to an
 already freed stack, as that will cause SEGFAULT. (Also, do not free a stack
-currently used by <code class="function">pcre2_match()</code> in another thread). You can also replace
+currently used by <code class="function rouge"><span class="nf">pcre2_match()</span></code> in another thread). You can also replace
 the stack in a context at any time when it is not in use. You should free the
 previous stack before assigning a replacement.</p></li><li><p><strong>Should I allocate/free a stack every time before/after calling
-<code class="function">pcre2_match()</code>?</strong></p><p>No, because this is too costly in terms of resources. However, you could
+<code class="function rouge"><span class="nf">pcre2_match()</span></code>?</strong></p><p>No, because this is too costly in terms of resources. However, you could
 implement some clever idea which release the stack if it is not used in let’s
 say two minutes. The JIT callback can help to achieve this without keeping a
 list of patterns.</p></li><li><p><strong>OK, the stack is for long term memory allocation. But what happens if a
@@ -242,66 +242,66 @@ any stack and another which allows releasing memory (shrinking the stack) would
 be a good idea if someone needs this.</p></li><li><p><strong>This is too much of a headache. Isn’t there any better solution for JIT
 stack handling?</strong></p><p>No, thanks to Windows. If POSIX threads were used everywhere, we could throw
 out this complicated API.</p></li></ol></section>
-<section class="doc-section level-1"><h2 id="_freeing_jit_speculative_memory">Freeing JIT speculative memory</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">void</span> <span class="nf">pcre2_jit_free_unused_memory</span><span class="p">(</span><span class="n">pcre2_general_context</span> <span class="o">*</span><span class="n">gcontext</span><span class="p">);</span></code></pre></div>
+<section class="doc-section level-1"><h2 id="_freeing_jit_speculative_memory">Freeing JIT speculative memory</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">void</span> <span class="nf">pcre2_jit_free_unused_memory</span><span class="p">(</span><span class="kt">pcre2_general_context</span> <span class="o">*</span><span class="nv">gcontext</span><span class="p">);</span></code></pre></div>
 <p>The JIT executable allocator does not free all memory when it is possible. It
 expects new allocations, and keeps some free memory around to improve
 allocation speed. However, in low memory conditions, it might be better to free
 all possible memory. You can cause this to happen by calling
-<code class="function">pcre2_jit_free_unused_memory()</code>. Its argument is a general context, for custom
-memory management, or <code class="constant">NULL</code> for standard memory management.</p></section>
+<code class="function rouge"><span class="nf">pcre2_jit_free_unused_memory()</span></code>. Its argument is a general context, for custom
+memory management, or <code class="constant rouge"><span class="kc">NULL</span></code> for standard memory management.</p></section>
 <section class="doc-section level-1"><h2 id="_example_code">Example code</h2><p>This is a single-threaded example that specifies a JIT stack without using a
 callback. A real program should include error checking after all the function
 calls.</p>
-<div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="n">rc</span><span class="p">;</span>
-<span class="n">pcre2_code</span> <span class="o">*</span><span class="n">re</span><span class="p">;</span>
-<span class="n">pcre2_match_data</span> <span class="o">*</span><span class="n">match_data</span><span class="p">;</span>
-<span class="n">pcre2_match_context</span> <span class="o">*</span><span class="n">mcontext</span><span class="p">;</span>
-<span class="n">pcre2_jit_stack</span> <span class="o">*</span><span class="n">jit_stack</span><span class="p">;</span>
+<div class="listing-block"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nv">rc</span><span class="p">;</span>
+<span class="kt">pcre2_code</span> <span class="o">*</span><span class="nv">re</span><span class="p">;</span>
+<span class="kt">pcre2_match_data</span> <span class="o">*</span><span class="nv">match_data</span><span class="p">;</span>
+<span class="kt">pcre2_match_context</span> <span class="o">*</span><span class="nv">mcontext</span><span class="p">;</span>
+<span class="kt">pcre2_jit_stack</span> <span class="o">*</span><span class="nv">jit_stack</span><span class="p">;</span>
 
-<span class="n">re</span> <span class="o">=</span> <span class="n">pcre2_compile</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">PCRE2_ZERO_TERMINATED</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
-                   <span class="o">&amp;</span><span class="n">errornumber</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">erroffset</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-<span class="n">rc</span> <span class="o">=</span> <span class="n">pcre2_jit_compile</span><span class="p">(</span><span class="n">re</span><span class="p">,</span> <span class="n">PCRE2_JIT_COMPLETE</span><span class="p">);</span>
-<span class="n">mcontext</span> <span class="o">=</span> <span class="n">pcre2_match_context_create</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>
-<span class="n">jit_stack</span> <span class="o">=</span> <span class="n">pcre2_jit_stack_create</span><span class="p">(</span><span class="mi">32</span><span class="o">*</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">512</span><span class="o">*</span><span class="mi">1024</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-<span class="n">pcre2_jit_stack_assign</span><span class="p">(</span><span class="n">mcontext</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">jit_stack</span><span class="p">);</span>
-<span class="n">match_data</span> <span class="o">=</span> <span class="n">pcre2_match_data_create</span><span class="p">(</span><span class="n">re</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
-<span class="n">rc</span> <span class="o">=</span> <span class="n">pcre2_match</span><span class="p">(</span><span class="n">re</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">match_data</span><span class="p">,</span> <span class="n">mcontext</span><span class="p">);</span>
+<span class="nv">re</span> <span class="o">=</span> <span class="nf">pcre2_compile</span><span class="p">(</span><span class="nv">pattern</span><span class="p">,</span> <span class="no">PCRE2_ZERO_TERMINATED</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                   <span class="o">&amp;</span><span class="nv">errornumber</span><span class="p">,</span> <span class="o">&amp;</span><span class="nv">erroffset</span><span class="p">,</span> <span class="kc">NULL</span><span class="p">);</span>
+<span class="nv">rc</span> <span class="o">=</span> <span class="nf">pcre2_jit_compile</span><span class="p">(</span><span class="nv">re</span><span class="p">,</span> <span class="no">PCRE2_JIT_COMPLETE</span><span class="p">);</span>
+<span class="nv">mcontext</span> <span class="o">=</span> <span class="nf">pcre2_match_context_create</span><span class="p">(</span><span class="kc">NULL</span><span class="p">);</span>
+<span class="nv">jit_stack</span> <span class="o">=</span> <span class="nf">pcre2_jit_stack_create</span><span class="p">(</span><span class="mi">32</span><span class="o">*</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">512</span><span class="o">*</span><span class="mi">1024</span><span class="p">,</span> <span class="kc">NULL</span><span class="p">);</span>
+<span class="nf">pcre2_jit_stack_assign</span><span class="p">(</span><span class="nv">mcontext</span><span class="p">,</span> <span class="kc">NULL</span><span class="p">,</span> <span class="nv">jit_stack</span><span class="p">);</span>
+<span class="nv">match_data</span> <span class="o">=</span> <span class="nf">pcre2_match_data_create</span><span class="p">(</span><span class="nv">re</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+<span class="nv">rc</span> <span class="o">=</span> <span class="nf">pcre2_match</span><span class="p">(</span><span class="nv">re</span><span class="p">,</span> <span class="nv">subject</span><span class="p">,</span> <span class="nv">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nv">match_data</span><span class="p">,</span> <span class="nv">mcontext</span><span class="p">);</span>
 <span class="cm">/* Process result */</span>
 
-<span class="n">pcre2_code_free</span><span class="p">(</span><span class="n">re</span><span class="p">);</span>
-<span class="n">pcre2_match_data_free</span><span class="p">(</span><span class="n">match_data</span><span class="p">);</span>
-<span class="n">pcre2_match_context_free</span><span class="p">(</span><span class="n">mcontext</span><span class="p">);</span>
-<span class="n">pcre2_jit_stack_free</span><span class="p">(</span><span class="n">jit_stack</span><span class="p">);</span></code></pre></div></section>
+<span class="nf">pcre2_code_free</span><span class="p">(</span><span class="nv">re</span><span class="p">);</span>
+<span class="nf">pcre2_match_data_free</span><span class="p">(</span><span class="nv">match_data</span><span class="p">);</span>
+<span class="nf">pcre2_match_context_free</span><span class="p">(</span><span class="nv">mcontext</span><span class="p">);</span>
+<span class="nf">pcre2_jit_stack_free</span><span class="p">(</span><span class="nv">jit_stack</span><span class="p">);</span></code></pre></div></section>
 <section class="doc-section level-1"><h2 id="_jit_fast_path_api">JIT fast path API</h2><p>Because the API described above falls back to interpreted matching when JIT is
 not available, it is convenient for programs that are written for general use
-in many environments. However, calling JIT via <code class="function">pcre2_match()</code> does have a
+in many environments. However, calling JIT via <code class="function rouge"><span class="nf">pcre2_match()</span></code> does have a
 performance impact. Programs that are written for use where JIT is known to be
 available, and which need the best possible performance, can instead use a
 "fast path" API to call JIT matching directly instead of calling
-<code class="function">pcre2_match()</code> (obviously only for patterns that have been successfully
-processed by <code class="function">pcre2_jit_compile()</code>).</p>
-<p>The fast path function is called <code class="function">pcre2_jit_match()</code>, and it takes exactly
-the same arguments as <code class="function">pcre2_match()</code>. However, the subject string must be
-specified with a length; <code class="constant">PCRE2_ZERO_TERMINATED</code> is not supported. Unsupported
-option bits (for example, <code class="constant">PCRE2_ANCHORED</code>, <code class="constant">PCRE2_ENDANCHORED</code>, and
-<code class="constant">PCRE2_COPY_MATCHED_SUBJECT</code>) are ignored, as is the <code class="constant">PCRE2_NO_JIT</code> option. The
-return values are also the same as for <code class="function">pcre2_match()</code>, plus
-<code class="constant">PCRE2_ERROR_JIT_BADOPTION</code> if a matching mode (partial or complete) is requested
+<code class="function rouge"><span class="nf">pcre2_match()</span></code> (obviously only for patterns that have been successfully
+processed by <code class="function rouge"><span class="nf">pcre2_jit_compile()</span></code>).</p>
+<p>The fast path function is called <code class="function rouge"><span class="nf">pcre2_jit_match()</span></code>, and it takes exactly
+the same arguments as <code class="function rouge"><span class="nf">pcre2_match()</span></code>. However, the subject string must be
+specified with a length; <code class="constant rouge"><span class="no">PCRE2_ZERO_TERMINATED</span></code> is not supported. Unsupported
+option bits (for example, <code class="constant rouge"><span class="no">PCRE2_ANCHORED</span></code>, <code class="constant rouge"><span class="no">PCRE2_ENDANCHORED</span></code>, and
+<code class="constant rouge"><span class="no">PCRE2_COPY_MATCHED_SUBJECT</span></code>) are ignored, as is the <code class="constant rouge"><span class="no">PCRE2_NO_JIT</span></code> option. The
+return values are also the same as for <code class="function rouge"><span class="nf">pcre2_match()</span></code>, plus
+<code class="constant rouge"><span class="no">PCRE2_ERROR_JIT_BADOPTION</span></code> if a matching mode (partial or complete) is requested
 that was not compiled.</p>
-<p>When you call <code class="function">pcre2_match()</code>, as well as testing for invalid options, a
+<p>When you call <code class="function rouge"><span class="nf">pcre2_match()</span></code>, as well as testing for invalid options, a
 number of other sanity checks are performed on the arguments. For example, if
-the subject pointer is <code class="constant">NULL</code> but the length is non-zero, an immediate error is
-given. Also, unless <code class="constant">PCRE2_NO_UTF_CHECK</code> is set, a UTF subject string is tested
+the subject pointer is <code class="constant rouge"><span class="kc">NULL</span></code> but the length is non-zero, an immediate error is
+given. Also, unless <code class="constant rouge"><span class="no">PCRE2_NO_UTF_CHECK</span></code> is set, a UTF subject string is tested
 for validity. In the interests of speed, these checks do not happen on the JIT
-fast path. If invalid UTF data is passed when <code class="constant">PCRE2_MATCH_INVALID_UTF</code> was not
-set for <code class="function">pcre2_compile()</code>, the result is undefined. The program may crash
-or loop or give wrong results. In the absence of <code class="constant">PCRE2_MATCH_INVALID_UTF</code> you
-should call <code class="function">pcre2_jit_match()</code> in UTF mode only if you are sure the
+fast path. If invalid UTF data is passed when <code class="constant rouge"><span class="no">PCRE2_MATCH_INVALID_UTF</span></code> was not
+set for <code class="function rouge"><span class="nf">pcre2_compile()</span></code>, the result is undefined. The program may crash
+or loop or give wrong results. In the absence of <code class="constant rouge"><span class="no">PCRE2_MATCH_INVALID_UTF</span></code> you
+should call <code class="function rouge"><span class="nf">pcre2_jit_match()</span></code> in UTF mode only if you are sure the
 subject is valid.</p>
 <p>Similarly, a non-default offset limit must not exceed the subject length.
-<code class="function">pcre2_match()</code> checks this condition before dispatching to JIT, but callers
-of <code class="function">pcre2_jit_match()</code> must ensure it themselves.</p>
-<p>Bypassing the sanity checks and the <code class="function">pcre2_match()</code> wrapping can give
+<code class="function rouge"><span class="nf">pcre2_match()</span></code> checks this condition before dispatching to JIT, but callers
+of <code class="function rouge"><span class="nf">pcre2_jit_match()</span></code> must ensure it themselves.</p>
+<p>Bypassing the sanity checks and the <code class="function rouge"><span class="nf">pcre2_match()</span></code> wrapping can give
 speedups of more than 10%.</p></section>
 <section class="doc-section level-1"><h2 id="_see_also">See also</h2><p><a href="./pcre2api.html"><code>pcre2api</code></a>, <a href="./pcre2unicode.html"><code>pcre2unicode</code></a>.</p>
 <h2 id="_author" class="discrete">Author</h2>

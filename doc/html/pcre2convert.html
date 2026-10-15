@@ -1,25 +1,25 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Experimental foreign pattern conversion functions"><title>pcre2convert(3)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2convert(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2023-11-14">14 Nov 2023</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Table of Contents</h2><ol class="toc-list level-1"><li><a href="#_experimental_pattern_conversion_functions">Experimental pattern conversion functions</a></li><li><a href="#_the_convert_context">The convert context</a></li><li><a href="#_the_conversion_function">The conversion function</a></li><li><a href="#_converting_globs">Converting globs</a></li><li><a href="#_converting_posix_patterns">Converting POSIX patterns</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_experimental_pattern_conversion_functions">Experimental pattern conversion functions</h2><p>This document describes a set of functions that can be used to convert
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Experimental foreign pattern conversion functions"><title>pcre2convert(3)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2convert(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2023-11-14">14 Nov 2023</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Contents</h2><ol class="toc-list level-1"><li><a href="#_experimental_pattern_conversion_functions" title="Experimental pattern conversion functions">Experimental pattern conversion functions</a></li><li><a href="#_the_convert_context" title="The convert context">The convert context</a></li><li><a href="#_the_conversion_function" title="The conversion function">The conversion function</a></li><li><a href="#_converting_globs" title="Converting globs">Converting globs</a></li><li><a href="#_converting_posix_patterns" title="Converting POSIX patterns">Converting POSIX patterns</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_experimental_pattern_conversion_functions">Experimental pattern conversion functions</h2><p>This document describes a set of functions that can be used to convert
 "foreign" patterns into PCRE2 regular expressions. This facility is currently
 experimental, and may be changed in future releases. Two kinds of pattern,
 globs and POSIX patterns, are supported.</p></section>
-<section class="doc-section level-1"><h2 id="_the_convert_context">The convert context</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="n">pcre2_convert_context</span> <span class="o">*</span><span class="nf">pcre2_convert_context_create</span><span class="p">(</span>
-      <span class="n">pcre2_general_context</span> <span class="o">*</span><span class="n">gcontext</span><span class="p">);</span>
+<section class="doc-section level-1"><h2 id="_the_convert_context">The convert context</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">pcre2_convert_context</span> <span class="o">*</span><span class="nf">pcre2_convert_context_create</span><span class="p">(</span>
+      <span class="kt">pcre2_general_context</span> <span class="o">*</span><span class="nv">gcontext</span><span class="p">);</span>
 
-<span class="n">pcre2_convert_context</span> <span class="o">*</span><span class="nf">pcre2_convert_context_copy</span><span class="p">(</span>
-      <span class="n">pcre2_convert_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">);</span>
+<span class="kt">pcre2_convert_context</span> <span class="o">*</span><span class="nf">pcre2_convert_context_copy</span><span class="p">(</span>
+      <span class="kt">pcre2_convert_context</span> <span class="o">*</span><span class="nv">ccontext</span><span class="p">);</span>
 
-<span class="kt">void</span> <span class="nf">pcre2_convert_context_free</span><span class="p">(</span><span class="n">pcre2_convert_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">pcre2_convert_context_free</span><span class="p">(</span><span class="kt">pcre2_convert_context</span> <span class="o">*</span><span class="nv">ccontext</span><span class="p">);</span>
 
-<span class="kt">int</span> <span class="nf">pcre2_set_glob_escape</span><span class="p">(</span><span class="n">pcre2_convert_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">,</span>
-                          <span class="kt">uint32_t</span> <span class="n">escape_char</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">pcre2_set_glob_escape</span><span class="p">(</span><span class="kt">pcre2_convert_context</span> <span class="o">*</span><span class="nv">ccontext</span><span class="p">,</span>
+                          <span class="kt">uint32_t</span> <span class="nv">escape_char</span><span class="p">);</span>
 
-<span class="kt">int</span> <span class="nf">pcre2_set_glob_separator</span><span class="p">(</span><span class="n">pcre2_convert_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">,</span>
-                             <span class="kt">uint32_t</span> <span class="n">separator_char</span><span class="p">);</span></code></pre></div>
+<span class="kt">int</span> <span class="nf">pcre2_set_glob_separator</span><span class="p">(</span><span class="kt">pcre2_convert_context</span> <span class="o">*</span><span class="nv">ccontext</span><span class="p">,</span>
+                             <span class="kt">uint32_t</span> <span class="nv">separator_char</span><span class="p">);</span></code></pre></div>
 <p>A convert context is used to hold parameters that affect the way that pattern
 conversion works. Like all PCRE2 contexts, you need to use a context only if
 you want to override the defaults. There are the usual create, copy, and free
 functions. If custom memory management functions are set in a general context
-that is passed to <code class="function">pcre2_convert_context_create()</code>, they are used for all
+that is passed to <code class="function rouge"><span class="nf">pcre2_convert_context_create()</span></code>, they are used for all
 memory management within the conversion functions.</p>
 <p>There are only two parameters in the convert context at present. Both apply
 only to glob conversions. The escape character defaults to grave accent under
@@ -29,69 +29,69 @@ except <code>!</code>, <code>*</code>, <code>-</code>, <code>:</code>, <code>?</
 for glob wildcard or character-class syntax and cannot be used as escapes.
 The separator character defaults to backslash under Windows, otherwise forward
 slash. It can be set to forward slash, backslash, or dot.</p>
-<p>The two setting functions return zero on success, or <code class="constant">PCRE2_ERROR_BADDATA</code> if
+<p>The two setting functions return zero on success, or <code class="constant rouge"><span class="no">PCRE2_ERROR_BADDATA</span></code> if
 their second argument is invalid.</p></section>
-<section class="doc-section level-1"><h2 id="_the_conversion_function">The conversion function</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nf">pcre2_pattern_convert</span><span class="p">(</span><span class="n">PCRE2_SPTR</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">PCRE2_SIZE</span> <span class="n">plength</span><span class="p">,</span>
-                          <span class="kt">uint32_t</span> <span class="n">options</span><span class="p">,</span> <span class="n">PCRE2_UCHAR</span> <span class="o">**</span><span class="n">buffptr</span><span class="p">,</span>
-                          <span class="n">PCRE2_SIZE</span> <span class="o">*</span><span class="n">bufflenptr</span><span class="p">,</span>
-                          <span class="n">pcre2_convert_context</span> <span class="o">*</span><span class="n">ccontext</span><span class="p">);</span>
+<section class="doc-section level-1"><h2 id="_the_conversion_function">The conversion function</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nf">pcre2_pattern_convert</span><span class="p">(</span><span class="kt">PCRE2_SPTR</span> <span class="nv">pattern</span><span class="p">,</span> <span class="kt">PCRE2_SIZE</span> <span class="nv">plength</span><span class="p">,</span>
+                          <span class="kt">uint32_t</span> <span class="nv">options</span><span class="p">,</span> <span class="kt">PCRE2_UCHAR</span> <span class="o">**</span><span class="nv">buffptr</span><span class="p">,</span>
+                          <span class="kt">PCRE2_SIZE</span> <span class="o">*</span><span class="nv">bufflenptr</span><span class="p">,</span>
+                          <span class="kt">pcre2_convert_context</span> <span class="o">*</span><span class="nv">ccontext</span><span class="p">);</span>
 
-<span class="kt">void</span> <span class="nf">pcre2_converted_pattern_free</span><span class="p">(</span><span class="n">PCRE2_UCHAR</span> <span class="o">*</span><span class="n">converted</span><span class="p">);</span></code></pre></div>
-<p>The first two arguments of <code class="function">pcre2_pattern_convert()</code> define the foreign
+<span class="kt">void</span> <span class="nf">pcre2_converted_pattern_free</span><span class="p">(</span><span class="kt">PCRE2_UCHAR</span> <span class="o">*</span><span class="nv">converted</span><span class="p">);</span></code></pre></div>
+<p>The first two arguments of <code class="function rouge"><span class="nf">pcre2_pattern_convert()</span></code> define the foreign
 pattern that is to be converted. The length may be given as
-<code class="constant">PCRE2_ZERO_TERMINATED</code>. The <code class="parameter">options</code> argument defines how the pattern is to
-be processed. If the input is UTF, the <code class="constant">PCRE2_CONVERT_UTF</code> option should be set.
-<code class="constant">PCRE2_CONVERT_NO_UTF_CHECK</code> may also be set if you are sure the input is valid.
+<code class="constant rouge"><span class="no">PCRE2_ZERO_TERMINATED</span></code>. The <code class="parameter rouge"><span class="nv">options</span></code> argument defines how the pattern is to
+be processed. If the input is UTF, the <code class="constant rouge"><span class="no">PCRE2_CONVERT_UTF</span></code> option should be set.
+<code class="constant rouge"><span class="no">PCRE2_CONVERT_NO_UTF_CHECK</span></code> may also be set if you are sure the input is valid.
 One or more of the glob options, or one of the following POSIX options must be
 set to define the type of conversion that is required:</p>
-<dl class="options compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="constant">PCRE2_CONVERT_GLOB</code><br><code class="constant">PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR</code><br><code class="constant">PCRE2_CONVERT_GLOB_NO_STARSTAR</code><br><code class="constant">PCRE2_CONVERT_POSIX_BASIC</code><br><code class="constant">PCRE2_CONVERT_POSIX_EXTENDED</code></span></dt><dd>Details of the conversions are given below. The <code class="parameter">buffer</code> and <code class="parameter">blength</code>
+<dl class="options compact" style="--tab-width: 6"><div class="dlist-item"><dt><span><code class="constant rouge"><span class="no">PCRE2_CONVERT_GLOB</span></code><br><code class="constant rouge"><span class="no">PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR</span></code><br><code class="constant rouge"><span class="no">PCRE2_CONVERT_GLOB_NO_STARSTAR</span></code><br><code class="constant rouge"><span class="no">PCRE2_CONVERT_POSIX_BASIC</span></code><br><code class="constant rouge"><span class="no">PCRE2_CONVERT_POSIX_EXTENDED</span></code></span></dt><dd>Details of the conversions are given below. The <code class="parameter rouge"><span class="nv">buffer</span></code> and <code class="parameter rouge"><span class="nv">blength</span></code>
 arguments define how the output is handled:</dd></div></dl>
-<p>If <code class="parameter">buffer</code> is <code class="constant">NULL</code>, the function just returns the length of the converted
-pattern via <code class="parameter">blength</code>. This is one less than the length of buffer needed,
+<p>If <code class="parameter rouge"><span class="nv">buffer</span></code> is <code class="constant rouge"><span class="kc">NULL</span></code>, the function just returns the length of the converted
+pattern via <code class="parameter rouge"><span class="nv">blength</span></code>. This is one less than the length of buffer needed,
 because a terminating zero is always added to the output.</p>
-<p>If <code class="parameter">buffer</code> points to a <code class="constant">NULL</code> pointer, an output buffer is obtained using
-the allocator in the context or <code class="c">malloc()</code> if no context is supplied. A
-pointer to this buffer is placed in the variable to which <code class="parameter">buffer</code> points.
+<p>If <code class="parameter rouge"><span class="nv">buffer</span></code> points to a <code class="constant rouge"><span class="kc">NULL</span></code> pointer, an output buffer is obtained using
+the allocator in the context or <code class="c rouge" data-lang="c"><span class="nf">malloc</span><span class="p">()</span></code> if no context is supplied. A
+pointer to this buffer is placed in the variable to which <code class="parameter rouge"><span class="nv">buffer</span></code> points.
 When no longer needed the output buffer must be freed by calling
-<code class="function">pcre2_converted_pattern_free()</code>. If this function is called with a <code class="constant">NULL</code>
+<code class="function rouge"><span class="nf">pcre2_converted_pattern_free()</span></code>. If this function is called with a <code class="constant rouge"><span class="kc">NULL</span></code>
 argument, it returns immediately without doing anything.</p>
-<p>If <code class="parameter">buffer</code> points to a non-<code class="constant">NULL</code> pointer, <code class="parameter">blength</code> must be set to the
+<p>If <code class="parameter rouge"><span class="nv">buffer</span></code> points to a non-<code class="constant rouge"><span class="kc">NULL</span></code> pointer, <code class="parameter rouge"><span class="nv">blength</span></code> must be set to the
 actual length of the buffer provided (in code units).</p>
 <p>In all cases, after successful conversion, the variable pointed to by
-<code class="parameter">blength</code> is updated to the length actually used (in code units), excluding
+<code class="parameter rouge"><span class="nv">blength</span></code> is updated to the length actually used (in code units), excluding
 the terminating zero that is always added.</p>
-<p>If an error occurs, the length (via <code class="parameter">blength</code>) is set to the offset
+<p>If an error occurs, the length (via <code class="parameter rouge"><span class="nv">blength</span></code>) is set to the offset
 within the input pattern where the error was detected. Only gross syntax errors
 are caught; there are plenty of errors that will get passed on for
-<code class="function">pcre2_compile()</code> to discover.</p>
-<p>The return from <code class="function">pcre2_pattern_convert()</code> is zero on success or a non-zero
+<code class="function rouge"><span class="nf">pcre2_compile()</span></code> to discover.</p>
+<p>The return from <code class="function rouge"><span class="nf">pcre2_pattern_convert()</span></code> is zero on success or a non-zero
 PCRE2 error code. Note that PCRE2 error codes may be positive or negative:
-<code class="function">pcre2_compile()</code> uses mostly positive codes and <code class="function">pcre2_match()</code>
-negative ones; <code class="function">pcre2_convert()</code> uses existing codes of both kinds. A
+<code class="function rouge"><span class="nf">pcre2_compile()</span></code> uses mostly positive codes and <code class="function rouge"><span class="nf">pcre2_match()</span></code>
+negative ones; <code class="function rouge"><span class="nf">pcre2_convert()</span></code> uses existing codes of both kinds. A
 textual error message can be obtained by calling
-<code class="function">pcre2_get_error_message()</code>.</p></section>
+<code class="function rouge"><span class="nf">pcre2_get_error_message()</span></code>.</p></section>
 <section class="doc-section level-1"><h2 id="_converting_globs">Converting globs</h2><p>Globs are used to match file names, and consequently have the concept of a
 "path separator", which defaults to backslash under Windows and forward slash
-otherwise. If <code class="constant">PCRE2_CONVERT_GLOB</code> is set, the wildcards <code class="regex">*</code> and <code class="regex">?</code> are not
-permitted to match separator characters, but the double-star (<code class="regex">**</code>) feature
+otherwise. If <code class="constant rouge"><span class="no">PCRE2_CONVERT_GLOB</span></code> is set, the wildcards <code class="regex rouge"><span class="pcre2-semantic">*</span></code> and <code class="regex rouge"><span class="pcre2-semantic">?</span></code> are not
+permitted to match separator characters, but the double-star (<code class="regex rouge"><span class="pcre2-semantic">**</span></code>) feature
 (which does match separators) is supported.</p>
-<p><code class="constant">PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR</code> matches globs with wildcards allowed to
-match separator characters. <code class="constant">PCRE2_CONVERT_GLOB_NO_STARSTAR</code> matches globs with
+<p><code class="constant rouge"><span class="no">PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR</span></code> matches globs with wildcards allowed to
+match separator characters. <code class="constant rouge"><span class="no">PCRE2_CONVERT_GLOB_NO_STARSTAR</span></code> matches globs with
 the double-star feature disabled. These options may be given together.</p></section>
 <section class="doc-section level-1"><h2 id="_converting_posix_patterns">Converting POSIX patterns</h2><p>POSIX defines two kinds of regular expression pattern: basic and extended.
-These can be processed by setting <code class="constant">PCRE2_CONVERT_POSIX_BASIC</code> or
-<code class="constant">PCRE2_CONVERT_POSIX_EXTENDED</code>, respectively.</p>
+These can be processed by setting <code class="constant rouge"><span class="no">PCRE2_CONVERT_POSIX_BASIC</span></code> or
+<code class="constant rouge"><span class="no">PCRE2_CONVERT_POSIX_EXTENDED</span></code>, respectively.</p>
 <p>In POSIX patterns, backslash is not special in a character class. Unmatched
 closing parentheses are treated as literals.</p>
-<p>In basic patterns, <code class="regex">?</code>, <code class="regex">+</code>, <code class="regex">|</code>, <code class="regex">{}</code>, and <code class="regex">()</code> must be escaped to be recognized
+<p>In basic patterns, <code class="regex rouge"><span class="pcre2-semantic">?</span></code>, <code class="regex rouge"><span class="pcre2-semantic">+</span></code>, <code class="regex rouge"><span class="pcre2-semantic">|</span></code>, <code class="regex rouge"><span class="pcre2-semantic">{}</span></code>, and <code class="regex rouge"><span class="pcre2-semantic">()</span></code> must be escaped to be recognized
 as metacharacters outside a character class. If the first character in the
-pattern is <code class="regex">*</code> it is treated as a literal. <code class="regex">^</code> is a metacharacter only at the start
+pattern is <code class="regex rouge"><span class="pcre2-semantic">*</span></code> it is treated as a literal. <code class="regex rouge"><span class="pcre2-semantic">^</span></code> is a metacharacter only at the start
 of a branch.</p>
 <p>In extended patterns, a backslash not in a character class always
 makes the next character literal, whatever it is. There are no backreferences.</p>
 <aside class="admonition-block note" role="note"><h6 class="block-title label-only"><span class="title-label">Note: </span></h6><p>POSIX mandates that the longest possible match at the first matching
-position must be found. This is not what <code class="function">pcre2_match()</code> does; it yields
-the first match that is found. An application can use <code class="function">pcre2_dfa_match()</code>
+position must be found. This is not what <code class="function rouge"><span class="nf">pcre2_match()</span></code> does; it yields
+the first match that is found. An application can use <code class="function rouge"><span class="nf">pcre2_dfa_match()</span></code>
 to find the longest match, but that does not support backreferences (but then
 neither do POSIX extended patterns).</p></aside>
 <h2 id="_author" class="discrete">Author</h2>

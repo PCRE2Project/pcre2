@@ -34,16 +34,16 @@ pcre2_general_context_free \- free a general context
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBvoid\fP pcre2_general_context_free(\fBpcre2_general_context\fP *\fIgcontext\fP);
+\f(CRvoid\fP \f(CBpcre2_general_context_free\fP\f(CR(pcre2_general_context *\fP\f(CIgcontext\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function frees the memory occupied by a general context, using the memory
-freeing function within the context, if set.  If the argument is \fBNULL\fP, the
+freeing function within the context, if set.  If the argument is \f(CRNULL\fP, the
 function returns immediately without doing anything.
 .sp
 There is a complete description of the PCRE2 native API in the

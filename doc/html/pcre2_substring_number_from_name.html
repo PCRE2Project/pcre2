@@ -1,16 +1,16 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><title>pcre2_substring_number_from_name(3)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2_substring_number_from_name(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2014-11-03">3 Nov 2014</time></p></header><div class="document-layout"><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_synopsis">Synopsis</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;pcre2.h&gt;</span><span class="cp">
 </span>
-<span class="kt">int</span> <span class="nf">pcre2_substring_number_from_name</span><span class="p">(</span><span class="k">const</span> <span class="n">pcre2_code</span> <span class="o">*</span><span class="n">code</span><span class="p">,</span>
-                                     <span class="n">PCRE2_SPTR</span> <span class="n">stringname</span><span class="p">);</span></code></pre></div></section>
+<span class="kt">int</span> <span class="nf">pcre2_substring_number_from_name</span><span class="p">(</span><span class="k">const</span> <span class="kt">pcre2_code</span> <span class="o">*</span><span class="nv">code</span><span class="p">,</span>
+                                     <span class="kt">PCRE2_SPTR</span> <span class="nv">stringname</span><span class="p">);</span></code></pre></div></section>
 <section class="doc-section level-1"><h2 id="_description">Description</h2><p>This convenience function finds the number of a named substring capturing
 parenthesis in a compiled pattern, provided that it is a unique name. The
 function arguments are:</p>
-<dl class="parameters compact" style="--tab-width: 8"><div class="dlist-item"><dt><span><code class="parameter">code</code></span></dt><dd>Compiled regular expression</dd></div><div class="dlist-item"><dt><span><code class="parameter">stringname</code></span></dt><dd>Name whose number is required</dd></div></dl>
+<dl class="parameters compact" style="--tab-width: 8"><div class="dlist-item"><dt><span><code class="parameter rouge"><span class="nv">code</span></code></span></dt><dd>Compiled regular expression</dd></div><div class="dlist-item"><dt><span><code class="parameter rouge"><span class="nv">stringname</span></code></span></dt><dd>Name whose number is required</dd></div></dl>
 <p>The yield of the function is the number of the parenthesis if the name is
-found, or <code class="constant">PCRE2_ERROR_NOSUBSTRING</code> if it is not found. When duplicate names are
-allowed (<code class="constant">PCRE2_DUPNAMES</code> is set), if the name is not unique,
-<code class="constant">PCRE2_ERROR_NOUNIQUESUBSTRING</code> is returned. You can obtain the list of numbers
-with the same name by calling <code class="function">pcre2_substring_nametable_scan()</code>.</p>
+found, or <code class="constant rouge"><span class="no">PCRE2_ERROR_NOSUBSTRING</span></code> if it is not found. When duplicate names are
+allowed (<code class="constant rouge"><span class="no">PCRE2_DUPNAMES</span></code> is set), if the name is not unique,
+<code class="constant rouge"><span class="no">PCRE2_ERROR_NOUNIQUESUBSTRING</span></code> is returned. You can obtain the list of numbers
+with the same name by calling <code class="function rouge"><span class="nf">pcre2_substring_nametable_scan()</span></code>.</p>
 <p>There is a complete description of the PCRE2 native API in the
 <a href="./pcre2api.html"><code>pcre2api</code></a>
 page and a description of the POSIX API in the

@@ -1,0 +1,6 @@
+{{- $plain := slice "" "text" "plain" "plaintext" "regex" "subject" "repl" -}}
+{{- if in $plain .Type -}}
+<pre><code{{ with .Type }} class="language-{{ . }}" data-lang="{{ . }}"{{ end }}>{{ if in (slice "regex" "subject" "repl") .Type }}<span class="pcre2-semantic">{{ .Inner }}</span>{{ else }}{{ .Inner }}{{ end }}</code></pre>
+{{- else -}}
+{{ highlight .Inner .Type .Options }}
+{{- end -}}

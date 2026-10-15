@@ -34,22 +34,22 @@ pcre2_set_offset_limit \- set the offset limit
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_set_offset_limit(\fBpcre2_match_context\fP *\fImcontext\fP,
-                           \fBPCRE2_SIZE\fP \fIlimit\fP);
+\f(CRint\fP \f(CBpcre2_set_offset_limit\fP\f(CR(pcre2_match_context *\fP\f(CImcontext\fP\f(CR,
+                           PCRE2_SIZE\fP \f(CIlimit\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function sets the offset limit field in a match context. The result is
-always zero. The largest value a \fBPCRE2_SIZE\fP variable can hold removes the
+always zero. The largest value a \f(CRPCRE2_SIZE\fP variable can hold removes the
 offset limit.
 .sp
 Any other value must not exceed the subject length when matching.
-pcre2_match() and pcre2_dfa_match() return
-\fBPCRE2_ERROR_BADOFFSETLIMITVALUE\fP if it does. The setter cannot check this
+\f(CBpcre2_match()\fP and \f(CBpcre2_dfa_match()\fP return
+\f(CBPCRE2_ERROR_BADOFFSETLIMITVALUE\fP if it does. The setter cannot check this
 condition because it does not receive the subject.
 .sp
 There is a complete description of the PCRE2 native API in the

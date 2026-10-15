@@ -34,17 +34,17 @@ pcre2_serialize_free \- free serialized compiled patterns
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBvoid\fP pcre2_serialize_free(\fBuint8_t\fP *\fIbytes\fP);
+\f(CRvoid\fP \f(CBpcre2_serialize_free\fP\f(CR(uint8_t *\fP\f(CIbytes\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function frees the memory that was obtained by
-pcre2_serialize_encode() to hold a serialized byte stream. The argument
-must point to such a byte stream or be \fBNULL\fP, in which case the function returns
+\f(CBpcre2_serialize_encode()\fP to hold a serialized byte stream. The argument
+must point to such a byte stream or be \f(CRNULL\fP, in which case the function returns
 without doing anything.
 .sp
 There is a complete description of the PCRE2 native API in the

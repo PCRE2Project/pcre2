@@ -11,7 +11,7 @@ require 'asciidoctor/syntax_highlighter/rouge'
 require 'asciidoctor-html5s'
 # Decode Asciidoctor's special-character substitutions before Rouge lexing.
 require 'cgi'
-# Supply lexical tokens for terminal highlighting of C source blocks.
+# Supply lexical tokens for HTML and terminal source highlighting.
 require 'rouge'
 require 'optparse'
 require 'fileutils'
@@ -24,6 +24,7 @@ class Pcre2DocumentDefaults < Asciidoctor::Extensions::Preprocessor
     document.set_attribute 'lang', 'en' unless document.attr? 'lang'
     document.set_attribute 'source-highlighter', 'rouge' unless document.attr? 'source-highlighter'
     if document.basebackend? 'html'
+      document.set_attribute 'toc-title', 'Contents'
       document.set_attribute 'nofooter' unless document.attr? 'nofooter'
       document.set_attribute 'stylesheet', 'css/pcre2.css'
       document.set_attribute 'linkcss'
@@ -39,6 +40,136 @@ class Pcre2HtmlPostprocessor < Asciidoctor::Extensions::Postprocessor
     return output unless document.basebackend? 'html'
 
     Pcre2HtmlOutput.process(document, output)
+  end
+end
+
+module Pcre2Source
+  SEMANTIC_ROLES = %w[regex subject repl].freeze
+  PLAIN_LANGUAGES = ['', 'text', 'plain', 'plaintext', *SEMANTIC_ROLES].freeze
+  SEMANTIC_TOKEN = Rouge::Token['Generic'].make_token(:Pcre2Semantic, 'pcre2-semantic')
+  KEYWORD_CONSTANTS = %w[TRUE FALSE NULL true false nullptr].freeze
+  ROLE_TOKENS = {
+    'function' => 'Name.Function',
+    'type' => 'Keyword.Type',
+    'constant' => 'Name.Constant',
+    'parameter' => 'Name.Variable',
+    'character' => 'Literal.String.Char',
+  }.merge(SEMANTIC_ROLES.to_h { |role| [role, SEMANTIC_TOKEN.qualname] }).freeze
+  PROFILE_FONTS = {
+    default: '(CR',
+    keyword: '(CR',
+    literal: '(CR',
+    preprocessor: '(CI',
+    constant: '(CB',
+    type: '(CR',
+    function: '(CB',
+    comment: '(CI',
+    variable: '(CI',
+    semantic: '(CI',
+  }.freeze
+
+  module_function
+
+  def inline_token(roles, text)
+    return SEMANTIC_TOKEN if (roles & SEMANTIC_ROLES).any?
+
+    role = roles.find { |name| ROLE_TOKENS.key?(name) }
+    return unless role
+
+    name = role == 'constant' && KEYWORD_CONSTANTS.include?(text) ?
+      'Keyword.Constant' : ROLE_TOKENS.fetch(role)
+    Rouge::Token[name]
+  end
+
+  def lexer(language)
+    return if PLAIN_LANGUAGES.include?(language.to_s)
+
+    Rouge::Lexer.find_fancy(language) || raise(ArgumentError, "Unknown source language: #{language.inspect}")
+  end
+
+  def inline_language(roles)
+    return if (roles & SEMANTIC_ROLES).any?
+
+    roles.find { |role| !PLAIN_LANGUAGES.include?(role) && Rouge::Lexer.find(role) }
+  end
+
+  def tokens(source, language)
+    return [[SEMANTIC_TOKEN, source]] if SEMANTIC_ROLES.include?(language.to_s)
+
+    parser = lexer(language)
+    return [[Rouge::Token['Text'], source]] unless parser
+
+    result = parser.lex(source).to_a
+    return result unless parser.tag == 'c'
+
+    result.each_with_index.map do |(token, text), index|
+      if Rouge::Token['Name'].matches?(token) && KEYWORD_CONSTANTS.include?(text)
+        next [Rouge::Token['Keyword.Constant'], text]
+      end
+      next [token, text] unless token.qualname == 'Name'
+
+      following = result.drop(index + 1).find do |next_token, value|
+        !next_token.qualname.start_with?('Comment') && !value.strip.empty?
+      end
+      category = if following && following[1].start_with?('(')
+        'Name.Function'
+      elsif text.start_with?('pcre2_') || text.end_with?('_t') ||
+          text.match?(/\APCRE2_(?:SIZE|(?:UCHAR|SPTR)(?:8|16|32)?)\z/)
+        'Keyword.Type'
+      elsif text.match?(/\A[A-Z][A-Z0-9_]*\z/)
+        'Name.Constant'
+      else
+        'Name.Variable'
+      end
+      [Rouge::Token[category], text]
+    end
+  end
+
+  def profile(token)
+    if token == SEMANTIC_TOKEN
+      :semantic
+    elsif Rouge::Token['Keyword.Type'].matches?(token)
+      :type
+    elsif Rouge::Token['Keyword'].matches?(token) || Rouge::Token['Operator'].matches?(token)
+      :keyword
+    elsif Rouge::Token['Literal'].matches?(token)
+      :literal
+    elsif Rouge::Token['Comment.Preproc'].matches?(token) || Rouge::Token['Comment.PreprocFile'].matches?(token)
+      :preprocessor
+    elsif Rouge::Token['Comment'].matches?(token)
+      :comment
+    elsif Rouge::Token['Name.Constant'].matches?(token)
+      :constant
+    elsif Rouge::Token['Name.Function'].matches?(token)
+      :function
+    elsif token == Rouge::Token['Name'] || Rouge::Token['Name.Variable'].matches?(token) ||
+        Rouge::Token['Name.Label'].matches?(token)
+      :variable
+    else
+      :default
+    end
+  end
+
+  def font(token)
+    PROFILE_FONTS.fetch(profile(token))
+  end
+end
+
+class Pcre2SourceBlocks < Asciidoctor::Extensions::TreeProcessor
+  def process(document)
+    document.find_by(context: :listing).each do |block|
+      if block.style != 'source' &&
+          (Pcre2Source::SEMANTIC_ROLES.include?(block.style) || Rouge::Lexer.find(block.style))
+        block.set_attr('language', block.style)
+        block.style = 'source'
+        block.set_attr('style', 'source')
+        if document.basebackend?('html') && !block.attr?('subs')
+          block.subs.map! { |sub| sub == :specialcharacters ? :highlight : sub }
+        end
+      end
+      Pcre2Source.lexer(block.attr('language')) if block.style == 'source'
+    end
+    document
   end
 end
 
@@ -190,12 +321,25 @@ Asciidoctor::Extensions.register do
   inline_macro Pcre2ArgumentInlineMacro
   inline_macro Pcre2CharacterInlineMacro
   inline_macro Pcre2MacroValueInlineMacro
+  tree_processor Pcre2SourceBlocks
   postprocessor Pcre2HtmlPostprocessor
 end
 
 # Token colours are part of our shared stylesheet, not Rouge's theme.
 class Pcre2RougeAdapter < Asciidoctor::SyntaxHighlighter::RougeAdapter
   register_for 'rouge'
+
+  def highlight(node, source, language, opts)
+    @style ||= (style = opts[:style]) && style_available?(style) || DEFAULT_STYLE
+    semantic = node.roles.find { |role| Pcre2Source::SEMANTIC_ROLES.include?(role) }
+    highlighted = create_formatter(node, source, language, opts).format(Pcre2Source.tokens(source, semantic || language))
+    if opts[:number_lines] && opts[:callouts]
+      offset = highlighted.index(CodeCellStartTagCs)
+      [highlighted, offset && offset + CodeCellStartTagCs.length]
+    else
+      highlighted
+    end
+  end
 
   def docinfo?(_location)
     false
@@ -299,7 +443,7 @@ end
 # `ESC_BS`, inherited from the stock converter, protects intended roff escapes
 # until `manify` performs its final escape and fake-markup cleanup pass.
 class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
-  PROTECTED_FONT_MARKER_RX = %r(</?#{Regexp.escape ESC_BS}f(B|I|\(CR|P)>)
+  PROTECTED_FONT_MARKER_RX = %r(</?#{Regexp.escape ESC_BS}f(B|I|R|\(C[RBI]|P)>)
 
   # Replace the stock manpage converter for documents using this extension.
   register_for 'manpage'
@@ -312,7 +456,8 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
       protected << fragment
       "\0#{protected.length - 1}\0"
     end
-    masked = text.gsub(/\bpcre2_[a-z0-9_]+(?:\(\))?|\bpcre2test\b/, &protect)
+    masked = text.gsub(%r(<pcre2-code>(.*?)</pcre2-code>)m) { protect.call(Regexp.last_match(1)) }
+    masked = masked.gsub(/\bpcre2_[a-z0-9_]+(?:\(\))?|\bpcre2test\b/, &protect)
     super(masked).gsub(/\0(\d+)\0/) { protected[$1.to_i] }
   end
 
@@ -449,24 +594,20 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
   # Flatten nested font changes into independent runs because roff's `\fP`
   # remembers only one previous font; it does not maintain a font stack.
   def convert_inline_quoted(node)
-    case node.role
-    when 'type', 'constant'
-      # Gross hack to add line-break points for roff when inside a table cell
-      text = node.parent.context == :table_cell ?
-        node.text.gsub('_', "_#{ESC_BS}:") : node.text
-      inline_font_run text, 'B'
-    when 'parameter'
-      inline_font_run node.text, 'I'
-    when 'function'
-      node.text
+    if node.type == :monospaced && (token = Pcre2Source.inline_token(node.roles, node.text))
+      # Retain line-break points for type/constant names inside table cells.
+      text = node.text
+      text = text.gsub('_', "_#{ESC_BS}:") if node.parent.context == :table_cell && (node.roles & %w[type constant]).any?
+      result = inline_font_run(text, Pcre2Source.font(token))
     else
-      case node.type
+      result = case node.type
       when :emphasis
         inline_font_run node.text, 'I'
       when :strong
         inline_font_run node.text, 'B'
       when :monospaced
-        inline_font_run node.text, '(CR'
+        language = Pcre2Source.inline_language(node.roles)
+        inline_font_run(language ? highlighted_source(node.text, language) : node.text, '(CR')
       when :single
         %[<#{ESC_BS}(oq>#{node.text}</#{ESC_BS}(cq>]
       when :double
@@ -474,6 +615,16 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
       else
         node.text
       end
+    end
+    case_sensitive_heading(result, node)
+  end
+
+  def case_sensitive_heading(text, node)
+    # Stock uppercase handling only protects CR text, not newly italic/bold code.
+    if node.type == :monospaced && node.parent.context == :section && node.parent.level <= 1
+      "<pcre2-code>#{text}</pcre2-code>"
+    else
+      text
     end
   end
 
@@ -485,7 +636,7 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
   # callback. Flatten the resulting protected font markers before stock manify
   # turns them into roff escapes.
   def manify(text, options = {})
-    super flatten_inline_fonts(text), options
+    super flatten_inline_fonts(text.gsub(%r(</?pcre2-code>), '')), options
   end
 
   def flatten_inline_fonts(text)
@@ -503,7 +654,9 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
 
         fonts.pop
       else
-        fonts << match[1]
+        font = match[1]
+        font = "(C#{font}" if %w[R B I].include?(font) && fonts.any? { |parent| parent.start_with?('(C') }
+        fonts << font
       end
       offset = match.end(0)
     end
@@ -515,12 +668,23 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
   end
 
   def convert_literal(node)
-    convert_preformatted node, manify(node.content, whitespace: :preserve)
+    content = node.content
+    if (node.roles & Pcre2Source::SEMANTIC_ROLES).any?
+      content = inline_font_run(content, Pcre2Source.font(Pcre2Source::SEMANTIC_TOKEN))
+    end
+    convert_preformatted node, manify(content, whitespace: :preserve)
   end
 
   def convert_listing(node)
-    content = node.style == 'source' ?
-      convert_source(node) : manify(node.content, whitespace: :preserve)
+    language = node.attr('language')
+    content = if Pcre2Source::SEMANTIC_ROLES.include?(language) ||
+        (node.roles & Pcre2Source::SEMANTIC_ROLES).any?
+      manify(inline_font_run(node.content, Pcre2Source.font(Pcre2Source::SEMANTIC_TOKEN)), whitespace: :preserve)
+    elsif node.style == 'source'
+      convert_source(node)
+    else
+      manify(node.content, whitespace: :preserve)
+    end
     convert_preformatted node, content
   end
 
@@ -556,20 +720,17 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
     result.join "\n"
   end
 
-  # Highlight C source with Rouge before the single manify escaping pass. Other
-  # languages keep normal source rendering. Asciidoctor callouts already contain
-  # protected roff escapes, so those blocks deliberately use the unhighlighted
-  # path to preserve callout markers and their list linkage.
+  # Callout blocks contain protected roff escapes; keep their existing path.
   def convert_source(node)
-    return manify(node.content, whitespace: :preserve) unless node.attr('language') == 'c'
     return manify(node.content, whitespace: :preserve) if node.content.include? ESC_BS
 
-    tokens = Rouge::Lexers::C.lex(CGI.unescapeHTML(node.content)).to_a
-    highlighted = tokens.each_with_index.map do |(token, text), index|
-      font = c_token_font(token, text, tokens, index, node.has_role?('prototype'))
-      font ? apply_roff_font(text, font) : text
+    manify highlighted_source(node.content, node.attr('language')), whitespace: :preserve
+  end
+
+  def highlighted_source(source, language)
+    Pcre2Source.tokens(CGI.unescapeHTML(source), language).chunk { |token, _| Pcre2Source.font(token) }.map do |font, tokens|
+      apply_roff_font(tokens.map(&:last).join, font)
     end.join
-    manify highlighted, whitespace: :preserve
   end
 
   # Wrap only visible token text in Asciidoctor's protected fake font tags,
@@ -584,31 +745,6 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
     %(#{match[1]}<#{ESC_BS}f#{font}>#{marker}#{match[3]}</#{ESC_BS}fP>#{match[4]})
   end
 
-  # Map Rouge's C tokens onto the terminal's limited font vocabulary. Rouge
-  # cannot infer project typedefs, macro constants, or call arguments from C,
-  # so PCRE2/all-uppercase naming supplies types and constants. The `prototype`
-  # flag comes from `[source,c,role=prototype]`; only those blocks treat the
-  # remaining generic names as italic parameters.
-  def c_token_font(token, text, tokens, index, prototype)
-    token_name = token.qualname
-    return 'B' if token_name.start_with?('Keyword') ||
-      token_name.start_with?('Name.Constant') ||
-      token_name.start_with?('Name.Builtin') ||
-      token_name.start_with?('Comment.Preproc')
-    return 'I' if token_name.start_with?('Name.Variable')
-    return unless token_name == 'Name'
-    return 'B' if text.match?(/\A[A-Z][A-Z0-9_]*\z/)
-    return function_call?(tokens, index) ? nil : 'B' if text.start_with?('pcre2_')
-
-    'I' if prototype
-  end
-
-  # A lowercase `pcre2_` name followed by `(` is a call and remains roman;
-  # otherwise that naming form denotes a PCRE2 type and is bold.
-  def function_call?(tokens, index)
-    following = tokens.drop(index + 1).find {|token, text| token.qualname != 'Text' || !text.strip.empty? }
-    following && following[1].start_with?('(')
-  end
 end
 
 module Pcre2HtmlOutput
@@ -665,10 +801,79 @@ module Pcre2HtmlOutput
     end
   end
 
+  def highlight_inline(tree, document)
+    return unless document.syntax_highlighter&.name == 'rouge'
+
+    tree.css('code[class]').each do |code|
+      next if code.ancestors('pre').any?
+      next if Pcre2Source.inline_token(code['class'].split, code.text)
+      language = Pcre2Source.inline_language(code['class'].split)
+      next unless language
+
+      tokens = Pcre2Source.tokens(code.text, language)
+      index = offset = 0
+      # Keep explicit emphasis, links and other inline markup; distribute tokens
+      # over their text nodes instead of replacing the whole code element.
+      code.xpath('.//text()').each do |text_node|
+        annotated = text_node.ancestors('code[class]').any? do |ancestor|
+          ancestor != code && Pcre2Source.inline_token(ancestor['class'].split, ancestor.text)
+        end
+        remaining = text_node.text.length
+        while remaining.positive?
+          token, text = tokens.fetch(index)
+          length = [remaining, text.length - offset].min
+          value = text[offset, length]
+          replacement = Nokogiri::XML::Text.new(value, tree.document)
+          unless token.shortname.empty? || annotated
+            span = Nokogiri::XML::Node.new('span', tree.document)
+            span['class'] = token.shortname
+            span.add_child(replacement)
+            replacement = span
+          end
+          text_node.add_previous_sibling(replacement)
+          remaining -= length
+          offset += length
+          index, offset = index + 1, 0 if offset == text.length
+        end
+        text_node.remove
+      end
+      code.add_class('rouge')
+      code['data-lang'] = language
+    end
+  end
+
+  def wrap_token(node, token)
+    span = Nokogiri::XML::Node.new('span', node.document)
+    span['class'] = token.shortname
+    span.add_child(node.children)
+    node.add_child(span)
+  end
+
+  def annotate_semantics(tree)
+    tree.css('code[class]').each do |code|
+      token = Pcre2Source.inline_token(code['class'].split, code.text)
+      token ||= Pcre2Source::SEMANTIC_TOKEN if Pcre2Source::SEMANTIC_ROLES.include?(code['data-lang'])
+      next unless token
+
+      code.add_class('rouge')
+      wrap_token(code, token) unless code.at_css(".#{token.shortname}")
+    end
+    tree.css('.listing-block pre, .literal-block pre').each do |pre|
+      block = pre.ancestors.find { |parent| parent['class'].to_s.split.any? { |name| %w[listing-block literal-block].include?(name) } }
+      next unless block && (block['class'].split & Pcre2Source::SEMANTIC_ROLES).any?
+
+      pre.add_class('rouge')
+      wrap_token(pre, Pcre2Source::SEMANTIC_TOKEN) unless pre.at_css('.pcre2-semantic')
+    end
+  end
+
   def process(document, output)
     full = output.start_with?('<!DOCTYPE')
     tree = full ? Nokogiri::HTML5.parse(output) : Nokogiri::HTML5.fragment(output)
+    highlight_inline(tree, document)
+    annotate_semantics(tree)
     normalize_links(tree, document)
+    tree.css('.toc-list a').each { |link| link['title'] ||= link.text }
     return tree.to_html unless full || document.attr?('pcre2-site')
 
     container = full ? tree.at_css('body') : tree

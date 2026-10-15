@@ -34,9 +34,9 @@ pcre2_converted_pattern_free \- free converted foreign pattern
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBvoid\fP pcre2_converted_pattern_free(\fBPCRE2_UCHAR\fP *\fIconverted\fP);
+\f(CRvoid\fP \f(CBpcre2_converted_pattern_free\fP\f(CR(PCRE2_UCHAR *\fP\f(CIconverted\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -44,8 +44,8 @@ pcre2_converted_pattern_free \- free converted foreign pattern
 .sp
 This function is part of an experimental set of pattern conversion functions.
 It frees the memory occupied by a converted pattern that was obtained by
-calling pcre2_pattern_convert() with arguments that caused it to place
-the converted pattern into newly obtained heap memory. If the argument is \fBNULL\fP,
+calling \f(CBpcre2_pattern_convert()\fP with arguments that caused it to place
+the converted pattern into newly obtained heap memory. If the argument is \f(CRNULL\fP,
 the function returns immediately without doing anything.
 .sp
 The pattern conversion functions are described in the

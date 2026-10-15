@@ -34,11 +34,11 @@ pcre2_jit_stack_create \- create a stack for JIT matching
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBpcre2_jit_stack\fP *pcre2_jit_stack_create(
-      \fBsize_t\fP \fIstartsize\fP, \fBsize_t\fP \fImaxsize\fP,
-      \fBpcre2_general_context\fP *\fIgcontext\fP);
+\f(CRpcre2_jit_stack *\fP\f(CBpcre2_jit_stack_create\fP\f(CR(
+      size_t\fP \f(CIstartsize\fP\f(CR, size_t\fP \f(CImaxsize\fP\f(CR,
+      pcre2_general_context *\fP\f(CIgcontext\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -47,13 +47,13 @@ pcre2_jit_stack_create \- create a stack for JIT matching
 This function is used to create a stack for use by the code compiled by the JIT
 compiler. The first two arguments are a starting size for the stack, and a
 maximum size to which it is allowed to grow. The final argument is a general
-context, for memory allocation functions, or \fBNULL\fP for standard memory
+context, for memory allocation functions, or \f(CRNULL\fP for standard memory
 allocation. The result can be passed to the JIT run\-time code by calling
-pcre2_jit_stack_assign() to associate the stack with a compiled pattern,
-which can then be processed by pcre2_match() or pcre2_jit_match().
+\f(CBpcre2_jit_stack_assign()\fP to associate the stack with a compiled pattern,
+which can then be processed by \f(CBpcre2_match()\fP or \f(CBpcre2_jit_match()\fP.
 A maximum stack size of 512KiB to 1MiB should be more than enough for any
 pattern. If the stack couldn\(cqt be allocated or the values passed were not
-reasonable, \fBNULL\fP will be returned. For more details, see the section
+reasonable, \f(CRNULL\fP will be returned. For more details, see the section
 Controlling the JIT stack
 in the
 \f(CRpcre2jit\fP

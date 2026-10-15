@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="The `pcre2grep` command"><title>pcre2grep(1)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2grep(1)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2025-01-24">24 Jan 2025</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Table of Contents</h2><ol class="toc-list level-1"><li><a href="#_synopsis">Synopsis</a></li><li><a href="#_description">Description</a></li><li><a href="#_support_for_compressed_files">Support for compressed files</a></li><li><a href="#_binary_files">Binary files</a></li><li><a href="#_binary_zeros_in_patterns">Binary zeros in patterns</a></li><li><a href="#_options">Options</a></li><li><a href="#_environment_variables">Environment variables</a></li><li><a href="#_newlines">Newlines</a></li><li><a href="#_options_compatibility_with_gnu_grep">Options compatibility with GNU grep</a></li><li><a href="#_options_with_data">Options with data</a></li><li><a href="#_using_pcre2s_callout_facility">Using PCRE2’s callout facility</a><ol class="toc-list level-2"><li><a href="#_echoing_a_specific_string">Echoing a specific string</a></li><li><a href="#_calling_external_programs_or_scripts">Calling external programs or scripts</a></li></ol></li><li><a href="#_matching_errors">Matching errors</a></li><li><a href="#_diagnostics">Diagnostics</a></li><li><a href="#_see_also">See also</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_synopsis">Synopsis</h2><div class="listing-block synopsis"><pre class="rouge highlight"><code data-lang="shell">pcre2grep <span class="o">[</span>options] <span class="o">[</span>long options] <span class="o">[</span>pattern] <span class="o">[</span>path1 path2 ...]</code></pre></div></section>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="The `pcre2grep` command"><title>pcre2grep(1)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2grep(1)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2025-01-24">24 Jan 2025</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Contents</h2><ol class="toc-list level-1"><li><a href="#_synopsis" title="Synopsis">Synopsis</a></li><li><a href="#_description" title="Description">Description</a></li><li><a href="#_support_for_compressed_files" title="Support for compressed files">Support for compressed files</a></li><li><a href="#_binary_files" title="Binary files">Binary files</a></li><li><a href="#_binary_zeros_in_patterns" title="Binary zeros in patterns">Binary zeros in patterns</a></li><li><a href="#_options" title="Options">Options</a></li><li><a href="#_environment_variables" title="Environment variables">Environment variables</a></li><li><a href="#_newlines" title="Newlines">Newlines</a></li><li><a href="#_options_compatibility_with_gnu_grep" title="Options compatibility with GNU grep">Options compatibility with GNU grep</a></li><li><a href="#_options_with_data" title="Options with data">Options with data</a></li><li><a href="#_using_pcre2s_callout_facility" title="Using PCRE2’s callout facility">Using PCRE2’s callout facility</a><ol class="toc-list level-2"><li><a href="#_echoing_a_specific_string" title="Echoing a specific string">Echoing a specific string</a></li><li><a href="#_calling_external_programs_or_scripts" title="Calling external programs or scripts">Calling external programs or scripts</a></li></ol></li><li><a href="#_matching_errors" title="Matching errors">Matching errors</a></li><li><a href="#_diagnostics" title="Diagnostics">Diagnostics</a></li><li><a href="#_see_also" title="See also">See also</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_synopsis">Synopsis</h2><div class="listing-block synopsis"><pre class="rouge highlight"><code data-lang="shell">pcre2grep <span class="o">[</span>options] <span class="o">[</span>long options] <span class="o">[</span>pattern] <span class="o">[</span>path1 path2 ...]</code></pre></div></section>
 <section class="doc-section level-1"><h2 id="_description">Description</h2><p><code>pcre2grep</code> searches files for character patterns, in the same way as other
 grep commands do, but it uses the PCRE2 regular expression library to support
 patterns that are compatible with the regular expressions of Perl 5. See
@@ -25,7 +25,7 @@ standard input can also be referenced by a name consisting of a single hyphen.
 For example:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">pcre2grep some-pattern file1 - file3</code></pre></div>
 <p>By default, input files are searched line by line, so pattern assertions about
-the beginning and end of a subject string (<code class="regex">^</code>, <code class="regex">$</code>, <code class="regex">\A</code>, <code class="regex">\Z</code>, and <code class="regex">\z</code>) match at
+the beginning and end of a subject string (<code class="regex rouge"><span class="pcre2-semantic">^</span></code>, <code class="regex rouge"><span class="pcre2-semantic">$</span></code>, <code class="regex rouge"><span class="pcre2-semantic">\A</span></code>, <code class="regex rouge"><span class="pcre2-semantic">\Z</span></code>, and <code class="regex rouge"><span class="pcre2-semantic">\z</span></code>) match at
 the beginning and end of each line. When a line matches a pattern, it is copied
 to the standard output, and if there is more than one file, the file name is
 output at the start of each line, followed by a colon. However, there are
@@ -49,7 +49,7 @@ allow for buffering "before" and "after" lines. If the buffer size is too
 small, fewer than requested "before" and "after" lines may be output.</p>
 <p>When matching with a multiline pattern, the size of the buffer must be at least
 half of the maximum match expected or the pattern might fail to match.</p>
-<p>Patterns can be no longer than 8KiB or <code class="constant">BUFSIZ</code> bytes, whichever is the greater.
+<p>Patterns can be no longer than 8KiB or <code class="constant rouge"><span class="no">BUFSIZ</span></code> bytes, whichever is the greater.
 BUFSIZ is defined in <code>&lt;stdio.h&gt;</code>. When there is more than one pattern
 (specified by the use of <code>-e</code> and/or <code>-f</code>), each pattern is applied to
 each line in the order in which they are defined, except that all the <code>-e</code>
@@ -71,7 +71,7 @@ match that starts in the middle of another match will not be processed.</p>
 grep. In earlier releases, <code>pcre2grep</code> did not recognize matches from
 later patterns that were earlier in the subject.</p>
 <p>Patterns that can match an empty string are accepted, but empty string
-matches are never recognized. An example is the pattern <code class="regex">(super)?(man)?</code>, in
+matches are never recognized. An example is the pattern <code class="regex rouge"><span class="pcre2-semantic">(super)?(man)?</span></code>, in
 which all components are optional. This pattern finds all occurrences of both
 "super" and "man"; the output differs from matching with "super|man" when only
 the matching substrings are being shown.</p>
@@ -112,8 +112,8 @@ terminator to a zero byte). A line containing <code>--</code> is output between 
 of lines, unless they are in fact contiguous in the input file. The value of
 <em>number</em> is expected to be relatively small. When <code>-c</code> is used,
 <code>-A</code> is ignored.</dd></div><div class="dlist-item"><dt><span><code>-a</code>, <code>--text</code></span></dt><dd>Treat binary files as text. This is equivalent to
-<code>--binary-files=text</code>.</dd></div><div class="dlist-item"><dt><span><code>--allow-lookaround-bsk</code></span></dt><dd>PCRE2 now forbids the use of <code class="regex">\K</code> in lookarounds by default, in line with Perl.
-This option causes <code>pcre2grep</code> to set the <code class="constant">PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK</code>
+<code>--binary-files=text</code>.</dd></div><div class="dlist-item"><dt><span><code>--allow-lookaround-bsk</code></span></dt><dd>PCRE2 now forbids the use of <code class="regex rouge"><span class="pcre2-semantic">\K</span></code> in lookarounds by default, in line with Perl.
+This option causes <code>pcre2grep</code> to set the <code class="constant rouge"><span class="no">PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK</span></code>
 option, which enables this somewhat dangerous usage.</dd></div><div class="dlist-item"><dt><span><code>-B <em>number</em></code>, <code>--before-context=<em>number</em></code></span></dt><dd>Output up to <em>number</em> lines of context before each matching line. Fewer
 lines are output if the previous match or the start of the file is within
 <em>number</em> lines, or if the processing buffer size has been set too small. If
@@ -177,7 +177,7 @@ compatibility with GNU grep), <code>recurse</code> (equivalent to the <code>-r</
 <code>read</code> case, directories are read as if they were ordinary files. In some
 operating systems the effect of reading a directory like this is an immediate
 end-of-file; in others it may provoke an error.</dd></div><div class="dlist-item"><dt><span><code>--depth-limit=<em>number</em></code></span></dt><dd>See <code>--match-limit</code> below.</dd></div><div class="dlist-item"><dt><span><code>-E</code>, <code>--case-restrict</code></span></dt><dd>When case distinctions are being ignored in Unicode mode, two ASCII letters (K
-and S) will by default match Unicode characters <code class="character">U+212A</code> (Kelvin sign) and <code class="character">U+017F</code>
+and S) will by default match Unicode characters <code class="character rouge"><span class="sc">U+212A</span></code> (Kelvin sign) and <code class="character rouge"><span class="sc">U+017F</span></code>
 (long S) respectively, as well as their lower case ASCII counterparts. When
 this option is set, case equivalences are restricted such that no ASCII
 character matches a non-ASCII character, and vice versa.</dd></div><div class="dlist-item"><dt><span><code>-e <em>pattern</em></code>, <code>--regex=<em>pattern</em></code>, <code>--regexp=<em>pattern</em></code></span></dt><dd><p>Specify a pattern to be matched. This option can be used multiple times in
@@ -218,7 +218,7 @@ option applies only to the patterns that are matched against the contents of
 files; it does not apply to patterns specified by any of the <code>--include</code> or
 <code>--exclude</code> options.</dd></div><div class="dlist-item"><dt><span><code>-f <em>filename</em></code>, <code>--file=<em>filename</em></code></span></dt><dd><p>Read patterns from the file, one per line. As is the case with patterns on the
 command line, no delimiters should be used. What constitutes a newline when
-reading the file is the operating system’s default interpretation of <code class="c">\n</code>. The
+reading the file is the operating system’s default interpretation of <code class="c rouge" data-lang="c"><span class="err">\</span><span class="nv">n</span></code>. The
 <code>--newline</code> option has no effect on this option. Trailing white space is
 removed from each line, and blank lines are ignored unless the
 <code>--posix-pattern-file</code> option is also provided. An empty file contains no
@@ -318,10 +318,10 @@ locale is specified, the PCRE2 library’s default (usually the "C" locale) is
 used. There is no short form for this option.</dd></div><div class="dlist-item"><dt><span><code>-M</code>, <code>--multiline</code></span></dt><dd><p>Allow patterns to match more than one line. When this option is set, the PCRE2
 library is called in "multiline" mode, and a match is allowed to continue past
 the end of the initial line and onto one or more subsequent lines.</p><p>Patterns used with <code>-M</code> may usefully contain literal newline characters and
-internal occurrences of <code class="regex">^</code> and <code class="regex">$</code> characters, because in multiline mode these can
+internal occurrences of <code class="regex rouge"><span class="pcre2-semantic">^</span></code> and <code class="regex rouge"><span class="pcre2-semantic">$</span></code> characters, because in multiline mode these can
 match at internal newlines. Because <code>pcre2grep</code> is scanning multiple lines,
-the <code class="regex">\Z</code> and <code class="regex">\z</code> assertions match only at the end of the last line in the file.
-The <code class="regex">\A</code> assertion matches at the start of the first line of a match. This can
+the <code class="regex rouge"><span class="pcre2-semantic">\Z</span></code> and <code class="regex rouge"><span class="pcre2-semantic">\z</span></code> assertions match only at the end of the last line in the file.
+The <code class="regex rouge"><span class="pcre2-semantic">\A</span></code> assertion matches at the start of the first line of a match. This can
 be any line in the file; it is not anchored to the first line.</p>
 <p>The output for a successful match may consist of more than one line. The first
 line is the line in which the match started, and the last line is the line in
@@ -330,12 +330,12 @@ output ends at the end of that line. If <code>-v</code> is set, none of the line
 multi-line match are output. Once a match has been handled, scanning restarts
 at the beginning of the line after the one in which the match ended.</p>
 <p>The newline sequence that separates multiple lines must be matched as part of
-the pattern. For example, to find the phrase <code class="subject">regular expression</code> in a file
-where <code class="subject">regular</code> might be at the end of a line and <code class="subject">expression</code> at the start of
+the pattern. For example, to find the phrase <code class="subject rouge"><span class="pcre2-semantic">regular expression</span></code> in a file
+where <code class="subject rouge"><span class="pcre2-semantic">regular</span></code> might be at the end of a line and <code class="subject rouge"><span class="pcre2-semantic">expression</span></code> at the start of
 the next line, you could use this command:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">pcre2grep <span class="nt">-M</span> <span class="s1">'regular\s+expression'</span> &lt;file&gt;</code></pre></div>
-<p>The <code class="regex">\s</code> escape sequence matches any white space character, including newlines,
-and is followed by <code class="regex">+</code> so as to match trailing white space on the first line as
+<p>The <code class="regex rouge"><span class="pcre2-semantic">\s</span></code> escape sequence matches any white space character, including newlines,
+and is followed by <code class="regex rouge"><span class="pcre2-semantic">+</span></code> so as to match trailing white space on the first line as
 well as possibly handling a two-character newline sequence.</p>
 <p>There is a limit to the number of lines that can be matched, imposed by the way
 that <code>pcre2grep</code> buffers the input file as it scans it. With a sufficiently
@@ -376,9 +376,9 @@ types are the single-character sequences CR (carriage return) and LF
 (linefeed), the two-character sequence CRLF, an "anycrlf" type, which
 recognizes any of the preceding three types, and an "any" type, for which any
 Unicode line ending sequence is assumed to end a line. The Unicode sequences
-are the three just mentioned, plus VT (vertical tab, <code class="character">U+000B</code>), FF (form feed,
-<code class="character">U+000C</code>), NEL (next line, <code class="character">U+0085</code>), LS (line separator, <code class="character">U+2028</code>), and PS
-(paragraph separator, <code class="character">U+2029</code>).</p>
+are the three just mentioned, plus VT (vertical tab, <code class="character rouge"><span class="sc">U+000B</span></code>), FF (form feed,
+<code class="character rouge"><span class="sc">U+000C</span></code>), NEL (next line, <code class="character rouge"><span class="sc">U+0085</span></code>), LS (line separator, <code class="character rouge"><span class="sc">U+2028</span></code>), and PS
+(paragraph separator, <code class="character rouge"><span class="sc">U+2029</span></code>).</p>
 <p>When the PCRE2 library is built, a default line-ending sequence is specified.
 This is normally the standard sequence for the operating system. Unless
 otherwise specified by this option, <code>pcre2grep</code> uses the library’s default.</p>
@@ -408,21 +408,21 @@ exclusive with <code>--only-matching</code>, <code>--file-offsets</code>, and
 than one match in a line, each of them causes a line of output.</p><p>Escape sequences starting with a dollar character may be used to insert the
 contents of the matched part of the line and/or captured substrings into the
 text.</p>
-<p><code class="repl">$<em>digits</em></code> or <code class="repl">${<em>digits</em>}</code> is replaced by the captured substring of the given
-decimal number; <code class="repl">$&amp;</code> (or the legacy <code class="repl">$0</code>) substitutes the whole match. If the
+<p><code class="repl rouge"><span class="pcre2-semantic">$<em>digits</em></span></code> or <code class="repl rouge"><span class="pcre2-semantic">${<em>digits</em>}</span></code> is replaced by the captured substring of the given
+decimal number; <code class="repl rouge"><span class="pcre2-semantic">$&amp;</span></code> (or the legacy <code class="repl rouge"><span class="pcre2-semantic">$0</span></code>) substitutes the whole match. If the
 number is greater than the number of capturing substrings, or if the capture
 is unset, the replacement is empty.</p>
-<p><code class="repl">$a</code> is replaced by bell; <code class="repl">$b</code> by backspace; <code class="repl">$e</code> by escape; <code class="repl">$f</code> by form feed; <code class="repl">$n</code> by
-newline; <code class="repl">$r</code> by carriage return; <code class="repl">$t</code> by tab; <code class="repl">$v</code> by vertical tab.</p>
-<p><code class="repl">$o<em>digits</em></code> or <code class="repl">$o{<em>digits</em>}</code> is replaced by the character whose code point is
+<p><code class="repl rouge"><span class="pcre2-semantic">$a</span></code> is replaced by bell; <code class="repl rouge"><span class="pcre2-semantic">$b</span></code> by backspace; <code class="repl rouge"><span class="pcre2-semantic">$e</span></code> by escape; <code class="repl rouge"><span class="pcre2-semantic">$f</span></code> by form feed; <code class="repl rouge"><span class="pcre2-semantic">$n</span></code> by
+newline; <code class="repl rouge"><span class="pcre2-semantic">$r</span></code> by carriage return; <code class="repl rouge"><span class="pcre2-semantic">$t</span></code> by tab; <code class="repl rouge"><span class="pcre2-semantic">$v</span></code> by vertical tab.</p>
+<p><code class="repl rouge"><span class="pcre2-semantic">$o<em>digits</em></span></code> or <code class="repl rouge"><span class="pcre2-semantic">$o{<em>digits</em>}</span></code> is replaced by the character whose code point is
 the given octal number. In the first form, up to three octal digits are processed.
 When more digits are needed in Unicode mode to specify a wide character, the
 second form must be used.</p>
-<p><code class="repl">$x<em>digits</em></code> or <code class="repl">$x{<em>digits</em>}</code> is replaced by the character represented by
+<p><code class="repl rouge"><span class="pcre2-semantic">$x<em>digits</em></span></code> or <code class="repl rouge"><span class="pcre2-semantic">$x{<em>digits</em>}</span></code> is replaced by the character represented by
 the given hexadecimal number. In the first form, up to two hexadecimal digits are
 processed. When more digits are needed in Unicode mode to specify a wide
 character, the second form must be used.</p>
-<p>Any other character is substituted by itself. In particular, <code class="repl">$$</code> is replaced by
+<p>Any other character is substituted by itself. In particular, <code class="repl rouge"><span class="pcre2-semantic">$$</span></code> is replaced by
 a single dollar.</p></dd></div><div class="dlist-item"><dt><span><code>-o</code>, <code>--only-matching</code></span></dt><dd>Show only the part of the line that matched a pattern instead of the whole
 line. In this mode, no context is shown. That is, the <code>-A</code>, <code>-B</code>, and
 <code>-C</code> options are ignored. If there is more than one match in a line, each
@@ -451,18 +451,18 @@ then 3 again to be output. By default, there is no separator (but see the next
 but one option).</p></dd></div><div class="dlist-item"><dt><span><code>--om-capture=<em>number</em></code></span></dt><dd>Set the number of capturing parentheses that can be accessed by <code>-o</code>. The
 default is 50.</dd></div><div class="dlist-item"><dt><span><code>--om-separator=<em>text</em></code></span></dt><dd>Specify a separating string for multiple occurrences of <code>-o</code>. The default
 is an empty string. Separating strings are never coloured.</dd></div><div class="dlist-item"><dt><span><code>-P</code>, <code>--no-ucp</code></span></dt><dd>Starting from release 10.43, when UTF/Unicode mode is specified with <code>-u</code>
-or <code>-U</code>, the <code class="constant">PCRE2_UCP</code> option is used by default. This means that the
+or <code>-U</code>, the <code class="constant rouge"><span class="no">PCRE2_UCP</span></code> option is used by default. This means that the
 POSIX classes in patterns match more than just ASCII characters. For example,
-<code class="regex">[:digit:]</code> matches any Unicode decimal digit. The <code>--no-ucp</code> option
-suppresses <code class="constant">PCRE2_UCP</code>, thus restricting the POSIX classes to ASCII characters,
+<code class="regex rouge"><span class="pcre2-semantic">[:digit:]</span></code> matches any Unicode decimal digit. The <code>--no-ucp</code> option
+suppresses <code class="constant rouge"><span class="no">PCRE2_UCP</span></code>, thus restricting the POSIX classes to ASCII characters,
 as was the case in earlier releases. Note that there are now more fine-grained
 option settings within patterns that affect individual classes. For example,
-when in UCP mode, the sequence <code class="regex">(?aP)</code> restricts <code class="regex">[:word:]</code> to ASCII letters, while
-allowing <code class="regex">\w</code> to match Unicode letters and digits.</dd></div><div class="dlist-item"><dt><span><code>--posix-pattern-file</code></span></dt><dd>When patterns are provided with the <code>-f</code> option, do not trim trailing
+when in UCP mode, the sequence <code class="regex rouge"><span class="pcre2-semantic">(?aP)</span></code> restricts <code class="regex rouge"><span class="pcre2-semantic">[:word:]</span></code> to ASCII letters, while
+allowing <code class="regex rouge"><span class="pcre2-semantic">\w</span></code> to match Unicode letters and digits.</dd></div><div class="dlist-item"><dt><span><code>--posix-pattern-file</code></span></dt><dd>When patterns are provided with the <code>-f</code> option, do not trim trailing
 spaces or ignore empty lines in a similar way than other grep tools. To keep
 the behaviour consistent with older versions, if the pattern read was
 terminated with CRLF (as character literals) then both characters won’t be
-included as part of it, so if you really need to have pattern ending in <code class="regex">\r</code>,
+included as part of it, so if you really need to have pattern ending in <code class="regex rouge"><span class="pcre2-semantic">\r</span></code>,
 use a escape sequence or provide it by a different method.</dd></div><div class="dlist-item"><dt><span><code>-q</code>, <code>--quiet</code></span></dt><dd>Work quietly, that is, display nothing except error messages. The exit
 status indicates whether or not any matches were found.</dd></div><div class="dlist-item"><dt><span><code>-r</code>, <code>--recursive</code></span></dt><dd>If any given path is a directory, recursively scan the files it contains,
 taking note of any <code>--include</code> and <code>--exclude</code> settings. By default, a
@@ -497,13 +497,13 @@ the patterns are the ones that are found. When this option is set, options such
 as <code>--only-matching</code> and <code>--output</code>, which specify parts of a match
 that are to be output, are ignored.</dd></div><div class="dlist-item"><dt><span><code>-w</code>, <code>--word-regex</code>, <code>--word-regexp</code></span></dt><dd>Force the patterns only to match "words". That is, there must be a word
 boundary at the start and end of each matched string. This is equivalent to
-having <code class="regex">\b(?:</code> at the start of each pattern, and <code class="regex">)\b</code> at the end. This
+having <code class="regex rouge"><span class="pcre2-semantic">\b(?:</span></code> at the start of each pattern, and <code class="regex rouge"><span class="pcre2-semantic">)\b</span></code> at the end. This
 option applies only to the patterns that are matched against the contents of
 files; it does not apply to patterns specified by any of the <code>--include</code> or
 <code>--exclude</code> options.</dd></div><div class="dlist-item"><dt><span><code>-x</code>, <code>--line-regex</code>, <code>--line-regexp</code></span></dt><dd>Force the patterns to start matching only at the beginnings of lines, and in
 addition, require them to match entire lines. In multiline mode the match may
-be more than one line. This is equivalent to having <code class="regex">^(?:</code> at the start of each
-pattern and <code class="regex">)$</code> at the end. This option applies only to the patterns that are
+be more than one line. This is equivalent to having <code class="regex rouge"><span class="pcre2-semantic">^(?:</span></code> at the start of each
+pattern and <code class="regex rouge"><span class="pcre2-semantic">)$</span></code> at the end. This option applies only to the patterns that are
 matched against the contents of files; it does not apply to patterns specified
 by any of the <code>--include</code> or <code>--exclude</code> options.</dd></div><div class="dlist-item"><dt><span><code>-Z</code>, <code>--null</code></span></dt><dd>Terminate files names in the regular output with a zero byte (the NUL
 character) instead of what would normally appear. This is useful when file
@@ -577,7 +577,7 @@ for callouts by running it with the <code>--help</code> option. If callout suppo
 completely disabled, callouts in patterns are forbidden by <code>pcre2grep</code>.
 If the facility is partially disabled, calling external programs is not
 supported, and callouts that request it are ignored.</p>
-<p>A callout in a PCRE2 pattern is of the form <code class="regex">(?C<em>arg</em>)</code> where the argument is
+<p>A callout in a PCRE2 pattern is of the form <code class="regex rouge"><span class="pcre2-semantic">(?C<em>arg</em>)</span></code> where the argument is
 either a number or a quoted string (see the
 <a href="./pcre2callout.html"><code>pcre2callout</code></a>
 documentation for details). Numbered callouts are ignored by <code>pcre2grep</code>;
@@ -589,20 +589,20 @@ available, provided that callouts were not completely disabled when
 zero-terminated string, which means it should not contain any internal binary
 zeros. It is written to the output, having first been passed through the same
 escape processing as text from the <code>--output</code> (<code>-O</code>) option (see
-above). However, <code class="repl">$0</code> or <code class="repl">$&amp;</code> cannot be used to insert a matched substring because
+above). However, <code class="repl rouge"><span class="pcre2-semantic">$0</span></code> or <code class="repl rouge"><span class="pcre2-semantic">$&amp;</span></code> cannot be used to insert a matched substring because
 the match is still in progress. Instead, the single character <code>0</code> is inserted.
 Any syntax errors in the string (for example, a dollar not followed by another
 character) causes the callout to be ignored. No terminator is added to the
 output string, so if you want a newline, you must include it explicitly using
-the escape <code class="repl">$n</code>. For example:</p>
+the escape <code class="repl rouge"><span class="pcre2-semantic">$n</span></code>. For example:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell">pcre2grep <span class="s1">'(.)(..(.))(?C"|[$1] [$2] [$3]$n")'</span> &lt;some file&gt;</code></pre></div>
 <p>Matching continues normally after the string is output. If you want to see only
 the callout output but not any output from an actual match, you should end the
-pattern with <code class="regex">(*FAIL)</code>.</p></section>
+pattern with <code class="regex rouge"><span class="pcre2-semantic">(*FAIL)</span></code>.</p></section>
 <section class="doc-section level-2"><h3 id="_calling_external_programs_or_scripts">Calling external programs or scripts</h3><p>This facility can be independently disabled when <code>pcre2grep</code> is built. It
-is supported for Windows, where a call to <code class="c">_spawnvp()</code> is used, for VMS,
-where <code class="c">lib$spawn()</code> is used, and for any Unix-like environment where
-<code class="c">fork()</code> and <code class="c">execv()</code> are available.</p>
+is supported for Windows, where a call to <code class="c rouge" data-lang="c"><span class="nf">_spawnvp</span><span class="p">()</span></code> is used, for VMS,
+where <code class="c rouge" data-lang="c"><span class="nv">lib</span><span class="err">$</span><span class="nf">spawn</span><span class="p">()</span></code> is used, and for any Unix-like environment where
+<code class="c rouge" data-lang="c"><span class="nf">fork</span><span class="p">()</span></code> and <code class="c rouge" data-lang="c"><span class="nf">execv</span><span class="p">()</span></code> are available.</p>
 <p>If the callout string does not start with a pipe (vertical bar) character, it
 is parsed into a list of substrings separated by pipe characters. The first
 substring must be an executable name, with the following substrings specifying
@@ -610,10 +610,10 @@ arguments:</p>
 <div class="literal-block"><pre><em>executable_name</em>|<em>arg1</em>|<em>arg2</em>|...</pre></div>
 <p>Any substring (including the executable name) may contain escape sequences
 started by a dollar character. These are the same as for the <code>--output</code>
-(<code>-O</code>) option documented above, except that <code class="repl">$0</code> or <code class="repl">$&amp;</code> cannot insert the
+(<code>-O</code>) option documented above, except that <code class="repl rouge"><span class="pcre2-semantic">$0</span></code> or <code class="repl rouge"><span class="pcre2-semantic">$&amp;</span></code> cannot insert the
 matched string because the match is still in progress. Instead, the character
 <code>0</code> is inserted. If you need a literal dollar or pipe character in any
-substring, use <code class="repl">$$</code> or <code class="repl">$|</code> respectively. Here is an example:</p>
+substring, use <code class="repl rouge"><span class="pcre2-semantic">$$</span></code> or <code class="repl rouge"><span class="pcre2-semantic">$|</span></code> respectively. Here is an example:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nb">echo</span> <span class="nt">-e</span> <span class="s2">"abcde</span><span class="se">\n</span><span class="s2">12345"</span> | pcre2grep <span class="se">\</span>
   <span class="s1">'(?x)(.)(..(.))
   (?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4)")()'</span> -</code></pre></div>
@@ -632,7 +632,7 @@ executable), a local matching failure occurs and the matcher backtracks in the
 normal way.</p></section></section>
 <section class="doc-section level-1"><h2 id="_matching_errors">Matching errors</h2><p>It is possible to supply a regular expression that takes a very long time to
 fail to match certain lines. Such patterns normally involve nested indefinite
-repeats, for example: <code class="regex">(a+)*\d</code> when matched against a line of <code class="subject">a</code>s with no final
+repeats, for example: <code class="regex rouge"><span class="pcre2-semantic">(a+)*\d</span></code> when matched against a line of <code class="subject rouge"><span class="pcre2-semantic">a</span></code>s with no final
 digit. The PCRE2 matching function has a resource limit that causes it to abort
 in these circumstances. If this happens, <code>pcre2grep</code> outputs an error
 message and the line that caused the problem to the standard error stream. If
@@ -646,8 +646,8 @@ for syntax errors, overlong lines, non-existent or inaccessible files (even if
 matches were found in other files) or too many matching errors. Using the
 <code>-s</code> option to suppress error messages about inaccessible files does not
 affect the return code.</p>
-<p>When run under VMS, the return code is placed in the symbol <code class="c">PCRE2GREP_RC</code>
-because VMS does not distinguish between <code class="c">exit(0)</code> and <code class="c">exit(1)</code>.</p></section>
+<p>When run under VMS, the return code is placed in the symbol <code class="c rouge" data-lang="c"><span class="no">PCRE2GREP_RC</span></code>
+because VMS does not distinguish between <code class="c rouge" data-lang="c"><span class="nf">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></code> and <code class="c rouge" data-lang="c"><span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></code>.</p></section>
 <section class="doc-section level-1"><h2 id="_see_also">See also</h2><p><a href="./pcre2pattern.html"><code>pcre2pattern</code></a>, <a href="./pcre2syntax.html"><code>pcre2syntax</code></a>, <a href="./pcre2callout.html"><code>pcre2callout</code></a>,
 <a href="./pcre2unicode.html"><code>pcre2unicode</code></a>.</p>
 <h2 id="_author" class="discrete">Author</h2>

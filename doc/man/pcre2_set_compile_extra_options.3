@@ -34,93 +34,93 @@ pcre2_set_compile_extra_options \- set compile time extra options
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_set_compile_extra_options(\fBpcre2_compile_context\fP *\fIccontext\fP,
-                                    \fBuint32_t\fP \fIoptions\fP);
+\f(CRint\fP \f(CBpcre2_set_compile_extra_options\fP\f(CR(pcre2_compile_context *\fP\f(CIccontext\fP\f(CR,
+                                    uint32_t\fP \f(CIoptions\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
-This function sets additional option bits for pcre2_compile() that are
+This function sets additional option bits for \f(CBpcre2_compile()\fP that are
 housed in a compile context. It completely replaces all the bits. The extra
 options are:
 .sp
 .RS 4
 .PD 0
 .TP 26
-\fBPCRE2_EXTRA_ALLOW_LOOKAROUND_BSK\fP
+\f(CBPCRE2_EXTRA_ALLOW_LOOKAROUND_BSK\fP
 .ad l
-Allow \f(CR\(rsK\fP in lookarounds
+Allow \f(CI\(rsK\fP in lookarounds
 .TP 26
-\fBPCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES\fP
+\f(CBPCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES\fP
 .ad l
-Allow \f(CR\(rsx{d800}\fP to \f(CR\(rsx{dfff}\fP
+Allow \f(CI\(rsx{d800}\fP to \f(CI\(rsx{dfff}\fP
 in UTF\-8 and UTF\-32 modes
 .TP 26
-\fBPCRE2_EXTRA_ALT_BSUX\fP
+\f(CBPCRE2_EXTRA_ALT_BSUX\fP
 .ad l
-Extended alternate \f(CR\(rsu\fP, \f(CR\(rsU\fP, and
-\f(CR\(rsx\fP handling
+Extended alternate \f(CI\(rsu\fP, \f(CI\(rsU\fP, and
+\f(CI\(rsx\fP handling
 .TP 26
-\fBPCRE2_EXTRA_ASCII_BSD\fP
+\f(CBPCRE2_EXTRA_ASCII_BSD\fP
 .ad l
-\f(CR\(rsd\fP remains ASCII in UCP mode
+\f(CI\(rsd\fP remains ASCII in UCP mode
 .TP 26
-\fBPCRE2_EXTRA_ASCII_BSS\fP
+\f(CBPCRE2_EXTRA_ASCII_BSS\fP
 .ad l
-\f(CR\(rss\fP remains ASCII in UCP mode
+\f(CI\(rss\fP remains ASCII in UCP mode
 .TP 26
-\fBPCRE2_EXTRA_ASCII_BSW\fP
+\f(CBPCRE2_EXTRA_ASCII_BSW\fP
 .ad l
-\f(CR\(rsw\fP remains ASCII in UCP mode
+\f(CI\(rsw\fP remains ASCII in UCP mode
 .TP 26
-\fBPCRE2_EXTRA_ASCII_DIGIT\fP
+\f(CBPCRE2_EXTRA_ASCII_DIGIT\fP
 .ad l
-\f(CR[:digit:]\fP and \f(CR[:xdigit:]\fP POSIX classes
+\f(CI[:digit:]\fP and \f(CI[:xdigit:]\fP POSIX classes
 remain ASCII in UCP mode
 .TP 26
-\fBPCRE2_EXTRA_ASCII_POSIX\fP
+\f(CBPCRE2_EXTRA_ASCII_POSIX\fP
 .ad l
 POSIX classes remain ASCII in
 UCP mode
 .TP 26
-\fBPCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL\fP
+\f(CBPCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL\fP
 .ad l
 Treat all invalid escapes as
 a literal following character
 .TP 26
-\fBPCRE2_EXTRA_CASELESS_RESTRICT\fP
+\f(CBPCRE2_EXTRA_CASELESS_RESTRICT\fP
 .ad l
 Disable mixed ASCII/non\-ASCII
 case folding
 .TP 26
-\fBPCRE2_EXTRA_ESCAPED_CR_IS_LF\fP
+\f(CBPCRE2_EXTRA_ESCAPED_CR_IS_LF\fP
 .ad l
-Interpret \f(CR\(rsr\fP as \f(CR\(rsn\fP
+Interpret \f(CI\(rsr\fP as \f(CI\(rsn\fP
 .TP 26
-\fBPCRE2_EXTRA_MATCH_LINE\fP
+\f(CBPCRE2_EXTRA_MATCH_LINE\fP
 .ad l
 Pattern matches whole lines
 .TP 26
-\fBPCRE2_EXTRA_MATCH_WORD\fP
+\f(CBPCRE2_EXTRA_MATCH_WORD\fP
 .ad l
 Pattern matches "words"
 .TP 26
-\fBPCRE2_EXTRA_NEVER_CALLOUT\fP
+\f(CBPCRE2_EXTRA_NEVER_CALLOUT\fP
 .ad l
 Disallow callouts in pattern
 .TP 26
-\fBPCRE2_EXTRA_NO_BS0\fP
+\f(CBPCRE2_EXTRA_NO_BS0\fP
 .ad l
-Disallow \f(CR\(rs0\fP (but not \f(CR\(rs00\fP or \f(CR\(rs000\fP)
+Disallow \f(CI\(rs0\fP (but not \f(CI\(rs00\fP or \f(CI\(rs000\fP)
 .TP 26
-\fBPCRE2_EXTRA_PYTHON_OCTAL\fP
+\f(CBPCRE2_EXTRA_PYTHON_OCTAL\fP
 .ad l
 Use Python rules for octal
 .TP 26
-\fBPCRE2_EXTRA_TURKISH_CASING\fP
+\f(CBPCRE2_EXTRA_TURKISH_CASING\fP
 .ad l
 Use Turkish I case folding
 .PD

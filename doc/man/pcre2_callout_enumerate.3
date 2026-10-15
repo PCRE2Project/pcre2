@@ -34,34 +34,34 @@ pcre2_callout_enumerate \- enumerate callouts in a compiled pattern
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_callout_enumerate(
-      \fBconst\fP \fBpcre2_code\fP *\fIcode\fP,
-      \fBint\fP (*\fIcallback\fP)(\fBpcre2_callout_enumerate_block\fP *\fIcallout_block\fP,
-                      \fBvoid\fP *\fIcallout_data\fP),
-      \fBvoid\fP *\fIcallout_data\fP);
+\f(CRint\fP \f(CBpcre2_callout_enumerate\fP\f(CR(
+      const pcre2_code *\fP\f(CIcode\fP\f(CR,
+      int (*\fP\f(CIcallback\fP\f(CR)(pcre2_callout_enumerate_block *\fP\f(CIcallout_block\fP\f(CR,
+                      void *\fP\f(CIcallout_data\fP\f(CR),
+      void *\fP\f(CIcallout_data\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
-This function scans a compiled regular expression and calls the \f(CRcallback()\fP
+This function scans a compiled regular expression and calls the \f(CBcallback\fP\f(CR()\fP
 function for each callout within the pattern. The yield of the function is zero
 for success and non\-zero otherwise. The arguments are:
 .sp
 .RS 4
 .PD 0
 .TP 13
-\fIcode\fP
+\f(CIcode\fP
 .ad l
 Points to the compiled pattern
 .TP 13
-\fIcallback\fP
+\f(CIcallback\fP
 .ad l
 The callback function
 .TP 13
-\fIcallout_data\fP
+\f(CIcallout_data\fP
 .ad l
 User data that is passed to the callback
 .PD
@@ -69,29 +69,29 @@ User data that is passed to the callback
 .PP
 .ad l
 .sp
-The \f(CRcallback()\fP function is passed a pointer to a data block containing
+The \f(CBcallback\fP\f(CR()\fP function is passed a pointer to a data block containing
 the following fields (not necessarily in this order):
 .sp
 .ss \n[.ss]
 .nf
 .fam C
-\fBuint32_t\fP version;\&                 /* Block version number */
-\fBuint32_t\fP callout_number;\&          /* Number for numbered callouts */
-\fBPCRE2_SIZE\fP pattern_position;\&      /* Offset to next item in pattern */
-\fBPCRE2_SIZE\fP next_item_length;\&      /* Length of next item in pattern */
-\fBPCRE2_SIZE\fP callout_string_offset; /* Offset to string within pattern */
-\fBPCRE2_SIZE\fP callout_string_length; /* Length of callout string */
-\fBPCRE2_SPTR\fP callout_string;\&        /* Points to callout string or is
-                                     NULL */
+\f(CRuint32_t\fP \f(CIversion\fP\f(CR;\fP\&                 \f(CI/* Block version number */\fP
+\f(CRuint32_t\fP \f(CIcallout_number\fP\f(CR;\fP\&          \f(CI/* Number for numbered callouts */\fP
+\f(CRPCRE2_SIZE\fP \f(CIpattern_position\fP\f(CR;\fP\&      \f(CI/* Offset to next item in pattern */\fP
+\f(CRPCRE2_SIZE\fP \f(CInext_item_length\fP\f(CR;\fP\&      \f(CI/* Length of next item in pattern */\fP
+\f(CRPCRE2_SIZE\fP \f(CIcallout_string_offset\fP\f(CR;\fP \f(CI/* Offset to string within pattern */\fP
+\f(CRPCRE2_SIZE\fP \f(CIcallout_string_length\fP\f(CR;\fP \f(CI/* Length of callout string */\fP
+\f(CRPCRE2_SPTR\fP \f(CIcallout_string\fP\f(CR;\fP\&        \f(CI/* Points to callout string or is
+                                     NULL */\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .sp
-The second argument passed to the \f(CRcallback()\fP function is the callout data
-that was passed to pcre2_callout_enumerate(). The \f(CRcallback()\fP
+The second argument passed to the \f(CBcallback\fP\f(CR()\fP function is the callout data
+that was passed to \f(CBpcre2_callout_enumerate()\fP. The \f(CBcallback\fP\f(CR()\fP
 function must return zero for success. Any other value causes the pattern scan
 to stop, with the value being passed back as the result of
-pcre2_callout_enumerate().
+\f(CBpcre2_callout_enumerate()\fP.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

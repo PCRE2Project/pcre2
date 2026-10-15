@@ -34,14 +34,14 @@ pcre2_substitute \- replace matched substrings
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_substitute(\fBconst\fP \fBpcre2_code\fP *\fIcode\fP, \fBPCRE2_SPTR\fP \fIsubject\fP,
-                     \fBPCRE2_SIZE\fP \fIlength\fP, \fBPCRE2_SIZE\fP \fIstart_offset\fP,
-                     \fBuint32_t\fP \fIoptions\fP, \fBpcre2_match_data\fP *\fImatch_data\fP,
-                     \fBpcre2_match_context\fP *\fImcontext\fP,
-                     \fBPCRE2_SPTR\fP \fIreplacement\fP, \fBPCRE2_SIZE\fP \fIrlength\fP,
-                     \fBPCRE2_UCHAR\fP *\fIbuffer\fP, \fBPCRE2_SIZE\fP *\fIblength\fP);
+\f(CRint\fP \f(CBpcre2_substitute\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR, PCRE2_SPTR\fP \f(CIsubject\fP\f(CR,
+                     PCRE2_SIZE\fP \f(CIlength\fP\f(CR, PCRE2_SIZE\fP \f(CIstart_offset\fP\f(CR,
+                     uint32_t\fP \f(CIoptions\fP\f(CR, pcre2_match_data *\fP\f(CImatch_data\fP\f(CR,
+                     pcre2_match_context *\fP\f(CImcontext\fP\f(CR,
+                     PCRE2_SPTR\fP \f(CIreplacement\fP\f(CR, PCRE2_SIZE\fP \f(CIrlength\fP\f(CR,
+                     PCRE2_UCHAR *\fP\f(CIbuffer\fP\f(CR, PCRE2_SIZE *\fP\f(CIblength\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -55,47 +55,47 @@ Its arguments are:
 .RS 4
 .PD 0
 .TP 13
-\fIcode\fP
+\f(CIcode\fP
 .ad l
 Points to the compiled pattern
 .TP 13
-\fIsubject\fP
+\f(CIsubject\fP
 .ad l
 Points to the subject string
 .TP 13
-\fIlength\fP
+\f(CIlength\fP
 .ad l
 Length of the subject string
 .TP 13
-\fIstart_offset\fP
+\f(CIstart_offset\fP
 .ad l
 Offset in the subject at which to start matching
 .TP 13
-\fIoptions\fP
+\f(CIoptions\fP
 .ad l
 Option bits
 .TP 13
-\fImatch_data\fP
+\f(CImatch_data\fP
 .ad l
-Points to a match data block, or is \fBNULL\fP
+Points to a match data block, or is \f(CRNULL\fP
 .TP 13
-\fImcontext\fP
+\f(CImcontext\fP
 .ad l
-Points to a match context, or is \fBNULL\fP
+Points to a match context, or is \f(CRNULL\fP
 .TP 13
-\fIreplacement\fP
+\f(CIreplacement\fP
 .ad l
 Points to the replacement string
 .TP 13
-\fIrlength\fP
+\f(CIrlength\fP
 .ad l
 Length of the replacement string
 .TP 13
-\fIbuffer\fP
+\f(CIbuffer\fP
 .ad l
-Points to the output buffer, or may be \fBNULL\fP if \fIblength\fP is zero
+Points to the output buffer, or may be \f(CRNULL\fP if \f(CIblength\fP is zero
 .TP 13
-\fIblength\fP
+\f(CIblength\fP
 .ad l
 Points to the length of the output buffer
 .PD
@@ -104,7 +104,7 @@ Points to the length of the output buffer
 .ad l
 .sp
 A match data block is needed only if you want to inspect the data from the
-final match that is returned in that block or if \fBPCRE2_SUBSTITUTE_MATCHED\fP is
+final match that is returned in that block or if \f(CBPCRE2_SUBSTITUTE_MATCHED\fP is
 set. A match context is needed only if you want to:
 .sp
 .RS 4
@@ -158,88 +158,88 @@ Change the backtracking depth limit
 Set custom memory management in the match context
 .RE
 .sp
-The \fIlength\fP, \fIstart_offset\fP and \fIrlength\fP values are code units,
+The \f(CIlength\fP, \f(CIstart_offset\fP and \f(CIrlength\fP values are code units,
 not characters, as is the contents of the variable pointed at by
-\fIblength\fP. This variable must contain the length of the output buffer
+\f(CIblength\fP. This variable must contain the length of the output buffer
 when the function is called. If the function is successful, the value is
 changed to the length of the new string, excluding the trailing zero that is
 automatically added.
 .sp
-The subject and replacement lengths can be given as \fBPCRE2_ZERO_TERMINATED\fP for
+The subject and replacement lengths can be given as \f(CBPCRE2_ZERO_TERMINATED\fP for
 zero\-terminated strings. The options are:
 .sp
 .RS 4
 .PD 0
 .TP 26
-\fBPCRE2_ANCHORED\fP
+\f(CBPCRE2_ANCHORED\fP
 .ad l
 Match only at the first position
 .TP 26
-\fBPCRE2_ENDANCHORED\fP
+\f(CBPCRE2_ENDANCHORED\fP
 .ad l
 Match only at end of subject
 .TP 26
-\fBPCRE2_NOTBOL\fP
+\f(CBPCRE2_NOTBOL\fP
 .ad l
 Subject is not the beginning of a
 line
 .TP 26
-\fBPCRE2_NOTEOL\fP
+\f(CBPCRE2_NOTEOL\fP
 .ad l
 Subject is not the end of a line
 .TP 26
-\fBPCRE2_NOTEMPTY\fP
+\f(CBPCRE2_NOTEMPTY\fP
 .ad l
 An empty string is not a
 valid match
 .TP 26
-\fBPCRE2_NOTEMPTY_ATSTART\fP
+\f(CBPCRE2_NOTEMPTY_ATSTART\fP
 .ad l
 An empty string at the start of
 the subject is not a valid match
 .TP 26
-\fBPCRE2_NO_JIT\fP
+\f(CBPCRE2_NO_JIT\fP
 .ad l
 Do not use JIT matching
 .TP 26
-\fBPCRE2_NO_UTF_CHECK\fP
+\f(CBPCRE2_NO_UTF_CHECK\fP
 .ad l
 Do not check for UTF validity in
 the subject or replacement
-(only relevant if \fBPCRE2_UTF\fP was
+(only relevant if \f(CBPCRE2_UTF\fP was
 set at compile time)
 .TP 26
-\fBPCRE2_SUBSTITUTE_EXTENDED\fP
+\f(CBPCRE2_SUBSTITUTE_EXTENDED\fP
 .ad l
 Do extended replacement processing
 .TP 26
-\fBPCRE2_SUBSTITUTE_GLOBAL\fP
+\f(CBPCRE2_SUBSTITUTE_GLOBAL\fP
 .ad l
 Replace all occurrences in the
 subject
 .TP 26
-\fBPCRE2_SUBSTITUTE_LITERAL\fP
+\f(CBPCRE2_SUBSTITUTE_LITERAL\fP
 .ad l
 The replacement string is literal
 .TP 26
-\fBPCRE2_SUBSTITUTE_MATCHED\fP
+\f(CBPCRE2_SUBSTITUTE_MATCHED\fP
 .ad l
 Use pre\-existing match data for
 first match
 .TP 26
-\fBPCRE2_SUBSTITUTE_OVERFLOW_LENGTH\fP
+\f(CBPCRE2_SUBSTITUTE_OVERFLOW_LENGTH\fP
 .ad l
 If overflow, compute needed length
 .TP 26
-\fBPCRE2_SUBSTITUTE_REPLACEMENT_ONLY\fP
+\f(CBPCRE2_SUBSTITUTE_REPLACEMENT_ONLY\fP
 .ad l
 Return only replacement string(s)
 .TP 26
-\fBPCRE2_SUBSTITUTE_UNKNOWN_UNSET\fP
+\f(CBPCRE2_SUBSTITUTE_UNKNOWN_UNSET\fP
 .ad l
 Treat unknown group as unset
 .TP 26
-\fBPCRE2_SUBSTITUTE_UNSET_EMPTY\fP
+\f(CBPCRE2_SUBSTITUTE_UNSET_EMPTY\fP
 .ad l
 Simple unset insert = empty string
 .PD
@@ -247,17 +247,17 @@ Simple unset insert = empty string
 .PP
 .ad l
 .sp
-If \fBPCRE2_SUBSTITUTE_LITERAL\fP is set, \fBPCRE2_SUBSTITUTE_EXTENDED\fP,
-\fBPCRE2_SUBSTITUTE_UNKNOWN_UNSET\fP, and \fBPCRE2_SUBSTITUTE_UNSET_EMPTY\fP are ignored.
+If \f(CBPCRE2_SUBSTITUTE_LITERAL\fP is set, \f(CBPCRE2_SUBSTITUTE_EXTENDED\fP,
+\f(CBPCRE2_SUBSTITUTE_UNKNOWN_UNSET\fP, and \f(CBPCRE2_SUBSTITUTE_UNSET_EMPTY\fP are ignored.
 .sp
-If \fBPCRE2_SUBSTITUTE_MATCHED\fP is set, \fImatch_data\fP must be non\-\fBNULL\fP; its
-contents must be the result of a call to pcre2_match() (or
-pcre2_jit_match()) using the same pattern, subject pointer, effective
+If \f(CBPCRE2_SUBSTITUTE_MATCHED\fP is set, \f(CImatch_data\fP must be non\-\f(CRNULL\fP; its
+contents must be the result of a call to \f(CBpcre2_match()\fP (or
+\f(CBpcre2_jit_match()\fP) using the same pattern, subject pointer, effective
 subject length, start offset, and match options.
 .sp
 The function returns the number of substitutions, which may be zero if there
 are no matches. The result may be greater than one only when
-\fBPCRE2_SUBSTITUTE_GLOBAL\fP is set. In the event of an error, a negative error code
+\f(CBPCRE2_SUBSTITUTE_GLOBAL\fP is set. In the event of an error, a negative error code
 is returned.
 .sp
 There is a complete description of the PCRE2 native API in the

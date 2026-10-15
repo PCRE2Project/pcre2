@@ -34,12 +34,12 @@ pcre2_substring_get_bynumber \- extract numbered substring into new memory
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_substring_get_bynumber(\fBpcre2_match_data\fP *\fImatch_data\fP,
-                                 \fBuint32_t\fP \fIstringnumber\fP,
-                                 \fBPCRE2_UCHAR\fP **\fIstringptr\fP,
-                                 \fBPCRE2_SIZE\fP *\fIsizeptr\fP);
+\f(CRint\fP \f(CBpcre2_substring_get_bynumber\fP\f(CR(pcre2_match_data *\fP\f(CImatch_data\fP\f(CR,
+                                 uint32_t\fP \f(CIstringnumber\fP\f(CR,
+                                 PCRE2_UCHAR **\fP\f(CIstringptr\fP\f(CR,
+                                 PCRE2_SIZE *\fP\f(CIsizeptr\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -51,19 +51,19 @@ into newly acquired memory. The arguments are:
 .RS 4
 .PD 0
 .TP 13
-\fImatch_data\fP
+\f(CImatch_data\fP
 .ad l
 The match data for the match
 .TP 13
-\fIstringnumber\fP
+\f(CIstringnumber\fP
 .ad l
 Number of the required substring
 .TP 13
-\fIstringptr\fP
+\f(CIstringptr\fP
 .ad l
 Where to put the string pointer
 .TP 13
-\fIsizeptr\fP
+\f(CIsizeptr\fP
 .ad l
 Where to put the string length
 .PD
@@ -73,26 +73,26 @@ Where to put the string length
 .sp
 The memory in which the substring is placed is obtained by calling the same
 memory allocation function that was used for the match data block. The
-convenience function pcre2_substring_free() can be used to free it when
+convenience function \f(CBpcre2_substring_free()\fP can be used to free it when
 it is no longer needed. The yield of the function is zero for success or one of
 the following error numbers:
 .sp
 .RS 4
 .PD 0
 .TP 24
-\fBPCRE2_ERROR_NOSUBSTRING\fP
+\f(CBPCRE2_ERROR_NOSUBSTRING\fP
 .ad l
 there are no groups of that number
 .TP 24
-\fBPCRE2_ERROR_UNAVAILABLE\fP
+\f(CBPCRE2_ERROR_UNAVAILABLE\fP
 .ad l
 the ovector was too small for that group
 .TP 24
-\fBPCRE2_ERROR_UNSET\fP
+\f(CBPCRE2_ERROR_UNSET\fP
 .ad l
 the group did not participate in the match
 .TP 24
-\fBPCRE2_ERROR_NOMEMORY\fP
+\f(CBPCRE2_ERROR_NOMEMORY\fP
 .ad l
 memory could not be obtained
 .PD

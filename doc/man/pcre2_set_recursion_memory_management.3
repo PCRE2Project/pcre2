@@ -34,13 +34,13 @@ pcre2_set_recursion_memory_management \- obsolete function that does nothing
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CI\&#include\fP \f(CI<pcre2.h>\fP
 
-\fBint\fP pcre2_set_recursion_memory_management(
-      \fBpcre2_match_context\fP *\fImcontext\fP,
-      \fBvoid\fP *(*\fImymalloc\fP)(\fBsize_t\fP \fIsize\fP, \fBvoid\fP *\fImydata\fP),
-      \fBvoid\fP (*\fImyfree\fP)(\fBvoid\fP *\fIptr\fP, \fBvoid\fP *\fImydata\fP),
-      \fBvoid\fP *\fImydata\fP);
+\f(CRint\fP \f(CBpcre2_set_recursion_memory_management\fP\f(CR(
+      pcre2_match_context *\fP\f(CImcontext\fP\f(CR,
+      void *(*\fP\f(CImymalloc\fP\f(CR)(size_t\fP \f(CIsize\fP\f(CR, void *\fP\f(CImydata\fP\f(CR),
+      void (*\fP\f(CImyfree\fP\f(CR)(void *\fP\f(CIptr\fP\f(CR, void *\fP\f(CImydata\fP\f(CR),
+      void *\fP\f(CImydata\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
