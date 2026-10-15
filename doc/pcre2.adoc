@@ -90,6 +90,7 @@ environments, it is possible to control which external symbols are exported
 when a shared library is built, and in these cases the undocumented symbols are
 not exported.
 
+[[security-considerations]]
 == Security considerations
 
 If you are using PCRE2 in a non-UTF application that permits users to supply
