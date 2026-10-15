@@ -17066,6 +17066,33 @@ No match
     aaa
  0: a
 
+# Check bumpalong after a control verb aborts a lazy leading repeat.
+
+/a+?(*THEN)/endanchored
+    aa
+ 0: a
+    aaa
+ 0: a
+    aaaa
+ 0: a
+
+/a+?(*THEN)\z/
+    aaaa
+ 0: a
+
+/a+?(*PRUNE)/endanchored
+    aaaa
+ 0: a
+
+/a+?(*SKIP)/endanchored
+    aaaa
+ 0: a
+
+/a+?(*COMMIT)/endanchored
+\= Expect no match
+    aaaa
+No match
+
 # Check auto-anchoring when there is a group that is never obeyed at
 # the start of a branch.
 

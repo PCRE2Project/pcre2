@@ -14409,6 +14409,7 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   const sljit_u8 *tables = re->tables;
   void *allocator_data = &re->memctl;
   int private_data_size;
+  int fast_forward_ptr = 0;
   PCRE2_SPTR ccend;
   executable_functions *functions;
   void *executable_func;
@@ -14757,8 +14758,10 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   if (common->capture_last_ptr != 0)
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->capture_last_ptr, SLJIT_IMM, 0);
   if (common->fast_forward_bc_ptr != NULL)
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), PRIVATE_DATA(common->fast_forward_bc_ptr + 1) >> 3,
-        STR_PTR, 0);
+  {
+    fast_forward_ptr = PRIVATE_DATA(common->fast_forward_bc_ptr + 1) >> 3;
+    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_forward_ptr, STR_PTR, 0);
+  }
 
   if (common->start_ptr != OVECTOR(0))
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->start_ptr, STR_PTR, 0);
@@ -15093,6 +15096,9 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
     /* The value of restart_match is in TMP1. */
     CMPTO(SLJIT_GREATER, STR_PTR, 0, TMP1, 0, continue_match_label);
     OP1(SLJIT_MOV, STR_PTR, 0, TMP1, 0);
+    /* A control verb can abort before the accelerated iterator backtracks. */
+    if (fast_forward_ptr != 0)
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), fast_forward_ptr, STR_PTR, 0);
     JUMPTO(SLJIT_JUMP, reset_match_label);
   }
 #ifdef SUPPORT_UNICODE
