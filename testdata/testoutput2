@@ -23843,6 +23843,82 @@ Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported
 Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported with partial match
         here: >$' |<--| <
 
+# Callout start offsets after resetting the start of a match.
+
+/(?C1)A\K(?C2)B(?C3)C/
+    _ABC_
+--->_ABC_
+  1  ^        A
+  2   ^       B
+  3   ^^      C
+ 0: BC
+    _ABC_ABC_\=offset=4
+--->_ABC_ABC_
+  1      ^        A
+  2       ^       B
+  3       ^^      C
+ 0: BC
+
+/A\K(?C"after")BC/
+    _ABC_
+Callout (7): "after"
+--->_ABC_
+      ^       B
+ 0: BC
+
+/A\K(?C1)B\K(?C2)C/
+    _ABC_
+--->_ABC_
+  1   ^       B
+  2    ^      C
+ 0: C
+
+/A(?:B\K(?C1)D|(?C2)B)(?C3)C/
+    _ABC_
+--->_ABC_
+  1    ^      D
+  2  ^^       B
+  3  ^ ^      C
+ 0: ABC
+
+/A\K(?(?C1)(?=B)B|D)C/
+    _ABC_\=no_jit
+--->_ABC_
+  1   ^       (?=
+ 0: BC
+
+/(?(DEFINE)(?<x>A\K(?C1)B))(?&x)(?C2)C/
+    _ABC_
+--->_ABC_
+  1   ^       B
+  2   ^^      C
+ 0: BC
+
+/A\K(?C1)B/
+    _AC_AB_
+--->_AC_AB_
+  1   ^         B
+  1      ^      B
+ 0: B
+
+/(?C1)A(?C2)B(?C3)C/
+    _ABC_
+--->_ABC_
+  1  ^        A
+  2  ^^       B
+  3  ^ ^      C
+ 0: ABC
+
+/A\KBC/auto_callout
+    _ABC_
+--->_ABC_
+ +0  ^        A
+ +1  ^^       \K
+ +3   ^       B
+ +4   ^^      C
+ +5   ^ ^     End of pattern
+ 0: BC
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
