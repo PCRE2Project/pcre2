@@ -8417,4 +8417,34 @@ a)"xI
     abc\=ps,substitute_replacement_only,replace=>$_<
     abc\=ps,substitute_replacement_only,replace=>$'<
 
+# Callout start offsets after resetting the start of a match.
+
+/(?C1)A\K(?C2)B(?C3)C/
+    _ABC_
+    _ABC_ABC_\=offset=4
+
+/A\K(?C"after")BC/
+    _ABC_
+
+/A\K(?C1)B\K(?C2)C/
+    _ABC_
+
+/A(?:B\K(?C1)D|(?C2)B)(?C3)C/
+    _ABC_
+
+/A\K(?(?C1)(?=B)B|D)C/
+    _ABC_\=no_jit
+
+/(?(DEFINE)(?<x>A\K(?C1)B))(?&x)(?C2)C/
+    _ABC_
+
+/A\K(?C1)B/
+    _AC_AB_
+
+/(?C1)A(?C2)B(?C3)C/
+    _ABC_
+
+/A\KBC/auto_callout
+    _ABC_
+
 # End of testinput2

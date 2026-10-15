@@ -15,6 +15,9 @@ Version 10.50 xx-xxx-2026
 the configured header installation directory and handle absolute header and
 library installation directories.
 
+2. (#1040) Fixed the start_match field passed to interpreter callouts after \K
+resets the start of a match, including restoration on backtracking.
+
 
 Version 10.49 28-September-2026
 -------------------------------
