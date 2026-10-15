@@ -804,8 +804,13 @@ module Pcre2HtmlOutput
   def highlight_inline(tree, document)
     return unless document.syntax_highlighter&.name == 'rouge'
 
+    highlight_source(tree)
+  end
+
+  def highlight_source(tree)
     tree.css('code[class]').each do |code|
       next if code.ancestors('pre').any?
+      next if code['data-lang'] && code['class'].split.include?('rouge')
       next if Pcre2Source.inline_token(code['class'].split, code.text)
       language = Pcre2Source.inline_language(code['class'].split)
       next unless language
@@ -993,7 +998,7 @@ if $PROGRAM_NAME == __FILE__
   options = {}
   OptionParser.new do |parser|
     parser.banner = "Usage: #{$PROGRAM_NAME} [--embedded --output-dir DIR] [input.adoc ...]"
-    parser.on('--embedded', 'Render HTML fragments for Hugo, without manpages') { options[:embedded] = true }
+    parser.on('--embedded', 'Render website HTML fragments, without manpages') { options[:embedded] = true }
     parser.on('--output-dir DIR', 'Write HTML to DIR') { |directory| options[:output_dir] = directory }
   end.parse!
   inputs = ARGV.empty? ? Dir.glob('*.adoc').sort : ARGV

@@ -16,37 +16,34 @@ concurrency:
 jobs:
   Build:
     runs-on: ubuntu-latest
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/pages/Gemfile
+      BUNDLE_PATH: ${{ github.workspace }}/pages/vendor/bundle
     steps:
       - name: Setup
         run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate && sudo dpkg-reconfigure man-db
           sudo apt-get -qq update
-          sudo apt-get -qq install -y hugo
-
-      # Install Asciidoctor, the semantic HTML converter, and the Rouge source highlighter
-      - name: Install Asciidoctor, HTML5s, and Rouge
-        run: |
-          sudo apt update
-          sudo apt install -y ruby ruby-dev
-          gem install --user-install asciidoctor asciidoctor-html5s rouge nokogiri
-          export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
-          export PATH="$GEM_HOME/bin:$PATH"
-          echo "Ruby version: $(ruby -v)"
-          echo "Asciidoctor version: $(asciidoctor --version)"
-          echo "Rouge version: $(rouge --version)"
-          echo "$GEM_HOME/bin" >> "$GITHUB_PATH"
+          sudo apt-get -qq install -y ruby ruby-dev ruby-bundler build-essential
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install locked website dependencies
+        run: |
+          bundle config set --local frozen true
+          bundle install
+          bundle exec ruby -rjekyll -rasciidoctor -rrouge -e \
+            'puts "Jekyll #{Jekyll::VERSION}, Asciidoctor #{Asciidoctor::VERSION}, Rouge #{Rouge.version}"'
 
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
-      - name: Build with Hugo
+      - name: Build with Jekyll
         env:
-          HUGO_BASE_URL: ${{ steps.pages.outputs.base_url }}
-        run: pages/maint/Build.py
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: ruby maint/BuildPages.rb
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0

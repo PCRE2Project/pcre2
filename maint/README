@@ -21,28 +21,22 @@ Files in the maint directory
 ============================
 
 AsciidocMarkup.md
-  Design goals and authoring conventions for semantic markup in
-  doc/pcre2api.adoc, including HTML and manpage requirements.
+  Authoring conventions and rendering architecture for the AsciiDoc manuals.
 
 AsciidocConverterPcre2.rb
-  Custom Asciidoctor extensions that render HTML and manpage output. Rendering
-  requires the Asciidoctor, asciidoctor-html5s, Rouge, and Nokogiri Ruby gems.
-  Pass --embedded --output-dir DIR to batch-render HTML fragments for Hugo;
-  the default generates full HTML documents and manpages. The site build uses
-  the sources directly, never doc/html, and does not invoke Hugo's Asciidoctor CLI.
+  Shared Asciidoctor extensions for standalone HTML, website fragments and
+  manpages. Requires Asciidoctor, asciidoctor-html5s, Rouge and Nokogiri.
+  See AsciidocMarkup.md for markup conventions and ownership of styles.
 
-AsciidocTest.rb
-  Converter regression tests. Run ruby maint/AsciidocTest.rb.
-  Shared typography/reset and standalone layout styles live in doc/assets/css.
-  They are concatenated into doc/html/css/pcre2.css for distributed manuals;
-  Hugo mounts the shared source directly and owns its layout and font loading.
-  Standalone manuals use installed fonts and fallbacks, not bundled fonts.
-  Shared light/dark SVGs live in doc/assets/images; Hugo mounts them and the
-  standalone renderer copies them into doc/html/images.
-  Rouge and Chroma keep their own lexers but share token styling in document.css.
-  Only typed programming-language source is lexed; regex/subject/repl roles and
-  neutral monospace are styled without parsing. Converter tests also cover
-  typed inline code and roff font/escaping behavior.
+AsciidocDemo.rb
+AsciidocIndex.rb
+  Generate the demo manual and documentation index from project sources.
+  UpdateAlways.rb runs these before rendering the manuals.
+
+BuildPages.rb
+  Build the Jekyll website from the manual and project sources, then index it
+  with Pagefind. Install pages/Gemfile with Bundler and pass --base-url URL
+  or set PAGES_BASE_URL. The website does not consume generated doc/html.
 
 cmake-tests
   CMake projects that exercise PCRE2 as a build-tree dependency and as an

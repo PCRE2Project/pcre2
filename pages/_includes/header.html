@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="color-scheme" content="light dark" />
+
+	<link rel="icon" type="image/png" href="{{ '/favicon-96x96.png' | relative_url }}" sizes="96x96" />
+	<link rel="icon" type="image/svg+xml" href="{{ '/favicon.svg' | relative_url }}" />
+	<link rel="shortcut icon" href="{{ '/favicon.ico' | relative_url }}" />
+
+	<title>{% unless page.url == '/' %}{{ page.title | escape }} | {% endunless %}{{ site.title | escape }}</title>
+
+	<link rel="stylesheet" href="{{ '/css/document.css' | relative_url }}" type="text/css" media="all" />
+	<link rel="stylesheet" href="{{ '/css/style.css' | relative_url }}" type="text/css" media="all" />
+
+	<meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc" />
+	<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff" />
+
+	<script src="{{ '/js/init-pagefind.js' | relative_url }}" type="module"></script>
+
+</head>
+
+<body>

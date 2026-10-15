@@ -1,0 +1,25 @@
+title: PCRE2 - Perl-Compatible Regular Expressions
+url: https://www.pcre2.org
+baseurl: ""
+destination: public
+markdown: Pcre2
+highlighter: rouge
+disable_disk_cache: true
+kramdown:
+  input: Pcre2GFM
+  parse_block_html: false
+  syntax_highlighter: null
+  auto_ids: true
+  hard_wrap: false
+  gfm_quirks: [paragraph_end]
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - public
+  - demo
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default

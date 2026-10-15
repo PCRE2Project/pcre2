@@ -235,7 +235,7 @@ code :is(strong, b), pre :is(strong, b) {
   font-weight: var(--weight-mono-strong);
 }
 
-:is(code.rouge, pre.rouge, .chroma) {
+code.rouge, pre.rouge {
   color: var(--colour-fg);
   font-style: normal;
   font-weight: 400;
@@ -243,37 +243,37 @@ code :is(strong, b), pre :is(strong, b) {
 
 /* Profiles mirror Pcre2Source.profile; palette variables are set only on pre. */
 code.parameter,
-:is(.rouge, .chroma) :is(.n, .nv, .vc, .vg, .vi, .vm, .nl) {
+.rouge :is(.n, .nv, .vc, .vg, .vi, .vm, .nl) {
   color: var(--colour-fg);
   font-style: italic;
   font-weight: 400;
 }
 
-code.function, :is(.rouge, .chroma) :is(.nf, .fm) {
+code.function, .rouge :is(.nf, .fm) {
   color: var(--source-function, var(--colour-fg));
   font-style: normal;
   font-weight: var(--weight-mono-strong);
 }
 
-code.type, :is(.rouge, .chroma) .kt {
+code.type, .rouge .kt {
   color: var(--source-type, var(--colour-fg));
   font-style: normal;
   font-weight: 400;
 }
 
-code.constant, :is(.rouge, .chroma) .no {
+code.constant, .rouge .no {
   color: var(--source-constant, var(--colour-fg));
   font-style: normal;
   font-weight: var(--weight-mono-strong);
 }
 
-:is(.rouge, .chroma) :is(.k, .kc, .kd, .kn, .kp, .kr, .kv, .o, .ow) {
+.rouge :is(.k, .kc, .kd, .kn, .kp, .kr, .kv, .o, .ow) {
   color: var(--source-keyword, var(--colour-fg));
   font-style: normal;
   font-weight: 400;
 }
 
-code.character, :is(.rouge, .chroma) :is(
+code.character, .rouge :is(
   .l, .ld, .m, .mb, .mf, .mh, .mi, .il, .mo, .mx,
   .s, .sa, .sb, .sc, .dl, .sd, .s1, .s2, .se, .sh, .si, .sx, .sr, .ss
 ) {
@@ -282,13 +282,13 @@ code.character, :is(.rouge, .chroma) :is(
   font-weight: 400;
 }
 
-:is(.rouge, .chroma) :is(.cp, .cpf) {
+.rouge :is(.cp, .cpf) {
   color: var(--source-literal, var(--colour-fg));
   font-style: italic;
   font-weight: 400;
 }
 
-:is(.rouge, .chroma) :is(.c, .ch, .cd, .c1, .cm, .cs) {
+.rouge :is(.c, .ch, .cd, .c1, .cm, .cs) {
   color: var(--source-comment, var(--colour-fg));
   font-style: italic;
   font-weight: 400;
@@ -381,6 +381,7 @@ th code { font-weight: 500; }
 [role="doc-toc"] .toc-list a,
 [role="doc-toc"] .toc-list a * {
   color: var(--neutral-1);
+  font-weight: inherit;
 }
 
 [role="doc-toc"] .toc-list a:is(:hover, :focus-visible),

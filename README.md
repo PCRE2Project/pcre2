@@ -1,6 +1,6 @@
 <picture>
-    <source media="(prefers-color-scheme: dark)" width="100%" height="100px" srcset="https://raw.githubusercontent.com/PCRE2Project/pcre2/refs/heads/main/pages/static/images/pcre2-readme-dark.svg">
-    <img alt="PCRE2: Perl-Compatible Regular Expressions" width="100%" height="100px" src="https://raw.githubusercontent.com/PCRE2Project/pcre2/refs/heads/main/pages/static/images/pcre2-readme-light.svg">
+    <source media="(prefers-color-scheme: dark)" width="100%" height="100px" srcset="https://raw.githubusercontent.com/PCRE2Project/pcre2/refs/heads/main/pages/images/pcre2-readme-dark.svg">
+    <img alt="PCRE2: Perl-Compatible Regular Expressions" width="100%" height="100px" src="https://raw.githubusercontent.com/PCRE2Project/pcre2/refs/heads/main/pages/images/pcre2-readme-light.svg">
 </picture>
 
 ## Overview
