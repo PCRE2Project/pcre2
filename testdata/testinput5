@@ -1651,6 +1651,22 @@
 
 /\p{Xan}+\p{Nd} \P{Xan}+\p{Nd} \p{Xan}+\P{Nd} \P{Xan}+\P{Nd}/Bx,ucp
 
+# Whole-pattern recursion may backtrack through terminal iterators.
+
+/(?:b(?R)a|a+)/B
+    baa
+    bbaaa
+    baaa
+
+/(?:b(?0)a|a+)/B
+    baa
+
+# Local subroutine calls do not re-enter the whole pattern.
+
+/(?<r>b(?&r)a|x)a+/B
+    xaa
+    bxaaa
+
 # End auto-possessification tests
 
 /\w+/B,utf,ucp,auto_callout
