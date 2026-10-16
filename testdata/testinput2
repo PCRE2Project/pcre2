@@ -4905,6 +4905,55 @@ B)x/alt_verbnames,mark
     \n..\naa\=offset_limit=3
     \n..\naa\=offset_limit=4
 
+# FIRSTLINE and offset limits must both constrain the starting position.
+
+/b/firstline,use_offset_limit,newline=lf
+    ab\nb\=offset_limit=0
+    ab\nb\=offset_limit=1
+    ab\nb\=offset_limit=2
+    ab\nb\=offset_limit=4
+    ab\nb
+    b\nb\=offset_limit=0
+    a\nb\=offset_limit=3
+    ab\=offset_limit=0
+    ab\=offset_limit=2
+    ab\nb\=offset=1,offset_limit=0
+    ab\nb\=offset=1,offset_limit=1
+    a\nab\=offset=2,offset_limit=2
+    a\nab\=offset=2,offset_limit=3
+    a\nb\=offset=2,offset_limit=2
+
+/b/firstline,use_offset_limit,newline=lf,no_start_optimize
+    ab\nb\=offset_limit=0
+    ab\nb\=offset_limit=1
+    ab\nb\=offset_limit=2
+    ab\nb\=offset_limit=4
+    ab\nb
+    b\nb\=offset_limit=0
+    a\nb\=offset_limit=3
+    ab\=offset_limit=0
+    ab\=offset_limit=2
+    ab\nb\=offset=1,offset_limit=0
+    ab\nb\=offset=1,offset_limit=1
+    a\nab\=offset=2,offset_limit=2
+    a\nab\=offset=2,offset_limit=3
+    a\nb\=offset=2,offset_limit=2
+
+/\n/firstline,use_offset_limit,newline=lf
+    a\nb\=offset_limit=0
+    a\nb\=offset_limit=1
+    a\nb\=offset_limit=3
+
+/b\nc/firstline,use_offset_limit,newline=lf
+    ab\nc\=offset_limit=0
+    ab\nc\=offset_limit=1
+
+/b/firstline,use_offset_limit,newline=crlf
+    ab\r\nb\=offset_limit=0
+    ab\r\nb\=offset_limit=1
+    ab\r\nb\=offset_limit=5
+    a\r\nb\=offset_limit=4
+
 /abcd/null_context
     abcd\=null_context
 \= Expect not allowed together
