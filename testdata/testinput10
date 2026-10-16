@@ -749,4 +749,9 @@
 /[\x00-\x2f\x11-\xff]{4,}/B,utf
     abcd
 
+/\b/utf,use_offset_limit
+    \x{300}\x{4e2d}\x{1f600}1\=offset_limit=9
+\= Expect no match
+    \x{300}\x{4e2d}\x{1f600}1\=offset_limit=6
+
 # End of testinput10
