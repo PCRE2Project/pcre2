@@ -64,7 +64,7 @@ which are not intended for use by external callers. Their names all begin with
 environments, it is possible to control which external symbols are exported
 when a shared library is built, and in these cases the undocumented symbols are
 not exported.</p></section>
-<section class="doc-section level-1"><h2 id="_security_considerations">Security considerations</h2><p>If you are using PCRE2 in a non-UTF application that permits users to supply
+<section class="doc-section level-1"><h2 id="security-considerations">Security considerations</h2><p>If you are using PCRE2 in a non-UTF application that permits users to supply
 arbitrary patterns for compilation, you should be aware of a feature that
 allows users to turn on UTF support from within a pattern. For example, an
 8-bit pattern that begins with <code class="regex rouge"><span class="pcre2-semantic">(*UTF)</span></code> turns on UTF-8 mode, which interprets
