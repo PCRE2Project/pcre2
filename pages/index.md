@@ -3,7 +3,7 @@ title: Home
 layout: home
 ---
 
-<!-- These two frontpages, README.md and pages/index.md, should be kept in sync. -->
+<!-- These two frontpages, .github/README.md and pages/index.md, should be kept in sync. -->
 
 <table border="0" style="display: grid; grid-template-columns: max-content minmax(0, 1fr);">
 <tbody style="display: contents;">
