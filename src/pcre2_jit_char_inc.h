@@ -2036,12 +2036,8 @@ compile_char1_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR
       detect_partial_match(common, backtracks);
     read_char(common, common->bsr_nlmin, common->bsr_nlmax, NULL, 0);
     jump[0] = CMP(SLJIT_NOT_EQUAL, TMP1, 0, SLJIT_IMM, CHAR_CR);
-    /* We don't need to handle soft partial matching case. */
     end_list = NULL;
-    if (common->mode != PCRE2_JIT_PARTIAL_HARD)
-      add_jump(compiler, &end_list, CMP(SLJIT_GREATER_EQUAL, STR_PTR, 0, STR_END, 0));
-    else
-      check_str_end(common, &end_list);
+    check_str_end(common, &end_list);
     OP1(MOV_UCHAR, TMP1, 0, SLJIT_MEM1(STR_PTR), 0);
     OP2U(SLJIT_SUB | SLJIT_SET_Z, TMP1, 0, SLJIT_IMM, CHAR_NL);
     OP_FLAGS(SLJIT_MOV, TMP1, 0, SLJIT_EQUAL);
