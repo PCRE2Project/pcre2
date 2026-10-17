@@ -98,7 +98,7 @@ being a pointer to a vector of pointers to compiled patterns, and the length of
 the vector. The third and fourth arguments point to variables which are set to
 point to the created byte stream and its length, respectively. The final
 argument is a pointer to a general context, which can be used to specify custom
-memory management functions. If this argument is \f(CRNULL\fP, \f(CBmalloc\fP\f(CR()\fP is used
+memory management functions. If this argument is \f(CBNULL\fP, \f(CBmalloc\fP\f(CR()\fP is used
 to obtain memory for the byte stream. The yield of the function is the number
 of serialized patterns, or one of the following negative error codes:
 .sp
@@ -123,7 +123,7 @@ the patterns do not all use the same tables
 .TP 24
 \f(CBPCRE2_ERROR_NULL\fP
 .ad l
-The 1st, 3rd, or 4th argument is \f(CRNULL\fP
+The 1st, 3rd, or 4th argument is \f(CBNULL\fP
 .PD
 .RE
 .PP
@@ -148,14 +148,14 @@ PCRE2_SIZE\fP \f(CIbytescount\fP\f(CR;
 pcre2_code *\fP\f(CIlist_of_codes\fP\f(CR[2];\fP
 \f(CIlist_of_codes\fP\f(CR[0] =\fP \f(CBpcre2_compile\fP\f(CR("first pattern",\fP
                                  \f(CBPCRE2_ZERO_TERMINATED\fP\f(CR, 0,
-                                 &\fP\f(CIerrorcode\fP\f(CR, &\fP\f(CIerroroffset\fP\f(CR,
-                                 NULL);\fP
+                                 &\fP\f(CIerrorcode\fP\f(CR, &\fP\f(CIerroroffset\fP\f(CR,\fP
+                                 \f(CBNULL\fP\f(CR);\fP
 \f(CIlist_of_codes\fP\f(CR[1] =\fP \f(CBpcre2_compile\fP\f(CR("second pattern",\fP
                                  \f(CBPCRE2_ZERO_TERMINATED\fP\f(CR, 0,
-                                 &\fP\f(CIerrorcode\fP\f(CR, &\fP\f(CIerroroffset\fP\f(CR,
-                                 NULL);\fP
+                                 &\fP\f(CIerrorcode\fP\f(CR, &\fP\f(CIerroroffset\fP\f(CR,\fP
+                                 \f(CBNULL\fP\f(CR);\fP
 \f(CIerrorcode\fP \f(CR=\fP \f(CBpcre2_serialize_encode\fP\f(CR(\fP\f(CIlist_of_codes\fP\f(CR, 2, &\fP\f(CIbytes\fP\f(CR,
-                                   &\fP\f(CIbytescount\fP\f(CR, NULL);\fP
+                                   &\fP\f(CIbytescount\fP\f(CR,\fP \f(CBNULL\fP\f(CR);\fP
 \f(CIerrorcode\fP \f(CR=\fP \f(CBfwrite\fP\f(CR(\fP\f(CIbytes\fP\f(CR, 1,\fP \f(CIbytescount\fP\f(CR,\fP \f(CIfd\fP\f(CR);\fP
 .fam
 .fi
@@ -169,7 +169,7 @@ Serializing a set of patterns leaves the original data untouched, so they can
 still be used for matching. Their memory must eventually be freed in the usual
 way by calling \f(CBpcre2_code_free()\fP. When you have finished with the byte
 stream, it too must be freed by calling \f(CBpcre2_serialize_free()\fP. If this
-function is called with a \f(CRNULL\fP argument, it returns immediately without doing
+function is called with a \f(CBNULL\fP argument, it returns immediately without doing
 anything.
 .SH "RE\-USING PRECOMPILED PATTERNS"
 .sp
@@ -198,7 +198,7 @@ the compiled patterns in new memory blocks, setting pointers to them in a
 vector. The first two arguments are a pointer to a suitable vector and its
 length, and the third argument points to a byte stream. The final argument is a
 pointer to a general context, which can be used to specify custom memory
-management functions for the decoded patterns. If this argument is \f(CRNULL\fP,
+management functions for the decoded patterns. If this argument is \f(CBNULL\fP,
 \f(CBmalloc\fP\f(CR()\fP and \f(CBfree\fP\f(CR()\fP are used. After deserialization, the byte
 stream is no longer needed and can be discarded.
 .sp
@@ -208,7 +208,7 @@ stream is no longer needed and can be discarded.
 \f(CRpcre2_code *\fP\f(CIlist_of_codes\fP\f(CR[2];
 uint8_t *\fP\f(CIbytes\fP \f(CR= <\fP\f(CIserialized\fP \f(CIdata\fP\f(CR>;
 int32_t\fP \f(CInumber_of_codes\fP \f(CR=\fP
-    \f(CBpcre2_serialize_decode\fP\f(CR(\fP\f(CIlist_of_codes\fP\f(CR, 2,\fP \f(CIbytes\fP\f(CR, NULL);\fP
+    \f(CBpcre2_serialize_decode\fP\f(CR(\fP\f(CIlist_of_codes\fP\f(CR, 2,\fP \f(CIbytes\fP\f(CR,\fP \f(CBNULL\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -243,7 +243,7 @@ memory allocation failed
 .TP 21
 \f(CBPCRE2_ERROR_NULL\fP
 .ad l
-first or third argument is \f(CRNULL\fP
+first or third argument is \f(CBNULL\fP
 .PD
 .RE
 .PP

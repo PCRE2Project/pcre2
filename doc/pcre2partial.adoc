@@ -41,6 +41,8 @@ func:pcre2_jit_compile() with one or both of these options:
 const:PCRE2_JIT_PARTIAL_HARD::
 const:PCRE2_JIT_PARTIAL_SOFT::
 
+//-
+
 const:PCRE2_JIT_COMPLETE should also be set if you are going to run non-partial
 matches on the same pattern. Separate code is compiled for each mode. If the
 appropriate JIT mode has not been compiled, interpretive matching code is used.

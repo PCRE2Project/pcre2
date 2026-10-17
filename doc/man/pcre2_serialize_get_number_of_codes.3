@@ -34,9 +34,9 @@ pcre2_serialize_get_number_of_codes \- get number of serialized compiled pattern
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint32_t\fP \f(CBpcre2_serialize_get_number_of_codes\fP\f(CR(const uint8_t *\fP\f(CIbytes\fP\f(CR);\fP
+int32_t\fP \f(CBpcre2_serialize_get_number_of_codes\fP\f(CR(const uint8_t *\fP\f(CIbytes\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -65,7 +65,7 @@ other sanity check failure
 .TP 21
 \f(CBPCRE2_ERROR_NULL\fP
 .ad l
-the argument is \f(CRNULL\fP
+the argument is \f(CBNULL\fP
 .PD
 .RE
 .PP

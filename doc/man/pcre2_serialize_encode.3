@@ -34,9 +34,9 @@ pcre2_serialize_encode \- serialize compiled patterns for save/restore
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint32_t\fP \f(CBpcre2_serialize_encode\fP\f(CR(const pcre2_code **\fP\f(CIcodes\fP\f(CR,
+int32_t\fP \f(CBpcre2_serialize_encode\fP\f(CR(const pcre2_code **\fP\f(CIcodes\fP\f(CR,
                                int32_t\fP \f(CInumber_of_codes\fP\f(CR,
                                uint8_t **\fP\f(CIserialized_bytes\fP\f(CR,
                                PCRE2_SIZE *\fP\f(CIserialized_size\fP\f(CR,
@@ -75,7 +75,7 @@ set to the number of bytes in the byte stream
 .TP 17
 \f(CIgcontext\fP
 .ad l
-pointer to a general context or \f(CRNULL\fP
+pointer to a general context or \f(CBNULL\fP
 .PD
 .RE
 .PP
@@ -107,7 +107,7 @@ the patterns do not all use the same tables
 .TP 24
 \f(CBPCRE2_ERROR_NULL\fP
 .ad l
-an argument other than \f(CIgcontext\fP is \f(CRNULL\fP
+an argument other than \f(CIgcontext\fP is \f(CBNULL\fP
 .PD
 .RE
 .PP

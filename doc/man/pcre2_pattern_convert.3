@@ -34,9 +34,9 @@ pcre2_pattern_convert \- foreign pattern converter
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint\fP \f(CBpcre2_pattern_convert\fP\f(CR(PCRE2_SPTR\fP \f(CIpattern\fP\f(CR, PCRE2_SIZE\fP \f(CIplength\fP\f(CR,
+int\fP \f(CBpcre2_pattern_convert\fP\f(CR(PCRE2_SPTR\fP \f(CIpattern\fP\f(CR, PCRE2_SIZE\fP \f(CIplength\fP\f(CR,
                           uint32_t\fP \f(CIoptions\fP\f(CR, PCRE2_UCHAR **\fP\f(CIbuffptr\fP\f(CR,
                           PCRE2_SIZE *\fP\f(CIbufflenptr\fP\f(CR,
                           pcre2_convert_context *\fP\f(CIccontext\fP\f(CR);\fP
@@ -66,7 +66,7 @@ Option bits
 .TP 11
 \f(CIbuffptr\fP
 .ad l
-Pointer to pointer to output buffer, or \f(CRNULL\fP
+Pointer to pointer to output buffer, or \f(CBNULL\fP
 .TP 11
 \f(CIbufflenptr\fP
 .ad l
@@ -74,25 +74,25 @@ Pointer to output length field
 .TP 11
 \f(CIccontext\fP
 .ad l
-Pointer to a convert context or \f(CRNULL\fP
+Pointer to a convert context or \f(CBNULL\fP
 .PD
 .RE
 .PP
 .ad l
 .sp
 The length of the converted pattern (excluding the terminating zero) is
-returned via \f(CIbufflenptr\fP. If \f(CIbuffptr\fP is \f(CRNULL\fP, the function just returns
-the output length. If \f(CIbuffptr\fP points to a \f(CRNULL\fP pointer, heap memory is
+returned via \f(CIbufflenptr\fP. If \f(CIbuffptr\fP is \f(CBNULL\fP, the function just returns
+the output length. If \f(CIbuffptr\fP points to a \f(CBNULL\fP pointer, heap memory is
 obtained for the converted pattern, using the allocator in the context if
 present (or else \f(CBmalloc\fP\f(CR()\fP), and the field pointed to by \f(CIbuffptr\fP is
-updated. If \f(CIbuffptr\fP points to a non\-\f(CRNULL\fP field, that must point to a
+updated. If \f(CIbuffptr\fP points to a non\-\f(CBNULL\fP field, that must point to a
 buffer whose size is in the variable pointed to by \f(CIbufflenptr\fP. This value is
 updated.
 .sp
 The option bits are:
 .sp
 .RS 4
-.PD 0
+.PD
 .TP 7
 \f(CBPCRE2_CONVERT_UTF\fP
 .ad l
@@ -111,12 +111,15 @@ Convert POSIX basic pattern
 Convert POSIX extended pattern
 .TP 7
 \f(CBPCRE2_CONVERT_GLOB\fP
+.PD 0
 .TP 7
 \f(CBPCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR\fP
+.PD 0
 .TP 7
 \f(CBPCRE2_CONVERT_GLOB_NO_STARSTAR\fP
 .ad l
 Convert the different types of glob
+.PD
 .PD
 .RE
 .PP

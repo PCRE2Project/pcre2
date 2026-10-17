@@ -34,35 +34,59 @@ html { scrollbar-gutter: stable; }
 }
 
 .offline-nav a {
-  color: var(--colour-fg);
+  height: 32px;
+  padding: 0 16px;
+  line-height: 32px;
+  border-radius: 4px;
+  color: var(--colour-bg);
+  background-color: var(--theme-bright);
   text-decoration: none;
+  white-space: nowrap;
 }
 
-.offline-nav a:hover, .offline-nav a:focus-visible { text-decoration: underline; }
+.offline-nav a.offline-index {
+  padding: 4px 16px 4px 4px;
+}
+
+.offline-nav a:is(:hover, :focus-visible) {
+  color: var(--colour-bg);
+  background-color: var(--theme-muted);
+  text-decoration: underline;
+}
+
+@media (prefers-color-scheme: dark) {
+  .offline-nav a { color: var(--colour-bg); }
+
+  .offline-nav a:is(:hover, :focus-visible) {
+    color: var(--colour-fg);
+  }
+}
 
 .offline-index {
   display: flex;
   align-items: center;
-  gap: var(--tab);
+  gap: 12px;
 }
 
-.offline-index picture {
+.offline-index::before {
+  content: "";
   display: block;
   width: 64px;
   height: 32px;
-  overflow: hidden;
+  background-image: var(--image-hero);
+  background-size: auto 60px;
+  background-position: -7px -14px;
+  flex-shrink: 0;
 }
 
-.offline-index img {
-  max-width: none;
-  height: 60px;
-  transform: translate(-7px, -14px);
+.offline-index:is(:hover, :focus-visible)::before {
+  background-image: var(--image-hero-hover);
 }
 
 .offline-hero picture { flex-basis: 100%; }
 .offline-hero img { display: block; width: 100%; }
 .offline-home { margin-inline-start: auto; }
-.offline-home span { font-family: 'DejaVu Sans', 'Segoe UI Symbol', sans-serif; }
+.offline-home span { font-family: var(--font-symbols); }
 
 .offline-footer {
   min-height: 1rlh;

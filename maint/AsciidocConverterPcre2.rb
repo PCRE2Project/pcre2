@@ -17,6 +17,7 @@ require 'optparse'
 require 'fileutils'
 require 'date'
 require 'nokogiri'
+require 'unicode/name'
 require_relative 'UpdateCommon'
 
 class Pcre2DocumentDefaults < Asciidoctor::Extensions::Preprocessor
@@ -26,7 +27,7 @@ class Pcre2DocumentDefaults < Asciidoctor::Extensions::Preprocessor
     if document.basebackend? 'html'
       document.set_attribute 'toc-title', 'Contents'
       document.set_attribute 'nofooter' unless document.attr? 'nofooter'
-      document.set_attribute 'stylesheet', 'css/pcre2.css'
+      document.set_attribute 'stylesheet', 'css/document.css'
       document.set_attribute 'linkcss'
       document.delete_attribute 'copycss'
       document.set_attribute 'docrole', 'offline-manual'
@@ -59,7 +60,7 @@ module Pcre2Source
     default: '(CR',
     keyword: '(CR',
     literal: '(CR',
-    preprocessor: '(CI',
+    preprocessor: '(CR',
     constant: '(CB',
     type: '(CR',
     function: '(CB',
@@ -102,7 +103,10 @@ module Pcre2Source
     result = parser.lex(source).to_a
     return result unless parser.tag == 'c'
 
-    result.each_with_index.map do |(token, text), index|
+    result = result.each_with_index.map do |(token, text), index|
+      if Rouge::Token['Keyword'].matches?(token) && text == 'const'
+        next [Rouge::Token['Keyword.Type'], text]
+      end
       if Rouge::Token['Name'].matches?(token) && KEYWORD_CONSTANTS.include?(text)
         next [Rouge::Token['Keyword.Constant'], text]
       end
@@ -123,6 +127,19 @@ module Pcre2Source
       end
       [Rouge::Token[category], text]
     end
+
+    result.each_with_index.flat_map do |(token, text), index|
+      next [[token, text]] unless Rouge::Token['Operator'].matches?(token)
+
+      following = result[index + 1]&.last.to_s
+      text.to_enum(:scan, /[*&]|[^*&]+/).map do
+        part = Regexp.last_match
+        following_character = text[part.end(0)] || following[0]
+        category = part[0].match?(/\A[*&]\z/) && !following_character.to_s.match?(/\s/) ?
+          Rouge::Token['Punctuation'] : token
+        [category, part[0]]
+      end
+    end
   end
 
   def profile(token)
@@ -130,6 +147,8 @@ module Pcre2Source
       :semantic
     elsif Rouge::Token['Keyword.Type'].matches?(token)
       :type
+    elsif Rouge::Token['Name.Constant'].matches?(token) || Rouge::Token['Keyword.Constant'].matches?(token)
+      :constant
     elsif Rouge::Token['Keyword'].matches?(token) || Rouge::Token['Operator'].matches?(token)
       :keyword
     elsif Rouge::Token['Literal'].matches?(token)
@@ -138,8 +157,6 @@ module Pcre2Source
       :preprocessor
     elsif Rouge::Token['Comment'].matches?(token)
       :comment
-    elsif Rouge::Token['Name.Constant'].matches?(token)
-      :constant
     elsif Rouge::Token['Name.Function'].matches?(token)
       :function
     elsif token == Rouge::Token['Name'] || Rouge::Token['Name.Variable'].matches?(token) ||
@@ -182,7 +199,7 @@ class Pcre2ApiInlineMacro < Asciidoctor::Extensions::InlineMacroProcessor
 
   def process(parent, target, _attributes)
     create_inline parent, :quoted, target,
-      type: :monospaced, attributes: {'role' => @role}
+      type: :monospaced, attributes: {'role' => "#{@role} pcre2-api"}
   end
 end
 
@@ -357,6 +374,8 @@ module Pcre2ListLayout
   module_function
 
   def spaced?(node)
+    return true if node.context == :dlist && node.items.any? { |terms, _| terms.length > 1 }
+
     items = node.context == :dlist ? node.items.map(&:last).compact : node.items
     items.any?(&:blocks?)
   end
@@ -392,8 +411,8 @@ class Pcre2HtmlConverter < Asciidoctor::Html5s::Converter
     node.extend(Asciidoctor::Html5s::Converter::Helpers)
     terms_and_descriptions = node.items.map { |terms, description| [terms.map(&:text), description] }
     width = Pcre2ListLayout.label_width(node, terms_and_descriptions.flat_map(&:first))
-    # Match the 16px tab and 8px minimum gap in document.css; round to double tabs.
-    tabs = [((width * 9.6 + 8) / 32).ceil * 2, 2].max
+    # Match the 20px tab and 10px minimum gap in document.css; round to double tabs.
+    tabs = [((width * 9.6 + 10) / 40).ceil * 2, 2].max
     entries = terms_and_descriptions.map do |terms, description|
       term = node.html_tag(:dt, {}, node.html_tag(:span, {}, terms.join('<br>')))
       body = description ? node.html_tag(:dd, {}, node.print_item_content(description)) : ''
@@ -474,7 +493,7 @@ class Pcre2ManpageConverter < Asciidoctor::Converter::ManPageConverter
     spaced = Pcre2ListLayout.spaced?(node)
     # `.sp` retains normal separation from preceding prose, `.RS 4` indents the
     # whole list by four ens, and `.PD 0` suppresses inter-item paragraph
-    # distance for lists whose descriptions contain no additional blocks.
+    # distance for compact single-term lists without additional blocks.
     result << '.sp'
     result << '.RS 4'
     result << (spaced ? '.PD' : '.PD 0')
@@ -749,13 +768,13 @@ end
 
 module Pcre2HtmlOutput
   DOCUMENT_NAMES = Dir.glob(File.expand_path('../doc/*.adoc', __dir__)).map { |path| File.basename(path, '.adoc') }.freeze
-  IMAGE_NAMES = %w[pcre2-header-light.svg pcre2-header-dark.svg pcre2-hero-light.svg pcre2-hero-dark.svg].freeze
 
   module_function
 
   def metadata(document)
     version = document.attr('mansource', "PCRE2 #{Pcre2Maintenance::CURRENT_RELEASE}")
-    kind = document.doctype == 'manpage' ? 'manual' : 'documentation'
+    kind = document.doctype == 'manpage' || document.attr('docname') == 'index' ?
+      'manual' : 'documentation'
     result = "PCRE2 #{CGI.escapeHTML(version.delete_prefix('PCRE2 '))} #{kind}"
     if (revision = document.attr('revdate'))
       date = Date.parse(revision)
@@ -774,7 +793,7 @@ module Pcre2HtmlOutput
     if document.attr('docname') == 'index'
       %(<header class="offline-nav offline-hero"><nav>#{picture('header', 'PCRE2: Perl-Compatible Regular Expressions')}#{home}</nav></header>)
     else
-      %(<header class="offline-nav"><nav><a class="offline-index" href="./index.html">#{picture('hero', '')} Index</a>#{home}</nav></header>)
+      %(<header class="offline-nav"><nav><a class="offline-index" href="./index.html">Index</a>#{home}</nav></header>)
     end
   end
 
@@ -872,6 +891,62 @@ module Pcre2HtmlOutput
     end
   end
 
+  def annotate_characters(tree)
+    links = []
+    tree.css('code.character.pcre2-api').each_with_index do |code, index|
+      value = Integer(code.text.delete_prefix('U+').delete_prefix('0x'), 16)
+      label = format('U+%04X', value)
+      glyph = ''
+      if value > 0x10ffff
+        name = 'Outside Unicode range'
+        label = code.text
+      elsif (0xd800..0xdfff).cover?(value)
+        name = 'Surrogate code point'
+      else
+        character = value.chr(Encoding::UTF_8)
+        name = Unicode::Name.readable(character)
+        unless character.match?(/[\p{C}\p{Z}\p{Default_Ignorable_Code_Point}]/)
+          glyph = character.match?(/\p{M}/) ? "\u25cc#{character}" : character
+        end
+      end
+      card = Nokogiri::XML::Node.new('span', tree.document)
+      card['class'] = 'character-card'
+      card['id'] = "pcre2-character-#{index + 1}"
+      card['role'] = 'tooltip'
+      card['aria-label'] = "#{name} (#{label})"
+      card['aria-hidden'] = 'true'
+      card['data-pagefind-ignore'] = ''
+      {
+        'glyph' => ['data-character', glyph],
+        'name' => ['data-character-name', name],
+        'codepoint' => ['data-codepoint', label],
+      }.each do |kind, (attribute, value)|
+        part = Nokogiri::XML::Node.new('span', tree.document)
+        part['class'] = "character-#{kind}"
+        part[attribute] = value
+        card.add_child(part)
+      end
+
+      wrapper = Nokogiri::XML::Node.new('span', tree.document)
+      wrapper['class'] = 'character-info'
+      # Suppress any enclosing link's native tooltip.
+      wrapper['title'] = ''
+      if (link = code.ancestors('a').first)
+        unless links.include?(link)
+          wrapper.add_class('character-link-focus')
+          link['aria-describedby'] = [link['aria-describedby'], card['id']].compact.join(' ')
+          links << link
+        end
+      else
+        wrapper['tabindex'] = '0'
+        wrapper['aria-describedby'] = card['id']
+      end
+      code.replace(wrapper)
+      wrapper.add_child(code)
+      wrapper.add_child(card)
+    end
+  end
+
   def process(document, output)
     full = output.start_with?('<!DOCTYPE')
     tree = full ? Nokogiri::HTML5.parse(output) : Nokogiri::HTML5.fragment(output)
@@ -879,6 +954,7 @@ module Pcre2HtmlOutput
     annotate_semantics(tree)
     normalize_links(tree, document)
     tree.css('.toc-list a').each { |link| link['title'] ||= link.text }
+    annotate_characters(tree)
     return tree.to_html unless full || document.attr?('pcre2-site')
 
     container = full ? tree.at_css('body') : tree
@@ -916,6 +992,7 @@ module Pcre2HtmlOutput
     if full
       head = tree.at_css('head')
       head.add_child(Nokogiri::HTML5.fragment(
+        %(<link rel="stylesheet" href="./css/standalone.css">) +
         %(<meta name="color-scheme" content="light dark">) +
         %(<meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc">) +
         %(<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff">)))
@@ -940,15 +1017,11 @@ module Pcre2AsciidocConverter
   module_function
 
   def copy_html_assets(directory)
-    assets = File.expand_path('../doc/assets/css', __dir__)
-    FileUtils.mkdir_p(File.join(directory, 'css'))
-    shared = File.read(File.join(assets, 'document.css'), encoding: Encoding::UTF_8)
-    offline = File.read(File.join(assets, 'standalone.css'), encoding: Encoding::UTF_8)
-    File.write(File.join(directory, 'css/pcre2.css'), shared + "\n" + offline, encoding: Encoding::UTF_8)
-    FileUtils.mkdir_p(File.join(directory, 'images'))
-    Pcre2HtmlOutput::IMAGE_NAMES.each do |name|
-      FileUtils.cp(File.join(File.expand_path('../doc/assets/images', __dir__), name), File.join(directory, 'images', name))
-    end
+    assets = File.expand_path('../doc/html', __dir__)
+    return if File.expand_path(directory) == assets
+
+    FileUtils.mkdir_p(directory)
+    FileUtils.cp_r(%w[css images].map { |name| File.join(assets, name) }, directory)
   end
 
   # Convert AsciiDoc sources into their HTML and manpage outputs.

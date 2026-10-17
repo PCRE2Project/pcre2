@@ -48,7 +48,7 @@ module Pcre2AsciidocIndex
   end
 
   def write_table(output, pages)
-    output << "[cols=\"2,3\",stripes=even]\n"
+    output << "[.fit-first,cols=\"2,3\",stripes=even]\n"
     output << "|===\n"
     pages.each do |page|
       output << "|xref:#{page.source.basename}[#{table_cell(page.name)}]\n"

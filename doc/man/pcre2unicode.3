@@ -381,15 +381,19 @@ values are not representable in UTF\-16.
 The following negative error codes are given for invalid UTF\-8 strings:
 .sp
 .RS 4
-.PD 0
+.PD
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR1\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR2\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR3\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR4\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR5\fP
 .ad l
@@ -398,27 +402,35 @@ bytes are missing (1 to 5). Although RFC 3629 restricts UTF\-8 characters to be
 no longer than 4 bytes, the encoding scheme (originally defined by RFC 2279)
 allows for up to 6 bytes, and this is checked first; hence the possibility of
 4 or 5 missing bytes.
+.PD
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR6\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR7\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR8\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR9\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR10\fP
 .ad l
 The two most significant bits of the 2nd, 3rd, 4th, 5th, or 6th byte of the
 character do not have the binary value \f(CR0\fP\f(CIb10\fP (that is, either the most
 significant bit is 0, or the next bit is 1).
+.PD
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR11\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR12\fP
 .ad l
 A character that is valid by the RFC 2279 rules is either 5 or 6 bytes long;
 these code points are excluded by RFC 3629.
+.PD
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR13\fP
 .ad l
@@ -432,12 +444,16 @@ code points are reserved by RFC 3629 for use with UTF\-16, and so are excluded
 from UTF\-8.
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR15\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR16\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR17\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR18\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR19\fP
 .ad l
@@ -445,6 +461,7 @@ A 2\-, 3\-, 4\-, 5\-, or 6\-byte character is "overlong", that is, it codes for 
 value that can be represented by fewer bytes, which is invalid. For example,
 the two bytes \f(CR0xc0\fP, \f(CR0xae\fP give the value \f(CR0x2e\fP, whose correct coding uses just
 one byte.
+.PD
 .TP 23
 \f(CBPCRE2_ERROR_UTF8_ERR20\fP
 .ad l

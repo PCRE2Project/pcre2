@@ -161,7 +161,7 @@ As of release 10.45 there is a more informative way to test for JIT support. If
 it returns zero if JIT is available and has a working allocator. Otherwise it
 returns \f(CBPCRE2_ERROR_NOMEMORY\fP if JIT is available but cannot allocate executable
 memory, or \f(CBPCRE2_ERROR_JIT_UNSUPPORTED\fP if JIT support is not compiled. The
-\f(CIcode\fP argument is ignored, so it can be a \f(CRNULL\fP value.
+\f(CIcode\fP argument is ignored, so it can be a \f(CBNULL\fP value.
 .sp
 A simple program does not need to check availability in order to use JIT when
 possible. The API is implemented in a way that falls back to the interpretive
@@ -301,10 +301,10 @@ below.
 .sp
 The \f(CBpcre2_jit_stack_create()\fP function creates a JIT stack. Its arguments
 are a starting size, a maximum size, and a general context (for memory
-allocation functions, or \f(CRNULL\fP for standard memory allocation). It returns a
-pointer to an opaque structure of type \f(CRpcre2_jit_stack\fP, or \f(CRNULL\fP if there
+allocation functions, or \f(CBNULL\fP for standard memory allocation). It returns a
+pointer to an opaque structure of type \f(CRpcre2_jit_stack\fP, or \f(CBNULL\fP if there
 is an error. The \f(CBpcre2_jit_stack_free()\fP function is used to free a stack
-that is no longer needed. If its argument is \f(CRNULL\fP, this function returns
+that is no longer needed. If its argument is \f(CBNULL\fP, this function returns
 immediately, without doing anything. (For the technically minded: the address
 space is allocated by \f(CBmmap\fP\f(CR()\fP or \f(CBVirtualAlloc\fP\f(CR()\fP.) A maximum stack size of 512KiB to
 1MiB should be more than enough for any pattern.
@@ -324,7 +324,7 @@ void\&                 *\fP\f(CIdata\fP
 .sp
 The first argument is a pointer to a match context. When this is subsequently
 passed to a matching function, its information determines which JIT stack is
-used. If this argument is \f(CRNULL\fP, the function returns immediately, without doing
+used. If this argument is \f(CBNULL\fP, the function returns immediately, without doing
 anything. There are three cases for the values of the other two options:
 .sp
 .RS 4
@@ -335,7 +335,7 @@ anything. There are three cases for the values of the other two options:
 .  sp -1
 .  IP " 1." 4.2
 .\}
-If \f(CIcallback\fP is \f(CRNULL\fP and \f(CIdata\fP is \f(CRNULL\fP, an internal block of 32KiB
+If \f(CIcallback\fP is \f(CBNULL\fP and \f(CIdata\fP is \f(CBNULL\fP, an internal block of 32KiB
 on the machine stack is used. This is the default when a match
 context is created.
 .RE
@@ -347,7 +347,7 @@ context is created.
 .  sp -1
 .  IP " 2." 4.2
 .\}
-If \f(CIcallback\fP is \f(CRNULL\fP and \f(CIdata\fP is not \f(CRNULL\fP, \f(CIdata\fP must be
+If \f(CIcallback\fP is \f(CBNULL\fP and \f(CIdata\fP is not \f(CBNULL\fP, \f(CIdata\fP must be
 a pointer to a valid JIT stack, the result of calling
 \f(CBpcre2_jit_stack_create()\fP.
 .RE
@@ -359,10 +359,10 @@ a pointer to a valid JIT stack, the result of calling
 .  sp -1
 .  IP " 3." 4.2
 .\}
-If \f(CIcallback\fP is not \f(CRNULL\fP, it must point to a function that is
+If \f(CIcallback\fP is not \f(CBNULL\fP, it must point to a function that is
 called with \f(CIdata\fP as an argument at the start of matching, in
 order to set up a JIT stack. If the return from the callback
-function is \f(CRNULL\fP, the internal stack of 32KiB is used; otherwise the
+function is \f(CBNULL\fP, the internal stack of 32KiB is used; otherwise the
 return value must be a valid JIT stack, the result of calling
 \f(CBpcre2_jit_stack_create()\fP.
 .RE
@@ -380,12 +380,12 @@ starts another match, that match must use a different JIT stack to the one used
 for currently suspended match(es).
 .sp
 In a multithread application, if you do not specify a JIT stack, or if you
-assign or pass back \f(CRNULL\fP from a callback, that is thread\-safe, because each
+assign or pass back \f(CBNULL\fP from a callback, that is thread\-safe, because each
 thread has its own machine stack. However, if you assign or pass back a
-non\-\f(CRNULL\fP JIT stack, this must be a different stack for each thread so that the
+non\-\f(CBNULL\fP JIT stack, this must be a different stack for each thread so that the
 application is thread\-safe.
 .sp
-Strictly speaking, even more is allowed. You can assign the same non\-\f(CRNULL\fP stack
+Strictly speaking, even more is allowed. You can assign the same non\-\f(CBNULL\fP stack
 to a match context that is used by any number of patterns, as long as they are
 not used for matching by multiple threads at the same time. For example, you
 could use the same stack in all compiled patterns, with a global mutex in the
@@ -554,7 +554,7 @@ expects new allocations, and keeps some free memory around to improve
 allocation speed. However, in low memory conditions, it might be better to free
 all possible memory. You can cause this to happen by calling
 \f(CBpcre2_jit_free_unused_memory()\fP. Its argument is a general context, for custom
-memory management, or \f(CRNULL\fP for standard memory management.
+memory management, or \f(CBNULL\fP for standard memory management.
 .SH "EXAMPLE CODE"
 .sp
 This is a single\-threaded example that specifies a JIT stack without using a
@@ -571,11 +571,11 @@ pcre2_match_context *\fP\f(CImcontext\fP\f(CR;
 pcre2_jit_stack *\fP\f(CIjit_stack\fP\f(CR;\fP
 
 \f(CIre\fP \f(CR=\fP \f(CBpcre2_compile\fP\f(CR(\fP\f(CIpattern\fP\f(CR,\fP \f(CBPCRE2_ZERO_TERMINATED\fP\f(CR, 0,
-                   &\fP\f(CIerrornumber\fP\f(CR, &\fP\f(CIerroffset\fP\f(CR, NULL);\fP
+                   &\fP\f(CIerrornumber\fP\f(CR, &\fP\f(CIerroffset\fP\f(CR,\fP \f(CBNULL\fP\f(CR);\fP
 \f(CIrc\fP \f(CR=\fP \f(CBpcre2_jit_compile\fP\f(CR(\fP\f(CIre\fP\f(CR,\fP \f(CBPCRE2_JIT_COMPLETE\fP\f(CR);\fP
-\f(CImcontext\fP \f(CR=\fP \f(CBpcre2_match_context_create\fP\f(CR(NULL);\fP
-\f(CIjit_stack\fP \f(CR=\fP \f(CBpcre2_jit_stack_create\fP\f(CR(32*1024, 512*1024, NULL);\fP
-\f(CBpcre2_jit_stack_assign\fP\f(CR(\fP\f(CImcontext\fP\f(CR, NULL,\fP \f(CIjit_stack\fP\f(CR);\fP
+\f(CImcontext\fP \f(CR=\fP \f(CBpcre2_match_context_create\fP\f(CR(\fP\f(CBNULL\fP\f(CR);\fP
+\f(CIjit_stack\fP \f(CR=\fP \f(CBpcre2_jit_stack_create\fP\f(CR(32*1024, 512*1024,\fP \f(CBNULL\fP\f(CR);\fP
+\f(CBpcre2_jit_stack_assign\fP\f(CR(\fP\f(CImcontext\fP\f(CR,\fP \f(CBNULL\fP\f(CR,\fP \f(CIjit_stack\fP\f(CR);\fP
 \f(CImatch_data\fP \f(CR=\fP \f(CBpcre2_match_data_create\fP\f(CR(\fP\f(CIre\fP\f(CR, 10);\fP
 \f(CIrc\fP \f(CR=\fP \f(CBpcre2_match\fP\f(CR(\fP\f(CIre\fP\f(CR,\fP \f(CIsubject\fP\f(CR,\fP \f(CIlength\fP\f(CR, 0, 0,\fP \f(CImatch_data\fP\f(CR,\fP \f(CImcontext\fP\f(CR);\fP
 \f(CI/* Process result */\fP
@@ -609,7 +609,7 @@ that was not compiled.
 .sp
 When you call \f(CBpcre2_match()\fP, as well as testing for invalid options, a
 number of other sanity checks are performed on the arguments. For example, if
-the subject pointer is \f(CRNULL\fP but the length is non\-zero, an immediate error is
+the subject pointer is \f(CBNULL\fP but the length is non\-zero, an immediate error is
 given. Also, unless \f(CBPCRE2_NO_UTF_CHECK\fP is set, a UTF subject string is tested
 for validity. In the interests of speed, these checks do not happen on the JIT
 fast path. If invalid UTF data is passed when \f(CBPCRE2_MATCH_INVALID_UTF\fP was not

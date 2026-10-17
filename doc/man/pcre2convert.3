@@ -99,37 +99,43 @@ One or more of the glob options, or one of the following POSIX options must be
 set to define the type of conversion that is required:
 .sp
 .RS 4
-.PD 0
+.PD
 .TP 7
 \f(CBPCRE2_CONVERT_GLOB\fP
+.PD 0
 .TP 7
 \f(CBPCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR\fP
+.PD 0
 .TP 7
 \f(CBPCRE2_CONVERT_GLOB_NO_STARSTAR\fP
+.PD 0
 .TP 7
 \f(CBPCRE2_CONVERT_POSIX_BASIC\fP
+.PD 0
 .TP 7
 \f(CBPCRE2_CONVERT_POSIX_EXTENDED\fP
 .ad l
-Details of the conversions are given below. The \f(CIbuffer\fP and \f(CIblength\fP
-arguments define how the output is handled:
+.PD
 .PD
 .RE
 .PP
 .ad l
 .sp
-If \f(CIbuffer\fP is \f(CRNULL\fP, the function just returns the length of the converted
+Details of the conversions are given below. The \f(CIbuffer\fP and \f(CIblength\fP
+arguments define how the output is handled:
+.sp
+If \f(CIbuffer\fP is \f(CBNULL\fP, the function just returns the length of the converted
 pattern via \f(CIblength\fP. This is one less than the length of buffer needed,
 because a terminating zero is always added to the output.
 .sp
-If \f(CIbuffer\fP points to a \f(CRNULL\fP pointer, an output buffer is obtained using
+If \f(CIbuffer\fP points to a \f(CBNULL\fP pointer, an output buffer is obtained using
 the allocator in the context or \f(CBmalloc\fP\f(CR()\fP if no context is supplied. A
 pointer to this buffer is placed in the variable to which \f(CIbuffer\fP points.
 When no longer needed the output buffer must be freed by calling
-\f(CBpcre2_converted_pattern_free()\fP. If this function is called with a \f(CRNULL\fP
+\f(CBpcre2_converted_pattern_free()\fP. If this function is called with a \f(CBNULL\fP
 argument, it returns immediately without doing anything.
 .sp
-If \f(CIbuffer\fP points to a non\-\f(CRNULL\fP pointer, \f(CIblength\fP must be set to the
+If \f(CIbuffer\fP points to a non\-\f(CBNULL\fP pointer, \f(CIblength\fP must be set to the
 actual length of the buffer provided (in code units).
 .sp
 In all cases, after successful conversion, the variable pointed to by

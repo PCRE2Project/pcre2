@@ -34,15 +34,15 @@ pcre2_code_free \- free a compiled pattern
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRvoid\fP \f(CBpcre2_code_free\fP\f(CR(pcre2_code *\fP\f(CIcode\fP\f(CR);\fP
+void\fP \f(CBpcre2_code_free\fP\f(CR(pcre2_code *\fP\f(CIcode\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
-If \f(CIcode\fP is \f(CRNULL\fP, this function does nothing. Otherwise, \f(CIcode\fP must
+If \f(CIcode\fP is \f(CBNULL\fP, this function does nothing. Otherwise, \f(CIcode\fP must
 point to a compiled pattern. This function frees its memory, including any
 memory used by the JIT compiler. If the compiled pattern was created by a call
 to \f(CBpcre2_code_copy_with_tables()\fP, the memory for the character tables is

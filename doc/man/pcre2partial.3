@@ -57,19 +57,22 @@ as setting a partial match option for the matching function, you must also call
 \f(CBpcre2_jit_compile()\fP with one or both of these options:
 .sp
 .RS 4
-.PD 0
+.PD
 .TP 23
 \f(CBPCRE2_JIT_PARTIAL_HARD\fP
+.PD 0
 .TP 23
 \f(CBPCRE2_JIT_PARTIAL_SOFT\fP
 .ad l
-\f(CBPCRE2_JIT_COMPLETE\fP should also be set if you are going to run non\-partial
-matches on the same pattern. Separate code is compiled for each mode. If the
-appropriate JIT mode has not been compiled, interpretive matching code is used.
+.PD
 .PD
 .RE
 .PP
 .ad l
+.sp
+\f(CBPCRE2_JIT_COMPLETE\fP should also be set if you are going to run non\-partial
+matches on the same pattern. Separate code is compiled for each mode. If the
+appropriate JIT mode has not been compiled, interpretive matching code is used.
 .sp
 Setting a partial matching option disables two of PCRE2\(cqs standard
 optimization hints. PCRE2 remembers the last literal code unit in a pattern,

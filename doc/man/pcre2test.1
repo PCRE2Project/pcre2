@@ -1361,16 +1361,16 @@ The \f(CRcallout_info\fP modifier requests information about all the callouts in
 the pattern. A list of them is output at the end of any other information that
 is requested. For each callout, either its number or string is given, followed
 by the item that follows it in the pattern.
-.SS "Passing a \f(CRNULL\fP context"
+.SS "Passing a \f(CBNULL\fP context"
 .sp
 Normally, \f(CRpcre2test\fP passes a context block to \f(CBpcre2_compile()\fP. If
-the \f(CRnull_context\fP modifier is set, however, \f(CRNULL\fP is passed. This is for
+the \f(CRnull_context\fP modifier is set, however, \f(CBNULL\fP is passed. This is for
 testing that \f(CBpcre2_compile()\fP behaves correctly in this case (it uses
 default values).
-.SS "Passing a \f(CRNULL\fP pattern"
+.SS "Passing a \f(CBNULL\fP pattern"
 .sp
 The \f(CRnull_pattern\fP modifier is for testing the behaviour of
-\f(CBpcre2_compile()\fP when the pattern argument is \f(CRNULL\fP. The length value
+\f(CBpcre2_compile()\fP when the pattern argument is \f(CBNULL\fP. The length value
 passed is the default \f(CBPCRE2_ZERO_TERMINATED\fP unless \f(CRuse_length\fP is set.
 Any length other than zero causes an error.
 .SS "Specifying pattern characters in hexadecimal"
@@ -2680,7 +2680,7 @@ appears, though of course it can also be used to set a default in a
 available for storing matching information. The default is 15.
 .sp
 A value of zero is useful when testing the POSIX API because it causes
-\f(CBregexec\fP\f(CR()\fP to be called with a \f(CRNULL\fP capture vector. When not testing the
+\f(CBregexec\fP\f(CR()\fP to be called with a \f(CBNULL\fP capture vector. When not testing the
 POSIX API, a value of zero is used to cause
 \f(CBpcre2_match_data_create_from_pattern()\fP to be called, in order to create a
 new match block of exactly the right size for the pattern. (It is not possible
@@ -2696,11 +2696,11 @@ this modifier is ignored, with a warning.
 .sp
 When testing \f(CBpcre2_substitute()\fP, this modifier also has the effect of
 passing the replacement string as zero\-terminated.
-.SS "Passing a \f(CRNULL\fP context, subject, replacement, or substitute buffer"
+.SS "Passing a \f(CBNULL\fP context, subject, replacement, or substitute buffer"
 .sp
 Normally, \f(CRpcre2test\fP passes a context block to \f(CBpcre2_match()\fP,
 \f(CBpcre2_dfa_match()\fP, \f(CBpcre2_jit_match()\fP or \f(CBpcre2_substitute()\fP.
-If the \f(CRnull_context\fP modifier is set, however, \f(CRNULL\fP is passed. This is for
+If the \f(CRnull_context\fP modifier is set, however, \f(CBNULL\fP is passed. This is for
 testing that the matching and substitution functions behave correctly in this
 case (they use default values). This modifier cannot be used with the
 \f(CRfind_limits\fP, \f(CRfind_limits_noheap\fP, or \f(CRsubstitute_callout\fP
@@ -2709,7 +2709,7 @@ modifiers.
 Similarly, for testing purposes, if the \f(CRnull_subject\fP,
 or \f(CRnull_replacement\fP, or \f(CRnull_substitute_buffer\fP modifiers are set, then the
 subject, or replacement string, or substitute output buffer pointers are passed
-as \f(CRNULL\fP, respectively, to the relevant functions. For \f(CRnull_substitute_buffer\fP,
+as \f(CBNULL\fP, respectively, to the relevant functions. For \f(CRnull_substitute_buffer\fP,
 the paired argument for the passed\-in buffer length is set by starting the
 replacement string with "[NUM]" as described in "Testing the substitution
 function" above.

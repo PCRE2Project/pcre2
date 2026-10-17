@@ -52,11 +52,14 @@ drwxr-xr-x install-dir/share/doc/pcre2/html
 -rw-r--r-- install-dir/share/doc/pcre2/html/NON-AUTOTOOLS-BUILD.txt
 -rw-r--r-- install-dir/share/doc/pcre2/html/README.txt
 drwxr-xr-x install-dir/share/doc/pcre2/html/css
--rw-r--r-- install-dir/share/doc/pcre2/html/css/pcre2.css
+-rw-r--r-- install-dir/share/doc/pcre2/html/css/document.css
+-rw-r--r-- install-dir/share/doc/pcre2/html/css/standalone.css
 drwxr-xr-x install-dir/share/doc/pcre2/html/images
 -rw-r--r-- install-dir/share/doc/pcre2/html/images/pcre2-header-dark.svg
 -rw-r--r-- install-dir/share/doc/pcre2/html/images/pcre2-header-light.svg
+-rw-r--r-- install-dir/share/doc/pcre2/html/images/pcre2-hero-dark-hover.svg
 -rw-r--r-- install-dir/share/doc/pcre2/html/images/pcre2-hero-dark.svg
+-rw-r--r-- install-dir/share/doc/pcre2/html/images/pcre2-hero-light-hover.svg
 -rw-r--r-- install-dir/share/doc/pcre2/html/images/pcre2-hero-light.svg
 -rw-r--r-- install-dir/share/doc/pcre2/html/index.html
 -rw-r--r-- install-dir/share/doc/pcre2/html/pcre2-config.html

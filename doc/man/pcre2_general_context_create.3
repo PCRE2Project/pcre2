@@ -34,9 +34,9 @@ pcre2_general_context_create \- create a general context
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRpcre2_general_context *\fP\f(CBpcre2_general_context_create\fP\f(CR(
+pcre2_general_context *\fP\f(CBpcre2_general_context_create\fP\f(CR(
       void *(*\fP\f(CIprivate_malloc\fP\f(CR)(size_t\fP \f(CIsize\fP\f(CR, void *\fP\f(CImemory_data\fP\f(CR),
       void (*\fP\f(CIprivate_free\fP\f(CR)(void *\fP\f(CIptr\fP\f(CR, void *\fP\f(CImemory_data\fP\f(CR),
       void *\fP\f(CImemory_data\fP\f(CR);\fP
@@ -48,8 +48,8 @@ pcre2_general_context_create \- create a general context
 This function creates and initializes a general context. The arguments define
 custom memory management functions and a data value that is passed to them when
 they are called. The \f(CIprivate_malloc\fP() function is used to get memory for
-the context. If either of the first two arguments is \f(CRNULL\fP, the system memory
-management function is used. The result is \f(CRNULL\fP if no memory could be obtained.
+the context. If either of the first two arguments is \f(CBNULL\fP, the system memory
+management function is used. The result is \f(CBNULL\fP if no memory could be obtained.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

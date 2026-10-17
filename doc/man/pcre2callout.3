@@ -34,9 +34,9 @@ pcre2callout \- PCRE2 callouts
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint (*pcre2_callout)(pcre2_callout_block *\fP\f(CIcallout_block\fP\f(CR,
+int (*pcre2_callout)(pcre2_callout_block *\fP\f(CIcallout_block\fP\f(CR,
                      void *\fP\f(CIcallout_data\fP\f(CR);
 
 int\fP \f(CBpcre2_callout_enumerate\fP\f(CR(
@@ -316,7 +316,7 @@ increase in future if more fields are added, but the intention is never to
 remove any of the existing fields.
 .SS "Fields for numerical callouts"
 .sp
-For a numerical callout, \f(CIcallout_string\fP is \f(CRNULL\fP, and \f(CIcallout_number\fP
+For a numerical callout, \f(CIcallout_string\fP is \f(CBNULL\fP, and \f(CIcallout_number\fP
 contains the number of the callout, in the range 0\-255. This is the number
 that follows \f(CI(?C\fP for callouts that part of the pattern; it is 255 for
 automatically generated callouts.
@@ -412,9 +412,9 @@ information.
 .sp
 In callouts from \f(CBpcre2_match()\fP the \f(CImark\fP field contains a pointer to
 the zero\-terminated name of the most recently passed \f(CI(*MARK)\fP, \f(CI(*PRUNE)\fP, or
-\f(CI(*THEN)\fP item in the match, or \f(CRNULL\fP if no such items have been passed. Instances
+\f(CI(*THEN)\fP item in the match, or \f(CBNULL\fP if no such items have been passed. Instances
 of \f(CI(*PRUNE)\fP or \f(CI(*THEN)\fP without a name do not obliterate a previous \f(CI(*MARK)\fP. In
-callouts from the DFA matching function this field always contains \f(CRNULL\fP.
+callouts from the DFA matching function this field always contains \f(CBNULL\fP.
 .sp
 The \f(CIcallout_flags\fP field is always zero in callouts from
 \f(CBpcre2_dfa_match()\fP or when JIT is being used. When \f(CBpcre2_match()\fP

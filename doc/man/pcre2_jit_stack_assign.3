@@ -34,9 +34,9 @@ pcre2_jit_stack_assign \- assign stack for JIT matching
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRvoid\fP \f(CBpcre2_jit_stack_assign\fP\f(CR(pcre2_match_context *\fP\f(CImcontext\fP\f(CR,
+void\fP \f(CBpcre2_jit_stack_assign\fP\f(CR(pcre2_match_context *\fP\f(CImcontext\fP\f(CR,
                             pcre2_jit_callback\fP \f(CIcallback\fP\f(CR,
                             void *\fP\f(CIcallback_data\fP\f(CR);\fP
 .fam
@@ -69,19 +69,19 @@ a JIT stack or a value to be passed to the callback
 .PP
 .ad l
 .sp
-If \f(CImcontext\fP is \f(CRNULL\fP, the function returns immediately, without doing
+If \f(CImcontext\fP is \f(CBNULL\fP, the function returns immediately, without doing
 anything.
 .sp
-If \f(CIcallback\fP is \f(CRNULL\fP and \f(CIcallback_data\fP is \f(CRNULL\fP, an internal block of 32KiB
+If \f(CIcallback\fP is \f(CBNULL\fP and \f(CIcallback_data\fP is \f(CBNULL\fP, an internal block of 32KiB
 on the machine stack is used.
 .sp
-If \f(CIcallback\fP is \f(CRNULL\fP and \f(CIcallback_data\fP is not \f(CRNULL\fP,
+If \f(CIcallback\fP is \f(CBNULL\fP and \f(CIcallback_data\fP is not \f(CBNULL\fP,
 \f(CIcallback_data\fP must be a valid JIT stack, the result of calling
 \f(CBpcre2_jit_stack_create()\fP.
 .sp
-If \f(CIcallback\fP not \f(CRNULL\fP, it is called with \f(CIcallback_data\fP as an
+If \f(CIcallback\fP not \f(CBNULL\fP, it is called with \f(CIcallback_data\fP as an
 argument at the start of matching, in order to set up a JIT stack. If the
-result is \f(CRNULL\fP, the internal stack of 32KiB is used; otherwise the return value
+result is \f(CBNULL\fP, the internal stack of 32KiB is used; otherwise the return value
 must be a valid JIT stack, the result of calling
 \f(CBpcre2_jit_stack_create()\fP.
 .sp

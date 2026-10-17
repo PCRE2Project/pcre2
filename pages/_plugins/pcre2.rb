@@ -133,7 +133,7 @@ module Pcre2Pages
         add_page(site, "guide/#{name}.html", "/guide/#{name.downcase}/", name, content,
                  'layout' => 'guide', 'render_with_liquid' => false)
       end
-      assets = File.join(root, 'doc/assets')
+      assets = File.join(root, 'doc/html')
       files = [File.join(assets, 'css/document.css'), *Dir.glob(File.join(assets, 'images/*.svg'))]
       files.each do |path|
         relative = path.delete_prefix(assets + File::SEPARATOR)

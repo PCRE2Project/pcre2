@@ -4,13 +4,11 @@
   --toc-width: 350px;
   --page-columns: minmax(var(--content-gutter), 1fr) minmax(0, var(--content-width)) minmax(var(--content-gutter), 1fr);
   --bg-dots: url(../images/dots-light.svg);
-  --bg-nav: url(../images/pcre2-hero-light.svg);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --bg-dots: url(../images/dots-dark.svg);
-    --bg-nav: url(../images/pcre2-hero-dark.svg);
   }
 }
 
@@ -87,9 +85,18 @@ body > header nav {
 .nav-home {
   height: 32px;
   width: 64px;
-  background: var(--bg-nav);
+  padding: 4px;
+  margin-block: -4px;
+  background-color: var(--theme-bright);
+  background-image: var(--image-hero);
   background-size: auto 60px;
-  background-position: -7px -14px;
+  background-position: -3px -10px;
+  border-radius: 4px;
+
+  &:hover, &:focus-visible {
+    background-color: var(--theme-muted);
+    background-image: var(--image-hero-hover);
+  }
 }
 
 .nav-row {
@@ -483,6 +490,27 @@ body > footer {
 
 @font-face {
   font-display: swap;
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/FiraSansCondensed-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../fonts/FiraSansCondensed-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Fira Sans Condensed';
+  font-style: normal;
+  font-weight: 600;
+  src: url('../fonts/FiraSansCondensed-SemiBold.woff2') format('woff2');
+}
+@font-face {
+  font-display: swap;
   font-family: 'Fira Sans';
   font-style: normal;
   font-weight: 400;
@@ -565,11 +593,4 @@ body > footer {
   font-style: italic;
   font-weight: 700;
   src: url('../fonts/FiraSans-BoldItalic.woff2') format('woff2');
-}
-@font-face {
-  font-display: swap;
-  font-family: 'Fira Mono';
-  font-style: normal;
-  font-weight: 700;
-  src: url('../fonts/FiraMono-Bold.woff2') format('woff2');
 }

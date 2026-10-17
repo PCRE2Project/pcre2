@@ -3695,31 +3695,39 @@ alphabetic alternatives which might be easier to remember. They all start with
 the following synonyms:
 .sp
 .RS 4
-.PD 0
+.PD
 .TP 23
 \f(CI(*positive_lookahead:\fP
+.PD 0
 .TP 23
 \f(CI(*pla:\fP
 .ad l
 Is the same as \f(CI(?=\fP.
+.PD
 .TP 23
 \f(CI(*negative_lookahead:\fP
+.PD 0
 .TP 23
 \f(CI(*nla:\fP
 .ad l
 Is the same as \f(CI(?!\fP.
+.PD
 .TP 23
 \f(CI(*positive_lookbehind:\fP
+.PD 0
 .TP 23
 \f(CI(*plb:\fP
 .ad l
 Is the same as \f(CI(?<=\fP.
+.PD
 .TP 23
 \f(CI(*negative_lookbehind:\fP
+.PD 0
 .TP 23
 \f(CI(*nlb:\fP
 .ad l
 Is the same as \f(CI(?<!\fP.
+.PD
 .PD
 .RE
 .PP
@@ -3958,23 +3966,29 @@ assertion. However, there are some cases where non\-atomic positive assertions
 can be useful. PCRE2 provides these using the following syntax:
 .sp
 .RS 4
-.PD 0
+.PD
 .TP 9
 \f(CI(*non_atomic_positive_lookahead:\fP
+.PD 0
 .TP 9
 \f(CI(*napla:\fP
+.PD 0
 .TP 9
 \f(CI(?*\fP
 .ad l
 Non\-atomic positive lookahead.
+.PD
 .TP 9
 \f(CI(*non_atomic_positive_lookbehind:\fP
+.PD 0
 .TP 9
 \f(CI(*naplb:\fP
+.PD 0
 .TP 9
 \f(CI(?<*\fP
 .ad l
 Non\-atomic positive lookbehind.
+.PD
 .PD
 .RE
 .PP
@@ -4772,23 +4786,29 @@ Only the specific capture groups listed by the caller will be retained, using
 the following syntax:
 .sp
 .RS 4
-.PD 0
+.PD
 .TP 24
 \f(CI(?R(\fP\f(CIgrouplist\fP\f(CI))\fP
+.PD 0
 .TP 24
 \f(CI(?\fP\f(CIn\fP\f(CI(\fP\f(CIgrouplist\fP\f(CI))\fP
+.PD 0
 .TP 24
 \f(CI(?+\fP\f(CIn\fP\f(CI(\fP\f(CIgrouplist\fP\f(CI))\fP
 .ad l
 Recurse the whole pattern, returning capture groups.
+.PD
 .TP 24
 \f(CI(?\-\fP\f(CIn\fP\f(CI(\fP\f(CIgrouplist\fP\f(CI))\fP
+.PD 0
 .TP 24
 \f(CI(?&\fP\f(CIname\fP\f(CI(\fP\f(CIgrouplist\fP\f(CI))\fP
+.PD 0
 .TP 24
 \f(CI(?P>\fP\f(CIname\fP\f(CI(\fP\f(CIgrouplist\fP\f(CI))\fP
 .ad l
 Call a subroutine, returning capture groups.
+.PD
 .PD
 .RE
 .PP

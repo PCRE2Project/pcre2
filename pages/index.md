@@ -3,19 +3,22 @@ title: Home
 layout: home
 ---
 
-<table border="0">
-<tbody>
-<tr>
-<th align="left">Distribution</th>
+<!-- These two frontpages, README.md and pages/index.md, should be kept in sync. -->
+
+<table border="0" style="display: grid; grid-template-columns: max-content minmax(0, 1fr);">
+<tbody style="display: contents;">
+<!-- Website row intentionally removed on this frontpage, as this *is* the website. -->
+<tr style="display: contents;">
+<th align="left" style="white-space: nowrap;">Distribution</th>
 <td markdown="block">
 
 [![GitHub Release](https://img.shields.io/github/v/release/PCRE2Project/pcre2?display_name=release&style=flat-square&label=Latest%20release&color=006094)](https://github.com/PCRE2Project/pcre2/releases)&nbsp;
-[![BSD licence](https://img.shields.io/badge/Licence-BSD%203--clause-006094?style=flat-square)](https://github.com/PCRE2Project/pcre2/blob/master/LICENCE.md)
+[![BSD licence](https://img.shields.io/badge/Licence-BSD%203--clause-006094?style=flat-square)](https://github.com/PCRE2Project/pcre2/blob/main/LICENCE.md)
 
 </td>
 </tr>
-<tr>
-<th align="left">Testing</th>
+<tr style="display: contents;">
+<th align="left" style="white-space: nowrap;">Testing</th>
 <td markdown="block">
 
 [![Codecov](https://img.shields.io/codecov/c/github/PCRE2Project/pcre2?component=library&style=flat-square&logo=codecov&label=Coverage&color=009400)](https://app.codecov.io/gh/PCRE2Project/pcre2/components)&nbsp;
@@ -29,9 +32,9 @@ layout: home
 
 </td>
 </tr>
-<tr>
-<th align="left">Platforms</th>
-<td>Tested continuously on Linux, Windows, macOS, FreeBSD, Solaris, z/OS;<br />
+<tr style="display: contents;">
+<th align="left" style="white-space: nowrap;">Platforms</th>
+<td>Tested continuously on Linux, Windows, macOS, FreeBSD, OpenBSD, Solaris, z/OS;<br />
 x86, ARM, RISC-V, POWER, S390X; others known to work
 </td>
 </tr>
@@ -151,16 +154,12 @@ The main ways of obtaining PCRE2 are:
 1. Via Git clone:
 
     ```
-    git clone https://github.com/PCRE2Project/pcre2.git
+    git clone --recurse-submodules https://github.com/PCRE2Project/pcre2.git
     ```
 
     Please use a release tag in production, not the development branch!
 
-    Because PCRE2's JIT uses code from a Git submodule, you must check this out after a fresh clone:
-
-    ```
-    git submodule update --init
-    ```
+    This also fetches the SLJIT submodule needed for JIT support.
 
 3. Via download of the [release tarball](https://github.com/PCRE2Project/pcre2/releases/latest).
 
@@ -184,6 +183,14 @@ The main ways of building PCRE2 are:
     make
     ```
 
+3. Via Meson (Linux/Windows/macOS, and others)
+
+    ```
+    cd pcre2/
+    meson setup build .
+    meson compile -C build
+    ```
+
 See ["Platforms"](#platforms) below for links to more detailed build documentation.
 
 ## API Overview
@@ -202,11 +209,11 @@ As well as the PCRE2 API, the library also offers a POSIX-compatible `<regex.h>`
 
 See the [full library and API documentation](./doc/) for further details.
 
-For third-party documentation, see further:
+For third-party documentation, see:
 
 - A curated summary of changes for each PCRE release, and some excellent tutorials on PCRE2 on the
   [RexEgg website](http://www.rexegg.com/pcre-documentation.html).
-- Jan Goyvaerts' popular Regular-Expressions.info site includes [information about PCRE2](https://www.regular-expressions.info/pcre.html) as well as tutorials and highly detailed comparisons of PCRE2 to other regular expression dialects.
+- Jan Goyvaerts' popular Regular-Expressions.info site includes [information about PCRE2](https://www.regular-expressions.info/pcre2.html) as well as tutorials and highly detailed comparisons of PCRE2 to other regular expression dialects.
 - Jeffrey Friedl's book [_Mastering Regular Expressions_](https://regex.info/book.html) includes chapters on Perl and PCRE, and is available in print and online via O'Reilly Media.
 
 ## Platforms
@@ -216,7 +223,7 @@ PCRE2 is portable C code, and is likely to work on any system with a C99 compile
 <dl>
 <dt>Operating systems</dt>
 <dd>
-Our continuous integration tests on <strong>Linux</strong> (GCC and Clang, glibc and musl), <strong>Windows</strong> (MSVC and MinGW-x64), and <strong>macOS</strong> (Clang), as well as <strong>FreeBSD</strong>, <strong>Solaris</strong> (Oracle Studio <code>cc</code>), and <strong>z/OS</strong> (<code>xlc</code> and <code>ibm-clang</code>).
+Our continuous integration tests on <strong>Linux</strong> (GCC and Clang, glibc and musl), <strong>Windows</strong> (MSVC and MinGW-x64), and <strong>macOS</strong> (Clang), as well as <strong>FreeBSD</strong>, <strong>OpenBSD</strong>, <strong>Solaris</strong> (Oracle Studio <code>cc</code>), and <strong>z/OS</strong> (<code>xlc</code> and <code>ibm-clang</code>).
 </dd>
 <dt>Processors</dt>
 <dd>
@@ -226,7 +233,7 @@ PCRE2 is tested continuously on x86 (i686 and amd64), ARM 32- and 64-bit (armv7 
 
 Other systems are likely to work (including mobile, embedded platforms, and commercial UNIX systems), but these are not tested continuously by the PCRE2 maintainers. Users are encouraged to run the full PCRE2 test suite when compiling for any new platform. We are aware of working ports to VMS and z/OS (PCRE2 supports EBCDIC).
 
-PCRE2 releases support CMake for building, and for UNIX platforms include a `./configure` script built by Autoconf. Build files for the Bazel build system and `zig build` are also included. Integrating PCRE2 with other systems can be done by including the `.c` files in an existing project.
+PCRE2 releases support CMake and Meson for building, and for UNIX platforms include a `./configure` script built by Autoconf. Build files for the Bazel build system and `zig build` are also included. Integrating PCRE2 with other systems can be done by including the `.c` files in an existing project.
 
 Please see the files [README](./guide/readme/) and [NON-AUTOTOOLS-BUILD](./guide/non-autotools-build/) for full build documentation, as well as the man pages, including [`man pcre2/doc/pcre2build.3`](./doc/pcre2build/).
 
@@ -242,6 +249,8 @@ PCRE2 is released under the **BSD 3-clause licence** with a PCRE2 Exception. It 
 Join the community by reporting issues or asking questions via [GitHub issues](https://github.com/PCRE2Project/pcre2/issues). We welcome feedback and proposals.
 
 Contributions ranging from bug fixes to feature requests are welcome, and can be made via GitHub pull requests.
+
+Our support lifecycle is to backport security and high-severity bug fixes for at least five years. See [SUPPORT-LIFECYCLE](./project/support-lifecycle/) for how to package older versions of PCRE2.
 
 Please review our [SECURITY](./project/security/) policy for information on reporting security issues.
 

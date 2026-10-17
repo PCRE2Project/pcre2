@@ -34,9 +34,9 @@ pcre2_config \- show build\-time related configuration options
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint\fP \f(CBpcre2_config\fP\f(CR(uint32_t\fP \f(CIwhat\fP\f(CR, void *\fP\f(CIwhere\fP\f(CR);\fP
+int\fP \f(CBpcre2_config\fP\f(CR(uint32_t\fP \f(CIwhat\fP\f(CR, void *\fP\f(CIwhere\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -61,11 +61,11 @@ Points to where to put the information
 .PP
 .ad l
 .sp
-If \f(CIwhere\fP is \f(CRNULL\fP, the function returns the amount of memory needed for
+If \f(CIwhere\fP is \f(CBNULL\fP, the function returns the amount of memory needed for
 the requested information. When the information is a string, the value is in
 code units including the terminating zero; for other types of data it is in bytes.
 .sp
-If \f(CIwhere\fP is not \f(CRNULL\fP, for \f(CBPCRE2_CONFIG_JITTARGET\fP,
+If \f(CIwhere\fP is not \f(CBNULL\fP, for \f(CBPCRE2_CONFIG_JITTARGET\fP,
 \f(CBPCRE2_CONFIG_UNICODE_VERSION\fP, and \f(CBPCRE2_CONFIG_VERSION\fP it must point to a
 buffer that is large enough to hold the string. For all other codes it must
 point to a \f(CRuint32_t\fP integer variable. The available codes are:

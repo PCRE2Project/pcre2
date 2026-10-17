@@ -1238,39 +1238,51 @@ Any Unicode newline sequence
 .SH "LOOKAHEAD AND LOOKBEHIND ASSERTIONS"
 .sp
 .RS 4
-.PD 0
+.PD
 .TP 26
 \f(CI(?=...)\fP
+.PD 0
 .TP 26
 \f(CI(*pla:...)\fP
+.PD 0
 .TP 26
 \f(CI(*positive_lookahead:...)\fP
 .ad l
 Positive lookahead
+.PD
 .TP 26
 \f(CI(?!...)\fP
+.PD 0
 .TP 26
 \f(CI(*nla:...)\fP
+.PD 0
 .TP 26
 \f(CI(*negative_lookahead:...)\fP
 .ad l
 Negative lookahead
+.PD
 .TP 26
 \f(CI(?<=...)\fP
+.PD 0
 .TP 26
 \f(CI(*plb:...)\fP
+.PD 0
 .TP 26
 \f(CI(*positive_lookbehind:...)\fP
 .ad l
 Positive lookbehind
+.PD
 .TP 26
 \f(CI(?<!...)\fP
+.PD 0
 .TP 26
 \f(CI(*nlb:...)\fP
+.PD 0
 .TP 26
 \f(CI(*negative_lookbehind:...)\fP
 .ad l
 Negative lookbehind
+.PD
 .PD
 .RE
 .PP
@@ -1287,25 +1299,31 @@ the limit for each branch is 65,535 characters.
 These assertions are specific to PCRE2 and are not Perl\-compatible.
 .sp
 .RS 4
-.PD 0
+.PD
 .TP 13
 \f(CI(?*...)\fP
+.PD 0
 .TP 13
 \f(CI(*napla:...)\fP
+.PD 0
 .TP 13
 \f(CI(*non_atomic_positive_lookahead:...)\fP
 .ad l
 Synonyms for non\-atomic
 positive lookahead
+.PD
 .TP 13
 \f(CI(?<*...)\fP
+.PD 0
 .TP 13
 \f(CI(*naplb:...)\fP
+.PD 0
 .TP 13
 \f(CI(*non_atomic_positive_lookbehind:...)\fP
 .ad l
 Synonyms for non\-atomic
 positive lookbehind
+.PD
 .PD
 .RE
 .PP
@@ -1361,20 +1379,24 @@ Name
 .SH "SCRIPT RUNS"
 .sp
 .RS 4
-.PD 0
+.PD
 .TP 25
 \f(CI(*script_run:...)\fP
+.PD 0
 .TP 25
 \f(CI(*sr:...)\fP
 .ad l
 Script run; can be
 backtracked into
+.PD
 .TP 25
 \f(CI(*atomic_script_run:...)\fP
+.PD 0
 .TP 25
 \f(CI(*asr:...)\fP
 .ad l
 Atomic script run
+.PD
 .PD
 .RE
 .PP
@@ -1505,7 +1527,7 @@ to return, which shall be retained in the calling subexpression if set during
 the recursion (this feature is not supported by Perl).
 .sp
 .RS 4
-.PD 0
+.PD
 .TP 24
 \f(CI(?R(\fP\f(CIgrouplist\fP\f(CI))\fP
 .ad l
@@ -1513,17 +1535,22 @@ Recurse whole pattern, returning capture groups
 (PCRE2 extension)
 .TP 24
 \f(CI(?\fP\f(CIn\fP\f(CI(\fP\f(CIgrouplist\fP\f(CI))\fP
+.PD 0
 .TP 24
 \f(CI(?+\fP\f(CIn\fP\f(CI(\fP\f(CIgrouplist\fP\f(CI))\fP
+.PD 0
 .TP 24
 \f(CI(?\-\fP\f(CIn\fP\f(CI(\fP\f(CIgrouplist\fP\f(CI))\fP
+.PD 0
 .TP 24
 \f(CI(?&\fP\f(CIname\fP\f(CI(\fP\f(CIgrouplist\fP\f(CI))\fP
+.PD 0
 .TP 24
 \f(CI(?P>\fP\f(CIname\fP\f(CI(\fP\f(CIgrouplist\fP\f(CI))\fP
 .ad l
 Call subroutine, returning capture groups
 (PCRE2 extension)
+.PD
 .PD
 .RE
 .PP

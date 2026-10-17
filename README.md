@@ -1,3 +1,5 @@
+<!-- These two frontpages, README.md and pages/index.md, should be kept in sync. -->
+
 <picture>
     <source media="(prefers-color-scheme: dark)" width="100%" height="100px" srcset="https://raw.githubusercontent.com/PCRE2Project/pcre2/refs/heads/main/pages/images/pcre2-readme-dark.svg">
     <img alt="PCRE2: Perl-Compatible Regular Expressions" width="100%" height="100px" src="https://raw.githubusercontent.com/PCRE2Project/pcre2/refs/heads/main/pages/images/pcre2-readme-light.svg">
@@ -34,7 +36,7 @@ https://www.pcre2.org/
 [![GitHub Release](https://img.shields.io/github/v/release/PCRE2Project/pcre2?display_name=release&style=flat-square&label=Latest%20release&color=006094)](https://github.com/PCRE2Project/pcre2/releases)&nbsp;
 [![BSD licence](https://img.shields.io/badge/Licence-BSD%203--clause-006094?style=flat-square)](https://github.com/PCRE2Project/pcre2/blob/main/LICENCE.md)
 
-</tr>
+</td>
 </tr>
 <tr>
 <th align="left">Testing</th>
@@ -173,16 +175,12 @@ The main ways of obtaining PCRE2 are:
 1. Via Git clone:
 
     ```
-    git clone https://github.com/PCRE2Project/pcre2.git
+    git clone --recurse-submodules https://github.com/PCRE2Project/pcre2.git
     ```
 
     Please use a release tag in production, not the development branch!
 
-    Because PCRE2's JIT uses code from a Git submodule, you must check this out after a fresh clone:
-
-    ```
-    git submodule update --init
-    ```
+    This also fetches the SLJIT submodule needed for JIT support.
 
 3. Via download of the [release tarball](https://github.com/PCRE2Project/pcre2/releases/latest).
 

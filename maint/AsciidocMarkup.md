@@ -32,14 +32,16 @@ Styling has three owners:
 
 | Source | Responsibility |
 | --- | --- |
-| `doc/assets/css/document.css` | Shared brand, typography/reset, content and source-token styles |
-| `doc/assets/css/standalone.css` | Standalone document layout |
+| `doc/html/css/document.css` | Shared brand, typography/reset, content and source-token styles |
+| `doc/html/css/standalone.css` | Standalone document layout |
 | `pages/css/style.css` | Website layout and font loading |
 
-The standalone renderer bundles the first two as `doc/html/css/pcre2.css`.
-Shared SVGs live in `doc/assets/images`. Standalone manuals work offline using
+Standalone manuals load the two CSS files directly.
+Shared SVGs live in `doc/html/images`. Standalone manuals are JavaScript-free,
+using CSS character cards with anchor positioning and a basic relative-position
+fallback. They work offline using
 installed fonts and fallbacks; only the website ships Fira fonts and their
-licence. Edit CSS sources, not the generated bundle.
+licence.
 
 ## Inline vocabulary
 
@@ -54,6 +56,11 @@ These short-form macros do not take trailing `[]`.
 | `arg:` | Lower-case parameter, callback or member name | `arg:match_data` |
 | `char:` | Hexadecimal character or Unicode code point | `char:U+000A` |
 | `macroval:` | A supported numerical default or limit from the sources | `macroval:MAX_NAME_SIZE` |
+
+In HTML, `char:` shows a character card on hover or keyboard focus, with its
+Unicode name and code point. Hexadecimal forms use the Unicode interpretation;
+non-printing characters use a box, and surrogates or out-of-range values are
+labelled explicitly. Manpages retain only the original notation.
 
 `macroval:bytes,NAME` formats a byte count with exact binary units where
 possible. Keep other units in the prose. Supported names are listed in the
@@ -139,13 +146,17 @@ arg:subject::
 The corresponding list roles are `parameters`, `options`, `values`, `returns`,
 `errors` and `members`. Use `::` for top-level terms and `:::` for nested terms;
 keep each term and delimiter on one source line. Consecutive terms may share a
-description. The renderer chooses label width and compact/spaced presentation;
+description; lists with multi-term entries are spaced. The renderer chooses
+label width and compact/spaced presentation;
 an integer `width` attribute can override the label-width estimate.
 
 Use ordinary lists for narrative sequences, continuation `+` and open blocks
 for attached material, and `[loweralpha]` when lettered conditions matter.
 Reserve tables for genuinely two-dimensional information; specify `cols` and
 `options="header"` where appropriate.
+Two-column lookup tables can add the `fit-first` role (for example,
+`[.fit-first,cols="2,3"]`) to fit an unbroken first column and fill the remaining
+width with the second. Below 600px, the columns stack and long names can wrap.
 
 Use standard `NOTE`, `WARNING` and `IMPORTANT` blocks sparingly. Reuse standard
 AsciiDoc structure rather than raw HTML or backend-specific passthrough tricks.
@@ -154,24 +165,27 @@ AsciiDoc structure rather than raw HTML or backend-specific passthrough tricks.
 
 Rouge tokens and shortcut macros share presentation profiles. C token fixups
 recognize PCRE2 types/constants and function calls; they are naming heuristics,
-not a C parser. Other identifiers may receive variable treatment.
+not a C parser. Other identifiers may receive variable treatment. A `*` or `&`
+operator not followed by whitespace is treated as punctuation.
 
-| Category | Typeface | Colour in source blocks |
+| Category | Typeface | Colour when highlighted |
 | --- | --- | --- |
-| Keywords, operators and keyword constants such as `NULL` | Roman | Secondary 3 |
+| Keywords and operators | Roman | Secondary 3 |
 | Literals | Roman | Secondary 2 |
-| Preprocessor text | Italic | Secondary 2 |
-| Named constants | Bold | Secondary 2 |
-| Types | Roman | Secondary 1 |
+| Preprocessor text | Roman | Secondary 2 |
+| Named and keyword constants such as `NULL` | Bold | Secondary 2 |
+| Types and `const` | Roman | Inherited |
 | Functions | Bold | Theme |
 | Comments | Italic | Neutral |
-| Variables and parameters | Italic | Foreground |
-| Other tokens and neutral text | Roman | Foreground |
+| Variables and parameters | Italic | Secondary 1 |
+| Other tokens and neutral text | Roman | Inherited |
 
 Manpages use the same typeface profiles without colour. Semantic regex,
-subject and replacement text is unparsed: upright theme-coloured HTML and
-italic manpage text. Other inline source uses foreground colour while retaining
-its profile's weight and slant. Essential meaning must not rely on these styles.
+subject and replacement text is unparsed: upright, theme-coloured HTML and
+italic manpage text. Explicit highlighting uses the same colours inline and in
+blocks, except that headings and contents links override pattern colours.
+API shortcodes retain their token's weight and slant but inherit the
+surrounding colour. Essential meaning must not rely on these styles.
 
 ## Headings and links
 
