@@ -77,9 +77,9 @@ available. The features themselves are described in the
 xref:pcre2build.adoc[`pcre2build`]
 page. Documentation about building PCRE2 for various operating systems can be
 found in the
-`README`
+`README.md`
 and
-`NON-AUTOTOOLS-BUILD`
+`NON-AUTOTOOLS-BUILD.md`
 files in the source distribution.
 
 The libraries contains a number of undocumented internal functions and data

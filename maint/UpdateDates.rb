@@ -27,7 +27,7 @@ module Pcre2UpdateDates
     date
   end
 
-  # Update AsciiDoc, README, and NON-AUTOTOOLS-BUILD date metadata.
+  # Update AsciiDoc, README.md, and NON-AUTOTOOLS-BUILD.md date metadata.
   def self.run
     puts 'Updating man pages'
 
@@ -44,12 +44,9 @@ module Pcre2UpdateDates
       end
     end
 
-    # README, NON-AUTOTOOLS-BUILD
-    puts 'Updating README and NON-AUTOTOOLS-BUILD'
-    %w[README NON-AUTOTOOLS-BUILD].each do |filename|
-      line = "Last updated: #{last_date(filename)}"
-      padding = '=' * line.length
-      update_file(filename, /=+\nLast updated: .*?\n=+/i, "#{padding}\n#{line}\n#{padding}")
+    puts 'Updating README.md and NON-AUTOTOOLS-BUILD.md'
+    %w[README.md NON-AUTOTOOLS-BUILD.md].each do |filename|
+      update_file(filename, LAST_UPDATED, "Last updated: #{last_date(filename)}")
     end
   end
 end

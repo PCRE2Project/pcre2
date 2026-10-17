@@ -45,7 +45,7 @@ drwxr-xr-x install-dir/share/doc/pcre2
 -rw-r--r-- install-dir/share/doc/pcre2/ChangeLog
 -rw-r--r-- install-dir/share/doc/pcre2/LICENCE.md
 -rw-r--r-- install-dir/share/doc/pcre2/NEWS
--rw-r--r-- install-dir/share/doc/pcre2/README
+-rw-r--r-- install-dir/share/doc/pcre2/README.md
 -rw-r--r-- install-dir/share/doc/pcre2/SECURITY.md
 -rw-r--r-- install-dir/share/doc/pcre2/SUPPORT-LIFECYCLE.md
 drwxr-xr-x install-dir/share/doc/pcre2/html

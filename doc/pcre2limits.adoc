@@ -20,7 +20,7 @@ for the 8-bit and 16-bit libraries if PCRE2 is compiled with the default
 internal linkage size, which is 2 bytes for these libraries. If you want to
 process regular expressions that are truly enormous, you can compile PCRE2 with
 an internal linkage size of 3 or 4 (when building the 16-bit library, 3 is
-rounded up to 4). See the `README` file in the source distribution and the
+rounded up to 4). See the `README.md` file in the source distribution and the
 xref:pcre2build.adoc[`pcre2build`]
 documentation for details. In these cases the limit is substantially larger.
 However, the speed of execution is slower. In the 32-bit library, the internal

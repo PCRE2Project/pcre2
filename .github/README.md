@@ -256,7 +256,7 @@ Other systems are likely to work (including mobile, embedded platforms, and comm
 
 PCRE2 releases support CMake and Meson for building, and for UNIX platforms include a `./configure` script built by Autoconf. Build files for the Bazel build system and `zig build` are also included. Integrating PCRE2 with other systems can be done by including the `.c` files in an existing project.
 
-Please see the files [README](../README) and [NON-AUTOTOOLS-BUILD](../NON-AUTOTOOLS-BUILD) for full build documentation, as well as the man pages, including [`man pcre2/doc/pcre2build.3`](https://www.pcre2.org/doc/pcre2build/).
+Please see the files [README](../README.md) and [NON-AUTOTOOLS-BUILD](../NON-AUTOTOOLS-BUILD.md) for full build documentation, as well as the man pages, including [`man pcre2/doc/pcre2build.3`](https://www.pcre2.org/doc/pcre2build/).
 
 ## Licence
 

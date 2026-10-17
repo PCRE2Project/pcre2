@@ -951,7 +951,7 @@ install_data(
   'ChangeLog',
   'LICENCE.md',
   'NEWS',
-  'README',
+  'README.md',
   'SECURITY.md',
   'SUPPORT-LIFECYCLE.md',
   'doc/pcre2.txt',

@@ -54,9 +54,9 @@ module Pcre2UpdateAlways
     MODULE.bazel
     Makefile.am
     NEWS
-    NON-AUTOTOOLS-BUILD
+    NON-AUTOTOOLS-BUILD.md
     PerlTest.sh
-    README
+    README.md
     RunGrepTest
     RunGrepTest.py
     RunPerlTest
@@ -248,8 +248,8 @@ module Pcre2UpdateAlways
       FileUtils.mkdir_p(%w[html man])
       # Assets under html are source files, not generated output.
       FileUtils.rm(Dir.glob('html/*.{html,txt}') + Dir.glob('man/*'))
-      FileUtils.cp('../README', 'html/README.txt')
-      FileUtils.cp('../NON-AUTOTOOLS-BUILD', 'html/NON-AUTOTOOLS-BUILD.txt')
+      FileUtils.cp('../README.md', 'html/README.txt')
+      FileUtils.cp('../NON-AUTOTOOLS-BUILD.md', 'html/NON-AUTOTOOLS-BUILD.txt')
 
       Pcre2AsciidocConverter.run(sources)
 

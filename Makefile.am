@@ -20,7 +20,7 @@ dist_doc_DATA = \
   ChangeLog \
   LICENCE.md \
   NEWS \
-  README \
+  README.md \
   SECURITY.md \
   SUPPORT-LIFECYCLE.md \
   doc/pcre2.txt \
@@ -315,7 +315,7 @@ EXTRA_DIST += \
 # These files contain maintenance information
 
 EXTRA_DIST += \
-  NON-AUTOTOOLS-BUILD \
+  NON-AUTOTOOLS-BUILD.md \
   HACKING
 
 # These are the documentation files that are included in the tarball but not

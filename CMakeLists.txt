@@ -1547,7 +1547,7 @@ file(
   ChangeLog
   LICENCE.md
   NEWS
-  README
+  README.md
   SECURITY.md
   SUPPORT-LIFECYCLE.md
 )

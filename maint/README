@@ -292,7 +292,7 @@ new release.
     at least confirm they haven't flagged anything.
 
   - Documentation: check the documentation is ready; and LICENCE,
-    NON-AUTOTOOLS-BUILD, and README. Many of these won't need changing, but over
+    NON-AUTOTOOLS-BUILD.md, and README.md. Many of these won't need changing, but over
     the long term things do change.
 
 * Ensure the AUTHORS file is up-to-date with any new contributors since the
