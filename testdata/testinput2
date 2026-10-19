@@ -4972,12 +4972,84 @@ B)x/alt_verbnames,mark
 /b\nc/firstline,use_offset_limit,newline=lf
     ab\nc\=offset_limit=0
     ab\nc\=offset_limit=1
+    ab\n\=offset_limit=1,ps
+    ab\n\=offset_limit=1,ph
 
 /b/firstline,use_offset_limit,newline=crlf
     ab\r\nb\=offset_limit=0
     ab\r\nb\=offset_limit=1
+    ab\r\nb\=offset_limit=2
     ab\r\nb\=offset_limit=5
+    ab\r\nb\=offset_limit=50
+    ab\r\nb
     a\r\nb\=offset_limit=4
+    b\r\nb\=offset_limit=0
+    ab\=offset_limit=1
+    ab\r\=offset_limit=1
+
+# The scan limit is inclusive, and does not truncate the match.
+
+/\r\n/firstline,use_offset_limit,newline=crlf
+    a\r\nb\=offset_limit=0
+    a\r\nb\=offset_limit=1
+    a\r\nb\=offset_limit=2
+    \r\nb\=offset_limit=0
+
+/b\r\nc/firstline,use_offset_limit,newline=crlf
+    ab\r\nc\=offset_limit=0
+    ab\r\nc\=offset_limit=1
+    ab\r\n\=offset_limit=1,ps
+    ab\r\n\=offset_limit=1,ph
+
+/(?:)/firstline,use_offset_limit,newline=lf,no_start_optimize
+    abc\=offset=2,offset_limit=1
+    abc\=offset=2,offset_limit=2
+    abc\=offset=3,offset_limit=3
+    \=offset_limit=0
+
+/(?:)/firstline,use_offset_limit,newline=crlf,no_start_optimize
+    abc\=offset=2,offset_limit=1
+    abc\=offset=2,offset_limit=2
+    abc\=offset=3,offset_limit=3
+    \=offset_limit=0
+
+# CRLF at the subject end, adjacent lone CRs, and a shortened scan.
+
+/\r\n\r?/firstline,use_offset_limit,newline=crlf
+    a\r\n\=offset_limit=0
+    a\r\n\=offset_limit=1
+    a\r\n\=offset_limit=2
+    a\r\n\=offset_limit=3
+    a\r\n\r\=offset_limit=0
+    a\r\n\r\=offset_limit=1
+    a\r\n\r\=offset_limit=2
+    a\r\n\r\=offset_limit=4
+    a\r\r\n\=offset_limit=1
+    a\r\r\n\=offset_limit=2
+    a\r\r\n\=offset_limit=3
+    a\r\r\n\=offset_limit=4
+    a\r\n\rxxxxxxxx\=offset_limit=0
+    a\r\n\rxxxxxxxx\=offset_limit=1
+    a\r\n\rxxxxxxxx\=offset_limit=2
+
+/\n/firstline,use_offset_limit,newline=crlf
+    a\r\n\=offset_limit=1
+    a\r\n\=offset_limit=2
+    a\r\n\=offset_limit=3
+    a\r\n\=offset=2,offset_limit=1
+    a\r\n\=offset=2,offset_limit=2
+    a\r\n\=offset=2,offset_limit=3
+
+/\r\z/firstline,use_offset_limit,newline=crlf,no_start_optimize
+    a\r\=offset_limit=0
+    a\r\=offset_limit=1
+    a\r\=offset_limit=2
+    a\r\n\r\=offset_limit=2
+    a\r\n\r\=offset_limit=3
+    a\r\n\r\=offset_limit=4
+    a\r\n\r\=offset=3,offset_limit=2
+    a\r\n\r\=offset=3,offset_limit=3
+    a\r\n\r\=offset=3,offset_limit=4
 
 /abcd/null_context
     abcd\=null_context
