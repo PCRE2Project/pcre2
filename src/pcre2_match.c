@@ -932,28 +932,32 @@ NEW_FRAME:
       where we know the starting frame is at the top of the chained frames, in
       this case we have to search back for the relevant frame in case other types
       of group that use chained frames have intervened. Multiple OP_CLOSEs always
-      come innermost first, which matches the chain order. We can ignore this in
-      a recursion, because captures are not passed out of recursions. */
+      come innermost first, which matches the chain order.
+
+      In a recursion, the closed groups may be returned to the caller by a
+      capture list. Only groups that were opened within the recursion are closed,
+      so the search stops at the recursion's frame. */
 
     case OP_CLOSE:
-      if (Fcurrent_recurse == RECURSE_UNSET)
+      number = GET2(Fecode, 1);
+      offset = Flast_group_offset;
+      for (;;)
       {
-        number = GET2(Fecode, 1);
-        offset = Flast_group_offset;
-        for (;;)
-        {
-          /* Corrupted heapframes?. Trigger an assert and return an error */
-          PCRE2_ASSERT(offset != PCRE2_UNSET);
-          if (offset == PCRE2_UNSET)
-            return PCRE2_ERROR_INTERNAL;
+        /* Corrupted heapframes?. Trigger an assert and return an error */
+        PCRE2_ASSERT(offset != PCRE2_UNSET);
+        if (offset == PCRE2_UNSET)
+          return PCRE2_ERROR_INTERNAL;
 
-          N = (heapframe *)((char *)match_data->heapframes + offset);
-          P = (heapframe *)((char *)N - frame_size);
-          if (N->group_frame_type == (GF_CAPTURE | number))
-            break;
-          offset = P->last_group_offset;
-        }
+        N = (heapframe *)((char *)match_data->heapframes + offset);
+        P = (heapframe *)((char *)N - frame_size);
+        if (N->group_frame_type == (GF_CAPTURE | number) ||
+            GF_IDMASK(N->group_frame_type) == GF_RECURSE)
+          break;
+        offset = P->last_group_offset;
+      }
 
+      if (N->group_frame_type == (GF_CAPTURE | number))
+      {
         offset = (number << 1) - 2;
         Fcapture_last = number;
         Fovector[offset] = P->eptr - mb->start_subject;

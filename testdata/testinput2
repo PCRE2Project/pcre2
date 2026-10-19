@@ -8301,6 +8301,31 @@ a)"xI
 \= Expect no match
     abc
 
+# Groups that are still open at (*ACCEPT) in a called group are closed before
+# the listed captures are returned, but groups opened outside the called group
+# are not. JIT does not yet close the open groups.
+
+/(*NO_JIT)^(?&r(2))b\2$(?(DEFINE)(?<r>(a(*ACCEPT)x)))/
+    aba
+\= Expect no match
+    abb
+
+/(*NO_JIT)^(?&r(2,3))\2\3$(?(DEFINE)(?<r>(a(b(*ACCEPT)c))))/
+    ababb
+
+/(*NO_JIT)^(?&r(3))\3(?(2)x|y)$(?(DEFINE)(?<r>(a(b(*ACCEPT)c))))/
+    abby
+\= Expect no match
+    abbx
+
+/(*NO_JIT)(?(R)(a(*ACCEPT)x)|(?R(1))b\1)/
+    aba
+
+/^(x(?<r>a(*ACCEPT)b){0}(?&r(1))(?(1)y|z))/
+    xaz
+\= Expect no match
+    xay
+
 # --------------
 
 # Test that a memory leak has been fixed
