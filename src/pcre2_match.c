@@ -108,6 +108,7 @@ points). */
 #define GF_NOCAPTURE  0x00020000u
 #define GF_CONDASSERT 0x00030000u
 #define GF_RECURSE    0x00040000u
+#define GF_ASSERT     0x00050000u
 
 /* Masks for the identity and data parts of the group frame type. */
 
@@ -862,6 +863,10 @@ MATCH_RECURSE:
       fprintf(stderr, "recurse=%d", GF_DATAMASK(group_frame_type));
       break;
 
+    case GF_ASSERT:
+      fprintf(stderr, "assert op=%d", Fop);
+      break;
+
     default:
       fprintf(stderr, "*** unknown ***");
       break;
@@ -969,9 +974,31 @@ NEW_FRAME:
       /* ===================================================================== */
       /* Real or forced end of the pattern, assertion, or recursion. In an
       assertion ACCEPT, update the last used pointer and remember the current
-      frame so that the captures and mark can be fished out of it. */
+      frame so that the captures and mark can be fished out of it.
+
+      OP_ASSERT_ACCEPT is compiled for an (*ACCEPT) that is lexically inside an
+      assertion, but the group containing it may have been called as a
+      subroutine from outside that assertion. In that case the recursion is
+      the innermost construct, and (*ACCEPT) must end only the recursion, as
+      it does in JIT. Look for whichever of the two was entered most recently. */
 
     case OP_ASSERT_ACCEPT:
+      if (Fcurrent_recurse != RECURSE_UNSET)
+      {
+        offset = Flast_group_offset;
+        while (offset != PCRE2_UNSET)
+        {
+          N = (heapframe *)((char *)match_data->heapframes + offset);
+          P = (heapframe *)((char *)N - frame_size);
+          if (GF_IDMASK(N->group_frame_type) == GF_ASSERT ||
+              GF_IDMASK(N->group_frame_type) == GF_CONDASSERT)
+            break;
+          if (GF_IDMASK(N->group_frame_type) == GF_RECURSE)
+            goto ACCEPT_IN_RECURSION;
+          offset = P->last_group_offset;
+        }
+      }
+
       if (Feptr > mb->last_used_ptr)
         mb->last_used_ptr = Feptr;
       assert_accept_frame = F;
@@ -1007,6 +1034,7 @@ NEW_FRAME:
         and mark, and the start_match position (\K might have changed it), and
         then move on past the OP_RECURSE. */
 
+      ACCEPT_IN_RECURSION:
         P->eptr = Feptr;
         P->mark = Fmark;
         P->start_match = Fstart_match;
@@ -6463,7 +6491,7 @@ NEW_FRAME:
     case OP_ASSERTBACK_NA:
       for (;;)
       {
-        group_frame_type = GF_NOCAPTURE;
+        group_frame_type = GF_ASSERT;
         RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM3);
         if (rrc == MATCH_ACCEPT)
         {
@@ -6496,7 +6524,7 @@ NEW_FRAME:
     case OP_ASSERTBACK_NOT:
       for (;;)
       {
-        group_frame_type = GF_NOCAPTURE;
+        group_frame_type = GF_ASSERT;
         RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM4);
         switch (rrc)
         {
@@ -6616,7 +6644,7 @@ NEW_FRAME:
 
       for (;;)
       {
-        group_frame_type = GF_NOCAPTURE;
+        group_frame_type = GF_ASSERT;
         RMATCH(Fecode + 1 + LINK_SIZE + length, RM38);
         if (rrc == MATCH_ACCEPT)
         {
