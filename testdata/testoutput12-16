@@ -1625,6 +1625,42 @@ No match
     \x{d800}aa
  0: aa
     
+# FIRSTLINE offset limits with unpaired surrogates around CRLF.
+
+/\r\n\r?/firstline,use_offset_limit,newline=crlf,match_invalid_utf,no_start_optimize
+    a\x{dc00}\r\n\=offset_limit=1
+No match
+    a\x{dc00}\r\n\=offset_limit=2
+ 0: \x{0d}\x{0a}
+    a\x{dc00}\r\n\=offset_limit=3
+ 0: \x{0d}\x{0a}
+    a\x{d800}\r\n\r\=offset_limit=1
+No match
+    a\x{d800}\r\n\r\=offset_limit=2
+ 0: \x{0d}\x{0a}\x{0d}
+    a\x{d800}\r\n\r\=offset_limit=3
+ 0: \x{0d}\x{0a}\x{0d}
+    a\x{dc00}\r\n\rxxxxxxxx\=offset_limit=1
+No match
+    a\x{dc00}\r\n\rxxxxxxxx\=offset_limit=2
+ 0: \x{0d}\x{0a}\x{0d}
+    a\x{dc00}\r\n\rxxxxxxxx\=offset_limit=3
+ 0: \x{0d}\x{0a}\x{0d}
+    a\r\n\r\x{d800}\=offset_limit=0
+No match
+    a\r\n\r\x{d800}\=offset_limit=1
+ 0: \x{0d}\x{0a}\x{0d}
+    a\r\n\r\x{d800}\=offset_limit=2
+ 0: \x{0d}\x{0a}\x{0d}
+
+/\r\n\r?/firstline,use_offset_limit,newline=any,match_invalid_utf,no_start_optimize
+    a\x{d800}\r\n\rxxxxxxxx\=offset_limit=1
+No match
+    a\x{d800}\r\n\rxxxxxxxx\=offset_limit=2
+ 0: \x{0d}\x{0a}\x{0d}
+    a\x{d800}\r\n\rxxxxxxxx\=offset_limit=3
+ 0: \x{0d}\x{0a}\x{0d}
+
 /A\z/utf,match_invalid_utf
     A\x{df00}\n
 No match

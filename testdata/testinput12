@@ -474,6 +474,27 @@
 /aa/utf,ucp,match_invalid_utf,global
     \x{d800}aa
     
+# FIRSTLINE offset limits with unpaired surrogates around CRLF.
+
+/\r\n\r?/firstline,use_offset_limit,newline=crlf,match_invalid_utf,no_start_optimize
+    a\x{dc00}\r\n\=offset_limit=1
+    a\x{dc00}\r\n\=offset_limit=2
+    a\x{dc00}\r\n\=offset_limit=3
+    a\x{d800}\r\n\r\=offset_limit=1
+    a\x{d800}\r\n\r\=offset_limit=2
+    a\x{d800}\r\n\r\=offset_limit=3
+    a\x{dc00}\r\n\rxxxxxxxx\=offset_limit=1
+    a\x{dc00}\r\n\rxxxxxxxx\=offset_limit=2
+    a\x{dc00}\r\n\rxxxxxxxx\=offset_limit=3
+    a\r\n\r\x{d800}\=offset_limit=0
+    a\r\n\r\x{d800}\=offset_limit=1
+    a\r\n\r\x{d800}\=offset_limit=2
+
+/\r\n\r?/firstline,use_offset_limit,newline=any,match_invalid_utf,no_start_optimize
+    a\x{d800}\r\n\rxxxxxxxx\=offset_limit=1
+    a\x{d800}\r\n\rxxxxxxxx\=offset_limit=2
+    a\x{d800}\r\n\rxxxxxxxx\=offset_limit=3
+
 /A\z/utf,match_invalid_utf
     A\x{df00}\n
 

@@ -677,6 +677,27 @@
     line1\nbreak
     line0\nline1\nbreak
 
+# FIRSTLINE offset limits with stray and truncated UTF-8 around CRLF.
+
+/\r\n\r?/firstline,use_offset_limit,newline=crlf,match_invalid_utf,no_start_optimize
+    a\x80\r\n\=offset_limit=1
+    a\x80\r\n\=offset_limit=2
+    a\x80\r\n\=offset_limit=3
+    a\xe2\x80\r\n\r\=offset_limit=2
+    a\xe2\x80\r\n\r\=offset_limit=3
+    a\xe2\x80\r\n\r\=offset_limit=4
+    a\x80\r\n\rxxxxxxxx\=offset_limit=1
+    a\x80\r\n\rxxxxxxxx\=offset_limit=2
+    a\x80\r\n\rxxxxxxxx\=offset_limit=3
+    a\r\n\r\xe2\x80\=offset_limit=0
+    a\r\n\r\xe2\x80\=offset_limit=1
+    a\r\n\r\xe2\x80\=offset_limit=2
+
+/\r\n\r?/firstline,use_offset_limit,newline=any,match_invalid_utf,no_start_optimize
+    a\xe2\x80\r\n\rxxxxxxxx\=offset_limit=2
+    a\xe2\x80\r\n\rxxxxxxxx\=offset_limit=3
+    a\xe2\x80\r\n\rxxxxxxxx\=offset_limit=4
+
 /A\z/utf,match_invalid_utf
     A\x80\x42\n
 

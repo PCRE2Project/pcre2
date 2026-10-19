@@ -5889,6 +5889,7 @@ mainloop_entry(compiler_common *common)
   jump_list *newline = NULL;
   sljit_u32 overall_options = common->re->overall_options;
   BOOL hascrorlf = (common->re->flags & PCRE2_HASCRORLF) != 0;
+  BOOL has_offset_limit = (overall_options & PCRE2_USE_OFFSET_LIMIT) != 0;
   BOOL newlinecheck = FALSE;
   BOOL readuchar = FALSE;
 
@@ -5903,6 +5904,45 @@ mainloop_entry(compiler_common *common)
     /* Search for the end of the first line. */
     SLJIT_ASSERT(common->match_end_ptr != 0);
     OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
+
+    /* Temporarily reduce STR_END for the newline lookup only. */
+    if (has_offset_limit)
+    {
+      /* Allow UTF decoding to finish a character at the offset limit.
+      The CRLF scan needs STR_PTR on LF, then records STR_PTR - 1 (the CR).
+      At exhaustion it records STR_END - 1, so it also needs one extra
+      code unit to preserve the inclusive offset limit. */
+      sljit_sw extra = 32 / PCRE2_CODE_UNIT_WIDTH;
+
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL0, STR_END, 0);
+      if (HAS_VIRTUAL_REGISTERS)
+      {
+        OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
+        OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, offset_limit));
+        OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
+      }
+      else
+      {
+        OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, offset_limit));
+        OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, begin));
+      }
+
+      /* Compare in code units before scaling, also excluding PCRE2_UNSET. */
+      OP2(SLJIT_SUB, TMP2, 0, STR_END, 0, TMP2, 0);
+#if PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
+      OP2(SLJIT_LSHR, TMP2, 0, TMP2, 0, SLJIT_IMM, UCHAR_SHIFT);
+#endif /* PCRE2_CODE_UNIT_WIDTH == [16|32] */
+      end = CMP(SLJIT_GREATER_EQUAL, TMP1, 0, TMP2, 0);
+      OP2(SLJIT_SUB, TMP2, 0, TMP2, 0, TMP1, 0);
+      end2 = CMP(SLJIT_LESS_EQUAL, TMP2, 0, SLJIT_IMM, extra);
+      OP2(SLJIT_SUB, TMP2, 0, TMP2, 0, SLJIT_IMM, extra);
+#if PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
+      OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, UCHAR_SHIFT);
+#endif /* PCRE2_CODE_UNIT_WIDTH == [16|32] */
+      OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, TMP2, 0);
+      JUMPHERE(end2);
+      JUMPHERE(end);
+    }
 
     if (common->nltype == NLTYPE_FIXED && common->newline > 255)
     {
@@ -5932,9 +5972,11 @@ mainloop_entry(compiler_common *common)
     }
 
     OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
+    if (has_offset_limit)
+      OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), LOCAL0);
   }
 
-  if ((overall_options & PCRE2_USE_OFFSET_LIMIT) != 0)
+  if (has_offset_limit)
   {
     /* Check whether offset limit is set and valid. */
     SLJIT_ASSERT(common->match_end_ptr != 0);

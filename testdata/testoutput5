@@ -999,6 +999,40 @@ No match
     A\x{1ec5}ABCXYZ
  0: X
 
+# FIRSTLINE scans may stop inside a multicode-unit character.
+
+/A.*Z/newline=any,utf,firstline,use_offset_limit,no_start_optimize
+    A\x{1ec5}Zxxxxxxxx\=offset_limit=0
+ 0: A\x{1ec5}Z
+    A\x{10000}Zxxxxxxxx\=offset_limit=1
+ 0: A\x{10000}Z
+    A\x{85}Zxxxxxxxx\=offset_limit=1
+No match
+    A\x{2028}Zxxxxxxxx\=offset_limit=2
+No match
+
+/Z/newline=any,utf,firstline,use_offset_limit,no_start_optimize
+    A\x{1ec5}Zxxxxxxxx\=offset_limit=1
+No match
+    A\x{10000}Zxxxxxxxx\=offset_limit=1
+No match
+    A\x{85}Zxxxxxxxx\=offset_limit=2
+No match
+    A\x{2028}Zxxxxxxxx\=offset_limit=3
+No match
+
+/A.*Z/newline=any,utf,firstline,use_offset_limit,no_start_optimize,match_invalid_utf
+    A\x{1ec5}Zxxxxxxxx\=offset_limit=1
+ 0: A\x{1ec5}Z
+    A\x{10000}Zxxxxxxxx\=offset_limit=1
+ 0: A\x{10000}Z
+
+/Z/newline=any,utf,firstline,use_offset_limit,no_start_optimize,match_invalid_utf
+    A\x{85}Zxxxxxxxx\=offset_limit=2
+No match
+    A\x{2028}Zxxxxxxxx\=offset_limit=3
+No match
+
 /Xa{2,4}b/utf
     X\=ps
 Partial match: X
