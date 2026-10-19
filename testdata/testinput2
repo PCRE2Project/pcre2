@@ -3983,6 +3983,31 @@
 
 /[a-c]{0,6}d/IB
 
+# Whole-pattern recursion may backtrack through terminal iterators.
+
+/(?:b(?R)a|a+)/B
+    baa
+    bbaaa
+    baaa
+
+/(?:b(?0)a|a+)/B
+    baa
+
+# Local subroutine calls do not re-enter the whole pattern.
+
+/(?<r>b(?&r)a|x)a+/B
+    xaa
+    bxaaa
+
+# Confirm that non-terminal auto-possessification applies even with (?R)
+
+/(?:b(?R)a|a+b)/B
+
+# Confirm behaviour with character class possessification as well
+
+/(?:b(?R)a|[ac]+)/B
+    baa
+
 # End of special auto-possessive tests
 
 /^A\o{1239}B/

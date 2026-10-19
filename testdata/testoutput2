@@ -13642,6 +13642,102 @@ Starting code units: a b c d
 Last code unit = 'd'
 Subject length lower bound = 1
 
+# Whole-pattern recursion may backtrack through terminal iterators.
+
+/(?:b(?R)a|a+)/B
+------------------------------------------------------------------
+        Bra
+        Bra
+        b
+        Recurse
+        a
+        Alt
+        a+
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    baa
+ 0: baa
+    bbaaa
+ 0: bbaaa
+    baaa
+ 0: baaa
+
+/(?:b(?0)a|a+)/B
+------------------------------------------------------------------
+        Bra
+        Bra
+        b
+        Recurse
+        a
+        Alt
+        a+
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    baa
+ 0: baa
+
+# Local subroutine calls do not re-enter the whole pattern.
+
+/(?<r>b(?&r)a|x)a+/B
+------------------------------------------------------------------
+        Bra
+        CBra 1
+        b
+        Recurse
+        a
+        Alt
+        x
+        Ket
+        a++
+        Ket
+        End
+------------------------------------------------------------------
+    xaa
+ 0: xaa
+ 1: x
+    bxaaa
+ 0: bxaaa
+ 1: bxa
+
+# Confirm that non-terminal auto-possessification applies even with (?R)
+
+/(?:b(?R)a|a+b)/B
+------------------------------------------------------------------
+        Bra
+        Bra
+        b
+        Recurse
+        a
+        Alt
+        a++
+        b
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+# Confirm behaviour with character class possessification as well
+
+/(?:b(?R)a|[ac]+)/B
+------------------------------------------------------------------
+        Bra
+        Bra
+        b
+        Recurse
+        a
+        Alt
+        [ac]+
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+    baa
+ 0: baa
+
 # End of special auto-possessive tests
 
 /^A\o{1239}B/
