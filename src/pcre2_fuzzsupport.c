@@ -478,10 +478,20 @@ END_QSCAN:
   and also that PCRE2_NO_UTF_CHECK is unset, as there is no guarantee that the
   input is valid UTF. Also unset PCRE2_NEVER_UTF and PCRE2_NEVER_UCP as there is
   no reason to disallow UTF and UCP. Force PCRE2_NEVER_BACKSLASH_C to be set
-  because \C in random patterns is highly likely to cause a crash. */
+  because \C in random patterns is highly likely to cause a crash (except in
+  the PCRE2_FUZZ_ALLOW_BACKSLASH_C variant below, outside UTF mode). */
 
-  uint32_t compile_options =
-      ((random_options >> 32) & ALLOWED_COMPILE_OPTIONS) | PCRE2_NEVER_BACKSLASH_C;
+  uint32_t compile_options = (uint32_t)((random_options >> 32) & ALLOWED_COMPILE_OPTIONS);
+#ifdef PCRE2_FUZZ_ALLOW_BACKSLASH_C
+  /* Variant for libraries configured without --enable-never-backslash-C (as
+  distributions ship them): allow \C, which matches one code unit, but only
+  outside UTF mode, where it cannot split a character. PCRE2_NEVER_UTF stops
+  (*UTF) at the start of the pattern from switching UTF mode on. */
+  if ((compile_options & PCRE2_UTF) == 0)
+    compile_options |= PCRE2_NEVER_UTF;
+  else
+#endif
+    compile_options |= PCRE2_NEVER_BACKSLASH_C;
   uint32_t match_options =
       (((uint32_t)random_options) & ALLOWED_MATCH_OPTIONS) | BASE_MATCH_OPTIONS;
 
