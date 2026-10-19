@@ -5968,9 +5968,9 @@ mainloop_entry(compiler_common *common)
     OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
     if ((overall_options & PCRE2_FIRSTLINE) != 0)
     {
-      OP1(SLJIT_MOV, TMP3, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
-      end2 = CMP(SLJIT_LESS_EQUAL, TMP2, 0, TMP3, 0);
-      OP1(SLJIT_MOV, TMP2, 0, TMP3, 0);
+      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
+      end2 = CMP(SLJIT_LESS_EQUAL, TMP2, 0, TMP1, 0);
+      OP1(SLJIT_MOV, TMP2, 0, TMP1, 0);
     }
     else
     {
