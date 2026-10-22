@@ -34,9 +34,9 @@ pcre2_substitute \- replace matched substrings
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint\fP \f(CBpcre2_substitute\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR, PCRE2_SPTR\fP \f(CIsubject\fP\f(CR,
+int\fP \f(CBpcre2_substitute\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR, PCRE2_SPTR\fP \f(CIsubject\fP\f(CR,
                      PCRE2_SIZE\fP \f(CIlength\fP\f(CR, PCRE2_SIZE\fP \f(CIstart_offset\fP\f(CR,
                      uint32_t\fP \f(CIoptions\fP\f(CR, pcre2_match_data *\fP\f(CImatch_data\fP\f(CR,
                      pcre2_match_context *\fP\f(CImcontext\fP\f(CR,
@@ -77,11 +77,11 @@ Option bits
 .TP 13
 \f(CImatch_data\fP
 .ad l
-Points to a match data block, or is \f(CRNULL\fP
+Points to a match data block, or is \f(CBNULL\fP
 .TP 13
 \f(CImcontext\fP
 .ad l
-Points to a match context, or is \f(CRNULL\fP
+Points to a match context, or is \f(CBNULL\fP
 .TP 13
 \f(CIreplacement\fP
 .ad l
@@ -93,7 +93,7 @@ Length of the replacement string
 .TP 13
 \f(CIbuffer\fP
 .ad l
-Points to the output buffer, or may be \f(CRNULL\fP if \f(CIblength\fP is zero
+Points to the output buffer, or may be \f(CBNULL\fP if \f(CIblength\fP is zero
 .TP 13
 \f(CIblength\fP
 .ad l
@@ -250,7 +250,7 @@ Simple unset insert = empty string
 If \f(CBPCRE2_SUBSTITUTE_LITERAL\fP is set, \f(CBPCRE2_SUBSTITUTE_EXTENDED\fP,
 \f(CBPCRE2_SUBSTITUTE_UNKNOWN_UNSET\fP, and \f(CBPCRE2_SUBSTITUTE_UNSET_EMPTY\fP are ignored.
 .sp
-If \f(CBPCRE2_SUBSTITUTE_MATCHED\fP is set, \f(CImatch_data\fP must be non\-\f(CRNULL\fP; its
+If \f(CBPCRE2_SUBSTITUTE_MATCHED\fP is set, \f(CImatch_data\fP must be non\-\f(CBNULL\fP; its
 contents must be the result of a call to \f(CBpcre2_match()\fP (or
 \f(CBpcre2_jit_match()\fP) using the same pattern, subject pointer, effective
 subject length, start offset, and match options.

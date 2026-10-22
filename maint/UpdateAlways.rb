@@ -54,9 +54,9 @@ module Pcre2UpdateAlways
     MODULE.bazel
     Makefile.am
     NEWS
-    NON-AUTOTOOLS-BUILD
+    NON-AUTOTOOLS-BUILD.md
     PerlTest.sh
-    README
+    README.md
     RunGrepTest
     RunGrepTest.py
     RunPerlTest
@@ -70,7 +70,6 @@ module Pcre2UpdateAlways
     cmake/*.in
     cmake/COPYING-CMAKE-SCRIPTS
     configure.ac
-    doc/assets/css/*.css
     doc/html/*.html
     doc/html/*.txt
     doc/html/css/*.css
@@ -247,9 +246,10 @@ module Pcre2UpdateAlways
 
       puts 'Making HTML and manpage documentation'
       FileUtils.mkdir_p(%w[html man])
-      FileUtils.rm_r(Dir.glob('{html,man}/*'))
-      FileUtils.cp('../README', 'html/README.txt')
-      FileUtils.cp('../NON-AUTOTOOLS-BUILD', 'html/NON-AUTOTOOLS-BUILD.txt')
+      # Assets under html are source files, not generated output.
+      FileUtils.rm(Dir.glob('html/*.{html,txt}') + Dir.glob('man/*'))
+      FileUtils.cp('../README.md', 'html/README.txt')
+      FileUtils.cp('../NON-AUTOTOOLS-BUILD.md', 'html/NON-AUTOTOOLS-BUILD.txt')
 
       Pcre2AsciidocConverter.run(sources)
 

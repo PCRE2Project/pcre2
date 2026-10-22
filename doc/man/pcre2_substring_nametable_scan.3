@@ -34,9 +34,9 @@ pcre2_substring_nametable_scan \- find table entries for given string name
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint\fP \f(CBpcre2_substring_nametable_scan\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR,
+int\fP \f(CBpcre2_substring_nametable_scan\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR,
                                    PCRE2_SPTR\fP \f(CIstringname\fP\f(CR,
                                    PCRE2_SPTR *\fP\f(CIfirstptr\fP\f(CR,
                                    PCRE2_SPTR *\fP\f(CIlastptr\fP\f(CR);\fP
@@ -72,7 +72,7 @@ Where to return a pointer to the last entry
 .PP
 .ad l
 .sp
-When the name is found in the table, if \f(CIfirstptr\fP is \f(CRNULL\fP, the function
+When the name is found in the table, if \f(CIfirstptr\fP is \f(CBNULL\fP, the function
 returns a group number, but if there is more than one matching entry, it is not
 defined which one. Otherwise, when both \f(CIfirstptr\fP and \f(CIlastptr\fP have been
 set, the yield of

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Some comments on performance"><title>pcre2perform(3)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2perform(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2022-12-06">6 Dec 2022</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Contents</h2><ol class="toc-list level-1"><li><a href="#_pcre2_performance" title="PCRE2 performance">PCRE2 performance</a></li><li><a href="#_compiled_pattern_memory_usage" title="Compiled pattern memory usage">Compiled pattern memory usage</a></li><li><a href="#_stack_and_heap_usage_at_run_time" title="Stack and heap usage at run time">Stack and heap usage at run time</a></li><li><a href="#_processing_time" title="Processing time">Processing time</a></li><li><a href="#_setting_resource_limits" title="Setting resource limits">Setting resource limits</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_pcre2_performance">PCRE2 performance</h2><p>Two aspects of performance are discussed below: memory usage and processing
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Some comments on performance"><title>pcre2perform(3)</title><link rel="stylesheet" href="./css/document.css"><link rel="stylesheet" href="./css/standalone.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html">Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2perform(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2022-12-06">6 Dec 2022</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Contents</h2><ol class="toc-list level-1"><li><a href="#_pcre2_performance" title="PCRE2 performance">PCRE2 performance</a></li><li><a href="#_compiled_pattern_memory_usage" title="Compiled pattern memory usage">Compiled pattern memory usage</a></li><li><a href="#_stack_and_heap_usage_at_run_time" title="Stack and heap usage at run time">Stack and heap usage at run time</a></li><li><a href="#_processing_time" title="Processing time">Processing time</a></li><li><a href="#_setting_resource_limits" title="Setting resource limits">Setting resource limits</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_pcre2_performance">PCRE2 performance</h2><p>Two aspects of performance are discussed below: memory usage and processing
 time. The way you express your pattern as a regular expression can affect both
 of them.</p></section>
 <section class="doc-section level-1"><h2 id="_compiled_pattern_memory_usage">Compiled pattern memory usage</h2><p>Patterns are compiled by PCRE2 into a reasonably efficient interpretive code,
@@ -37,7 +37,7 @@ problem, this kind of rewriting will allow you to process patterns that PCRE2
 cannot otherwise handle. The matching performance of the two different versions
 of the pattern are roughly the same. (This applies from release 10.30 — things
 were different in earlier releases.)</p></section>
-<section class="doc-section level-1"><h2 id="_stack_and_heap_usage_at_run_time">Stack and heap usage at run time</h2><p>From release 10.30, the interpretive (non-JIT) version of <code class="function rouge"><span class="nf">pcre2_match()</span></code>
+<section class="doc-section level-1"><h2 id="_stack_and_heap_usage_at_run_time">Stack and heap usage at run time</h2><p>From release 10.30, the interpretive (non-JIT) version of <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>
 uses very little system stack at run time. In earlier releases recursive
 function calls could use a great deal of stack, and this could cause problems,
 but this usage has been eliminated. Backtracking positions are now explicitly
@@ -50,7 +50,7 @@ capturing group the size increases by 16 bytes.</p>
 stack, but this still caused some issues for multi-thread applications where
 each thread has a very small stack. From release 10.41 backtracking memory
 frames are always held in heap memory. An initial heap allocation is obtained
-the first time any match data block is passed to <code class="function rouge"><span class="nf">pcre2_match()</span></code>. This is
+the first time any match data block is passed to <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>. This is
 remembered with the match data block and re-used if that block is used for
 another match. It is freed when the match data block itself is freed.</p>
 <p>The size of the initial block is the larger of 20KiB or 10 times the pattern’s
@@ -58,19 +58,19 @@ frame size, unless the heap limit is less than this, in which case the heap
 limit is used. If the initial block proves to be too small during matching, it
 is replaced by a larger block, subject to the heap limit. The heap limit is
 checked only when a new block is to be allocated. Reducing the heap limit
-between calls to <code class="function rouge"><span class="nf">pcre2_match()</span></code> with the same match data block does not
+between calls to <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> with the same match data block does not
 affect the saved block.</p>
-<p>In contrast to <code class="function rouge"><span class="nf">pcre2_match()</span></code>, <code class="function rouge"><span class="nf">pcre2_dfa_match()</span></code> does use recursive
+<p>In contrast to <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>, <code class="function pcre2-api rouge"><span class="nf">pcre2_dfa_match()</span></code> does use recursive
 function calls, but only for processing atomic groups, lookaround assertions,
 and recursion within the pattern. The original version of the code used to
 allocate quite large internal workspace vectors on the stack, which caused some
 problems for some patterns in environments with small stacks. From release
-10.32 the code for <code class="function rouge"><span class="nf">pcre2_dfa_match()</span></code> has been re-factored to use heap
+10.32 the code for <code class="function pcre2-api rouge"><span class="nf">pcre2_dfa_match()</span></code> has been re-factored to use heap
 memory when necessary for internal workspace when recursing, though recursive
 function calls are still used.</p>
 <p>The "match depth" parameter can be used to limit the depth of function
 recursion, and the "match heap" parameter to limit heap memory in
-<code class="function rouge"><span class="nf">pcre2_dfa_match()</span></code>.</p></section>
+<code class="function pcre2-api rouge"><span class="nf">pcre2_dfa_match()</span></code>.</p></section>
 <section class="doc-section level-1"><h2 id="_processing_time">Processing time</h2><p>Certain items in regular expression patterns are processed more efficiently
 than others. It is more efficient to use a character class like [aeiou] than a
 set of single-character alternatives such as (a|e|i|o|u). In general, the
@@ -85,19 +85,19 @@ character properties, it will probably be faster.</p>
 <p>By default, the escape sequences <code class="regex rouge"><span class="pcre2-semantic">\b</span></code>, <code class="regex rouge"><span class="pcre2-semantic">\d</span></code>, <code class="regex rouge"><span class="pcre2-semantic">\s</span></code>, and <code class="regex rouge"><span class="pcre2-semantic">\w</span></code>, and the POSIX
 character classes such as <code class="regex rouge"><span class="pcre2-semantic">[:alpha:]</span></code> do not use Unicode properties, partly for
 backwards compatibility, and partly for performance reasons. However, you can
-set the <code class="constant rouge"><span class="no">PCRE2_UCP</span></code> option or start the pattern with <code class="regex rouge"><span class="pcre2-semantic">(*UCP)</span></code> if you want Unicode
+set the <code class="constant pcre2-api rouge"><span class="no">PCRE2_UCP</span></code> option or start the pattern with <code class="regex rouge"><span class="pcre2-semantic">(*UCP)</span></code> if you want Unicode
 character properties to be used. This can double the matching time for items
-such as <code class="regex rouge"><span class="pcre2-semantic">\d</span></code>, when matched with <code class="function rouge"><span class="nf">pcre2_match()</span></code>; the performance loss is
+such as <code class="regex rouge"><span class="pcre2-semantic">\d</span></code>, when matched with <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>; the performance loss is
 less with a DFA matching function, and in both cases there is not much
 difference for <code class="regex rouge"><span class="pcre2-semantic">\b</span></code>.</p>
 <p>When a pattern begins with <code class="regex rouge"><span class="pcre2-semantic">.*</span></code> not in atomic parentheses, nor in parentheses
-that are the subject of a backreference, and the <code class="constant rouge"><span class="no">PCRE2_DOTALL</span></code> option is set,
+that are the subject of a backreference, and the <code class="constant pcre2-api rouge"><span class="no">PCRE2_DOTALL</span></code> option is set,
 the pattern is implicitly anchored by PCRE2, since it can match only at the
 start of a subject string. If the pattern has multiple top-level branches, they
 must all be anchorable. The optimization can be disabled by the
-<code class="constant rouge"><span class="no">PCRE2_NO_DOTSTAR_ANCHOR</span></code> option, and is automatically disabled if the pattern
+<code class="constant pcre2-api rouge"><span class="no">PCRE2_NO_DOTSTAR_ANCHOR</span></code> option, and is automatically disabled if the pattern
 contains <code class="regex rouge"><span class="pcre2-semantic">(*PRUNE)</span></code> or <code class="regex rouge"><span class="pcre2-semantic">(*SKIP)</span></code>.</p>
-<p>If <code class="constant rouge"><span class="no">PCRE2_DOTALL</span></code> is not set, PCRE2 cannot make this optimization, because the
+<p>If <code class="constant pcre2-api rouge"><span class="no">PCRE2_DOTALL</span></code> is not set, PCRE2 cannot make this optimization, because the
 dot metacharacter does not then match a newline, and if the subject string
 contains newlines, the pattern may match from the character immediately
 following one of them instead of from the very start. For example, the pattern</p>
@@ -106,7 +106,7 @@ following one of them instead of from the very start. For example, the pattern</
 character), with the match starting at the seventh character. In order to do
 this, PCRE2 has to retry the match starting after every newline in the subject.</p>
 <p>If you are using such a pattern with subject strings that do not contain
-newlines, the best performance is obtained by setting <code class="constant rouge"><span class="no">PCRE2_DOTALL</span></code>, or starting
+newlines, the best performance is obtained by setting <code class="constant pcre2-api rouge"><span class="no">PCRE2_DOTALL</span></code>, or starting
 the pattern with <code class="regex rouge"><span class="pcre2-semantic">^.*</span></code> or <code class="regex rouge"><span class="pcre2-semantic">^.*?</span></code> to indicate explicit anchoring. That saves PCRE2
 from having to scan along the subject looking for a newline to restart at.</p>
 <p>Beware of patterns that contain nested indefinite repeats. These can take a
@@ -156,8 +156,8 @@ than one character whenever possible.</p></section>
 <section class="doc-section level-1"><h2 id="_setting_resource_limits">Setting resource limits</h2><p>You can set limits on the amount of processing that takes place when matching,
 and on the amount of heap memory that is used. The default values of the limits
 are very large, and unlikely ever to operate. They can be changed when PCRE2 is
-built, and they can also be set when <code class="function rouge"><span class="nf">pcre2_match()</span></code> or
-<code class="function rouge"><span class="nf">pcre2_dfa_match()</span></code> is called. For details of these interfaces, see the
+built, and they can also be set when <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> or
+<code class="function pcre2-api rouge"><span class="nf">pcre2_dfa_match()</span></code> is called. For details of these interfaces, see the
 <a href="./pcre2build.html"><code>pcre2build</code></a>
 documentation and the section
 <a href="./pcre2api.html#match-context">The match context</a>

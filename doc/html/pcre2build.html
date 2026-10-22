@@ -1,17 +1,17 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Building PCRE2"><title>pcre2build(3)</title><link rel="stylesheet" href="./css/pcre2.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html"><picture><source media="(prefers-color-scheme: dark)" srcset="./images/pcre2-hero-dark.svg"><img src="./images/pcre2-hero-light.svg" alt=""></picture> Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2build(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2025-10-17">17 Oct 2025</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Contents</h2><ol class="toc-list level-1"><li><a href="#_building_pcre2" title="Building PCRE2">Building PCRE2</a></li><li><a href="#_pcre2_build_time_options" title="PCRE2 build-time options">PCRE2 build-time options</a></li><li><a href="#_building_8_bit_16_bit_and_32_bit_libraries" title="Building 8-bit, 16-bit and 32-bit libraries">Building 8-bit, 16-bit and 32-bit libraries</a></li><li><a href="#_building_shared_and_static_libraries" title="Building shared and static libraries">Building shared and static libraries</a></li><li><a href="#_unicode_and_utf_support" title="Unicode and UTF support">Unicode and UTF support</a></li><li><a href="#_disabling_the_use_of_c" title="Disabling the use of \C">Disabling the use of <code class="regex rouge"><span class="pcre2-semantic">\C</span></code></a></li><li><a href="#_just_in_time_compiler_support" title="Just-in-time compiler support">Just-in-time compiler support</a></li><li><a href="#_newline_recognition" title="Newline recognition">Newline recognition</a></li><li><a href="#_what_r_matches" title="What \R matches">What <code class="regex rouge"><span class="pcre2-semantic">\R</span></code> matches</a></li><li><a href="#_handling_very_large_patterns" title="Handling very large patterns">Handling very large patterns</a></li><li><a href="#_limiting_pcre2_resource_usage" title="Limiting PCRE2 resource usage">Limiting PCRE2 resource usage</a></li><li><a href="#_limiting_variable_length_lookbehind_assertions" title="Limiting variable-length lookbehind assertions">Limiting variable-length lookbehind assertions</a></li><li><a href="#_creating_character_tables_at_build_time" title="Creating character tables at build time">Creating character tables at build time</a></li><li><a href="#_using_ebcdic_code" title="Using EBCDIC code">Using EBCDIC code</a></li><li><a href="#_pcre2grep_support_for_external_scripts" title="pcre2grep support for external scripts">pcre2grep support for external scripts</a></li><li><a href="#_pcre2grep_options_for_compressed_file_support" title="pcre2grep options for compressed file support">pcre2grep options for compressed file support</a></li><li><a href="#_pcre2grep_buffer_size" title="pcre2grep buffer size">pcre2grep buffer size</a></li><li><a href="#_pcre2test_option_for_libreadline_support" title="pcre2test option for libreadline support">pcre2test option for libreadline support</a></li><li><a href="#_including_debugging_code" title="Including debugging code">Including debugging code</a></li><li><a href="#_debugging_with_valgrind_support" title="Debugging with Valgrind support">Debugging with Valgrind support</a></li><li><a href="#_code_coverage_reporting" title="Code coverage reporting">Code coverage reporting</a></li><li><a href="#_disabling_the_z_and_t_formatting_modifiers" title="Disabling the z and t formatting modifiers">Disabling the z and t formatting modifiers</a></li><li><a href="#_support_for_fuzzers" title="Support for fuzzers">Support for fuzzers</a></li><li><a href="#_obsolete_option" title="Obsolete option">Obsolete option</a></li><li><a href="#_see_also" title="See also">See also</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_building_pcre2">Building PCRE2</h2><p>PCRE2 is distributed with a <code>configure</code> script that can be used to build
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><meta name="description" content="Building PCRE2"><title>pcre2build(3)</title><link rel="stylesheet" href="./css/document.css"><link rel="stylesheet" href="./css/standalone.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage toc2 toc-right offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html">Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2build(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2025-10-17">17 Oct 2025</time></p></header><div class="document-layout"><nav id="toc" class="toc2" role="doc-toc"><h2 id="toc-title">Contents</h2><ol class="toc-list level-1"><li><a href="#_building_pcre2" title="Building PCRE2">Building PCRE2</a></li><li><a href="#_pcre2_build_time_options" title="PCRE2 build-time options">PCRE2 build-time options</a></li><li><a href="#_building_8_bit_16_bit_and_32_bit_libraries" title="Building 8-bit, 16-bit and 32-bit libraries">Building 8-bit, 16-bit and 32-bit libraries</a></li><li><a href="#_building_shared_and_static_libraries" title="Building shared and static libraries">Building shared and static libraries</a></li><li><a href="#_unicode_and_utf_support" title="Unicode and UTF support">Unicode and UTF support</a></li><li><a href="#_disabling_the_use_of_c" title="Disabling the use of \C">Disabling the use of <code class="regex rouge"><span class="pcre2-semantic">\C</span></code></a></li><li><a href="#_just_in_time_compiler_support" title="Just-in-time compiler support">Just-in-time compiler support</a></li><li><a href="#_newline_recognition" title="Newline recognition">Newline recognition</a></li><li><a href="#_what_r_matches" title="What \R matches">What <code class="regex rouge"><span class="pcre2-semantic">\R</span></code> matches</a></li><li><a href="#_handling_very_large_patterns" title="Handling very large patterns">Handling very large patterns</a></li><li><a href="#_limiting_pcre2_resource_usage" title="Limiting PCRE2 resource usage">Limiting PCRE2 resource usage</a></li><li><a href="#_limiting_variable_length_lookbehind_assertions" title="Limiting variable-length lookbehind assertions">Limiting variable-length lookbehind assertions</a></li><li><a href="#_creating_character_tables_at_build_time" title="Creating character tables at build time">Creating character tables at build time</a></li><li><a href="#_using_ebcdic_code" title="Using EBCDIC code">Using EBCDIC code</a></li><li><a href="#_pcre2grep_support_for_external_scripts" title="pcre2grep support for external scripts">pcre2grep support for external scripts</a></li><li><a href="#_pcre2grep_options_for_compressed_file_support" title="pcre2grep options for compressed file support">pcre2grep options for compressed file support</a></li><li><a href="#_pcre2grep_buffer_size" title="pcre2grep buffer size">pcre2grep buffer size</a></li><li><a href="#_pcre2test_option_for_libreadline_support" title="pcre2test option for libreadline support">pcre2test option for libreadline support</a></li><li><a href="#_including_debugging_code" title="Including debugging code">Including debugging code</a></li><li><a href="#_debugging_with_valgrind_support" title="Debugging with Valgrind support">Debugging with Valgrind support</a></li><li><a href="#_code_coverage_reporting" title="Code coverage reporting">Code coverage reporting</a></li><li><a href="#_disabling_the_z_and_t_formatting_modifiers" title="Disabling the z and t formatting modifiers">Disabling the z and t formatting modifiers</a></li><li><a href="#_support_for_fuzzers" title="Support for fuzzers">Support for fuzzers</a></li><li><a href="#_obsolete_option" title="Obsolete option">Obsolete option</a></li><li><a href="#_see_also" title="See also">See also</a></li></ol></nav><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_building_pcre2">Building PCRE2</h2><p>PCRE2 is distributed with a <code>configure</code> script that can be used to build
 the library in Unix-like environments using the Autotools applications. Also in
 the distribution are files to support building using CMake instead of
 <code>configure</code>. The text file
-<code>README</code>
+<code>README.md</code>
 contains general information about building with Autotools (some of which is
 repeated below), and also has some comments about building on various operating
 systems. The files in the <code>vms</code> directory support building under OpenVMS.
 There is a lot more information about building PCRE2 without using
 Autotools (including information about using CMake and building "by
 hand") in the text file called
-<code>NON-AUTOTOOLS-BUILD</code>.
+<code>NON-AUTOTOOLS-BUILD.md</code>.
 You should consult this file as well as the
-<code>README</code>
+<code>README.md</code>
 file if you are building in a non-Unix-like environment.</p></section>
 <section class="doc-section level-1"><h2 id="_pcre2_build_time_options">PCRE2 build-time options</h2><p>The rest of this document describes the optional features of PCRE2 that can be
 selected when the library is compiled. It assumes use of the <code>configure</code>
@@ -22,7 +22,7 @@ if you are using CMake instead of <code>configure</code> to build PCRE2.</p>
 <p>If you are not using Autotools or CMake, option selection can be done by
 editing the <code>config.h</code> file, or by passing parameter settings to the
 compiler, as described in
-<code>NON-AUTOTOOLS-BUILD</code>.</p>
+<code>NON-AUTOTOOLS-BUILD.md</code>.</p>
 <p>The complete list of options for <code>configure</code> (which includes the standard
 ones such as the selection of the installation directory) can be obtained by
 running</p>
@@ -70,12 +70,12 @@ To build it without Unicode support, add</p>
 is not possible to build one library with Unicode support and another without
 in the same configuration.</p>
 <p>Of itself, Unicode support does not make PCRE2 treat strings as UTF-8, UTF-16
-or UTF-32. To do that, applications that use the library can set the <code class="constant rouge"><span class="no">PCRE2_UTF</span></code>
-option when they call <code class="function rouge"><span class="nf">pcre2_compile()</span></code> to compile a pattern.
+or UTF-32. To do that, applications that use the library can set the <code class="constant pcre2-api rouge"><span class="no">PCRE2_UTF</span></code>
+option when they call <code class="function pcre2-api rouge"><span class="nf">pcre2_compile()</span></code> to compile a pattern.
 Alternatively, patterns may be started with <code class="regex rouge"><span class="pcre2-semantic">(*UTF)</span></code> unless the application has
-locked this out by setting <code class="constant rouge"><span class="no">PCRE2_NEVER_UTF</span></code>.</p>
+locked this out by setting <code class="constant pcre2-api rouge"><span class="no">PCRE2_NEVER_UTF</span></code>.</p>
 <p>UTF support allows the libraries to process character code points up to
-<code class="character rouge"><span class="sc">0x10ffff</span></code> in the strings that they handle. Unicode support also gives access to
+<span class="character-info" title="" tabindex="0" aria-describedby="pcre2-character-1"><code class="character pcre2-api rouge"><span class="sc">0x10ffff</span></code><span class="character-card" id="pcre2-character-1" role="tooltip" aria-label="<noncharacter-10FFFF> (U+10FFFF)" aria-hidden="true" data-pagefind-ignore=""><span class="character-glyph" data-character=""></span><span class="character-name" data-character-name="<noncharacter-10FFFF>"></span><span class="character-codepoint" data-codepoint="U+10FFFF"></span></span></span> in the strings that they handle. Unicode support also gives access to
 the Unicode properties of characters, using pattern escapes such as <code class="regex rouge"><span class="pcre2-semantic">\P</span></code>, <code class="regex rouge"><span class="pcre2-semantic">\p</span></code>,
 and <code class="regex rouge"><span class="pcre2-semantic">\X</span></code>. Only the general category properties such as <code class="regex rouge"><span class="pcre2-semantic">Lu</span></code> and <code class="regex rouge"><span class="pcre2-semantic">Nd</span></code>,
 script names, and some bi-directional and binary properties are supported.
@@ -83,14 +83,14 @@ Details are given in the
 <a href="./pcre2pattern.html"><code>pcre2pattern</code></a>
 documentation.</p>
 <p>Pattern escapes such as <code class="regex rouge"><span class="pcre2-semantic">\d</span></code> and <code class="regex rouge"><span class="pcre2-semantic">\w</span></code> do not by default make use of Unicode
-properties. The application can request that they do by setting the <code class="constant rouge"><span class="no">PCRE2_UCP</span></code>
-option. Unless the application has set <code class="constant rouge"><span class="no">PCRE2_NEVER_UCP</span></code>, a pattern may also
+properties. The application can request that they do by setting the <code class="constant pcre2-api rouge"><span class="no">PCRE2_UCP</span></code>
+option. Unless the application has set <code class="constant pcre2-api rouge"><span class="no">PCRE2_NEVER_UCP</span></code>, a pattern may also
 request this by starting with <code class="regex rouge"><span class="pcre2-semantic">(*UCP)</span></code>.</p></section>
 <section class="doc-section level-1"><h2 id="_disabling_the_use_of_c">Disabling the use of <code class="regex rouge"><span class="pcre2-semantic">\C</span></code></h2><p>The <code class="regex rouge"><span class="pcre2-semantic">\C</span></code> escape sequence, which matches a single code unit, even in a UTF mode,
 can cause unpredictable behaviour because it may leave the current matching
 point in the middle of a multi-code-unit character. The application can lock
-it out by setting the <code class="constant rouge"><span class="no">PCRE2_NEVER_BACKSLASH_C</span></code> option when calling
-<code class="function rouge"><span class="nf">pcre2_compile()</span></code>. There is also a build-time option</p>
+it out by setting the <code class="constant pcre2-api rouge"><span class="no">PCRE2_NEVER_BACKSLASH_C</span></code> option when calling
+<code class="function pcre2-api rouge"><span class="nf">pcre2_compile()</span></code>. There is also a build-time option</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">--enable-never-backslash-C</span></code></pre></div>
 <p>(note the upper case C) which locks out the use of <code class="regex rouge"><span class="pcre2-semantic">\C</span></code> entirely.</p></section>
 <section class="doc-section level-1"><h2 id="_just_in_time_compiler_support">Just-in-time compiler support</h2><p>Just-in-time (JIT) compiler support is included in the build by specifying</p>
@@ -128,8 +128,8 @@ indicating a line ending. A fifth option, specified by</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">--enable-newline-is-any</span></code></pre></div>
 <p>causes PCRE2 to recognize any Unicode newline sequence. The Unicode newline
 sequences are the three just mentioned, plus the single characters VT (vertical
-tab, <code class="character rouge"><span class="sc">U+000B</span></code>), FF (form feed, <code class="character rouge"><span class="sc">U+000C</span></code>), NEL (next line, <code class="character rouge"><span class="sc">U+0085</span></code>), LS (line
-separator, <code class="character rouge"><span class="sc">U+2028</span></code>), and PS (paragraph separator, <code class="character rouge"><span class="sc">U+2029</span></code>). The final option is</p>
+tab, <span class="character-info" title="" tabindex="0" aria-describedby="pcre2-character-2"><code class="character pcre2-api rouge"><span class="sc">U+000B</span></code><span class="character-card" id="pcre2-character-2" role="tooltip" aria-label="LINE TABULATION (U+000B)" aria-hidden="true" data-pagefind-ignore=""><span class="character-glyph" data-character=""></span><span class="character-name" data-character-name="LINE TABULATION"></span><span class="character-codepoint" data-codepoint="U+000B"></span></span></span>), FF (form feed, <span class="character-info" title="" tabindex="0" aria-describedby="pcre2-character-3"><code class="character pcre2-api rouge"><span class="sc">U+000C</span></code><span class="character-card" id="pcre2-character-3" role="tooltip" aria-label="FORM FEED (U+000C)" aria-hidden="true" data-pagefind-ignore=""><span class="character-glyph" data-character=""></span><span class="character-name" data-character-name="FORM FEED"></span><span class="character-codepoint" data-codepoint="U+000C"></span></span></span>), NEL (next line, <span class="character-info" title="" tabindex="0" aria-describedby="pcre2-character-4"><code class="character pcre2-api rouge"><span class="sc">U+0085</span></code><span class="character-card" id="pcre2-character-4" role="tooltip" aria-label="NEXT LINE (U+0085)" aria-hidden="true" data-pagefind-ignore=""><span class="character-glyph" data-character=""></span><span class="character-name" data-character-name="NEXT LINE"></span><span class="character-codepoint" data-codepoint="U+0085"></span></span></span>), LS (line
+separator, <span class="character-info" title="" tabindex="0" aria-describedby="pcre2-character-5"><code class="character pcre2-api rouge"><span class="sc">U+2028</span></code><span class="character-card" id="pcre2-character-5" role="tooltip" aria-label="LINE SEPARATOR (U+2028)" aria-hidden="true" data-pagefind-ignore=""><span class="character-glyph" data-character=""></span><span class="character-name" data-character-name="LINE SEPARATOR"></span><span class="character-codepoint" data-codepoint="U+2028"></span></span></span>), and PS (paragraph separator, <span class="character-info" title="" tabindex="0" aria-describedby="pcre2-character-6"><code class="character pcre2-api rouge"><span class="sc">U+2029</span></code><span class="character-card" id="pcre2-character-6" role="tooltip" aria-label="PARAGRAPH SEPARATOR (U+2029)" aria-hidden="true" data-pagefind-ignore=""><span class="character-glyph" data-character=""></span><span class="character-name" data-character-name="PARAGRAPH SEPARATOR"></span><span class="character-codepoint" data-codepoint="U+2029"></span></span></span>). The final option is</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">--enable-newline-is-nul</span></code></pre></div>
 <p>which causes NUL (binary zero) to be set as the default line-ending character.</p>
 <p>Whatever default line ending convention is selected when PCRE2 is built can be
@@ -156,18 +156,18 @@ offsets by adding a setting such as</p>
 longer offsets slows down the operation of PCRE2 because it has to load
 additional data when handling them. For the 32-bit library the value is always
 4 and cannot be overridden; the value of <code>--with-link-size</code> is ignored.</p></section>
-<section class="doc-section level-1"><h2 id="_limiting_pcre2_resource_usage">Limiting PCRE2 resource usage</h2><p>The <code class="function rouge"><span class="nf">pcre2_match()</span></code> function increments a counter each time it goes round
+<section class="doc-section level-1"><h2 id="_limiting_pcre2_resource_usage">Limiting PCRE2 resource usage</h2><p>The <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> function increments a counter each time it goes round
 its main loop. Putting a limit on this counter controls the amount of computing
-resource used by a single call to <code class="function rouge"><span class="nf">pcre2_match()</span></code>. The limit can be changed
+resource used by a single call to <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>. The limit can be changed
 at run time, as described in the
 <a href="./pcre2api.html"><code>pcre2api</code></a>
 documentation. The default is 10,000,000, but this can be changed by adding a
 setting such as</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">--with-match-limit</span><span class="o">=</span>500000</code></pre></div>
 <p>to the <code>configure</code> command. This setting also applies to the
-<code class="function rouge"><span class="nf">pcre2_dfa_match()</span></code> matching function, and to JIT matching (though the
+<code class="function pcre2-api rouge"><span class="nf">pcre2_dfa_match()</span></code> matching function, and to JIT matching (though the
 counting is done differently).</p>
-<p>The <code class="function rouge"><span class="nf">pcre2_match()</span></code> function uses heap memory to record backtracking
+<p>The <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> function uses heap memory to record backtracking
 points. The more nested backtracking points there are (that is, the deeper the
 search tree), the more memory is needed. There is an upper limit, specified in
 kibibytes (units of 1024 bytes). This limit can be changed at run time, as
@@ -177,12 +177,12 @@ documentation. The default limit (in effect unlimited) is 20,000,000. You can
 change this by a setting such as</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">--with-heap-limit</span><span class="o">=</span>500</code></pre></div>
 <p>which limits the amount of heap to 500 KiB. This limit applies only to
-interpretive matching in <code class="function rouge"><span class="nf">pcre2_match()</span></code> and <code class="function rouge"><span class="nf">pcre2_dfa_match()</span></code>, which
+interpretive matching in <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> and <code class="function pcre2-api rouge"><span class="nf">pcre2_dfa_match()</span></code>, which
 may also use the heap for internal workspace when processing complicated
 patterns. This limit does not apply when JIT (which has its own memory
 arrangements) is used.</p>
 <p>You can also explicitly limit the depth of nested backtracking in the
-<code class="function rouge"><span class="nf">pcre2_match()</span></code> interpreter. This limit defaults to the value that is set
+<code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> interpreter. This limit defaults to the value that is set
 for <code>--with-match-limit</code>. You can set a lower default limit by adding, for
 example,</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">--with-match-limit-depth</span><span class="o">=</span>10000</code></pre></div>
@@ -192,8 +192,8 @@ because the size of each backtracking "frame" depends on the number of
 capturing parentheses in a pattern, the amount of heap that is used before the
 limit is reached varies from pattern to pattern. This limit was more useful in
 versions before 10.30, where function recursion was used for backtracking.</p>
-<p>As well as applying to <code class="function rouge"><span class="nf">pcre2_match()</span></code>, the depth limit also controls
-the depth of recursive function calls in <code class="function rouge"><span class="nf">pcre2_dfa_match()</span></code>. These are
+<p>As well as applying to <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>, the depth limit also controls
+the depth of recursive function calls in <code class="function pcre2-api rouge"><span class="nf">pcre2_dfa_match()</span></code>. These are
 used for lookaround assertions, atomic groups, and recursion within patterns.
 The limit does not apply to JIT matching.</p></section>
 <section class="doc-section level-1"><h2 id="_limiting_variable_length_lookbehind_assertions">Limiting variable-length lookbehind assertions</h2><p>Lookbehind assertions in which one or more branches can match a variable number
@@ -202,7 +202,7 @@ top-level branch. There is a limit to this maximum that defaults to 255
 characters. You can alter this default by a setting such as</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">--with-max-varlookbehind</span><span class="o">=</span>100</code></pre></div>
 <p>The limit can be changed at runtime by calling
-<code class="function rouge"><span class="nf">pcre2_set_max_varlookbehind()</span></code>. Lookbehind assertions in which every
+<code class="function pcre2-api rouge"><span class="nf">pcre2_set_max_varlookbehind()</span></code>. Lookbehind assertions in which every
 branch matches a fixed number of characters (not necessarily all the same) are
 not constrained by this limit.</p></section>
 <section class="doc-section level-1"><h2 id="_creating_character_tables_at_build_time">Creating character tables at build time</h2><p>PCRE2 uses fixed tables for processing characters whose code points are less
@@ -228,8 +228,8 @@ specify a locale, you must use the -L option:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nv">LC_ALL</span><span class="o">=</span>fr_FR ./pcre2_dftables <span class="nt">-L</span> src/pcre2_chartables.c</code></pre></div>
 <p>You can also specify <code>-b</code> (with or without <code>-L</code>). This causes the tables to be
 written in binary instead of as source code. A set of binary tables can be
-loaded into memory by an application and passed to <code class="function rouge"><span class="nf">pcre2_compile()</span></code> in the
-same way as tables created by calling <code class="function rouge"><span class="nf">pcre2_maketables()</span></code>. The tables are
+loaded into memory by an application and passed to <code class="function pcre2-api rouge"><span class="nf">pcre2_compile()</span></code> in the
+same way as tables created by calling <code class="function pcre2-api rouge"><span class="nf">pcre2_maketables()</span></code>. The tables are
 just a string of bytes, independent of hardware characteristics such as
 endianness. This means they can be bundled with an application that runs in
 different environments, to ensure consistent behaviour.</p></section>
@@ -250,12 +250,12 @@ in the same build of the library. When PCRE2 is built with EBCDIC support, it
 always operates in EBCDIC, and consequently <code>--enable-unicode</code> and <code>--enable-ebcdic</code>
 are mutually exclusive.</p>
 <p>The EBCDIC character that corresponds to an ASCII LF is assumed to have the
-value <code class="character rouge"><span class="sc">0x15</span></code> by default. However, in some EBCDIC environments, <code class="character rouge"><span class="sc">0x25</span></code> is used. In
+value <span class="character-info" title="" tabindex="0" aria-describedby="pcre2-character-7"><code class="character pcre2-api rouge"><span class="sc">0x15</span></code><span class="character-card" id="pcre2-character-7" role="tooltip" aria-label="NEGATIVE ACKNOWLEDGE (U+0015)" aria-hidden="true" data-pagefind-ignore=""><span class="character-glyph" data-character=""></span><span class="character-name" data-character-name="NEGATIVE ACKNOWLEDGE"></span><span class="character-codepoint" data-codepoint="U+0015"></span></span></span> by default. However, in some EBCDIC environments, <span class="character-info" title="" tabindex="0" aria-describedby="pcre2-character-8"><code class="character pcre2-api rouge"><span class="sc">0x25</span></code><span class="character-card" id="pcre2-character-8" role="tooltip" aria-label="PERCENT SIGN (U+0025)" aria-hidden="true" data-pagefind-ignore=""><span class="character-glyph" data-character="%"></span><span class="character-name" data-character-name="PERCENT SIGN"></span><span class="character-codepoint" data-codepoint="U+0025"></span></span></span> is used. In
 such an environment you should use</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">--enable-ebcdic-nl25</span></code></pre></div>
 <p>(which implies <code>--enable-ebcdic</code>). The EBCDIC character for CR has the same value
-as in ASCII, namely, <code class="character rouge"><span class="sc">0x0d</span></code>. Whichever of <code class="character rouge"><span class="sc">0x15</span></code> and <code class="character rouge"><span class="sc">0x25</span></code> is <em>not</em> chosen as LF
-is made to correspond to the Unicode NEL character (which, in Unicode, is <code class="character rouge"><span class="sc">0x85</span></code>).</p>
+as in ASCII, namely, <span class="character-info" title="" tabindex="0" aria-describedby="pcre2-character-9"><code class="character pcre2-api rouge"><span class="sc">0x0d</span></code><span class="character-card" id="pcre2-character-9" role="tooltip" aria-label="CARRIAGE RETURN (U+000D)" aria-hidden="true" data-pagefind-ignore=""><span class="character-glyph" data-character=""></span><span class="character-name" data-character-name="CARRIAGE RETURN"></span><span class="character-codepoint" data-codepoint="U+000D"></span></span></span>. Whichever of <span class="character-info" title="" tabindex="0" aria-describedby="pcre2-character-10"><code class="character pcre2-api rouge"><span class="sc">0x15</span></code><span class="character-card" id="pcre2-character-10" role="tooltip" aria-label="NEGATIVE ACKNOWLEDGE (U+0015)" aria-hidden="true" data-pagefind-ignore=""><span class="character-glyph" data-character=""></span><span class="character-name" data-character-name="NEGATIVE ACKNOWLEDGE"></span><span class="character-codepoint" data-codepoint="U+0015"></span></span></span> and <span class="character-info" title="" tabindex="0" aria-describedby="pcre2-character-11"><code class="character pcre2-api rouge"><span class="sc">0x25</span></code><span class="character-card" id="pcre2-character-11" role="tooltip" aria-label="PERCENT SIGN (U+0025)" aria-hidden="true" data-pagefind-ignore=""><span class="character-glyph" data-character="%"></span><span class="character-name" data-character-name="PERCENT SIGN"></span><span class="character-codepoint" data-codepoint="U+0025"></span></span></span> is <em>not</em> chosen as LF
+is made to correspond to the Unicode NEL character (which, in Unicode, is <span class="character-info" title="" tabindex="0" aria-describedby="pcre2-character-12"><code class="character pcre2-api rouge"><span class="sc">0x85</span></code><span class="character-card" id="pcre2-character-12" role="tooltip" aria-label="NEXT LINE (U+0085)" aria-hidden="true" data-pagefind-ignore=""><span class="character-glyph" data-character=""></span><span class="character-name" data-character-name="NEXT LINE"></span><span class="character-codepoint" data-codepoint="U+0085"></span></span></span>).</p>
 <p>The options that select newline behaviour, such as <code>--enable-newline-is-cr</code>,
 and equivalent run-time options, refer to these character values in an EBCDIC
 environment.</p>
@@ -363,7 +363,7 @@ created at compile time (<code>*.gcno</code>).</p>
 information about code coverage, see the <code>gcov</code> and <code>lcov</code>
 documentation.</p></section>
 <section class="doc-section level-1"><h2 id="_disabling_the_z_and_t_formatting_modifiers">Disabling the z and t formatting modifiers</h2><p>The C99 standard defines formatting modifiers <code class="c rouge" data-lang="c"><span class="nv">z</span></code> and <code class="c rouge" data-lang="c"><span class="nv">t</span></code> for
-<code class="type rouge"><span class="kt">size_t</span></code> and <code class="type rouge"><span class="kt">ptrdiff_t</span></code> values, respectively. By default, PCRE2 uses
+<code class="type pcre2-api rouge"><span class="kt">size_t</span></code> and <code class="type pcre2-api rouge"><span class="kt">ptrdiff_t</span></code> values, respectively. By default, PCRE2 uses
 these modifiers in
 environments other than old versions of Microsoft Visual Studio when
 <code class="c rouge" data-lang="c"><span class="nv">__STDC_VERSION__</span></code> is defined and has a value greater than or equal to <code class="c rouge" data-lang="c"><span class="mi">199901L</span></code>
@@ -392,7 +392,7 @@ arguments: if an argument starts with "=" the rest of it is a literal input
 string. Otherwise, it is assumed to be a file name, and the contents of the
 file are the test string.</p></section>
 <section class="doc-section level-1"><h2 id="_obsolete_option">Obsolete option</h2><p>In versions of PCRE2 prior to 10.30, there were two ways of handling
-backtracking in the <code class="function rouge"><span class="nf">pcre2_match()</span></code> function. The default was to use the
+backtracking in the <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> function. The default was to use the
 system stack, but if</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nt">--disable-stack-for-recursion</span></code></pre></div>
 <p>was set, memory on the heap was used. From release 10.30 onwards this has

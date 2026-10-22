@@ -34,9 +34,9 @@ pcre2_get_error_message \- get textual error message for error number
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint\fP \f(CBpcre2_get_error_message\fP\f(CR(int\fP \f(CIerrorcode\fP\f(CR, PCRE2_UCHAR *\fP\f(CIbuffer\fP\f(CR,
+int\fP \f(CBpcre2_get_error_message\fP\f(CR(int\fP \f(CIerrorcode\fP\f(CR, PCRE2_UCHAR *\fP\f(CIbuffer\fP\f(CR,
                             PCRE2_SIZE\fP \f(CIbufflen\fP\f(CR);\fP
 .fam
 .fi
@@ -56,7 +56,7 @@ an error code (positive or negative), or zero for no error
 .TP 10
 \f(CIbuffer\fP
 .ad l
-where to put the message; may be \f(CRNULL\fP only when \f(CIbufflen\fP is zero
+where to put the message; may be \f(CBNULL\fP only when \f(CIbufflen\fP is zero
 .TP 10
 \f(CIbufflen\fP
 .ad l

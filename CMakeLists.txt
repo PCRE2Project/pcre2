@@ -1547,7 +1547,7 @@ file(
   ChangeLog
   LICENCE.md
   NEWS
-  README
+  README.md
   SECURITY.md
   SUPPORT-LIFECYCLE.md
 )
@@ -1558,7 +1558,8 @@ install(FILES ${man1} DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 install(FILES ${man3} DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
 install(FILES ${txts} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2)
 install(FILES ${html} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2/html)
-install(FILES ${PROJECT_SOURCE_DIR}/doc/html/css/pcre2.css
+install(FILES ${PROJECT_SOURCE_DIR}/doc/html/css/document.css
+              ${PROJECT_SOURCE_DIR}/doc/html/css/standalone.css
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2/html/css)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/html/images
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2/html)

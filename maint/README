@@ -25,7 +25,7 @@ AsciidocMarkup.md
 
 AsciidocConverterPcre2.rb
   Shared Asciidoctor extensions for standalone HTML, website fragments and
-  manpages. Requires Asciidoctor, asciidoctor-html5s, Rouge and Nokogiri.
+  manpages. Requires Asciidoctor, asciidoctor-html5s, Rouge, Nokogiri and unicode-name.
   See AsciidocMarkup.md for markup conventions and ownership of styles.
 
 AsciidocDemo.rb
@@ -36,7 +36,8 @@ AsciidocIndex.rb
 BuildPages.rb
   Build the Jekyll website from the manual and project sources, then index it
   with Pagefind. Install pages/Gemfile with Bundler and pass --base-url URL
-  or set PAGES_BASE_URL. The website does not consume generated doc/html.
+  or set PAGES_BASE_URL. The website renders the manuals from source and shares
+  the source CSS and images under doc/html.
 
 cmake-tests
   CMake projects that exercise PCRE2 as a build-tree dependency and as an
@@ -291,7 +292,7 @@ new release.
     at least confirm they haven't flagged anything.
 
   - Documentation: check the documentation is ready; and LICENCE,
-    NON-AUTOTOOLS-BUILD, and README. Many of these won't need changing, but over
+    NON-AUTOTOOLS-BUILD.md, and README.md. Many of these won't need changing, but over
     the long term things do change.
 
 * Ensure the AUTHORS file is up-to-date with any new contributors since the

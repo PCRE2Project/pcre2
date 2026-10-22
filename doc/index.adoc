@@ -6,7 +6,7 @@ The HTML documentation for PCRE2 consists of a number of pages that are listed
 below in alphabetical order. If you are new to PCRE2, please read the first one
 first.
 
-[cols="2,3",stripes=even]
+[.fit-first,cols="2,3",stripes=even]
 |===
 |xref:pcre2.adoc[pcre2]
 |Introductory page
@@ -76,7 +76,7 @@ first.
 There are also individual pages that summarize the interface for each function
 in the library.
 
-[cols="2,3",stripes=even]
+[.fit-first,cols="2,3",stripes=even]
 |===
 |xref:pcre2_callout_enumerate.adoc[pcre2_callout_enumerate]
 |Enumerate callouts in a compiled pattern

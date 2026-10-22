@@ -34,9 +34,9 @@ pcre2_jit_compile \- process a compiled pattern with the JIT compiler
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint\fP \f(CBpcre2_jit_compile\fP\f(CR(pcre2_code *\fP\f(CIcode\fP\f(CR, uint32_t\fP \f(CIoptions\fP\f(CR);\fP
+int\fP \f(CBpcre2_jit_compile\fP\f(CR(pcre2_code *\fP\f(CIcode\fP\f(CR, uint32_t\fP \f(CIoptions\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -51,7 +51,7 @@ documentation.
 .sp
 The availability of JIT support can be tested by calling
 \f(CBpcre2_jit_compile()\fP with a single option \f(CBPCRE2_JIT_TEST_ALLOC\fP (the
-\f(CIcode\fP argument is ignored, so a \f(CRNULL\fP value is accepted). Such a call
+\f(CIcode\fP argument is ignored, so a \f(CBNULL\fP value is accepted). Such a call
 returns zero if JIT is available and has a working allocator. Otherwise
 it returns \f(CBPCRE2_ERROR_NOMEMORY\fP if JIT is available but cannot allocate
 executable memory, or \f(CBPCRE2_ERROR_JIT_UNSUPPORTED\fP if JIT support is not

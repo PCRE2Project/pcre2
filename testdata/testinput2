@@ -3983,6 +3983,31 @@
 
 /[a-c]{0,6}d/IB
 
+# Whole-pattern recursion may backtrack through terminal iterators.
+
+/(?:b(?R)a|a+)/B
+    baa
+    bbaaa
+    baaa
+
+/(?:b(?0)a|a+)/B
+    baa
+
+# Local subroutine calls do not re-enter the whole pattern.
+
+/(?<r>b(?&r)a|x)a+/B
+    xaa
+    bxaaa
+
+# Confirm that non-terminal auto-possessification applies even with (?R)
+
+/(?:b(?R)a|a+b)/B
+
+# Confirm behaviour with character class possessification as well
+
+/(?:b(?R)a|[ac]+)/B
+    baa
+
 # End of special auto-possessive tests
 
 /^A\o{1239}B/
@@ -5497,6 +5522,17 @@ a)"xI
 
 /a(*ACCEPT)x|aa/endanchored
     aaa
+
+/a+?(*THEN)/endanchored
+    aa
+    aaaa
+
+/a+?b|a+?(*THEN)/endanchored
+    aaxaa
+    aaxaab
+
+/a+?(?:b(*THEN)c|c(*THEN)b)/endanchored
+    aaabcaaacbaaabc
 
 # Check auto-anchoring when there is a group that is never obeyed at
 # the start of a branch.
@@ -8439,6 +8475,9 @@ a)"xI
     _ABC_
 
 /A\K(?C1)B/
+    _AC_AB_
+
+/(?C1)A\K(?C2)B/no_start_optimize
     _AC_AB_
 
 /(?C1)A(?C2)B(?C3)C/

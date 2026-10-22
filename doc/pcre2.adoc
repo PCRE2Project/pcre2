@@ -77,9 +77,9 @@ available. The features themselves are described in the
 xref:pcre2build.adoc[`pcre2build`]
 page. Documentation about building PCRE2 for various operating systems can be
 found in the
-`README`
+`README.md`
 and
-`NON-AUTOTOOLS-BUILD`
+`NON-AUTOTOOLS-BUILD.md`
 files in the source distribution.
 
 The libraries contains a number of undocumented internal functions and data
@@ -90,6 +90,7 @@ environments, it is possible to control which external symbols are exported
 when a shared library is built, and in these cases the undocumented symbols are
 not exported.
 
+[[security-considerations]]
 == Security considerations
 
 If you are using PCRE2 in a non-UTF application that permits users to supply

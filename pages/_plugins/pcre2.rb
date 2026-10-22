@@ -119,21 +119,19 @@ module Pcre2Pages
       ensure
         Asciidoctor::LoggerManager.logger = original_logger
       end
-      PROJECT_PAGES.each do |name|
-        source = File.read(File.join(root, "#{name}.md"), encoding: 'UTF-8')
-        title = /\A(?:# ([^\n]+)\n+|([^\n]+)\n=+\n+)/.match(source)
-        raise "Missing Markdown title: #{name}" unless title
+      {'project' => PROJECT_PAGES, 'guide' => %w[README NON-AUTOTOOLS-BUILD]}.each do |directory, names|
+        names.each do |name|
+          source = File.read(File.join(root, "#{name}.md"), encoding: 'UTF-8')
+          title = /\A(?:# ([^\n]+)\n+|([^\n]+)\n=+\n+)/.match(source)
+          raise "Missing Markdown title: #{name}" unless title
 
-        add_page(site, "project/#{name}.md", "/project/#{name.downcase}/",
-                 title[1] || title[2], source[title.end(0)..],
-                 'pcre2_project' => true, 'render_with_liquid' => false)
+          add_page(site, "#{directory}/#{name}.md", "/#{directory}/#{name.downcase}/",
+                   title[1] || title[2], source[title.end(0)..],
+                   'layout' => directory == 'guide' ? 'guide' : 'default',
+                   'pcre2_project' => directory == 'project', 'render_with_liquid' => false)
+        end
       end
-      %w[README NON-AUTOTOOLS-BUILD].each do |name|
-        content = "<pre><code>#{CGI.escapeHTML(File.read(File.join(root, name), encoding: 'UTF-8'))}</code></pre>"
-        add_page(site, "guide/#{name}.html", "/guide/#{name.downcase}/", name, content,
-                 'layout' => 'guide', 'render_with_liquid' => false)
-      end
-      assets = File.join(root, 'doc/assets')
+      assets = File.join(root, 'doc/html')
       files = [File.join(assets, 'css/document.css'), *Dir.glob(File.join(assets, 'images/*.svg'))]
       files.each do |path|
         relative = path.delete_prefix(assets + File::SEPARATOR)

@@ -34,16 +34,16 @@ pcre2_jit_free_unused_memory \- free unused JIT memory
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRvoid\fP \f(CBpcre2_jit_free_unused_memory\fP\f(CR(pcre2_general_context *\fP\f(CIgcontext\fP\f(CR);\fP
+void\fP \f(CBpcre2_jit_free_unused_memory\fP\f(CR(pcre2_general_context *\fP\f(CIgcontext\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function frees unused JIT executable memory. The argument is a general
-context, for custom memory management, or \f(CRNULL\fP for standard memory management.
+context, for custom memory management, or \f(CBNULL\fP for standard memory management.
 JIT memory allocation retains some memory in order to improve future JIT
 compilation speed. In low memory conditions,
 \f(CBpcre2_jit_free_unused_memory()\fP can be used to cause this memory to be

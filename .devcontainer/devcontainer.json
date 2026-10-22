@@ -13,6 +13,10 @@
 
   // Configure tool-specific properties.
   "customizations": {
+    // Show the frontpage when a codespace is first opened.
+    "codespaces": {
+      "openFiles": [".github/README.md"]
+    },
     // Configure properties specific to VS Code.
     "vscode": {
       "extensions": [

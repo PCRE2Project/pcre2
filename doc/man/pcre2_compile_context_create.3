@@ -34,9 +34,9 @@ pcre2_compile_context_create \- create a compile context
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRpcre2_compile_context *\fP\f(CBpcre2_compile_context_create\fP\f(CR(
+pcre2_compile_context *\fP\f(CBpcre2_compile_context_create\fP\f(CR(
       pcre2_general_context *\fP\f(CIgcontext\fP\f(CR);\fP
 .fam
 .fi
@@ -44,8 +44,8 @@ pcre2_compile_context_create \- create a compile context
 .SH "DESCRIPTION"
 .sp
 This function creates and initializes a new compile context. If its argument is
-\f(CRNULL\fP, \f(CBmalloc\fP\f(CR()\fP is used to get the necessary memory; otherwise the memory
-allocation function within the general context is used. The result is \f(CRNULL\fP if
+\f(CBNULL\fP, \f(CBmalloc\fP\f(CR()\fP is used to get the necessary memory; otherwise the memory
+allocation function within the general context is used. The result is \f(CBNULL\fP if
 the memory could not be obtained.
 .sp
 There is a complete description of the PCRE2 native API in the

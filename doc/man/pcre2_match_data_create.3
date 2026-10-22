@@ -34,9 +34,9 @@ pcre2_match_data_create \- create a match data block
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRpcre2_match_data *\fP\f(CBpcre2_match_data_create\fP\f(CR(
+pcre2_match_data *\fP\f(CBpcre2_match_data_create\fP\f(CR(
       uint32_t\fP \f(CIoveccount\fP\f(CR, pcre2_general_context *\fP\f(CIgcontext\fP\f(CR);\fP
 .fam
 .fi
@@ -52,7 +52,7 @@ matches at the same point when used with \f(CBpcre2_dfa_match()\fP. There is
 always one pair of offsets; if \f(CIoveccount\fP is zero, it is treated as one.
 .sp
 The second argument points to a general context, for custom memory management,
-or is \f(CRNULL\fP for system memory management. The result of the function is \f(CRNULL\fP if
+or is \f(CBNULL\fP for system memory management. The result of the function is \f(CBNULL\fP if
 the memory for the block could not be obtained.
 .sp
 There is a complete description of the PCRE2 native API in the

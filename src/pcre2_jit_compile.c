@@ -1421,7 +1421,7 @@ detect_early_fail(compiler_common *common, PCRE2_SPTR cc, int *private_data_star
   int result = 0;
   int count, prev_count;
 
-  SLJIT_ASSERT(*cc == OP_ONCE || *cc == OP_BRA || *cc == OP_CBRA);
+  SLJIT_ASSERT(*cc == OP_BRA || *cc == OP_CBRA);
   SLJIT_ASSERT(*cc != OP_CBRA || is_optimized_cbracket(common, GET2(cc, 1 + LINK_SIZE)));
   SLJIT_ASSERT(start < EARLY_FAIL_ENHANCE_MAX);
 
@@ -1434,354 +1434,357 @@ detect_early_fail(compiler_common *common, PCRE2_SPTR cc, int *private_data_star
     count = start;
     cc += 1 + LINK_SIZE + ((*cc == OP_CBRA) ? IMM2_SIZE : 0);
 
-    while (TRUE)
+    if (!common->has_then || common->then_offsets[cc - common->start] == 0)
     {
-      accelerated_start = NULL;
-
-      switch (*cc)
+      while (TRUE)
       {
-      case OP_SOD:
-      case OP_SOM:
-      case OP_SET_SOM:
-      case OP_NOT_WORD_BOUNDARY:
-      case OP_WORD_BOUNDARY:
-      case OP_EODN:
-      case OP_EOD:
-      case OP_CIRC:
-      case OP_CIRCM:
-      case OP_DOLL:
-      case OP_DOLLM:
-      case OP_NOT_UCP_WORD_BOUNDARY:
-      case OP_UCP_WORD_BOUNDARY:
-        /* Zero width assertions. */
-        cc++;
-        continue;
-
-      case OP_NOT_DIGIT:
-      case OP_DIGIT:
-      case OP_NOT_WHITESPACE:
-      case OP_WHITESPACE:
-      case OP_NOT_WORDCHAR:
-      case OP_WORDCHAR:
-      case OP_ANY:
-      case OP_ALLANY:
-      case OP_ANYBYTE:
-      case OP_NOT_HSPACE:
-      case OP_HSPACE:
-      case OP_NOT_VSPACE:
-      case OP_VSPACE:
-        if (count < 1)
-          count = 1;
-        cc++;
-        continue;
-
-      case OP_ANYNL:
-      case OP_EXTUNI:
-        if (count < 3)
-          count = 3;
-        cc++;
-        continue;
-
-      case OP_NOTPROP:
-      case OP_PROP:
-        if (count < 1)
-          count = 1;
-        cc += 1 + 2;
-        continue;
-
-      case OP_CHAR:
-      case OP_CHARI:
-      case OP_NOT:
-      case OP_NOTI:
-        if (count < 1)
-          count = 1;
-        cc += 2;
-#ifdef SUPPORT_UNICODE
-        if (common->utf && HAS_EXTRALEN(cc[-1]))
-          cc += GET_EXTRALEN(cc[-1]);
-#endif
-        continue;
-
-      case OP_TYPEMINSTAR:
-      case OP_TYPEMINPLUS:
-        if (count == 2)
-          count = 3;
-        PCRE2_FALLTHROUGH /* Fall through */
-
-      case OP_TYPESTAR:
-      case OP_TYPEPLUS:
-      case OP_TYPEPOSSTAR:
-      case OP_TYPEPOSPLUS:
-        /* The type or prop opcode is skipped in the next iteration. */
-        cc += 1;
-
-        if (cc[0] != OP_ANYNL && cc[0] != OP_EXTUNI)
-        {
-          accelerated_start = cc - 1;
-          break;
-        }
-
-        if (count < 3)
-          count = 3;
-        continue;
-
-      case OP_TYPEEXACT:
-        if (count < 1)
-          count = 1;
-        cc += 1 + IMM2_SIZE;
-        continue;
-
-      case OP_TYPEUPTO:
-      case OP_TYPEMINUPTO:
-      case OP_TYPEPOSUPTO:
-        cc += IMM2_SIZE;
-        PCRE2_FALLTHROUGH /* Fall through */
-
-      case OP_TYPEQUERY:
-      case OP_TYPEMINQUERY:
-      case OP_TYPEPOSQUERY:
-        /* The type or prop opcode is skipped in the next iteration. */
-        if (count < 3)
-          count = 3;
-        cc += 1;
-        continue;
-
-      case OP_MINSTAR:
-      case OP_MINPLUS:
-      case OP_MINSTARI:
-      case OP_MINPLUSI:
-      case OP_NOTMINSTAR:
-      case OP_NOTMINPLUS:
-      case OP_NOTMINSTARI:
-      case OP_NOTMINPLUSI:
-        if (count == 2)
-          count = 3;
-        PCRE2_FALLTHROUGH /* Fall through */
-
-      case OP_STAR:
-      case OP_PLUS:
-      case OP_POSSTAR:
-      case OP_POSPLUS:
-
-      case OP_STARI:
-      case OP_PLUSI:
-      case OP_POSSTARI:
-      case OP_POSPLUSI:
-
-      case OP_NOTSTAR:
-      case OP_NOTPLUS:
-      case OP_NOTPOSSTAR:
-      case OP_NOTPOSPLUS:
-
-      case OP_NOTSTARI:
-      case OP_NOTPLUSI:
-      case OP_NOTPOSSTARI:
-      case OP_NOTPOSPLUSI:
-        accelerated_start = cc;
-        cc += 2;
-#ifdef SUPPORT_UNICODE
-        if (common->utf && HAS_EXTRALEN(cc[-1]))
-          cc += GET_EXTRALEN(cc[-1]);
-#endif
-        break;
-
-      case OP_EXACT:
-        if (count < 1)
-          count = 1;
-        cc += 2 + IMM2_SIZE;
-#ifdef SUPPORT_UNICODE
-        if (common->utf && HAS_EXTRALEN(cc[-1]))
-          cc += GET_EXTRALEN(cc[-1]);
-#endif
-        continue;
-
-      case OP_UPTO:
-      case OP_MINUPTO:
-      case OP_POSUPTO:
-      case OP_UPTOI:
-      case OP_MINUPTOI:
-      case OP_EXACTI:
-      case OP_POSUPTOI:
-      case OP_NOTUPTO:
-      case OP_NOTMINUPTO:
-      case OP_NOTEXACT:
-      case OP_NOTPOSUPTO:
-      case OP_NOTUPTOI:
-      case OP_NOTMINUPTOI:
-      case OP_NOTEXACTI:
-      case OP_NOTPOSUPTOI:
-        cc += IMM2_SIZE;
-        PCRE2_FALLTHROUGH /* Fall through */
-
-      case OP_QUERY:
-      case OP_MINQUERY:
-      case OP_POSQUERY:
-      case OP_QUERYI:
-      case OP_MINQUERYI:
-      case OP_POSQUERYI:
-      case OP_NOTQUERY:
-      case OP_NOTMINQUERY:
-      case OP_NOTPOSQUERY:
-      case OP_NOTQUERYI:
-      case OP_NOTMINQUERYI:
-      case OP_NOTPOSQUERYI:
-        if (count < 3)
-          count = 3;
-        cc += 2;
-#ifdef SUPPORT_UNICODE
-        if (common->utf && HAS_EXTRALEN(cc[-1]))
-          cc += GET_EXTRALEN(cc[-1]);
-#endif
-        continue;
-
-      case OP_CLASS:
-      case OP_NCLASS:
-#if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
-      case OP_XCLASS:
-      case OP_ECLASS:
-        accelerated_start = cc;
-        cc += (*cc >= OP_XCLASS) ? GET(cc, 1) : (unsigned int)(1 + (32 / sizeof(PCRE2_UCHAR)));
-#else
-        accelerated_start = cc;
-        cc += (1 + (32 / sizeof(PCRE2_UCHAR)));
-#endif
+        accelerated_start = NULL;
 
         switch (*cc)
         {
-        case OP_CRMINSTAR:
-        case OP_CRMINPLUS:
+        case OP_SOD:
+        case OP_SOM:
+        case OP_SET_SOM:
+        case OP_NOT_WORD_BOUNDARY:
+        case OP_WORD_BOUNDARY:
+        case OP_EODN:
+        case OP_EOD:
+        case OP_CIRC:
+        case OP_CIRCM:
+        case OP_DOLL:
+        case OP_DOLLM:
+        case OP_NOT_UCP_WORD_BOUNDARY:
+        case OP_UCP_WORD_BOUNDARY:
+          /* Zero width assertions. */
+          cc++;
+          continue;
+
+        case OP_NOT_DIGIT:
+        case OP_DIGIT:
+        case OP_NOT_WHITESPACE:
+        case OP_WHITESPACE:
+        case OP_NOT_WORDCHAR:
+        case OP_WORDCHAR:
+        case OP_ANY:
+        case OP_ALLANY:
+        case OP_ANYBYTE:
+        case OP_NOT_HSPACE:
+        case OP_HSPACE:
+        case OP_NOT_VSPACE:
+        case OP_VSPACE:
+          if (count < 1)
+            count = 1;
+          cc++;
+          continue;
+
+        case OP_ANYNL:
+        case OP_EXTUNI:
+          if (count < 3)
+            count = 3;
+          cc++;
+          continue;
+
+        case OP_NOTPROP:
+        case OP_PROP:
+          if (count < 1)
+            count = 1;
+          cc += 1 + 2;
+          continue;
+
+        case OP_CHAR:
+        case OP_CHARI:
+        case OP_NOT:
+        case OP_NOTI:
+          if (count < 1)
+            count = 1;
+          cc += 2;
+#ifdef SUPPORT_UNICODE
+          if (common->utf && HAS_EXTRALEN(cc[-1]))
+            cc += GET_EXTRALEN(cc[-1]);
+#endif
+          continue;
+
+        case OP_TYPEMINSTAR:
+        case OP_TYPEMINPLUS:
           if (count == 2)
             count = 3;
           PCRE2_FALLTHROUGH /* Fall through */
 
-        case OP_CRSTAR:
-        case OP_CRPLUS:
-        case OP_CRPOSSTAR:
-        case OP_CRPOSPLUS:
-          cc++;
+        case OP_TYPESTAR:
+        case OP_TYPEPLUS:
+        case OP_TYPEPOSSTAR:
+        case OP_TYPEPOSPLUS:
+          /* The type or prop opcode is skipped in the next iteration. */
+          cc += 1;
+
+          if (cc[0] != OP_ANYNL && cc[0] != OP_EXTUNI)
+          {
+            accelerated_start = cc - 1;
+            break;
+          }
+
+          if (count < 3)
+            count = 3;
+          continue;
+
+        case OP_TYPEEXACT:
+          if (count < 1)
+            count = 1;
+          cc += 1 + IMM2_SIZE;
+          continue;
+
+        case OP_TYPEUPTO:
+        case OP_TYPEMINUPTO:
+        case OP_TYPEPOSUPTO:
+          cc += IMM2_SIZE;
+          PCRE2_FALLTHROUGH /* Fall through */
+
+        case OP_TYPEQUERY:
+        case OP_TYPEMINQUERY:
+        case OP_TYPEPOSQUERY:
+          /* The type or prop opcode is skipped in the next iteration. */
+          if (count < 3)
+            count = 3;
+          cc += 1;
+          continue;
+
+        case OP_MINSTAR:
+        case OP_MINPLUS:
+        case OP_MINSTARI:
+        case OP_MINPLUSI:
+        case OP_NOTMINSTAR:
+        case OP_NOTMINPLUS:
+        case OP_NOTMINSTARI:
+        case OP_NOTMINPLUSI:
+          if (count == 2)
+            count = 3;
+          PCRE2_FALLTHROUGH /* Fall through */
+
+        case OP_STAR:
+        case OP_PLUS:
+        case OP_POSSTAR:
+        case OP_POSPLUS:
+
+        case OP_STARI:
+        case OP_PLUSI:
+        case OP_POSSTARI:
+        case OP_POSPLUSI:
+
+        case OP_NOTSTAR:
+        case OP_NOTPLUS:
+        case OP_NOTPOSSTAR:
+        case OP_NOTPOSPLUS:
+
+        case OP_NOTSTARI:
+        case OP_NOTPLUSI:
+        case OP_NOTPOSSTARI:
+        case OP_NOTPOSPLUSI:
+          accelerated_start = cc;
+          cc += 2;
+#ifdef SUPPORT_UNICODE
+          if (common->utf && HAS_EXTRALEN(cc[-1]))
+            cc += GET_EXTRALEN(cc[-1]);
+#endif
           break;
 
-        case OP_CRRANGE:
-        case OP_CRMINRANGE:
-        case OP_CRPOSRANGE:
-          if (GET2(cc, 1) == GET2(cc, 1 + IMM2_SIZE))
+        case OP_EXACT:
+          if (count < 1)
+            count = 1;
+          cc += 2 + IMM2_SIZE;
+#ifdef SUPPORT_UNICODE
+          if (common->utf && HAS_EXTRALEN(cc[-1]))
+            cc += GET_EXTRALEN(cc[-1]);
+#endif
+          continue;
+
+        case OP_UPTO:
+        case OP_MINUPTO:
+        case OP_POSUPTO:
+        case OP_UPTOI:
+        case OP_MINUPTOI:
+        case OP_EXACTI:
+        case OP_POSUPTOI:
+        case OP_NOTUPTO:
+        case OP_NOTMINUPTO:
+        case OP_NOTEXACT:
+        case OP_NOTPOSUPTO:
+        case OP_NOTUPTOI:
+        case OP_NOTMINUPTOI:
+        case OP_NOTEXACTI:
+        case OP_NOTPOSUPTOI:
+          cc += IMM2_SIZE;
+          PCRE2_FALLTHROUGH /* Fall through */
+
+        case OP_QUERY:
+        case OP_MINQUERY:
+        case OP_POSQUERY:
+        case OP_QUERYI:
+        case OP_MINQUERYI:
+        case OP_POSQUERYI:
+        case OP_NOTQUERY:
+        case OP_NOTMINQUERY:
+        case OP_NOTPOSQUERY:
+        case OP_NOTQUERYI:
+        case OP_NOTMINQUERYI:
+        case OP_NOTPOSQUERYI:
+          if (count < 3)
+            count = 3;
+          cc += 2;
+#ifdef SUPPORT_UNICODE
+          if (common->utf && HAS_EXTRALEN(cc[-1]))
+            cc += GET_EXTRALEN(cc[-1]);
+#endif
+          continue;
+
+        case OP_CLASS:
+        case OP_NCLASS:
+#if defined SUPPORT_UNICODE || PCRE2_CODE_UNIT_WIDTH != 8
+        case OP_XCLASS:
+        case OP_ECLASS:
+          accelerated_start = cc;
+          cc += (*cc >= OP_XCLASS) ? GET(cc, 1) : (unsigned int)(1 + (32 / sizeof(PCRE2_UCHAR)));
+#else
+          accelerated_start = cc;
+          cc += (1 + (32 / sizeof(PCRE2_UCHAR)));
+#endif
+
+          switch (*cc)
           {
-            /* Exact repeat. */
-            cc += 1 + 2 * IMM2_SIZE;
+          case OP_CRMINSTAR:
+          case OP_CRMINPLUS:
+            if (count == 2)
+              count = 3;
+            PCRE2_FALLTHROUGH /* Fall through */
+
+          case OP_CRSTAR:
+          case OP_CRPLUS:
+          case OP_CRPOSSTAR:
+          case OP_CRPOSPLUS:
+            cc++;
+            break;
+
+          case OP_CRRANGE:
+          case OP_CRMINRANGE:
+          case OP_CRPOSRANGE:
+            if (GET2(cc, 1) == GET2(cc, 1 + IMM2_SIZE))
+            {
+              /* Exact repeat. */
+              cc += 1 + 2 * IMM2_SIZE;
+              if (count < 1)
+                count = 1;
+              continue;
+            }
+
+            cc += 2 * IMM2_SIZE;
+            PCRE2_FALLTHROUGH /* Fall through */
+          case OP_CRQUERY:
+          case OP_CRMINQUERY:
+          case OP_CRPOSQUERY:
+            cc++;
+            if (count < 3)
+              count = 3;
+            continue;
+
+          default:
+            /* No repeat. */
             if (count < 1)
               count = 1;
             continue;
           }
 
-          cc += 2 * IMM2_SIZE;
-          PCRE2_FALLTHROUGH /* Fall through */
-        case OP_CRQUERY:
-        case OP_CRMINQUERY:
-        case OP_CRPOSQUERY:
-          cc++;
-          if (count < 3)
-            count = 3;
-          continue;
+          break;
 
-        default:
-          /* No repeat. */
+        case OP_BRA:
+        case OP_CBRA:
+          prev_count = count;
           if (count < 1)
             count = 1;
+
+          if (depth >= 4)
+            break;
+
+          if (count < 3 && cc[GET(cc, 1)] == OP_ALT)
+            count = 3;
+
+          end = bracketend(cc);
+          if (end[-1 - LINK_SIZE] != OP_KET ||
+              (*cc == OP_CBRA && !is_optimized_cbracket(common, GET2(cc, 1 + LINK_SIZE))))
+            break;
+
+          prev_count = detect_early_fail(common, cc, private_data_start, depth + 1, prev_count);
+
+          if (prev_count > count)
+            count = prev_count;
+
+          if (PRIVATE_DATA(cc) != 0)
+            common->private_data_ptrs[begin - common->start] = 1;
+
+          if (count < EARLY_FAIL_ENHANCE_MAX)
+          {
+            cc = end;
+            continue;
+          }
+
+          break;
+
+        case OP_KET:
+          SLJIT_ASSERT(PRIVATE_DATA(cc) == 0);
+          if (cc >= next_alt)
+            break;
+          cc += 1 + LINK_SIZE;
           continue;
         }
 
-        break;
-
-      case OP_BRA:
-      case OP_CBRA:
-        prev_count = count;
-        if (count < 1)
-          count = 1;
-
-        if (depth >= 4)
+        if (accelerated_start == NULL)
           break;
 
-        if (count < 3 && cc[GET(cc, 1)] == OP_ALT)
-          count = 3;
-
-        end = bracketend(cc);
-        if (end[-1 - LINK_SIZE] != OP_KET ||
-            (*cc == OP_CBRA && !is_optimized_cbracket(common, GET2(cc, 1 + LINK_SIZE))))
-          break;
-
-        prev_count = detect_early_fail(common, cc, private_data_start, depth + 1, prev_count);
-
-        if (prev_count > count)
-          count = prev_count;
-
-        if (PRIVATE_DATA(cc) != 0)
-          common->private_data_ptrs[begin - common->start] = 1;
-
-        if (count < EARLY_FAIL_ENHANCE_MAX)
+        if (count == 0)
         {
-          cc = end;
-          continue;
+          common->fast_forward_bc_ptr = accelerated_start;
+          common->private_data_ptrs[(accelerated_start + 1) - common->start] =
+              ((*private_data_start) << 3) | type_skip;
+          *private_data_start += sizeof(sljit_sw);
+          count = 4;
+        }
+        else if (count < 3)
+        {
+          common->private_data_ptrs[(accelerated_start + 1) - common->start] =
+              ((*private_data_start) << 3) | type_fail;
+
+          if (common->early_fail_start_ptr == 0)
+            common->early_fail_start_ptr = *private_data_start;
+
+          *private_data_start += sizeof(sljit_sw);
+          common->early_fail_end_ptr = *private_data_start;
+
+          if (*private_data_start > SLJIT_MAX_LOCAL_SIZE)
+            return EARLY_FAIL_ENHANCE_MAX;
+
+          count = 4;
+        }
+        else
+        {
+          common->private_data_ptrs[(accelerated_start + 1) - common->start] =
+              ((*private_data_start) << 3) | type_fail_range;
+
+          if (common->early_fail_start_ptr == 0)
+            common->early_fail_start_ptr = *private_data_start;
+
+          *private_data_start += 2 * sizeof(sljit_sw);
+          common->early_fail_end_ptr = *private_data_start;
+
+          if (*private_data_start > SLJIT_MAX_LOCAL_SIZE)
+            return EARLY_FAIL_ENHANCE_MAX;
+
+          count++;
         }
 
-        break;
+        /* Cannot be part of a repeat. */
+        common->private_data_ptrs[begin - common->start] = 1;
 
-      case OP_KET:
-        SLJIT_ASSERT(PRIVATE_DATA(cc) == 0);
-        if (cc >= next_alt)
+        if (count >= EARLY_FAIL_ENHANCE_MAX)
           break;
-        cc += 1 + LINK_SIZE;
-        continue;
       }
-
-      if (accelerated_start == NULL)
-        break;
-
-      if (count == 0)
-      {
-        common->fast_forward_bc_ptr = accelerated_start;
-        common->private_data_ptrs[(accelerated_start + 1) - common->start] =
-            ((*private_data_start) << 3) | type_skip;
-        *private_data_start += sizeof(sljit_sw);
-        count = 4;
-      }
-      else if (count < 3)
-      {
-        common->private_data_ptrs[(accelerated_start + 1) - common->start] =
-            ((*private_data_start) << 3) | type_fail;
-
-        if (common->early_fail_start_ptr == 0)
-          common->early_fail_start_ptr = *private_data_start;
-
-        *private_data_start += sizeof(sljit_sw);
-        common->early_fail_end_ptr = *private_data_start;
-
-        if (*private_data_start > SLJIT_MAX_LOCAL_SIZE)
-          return EARLY_FAIL_ENHANCE_MAX;
-
-        count = 4;
-      }
-      else
-      {
-        common->private_data_ptrs[(accelerated_start + 1) - common->start] =
-            ((*private_data_start) << 3) | type_fail_range;
-
-        if (common->early_fail_start_ptr == 0)
-          common->early_fail_start_ptr = *private_data_start;
-
-        *private_data_start += 2 * sizeof(sljit_sw);
-        common->early_fail_end_ptr = *private_data_start;
-
-        if (*private_data_start > SLJIT_MAX_LOCAL_SIZE)
-          return EARLY_FAIL_ENHANCE_MAX;
-
-        count++;
-      }
-
-      /* Cannot be part of a repeat. */
-      common->private_data_ptrs[begin - common->start] = 1;
-
-      if (count >= EARLY_FAIL_ENHANCE_MAX)
-        break;
     }
 
     if (*cc != OP_ALT && *cc != OP_KET)
@@ -3489,73 +3492,97 @@ copy_recurse_data(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend, int 
   delayed_mem_copy_finish(&status);
 }
 
-static SLJIT_INLINE PCRE2_SPTR
-set_then_offsets(compiler_common *common, PCRE2_SPTR cc, sljit_u8 *current_offset)
+static SLJIT_INLINE void set_then_offsets(compiler_common *common)
 {
-  PCRE2_SPTR end = bracketend(cc);
-  BOOL has_alternatives = cc[GET(cc, 1)] == OP_ALT;
+  PCRE2_SPTR cc = common->start;
+  PCRE2_SPTR end;
+  BOOL has_alternatives = TRUE;
+  sljit_s32 start = 1 + LINK_SIZE;
+  sljit_s32 last_alternative, end_offset;
 
-  /* Assert captures *THEN verb even if it has no alternatives. */
-  if (*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NOT)
-    current_offset = NULL;
-  else if (*cc >= OP_ASSERT_NA && *cc <= OP_ASSERT_SCS)
-    has_alternatives = TRUE;
-  /* Conditional block does never capture. */
-  else if (*cc == OP_COND || *cc == OP_SCOND)
-    has_alternatives = FALSE;
-
-  cc = next_opcode(common, cc);
-
-  if (has_alternatives)
+  SLJIT_ASSERT(*cc == OP_BRA);
+  end = cc;
+  do
   {
-    switch (*cc)
-    {
-    case OP_REVERSE:
-    case OP_CREF:
-      cc += 1 + IMM2_SIZE;
-      break;
-    case OP_VREVERSE:
-    case OP_DNCREF:
-      cc += 1 + 2 * IMM2_SIZE;
-      break;
-    }
-
-    current_offset = common->then_offsets + (cc - common->start);
+    last_alternative = (sljit_s32)((end - cc) + 1 + LINK_SIZE);
+    end += GET(end, 1);
   }
+  while (*end == OP_ALT);
+  cc += 1 + LINK_SIZE;
 
   while (cc < end)
   {
     if (*cc >= OP_ASSERT && *cc <= OP_SCOND)
     {
-      cc = set_then_offsets(common, cc, current_offset);
+      end_offset = (sljit_s32)((bracketend(cc) - common->start) - (1 + LINK_SIZE));
+      common->then_offsets[end_offset] = (sljit_u8)has_alternatives;
+      SLJIT_ASSERT(common->private_data_ptrs[end - common->start] == 0);
+      common->private_data_ptrs[end_offset] = start;
+
+      has_alternatives = cc[GET(cc, 1)] == OP_ALT;
+
+      /* Assert captures *THEN verb even if it has no alternatives. */
+      if (*cc >= OP_ASSERT && *cc <= OP_ASSERTBACK_NOT)
+        start = 0;
+      else if (*cc >= OP_ASSERT_NA && *cc <= OP_ASSERT_SCS)
+        has_alternatives = TRUE;
+      /* Conditional block does never capture. */
+      else if (*cc == OP_COND || *cc == OP_SCOND)
+        has_alternatives = FALSE;
+
+      cc = next_opcode(common, cc);
+
+      if (has_alternatives)
+      {
+        switch (*cc)
+        {
+        case OP_REVERSE:
+        case OP_CREF:
+          cc += 1 + IMM2_SIZE;
+          break;
+        case OP_VREVERSE:
+        case OP_DNCREF:
+          cc += 1 + 2 * IMM2_SIZE;
+          break;
+        }
+
+        start = (sljit_s32)(cc - common->start);
+        SLJIT_ASSERT(start > 0);
+      }
       continue;
     }
 
-    if (*cc == OP_ALT && has_alternatives)
+    if (*cc >= OP_KET && *cc <= OP_KETRPOS)
+    {
+      has_alternatives = (BOOL)common->then_offsets[cc - common->start];
+      start = common->private_data_ptrs[cc - common->start];
+      common->then_offsets[cc - common->start] = 0;
+      common->private_data_ptrs[cc - common->start] = 0;
+      cc += 1 + LINK_SIZE;
+      continue;
+    }
+
+    if (*cc == OP_ALT)
     {
       cc += 1 + LINK_SIZE;
 
-      if (*cc == OP_REVERSE)
-        cc += 1 + IMM2_SIZE;
-      else if (*cc == OP_VREVERSE)
-        cc += 1 + 2 * IMM2_SIZE;
+      if (has_alternatives)
+      {
+        if (*cc == OP_REVERSE)
+          cc += 1 + IMM2_SIZE;
+        else if (*cc == OP_VREVERSE)
+          cc += 1 + 2 * IMM2_SIZE;
 
-      current_offset = common->then_offsets + (cc - common->start);
+        start = (sljit_s32)(cc - common->start);
+      }
       continue;
     }
 
-    if (*cc >= OP_THEN && *cc <= OP_THEN_ARG && current_offset != NULL)
-      *current_offset = 1;
+    if (*cc >= OP_THEN && *cc <= OP_THEN_ARG && start != 0)
+      common->then_offsets[start] = (start == last_alternative) + 1;
+
     cc = next_opcode(common, cc);
   }
-
-  cc = end - 1 - LINK_SIZE;
-
-  /* Ignore repeats. */
-  if (*cc == OP_KET && PRIVATE_DATA(cc) != 0)
-    end += PRIVATE_DATA(cc + 1);
-
-  return end;
 }
 
 #undef CASE_ITERATOR_PRIVATE_DATA_1
@@ -12452,7 +12479,7 @@ compile_matchingpath(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend,
 
   SLJIT_ASSERT(*ccend == OP_END || (*ccend >= OP_ALT && *ccend <= OP_KETRPOS));
 
-  if (common->has_then && common->then_offsets[cc - common->start] != 0)
+  if (common->has_then && common->then_offsets[cc - common->start] == 1)
   {
     SLJIT_ASSERT(*ccend != OP_END && common->control_head_ptr != 0);
     has_then_trap = TRUE;
@@ -14644,6 +14671,20 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   common->cbra_ptr = OVECTOR_START + (re->top_bracket + 1) * 2 * sizeof(sljit_sw);
   private_data_size = common->cbra_ptr + (re->top_bracket + 1) * sizeof(sljit_sw);
 
+  if (common->has_then)
+  {
+    total_length = ccend - common->start;
+    common->then_offsets = (sljit_u8 *)SLJIT_MALLOC(total_length, allocator_data);
+    if (!common->then_offsets)
+    {
+      SLJIT_FREE(common->private_data_ptrs, allocator_data);
+      return PCRE2_ERROR_NOMEMORY;
+    }
+
+    memset(common->then_offsets, 0, total_length);
+    set_then_offsets(common);
+  }
+
   if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
       (re->optimization_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0 &&
       !common->has_skip_in_assert_back)
@@ -14656,21 +14697,9 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   if (private_data_size > 65536)
   {
     SLJIT_FREE(common->private_data_ptrs, allocator_data);
+    if (common->has_then)
+      SLJIT_FREE(common->then_offsets, allocator_data);
     return PCRE2_ERROR_JIT_UNSUPPORTED;
-  }
-
-  if (common->has_then)
-  {
-    total_length = ccend - common->start;
-    common->then_offsets = (sljit_u8 *)SLJIT_MALLOC(total_length, allocator_data);
-    if (!common->then_offsets)
-    {
-      SLJIT_FREE(common->private_data_ptrs, allocator_data);
-      return PCRE2_ERROR_NOMEMORY;
-    }
-
-    memset(common->then_offsets, 0, total_length);
-    set_then_offsets(common, common->start, NULL);
   }
 
   compiler = sljit_create_compiler(allocator_data);
@@ -15092,7 +15121,6 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
     do_reset_match(common, (re->top_bracket + 1) * 2);
     /* The value of restart_match is in TMP1. */
     CMPTO(SLJIT_GREATER, STR_PTR, 0, TMP1, 0, continue_match_label);
-    OP1(SLJIT_MOV, STR_PTR, 0, TMP1, 0);
     JUMPTO(SLJIT_JUMP, reset_match_label);
   }
 #ifdef SUPPORT_UNICODE

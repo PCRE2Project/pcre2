@@ -8,20 +8,29 @@
   --neutral-3: #cccccc;
   --colour-pre: #f6f8fa;
   --theme-secondary-1: #823ff1;
-  --theme-secondary-2: #d52753;
-  --theme-secondary-3: #23974a;
-  --colour-code-theme: var(--theme-muted);
+  --theme-secondary-2: #23974a;
+  --theme-secondary-3: #d52753;
+  --colour-code-theme: #0081c7;
   --colour-code-comment: var(--neutral-1);
-  --tab: 16px;
+  --colour-code-pattern: var(--theme-muted);
+  --image-hero: url(../images/pcre2-hero-light.svg);
+  --image-hero-hover: url(../images/pcre2-hero-light-hover.svg);
+  --tab: 20px;
   --space: 0.5rlh;
+  --font-body: 'Fira Sans', Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif;
+  --font-mono: 'Fira Mono', 'Fira Code', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  --font-condensed: 'Fira Sans Condensed', var(--font-body);
+  --font-codepoint: 'Fira Mono', ui-monospace, monospace;
+  --font-symbols: 'DejaVu Sans', 'Segoe UI Symbol', sans-serif;
   --weight-body: 400;
   --weight-emphasis: 600;
   --weight-heading: 700;
-  --weight-mono-strong: 700;
+  --weight-mono-strong: 500;
   color-scheme: light dark;
   font-size: 16px;
   line-height: 1.5;
   font-synthesis: none;
+  scroll-behavior: smooth;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -33,14 +42,16 @@
     --neutral-2: #666666;
     --neutral-3: #444444;
     --colour-pre: #151b23;
-    --theme-secondary-1: #C678DD;
-    --theme-secondary-2: #E06C75;
+    --theme-secondary-1: #c078d5;
+    --theme-secondary-2: #90d34c;
     --theme-secondary-3: #ffea6b;
     --colour-code-theme: var(--theme-bright);
+    --colour-code-pattern: var(--theme-bright);
+    --image-hero: url(../images/pcre2-hero-dark.svg);
+    --image-hero-hover: url(../images/pcre2-hero-dark-hover.svg);
     --weight-body: 350;
     --weight-emphasis: 500;
     --weight-heading: 600;
-    --weight-mono-strong: 500;
   }
 }
 
@@ -60,11 +71,11 @@ body {
 }
 
 body, input {
-  font-family: 'Fira Sans', Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif;
+  font-family: var(--font-body);
 }
 
 pre, code, kbd, samp {
-  font-family: 'Fira Mono', 'Fira Code', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  font-family: var(--font-mono);
   hyphens: none;
   font-weight: 400;
   font-synthesis: style;
@@ -74,13 +85,17 @@ code, kbd, samp {
   font-size: 1em;
 }
 
-pre {
+pre, code.rouge {
   --source-keyword: var(--theme-secondary-3);
   --source-literal: var(--theme-secondary-2);
   --source-constant: var(--theme-secondary-2);
-  --source-type: var(--theme-secondary-1);
+  --source-variable: var(--theme-secondary-1);
   --source-function: var(--colour-code-theme);
   --source-comment: var(--colour-code-comment);
+  --source-pattern: var(--colour-code-pattern);
+}
+
+pre {
   padding: calc(0.5rlh - 1px) calc(var(--tab) - 1px);
   background: var(--colour-pre);
   border: 1px solid var(--neutral-3);
@@ -104,6 +119,11 @@ a:hover, a:focus-visible {
   color: var(--theme-bright);
 }
 
+main a:focus-visible {
+  outline: 3px solid var(--theme-bright);
+  outline-offset: 2px;
+}
+
 @media (prefers-color-scheme: dark) {
   a { color: var(--theme-bright); }
   a:hover, a:focus-visible { color: var(--colour-fg); }
@@ -111,6 +131,10 @@ a:hover, a:focus-visible {
 
 h1, h2, h3, h4, h5, h6, strong, b, dt, th {
   font-weight: var(--weight-emphasis);
+}
+
+h1, h2, h3, h4, h5, h6, [role="doc-toc"] {
+  --colour-code-pattern: currentColor;
 }
 
 h1 {
@@ -151,6 +175,10 @@ h2, h3, h4, h5, h6 {
 }
 
 h2 { line-height: 1.5rlh; }
+
+h2, [role="doc-toc"] {
+  font-family: var(--font-condensed);
+}
 
 .prose > :is(h2, h3, h4, h5, h6):first-child,
 .prose > .doc-section:first-child > :is(h2, h3, h4, h5, h6):first-child,
@@ -236,39 +264,37 @@ code :is(strong, b), pre :is(strong, b) {
 }
 
 code.rouge, pre.rouge {
-  color: var(--colour-fg);
   font-style: normal;
   font-weight: 400;
 }
 
-/* Profiles mirror Pcre2Source.profile; palette variables are set only on pre. */
+/* Profiles mirror Pcre2Source.profile. */
 code.parameter,
 .rouge :is(.n, .nv, .vc, .vg, .vi, .vm, .nl) {
-  color: var(--colour-fg);
+  color: var(--source-variable, inherit);
   font-style: italic;
   font-weight: 400;
 }
 
 code.function, .rouge :is(.nf, .fm) {
-  color: var(--source-function, var(--colour-fg));
+  color: var(--source-function, inherit);
   font-style: normal;
   font-weight: var(--weight-mono-strong);
 }
 
 code.type, .rouge .kt {
-  color: var(--source-type, var(--colour-fg));
   font-style: normal;
   font-weight: 400;
 }
 
-code.constant, .rouge .no {
-  color: var(--source-constant, var(--colour-fg));
+code.constant, .rouge :is(.no, .kc) {
+  color: var(--source-constant, inherit);
   font-style: normal;
   font-weight: var(--weight-mono-strong);
 }
 
-.rouge :is(.k, .kc, .kd, .kn, .kp, .kr, .kv, .o, .ow) {
-  color: var(--source-keyword, var(--colour-fg));
+.rouge :is(.k, .kd, .kn, .kp, .kr, .kv, .o, .ow) {
+  color: var(--source-keyword, inherit);
   font-style: normal;
   font-weight: 400;
 }
@@ -277,28 +303,109 @@ code.character, .rouge :is(
   .l, .ld, .m, .mb, .mf, .mh, .mi, .il, .mo, .mx,
   .s, .sa, .sb, .sc, .dl, .sd, .s1, .s2, .se, .sh, .si, .sx, .sr, .ss
 ) {
-  color: var(--source-literal, var(--colour-fg));
+  color: var(--source-literal, inherit);
   font-style: normal;
   font-weight: 400;
 }
 
 .rouge :is(.cp, .cpf) {
-  color: var(--source-literal, var(--colour-fg));
-  font-style: italic;
+  color: var(--source-literal, inherit);
+  font-style: normal;
   font-weight: 400;
 }
 
 .rouge :is(.c, .ch, .cd, .c1, .cm, .cs) {
-  color: var(--source-comment, var(--colour-fg));
+  color: var(--source-comment, inherit);
   font-style: italic;
   font-weight: 400;
 }
 
-/* Unparsed patterns keep theme colour inline and use a different manpage slant. */
+/* Unparsed patterns use the same theme colour inline and in blocks. */
 code:is(.regex, .subject, .repl), .pcre2-semantic {
-  color: var(--colour-code-theme);
+  color: var(--source-pattern, inherit);
   font-style: normal;
   font-weight: 400;
+}
+
+/* API shortcodes retain token typefaces without adding colour. */
+code.rouge.pcre2-api, code.rouge.pcre2-api > span {
+  color: inherit;
+}
+
+.character-info {
+  position: relative;
+  display: inline-block;
+  anchor-scope: --character;
+}
+
+.character-info > code {
+  anchor-name: --character;
+  cursor: help;
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+}
+
+.character-info:focus-visible {
+  outline: 2px solid var(--theme-bright);
+  outline-offset: 2px;
+}
+
+.character-card {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  display: none;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(20rem, calc(100vw - 16px));
+  max-height: calc(100vh - 16px);
+  overflow: auto;
+  padding: 0.5rlh var(--tab);
+  border: 1px solid var(--neutral-3);
+  border-radius: 4px;
+  background: var(--colour-pre);
+  color: var(--colour-fg);
+  box-shadow: 0 4px 12px #0003;
+  font: var(--weight-body) 0.875rem/1.25 var(--font-body);
+  white-space: normal;
+  text-align: center;
+}
+
+:where(
+  .character-info:is(:hover, :focus-within),
+  a:focus:not(:has(.character-info:hover)) .character-link-focus
+) > .character-card {
+  display: block;
+}
+
+@supports (anchor-scope: --character) and (position-area: bottom) {
+  .character-card {
+    position: fixed;
+    inset: auto;
+    position-anchor: --character;
+    position-area: bottom span-right;
+    justify-self: start;
+    position-try-fallbacks: flip-inline, flip-block, flip-block flip-inline;
+    position-visibility: anchors-visible;
+  }
+}
+
+.character-card > span { display: block; }
+.character-glyph {
+  font-size: 3rem;
+  line-height: 1.25;
+  unicode-bidi: isolate;
+}
+.character-glyph::before { content: attr(data-character); }
+.character-glyph[data-character=""]::before {
+  content: "\25a1";
+  color: var(--neutral-1);
+}
+.character-name::before { content: attr(data-character-name); }
+.character-codepoint::before { content: attr(data-codepoint); }
+.character-codepoint {
+  font-family: var(--font-codepoint);
 }
 
 blockquote, .admonition-block, .example-block, .sidebar-block {
@@ -320,7 +427,10 @@ hr {
 }
 
 details { padding-inline-start: calc(2 * var(--tab)); }
-summary { cursor: pointer; }
+summary {
+  cursor: pointer;
+  list-style-position: outside;
+}
 
 img {
   max-width: 100%;
@@ -329,6 +439,7 @@ img {
 
 table {
   border-collapse: collapse;
+  border-top: 1px solid var(--neutral-3);
   width: 100%;
   table-layout: auto;
   font: inherit;
@@ -339,6 +450,36 @@ table {
   overflow-x: auto;
 }
 
+.fit-first > table {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+}
+
+.fit-first > table > colgroup { display: none; }
+
+.fit-first > table > :is(thead, tbody, tfoot),
+.fit-first > table > :is(thead, tbody, tfoot) > tr {
+  display: contents;
+}
+
+.fit-first > table > :is(thead, tbody, tfoot) > tr > :first-child {
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .fit-first > table { grid-template-columns: minmax(0, 1fr); }
+
+  .fit-first > table > :is(thead, tbody, tfoot) > tr > :first-child {
+    white-space: normal;
+    padding-block-end: 0;
+    border-block-end: 0;
+  }
+
+  .fit-first > table > :is(thead, tbody, tfoot) > tr > :last-child {
+    padding-block-start: 0;
+  }
+}
+
 td, th {
   padding: 0.5rlh var(--tab) calc(0.5rlh - 1px);
   text-align: start;
@@ -347,7 +488,7 @@ td, th {
   overflow-wrap: anywhere;
 }
 
-thead, tbody tr:nth-child(even) { background: var(--colour-pre); }
+thead > tr > *, tbody > tr:nth-child(even) > * { background: var(--colour-pre); }
 th code { font-weight: 500; }
 .halign-center { text-align: center; }
 .halign-right { text-align: end; }
@@ -379,13 +520,13 @@ th code { font-weight: 500; }
 }
 
 [role="doc-toc"] .toc-list a,
-[role="doc-toc"] .toc-list a * {
-  color: var(--neutral-1);
+[role="doc-toc"] .toc-list a :not(.character-card, .character-card *) {
   font-weight: inherit;
 }
 
-[role="doc-toc"] .toc-list a:is(:hover, :focus-visible),
-[role="doc-toc"] .toc-list a:is(:hover, :focus-visible) * {
+[role="doc-toc"] .toc-list a { color: var(--neutral-1); }
+
+[role="doc-toc"] .toc-list a:is(:hover, :focus-visible) {
   color: var(--colour-fg);
 }
 
@@ -407,11 +548,11 @@ th code { font-weight: 500; }
     --weight-body: 350;
     --weight-emphasis: 500;
     --weight-heading: 600;
-    --weight-mono-strong: 500;
     color-scheme: light;
   }
   h1, h2, h3, h4, h5, h6 { break-after: avoid; }
   pre { white-space: pre-wrap; overflow-wrap: anywhere; }
   .table-block { overflow: visible; }
+  .character-card { display: none; }
   .toc-list a[aria-current="location"] { font-weight: inherit; }
 }

@@ -34,9 +34,9 @@ pcre2_serialize_decode \- decode serialized compiled patterns
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint32_t\fP \f(CBpcre2_serialize_decode\fP\f(CR(pcre2_code **\fP\f(CIcodes\fP\f(CR,
+int32_t\fP \f(CBpcre2_serialize_decode\fP\f(CR(pcre2_code **\fP\f(CIcodes\fP\f(CR,
                                int32_t\fP \f(CInumber_of_codes\fP\f(CR,
                                const uint8_t *\fP\f(CIbytes\fP\f(CR,
                                pcre2_general_context *\fP\f(CIgcontext\fP\f(CR);\fP
@@ -68,7 +68,7 @@ the serialized byte stream
 .TP 16
 \f(CIgcontext\fP
 .ad l
-pointer to a general context or \f(CRNULL\fP
+pointer to a general context or \f(CBNULL\fP
 .PD
 .RE
 .PP
@@ -102,7 +102,7 @@ memory allocation failed
 .TP 21
 \f(CBPCRE2_ERROR_NULL\fP
 .ad l
-\f(CIcodes\fP or \f(CIbytes\fP is \f(CRNULL\fP
+\f(CIcodes\fP or \f(CIbytes\fP is \f(CBNULL\fP
 .PD
 .RE
 .PP

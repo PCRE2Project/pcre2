@@ -34,9 +34,9 @@ pcre2_pattern_info \- extract information about a pattern
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint\fP \f(CBpcre2_pattern_info\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR, uint32_t\fP \f(CIwhat\fP\f(CR,
+int\fP \f(CBpcre2_pattern_info\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR, uint32_t\fP \f(CIwhat\fP\f(CR,
                        void *\fP\f(CIwhere\fP\f(CR);\fP
 .fam
 .fi
@@ -119,7 +119,7 @@ compile context
 .TP 26
 \f(CBPCRE2_INFO_FIRSTBITMAP\fP
 .ad l
-Bitmap of first code units, or \f(CRNULL\fP
+Bitmap of first code units, or \f(CBNULL\fP
 .TP 26
 \f(CBPCRE2_INFO_FIRSTCODETYPE\fP
 .ad l
@@ -238,20 +238,26 @@ Code for the newline sequence:
 .RS 26
 .sp
 .RS 4
-.PD 0
+.PD
 .TP 22
 \f(CBPCRE2_NEWLINE_CR\fP
+.PD 0
 .TP 22
 \f(CBPCRE2_NEWLINE_LF\fP
+.PD 0
 .TP 22
 \f(CBPCRE2_NEWLINE_CRLF\fP
+.PD 0
 .TP 22
 \f(CBPCRE2_NEWLINE_ANY\fP
+.PD 0
 .TP 22
 \f(CBPCRE2_NEWLINE_ANYCRLF\fP
+.PD 0
 .TP 22
 \f(CBPCRE2_NEWLINE_NUL\fP
 .ad l
+.PD
 .PD
 .RE
 .PP
@@ -270,7 +276,7 @@ Size of compiled pattern
 .PP
 .ad l
 .sp
-If \f(CIwhere\fP is \f(CRNULL\fP, the function returns the amount of memory needed for
+If \f(CIwhere\fP is \f(CBNULL\fP, the function returns the amount of memory needed for
 the requested information, in bytes. Otherwise, the \f(CIwhere\fP argument must
 point to an unsigned 32\-bit integer (\f(CRuint32_t\fP variable), except for the
 following \f(CIwhat\fP values, when it must point to a variable of the type
@@ -306,7 +312,7 @@ The yield of the function is zero on success or:
 .TP 22
 \f(CBPCRE2_ERROR_NULL\fP
 .ad l
-the argument \f(CIcode\fP is \f(CRNULL\fP
+the argument \f(CIcode\fP is \f(CBNULL\fP
 .TP 22
 \f(CBPCRE2_ERROR_BADMAGIC\fP
 .ad l

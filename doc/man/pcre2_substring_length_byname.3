@@ -34,9 +34,9 @@ pcre2_substring_length_byname \- find length of named substring
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint\fP \f(CBpcre2_substring_length_byname\fP\f(CR(pcre2_match_data *\fP\f(CImatch_data\fP\f(CR,
+int\fP \f(CBpcre2_substring_length_byname\fP\f(CR(pcre2_match_data *\fP\f(CImatch_data\fP\f(CR,
                                   PCRE2_SPTR\fP \f(CIstringname\fP\f(CR,
                                   PCRE2_SIZE *\fP\f(CIsizeptr\fP\f(CR);\fP
 .fam
@@ -60,13 +60,13 @@ The substring name
 .TP 11
 \f(CIsizeptr\fP
 .ad l
-Where to return the length, or \f(CRNULL\fP
+Where to return the length, or \f(CBNULL\fP
 .PD
 .RE
 .PP
 .ad l
 .sp
-The third argument may be \f(CRNULL\fP if all you want to know is whether or not a
+The third argument may be \f(CBNULL\fP if all you want to know is whether or not a
 substring is set. The yield is zero on success, or a negative error code
 otherwise.
 .sp

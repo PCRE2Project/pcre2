@@ -34,9 +34,9 @@ pcre2_maketables \- build character tables in current locale
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRconst uint8_t *\fP\f(CBpcre2_maketables\fP\f(CR(pcre2_general_context *\fP\f(CIgcontext\fP\f(CR);\fP
+const uint8_t *\fP\f(CBpcre2_maketables\fP\f(CR(pcre2_general_context *\fP\f(CIgcontext\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -49,7 +49,7 @@ defaulted or made by \f(CBpcre2_maketables()\fP when PCRE2 was compiled). See th
 \f(CBpcre2_set_character_tables()\fP
 page. You might want to do this if you are using a non\-standard locale.
 .sp
-If the argument is \f(CRNULL\fP, \f(CBmalloc\fP\f(CR()\fP is used to get memory for the tables.
+If the argument is \f(CBNULL\fP, \f(CBmalloc\fP\f(CR()\fP is used to get memory for the tables.
 Otherwise it must point to a general context, which can supply pointers to a
 custom memory manager. The function yields a pointer to the tables.
 .sp

@@ -34,9 +34,9 @@ pcre2posix \- PCRE2 POSIX API
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2posix.h>\fP
+\f(CR\&#include <pcre2posix.h>
 
-\f(CRint\fP \f(CBpcre2_regcomp\fP\f(CR(regex_t *\fP\f(CIpreg\fP\f(CR, const char *\fP\f(CIpattern\fP\f(CR,
+int\fP \f(CBpcre2_regcomp\fP\f(CR(regex_t *\fP\f(CIpreg\fP\f(CR, const char *\fP\f(CIpattern\fP\f(CR,
      int\fP \f(CIcflags\fP\f(CR);
 
 int\fP \f(CBpcre2_regexec\fP\f(CR(const regex_t *\fP\f(CIpreg\fP\f(CR, const char *\fP\f(CIstring\fP\f(CR,
@@ -452,7 +452,7 @@ This is a BSD extension, compatible with but not specified by IEEE Standard
 1003.2 (POSIX.2), and should be used with caution in software intended to be
 portable to other systems. Note that a non\-zero \f(CIrm_so\fP does not imply
 \f(CBREG_NOTBOL\fP; \f(CBREG_STARTEND\fP affects only the location and length of the string,
-not how it is matched. Setting \f(CBREG_STARTEND\fP and passing \f(CIpmatch\fP as \f(CRNULL\fP
+not how it is matched. Setting \f(CBREG_STARTEND\fP and passing \f(CIpmatch\fP as \f(CBNULL\fP
 are mutually exclusive; the error \f(CBREG_INVARG\fP is returned.
 .RE
 .PD
@@ -464,7 +464,7 @@ If the pattern was compiled with the \f(CBREG_NOSUB\fP flag, no data about any m
 strings is returned. The \f(CInmatch\fP and \f(CIpmatch\fP arguments of
 \f(CBpcre2_regexec()\fP are ignored (except possibly as input for \f(CBREG_STARTEND\fP).
 .sp
-The value of \f(CInmatch\fP may be zero, and the value \f(CIpmatch\fP may be \f(CRNULL\fP
+The value of \f(CInmatch\fP may be zero, and the value \f(CIpmatch\fP may be \f(CBNULL\fP
 (unless \f(CBREG_STARTEND\fP is set); in both these cases no data about any matched
 strings is returned.
 .sp
@@ -491,7 +491,7 @@ loops or invalid uses of \f(CI\(rsK\fP, return \f(CBREG_BADPAT\fP.
 .sp
 The \f(CBpcre2_regerror()\fP function maps a non\-zero errorcode from either
 \f(CBpcre2_regcomp()\fP or \f(CBpcre2_regexec()\fP to a printable message. If
-\f(CIpreg\fP is not \f(CRNULL\fP, the error should have arisen from the use of that
+\f(CIpreg\fP is not \f(CBNULL\fP, the error should have arisen from the use of that
 structure. A message terminated by a binary zero is placed in \f(CIerrbuf\fP. If
 the buffer is too short, only the first \f(CIerrbuf_size\fP \- 1 characters of the
 error message are used. The yield of the function is the size of buffer needed

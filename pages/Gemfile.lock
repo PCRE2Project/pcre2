@@ -78,6 +78,9 @@ GEM
       unicode-display_width (>= 1.1.1, < 3)
     thread_safe (0.3.6)
     unicode-display_width (2.6.0)
+    unicode-name (1.15.1)
+      unicode-types (~> 1.12)
+    unicode-types (1.12.0)
     webrick (1.9.2)
 
 PLATFORMS
@@ -90,6 +93,7 @@ DEPENDENCIES
   kramdown-parser-gfm (~> 1.1)
   nokogiri (~> 1.18)
   rouge (~> 4.6)
+  unicode-name (~> 1.15)
 
 BUNDLED WITH
    2.4.19

@@ -8249,4 +8249,13 @@ Failed: error -41: function is not supported for DFA matching
     a\=dfa
 Failed: error -63: heap limit exceeded
 
+# Whole-pattern recursion must preserve alternative match lengths.
+
+/(?:b(?R)a|a+)/
+    baa
+ 0: baa
+    baaa
+ 0: baaa
+ 1: baa
+
 # End of testinput6

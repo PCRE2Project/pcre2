@@ -34,9 +34,9 @@ pcre2_jit_stack_free \- free a JIT matching stack
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRvoid\fP \f(CBpcre2_jit_stack_free\fP\f(CR(pcre2_jit_stack *\fP\f(CIjit_stack\fP\f(CR);\fP
+void\fP \f(CBpcre2_jit_stack_free\fP\f(CR(pcre2_jit_stack *\fP\f(CIjit_stack\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -44,7 +44,7 @@ pcre2_jit_stack_free \- free a JIT matching stack
 .sp
 This function is used to free a JIT stack that was created by
 \f(CBpcre2_jit_stack_create()\fP when it is no longer needed. If the argument is
-\f(CRNULL\fP, the function returns immediately without doing anything. For more
+\f(CBNULL\fP, the function returns immediately without doing anything. For more
 details, see the section
 Controlling the JIT stack
 in the

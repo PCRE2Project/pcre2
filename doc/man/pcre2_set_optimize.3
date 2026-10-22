@@ -34,9 +34,9 @@ pcre2_set_optimize \- set an optimization directive
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint\fP \f(CBpcre2_set_optimize\fP\f(CR(pcre2_compile_context *\fP\f(CIccontext\fP\f(CR,
+int\fP \f(CBpcre2_set_optimize\fP\f(CR(pcre2_compile_context *\fP\f(CIccontext\fP\f(CR,
                        uint32_t\fP \f(CIdirective\fP\f(CR);\fP
 .fam
 .fi
@@ -48,7 +48,7 @@ by \f(CBpcre2_compile()\fP. It can be called multiple times with the same compil
 context; the effects are cumulative, with the effects of later calls taking
 precedence over earlier ones.
 .sp
-The result is zero for success, \f(CBPCRE2_ERROR_NULL\fP if \f(CIccontext\fP is \f(CRNULL\fP,
+The result is zero for success, \f(CBPCRE2_ERROR_NULL\fP if \f(CIccontext\fP is \f(CBNULL\fP,
 or \f(CBPCRE2_ERROR_BADOPTION\fP if \f(CIdirective\fP is unknown. The latter could be
 useful to detect if a certain optimization is available.
 .sp

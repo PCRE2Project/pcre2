@@ -89,11 +89,11 @@ where string\-handling functions such as strcmp() and printf() work with 16\-bit
 characters, the code for handling the table of named substrings will still
 need to be modified. */\fP
 
-\f(CI\&#define PCRE2_CODE_UNIT_WIDTH 8\fP
+\f(CR\&#define PCRE2_CODE_UNIT_WIDTH 8
 
-\f(CI\&#include\fP \f(CI<stdio.h>
-#include\fP \f(CI<string.h>
-#include\fP \f(CI<pcre2.h>\fP
+#include <stdio.h>
+#include <string.h>
+#include <pcre2.h>\fP
 
 
 \f(CI/***************************************************************************
@@ -174,11 +174,11 @@ need to be modified. */\fP
                     \f(CIcaseless_match\fP\f(CR,\fP\&        \f(CI// possibly enable caseless\fP
                     \f(CR&\fP\f(CIerrornumber\fP\f(CR,\fP\&          \f(CI// for error number\fP
                     \f(CR&\fP\f(CIerroroffset\fP\f(CR,\fP\&          \f(CI// for error offset\fP
-                    \f(CRNULL);\fP\&                 \f(CI// use default compile context\fP
+                    \f(CBNULL\fP\f(CR);\fP\&                 \f(CI// use default compile context\fP
 
   \f(CI/* Compilation failed: print the error message and exit. */\fP
 
-  \f(CRif (\fP\f(CIre\fP \f(CR== NULL)
+  \f(CRif (\fP\f(CIre\fP \f(CR==\fP \f(CBNULL\fP\f(CR)
   {
     PCRE2_UCHAR\fP \f(CIbuffer\fP\f(CR[256];\fP
     \f(CBpcre2_get_error_message\fP\f(CR(\fP\f(CIerrornumber\fP\f(CR,\fP \f(CIbuffer\fP\f(CR, sizeof(\fP\f(CIbuffer\fP\f(CR));\fP
@@ -202,7 +202,7 @@ need to be modified. */\fP
   *************************************************************************/\fP
 
   \f(CRpcre2_match_data *\fP\f(CImatch_data\fP \f(CR=\fP
-      \f(CBpcre2_match_data_create_from_pattern\fP\f(CR(\fP\f(CIre\fP\f(CR, NULL);\fP
+      \f(CBpcre2_match_data_create_from_pattern\fP\f(CR(\fP\f(CIre\fP\f(CR,\fP \f(CBNULL\fP\f(CR);\fP
 
   \f(CI/* Now run the match. */\fP
 
@@ -212,7 +212,7 @@ need to be modified. */\fP
                        \f(CR0,\fP\&              \f(CI// start at offset 0 in the subject\fP
                        \f(CR0,\fP\&              \f(CI// default options\fP
                        \f(CImatch_data\fP\f(CR,\fP\&     \f(CI// block for storing the result\fP
-                       \f(CRNULL);\fP\&          \f(CI// use default match context\fP
+                       \f(CBNULL\fP\f(CR);\fP\&          \f(CI// use default match context\fP
 
   \f(CI/* Matching failed: handle error cases */\fP
 
@@ -382,7 +382,7 @@ need to be modified. */\fP
                      \f(CIstart_offset\fP\f(CR,\fP\&   \f(CI// starting offset in the subject\fP
                      \f(CIoptions\fP\f(CR,\fP\&        \f(CI// options\fP
                      \f(CImatch_data\fP\f(CR,\fP\&     \f(CI// block for storing the result\fP
-                     \f(CRNULL);\fP\&          \f(CI// use default match context\fP
+                     \f(CBNULL\fP\f(CR);\fP\&          \f(CI// use default match context\fP
 
     \f(CI/* If this match attempt fails, exit the loop for subsequent matches. */\fP
 

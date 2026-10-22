@@ -20,7 +20,7 @@ dist_doc_DATA = \
   ChangeLog \
   LICENCE.md \
   NEWS \
-  README \
+  README.md \
   SECURITY.md \
   SUPPORT-LIFECYCLE.md \
   doc/pcre2.txt \
@@ -142,12 +142,14 @@ dist_html_DATA = \
   doc/html/pcre2test.html \
   doc/html/pcre2unicode.html
 
-dist_htmlcss_DATA = doc/html/css/pcre2.css
+dist_htmlcss_DATA = doc/html/css/document.css doc/html/css/standalone.css
 htmlcssdir = $(htmldir)/css
 dist_htmlimages_DATA = \
   doc/html/images/pcre2-header-dark.svg \
   doc/html/images/pcre2-header-light.svg \
+  doc/html/images/pcre2-hero-dark-hover.svg \
   doc/html/images/pcre2-hero-dark.svg \
+  doc/html/images/pcre2-hero-light-hover.svg \
   doc/html/images/pcre2-hero-light.svg
 htmlimagesdir = $(htmldir)/images
 
@@ -313,19 +315,13 @@ EXTRA_DIST += \
 # These files contain maintenance information
 
 EXTRA_DIST += \
-  NON-AUTOTOOLS-BUILD \
+  NON-AUTOTOOLS-BUILD.md \
   HACKING
 
 # These are the documentation files that are included in the tarball but not
 # installed in the system.
 
 EXTRA_DIST += \
-  doc/assets/css/document.css \
-  doc/assets/css/standalone.css \
-  doc/assets/images/pcre2-header-dark.svg \
-  doc/assets/images/pcre2-header-light.svg \
-  doc/assets/images/pcre2-hero-dark.svg \
-  doc/assets/images/pcre2-hero-light.svg \
   doc/index.adoc \
   doc/pcre2-config.adoc \
   doc/pcre2.adoc \

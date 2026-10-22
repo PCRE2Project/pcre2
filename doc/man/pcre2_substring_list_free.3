@@ -34,9 +34,9 @@ pcre2_substring_list_free \- free list of extracted substrings
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRvoid\fP \f(CBpcre2_substring_list_free\fP\f(CR(PCRE2_UCHAR **\fP\f(CIlist\fP\f(CR);\fP
+void\fP \f(CBpcre2_substring_list_free\fP\f(CR(PCRE2_UCHAR **\fP\f(CIlist\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -44,7 +44,7 @@ pcre2_substring_list_free \- free list of extracted substrings
 .sp
 This is a convenience function for freeing the store obtained by a previous
 call to \f(CBpcre2_substring_list_get()\fP. Its only argument is a pointer to
-the list of string pointers. If the argument is \f(CRNULL\fP, the function returns
+the list of string pointers. If the argument is \f(CBNULL\fP, the function returns
 immediately, without doing anything.
 .sp
 There is a complete description of the PCRE2 native API in the

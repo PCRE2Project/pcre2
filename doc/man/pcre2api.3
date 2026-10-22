@@ -34,7 +34,7 @@ pcre2api \- PCRE2 native API
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -661,7 +661,7 @@ been matched by \f(CBpcre2_match()\fP. They are:
 .sp
 \f(CBpcre2_substring_free()\fP and \f(CBpcre2_substring_list_free()\fP are also
 provided, to free memory used for extracted strings. If either of these
-functions is called with a \f(CRNULL\fP argument, the function returns immediately
+functions is called with a \f(CBNULL\fP argument, the function returns immediately
 without doing anything.
 .sp
 The function \f(CBpcre2_substitute()\fP can be called to match a pattern and
@@ -677,7 +677,7 @@ PCRE2 was built (\f(CBpcre2_config()\fP) and that it is using.
 .sp
 Functions with names ending with \f(CB_free\fP\f(CR()\fP are used for freeing memory
 blocks of various sorts. In all cases, if one of these functions is called with
-a \f(CRNULL\fP argument, it does nothing.
+a \f(CBNULL\fP argument, it does nothing.
 .SH "STRING LENGTHS AND OFFSETS"
 .sp
 The PCRE2 API uses string lengths and offsets into strings of code units in
@@ -752,10 +752,10 @@ atomic in your environment, you can use logic like this:
 .nf
 .fam C
 \f(CI// Get a read\-only (shared) lock (mutex) for pointer\fP
-\f(CRif (\fP\f(CIpointer\fP \f(CR== NULL)
+\f(CRif (\fP\f(CIpointer\fP \f(CR==\fP \f(CBNULL\fP\f(CR)
 {\fP
   \f(CI// Get a write (unique) lock for pointer\fP
-  \f(CRif (\fP\f(CIpointer\fP \f(CR== NULL)\fP
+  \f(CRif (\fP\f(CIpointer\fP \f(CR==\fP \f(CBNULL\fP\f(CR)\fP
     \f(CIpointer\fP \f(CR=\fP \f(CBpcre2_compile\fP\f(CR(...);
 }\fP
 \f(CI// Release the lock\fP
@@ -768,10 +768,10 @@ Of course, testing for compilation errors should also be included in the code.
 .sp
 The reason for checking the pointer a second time is as follows: Several
 threads may have acquired the shared lock and tested the pointer for being
-\f(CRNULL\fP, but only one of them will be given the write lock, with the rest kept
+\f(CBNULL\fP, but only one of them will be given the write lock, with the rest kept
 waiting. The winning thread will compile the pattern and store the result.
 After this thread releases the write lock, another thread will get it, and if
-it does not retest pointer for being \f(CRNULL\fP, will recompile the pattern and
+it does not retest pointer for being \f(CBNULL\fP, will recompile the pattern and
 overwrite the pointer, creating a memory leak and possibly causing other
 issues.
 .sp
@@ -791,7 +791,7 @@ is valid" flag (that can be updated atomically) must be used:
   \f(CRif (!\fP\f(CIpointer_is_valid\fP\f(CR)
   {\fP
     \f(CIpointer\fP \f(CR=\fP \f(CBpcre2_compile\fP\f(CR(...);\fP
-    \f(CIpointer_is_valid\fP \f(CR= TRUE;
+    \f(CIpointer_is_valid\fP \f(CR=\fP \f(CBTRUE\fP\f(CR;
   }
 }\fP
 \f(CI// Release the lock\fP
@@ -836,9 +836,9 @@ reasonable size, and at the same time to keep the API extensible, "uncommon"
 parameters are passed to certain functions in a "context" instead of
 directly. A context is just a block of memory that holds the parameter values.
 Applications that do not need to adjust any of the context parameters can pass
-\f(CRNULL\fP to operations that accept a context to select their defaults. The
-context setter and getter functions require a non\-\f(CRNULL\fP context.
-Getter output pointers must also be non\-\f(CRNULL\fP.
+\f(CBNULL\fP to operations that accept a context to select their defaults. The
+context setter and getter functions require a non\-\f(CBNULL\fP context.
+Getter output pointers must also be non\-\f(CBNULL\fP.
 .sp
 The main API uses a general context that is relevant for several PCRE2
 operations, a compile\-time context, and a match\-time context. The experimental
@@ -878,7 +878,7 @@ void\fP \f(CBprivate_free\fP\f(CR(void *, void *);\fP
 .sp
 Whenever code in PCRE2 calls these functions, the final argument is the value
 of \f(CImemory_data\fP. Either of the first two arguments of the creation
-function may be \f(CRNULL\fP, in which case the system memory management functions
+function may be \f(CBNULL\fP, in which case the system memory management functions
 \f(CBmalloc\fP\f(CR()\fP and \f(CBfree\fP\f(CR()\fP are used. (This is not currently useful, as
 there are no other fields in a general context, but in future there might be.)
 The \f(CBprivate_malloc\fP\f(CR()\fP function is used (if supplied) to obtain memory for
@@ -909,7 +909,7 @@ The memory used for a general context should be freed by calling:
 .fi
 .ss \n[.ss] 0
 .sp
-If this function is passed a \f(CRNULL\fP argument, it returns immediately without
+If this function is passed a \f(CBNULL\fP argument, it returns immediately without
 doing anything.
 .SS "The compile context"
 .sp
@@ -989,7 +989,7 @@ Which performance optimizations the compiler should apply
 .RE
 .sp
 A compile context is also required if you are using custom memory management.
-If none of these apply, just pass \f(CRNULL\fP as the context argument of
+If none of these apply, just pass \f(CBNULL\fP as the context argument of
 \f(CBpcre2_compile()\fP.
 .sp
 A compile context is created, copied, and freed by the following functions:
@@ -1017,7 +1017,7 @@ be changed by calling the following functions, which return 0 on success, or
 The following functions get, respectively, the convention for processing \f(CI\(rsR\fP,
 the maximum pattern length, the newline convention, and the maximum depth of
 nested parentheses. They return 0 and require both arguments to be
-non\-\f(CRNULL\fP.
+non\-\f(CBNULL\fP.
 .sp
 .ss \n[.ss]
 .nf
@@ -1063,7 +1063,7 @@ interpreted matching functions, \f(CBpcre2_match()\fP and
 .fi
 .ss \n[.ss] 0
 .sp
-The value may be \f(CRNULL\fP to select the default tables; the result of
+The value may be \f(CBNULL\fP to select the default tables; the result of
 \f(CBpcre2_maketables()\fP; or another valid set of PCRE2 character tables.
 The \f(CBpcre2_maketables()\fP function takes a general context and builds tables
 in the current locale. Supplied tables must remain valid while the context or
@@ -1402,7 +1402,7 @@ Change the backtracking depth limit
 Set custom memory management specifically for the match
 .RE
 .sp
-If none of these apply, just pass \f(CRNULL\fP as the context argument of
+If none of these apply, just pass \f(CBNULL\fP as the context argument of
 \f(CBpcre2_match()\fP, \f(CBpcre2_dfa_match()\fP, or \f(CBpcre2_jit_match()\fP.
 .sp
 A match context is created, copied, and freed by the following functions:
@@ -1427,7 +1427,7 @@ be changed by calling the following functions, which return 0 on success, or
 .sp
 The following functions get, respectively, the backtracking heap limit, match
 limit, depth limit, and offset limit. They return 0 and require both arguments
-to be non\-\f(CRNULL\fP.
+to be non\-\f(CBNULL\fP.
 .sp
 .ss \n[.ss]
 .nf
@@ -1710,7 +1710,7 @@ documentation has more details about these features.
 .sp
 The first argument for \f(CBpcre2_config()\fP specifies which information is
 required. The second argument is a pointer to memory into which the information
-is placed. If \f(CRNULL\fP is passed, the function returns the amount of memory that is
+is placed. If \f(CBNULL\fP is passed, the function returns the amount of memory that is
 needed for the requested information. For calls that return numerical values,
 the value is in bytes; when requesting these values, \f(CIwhere\fP should point
 to appropriately aligned memory. For calls that return strings, the required
@@ -1776,7 +1776,7 @@ documentation for more details.
 The \f(CIwhere\fP argument should point to a code\-unit\-aligned buffer. All
 previous versions of PCRE2 have required no more than 128 code units of buffer
 capacity. However, this requirement is not guaranteed to be maintained, so
-applications should call \f(CBpcre2_config()\fP with \f(CIwhere\fP set to \f(CRNULL\fP to
+applications should call \f(CBpcre2_config()\fP with \f(CIwhere\fP set to \f(CBNULL\fP to
 receive the required buffer size, then assert or allocate a suitably\-size buffer
 for a second call to \f(CBpcre2_config()\fP. The buffer is filled with a string
 that contains the name of the architecture for which the JIT compiler is
@@ -1882,7 +1882,7 @@ below.
 The \f(CIwhere\fP argument should point to a code\-unit\-aligned buffer. All
 previous versions of PCRE2 have required no more than 24 code units of buffer
 capacity. However, applications should call \f(CBpcre2_config()\fP with
-\f(CIwhere\fP set to \f(CRNULL\fP to receive the required buffer size, then assert or
+\f(CIwhere\fP set to \f(CBNULL\fP to receive the required buffer size, then assert or
 allocate a suitably\-size buffer for a second call to \f(CBpcre2_config()\fP. If
 PCRE2 has been compiled without Unicode support, the buffer is filled with the
 text \f(CRUnicode not supported\fP. Otherwise, the Unicode version string (for
@@ -1899,7 +1899,7 @@ available; otherwise it is set to zero. Unicode support implies UTF support.
 The \f(CIwhere\fP argument should point to a code\-unit\-aligned buffer. All
 previous versions of PCRE2 have required no more than 24 code units of buffer
 capacity. However, applications should call \f(CBpcre2_config()\fP with
-\f(CIwhere\fP set to \f(CRNULL\fP to receive the required buffer size, then assert or
+\f(CIwhere\fP set to \f(CBNULL\fP to receive the required buffer size, then assert or
 allocate a suitably\-size buffer for a second call to \f(CBpcre2_config()\fP. The
 buffer is filled with the PCRE2 version string, zero\-terminated. The number of
 code units used is returned. This is the length of the string plus one unit for
@@ -1930,16 +1930,16 @@ pcre2_code *\fP\f(CBpcre2_code_copy_with_tables\fP\f(CR(const pcre2_code *\fP\f(
 The \f(CBpcre2_compile()\fP function compiles a pattern into an internal form.
 The pattern is defined by a pointer to a string of code units and a length in
 code units. If the pattern is zero\-terminated, the length can be specified as
-\f(CBPCRE2_ZERO_TERMINATED\fP. A \f(CRNULL\fP pattern pointer with a length of zero is treated
-as an empty string (\f(CRNULL\fP with a non\-zero length causes an error return). The
+\f(CBPCRE2_ZERO_TERMINATED\fP. A \f(CBNULL\fP pattern pointer with a length of zero is treated
+as an empty string (\f(CBNULL\fP with a non\-zero length causes an error return). The
 function returns a pointer to a block of memory that contains the compiled
-pattern and related data, or \f(CRNULL\fP if an error occurred.
+pattern and related data, or \f(CBNULL\fP if an error occurred.
 .sp
-If the compile context argument \f(CIccontext\fP is \f(CRNULL\fP, memory for the compiled
+If the compile context argument \f(CIccontext\fP is \f(CBNULL\fP, memory for the compiled
 pattern is obtained by calling \f(CBmalloc\fP\f(CR()\fP. Otherwise, it is obtained from
 the same memory function that was used for the compile context. The caller must
 free the memory by calling \f(CBpcre2_code_free()\fP when it is no longer needed.
-If \f(CBpcre2_code_free()\fP is called with a \f(CRNULL\fP argument, it returns
+If \f(CBpcre2_code_free()\fP is called with a \f(CBNULL\fP argument, it returns
 immediately, without doing anything.
 .sp
 The function \f(CBpcre2_code_copy()\fP makes a copy of the compiled code in new
@@ -1949,7 +1949,7 @@ below),
 the JIT information cannot be copied (because it is position\-dependent).
 The new copy can initially be used only for non\-JIT matching, though it can be
 passed to \f(CBpcre2_jit_compile()\fP if required. If \f(CBpcre2_code_copy()\fP is
-called with a \f(CRNULL\fP argument, it returns \f(CRNULL\fP.
+called with a \f(CBNULL\fP argument, it returns \f(CBNULL\fP.
 .sp
 The \f(CBpcre2_code_copy()\fP function provides a way for individual threads in a
 multithreaded application to acquire a private copy of shared compiled code.
@@ -1964,8 +1964,8 @@ are needed. The \f(CBpcre2_code_copy_with_tables()\fP provides this facility.
 Copies of both the code and the tables are made, with the new code pointing to
 the new tables. The memory for the new tables is automatically freed when
 \f(CBpcre2_code_free()\fP is called for the new copy of the compiled code. If
-\f(CBpcre2_code_copy_with_tables()\fP is called with a \f(CRNULL\fP argument, it returns
-\f(CRNULL\fP.
+\f(CBpcre2_code_copy_with_tables()\fP is called with a \f(CBNULL\fP argument, it returns
+\f(CBNULL\fP.
 .if n .sp
 .RS 4
 .it 1 an-trap
@@ -2009,10 +2009,10 @@ Some additional options and less frequently required compile\-time parameters
 described
 above).
 .sp
-If \f(CIerrorcode\fP or \f(CIerroroffset\fP is \f(CRNULL\fP, \f(CBpcre2_compile()\fP returns
-\f(CRNULL\fP immediately. Otherwise, the variables to which these point are set to an
+If \f(CIerrorcode\fP or \f(CIerroroffset\fP is \f(CBNULL\fP, \f(CBpcre2_compile()\fP returns
+\f(CBNULL\fP immediately. Otherwise, the variables to which these point are set to an
 error code and an offset (number of code units) within the pattern,
-respectively, when \f(CBpcre2_compile()\fP returns \f(CRNULL\fP because a compilation
+respectively, when \f(CBpcre2_compile()\fP returns \f(CBNULL\fP because a compilation
 error has occurred.
 .sp
 There are over 100 positive error codes that \f(CBpcre2_compile()\fP may return
@@ -2059,7 +2059,7 @@ int\fP \f(CIerrorcode\fP\f(CR;\fP
          \f(CR0,\fP\&                      \f(CI/* default options */\fP
          \f(CR&\fP\f(CIerrorcode\fP\f(CR,\fP\&             \f(CI/* for error code */\fP
          \f(CR&\fP\f(CIerroffset\fP\f(CR,\fP\&             \f(CI/* for error offset */\fP
-         \f(CRNULL);\fP\&                  \f(CI/* no compile context */\fP
+         \f(CBNULL\fP\f(CR);\fP\&                  \f(CI/* no compile context */\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -2834,7 +2834,7 @@ support is expected to die away.
 .sp
 External tables are built by calling the \f(CBpcre2_maketables()\fP function, in
 the relevant locale. The only argument to this function is a general context,
-which can be used to pass a custom memory allocator. If the argument is \f(CRNULL\fP,
+which can be used to pass a custom memory allocator. If the argument is \f(CBNULL\fP,
 the system \f(CBmalloc\fP\f(CR()\fP is used. The result can be passed to
 \f(CBpcre2_compile()\fP as often as necessary, by creating a compile context and
 calling \f(CBpcre2_set_character_tables()\fP to set the tables pointer therein.
@@ -2847,8 +2847,8 @@ letters), the following code could be used:
 .nf
 .fam C
 \f(CBsetlocale\fP\f(CR(\fP\f(CBLC_CTYPE\fP\f(CR, "fr_FR");\fP
-\f(CItables\fP \f(CR=\fP \f(CBpcre2_maketables\fP\f(CR(NULL);\fP
-\f(CIccontext\fP \f(CR=\fP \f(CBpcre2_compile_context_create\fP\f(CR(NULL);\fP
+\f(CItables\fP \f(CR=\fP \f(CBpcre2_maketables\fP\f(CR(\fP\f(CBNULL\fP\f(CR);\fP
+\f(CIccontext\fP \f(CR=\fP \f(CBpcre2_compile_context_create\fP\f(CR(\fP\f(CBNULL\fP\f(CR);\fP
 \f(CBpcre2_set_character_tables\fP\f(CR(\fP\f(CIccontext\fP\f(CR,\fP \f(CItables\fP\f(CR);\fP
 \f(CIre\fP \f(CR=\fP \f(CBpcre2_compile\fP\f(CR(...,\fP \f(CIccontext\fP\f(CR);\fP
 .fam
@@ -2900,7 +2900,7 @@ section INFORMATION ABOUT A PATTERN\(cqS CALLOUTS.
 The first argument for \f(CBpcre2_pattern_info()\fP is a pointer to the compiled
 pattern. The second argument specifies which piece of information is required,
 and the third argument is a pointer to a variable to receive the data. If the
-third argument is \f(CRNULL\fP, the first argument is ignored, and the function returns
+third argument is \f(CBNULL\fP, the first argument is ignored, and the function returns
 the size in bytes of the variable that is required for the information
 requested. Otherwise, the yield of the function is zero for success, or one of
 the following negative numbers:
@@ -2910,7 +2910,7 @@ the following negative numbers:
 .TP 22
 \f(CBPCRE2_ERROR_NULL\fP
 .ad l
-the argument \f(CIcode\fP was \f(CRNULL\fP
+the argument \f(CIcode\fP was \f(CBNULL\fP
 .TP 22
 \f(CBPCRE2_ERROR_BADMAGIC\fP
 .ad l
@@ -3110,7 +3110,7 @@ values for the first code unit in any match. For example, a pattern that starts
 with \f(CI[abc]\fP results in a table with three bits set. When code unit values
 greater than 255 are supported, the flag bit for 255 means "any code unit of
 value 255 or above". If such a table was constructed, a pointer to it is
-returned. Otherwise \f(CRNULL\fP is returned. The third argument should point to a
+returned. Otherwise \f(CBNULL\fP is returned. The third argument should point to a
 \f(CRconst uint8_t *\fP variable.
 .TP 25
 \f(CBPCRE2_INFO_FIRSTCODETYPE\fP
@@ -3450,14 +3450,14 @@ used.
 The second argument of \f(CBpcre2_match_data_create()\fP is a pointer to a
 general context, which can specify custom memory management for obtaining the
 memory for the match data block. If you are not using custom memory management,
-pass \f(CRNULL\fP, which causes \f(CBmalloc\fP\f(CR()\fP to be used.
+pass \f(CBNULL\fP, which causes \f(CBmalloc\fP\f(CR()\fP to be used.
 .sp
 For \f(CBpcre2_match_data_create_from_pattern()\fP, the first argument is a
 pointer to a compiled pattern. The ovector is created to be exactly the right
 size to hold all the substrings a pattern might capture when matched using
 \f(CBpcre2_match()\fP. You should not use this call when matching with
 \f(CBpcre2_dfa_match()\fP. The second argument is again a pointer to a general
-context, but in this case if \f(CRNULL\fP is passed, the memory is obtained using the
+context, but in this case if \f(CBNULL\fP is passed, the memory is obtained using the
 same allocator that was used for the compiled pattern (custom or default).
 .sp
 A match data block can be used many times, with the same or different compiled
@@ -3484,7 +3484,7 @@ Option bits for \f(CBpcre2_match()\fP
 below.
 .sp
 When a match data block itself is no longer needed, it should be freed by
-calling \f(CBpcre2_match_data_free()\fP. If this function is called with a \f(CRNULL\fP
+calling \f(CBpcre2_match_data_free()\fP. If this function is called with a \f(CBNULL\fP
 argument, it returns immediately, without doing anything.
 .SH "MEMORY USE FOR MATCH DATA BLOCKS"
 .sp
@@ -3553,7 +3553,7 @@ Here is an example of a simple call to \f(CBpcre2_match()\fP:
 .ss \n[.ss]
 .nf
 .fam C
-\f(CRpcre2_match_data *\fP\f(CImd\fP \f(CR=\fP \f(CBpcre2_match_data_create\fP\f(CR(4, NULL);
+\f(CRpcre2_match_data *\fP\f(CImd\fP \f(CR=\fP \f(CBpcre2_match_data_create\fP\f(CR(4,\fP \f(CBNULL\fP\f(CR);
 int\fP \f(CIrc\fP \f(CR=\fP \f(CBpcre2_match\fP\f(CR(\fP
              \f(CIre\fP\f(CR,\fP\&    \f(CI/* result of pcre2_compile() */\fP
              \f(CR"some string",\fP \f(CI/* the subject string */\fP
@@ -3561,7 +3561,7 @@ int\fP \f(CIrc\fP \f(CR=\fP \f(CBpcre2_match\fP\f(CR(\fP
              \f(CR0,\fP\&     \f(CI/* start at offset 0 in the subject */\fP
              \f(CR0,\fP\&     \f(CI/* default options */\fP
              \f(CImd\fP\f(CR,\fP\&    \f(CI/* the match data block */\fP
-             \f(CRNULL);\fP \f(CI/* a match context; NULL means use defaults */\fP
+             \f(CBNULL\fP\f(CR);\fP \f(CI/* a match context; NULL means use defaults */\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -3578,9 +3578,9 @@ The subject string is passed to \f(CBpcre2_match()\fP as a pointer in
 \f(CIstart_offset\fP. The length and offset are in code units, not characters.
 That is, they are in bytes for the 8\-bit library, 16\-bit code units for the
 16\-bit library, and 32\-bit code units for the 32\-bit library, whether or not
-UTF processing is enabled. As a special case, if \f(CIsubject\fP is \f(CRNULL\fP and
+UTF processing is enabled. As a special case, if \f(CIsubject\fP is \f(CBNULL\fP and
 \f(CIlength\fP is zero, the subject is assumed to be an empty string. If
-\f(CIlength\fP is non\-zero, an error occurs if \f(CIsubject\fP is \f(CRNULL\fP.
+\f(CIlength\fP is non\-zero, an error occurs if \f(CIsubject\fP is \f(CBNULL\fP.
 .sp
 If \f(CIstart_offset\fP is greater than the length of the subject,
 \f(CBpcre2_match()\fP returns \f(CBPCRE2_ERROR_BADOFFSET\fP. When the starting offset is
@@ -3985,8 +3985,8 @@ is exactly the same length as the subject that was passed to the matching
 function and is additionally zero\-terminated. The copy is freed when the match
 data block is reused for another match or is freed. If there is any match error
 other than \f(CBPCRE2_ERROR_NOMATCH\fP or \f(CBPCRE2_ERROR_PARTIAL\fP,
-\f(CBpcre2_get_subject()\fP may return \f(CRNULL\fP. If the \f(CIlengthptr\fP argument
-is not \f(CRNULL\fP, it receives the length in code units of the string which is
+\f(CBpcre2_get_subject()\fP may return \f(CBNULL\fP. If the \f(CIlengthptr\fP argument
+is not \f(CBNULL\fP, it receives the length in code units of the string which is
 returned, excluding the terminating zero (the subject string may contain
 embedded NUL characters).
 .sp
@@ -3996,7 +3996,7 @@ to match (\f(CBPCRE2_ERROR_NOMATCH\fP), a mark name may be available. The functi
 specified in the pattern by any of the backtracking control verbs, not just
 \f(CI(*MARK)\fP. The same function applies to all the verbs. It returns a pointer to
 the zero\-terminated name, which is within the compiled pattern. If no name is
-available, \f(CRNULL\fP is returned. The length of the name (excluding the terminating
+available, \f(CBNULL\fP is returned. The length of the name (excluding the terminating
 zero) is stored in the code unit that precedes the name. You should use this
 length instead of relying on the terminating zero if the name might contain a
 binary zero.
@@ -4160,7 +4160,7 @@ the heap limit. \f(CBPCRE2_ERROR_NOMEMORY\fP is also returned if
 \f(CBPCRE2_ERROR_NULL\fP
 .ad l
 Either the \f(CIcode\fP, \f(CIsubject\fP, or \f(CImatch_data\fP argument was passed
-as \f(CRNULL\fP.
+as \f(CBNULL\fP.
 .TP 25
 \f(CBPCRE2_ERROR_RECURSELOOP\fP
 .ad l
@@ -4201,7 +4201,7 @@ If the buffer is too small, the message is truncated (but still with
 a trailing zero, assuming \f(CIbufflen\fP is not zero), and the negative error code
 \f(CBPCRE2_ERROR_NOMEMORY\fP is returned.
 With a recognized code and zero capacity, no output is written. The buffer
-pointer may be \f(CRNULL\fP only when its capacity is zero.
+pointer may be \f(CBNULL\fP only when its capacity is zero.
 None of the messages is very long; a buffer size of 120 code units is ample.
 .sp
 No arithmetic (including unary negation) should ever be performed on error codes
@@ -4387,7 +4387,7 @@ extracting it by calling \f(CBpcre2_substring_length_bynumber()\fP. The first
 argument is a pointer to the match data block, the second is the group number,
 and the third is a pointer to a variable into which the length is placed. If
 you just want to know whether or not the substring has been captured, you can
-pass the third argument as \f(CRNULL\fP.
+pass the third argument as \f(CBNULL\fP.
 .sp
 The \f(CBpcre2_substring_copy_bynumber()\fP function copies a captured substring
 into a supplied buffer, whereas \f(CBpcre2_substring_get_bynumber()\fP copies it
@@ -4465,9 +4465,9 @@ partial match, the error code \f(CBPCRE2_ERROR_PARTIAL\fP is returned.
 .sp
 The address of the memory block is returned via \f(CIlistptr\fP, which is also
 the start of the list of string pointers. The end of the list is marked by a
-\f(CRNULL\fP pointer. The address of the list of lengths is returned via
+\f(CBNULL\fP pointer. The address of the list of lengths is returned via
 \f(CIlengthsptr\fP. If your strings do not contain binary zeros and you do not
-therefore need the lengths, you may supply \f(CRNULL\fP as the \f(CIlengthsptr\fP
+therefore need the lengths, you may supply \f(CBNULL\fP as the \f(CIlengthsptr\fP
 argument to disable the creation of a list of lengths. The yield of the
 function is zero if all went well, or \f(CBPCRE2_ERROR_NOMEMORY\fP if the memory block
 could not be obtained. When the list is no longer needed, it should be freed by
@@ -4578,9 +4578,9 @@ This function optionally calls \f(CBpcre2_match()\fP and then makes a copy of th
 subject string in \f(CIbuffer\fP, replacing parts that were matched with
 the \f(CIreplacement\fP string, whose length is supplied in \f(CIrlength\fP, which
 can be given as \f(CBPCRE2_ZERO_TERMINATED\fP for a zero\-terminated string. As a
-special case, if \f(CIreplacement\fP is \f(CRNULL\fP and \f(CIrlength\fP is zero, the
+special case, if \f(CIreplacement\fP is \f(CBNULL\fP and \f(CIrlength\fP is zero, the
 replacement is assumed to be an empty string. If \f(CIrlength\fP is non\-zero, an
-error occurs if \f(CIreplacement\fP is \f(CRNULL\fP.
+error occurs if \f(CIreplacement\fP is \f(CBNULL\fP.
 .sp
 There is an option (see \f(CBPCRE2_SUBSTITUTE_REPLACEMENT_ONLY\fP below) to return just
 the replacement string(s). The default action is to perform just one
@@ -4601,12 +4601,12 @@ with the backwards\-compatibility option \f(CBPCRE2_EXTRA_ALLOW_LOOKAROUND_BSK\f
 .sp
 The first seven arguments of \f(CBpcre2_substitute()\fP are the same as for
 \f(CBpcre2_match()\fP, except that the partial matching options are not
-permitted, and \f(CImatch_data\fP may be passed as \f(CRNULL\fP, in which case a match
+permitted, and \f(CImatch_data\fP may be passed as \f(CBNULL\fP, in which case a match
 data block is obtained and freed within this function, using memory management
 functions from the match context, if provided, or else those that were used to
 allocate memory for the compiled code.
 .sp
-If \f(CImatch_data\fP is not \f(CRNULL\fP and \f(CBPCRE2_SUBSTITUTE_MATCHED\fP is not set, the
+If \f(CImatch_data\fP is not \f(CBNULL\fP and \f(CBPCRE2_SUBSTITUTE_MATCHED\fP is not set, the
 provided block is used for all calls to \f(CBpcre2_match()\fP, and its contents
 afterwards are the result of the final call made internally by
 \f(CBpcre2_substitute()\fP to the matching function. For global changes, this will
@@ -4693,7 +4693,7 @@ extra space for the terminating NUL. This value is passed back via the
 \f(CIblength\fP variable, with the result of the function still being
 \f(CBPCRE2_ERROR_NOMEMORY\fP.
 .sp
-Passing a buffer size of zero (with \f(CIbuffer\fP optionally \f(CRNULL\fP) is a
+Passing a buffer size of zero (with \f(CIbuffer\fP optionally \f(CBNULL\fP) is a
 permitted way of finding out how much memory is needed for given substitution.
 However, this does mean that the entire operation is carried out twice.
 Depending on the application, it may be more efficient to allocate a large
@@ -4959,10 +4959,10 @@ default.
 .TP 24
 \f(CBPCRE2_ERROR_NULL\fP
 .ad l
-is returned if \f(CIcode\fP or \f(CIblength\fP is \f(CRNULL\fP; or if
+is returned if \f(CIcode\fP or \f(CIblength\fP is \f(CBNULL\fP; or if
 \f(CBPCRE2_SUBSTITUTE_MATCHED\fP is set but the \f(CImatch_data\fP argument is
-\f(CRNULL\fP; or if the \f(CIsubject\fP or \f(CIreplacement\fP or \f(CIbuffer\fP
-argument is \f(CRNULL\fP. However, a \f(CRNULL\fP \f(CIreplacement\fP argument is
+\f(CBNULL\fP; or if the \f(CIsubject\fP or \f(CIreplacement\fP or \f(CIbuffer\fP
+argument is \f(CBNULL\fP. However, a \f(CBNULL\fP \f(CIreplacement\fP argument is
 allowed if the \f(CIrlength\fP argument is zero; and similarly for \f(CIsubject\fP
 with zero \f(CIlength\fP and \f(CIbuffer\fP with zero \f(CIblength\fP.
 .TP 24
@@ -5120,13 +5120,13 @@ library would be:
   \f(CIUErrorCode\fP \f(CIerr\fP \f(CR=\fP \f(CBU_ZERO_ERROR\fP\f(CR;
   int32_t\fP \f(CIr\fP \f(CR=\fP
       \f(CIto_case\fP \f(CR==\fP \f(CBPCRE2_SUBSTITUTE_CASE_LOWER\fP
-          \f(CR?\fP \f(CBu_strToLower\fP\f(CR(\fP\f(CIoutput\fP\f(CR,\fP \f(CIoutput_cap\fP\f(CR,\fP \f(CIinput\fP\f(CR,\fP \f(CIinput_len\fP\f(CR,
-                         NULL, &\fP\f(CIerr\fP\f(CR)
+          \f(CR?\fP \f(CBu_strToLower\fP\f(CR(\fP\f(CIoutput\fP\f(CR,\fP \f(CIoutput_cap\fP\f(CR,\fP \f(CIinput\fP\f(CR,\fP \f(CIinput_len\fP\f(CR,\fP
+                         \f(CBNULL\fP\f(CR, &\fP\f(CIerr\fP\f(CR)
       :\fP \f(CIto_case\fP \f(CR==\fP \f(CBPCRE2_SUBSTITUTE_CASE_UPPER\fP
-          \f(CR?\fP \f(CBu_strToUpper\fP\f(CR(\fP\f(CIoutput\fP\f(CR,\fP \f(CIoutput_cap\fP\f(CR,\fP \f(CIinput\fP\f(CR,\fP \f(CIinput_len\fP\f(CR,
-                         NULL, &\fP\f(CIerr\fP\f(CR)
+          \f(CR?\fP \f(CBu_strToUpper\fP\f(CR(\fP\f(CIoutput\fP\f(CR,\fP \f(CIoutput_cap\fP\f(CR,\fP \f(CIinput\fP\f(CR,\fP \f(CIinput_len\fP\f(CR,\fP
+                         \f(CBNULL\fP\f(CR, &\fP\f(CIerr\fP\f(CR)
           :\fP \f(CBu_strToTitle\fP\f(CR(\fP\f(CIoutput\fP\f(CR,\fP \f(CIoutput_cap\fP\f(CR,\fP \f(CIinput\fP\f(CR,\fP \f(CIinput_len\fP\f(CR,
-                         &\fP\f(CIfirst_char_only\fP\f(CR, NULL, &\fP\f(CIerr\fP\f(CR);
+                         &\fP\f(CIfirst_char_only\fP\f(CR,\fP \f(CBNULL\fP\f(CR, &\fP\f(CIerr\fP\f(CR);
   if (\fP\f(CBU_FAILURE\fP\f(CR(\fP\f(CIerr\fP\f(CR))
     return (~(PCRE2_SIZE)0);
   return\fP \f(CIr\fP\f(CR;
@@ -5209,10 +5209,10 @@ error \f(CBPCRE2_ERROR_NOUNIQUESUBSTRING\fP when there are duplicate names.
 If you want to get full details of all captured substrings for a given name,
 you must use the \f(CBpcre2_substring_nametable_scan()\fP function. The first
 argument is the compiled pattern, and the second is the name. If the third and
-fourth arguments are \f(CRNULL\fP, the function returns a group number for a unique
+fourth arguments are \f(CBNULL\fP, the function returns a group number for a unique
 name, or \f(CBPCRE2_ERROR_NOUNIQUESUBSTRING\fP otherwise.
 .sp
-When the third and fourth arguments are not \f(CRNULL\fP, they must be pointers to
+When the third and fourth arguments are not \f(CBNULL\fP, they must be pointers to
 variables that are updated by the function. After it has run, they point to the
 first and last entries in the name\-to\-number table for the given name, and the
 function returns the length of each entry in code units. In both cases,
@@ -5282,7 +5282,7 @@ Here is an example of a simple call to \f(CBpcre2_dfa_match()\fP:
 .nf
 .fam C
 \f(CRint\fP \f(CIwspace\fP\f(CR[20];
-pcre2_match_data *\fP\f(CImd\fP \f(CR=\fP \f(CBpcre2_match_data_create\fP\f(CR(4, NULL);
+pcre2_match_data *\fP\f(CImd\fP \f(CR=\fP \f(CBpcre2_match_data_create\fP\f(CR(4,\fP \f(CBNULL\fP\f(CR);
 int\fP \f(CIrc\fP \f(CR=\fP \f(CBpcre2_dfa_match\fP\f(CR(\fP
              \f(CIre\fP\f(CR,\fP\&     \f(CI/* result of pcre2_compile() */\fP
              \f(CR"some string",\fP \f(CI/* the subject string */\fP
@@ -5290,7 +5290,7 @@ int\fP \f(CIrc\fP \f(CR=\fP \f(CBpcre2_dfa_match\fP\f(CR(\fP
              \f(CR0,\fP\&      \f(CI/* start at offset 0 in the subject */\fP
              \f(CR0,\fP\&      \f(CI/* default options */\fP
              \f(CImd\fP\f(CR,\fP\&     \f(CI/* the match data block */\fP
-             \f(CRNULL,\fP\&   \f(CI/* a match context; NULL means use defaults */\fP
+             \f(CBNULL\fP\f(CR,\fP\&   \f(CI/* a match context; NULL means use defaults */\fP
              \f(CIwspace\fP\f(CR,\fP \f(CI/* working space vector */\fP
              \f(CR20);\fP\&    \f(CI/* number of elements (NOT size in bytes) */\fP
 .fam
@@ -5307,9 +5307,10 @@ four of these are exactly the same as for \f(CBpcre2_match()\fP, so their
 description is not repeated here.
 .sp
 .RS 4
-.PD 0
+.PD
 .TP 19
 \f(CBPCRE2_PARTIAL_HARD\fP
+.PD 0
 .TP 19
 \f(CBPCRE2_PARTIAL_SOFT\fP
 .ad l
@@ -5327,6 +5328,7 @@ both cases. There is a more detailed discussion of partial and multi\-segment
 matching, with examples, in the
 \f(CRpcre2partial\fP
 documentation.
+.PD
 .TP 19
 \f(CBPCRE2_DFA_SHORTEST\fP
 .ad l

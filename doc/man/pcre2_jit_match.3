@@ -34,9 +34,9 @@ pcre2_jit_match \- fast path interface to JIT matching
 .ss \n[.ss]
 .nf
 .fam C
-\f(CI\&#include\fP \f(CI<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\f(CRint\fP \f(CBpcre2_jit_match\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR, PCRE2_SPTR\fP \f(CIsubject\fP\f(CR,
+int\fP \f(CBpcre2_jit_match\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR, PCRE2_SPTR\fP \f(CIsubject\fP\f(CR,
                     PCRE2_SIZE\fP \f(CIlength\fP\f(CR, PCRE2_SIZE\fP \f(CIstart_offset\fP\f(CR,
                     uint32_t\fP \f(CIoptions\fP\f(CR, pcre2_match_data *\fP\f(CImatch_data\fP\f(CR,
                     pcre2_match_context *\fP\f(CImcontext\fP\f(CR);\fP

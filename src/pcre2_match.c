@@ -8719,7 +8719,6 @@ FRAGMENT_RESTART:
     /* OK, we can now run the match. If "hitend" is set afterwards, remember the
     first starting point for which a partial match was found. */
 
-    cb.start_match = (PCRE2_SIZE)(start_match - subject);
     cb.callout_flags |= PCRE2_CALLOUT_STARTMATCH;
 
     mb->start_used_ptr = start_match;

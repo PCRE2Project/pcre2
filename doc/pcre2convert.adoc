@@ -82,6 +82,8 @@ const:PCRE2_CONVERT_GLOB_NO_STARSTAR::
 const:PCRE2_CONVERT_POSIX_BASIC::
 const:PCRE2_CONVERT_POSIX_EXTENDED::
 
+//-
+
 Details of the conversions are given below. The arg:buffer and arg:blength
 arguments define how the output is handled:
 

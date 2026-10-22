@@ -72,8 +72,8 @@ INTRODUCTION
        library is built. The pcre2_config() function makes it possible for a
        client to discover which features are available. The features
        themselves are described in the pcre2build page. Documentation about
-       building PCRE2 for various operating systems can be found in the README
-       and NON-AUTOTOOLS-BUILD files in the source distribution.
+       building PCRE2 for various operating systems can be found in the
+       README.md and NON-AUTOTOOLS-BUILD.md files in the source distribution.
 
        The libraries contains a number of undocumented internal functions and
        data tables that are used by more than one of the exported external
@@ -4862,6 +4862,7 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
        these are exactly the same as for pcre2_match(), so their description
        is not repeated here.
 
+
            PCRE2_PARTIAL_HARD
            PCRE2_PARTIAL_SOFT These have the same general effect as they do
                               for pcre2_match(), but the details are slightly
@@ -4883,12 +4884,14 @@ MATCHING A PATTERN: THE ALTERNATIVE FUNCTION
                               detailed discussion of partial and multi-segment
                               matching, with examples, in the pcre2partial
                               documentation.
+
            PCRE2_DFA_SHORTEST Setting the PCRE2_DFA_SHORTEST option causes the
                               matching algorithm to stop as soon as it has
                               found one match. Because of the way the
                               alternative algorithm works, this is necessarily
                               the shortest possible match at the first
                               possible matching point in the subject string.
+
            PCRE2_DFA_RESTART  When pcre2_dfa_match() returns a partial match,
                               it is possible to call it again, with additional
                               subject characters, and have it continue with
@@ -5009,15 +5012,15 @@ BUILDING PCRE2
        PCRE2 is distributed with a configure script that can be used to build
        the library in Unix-like environments using the Autotools applications.
        Also in the distribution are files to support building using CMake
-       instead of configure. The text file README contains general information
-       about building with Autotools (some of which is repeated below), and
-       also has some comments about building on various operating systems. The
-       files in the vms directory support building under OpenVMS. There is a
-       lot more information about building PCRE2 without using Autotools
-       (including information about using CMake and building "by hand") in the
-       text file called NON-AUTOTOOLS-BUILD. You should consult this file as
-       well as the README file if you are building in a non-Unix-like
-       environment.
+       instead of configure. The text file README.md contains general
+       information about building with Autotools (some of which is repeated
+       below), and also has some comments about building on various operating
+       systems. The files in the vms directory support building under OpenVMS.
+       There is a lot more information about building PCRE2 without using
+       Autotools (including information about using CMake and building "by
+       hand") in the text file called NON-AUTOTOOLS-BUILD.md. You should
+       consult this file as well as the README.md file if you are building in
+       a non-Unix-like environment.
 
 PCRE2 BUILD-TIME OPTIONS
        The rest of this document describes the optional features of PCRE2 that
@@ -5030,7 +5033,7 @@ PCRE2 BUILD-TIME OPTIONS
 
        If you are not using Autotools or CMake, option selection can be done
        by editing the config.h file, or by passing parameter settings to the
-       compiler, as described in NON-AUTOTOOLS-BUILD.
+       compiler, as described in NON-AUTOTOOLS-BUILD.md.
 
        The complete list of options for configure (which includes the standard
        ones such as the selection of the installation directory) can be
@@ -6336,13 +6339,15 @@ THE CONVERSION FUNCTION
        following POSIX options must be set to define the type of conversion
        that is required:
 
+
            PCRE2_CONVERT_GLOB
            PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR
            PCRE2_CONVERT_GLOB_NO_STARSTAR
            PCRE2_CONVERT_POSIX_BASIC
            PCRE2_CONVERT_POSIX_EXTENDED
-                  Details of the conversions are given below. The buffer and
-                  blength arguments define how the output is handled:
+
+       Details of the conversions are given below. The buffer and blength
+       arguments define how the output is handled:
 
        If buffer is NULL, the function just returns the length of the
        converted pattern via blength. This is one less than the length of
@@ -6873,9 +6878,9 @@ SIZE AND OTHER LIMITATIONS
        internal linkage size, which is 2 bytes for these libraries. If you
        want to process regular expressions that are truly enormous, you can
        compile PCRE2 with an internal linkage size of 3 or 4 (when building
-       the 16-bit library, 3 is rounded up to 4). See the README file in the
-       source distribution and the pcre2build documentation for details. In
-       these cases the limit is substantially larger. However, the speed of
+       the 16-bit library, 3 is rounded up to 4). See the README.md file in
+       the source distribution and the pcre2build documentation for details.
+       In these cases the limit is substantially larger. However, the speed of
        execution is slower. In the 32-bit library, the internal linkage size
        is always 4.
 
@@ -7179,13 +7184,14 @@ PARTIAL MATCHING IN PCRE2
        you must also call pcre2_jit_compile() with one or both of these
        options:
 
+
            PCRE2_JIT_PARTIAL_HARD
-           PCRE2_JIT_PARTIAL_SOFT PCRE2_JIT_COMPLETE should also be set if you
-                                  are going to run non-partial matches on the
-                                  same pattern. Separate code is compiled for
-                                  each mode. If the appropriate JIT mode has
-                                  not been compiled, interpretive matching
-                                  code is used.
+           PCRE2_JIT_PARTIAL_SOFT
+
+       PCRE2_JIT_COMPLETE should also be set if you are going to run
+       non-partial matches on the same pattern. Separate code is compiled for
+       each mode. If the appropriate JIT mode has not been compiled,
+       interpretive matching code is used.
 
        Setting a partial matching option disables two of PCRE2’s standard
        optimization hints. PCRE2 remembers the last literal code unit in a
@@ -9860,12 +9866,16 @@ ASSERTIONS
        They all start with (* instead of (? and must be written using lower
        case letters. PCRE2 supports the following synonyms:
 
+
            (*positive_lookahead:
            (*pla:                 Is the same as (?=.
+
            (*negative_lookahead:
            (*nla:                 Is the same as (?!.
+
            (*positive_lookbehind:
            (*plb:                 Is the same as (?<=.
+
            (*negative_lookbehind:
            (*nlb:                 Is the same as (?<!.
 
@@ -10020,9 +10030,11 @@ NON-ATOMIC ASSERTIONS
        non-atomic positive assertions can be useful. PCRE2 provides these
        using the following syntax:
 
+
            (*non_atomic_positive_lookahead:
            (*napla:
            (?*      Non-atomic positive lookahead.
+
            (*non_atomic_positive_lookbehind:
            (*naplb:
            (?<*     Non-atomic positive lookbehind.
@@ -10629,10 +10641,12 @@ RECURSIVE PATTERNS
        Only the specific capture groups listed by the caller will be retained,
        using the following syntax:
 
+
            (?R(grouplist))
            (?n(grouplist))
            (?+n(grouplist))        Recurse the whole pattern, returning
                                    capture groups.
+
            (?-n(grouplist))
            (?&name(grouplist))
            (?P>name(grouplist))    Call a subroutine, returning capture
@@ -12689,13 +12703,16 @@ LOOKAHEAD AND LOOKBEHIND ASSERTIONS
            (?=...)
            (*pla:...)
            (*positive_lookahead:...) Positive lookahead
+
            (?!...)
            (*nla:...)
            (*negative_lookahead:...) Negative lookahead
+
            (?<=...)
            (*plb:...)
            (*positive_lookbehind:...)
                                      Positive lookbehind
+
            (?<!...)
            (*nlb:...)
            (*negative_lookbehind:...)
@@ -12711,10 +12728,12 @@ LOOKAHEAD AND LOOKBEHIND ASSERTIONS
 NON-ATOMIC LOOKAROUND ASSERTIONS
        These assertions are specific to PCRE2 and are not Perl-compatible.
 
+
            (?*...)
            (*napla:...)
            (*non_atomic_positive_lookahead:...)
                         Synonyms for non-atomic positive lookahead
+
            (?<*...)
            (*naplb:...)
            (*non_atomic_positive_lookbehind:...)
@@ -12740,6 +12759,7 @@ SUBSTRING SCAN ASSERTION
 SCRIPT RUNS
            (*script_run:...)
            (*sr:...)                Script run; can be backtracked into
+
            (*atomic_script_run:...)
            (*asr:...)               Atomic script run
 
@@ -12778,8 +12798,10 @@ SUBROUTINE REFERENCES (POSSIBLY RECURSIVE)
        subexpression if set during the recursion (this feature is not
        supported by Perl).
 
+
            (?R(grouplist))         Recurse whole pattern, returning capture
                                    groups (PCRE2 extension)
+
            (?n(grouplist))
            (?+n(grouplist))
            (?-n(grouplist))
@@ -13252,6 +13274,7 @@ VALIDITY OF UTF STRINGS
    Errors in UTF-8 strings
        The following negative error codes are given for invalid UTF-8 strings:
 
+
            PCRE2_ERROR_UTF8_ERR1
            PCRE2_ERROR_UTF8_ERR2
            PCRE2_ERROR_UTF8_ERR3
@@ -13265,6 +13288,7 @@ VALIDITY OF UTF STRINGS
                                   up to 6 bytes, and this is checked first;
                                   hence the possibility of 4 or 5 missing
                                   bytes.
+
            PCRE2_ERROR_UTF8_ERR6
            PCRE2_ERROR_UTF8_ERR7
            PCRE2_ERROR_UTF8_ERR8
@@ -13274,17 +13298,21 @@ VALIDITY OF UTF STRINGS
                                   do not have the binary value 0b10 (that is,
                                   either the most significant bit is 0, or the
                                   next bit is 1).
+
            PCRE2_ERROR_UTF8_ERR11
            PCRE2_ERROR_UTF8_ERR12 A character that is valid by the RFC 2279
                                   rules is either 5 or 6 bytes long; these
                                   code points are excluded by RFC 3629.
+
            PCRE2_ERROR_UTF8_ERR13 A 4-byte character has a value greater than
                                   0x10ffff; these code points are excluded by
                                   RFC 3629.
+
            PCRE2_ERROR_UTF8_ERR14 A 3-byte character has a value in the range
                                   0xd800 to 0xdfff; this range of code points
                                   are reserved by RFC 3629 for use with
                                   UTF-16, and so are excluded from UTF-8.
+
            PCRE2_ERROR_UTF8_ERR15
            PCRE2_ERROR_UTF8_ERR16
            PCRE2_ERROR_UTF8_ERR17
@@ -13295,12 +13323,14 @@ VALIDITY OF UTF STRINGS
                                   which is invalid. For example, the two bytes
                                   0xc0, 0xae give the value 0x2e, whose
                                   correct coding uses just one byte.
+
            PCRE2_ERROR_UTF8_ERR20 The two most significant bits of the first
                                   byte of a character have the binary value
                                   0b10 (that is, the most significant bit is 1
                                   and the second is 0). Such a byte can only
                                   validly occur as the second or subsequent
                                   byte of a multi-byte character.
+
            PCRE2_ERROR_UTF8_ERR21 The first byte of a character has the value
                                   0xfe or 0xff. These values can never occur
                                   in a valid UTF-8 string.

@@ -70,7 +70,7 @@ Previous vulnerabilities
   in 10.48.
 * GHSA-q7rw-r7qq-2hx6 (October 2025). Affects 10.45 and later, and is fixed in
   10.48.
-* CVE-2025-58050 [GHSA-c2gv-xgf5-5cc2] (August 2025). Affects 10.45 only (not
+* CVE-2025-58050 \[GHSA-c2gv-xgf5-5cc2] (August 2025). Affects 10.45 only (not
   earlier), and is fixed in 10.46.
 * CVE-2022-41409 (July 2023). Only affects test code; no expected impact. Fixed
   in 10.41.
