@@ -17168,13 +17168,45 @@ No match
     aaaa
  0: a
 
-/a+?b|a+?(*THEN)/endanchored
+/a+?b|a+?(*THEN:arg)/endanchored
     aaxaa
  0: a
     aaxaab
  0: aab
 
 /a+?(?:b(*THEN)c|c(*THEN)b)/endanchored
+    aaabcaaacbaaabc
+ 0: aaabc
+
+/a+?(*SKIP)/endanchored
+    aa
+ 0: a
+    aaaa
+ 0: a
+
+/a+?b|a+?(*SKIP:arg)/endanchored
+    aaxaa
+ 0: aa
+    aaxaab
+ 0: aab
+
+/a+?(?:b(*SKIP)c|c(*SKIP)b)/endanchored
+    aaabcaaacbaaabc
+ 0: aaabc
+
+/a+?(*PRUNE)/endanchored
+    aa
+ 0: a
+    aaaa
+ 0: a
+
+/a+?b|a+?(*PRUNE:arg)/endanchored
+    aaxaa
+ 0: a
+    aaxaab
+ 0: aab
+
+/a+?(?:b(*PRUNE)c|c(*PRUNE)b)/endanchored
     aaabcaaacbaaabc
  0: aaabc
 
