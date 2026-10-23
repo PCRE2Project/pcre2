@@ -43,24 +43,24 @@ target_link_options(test_vscript PRIVATE \"-Wl,${link_flag},${map_file}\")
   )
 
   try_compile(
-    compile_result
+    _pcre2_vscript_compile_result
     "${try_dir}/build" # BINARY_DIR
     "${try_dir}" # SOURCE_DIR
     test_vscript # Project name
-    OUTPUT_VARIABLE compile_output
   )
 
-  if(compile_result)
+  if("$CACHE{_pcre2_vscript_compile_result}")
     set(${result_var} TRUE PARENT_SCOPE)
-  endif()
-
-  if(${compile_result})
     set(${result_var} 1 CACHE INTERNAL "Test ${result_var}")
     message(STATUS "Performing Test ${result_var} - Success")
   else()
     set(${result_var} "" CACHE INTERNAL "Test ${result_var}")
     message(STATUS "Performing Test ${result_var} - Failed")
   endif()
+
+  # In CMake 3.25+ we could use NO_CACHE. But for now, we just read the result
+  # using $CACHE{_pcre2_vscript_compile_result} explicitly, then delete it.
+  unset(_pcre2_vscript_compile_result CACHE)
 endfunction()
 
 function(pcre2_check_vscript have_var flag_var no_star_var)

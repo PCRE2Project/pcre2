@@ -829,7 +829,7 @@ set(LIBPCRE2_8_VERSION "17:0:17")
 set(LIBPCRE2_16_VERSION "17:0:17")
 set(LIBPCRE2_32_VERSION "17:0:17")
 
-macro(parse_lib_version variable_prefix)
+macro(_pcre2_parse_lib_version variable_prefix)
   string(REPLACE ":" ";" ${variable_prefix}_VERSION_LIST ${${variable_prefix}_VERSION})
   list(GET ${variable_prefix}_VERSION_LIST 0 ${variable_prefix}_VERSION_CURRENT)
   list(GET ${variable_prefix}_VERSION_LIST 1 ${variable_prefix}_VERSION_REVISION)
@@ -848,10 +848,10 @@ macro(parse_lib_version variable_prefix)
   )
 endmacro()
 
-parse_lib_version(LIBPCRE2_POSIX)
-parse_lib_version(LIBPCRE2_8)
-parse_lib_version(LIBPCRE2_16)
-parse_lib_version(LIBPCRE2_32)
+_pcre2_parse_lib_version(LIBPCRE2_POSIX)
+_pcre2_parse_lib_version(LIBPCRE2_8)
+_pcre2_parse_lib_version(LIBPCRE2_16)
+_pcre2_parse_lib_version(LIBPCRE2_32)
 
 # -----------------------------------------------------------------------------
 # Generated files
