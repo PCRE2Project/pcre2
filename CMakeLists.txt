@@ -526,6 +526,24 @@ if(CMAKE_C_LINKER_SUPPORTS_PDB)
   option(INSTALL_MSVC_PDB "ON=Install .pdb files, if produced" OFF)
 endif()
 
+set(PCRE2_HAS_IMPORT_LIBRARY FALSE)
+if(DEFINED CMAKE_IMPORT_LIBRARY_SUFFIX)
+  if(NOT "${CMAKE_IMPORT_LIBRARY_SUFFIX}" STREQUAL "")
+    set(PCRE2_HAS_IMPORT_LIBRARY TRUE)
+  endif()
+endif()
+if(PCRE2_HAS_IMPORT_LIBRARY)
+  # Our "-static" postfix is a bit idiosyncratic, so we should allow it to be customized by the user.
+  # Customising this filename was added for use by vcpkg.
+  # The default "-static" postfix is used regardless of the BUILD_STATIC_LIBS and BUILD_SHARED_LIBS settings, for output stability.
+  set(PCRE2_STATIC_LIBRARY_POSTFIX_DEFAULT "")
+  if("${CMAKE_STATIC_LIBRARY_PREFIX}" STREQUAL "${CMAKE_IMPORT_LIBRARY_PREFIX}" AND
+     "${CMAKE_STATIC_LIBRARY_SUFFIX}" STREQUAL "${CMAKE_IMPORT_LIBRARY_SUFFIX}")
+    set(PCRE2_STATIC_LIBRARY_POSTFIX_DEFAULT "-static")
+  endif()
+  set(PCRE2_STATIC_LIBRARY_POSTFIX "${PCRE2_STATIC_LIBRARY_POSTFIX_DEFAULT}" CACHE STRING "Postfix to append to static library output filenames, in addition to any suffix provided by the toolchain (CMAKE_STATIC_LIBRARY_SUFFIX). Static library .lib files may conflict with the import library .lib files corresponding to a shared library DLL. Must be set to a non-empty string if both static and shared library outputs, are selected and a name collision occurs.")
+endif()
+
 if(HAVE_VSCRIPT)
   option(PCRE2_SYMVERS "Enable library symbol versioning" ON)
 endif()
@@ -982,24 +1000,23 @@ elseif(PCRE2_DEBUG)
 endif()
 
 # Make sure to not link debug libs against release libs and vice versa.
-if(WIN32)
+if(WIN32 AND NOT DEFINED CMAKE_DEBUG_POSTFIX)
   set(CMAKE_DEBUG_POSTFIX "d")
 endif()
 
 # Detect whether pcre2-*.lib collides (same filename would be produced by both
-# static and shared build). In this case, we bump the static library suffix to
-# avoid this. This seems preferable to bumping the filename conditionally; or
+# static and shared build). In this case, we budge the static library filename to
+# avoid this. This seems preferable to altering the filename conditionally; or
 # to placing the outputs in different directories (which would prevent clients
 # copying all outputs to a common location).
-set(PCRE2_STATIC_LIB_SUFFIX "")
-if(DEFINED CMAKE_IMPORT_LIBRARY_SUFFIX)
-  if(
-    NOT "${CMAKE_IMPORT_LIBRARY_SUFFIX}" STREQUAL ""
-    AND "${CMAKE_STATIC_LIBRARY_PREFIX}" STREQUAL "${CMAKE_IMPORT_LIBRARY_PREFIX}"
-    AND "${CMAKE_STATIC_LIBRARY_SUFFIX}" STREQUAL "${CMAKE_IMPORT_LIBRARY_SUFFIX}"
-  )
-    set(PCRE2_STATIC_LIB_SUFFIX "-static")
+set(STATIC_LIB_POSTFIX "")
+if(PCRE2_HAS_IMPORT_LIBRARY)
+  if("${CMAKE_STATIC_LIBRARY_PREFIX}" STREQUAL "${CMAKE_IMPORT_LIBRARY_PREFIX}" AND
+     "${PCRE2_STATIC_LIBRARY_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}" STREQUAL "${CMAKE_IMPORT_LIBRARY_SUFFIX}" AND
+     BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS)
+    message(FATAL_ERROR "Static and shared libraries are being built with colliding suffix \"${CMAKE_IMPORT_LIBRARY_SUFFIX}\"; PCRE2_STATIC_LIBRARY_POSTFIX must be used to avoid this.")
   endif()
+  set(STATIC_LIB_POSTFIX "${PCRE2_STATIC_LIBRARY_POSTFIX}")
 endif()
 
 set(TARGETS "")
@@ -1046,8 +1063,8 @@ if(PCRE2_BUILD_PCRE2_8)
     )
     list(APPEND TARGETS pcre2-posix-static)
 
-    set_target_properties(pcre2-8-static PROPERTIES OUTPUT_NAME "pcre2-8${PCRE2_STATIC_LIB_SUFFIX}")
-    set_target_properties(pcre2-posix-static PROPERTIES OUTPUT_NAME "pcre2-posix${PCRE2_STATIC_LIB_SUFFIX}")
+    set_target_properties(pcre2-8-static PROPERTIES OUTPUT_NAME "pcre2-8${STATIC_LIB_POSTFIX}")
+    set_target_properties(pcre2-posix-static PROPERTIES OUTPUT_NAME "pcre2-posix${STATIC_LIB_POSTFIX}")
     if(PCRE2_STATIC_PIC)
       set_target_properties(pcre2-8-static pcre2-posix-static PROPERTIES POSITION_INDEPENDENT_CODE 1)
     endif()
@@ -1137,7 +1154,7 @@ if(PCRE2_BUILD_PCRE2_16)
     endif()
     list(APPEND TARGETS pcre2-16-static)
 
-    set_target_properties(pcre2-16-static PROPERTIES OUTPUT_NAME "pcre2-16${PCRE2_STATIC_LIB_SUFFIX}")
+    set_target_properties(pcre2-16-static PROPERTIES OUTPUT_NAME "pcre2-16${STATIC_LIB_POSTFIX}")
     if(PCRE2_STATIC_PIC)
       set_target_properties(pcre2-16-static PROPERTIES POSITION_INDEPENDENT_CODE 1)
     endif()
@@ -1201,7 +1218,7 @@ if(PCRE2_BUILD_PCRE2_32)
     endif()
     list(APPEND TARGETS pcre2-32-static)
 
-    set_target_properties(pcre2-32-static PROPERTIES OUTPUT_NAME "pcre2-32${PCRE2_STATIC_LIB_SUFFIX}")
+    set_target_properties(pcre2-32-static PROPERTIES OUTPUT_NAME "pcre2-32${STATIC_LIB_POSTFIX}")
     if(PCRE2_STATIC_PIC)
       set_target_properties(pcre2-32-static PROPERTIES POSITION_INDEPENDENT_CODE 1)
     endif()
@@ -1284,7 +1301,7 @@ endforeach()
 set(PCRE2_STATIC_CFLAG "")
 if(NOT BUILD_SHARED_LIBS)
   set(PCRE2_STATIC_CFLAG "-DPCRE2_STATIC")
-  set(LIB_POSTFIX "${PCRE2_STATIC_LIB_SUFFIX}${LIB_POSTFIX}")
+  set(LIB_POSTFIX "${STATIC_LIB_POSTFIX}${LIB_POSTFIX}")
 endif()
 
 set(PCRE2POSIX_CFLAG "")
