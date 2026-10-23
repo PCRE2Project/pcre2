@@ -668,6 +668,10 @@ pcre2_config_data = {
   'PCRE2_STATIC_CFLAG': build_shared ? '' : '-DPCRE2_STATIC',
   'PCRE2POSIX_CFLAG': build_shared ? '-DPCRE2POSIX_SHARED' : '',
   'LIB_POSTFIX': windows_debug_postfix,
+  # We have (as yet) no straightforward way to extract the pthread flags from
+  # Meson, which is a shame. Leave them empty until this is supported.
+  'PTHREAD_CFLAGS': '',
+  'PTHREAD_LIBS': '',
 }
 pcre2_config = configure_file(
   input: 'pcre2-config.in',
