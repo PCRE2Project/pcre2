@@ -952,43 +952,22 @@ set(
   src/pcre2_xclass.c
 )
 
+set(PCRE2_SHARED_SOURCES)
+
 set(PCRE2POSIX_HEADERS ${PROJECT_BINARY_DIR}/interface/pcre2posix.h)
 set(PCRE2POSIX_SOURCES src/pcre2posix.c)
+set(PCRE2POSIX_SHARED_SOURCES)
 
 # It's possible that some users may still make use of the facility to place
 # their own resource files in the PCRE2 source directory to customize the DLLs.
 
-if(MINGW AND BUILD_SHARED_LIBS)
-  if(EXISTS ${PROJECT_SOURCE_DIR}/pcre2.rc)
-    add_custom_command(
-      OUTPUT ${PROJECT_SOURCE_DIR}/pcre2.o PRE-LINK
-      COMMAND windres
-      ARGS pcre2.rc pcre2.o
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      COMMENT "Using pcre2 coff info in mingw build"
-    )
-    list(APPEND PCRE2_SOURCES ${PROJECT_SOURCE_DIR}/pcre2.o)
+if(WIN32)
+  if(EXISTS "${PROJECT_SOURCE_DIR}/pcre2.rc")
+    list(APPEND PCRE2_SHARED_SOURCES "${PROJECT_SOURCE_DIR}/pcre2.rc")
   endif()
 
-  if(EXISTS ${PROJECT_SOURCE_DIR}/pcre2posix.rc)
-    add_custom_command(
-      OUTPUT ${PROJECT_SOURCE_DIR}/pcre2posix.o PRE-LINK
-      COMMAND windres
-      ARGS pcre2posix.rc pcre2posix.o
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-      COMMENT "Using pcre2posix coff info in mingw build"
-    )
-    list(APPEND PCRE2POSIX_SOURCES ${PROJECT_SOURCE_DIR}/pcre2posix.o)
-  endif()
-endif()
-
-if(MSVC AND BUILD_SHARED_LIBS)
-  if(EXISTS ${PROJECT_SOURCE_DIR}/pcre2.rc)
-    list(APPEND PCRE2_SOURCES pcre2.rc)
-  endif()
-
-  if(EXISTS ${PROJECT_SOURCE_DIR}/pcre2posix.rc)
-    list(APPEND PCRE2POSIX_SOURCES pcre2posix.rc)
+  if(EXISTS "${PROJECT_SOURCE_DIR}/pcre2posix.rc")
+    list(APPEND PCRE2POSIX_SHARED_SOURCES "${PROJECT_SOURCE_DIR}/pcre2posix.rc")
   endif()
 endif()
 
@@ -1077,7 +1056,7 @@ if(PCRE2_BUILD_PCRE2_8)
   endif()
 
   if(BUILD_SHARED_LIBS)
-    add_library(pcre2-8-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES})
+    add_library(pcre2-8-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PCRE2_SHARED_SOURCES})
     target_include_directories(
       pcre2-8-shared
       PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
@@ -1102,7 +1081,7 @@ if(PCRE2_BUILD_PCRE2_8)
     list(APPEND TARGETS pcre2-8-shared)
     list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE:pcre2-8-shared>)
 
-    add_library(pcre2-posix-shared SHARED ${PCRE2POSIX_HEADERS} ${PCRE2POSIX_SOURCES})
+    add_library(pcre2-posix-shared SHARED ${PCRE2POSIX_HEADERS} ${PCRE2POSIX_SOURCES} ${PCRE2POSIX_SHARED_SOURCES})
     target_include_directories(
       pcre2-posix-shared
       PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
@@ -1176,7 +1155,7 @@ if(PCRE2_BUILD_PCRE2_16)
   endif()
 
   if(BUILD_SHARED_LIBS)
-    add_library(pcre2-16-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES})
+    add_library(pcre2-16-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PCRE2_SHARED_SOURCES})
     target_include_directories(
       pcre2-16-shared
       PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
@@ -1249,7 +1228,7 @@ if(PCRE2_BUILD_PCRE2_32)
   endif()
 
   if(BUILD_SHARED_LIBS)
-    add_library(pcre2-32-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES})
+    add_library(pcre2-32-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PCRE2_SHARED_SOURCES})
     target_include_directories(
       pcre2-32-shared
       PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
