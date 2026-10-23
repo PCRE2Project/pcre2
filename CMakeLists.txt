@@ -809,11 +809,23 @@ if(EBCDIC)
   endif()
 endif()
 
-# Remove the Autotools-generated copy of config.h and pcre2.h. I sometimes switch
-# between Autoconf and CMake, and the conflicting copies of config.h generate some
-# very unintuitive build errors.
-file(REMOVE ${PROJECT_SOURCE_DIR}/src/config.h)
-file(REMOVE ${PROJECT_SOURCE_DIR}/src/pcre2.h)
+# Detect the Autotools-generated copy of config.h and pcre2.h. I sometimes switch
+# between Autoconf and other build systems, and the conflicting copies of config.h
+# generate some very unintuitive build errors.
+foreach(header IN ITEMS config.h pcre2.h)
+  # An in-source CMake build generates ${PROJECT_BINARY_DIR}/src/config.h itself.
+  if(header STREQUAL "config.h" AND PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
+    continue()
+  endif()
+  if(EXISTS "${PROJECT_SOURCE_DIR}/src/${header}" OR IS_SYMLINK "${PROJECT_SOURCE_DIR}/src/${header}")
+    message(
+      FATAL_ERROR
+      "Source-tree header src/${header} conflicts with CMake-generated headers. "
+      "Remove it before configuring with CMake. "
+      "After an in-source Autotools build, run 'make distclean' first."
+    )
+  endif()
+endforeach()
 
 # -----------------------------------------------------------------------------
 # Release and library version information

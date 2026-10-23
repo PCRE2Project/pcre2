@@ -296,22 +296,17 @@ if ebcdic
   endif
 endif
 
-# Match CMake's cleanup before generating headers: quoted includes would otherwise
-# pick up these source-tree headers from an earlier Autotools build.
-build_python = import('python').find_installation()
-run_command(
-  build_python,
-  '-c',
-  '''
-import os, sys
-for name in ('config.h', 'pcre2.h'):
-    path = os.path.join(sys.argv[1], name)
-    if os.path.lexists(path):
-        os.remove(path)
-''',
-  meson.project_source_root() / 'src',
-  check: true,
-)
+# Detect the Autotools-generated copy of config.h and pcre2.h. I sometimes switch
+# between Autoconf and other build systems, and the conflicting copies of config.h
+# generate some very unintuitive build errors.
+foreach header : ['config.h', 'pcre2.h']
+  path = meson.project_source_root() / 'src' / header
+  if fs.exists(path) or fs.is_symlink(path)
+    error(
+      'Source-tree header src/@0@ conflicts with Meson-generated headers. '.format(header) + 'Remove it before configuring with Meson. ' + 'After an in-source Autotools build, run \'make distclean\' first.',
+    )
+  endif
+endforeach
 
 # -----------------------------------------------------------------------------
 # Release and library version information
