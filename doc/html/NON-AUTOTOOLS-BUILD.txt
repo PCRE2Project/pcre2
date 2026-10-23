@@ -395,8 +395,6 @@ Meson installs generated program and DLL PDBs alongside their binaries in
 `debug` and `debugoptimized` builds by default. Unlike CMake's `INSTALL_MSVC_PDB`
 option, this follows Meson's native policy; `-Dstrip=true` omits installed PDBs.
 Static libraries embed their debug information and do not install separate PDBs.
-Meson does not implement CMake's legacy MinGW `NON_STANDARD_LIB_PREFIX` and
-`NON_STANDARD_LIB_SUFFIX` switches; MinGW targets use Meson's native names.
 The installed `pcre2-config` script requires a Unix shell; native MSVC consumers
 should use `pkg-config` or Meson subproject dependencies instead.
 

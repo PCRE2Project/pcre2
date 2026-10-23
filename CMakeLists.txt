@@ -520,20 +520,6 @@ set(
   "Path used during CMake install for placing PCRE2's CMake config files, relative to the installation root (prefix)"
 )
 
-if(MINGW)
-  option(
-    NON_STANDARD_LIB_PREFIX
-    "ON=Shared libraries built in mingw will be named pcre2.dll, etc., instead of libpcre2.dll, etc."
-    OFF
-  )
-
-  option(
-    NON_STANDARD_LIB_SUFFIX
-    "ON=Shared libraries built in mingw will be named libpcre2-0.dll, etc., instead of libpcre2.dll, etc."
-    OFF
-  )
-endif()
-
 if(CMAKE_C_LINKER_SUPPORTS_PDB)
   # Despite the name "INSTALL_MSVC_PDB", this actually controls whether .pdb files
   # are installed, regardless of the compiler.
@@ -1116,15 +1102,6 @@ if(PCRE2_BUILD_PCRE2_8)
     target_link_libraries(pcre2-posix-shared pcre2-8-shared)
     list(APPEND TARGETS pcre2-posix-shared)
     list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE:pcre2-posix-shared>)
-
-    if(MINGW)
-      if(NON_STANDARD_LIB_PREFIX)
-        set_target_properties(pcre2-8-shared pcre2-posix-shared PROPERTIES PREFIX "")
-      endif()
-      if(NON_STANDARD_LIB_SUFFIX)
-        set_target_properties(pcre2-8-shared pcre2-posix-shared PROPERTIES SUFFIX "-0.dll")
-      endif()
-    endif()
   endif()
 
   if(BUILD_STATIC_LIBS)
@@ -1191,15 +1168,6 @@ if(PCRE2_BUILD_PCRE2_16)
     endif()
     list(APPEND TARGETS pcre2-16-shared)
     list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE:pcre2-16-shared>)
-
-    if(MINGW)
-      if(NON_STANDARD_LIB_PREFIX)
-        set_target_properties(pcre2-16-shared PROPERTIES PREFIX "")
-      endif()
-      if(NON_STANDARD_LIB_SUFFIX)
-        set_target_properties(pcre2-16-shared PROPERTIES SUFFIX "-0.dll")
-      endif()
-    endif()
   endif()
 
   if(BUILD_STATIC_LIBS)
@@ -1264,15 +1232,6 @@ if(PCRE2_BUILD_PCRE2_32)
     endif()
     list(APPEND TARGETS pcre2-32-shared)
     list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE:pcre2-32-shared>)
-
-    if(MINGW)
-      if(NON_STANDARD_LIB_PREFIX)
-        set_target_properties(pcre2-32-shared PROPERTIES PREFIX "")
-      endif()
-      if(NON_STANDARD_LIB_SUFFIX)
-        set_target_properties(pcre2-32-shared PROPERTIES SUFFIX "-0.dll")
-      endif()
-    endif()
   endif()
 
   if(BUILD_STATIC_LIBS)
@@ -1761,11 +1720,6 @@ if(PCRE2_SHOW_REPORT)
     message(STATUS "  Use %zu and %td ................... : OFF")
   else()
     message(STATUS "  Use %zu and %td ................... : AUTO")
-  endif()
-
-  if(MINGW AND BUILD_SHARED_LIBS)
-    message(STATUS "  Non-standard dll names (prefix) ... : ${NON_STANDARD_LIB_PREFIX}")
-    message(STATUS "  Non-standard dll names (suffix) ... : ${NON_STANDARD_LIB_SUFFIX}")
   endif()
 
   if(CMAKE_C_LINKER_SUPPORTS_PDB)
