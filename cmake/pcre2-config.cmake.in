@@ -44,6 +44,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/pcre2-targets.cmake")
 
 # Set version
 set(PCRE2_VERSION "@PCRE2_MAJOR@.@PCRE2_MINOR@.0")
+set(${CMAKE_FIND_PACKAGE_NAME}_VERSION "${PCRE2_VERSION}")
 
 # Chooses the linkage of the library to expose in the
 # unsuffixed edition of the target.
@@ -90,6 +91,7 @@ macro(_pcre2_add_component_target component target)
       set(PCRE2_LIBRARIES ${PCRE2_LIBRARIES} ${PCRE2_${component}_LIBRARY})
     endif()
   endif()
+  set(${CMAKE_FIND_PACKAGE_NAME}_${component}_FOUND "${PCRE2_${component}_FOUND}")
 endmacro()
 _pcre2_add_component_target(8BIT 8)
 _pcre2_add_component_target(16BIT 16)
@@ -99,7 +101,7 @@ _pcre2_add_component_target(POSIX posix)
 # When POSIX component has been specified make sure that also 8BIT component is specified.
 set(PCRE2_8BIT_COMPONENT FALSE)
 set(PCRE2_POSIX_COMPONENT FALSE)
-foreach(component ${PCRE2_FIND_COMPONENTS})
+foreach(component IN LISTS ${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS)
   if(component STREQUAL "8BIT")
     set(PCRE2_8BIT_COMPONENT TRUE)
   elseif(component STREQUAL "POSIX")
@@ -117,4 +119,6 @@ unset(PCRE2_8BIT_COMPONENT)
 unset(PCRE2_POSIX_COMPONENT)
 
 # Check for required components.
-check_required_components("PCRE2")
+set(${CMAKE_FIND_PACKAGE_NAME}_FOUND TRUE)
+check_required_components("${CMAKE_FIND_PACKAGE_NAME}")
+set(PCRE2_FOUND "${${CMAKE_FIND_PACKAGE_NAME}_FOUND}")
