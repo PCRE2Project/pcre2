@@ -111,8 +111,13 @@
 
 message(STATUS "Using CMake version ${CMAKE_VERSION} (${CMAKE_COMMAND})")
 
-# Increased minimum to 3.15 to allow use of string(REPEAT).
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
+# Increased minimum to 3.15 to allow use of string(REPEAT). Increase policy
+# version to 3.31 to obtain better defaults such as CMP0126 and CMP0137.
+#
+# Note that for all policies between 3.15 and 3.31, we must therefore support
+# both the old and new behaviour.
+cmake_minimum_required(VERSION 3.15...3.31 FATAL_ERROR)
+
 project(PCRE2 C)
 if("c_std_11" IN_LIST CMAKE_C_COMPILE_FEATURES)
   set(CMAKE_C_STANDARD 11)
@@ -151,12 +156,6 @@ endif()
 if(PCRE2_MSVC_ABI)
   add_compile_definitions(_CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS)
 endif()
-
-# The following policies have been set in the PCRE2 CMake file in the past.
-# Since we specify a minimum of CMake 3.15, these are no longer required.
-# cmake_policy(SET CMP0063 NEW)
-# cmake_policy(SET CMP0026 OLD)
-# cmake_policy(SET CMP0074 NEW)
 
 # For our modules in cmake/. This uses list(APPEND) rather than set() to allow
 # setting CMAKE_MODULE_PATH on the command line.
@@ -342,7 +341,7 @@ endif()
 # Note: CMakeSetup displays these in alphabetical order, regardless of
 # the order we use here.
 
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries.")
+option(BUILD_SHARED_LIBS "Build shared libraries." OFF)
 
 option(BUILD_STATIC_LIBS "Build static libraries." ON)
 
@@ -359,20 +358,18 @@ set_property(CACHE PCRE2_DEBUG PROPERTY STRINGS "IfDebugBuild" "ON" "OFF")
 
 option(PCRE2_DISABLE_PERCENT_ZT "Disable the use of %zu and %td (rarely needed)" OFF)
 
-set(
+option(
   PCRE2_EBCDIC
-  OFF
-  CACHE BOOL
   "Use EBCDIC coding instead of ASCII. (This is rarely used outside of mainframe systems.)"
+  OFF
 )
 
-set(PCRE2_EBCDIC_NL25 OFF CACHE BOOL "Use 0x25 as EBCDIC NL character instead of 0x15; implies EBCDIC.")
+option(PCRE2_EBCDIC_NL25 "Use 0x25 as EBCDIC NL character instead of 0x15; implies EBCDIC." OFF)
 
-set(
+option(
   PCRE2_EBCDIC_IGNORING_COMPILER
-  OFF
-  CACHE BOOL
   "Force EBCDIC 1047 using numeric literals rather than C character literals; implies EBCDIC."
+  OFF
 )
 
 option(PCRE2_REBUILD_CHARTABLES "Rebuild char tables" OFF)
@@ -482,29 +479,28 @@ else()
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES Linux|NetBSD)
-  set(PCRE2_SUPPORT_JIT_SEALLOC OFF CACHE BOOL "Enable SELinux compatible execmem allocator in JIT (experimental).")
+  option(PCRE2_SUPPORT_JIT_SEALLOC "Enable SELinux compatible execmem allocator in JIT (experimental)." OFF)
 else()
   set(PCRE2_SUPPORT_JIT_SEALLOC IGNORE)
 endif()
 
-set(PCRE2GREP_SUPPORT_JIT ON CACHE BOOL "Enable use of Just-in-time compiling in pcre2grep.")
+option(PCRE2GREP_SUPPORT_JIT "Enable use of Just-in-time compiling in pcre2grep." ON)
 
-set(PCRE2GREP_SUPPORT_CALLOUT ON CACHE BOOL "Enable callout string support in pcre2grep.")
+option(PCRE2GREP_SUPPORT_CALLOUT "Enable callout string support in pcre2grep." ON)
 
-set(PCRE2GREP_SUPPORT_CALLOUT_FORK ON CACHE BOOL "Enable callout string fork support in pcre2grep.")
+option(PCRE2GREP_SUPPORT_CALLOUT_FORK "Enable callout string fork support in pcre2grep." ON)
 
-set(PCRE2_SUPPORT_UNICODE ON CACHE BOOL "Enable support for Unicode and UTF-8/UTF-16/UTF-32 encoding.")
+option(PCRE2_SUPPORT_UNICODE "Enable support for Unicode and UTF-8/UTF-16/UTF-32 encoding." ON)
 
-set(
+option(
   PCRE2_SUPPORT_BSR_ANYCRLF
-  OFF
-  CACHE BOOL
   "ON=Backslash-R matches only LF CR and CRLF, OFF=Backslash-R matches all Unicode Linebreaks"
+  OFF
 )
 
-set(PCRE2_NEVER_BACKSLASH_C OFF CACHE BOOL "If ON, backslash-C (upper case C) is locked out.")
+option(PCRE2_NEVER_BACKSLASH_C "If ON, backslash-C (upper case C) is locked out." OFF)
 
-set(PCRE2_SUPPORT_VALGRIND OFF CACHE BOOL "Enable Valgrind support.")
+option(PCRE2_SUPPORT_VALGRIND "Enable Valgrind support." OFF)
 
 option(PCRE2_FUZZ_SUPPORT "Enable fuzzer support" OFF)
 option(PCRE2_DIFF_FUZZ_SUPPORT "Enable differential fuzzer support (requires fuzz support and JIT)" OFF)

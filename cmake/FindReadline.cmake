@@ -10,6 +10,7 @@ mark_as_advanced(READLINE_INCLUDE_DIR)
 find_library(READLINE_LIBRARY NAMES readline)
 mark_as_advanced(READLINE_LIBRARY)
 
+set(_pcre2_readline_ncurses_library "")
 if(READLINE_INCLUDE_DIR AND READLINE_LIBRARY)
   # Check if we need to link to ncurses as well
 
@@ -44,8 +45,7 @@ if(READLINE_INCLUDE_DIR AND READLINE_LIBRARY)
           if(first_run)
             message(STATUS "Looking for readline - readline needs ${lib}")
           endif()
-          set(NCURSES_LIBRARY "${NCURSES_LIBRARY_${lib}}" CACHE FILEPATH "Path to the ncurses library")
-          mark_as_advanced(NCURSES_LIBRARY)
+          set(_pcre2_readline_ncurses_library "${NCURSES_LIBRARY_${lib}}")
           break()
         endif()
       endif()
@@ -60,8 +60,8 @@ find_package_handle_standard_args(Readline DEFAULT_MSG READLINE_LIBRARY READLINE
 
 if(Readline_FOUND)
   set(READLINE_LIBRARIES "${READLINE_LIBRARY}")
-  if(DEFINED NCURSES_LIBRARY)
-    list(APPEND READLINE_LIBRARIES "${NCURSES_LIBRARY}")
+  if(_pcre2_readline_ncurses_library)
+    list(APPEND READLINE_LIBRARIES "${_pcre2_readline_ncurses_library}")
   endif()
   set(READLINE_INCLUDE_DIRS "${READLINE_INCLUDE_DIR}")
 endif()
