@@ -852,7 +852,7 @@ macro(_pcre2_parse_lib_version variable_prefix)
   math(EXPR ${variable_prefix}_MACHO_CURRENT_VERSION "${${variable_prefix}_VERSION_CURRENT} + 1")
   set(
     ${variable_prefix}_MACHO_CURRENT_VERSION
-    "${${variable_prefix}_MACHO_CURRENT_VERSION}.${${variable_prefix}_VERSION_REVISION}}"
+    "${${variable_prefix}_MACHO_CURRENT_VERSION}.${${variable_prefix}_VERSION_REVISION}"
   )
   set(
     ${variable_prefix}_VERSION
