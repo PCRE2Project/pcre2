@@ -299,7 +299,7 @@ endif()
 if(HAVE_VISIBILITY)
   set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
 else()
-  set(PCRE2_EXPORT)
+  set(PCRE2_EXPORT "")
 endif()
 cmake_pop_check_state()
 
@@ -718,8 +718,8 @@ if(PCRE2_DISABLE_PERCENT_ZT)
   set(DISABLE_PERCENT_ZT 1)
 endif()
 
-set(PCRE2TEST_LIBS)
-set(PCRE2GREP_LIBS)
+set(PCRE2TEST_LIBS "")
+set(PCRE2GREP_LIBS "")
 
 if(PCRE2_SUPPORT_LIBREADLINE)
   set(SUPPORT_LIBREADLINE 1)
@@ -964,11 +964,11 @@ set(
   src/pcre2_xclass.c
 )
 
-set(PCRE2_SHARED_SOURCES)
+set(PCRE2_SHARED_SOURCES "")
 
 set(PCRE2POSIX_HEADERS ${PROJECT_BINARY_DIR}/interface/pcre2posix.h)
 set(PCRE2POSIX_SOURCES src/pcre2posix.c)
-set(PCRE2POSIX_SHARED_SOURCES)
+set(PCRE2POSIX_SHARED_SOURCES "")
 
 # It's possible that some users may still make use of the facility to place
 # their own resource files in the PCRE2 source directory to customize the DLLs.
@@ -1016,9 +1016,9 @@ if(DEFINED CMAKE_IMPORT_LIBRARY_SUFFIX)
   endif()
 endif()
 
-set(TARGETS)
-set(PRIVATE_TARGETS)
-set(DLL_PDB_FILES)
+set(TARGETS "")
+set(PRIVATE_TARGETS "")
+set(DLL_PDB_FILES "")
 
 # 8-bit library
 
@@ -1420,7 +1420,7 @@ if(PCRE2_BUILD_TESTS)
 
   if(PCRE2_SUPPORT_JIT_DETECTED)
     add_executable(pcre2_jit_test src/pcre2_jit_test.c)
-    set(PCRE2_JIT_TEST_LIBS)
+    set(PCRE2_JIT_TEST_LIBS "")
     if(PCRE2_BUILD_PCRE2_8)
       list(APPEND PCRE2_JIT_TEST_LIBS pcre2-8)
     endif()
