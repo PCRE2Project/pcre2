@@ -1580,14 +1580,24 @@ install(
 
 install(FILES ${PCRE2_HEADERS} ${PCRE2POSIX_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-# CMake config files.
+# CMake config files. Unfortunately, CMake's version scheme doesn't handle SemVer
+# (which allows -DEV, -RC1 suffixes), so we budge the version number in this case.
+set(PCRE2_CONFIG_VERSION ${PCRE2_MAJOR}.${PCRE2_MINOR}.0)
+if(NOT "${PCRE2_PRERELEASE}" STREQUAL "")
+  math(EXPR PCRE2_CONFIG_MINOR "${PCRE2_MINOR} - 1")
+  if(PCRE2_CONFIG_MINOR LESS 0)
+    message(FATAL_ERROR "PCRE2_CONFIG_MINOR is less than 0, cannot compute version")
+  else()
+    set(PCRE2_CONFIG_VERSION ${PCRE2_MAJOR}.${PCRE2_CONFIG_MINOR}.99)
+  endif()
+endif()
 set(PCRE2_CONFIG_IN ${PROJECT_SOURCE_DIR}/cmake/pcre2-config.cmake.in)
 set(PCRE2_CONFIG_OUT ${PROJECT_BINARY_DIR}/cmake/pcre2-config.cmake)
 configure_package_config_file(${PCRE2_CONFIG_IN} ${PCRE2_CONFIG_OUT} INSTALL_DESTINATION ${PCRE2_INSTALL_CMAKEDIR})
 set(PCRE2_CONFIG_VERSION_OUT ${PROJECT_BINARY_DIR}/cmake/pcre2-config-version.cmake)
 write_basic_package_version_file(
   ${PCRE2_CONFIG_VERSION_OUT}
-  VERSION ${PCRE2_MAJOR}.${PCRE2_MINOR}.0
+  VERSION ${PCRE2_CONFIG_VERSION}
   COMPATIBILITY SameMajorVersion
 )
 install(FILES ${PCRE2_CONFIG_OUT} ${PCRE2_CONFIG_VERSION_OUT} DESTINATION ${PCRE2_INSTALL_CMAKEDIR})
