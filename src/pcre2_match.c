@@ -307,15 +307,15 @@ do_callout(heapframe *F, match_block *mb, PCRE2_SIZE *lengthptr)
 
   callout_ovector = (PCRE2_SIZE *)(Fovector)-2;
 
-  /* The cb->version, cb->subject, cb->subject_length, and cb->start_match fields
-  are set externally. The first 3 never change; the last is updated for each
-  bumpalong. */
+  /* The cb->version, cb->subject, and cb->subject_length fields are set
+  externally and never change. */
 
   cb = mb->cb;
   cb->capture_top = (uint32_t)Foffset_top / 2 + 1;
   cb->capture_last = Fcapture_last;
   cb->offset_vector = callout_ovector;
   cb->mark = mb->nomatch_mark;
+  cb->start_match = (PCRE2_SIZE)(Fstart_match - mb->start_subject);
   cb->current_position = (PCRE2_SIZE)(Feptr - mb->start_subject);
   cb->pattern_position = GET(Fecode, 1);
   cb->next_item_length = GET(Fecode, 1 + LINK_SIZE);
@@ -8719,7 +8719,6 @@ FRAGMENT_RESTART:
     /* OK, we can now run the match. If "hitend" is set afterwards, remember the
     first starting point for which a partial match was found. */
 
-    cb.start_match = (PCRE2_SIZE)(start_match - subject);
     cb.callout_flags |= PCRE2_CALLOUT_STARTMATCH;
 
     mb->start_used_ptr = start_match;

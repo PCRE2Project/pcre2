@@ -19,6 +19,9 @@ library installation directories.
 pattern is called recursively, which could prevent valid matches requiring
 backtracking after the recursive call.
 
+3. (#1040) Fixed the start_match field passed to interpreter callouts after \K
+resets the start of a match, including restoration on backtracking.
+
 
 Version 10.49 28-September-2026
 -------------------------------
