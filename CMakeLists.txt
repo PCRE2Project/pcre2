@@ -137,8 +137,18 @@ if(
   set(CMAKE_C_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")
 endif()
 
-# MSVC compiler specific settings
-if(MSVC)
+# Use 'MSVC' to detect a compiler using arguments compatible with cl.exe's syntax
+# (so, MSVC, but also clang-cl.exe, acting as a drop-in replacement to cl.exe).
+# Use 'WIN32' to detect any compiler targeting the Windows platform (MSVC, but
+# also ordinary clang.exe taking Clang's commandline arguments).
+# Use 'PCRE2_MSVC_ABI' to detect targetting ordinary Windows binaries using the
+# MSVC ABI.
+set(PCRE2_MSVC_ABI FALSE)
+if(WIN32 AND (MSVC OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC"))
+  set(PCRE2_MSVC_ABI TRUE)
+endif()
+
+if(PCRE2_MSVC_ABI)
   add_compile_definitions(_CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
@@ -151,6 +161,14 @@ endif()
 # For our modules in cmake/. This uses list(APPEND) rather than set() to allow
 # setting CMAKE_MODULE_PATH on the command line.
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
+# Useful properties for working with multi/single-config generators.
+get_property(PCRE2_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(PCRE2_MULTI_CONFIG)
+  set(PCRE2_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}")
+else()
+  set(PCRE2_CONFIGURATION_TYPES "${CMAKE_BUILD_TYPE}")
+endif()
 
 # -----------------------------------------------------------------------------
 # External packages
@@ -249,7 +267,9 @@ check_c_source_compiles(
   HAVE_ATTRIBUTE_UNINITIALIZED
 )
 
-if(NOT MSVC)
+if(PCRE2_MSVC_ABI)
+  set(HAVE_VISIBILITY 0)
+else()
   check_c_source_compiles(
     [=[
     extern __attribute__ ((visibility ("default"))) int f(void);
@@ -514,8 +534,10 @@ if(MINGW)
   )
 endif()
 
-if(MSVC)
-  option(INSTALL_MSVC_PDB "ON=Install .pdb files built by MSVC, if generated" OFF)
+if(CMAKE_C_LINKER_SUPPORTS_PDB)
+  # Despite the name "INSTALL_MSVC_PDB", this actually controls whether .pdb files
+  # are installed, regardless of the compiler.
+  option(INSTALL_MSVC_PDB "ON=Install .pdb files, if produced" OFF)
 endif()
 
 if(HAVE_VSCRIPT)
@@ -987,6 +1009,22 @@ if(WIN32)
   set(CMAKE_DEBUG_POSTFIX "d")
 endif()
 
+# Detect whether pcre2-*.lib collides (same filename would be produced by both
+# static and shared build). In this case, we bump the static library suffix to
+# avoid this. This seems preferable to bumping the filename conditionally; or
+# to placing the outputs in different directories (which would prevent clients
+# copying all outputs to a common location).
+set(PCRE2_STATIC_LIB_SUFFIX "")
+if(DEFINED CMAKE_IMPORT_LIBRARY_SUFFIX)
+  if(
+    NOT "${CMAKE_IMPORT_LIBRARY_SUFFIX}" STREQUAL ""
+    AND "${CMAKE_STATIC_LIBRARY_PREFIX}" STREQUAL "${CMAKE_IMPORT_LIBRARY_PREFIX}"
+    AND "${CMAKE_STATIC_LIBRARY_SUFFIX}" STREQUAL "${CMAKE_IMPORT_LIBRARY_SUFFIX}"
+  )
+    set(PCRE2_STATIC_LIB_SUFFIX "-static")
+  endif()
+endif()
+
 set(TARGETS)
 set(PRIVATE_TARGETS)
 set(DLL_PDB_FILES)
@@ -1031,13 +1069,8 @@ if(PCRE2_BUILD_PCRE2_8)
     )
     list(APPEND TARGETS pcre2-posix-static)
 
-    if(MSVC)
-      set_target_properties(pcre2-8-static PROPERTIES OUTPUT_NAME pcre2-8-static)
-      set_target_properties(pcre2-posix-static PROPERTIES OUTPUT_NAME pcre2-posix-static)
-    else()
-      set_target_properties(pcre2-8-static PROPERTIES OUTPUT_NAME pcre2-8)
-      set_target_properties(pcre2-posix-static PROPERTIES OUTPUT_NAME pcre2-posix)
-    endif()
+    set_target_properties(pcre2-8-static PROPERTIES OUTPUT_NAME "pcre2-8${PCRE2_STATIC_LIB_SUFFIX}")
+    set_target_properties(pcre2-posix-static PROPERTIES OUTPUT_NAME "pcre2-posix${PCRE2_STATIC_LIB_SUFFIX}")
     if(PCRE2_STATIC_PIC)
       set_target_properties(pcre2-8-static pcre2-posix-static PROPERTIES POSITION_INDEPENDENT_CODE 1)
     endif()
@@ -1136,11 +1169,7 @@ if(PCRE2_BUILD_PCRE2_16)
     endif()
     list(APPEND TARGETS pcre2-16-static)
 
-    if(MSVC)
-      set_target_properties(pcre2-16-static PROPERTIES OUTPUT_NAME pcre2-16-static)
-    else()
-      set_target_properties(pcre2-16-static PROPERTIES OUTPUT_NAME pcre2-16)
-    endif()
+    set_target_properties(pcre2-16-static PROPERTIES OUTPUT_NAME "pcre2-16${PCRE2_STATIC_LIB_SUFFIX}")
     if(PCRE2_STATIC_PIC)
       set_target_properties(pcre2-16-static PROPERTIES POSITION_INDEPENDENT_CODE 1)
     endif()
@@ -1213,11 +1242,7 @@ if(PCRE2_BUILD_PCRE2_32)
     endif()
     list(APPEND TARGETS pcre2-32-static)
 
-    if(MSVC)
-      set_target_properties(pcre2-32-static PROPERTIES OUTPUT_NAME pcre2-32-static)
-    else()
-      set_target_properties(pcre2-32-static PROPERTIES OUTPUT_NAME pcre2-32)
-    endif()
+    set_target_properties(pcre2-32-static PROPERTIES OUTPUT_NAME "pcre2-32${PCRE2_STATIC_LIB_SUFFIX}")
     if(PCRE2_STATIC_PIC)
       set_target_properties(pcre2-32-static PROPERTIES POSITION_INDEPENDENT_CODE 1)
     endif()
@@ -1286,14 +1311,30 @@ else()
   set(includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
 endif()
 
-set(LIB_POSTFIX "")
-if(WIN32 AND (CMAKE_BUILD_TYPE MATCHES Debug))
-  set(LIB_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+set(CONFIG_BINARY_DIR "${PROJECT_BINARY_DIR}")
+if(PCRE2_MULTI_CONFIG)
+  string(APPEND CONFIG_BINARY_DIR "/$<CONFIG>")
 endif()
 
+# There is no singular value for LIB_POSTFIX, because we made the postfix
+# dependent on whether it's a Release/Debug build on Windows. Set it to a
+# generator expression which is the conditional concatenation of all the
+# possible postfixes, so that it expands to the active configuration's suffix.
+set(LIB_POSTFIX "")
+foreach(config IN LISTS PCRE2_CONFIGURATION_TYPES)
+  string(TOUPPER "${config}" config_upper)
+  if(DEFINED CMAKE_${config_upper}_POSTFIX)
+    string(APPEND LIB_POSTFIX "$<$<CONFIG:${config}>:${CMAKE_${config_upper}_POSTFIX}>")
+  endif()
+endforeach()
+
+# For pkg-config, there simply isn't a strong way to support builds with
+# shared + static output. We follow the model of shared taking priority. The
+# pcre2-config script (deprecated) reports the same as pkg-config.
 set(PCRE2_STATIC_CFLAG "")
 if(NOT BUILD_SHARED_LIBS)
   set(PCRE2_STATIC_CFLAG "-DPCRE2_STATIC")
+  set(LIB_POSTFIX "${PCRE2_STATIC_LIB_SUFFIX}${LIB_POSTFIX}")
 endif()
 
 set(PCRE2POSIX_CFLAG "")
@@ -1310,11 +1351,14 @@ endif()
 
 if(PCRE2_BUILD_PCRE2_8)
   configure_file(libpcre2-posix.pc.in libpcre2-posix.pc.generator @ONLY)
-  file(GENERATE OUTPUT libpcre2-posix.pc INPUT "${PROJECT_BINARY_DIR}/libpcre2-posix.pc.generator")
-  list(APPEND pkg_config_files "${PROJECT_BINARY_DIR}/libpcre2-posix.pc")
+  file(
+    GENERATE OUTPUT "${CONFIG_BINARY_DIR}/libpcre2-posix.pc"
+    INPUT "${PROJECT_BINARY_DIR}/libpcre2-posix.pc.generator"
+  )
+  list(APPEND pkg_config_files "${CONFIG_BINARY_DIR}/libpcre2-posix.pc")
   configure_file(libpcre2-8.pc.in libpcre2-8.pc.generator @ONLY)
-  file(GENERATE OUTPUT libpcre2-8.pc INPUT "${PROJECT_BINARY_DIR}/libpcre2-8.pc.generator")
-  list(APPEND pkg_config_files "${PROJECT_BINARY_DIR}/libpcre2-8.pc")
+  file(GENERATE OUTPUT "${CONFIG_BINARY_DIR}/libpcre2-8.pc" INPUT "${PROJECT_BINARY_DIR}/libpcre2-8.pc.generator")
+  list(APPEND pkg_config_files "${CONFIG_BINARY_DIR}/libpcre2-8.pc")
   set(enable_pcre2_8 "yes")
 else()
   set(enable_pcre2_8 "no")
@@ -1322,8 +1366,8 @@ endif()
 
 if(PCRE2_BUILD_PCRE2_16)
   configure_file(libpcre2-16.pc.in libpcre2-16.pc.generator @ONLY)
-  file(GENERATE OUTPUT libpcre2-16.pc INPUT "${PROJECT_BINARY_DIR}/libpcre2-16.pc.generator")
-  list(APPEND pkg_config_files "${PROJECT_BINARY_DIR}/libpcre2-16.pc")
+  file(GENERATE OUTPUT "${CONFIG_BINARY_DIR}/libpcre2-16.pc" INPUT "${PROJECT_BINARY_DIR}/libpcre2-16.pc.generator")
+  list(APPEND pkg_config_files "${CONFIG_BINARY_DIR}/libpcre2-16.pc")
   set(enable_pcre2_16 "yes")
 else()
   set(enable_pcre2_16 "no")
@@ -1331,14 +1375,15 @@ endif()
 
 if(PCRE2_BUILD_PCRE2_32)
   configure_file(libpcre2-32.pc.in libpcre2-32.pc.generator @ONLY)
-  file(GENERATE OUTPUT libpcre2-32.pc INPUT "${PROJECT_BINARY_DIR}/libpcre2-32.pc.generator")
-  list(APPEND pkg_config_files "${PROJECT_BINARY_DIR}/libpcre2-32.pc")
+  file(GENERATE OUTPUT "${CONFIG_BINARY_DIR}/libpcre2-32.pc" INPUT "${PROJECT_BINARY_DIR}/libpcre2-32.pc.generator")
+  list(APPEND pkg_config_files "${CONFIG_BINARY_DIR}/libpcre2-32.pc")
   set(enable_pcre2_32 "yes")
 else()
   set(enable_pcre2_32 "no")
 endif()
 
-configure_file(pcre2-config.in pcre2-config @ONLY NEWLINE_STYLE LF)
+configure_file(pcre2-config.in pcre2-config.generator @ONLY NEWLINE_STYLE LF)
+file(GENERATE OUTPUT "${CONFIG_BINARY_DIR}/pcre2-config" INPUT "${PROJECT_BINARY_DIR}/pcre2-config.generator")
 
 # -----------------------------------------------------------------------------
 # Executables
@@ -1504,8 +1549,6 @@ endif()
 # Installation
 # -----------------------------------------------------------------------------
 
-set(CMAKE_INSTALL_ALWAYS 1)
-
 install(
   TARGETS ${TARGETS}
   EXPORT pcre2-targets
@@ -1517,9 +1560,28 @@ if(PRIVATE_TARGETS)
   install(TARGETS ${PRIVATE_TARGETS} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 install(EXPORT pcre2-targets DESTINATION ${PCRE2_INSTALL_CMAKEDIR} NAMESPACE pcre2::)
+
+# Beware of CMake's default install behaviour! It is brittle and uses timestamps
+# to avoid overwriting files that have not changed. However... this is imprecise.
+# Clearly they *should* be hashing the file contents and overwriting whenever the
+# new file is different to the existing one.
+#
+# This can strike when installing the pkg-config files below.
+#   * CMake generates BINARY_DIR/Debug/libpcre2-8.pc and .../RelWithDebInfo/...
+#     with identical timestamps, as both are created at project-generation time.
+#   * If you install the Debug build into a temp directory, and test it, then
+#     install the RelWithDebInfo one over the top, then it will not update the
+#     libpcre2-8.pc file, because the timestamps are identical. This doesn't
+#     affect the binaries, because it's very much less likely the two builds will
+#     have generated identical timestamps for those.
+#
+# Either:
+#   1. Use "CMAKE_INSTALL_ALWAYS=ON ninja install"
+#   2. Always install into a clean directory
+
 install(FILES ${pkg_config_files} DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(
-  FILES "${PROJECT_BINARY_DIR}/pcre2-config"
+  FILES "${CONFIG_BINARY_DIR}/pcre2-config"
   DESTINATION ${CMAKE_INSTALL_BINDIR}
   # Set 0755 permissions
   PERMISSIONS OWNER_WRITE OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
@@ -1564,7 +1626,7 @@ install(FILES ${PROJECT_SOURCE_DIR}/doc/html/css/document.css
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/html/images
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2/html)
 
-if(MSVC AND INSTALL_MSVC_PDB)
+if(CMAKE_C_LINKER_SUPPORTS_PDB AND INSTALL_MSVC_PDB)
   install(FILES ${DLL_PDB_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS Debug RelWithDebInfo)
 endif()
 
@@ -1595,7 +1657,7 @@ if(PCRE2_SHOW_REPORT)
   if(CMAKE_C_FLAGS)
     set(CFSP " ")
   endif()
-  if(CMAKE_CONFIGURATION_TYPES)
+  if(PCRE2_MULTI_CONFIG)
     foreach(config IN LISTS CMAKE_CONFIGURATION_TYPES)
       string(TOUPPER "${config}" buildtype)
       string(LENGTH " (${config})" buildtypelen)
@@ -1614,7 +1676,7 @@ if(PCRE2_SHOW_REPORT)
   endif()
 
   message(STATUS "")
-  if(CMAKE_CONFIGURATION_TYPES)
+  if(PCRE2_MULTI_CONFIG)
     message(STATUS "  Build configurations .............. : ${CMAKE_CONFIGURATION_TYPES}")
   else()
     message(STATUS "  Build type ........................ : ${CMAKE_BUILD_TYPE}")
@@ -1705,8 +1767,8 @@ if(PCRE2_SHOW_REPORT)
     message(STATUS "  Non-standard dll names (suffix) ... : ${NON_STANDARD_LIB_SUFFIX}")
   endif()
 
-  if(MSVC)
-    message(STATUS "  Install MSVC .pdb files ........... : ${INSTALL_MSVC_PDB}")
+  if(CMAKE_C_LINKER_SUPPORTS_PDB)
+    message(STATUS "  Install linker .pdb files ......... : ${INSTALL_MSVC_PDB}")
   endif()
 
   message(STATUS "")
