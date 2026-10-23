@@ -7108,6 +7108,23 @@ unittest(void)
   rc = pcre2_substring_get_bynumber(test_match_data, 1, &sptrval, &sizeval);
   ASSERT(rc == PCRE2_ERROR_NOMATCH && sptrval == NULL, "pcre2_substring_get_bynumber(no match)");
 
+  /* Test after an early match failure where match_data->code was not set. */
+
+  pcre2_match_data_free(test_match_data);
+  test_match_data = pcre2_match_data_create(10, NULL);
+  ASSERT(test_match_data != NULL, "pcre2_match_data_create(early failure)");
+
+  rc = pcre2_match(test_compiled_code, subject_abcz, 4, 10, 0, test_match_data, NULL);
+  ASSERT(rc == PCRE2_ERROR_BADOFFSET, "pcre2_match(badoffset)");
+
+  sizeval = 4;
+  rc = pcre2_substring_copy_byname(test_match_data, name_n, copy_buf, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_BADOFFSET, "pcre2_substring_copy_byname(early failure)");
+  rc = pcre2_substring_get_byname(test_match_data, name_n, &sptrval, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_BADOFFSET && sptrval == NULL, "pcre2_substring_get_byname(early failure)");
+  rc = pcre2_substring_length_byname(test_match_data, name_n, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_BADOFFSET, "pcre2_substring_length_byname(early failure)");
+
   /* ------------- pcre2_substitute with PCRE2_SUBSTITUTE_MATCHED ------------ */
 
   /* There are some specific edge cases here that would be a pain to exercise via
