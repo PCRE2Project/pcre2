@@ -1,0 +1,9 @@
+ARG BASE_IMAGE=debian:trixie
+FROM ${BASE_IMAGE}
+
+LABEL org.opencontainers.image.source="https://github.com/PCRE2Project/pcre2"
+ENV LANG=C.UTF-8
+
+COPY .devcontainer/setup.sh /opt/pcre2-container/.devcontainer/setup.sh
+COPY pages/Gemfile pages/Gemfile.lock /opt/pcre2-container/pages/
+RUN bash /opt/pcre2-container/.devcontainer/setup.sh --env=ci

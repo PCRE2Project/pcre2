@@ -1,0 +1,127 @@
+name: Containers
+on:
+  schedule:
+    - cron: '23 4 * * 1'
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '.devcontainer/**'
+      - 'pages/Gemfile*'
+      - '.github/workflows/containers.yml'
+  pull_request:
+    paths:
+      - '.devcontainer/**'
+      - 'pages/Gemfile*'
+      - '.github/workflows/containers.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: containers-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io/pcre2project
+
+jobs:
+  build:
+    name: ${{ matrix.distro }} / ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [debian, ubuntu]
+        arch: [amd64, arm64]
+        include:
+          - distro: debian
+            base: debian:trixie
+          - distro: ubuntu
+            base: ubuntu:26.04
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+
+      - name: Check shell scripts
+        run: |
+          shellcheck .devcontainer/setup.sh .devcontainer/test.sh .devcontainer/post-create.sh
+          for argument in '' --env=invalid --env=; do
+            status=0
+            bash .devcontainer/setup.sh $argument || status=$?
+            test "$status" -eq 2
+          done
+          status=0
+          bash .devcontainer/setup.sh --env=ci --env=interactive || status=$?
+          test "$status" -eq 2
+
+      - name: Build CI image
+        env:
+          BASE_IMAGE: ${{ matrix.base }}
+        run: |
+          docker build --pull --no-cache -f .devcontainer/Dockerfile.ci \
+            --build-arg "BASE_IMAGE=$BASE_IMAGE" -t pcre2-ci:test .
+
+      - name: Test CI image
+        run: |
+          docker run --rm -v "$PWD:/src:ro" -w /src pcre2-ci:test \
+            bash .devcontainer/test.sh --env=ci
+
+      - name: Build interactive image on the same CI layers
+        run: |
+          docker build --no-cache -f .devcontainer/Dockerfile \
+            --build-arg CI_IMAGE=pcre2-ci:test -t pcre2-interactive:test .
+
+      - name: Test interactive image
+        run: |
+          docker run --rm -v "$PWD:/src:ro" -w /src pcre2-interactive:test \
+            bash .devcontainer/test.sh --env=interactive
+
+      - name: Push Debian architecture images
+        if: >-
+          matrix.distro == 'debian' &&
+          github.repository == 'PCRE2Project/pcre2' &&
+          github.ref == 'refs/heads/main' &&
+          github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          for image in ci interactive; do
+            tag="$REGISTRY/pcre2-$image:build-$GITHUB_RUN_ID-$ARCH"
+            docker tag "pcre2-$image:test" "$tag"
+            docker push "$tag"
+          done
+
+  publish:
+    name: Publish multi-architecture latest tags
+    needs: build
+    if: >-
+      github.repository == 'PCRE2Project/pcre2' &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Publish manifests
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          for image in ci interactive; do
+            name="$REGISTRY/pcre2-$image"
+            build="$name:build-$GITHUB_RUN_ID"
+            docker manifest create "$name:latest" "$build-amd64" "$build-arm64"
+            docker manifest push "$name:latest"
+          done

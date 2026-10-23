@@ -1,21 +1,17 @@
 {
   "name": "Default PCRE2 container",
-  "build": { "dockerfile": "Dockerfile" },
+  "image": "ghcr.io/pcre2project/pcre2-interactive:latest",
+  "remoteUser": "vscode",
 
   // Check out the submodule and any other post-checkout setup.
   "postCreateCommand": ["${containerWorkspaceFolder}/.devcontainer/post-create.sh"],
   "waitFor": "postCreateCommand",
 
-  // Configure extension features.
-  "features": {
-    "ghcr.io/devcontainers/features/github-cli:1": {}
-  },
-
   // Configure tool-specific properties.
   "customizations": {
-    // Show the frontpage when a codespace is first opened.
+    // Start with a blank slate.
     "codespaces": {
-      "openFiles": [".github/README.md"]
+      "openFiles": []
     },
     // Configure properties specific to VS Code.
     "vscode": {
@@ -24,7 +20,6 @@
         "bazelbuild.vscode-bazel",
         "EditorConfig.EditorConfig",
         "github.vscode-github-actions",
-        // "ionutvmi.vscode-commands-executor",
         "mesonbuild.mesonbuild",
         "ms-python.python",
         "ms-vscode.cmake-tools",
@@ -66,30 +61,21 @@
           "*.h.generic": "c",
           "*.h.in": "c"
         },
+        "workbench.editorAssociations": {
+          "*.md": "vscode.markdown.preview.editor"
+        },
+        "markdown.styles": ["doc/html/css/document.css"],
         "bazel.workspaceTree.enable": false,
         "bazel.codeLens.enable": false,
         "bazel.languageSupport.enable": false,
         "C_Cpp.clang_format_style": "file:${workspaceFolder}/maint/formatting/.clang-format",
         "C_Cpp.clang_format_path": "/usr/bin/clang-format-22",
         "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-        // "cmake.configureOnOpen": false,
         "cmake.useCMakePresets": "always",
         "mesonbuild.configureOnOpen": false,
         "mesonbuild.buildFolder": "${workspaceFolder}/build-meson",
         "mesonbuild.downloadLanguageServer": false,
         "mesonbuild.modifySettings": false,
-        // "vscode-commands-executor.startupRules": [
-        //   {
-        //     "conditions": ["hasFile: CMakeUserPresets.json"],
-        //     "commands": [
-        //       // Wait for CMake Tools activation before calling its preset setter.
-        //       { "id": "cmake.activeConfigurePresetName" },
-        //       { "id": "cmake.setConfigurePreset", "args": ["devcontainer-debug"] },
-        //       { "id": "cmake.configure" },
-        //       { "id": "cmake.build" }
-        //     ]
-        //   }
-        // ],
         "zig.path": "/usr/local/bin/zig"
       }
     }
