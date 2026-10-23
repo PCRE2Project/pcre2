@@ -35,6 +35,11 @@
 
 @PACKAGE_INIT@
 
+# Set package to initially not-found, to handle early returns (from the
+# find_dependency macro)
+set(PCRE2_FOUND FALSE)
+set(${CMAKE_FIND_PACKAGE_NAME}_FOUND "${PCRE2_FOUND}")
+
 include(CMakeFindDependencyMacro)
 if("@REQUIRE_PTHREAD@") # REQUIRE_PTHREAD
   find_dependency(Threads)
@@ -46,79 +51,135 @@ include("${CMAKE_CURRENT_LIST_DIR}/pcre2-targets.cmake")
 set(PCRE2_VERSION "@PCRE2_MAJOR@.@PCRE2_MINOR@.0")
 set(${CMAKE_FIND_PACKAGE_NAME}_VERSION "${PCRE2_VERSION}")
 
-# Chooses the linkage of the library to expose in the
-# unsuffixed edition of the target.
 macro(_pcre2_add_component_target component target)
+  # Chooses the linkage of the library to expose in the
+  # unsuffixed edition of the target.
+  #
   # If the static library exists and either PCRE2_USE_STATIC_LIBS
-  # is defined, or the dynamic library does not exist, use the static library.
+  # is defined and true, or the dynamic library does not exist, use the static library.
+  set(_pcre2_want_default_linkage FALSE)
+  if(TARGET pcre2::pcre2-${target}-static AND (PCRE2_USE_STATIC_LIBS OR NOT TARGET pcre2::pcre2-${target}-shared))
+    set(_pcre2_want_default_linkage static)
+    # Otherwise use the dynamic library if it exists.
+  elseif(TARGET pcre2::pcre2-${target}-shared AND NOT PCRE2_USE_STATIC_LIBS)
+    set(_pcre2_want_default_linkage shared)
+  endif()
+
   if(NOT TARGET PCRE2::${component})
-    if(TARGET pcre2::pcre2-${target}-static AND (PCRE2_USE_STATIC_LIBS OR NOT TARGET pcre2::pcre2-${target}-shared))
-      add_library(PCRE2::${component} ALIAS pcre2::pcre2-${target}-static)
-      set(PCRE2_${component}_FOUND TRUE)
-      # Otherwise use the dynamic library if it exists.
-    elseif(TARGET pcre2::pcre2-${target}-shared AND NOT PCRE2_USE_STATIC_LIBS)
-      add_library(PCRE2::${component} ALIAS pcre2::pcre2-${target}-shared)
-      set(PCRE2_${component}_FOUND TRUE)
+    if(_pcre2_want_default_linkage)
+      add_library(PCRE2::${component} ALIAS pcre2::pcre2-${target}-${_pcre2_want_default_linkage})
+    elseif((TARGET pcre2::pcre2-${target}-shared) OR (TARGET pcre2::pcre2-${target}-static)
+           AND NOT ${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
+      message(
+        WARNING
+        "A shared-library target is available for the PCRE2::${component} component, "
+          "but PCRE2_USE_STATIC_LIBS was set to true and no static library is available. "
+          "The component shall be reported as not found."
+      )
     endif()
-    if(PCRE2_${component}_FOUND)
-      foreach(_pcre2_property IMPORTED_IMPLIB IMPORTED_LOCATION)
-        get_target_property(PCRE2_${component}_LIBRARY PCRE2::${component} ${_pcre2_property})
-        if(NOT PCRE2_${component}_LIBRARY)
-          get_target_property(_pcre2_imported_configs PCRE2::${component} IMPORTED_CONFIGURATIONS)
-          set(_pcre2_location_configs ${_pcre2_imported_configs})
-          if(CMAKE_BUILD_TYPE)
-            string(TOUPPER "${CMAKE_BUILD_TYPE}" _pcre2_build_type)
-            list(PREPEND _pcre2_location_configs "${_pcre2_build_type}")
-          endif()
-          list(REMOVE_DUPLICATES _pcre2_location_configs)
-          foreach(_pcre2_config IN LISTS _pcre2_location_configs)
-            string(TOUPPER "${_pcre2_config}" _pcre2_config)
-            get_target_property(PCRE2_${component}_LIBRARY PCRE2::${component} ${_pcre2_property}_${_pcre2_config})
-            if(PCRE2_${component}_LIBRARY)
-              break()
-            endif()
-          endforeach()
-          unset(_pcre2_build_type)
-          unset(_pcre2_config)
-          unset(_pcre2_imported_configs)
-          unset(_pcre2_location_configs)
-        endif()
-        if(PCRE2_${component}_LIBRARY)
-          break()
-        endif()
-      endforeach()
-      unset(_pcre2_property)
-      set(PCRE2_LIBRARIES ${PCRE2_LIBRARIES} ${PCRE2_${component}_LIBRARY})
+  else()
+    # Our CMake targets are not global, so this is a sanity check. The caller
+    # really should not be calling find_package(PCRE2) twice in the same scope,
+    # but with differing values of PCRE2_USE_STATIC_LIBS.
+    get_target_property(_pcre2_alias_target PCRE2::${component} ALIASED_TARGET)
+    if(_pcre2_want_default_linkage)
+      set(_pcre2_expected_target "pcre2::pcre2-${target}-${_pcre2_want_default_linkage}")
+    else()
+      set(_pcre2_expected_target "no default target")
     endif()
+    if(NOT _pcre2_want_default_linkage OR NOT "${_pcre2_alias_target}" STREQUAL "${_pcre2_expected_target}")
+      message(
+        FATAL_ERROR
+        "The name PCRE2::${component} was created as an alias for "
+          "${_pcre2_alias_target}, but now ${_pcre2_expected_target} "
+          "is expected. Possibly, PCRE2 is being used twice within the build tree, "
+          "with incompatible values for PCRE2_USE_STATIC_LIBS."
+      )
+    endif()
+    unset(_pcre2_alias_target)
+    unset(_pcre2_expected_target)
+  endif()
+  unset(_pcre2_want_default_linkage)
+
+  # Simple logic to set the _FOUND variable based on whether we have the target.
+  # These variables are not legacy; they power the check_required_components macro.
+  set(PCRE2_${component}_FOUND FALSE)
+  if(TARGET PCRE2::${component})
+    set(PCRE2_${component}_FOUND TRUE)
   endif()
   set(${CMAKE_FIND_PACKAGE_NAME}_${component}_FOUND "${PCRE2_${component}_FOUND}")
+
+  # Legacy support. Clients shouldn't use the PCRE2_LIBRARIES or PCRE2_component_LIBRARY
+  # variables. If they do, we deliver some approximation to the correct files. Notably,
+  # in multi-config builds, we simply pick one of the several available objects without
+  # any particular preference.
+  unset(PCRE2_${component}_LIBRARY)
+  unset(${CMAKE_FIND_PACKAGE_NAME}_${component}_LIBRARY)
+  if(TARGET PCRE2::${component})
+    foreach(_pcre2_property IMPORTED_IMPLIB IMPORTED_LOCATION)
+      get_target_property(PCRE2_${component}_LIBRARY PCRE2::${component} ${_pcre2_property})
+      if(NOT PCRE2_${component}_LIBRARY)
+        get_target_property(_pcre2_imported_configs PCRE2::${component} IMPORTED_CONFIGURATIONS)
+        set(_pcre2_location_configs "${_pcre2_imported_configs}")
+        if(CMAKE_BUILD_TYPE)
+          string(TOUPPER "${CMAKE_BUILD_TYPE}" _pcre2_build_type)
+          list(PREPEND _pcre2_location_configs "${_pcre2_build_type}")
+        endif()
+        list(REMOVE_DUPLICATES _pcre2_location_configs)
+        foreach(_pcre2_config IN LISTS _pcre2_location_configs)
+          string(TOUPPER "${_pcre2_config}" _pcre2_config)
+          get_target_property(PCRE2_${component}_LIBRARY PCRE2::${component} ${_pcre2_property}_${_pcre2_config})
+          if(PCRE2_${component}_LIBRARY)
+            break()
+          endif()
+        endforeach()
+        unset(_pcre2_build_type)
+        unset(_pcre2_config)
+        unset(_pcre2_imported_configs)
+        unset(_pcre2_location_configs)
+      endif()
+      if(PCRE2_${component}_LIBRARY)
+        break()
+      endif()
+    endforeach()
+    unset(_pcre2_property)
+    list(APPEND PCRE2_LIBRARIES "${PCRE2_${component}_LIBRARY}")
+    set(${CMAKE_FIND_PACKAGE_NAME}_${component}_LIBRARY "${PCRE2_${component}_LIBRARY}")
+  endif()
 endmacro()
+
+set(PCRE2_LIBRARIES "")
+_pcre2_add_component_target(POSIX posix) # Posix must come first in PCRE2_LIBRARIES so -l flags are in correct order
 _pcre2_add_component_target(8BIT 8)
 _pcre2_add_component_target(16BIT 16)
 _pcre2_add_component_target(32BIT 32)
-_pcre2_add_component_target(POSIX posix)
+set(${CMAKE_FIND_PACKAGE_NAME}_LIBRARIES "${PCRE2_LIBRARIES}")
 
 # When POSIX component has been specified make sure that also 8BIT component is specified.
-set(PCRE2_8BIT_COMPONENT FALSE)
-set(PCRE2_POSIX_COMPONENT FALSE)
-foreach(component IN LISTS ${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS)
-  if(component STREQUAL "8BIT")
-    set(PCRE2_8BIT_COMPONENT TRUE)
-  elseif(component STREQUAL "POSIX")
-    set(PCRE2_POSIX_COMPONENT TRUE)
+# This is unnecessary, but it's been our behaviour for a long time.
+set(_pcre2_8bit_component FALSE)
+set(_pcre2_posix_component FALSE)
+foreach(_pcre2_component IN LISTS ${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS)
+  if(_pcre2_component STREQUAL "8BIT")
+    set(_pcre2_8bit_component TRUE)
+  elseif(_pcre2_component STREQUAL "POSIX")
+    set(_pcre2_posix_component TRUE)
   endif()
 endforeach()
+unset(_pcre2_component)
 
-if(PCRE2_POSIX_COMPONENT AND NOT PCRE2_8BIT_COMPONENT)
+if(_pcre2_posix_component AND NOT _pcre2_8bit_component)
   message(
     FATAL_ERROR
     "The component POSIX is specified while the 8BIT one is not. This is not allowed. Please, also specify the 8BIT component."
   )
 endif()
-unset(PCRE2_8BIT_COMPONENT)
-unset(PCRE2_POSIX_COMPONENT)
+unset(_pcre2_8bit_component)
+unset(_pcre2_posix_component)
 
 # Check for required components.
-set(${CMAKE_FIND_PACKAGE_NAME}_FOUND TRUE)
+if(PCRE2_POSIX_FOUND OR PCRE2_8BIT_FOUND OR PCRE2_16BIT_FOUND OR PCRE2_32BIT_FOUND)
+  set(${CMAKE_FIND_PACKAGE_NAME}_FOUND TRUE)
+endif()
 check_required_components("${CMAKE_FIND_PACKAGE_NAME}")
 set(PCRE2_FOUND "${${CMAKE_FIND_PACKAGE_NAME}_FOUND}")
