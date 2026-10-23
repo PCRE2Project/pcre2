@@ -997,9 +997,11 @@ for bmode in (test8, test16, test32):
 if not failed:
     print()
     print("All tests passed.")
+    # RunGrepTest(.py) may run concurrently in this directory. Keep working
+    # files and cleanup lists disjoint, and update Makefile.am and .gitignore.
     for name in ("testbtables", "testSinput", "testSoutput", "test3input", "test3output", "test3outputA",
                  "test3outputB", "test3outputC", "test3outputD", "test3outputE", "test3outputF", "testsaved1",
-                 "testsaved2", "teststdout", "teststderr"):
+                 "testsaved2", "teststdout"):
         try:
             Path(name).unlink()
         except FileNotFoundError:

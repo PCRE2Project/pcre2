@@ -1086,9 +1086,11 @@ if [ $yield -eq 0 ] ; then
   echo "All tests passed."
 
   # Clean up local working files
+  # RunGrepTest(.py) may run concurrently in this directory. Keep working
+  # files and cleanup lists disjoint, and update Makefile.am and .gitignore.
   rm -f testbtables testSinput testSoutput test3input \
         test3output test3outputA test3outputB test3outputC test3outputD test3outputE test3outputF \
-        testsaved1 testsaved2 teststdout teststderr
+        testsaved1 testsaved2 teststdout
   rm -rf testoutput8 testoutput8-jit testoutput8-dfa \
          testoutput16 testoutput16-jit testoutput16-dfa \
          testoutput32 testoutput32-jit testoutput32-dfa

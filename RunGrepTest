@@ -162,9 +162,9 @@ checkspecial()
 
 run_sorted()
   {
-  "$@" >"$builddir/teststdout"
+  "$@" >"$builddir/teststdoutgrep"
   grep_rc=$?
-  sort "$builddir/teststdout"
+  sort "$builddir/teststdoutgrep"
   # Technique to pipe output to `sort`, while returning the exit code of the
   # first process in the pipe. Use a file instead.
   return $grep_rc
@@ -172,9 +172,9 @@ run_sorted()
 
 run_null_translated()
   {
-  "$@" >"$builddir/teststdout"
+  "$@" >"$builddir/teststdoutgrep"
   grep_rc=$?
-  $tr '\000' '@' <"$builddir/teststdout"
+  $tr '\000' '@' <"$builddir/teststdoutgrep"
   return $grep_rc
   }
 
@@ -1425,7 +1425,9 @@ checkspecial 2 "(unpaired" /dev/null
 checkspecial 2 -e "(unpaired1" -e "(unpaired2" /dev/null
 
 # Clean up local working files
-rm -f testNinputgrep teststderrgrep testtrygrep testtemp1grep testtemp2grep teststdout
+# RunTest(.py) may run concurrently in this directory. Keep working files
+# and cleanup lists disjoint, and update Makefile.am and .gitignore.
+rm -f testNinputgrep teststderrgrep testtrygrep testtemp1grep testtemp2grep teststdoutgrep
 rm -f ./-testtemp1grep ./--
 
 exit 0

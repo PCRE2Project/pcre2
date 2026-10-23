@@ -1390,6 +1390,8 @@ checkspecial(("(unpaired", os.devnull), 2)
 checkspecial(("-e", "(unpaired1", "-e", "(unpaired2", os.devnull), 2)
 
 # Clean up local working files
+# RunTest(.py) may run concurrently in this directory. Keep working files
+# and cleanup lists disjoint, and update Makefile.am and .gitignore.
 for filename in ("testNinputgrep", "teststderrgrep", "testtrygrep", "testtemp1grep", "testtemp2grep", "-testtemp1grep",
                  "--"):
     try:
