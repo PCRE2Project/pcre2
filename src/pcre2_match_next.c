@@ -52,15 +52,16 @@ do_bumpalong(pcre2_match_data *match_data, PCRE2_SIZE offset)
   PCRE2_SPTR subject = match_data->subject;
   PCRE2_SIZE subject_length = match_data->subject_length;
 #ifdef SUPPORT_UNICODE
-  BOOL utf = (match_data->code->overall_options & PCRE2_UTF) != 0;
+  BOOL utf = (match_data->code != NULL && (match_data->code->overall_options & PCRE2_UTF) != 0);
 #endif
 
   /* Skip over CRLF as an atomic sequence, if CRLF is configured as a newline
   sequence. */
 
-  if (subject[offset] == CHAR_CR && offset + 1 < subject_length && subject[offset + 1] == CHAR_LF)
+  if (subject != NULL && subject[offset] == CHAR_CR && offset + 1 < subject_length && subject[offset + 1] == CHAR_LF)
   {
-    switch (match_data->code->newline_convention)
+    uint32_t nl = (match_data->code != NULL) ? match_data->code->newline_convention : PCRE2_NEWLINE_LF;
+    switch (nl)
     {
     case PCRE2_NEWLINE_CRLF:
     case PCRE2_NEWLINE_ANY:
@@ -72,7 +73,7 @@ do_bumpalong(pcre2_match_data *match_data, PCRE2_SIZE offset)
   /* Advance by one full character if in UTF mode. */
 
 #ifdef SUPPORT_UNICODE
-  if (utf)
+  if (utf && subject != NULL)
   {
     PCRE2_SPTR next = subject + offset + 1;
     PCRE2_SPTR subject_end = subject + subject_length;
@@ -95,6 +96,15 @@ do_bumpalong(pcre2_match_data *match_data, PCRE2_SIZE offset)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_next_match(pcre2_match_data *match_data, PCRE2_SIZE *pstart_offset, uint32_t *poptions)
 {
+  /* Preconditions on argument values */
+
+  PCRE2_ASSERT(match_data != NULL);
+  PCRE2_ASSERT(pstart_offset != NULL);
+  PCRE2_ASSERT(poptions != NULL);
+
+  if (match_data == NULL || pstart_offset == NULL || poptions == NULL)
+    return FALSE;
+
   PCRE2_SIZE start_offset = match_data->start_offset;
   PCRE2_SIZE *ovector = match_data->ovector;
 

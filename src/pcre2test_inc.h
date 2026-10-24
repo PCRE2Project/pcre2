@@ -7194,6 +7194,20 @@ unittest(void)
                         &sizeval);
   ASSERT(rc == PCRE2_ERROR_DIFFSUBSPATTERN, "pcre2_substitute(pattern)");
 
+  /* ----------------- pcre2_next_match validation --------------------------- */
+
+  {
+    PCRE2_SIZE next_offset = 0;
+    uint32_t next_options = 0;
+
+    ASSERT(pcre2_next_match(NULL, &next_offset, &next_options) == FALSE,
+           "pcre2_next_match(null match_data)");
+    ASSERT(pcre2_next_match(test_match_data, NULL, &next_options) == FALSE,
+           "pcre2_next_match(null pstart_offset)");
+    ASSERT(pcre2_next_match(test_match_data, &next_offset, NULL) == FALSE,
+           "pcre2_next_match(null poptions)");
+  }
+
   /* -------------- pcre2_serialize_decode: three goto cleanup branches -------- */
 
   {

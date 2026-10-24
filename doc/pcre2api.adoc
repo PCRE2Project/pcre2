@@ -3584,8 +3584,9 @@ First, a match attempt should be made using one of the matching functions
 Then, func:pcre2_next_match() can be called, providing the same
 arg:match_data parameter.
 
-It returns 0 ("false") if there is no need to make a further match attempt, or
-1 ("true") if another match should be attempted. Returning 1 does not imply that
+It returns 0 ("false") if there is no need to make a further match attempt (or
+if any pointer argument is NULL), or 1 ("true") if another match should be
+attempted. Returning 1 does not imply that
 there is another match, only that another match should be attempted (which may
 return const:PCRE2_ERROR_NOMATCH).
 
