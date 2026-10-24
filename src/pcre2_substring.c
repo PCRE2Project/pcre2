@@ -82,8 +82,9 @@ pcre2_substring_copy_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
   if (match_data->rc < 0)
     return match_data->rc;
 
-  if (match_data->code == NULL)
-    return PCRE2_ERROR_NULL;
+  /* Preconditions on argument state */
+
+  PCRE2_ASSERT(match_data->code != NULL);
 
   PCRE2_SPTR first, last;
   int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
@@ -194,8 +195,9 @@ pcre2_substring_get_byname(pcre2_match_data *match_data, PCRE2_SPTR stringname,
   if (match_data->rc < 0)
     return match_data->rc;
 
-  if (match_data->code == NULL)
-    return PCRE2_ERROR_NULL;
+  /* Preconditions on argument state */
+
+  PCRE2_ASSERT(match_data->code != NULL);
 
   PCRE2_SPTR first, last;
   int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
@@ -331,8 +333,9 @@ pcre2_substring_length_byname(pcre2_match_data *match_data, PCRE2_SPTR stringnam
   if (match_data->rc < 0)
     return match_data->rc;
 
-  if (match_data->code == NULL)
-    return PCRE2_ERROR_NULL;
+  /* Preconditions on argument state */
+
+  PCRE2_ASSERT(match_data->code != NULL);
 
   PCRE2_SPTR first, last;
   int entrysize = pcre2_substring_nametable_scan(match_data->code, stringname, &first, &last);
