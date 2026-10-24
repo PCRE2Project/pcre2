@@ -1981,6 +1981,42 @@ Partial match:
     line0\nline1\nbreak
 No match
 
+# FIRSTLINE offset limits with stray and truncated UTF-8 around CRLF.
+
+/\r\n\r?/firstline,use_offset_limit,newline=crlf,match_invalid_utf,no_start_optimize
+    a\x80\r\n\=offset_limit=1
+No match
+    a\x80\r\n\=offset_limit=2
+ 0: \x{0d}\x{0a}
+    a\x80\r\n\=offset_limit=3
+ 0: \x{0d}\x{0a}
+    a\xe2\x80\r\n\r\=offset_limit=2
+No match
+    a\xe2\x80\r\n\r\=offset_limit=3
+ 0: \x{0d}\x{0a}\x{0d}
+    a\xe2\x80\r\n\r\=offset_limit=4
+ 0: \x{0d}\x{0a}\x{0d}
+    a\x80\r\n\rxxxxxxxx\=offset_limit=1
+No match
+    a\x80\r\n\rxxxxxxxx\=offset_limit=2
+ 0: \x{0d}\x{0a}\x{0d}
+    a\x80\r\n\rxxxxxxxx\=offset_limit=3
+ 0: \x{0d}\x{0a}\x{0d}
+    a\r\n\r\xe2\x80\=offset_limit=0
+No match
+    a\r\n\r\xe2\x80\=offset_limit=1
+ 0: \x{0d}\x{0a}\x{0d}
+    a\r\n\r\xe2\x80\=offset_limit=2
+ 0: \x{0d}\x{0a}\x{0d}
+
+/\r\n\r?/firstline,use_offset_limit,newline=any,match_invalid_utf,no_start_optimize
+    a\xe2\x80\r\n\rxxxxxxxx\=offset_limit=2
+No match
+    a\xe2\x80\r\n\rxxxxxxxx\=offset_limit=3
+ 0: \x{0d}\x{0a}\x{0d}
+    a\xe2\x80\r\n\rxxxxxxxx\=offset_limit=4
+ 0: \x{0d}\x{0a}\x{0d}
+
 /A\z/utf,match_invalid_utf
     A\x80\x42\n
 No match

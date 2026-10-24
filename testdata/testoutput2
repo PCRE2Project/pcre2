@@ -15948,6 +15948,218 @@ No match
     \n..\naa\=offset_limit=4
  0: a
 
+# FIRSTLINE and offset limits must both constrain the starting position.
+
+/b/firstline,use_offset_limit,newline=lf
+    ab\nb\=offset_limit=0
+No match
+    ab\nb\=offset_limit=1
+ 0: b
+    ab\nb\=offset_limit=2
+ 0: b
+    ab\nb\=offset_limit=4
+ 0: b
+    ab\nb
+ 0: b
+    b\nb\=offset_limit=0
+ 0: b
+    a\nb\=offset_limit=3
+No match
+    ab\=offset_limit=0
+No match
+    ab\=offset_limit=2
+ 0: b
+    ab\nb\=offset=1,offset_limit=0
+No match
+    ab\nb\=offset=1,offset_limit=1
+ 0: b
+    a\nab\=offset=2,offset_limit=2
+No match
+    a\nab\=offset=2,offset_limit=3
+ 0: b
+    a\nb\=offset=2,offset_limit=2
+ 0: b
+
+/b/firstline,use_offset_limit,newline=lf,no_start_optimize
+    ab\nb\=offset_limit=0
+No match
+    ab\nb\=offset_limit=1
+ 0: b
+    ab\nb\=offset_limit=2
+ 0: b
+    ab\nb\=offset_limit=4
+ 0: b
+    ab\nb
+ 0: b
+    b\nb\=offset_limit=0
+ 0: b
+    a\nb\=offset_limit=3
+No match
+    ab\=offset_limit=0
+No match
+    ab\=offset_limit=2
+ 0: b
+    ab\nb\=offset=1,offset_limit=0
+No match
+    ab\nb\=offset=1,offset_limit=1
+ 0: b
+    a\nab\=offset=2,offset_limit=2
+No match
+    a\nab\=offset=2,offset_limit=3
+ 0: b
+    a\nb\=offset=2,offset_limit=2
+ 0: b
+
+/\n/firstline,use_offset_limit,newline=lf
+    a\nb\=offset_limit=0
+No match
+    a\nb\=offset_limit=1
+ 0: \x0a
+    a\nb\=offset_limit=3
+ 0: \x0a
+
+/b\nc/firstline,use_offset_limit,newline=lf
+    ab\nc\=offset_limit=0
+No match
+    ab\nc\=offset_limit=1
+ 0: b\x0ac
+    ab\n\=offset_limit=1,ps
+Partial match: b\x0a
+    ab\n\=offset_limit=1,ph
+Partial match: b\x0a
+
+/b/firstline,use_offset_limit,newline=crlf
+    ab\r\nb\=offset_limit=0
+No match
+    ab\r\nb\=offset_limit=1
+ 0: b
+    ab\r\nb\=offset_limit=2
+ 0: b
+    ab\r\nb\=offset_limit=5
+ 0: b
+    ab\r\nb\=offset_limit=50
+Failed: error -77: bad offset limit value
+    ab\r\nb
+ 0: b
+    a\r\nb\=offset_limit=4
+No match
+    b\r\nb\=offset_limit=0
+ 0: b
+    ab\=offset_limit=1
+ 0: b
+    ab\r\=offset_limit=1
+ 0: b
+
+# The scan limit is inclusive, and does not truncate the match.
+
+/\r\n/firstline,use_offset_limit,newline=crlf
+    a\r\nb\=offset_limit=0
+No match
+    a\r\nb\=offset_limit=1
+ 0: \x0d\x0a
+    a\r\nb\=offset_limit=2
+ 0: \x0d\x0a
+    \r\nb\=offset_limit=0
+ 0: \x0d\x0a
+
+/b\r\nc/firstline,use_offset_limit,newline=crlf
+    ab\r\nc\=offset_limit=0
+No match
+    ab\r\nc\=offset_limit=1
+ 0: b\x0d\x0ac
+    ab\r\n\=offset_limit=1,ps
+Partial match: b\x0d\x0a
+    ab\r\n\=offset_limit=1,ph
+Partial match: b\x0d\x0a
+
+/(?:)/firstline,use_offset_limit,newline=lf,no_start_optimize
+    abc\=offset=2,offset_limit=1
+No match
+    abc\=offset=2,offset_limit=2
+ 0: 
+    abc\=offset=3,offset_limit=3
+ 0: 
+    \=offset_limit=0
+ 0: 
+
+/(?:)/firstline,use_offset_limit,newline=crlf,no_start_optimize
+    abc\=offset=2,offset_limit=1
+No match
+    abc\=offset=2,offset_limit=2
+ 0: 
+    abc\=offset=3,offset_limit=3
+ 0: 
+    \=offset_limit=0
+ 0: 
+
+# CRLF at the subject end, adjacent lone CRs, and a shortened scan.
+
+/\r\n\r?/firstline,use_offset_limit,newline=crlf
+    a\r\n\=offset_limit=0
+No match
+    a\r\n\=offset_limit=1
+ 0: \x0d\x0a
+    a\r\n\=offset_limit=2
+ 0: \x0d\x0a
+    a\r\n\=offset_limit=3
+ 0: \x0d\x0a
+    a\r\n\r\=offset_limit=0
+No match
+    a\r\n\r\=offset_limit=1
+ 0: \x0d\x0a\x0d
+    a\r\n\r\=offset_limit=2
+ 0: \x0d\x0a\x0d
+    a\r\n\r\=offset_limit=4
+ 0: \x0d\x0a\x0d
+    a\r\r\n\=offset_limit=1
+No match
+    a\r\r\n\=offset_limit=2
+ 0: \x0d\x0a
+    a\r\r\n\=offset_limit=3
+ 0: \x0d\x0a
+    a\r\r\n\=offset_limit=4
+ 0: \x0d\x0a
+    a\r\n\rxxxxxxxx\=offset_limit=0
+No match
+    a\r\n\rxxxxxxxx\=offset_limit=1
+ 0: \x0d\x0a\x0d
+    a\r\n\rxxxxxxxx\=offset_limit=2
+ 0: \x0d\x0a\x0d
+
+/\n/firstline,use_offset_limit,newline=crlf
+    a\r\n\=offset_limit=1
+No match
+    a\r\n\=offset_limit=2
+No match
+    a\r\n\=offset_limit=3
+No match
+    a\r\n\=offset=2,offset_limit=1
+No match
+    a\r\n\=offset=2,offset_limit=2
+ 0: \x0a
+    a\r\n\=offset=2,offset_limit=3
+ 0: \x0a
+
+/\r\z/firstline,use_offset_limit,newline=crlf,no_start_optimize
+    a\r\=offset_limit=0
+No match
+    a\r\=offset_limit=1
+ 0: \x0d
+    a\r\=offset_limit=2
+ 0: \x0d
+    a\r\n\r\=offset_limit=2
+No match
+    a\r\n\r\=offset_limit=3
+No match
+    a\r\n\r\=offset_limit=4
+No match
+    a\r\n\r\=offset=3,offset_limit=2
+No match
+    a\r\n\r\=offset=3,offset_limit=3
+ 0: \x0d
+    a\r\n\r\=offset=3,offset_limit=4
+ 0: \x0d
+
 /abcd/null_context
     abcd\=null_context
  0: abcd
