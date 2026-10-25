@@ -783,6 +783,48 @@ for block_size in [2**i for i in range(5, 10)]:
 #                   MAIN CODE FOR WRITING THE OUTPUT FILE
 # ---------------------------------------------------------------------------
 
+# Precompute the low-codepoint class bitmaps used while compiling properties.
+# Keep the property types in the order of the PT_* definitions in
+# pcre2_internal.h. Most scripts and properties share the empty bitmap.
+
+low_categories = [category_names[category[c]] for c in range(256)]
+low_gentypes = [general_category_names.index(name[0]) for name in low_categories]
+low_properties = [
+    ('PT_LAMP', 1, lambda c, p: low_categories[c] in ('Lu', 'Ll', 'Lt')),
+    ('PT_GC', len(general_category_names), lambda c, p: low_gentypes[c] == p),
+    ('PT_PC', len(category_names), lambda c, p: category[c] == p),
+    ('PT_SC', len(script_names), lambda c, p: script[c] == p),
+    ('PT_SCX', len(script_names), lambda c, p: script[c] == p or p in script_lists[
+        (scriptx_bidi_class[c] & 0x3ff) // script_list_item_size]),
+    ('PT_ALNUM', 1, lambda c, p: low_categories[c][0] in ('L', 'N')),
+    ('PT_SPACE', 1, lambda c, p: low_categories[c][0] == 'Z' or c in (9, 10, 11, 12, 13, 0x85)),
+    ('PT_PXSPACE', 1, lambda c, p: low_categories[c][0] == 'Z' or c in (9, 10, 11, 12, 13, 0x85)),
+    ('PT_WORD', 1, lambda c, p: low_categories[c][0] in ('L', 'N') or low_categories[c] in ('Mn', 'Pc')),
+    ('PT_CLIST', 0, None),
+    ('PT_UCNC', 1, lambda c, p: c in (0x24, 0x40, 0x60) or c >= 0xa0),
+    ('PT_BIDICL', len(bidi_classes_short), lambda c, p: (scriptx_bidi_class[c] >> 11) == p),
+    ('PT_BOOL', len(bool_properties), lambda c, p: p in bprops[c]),
+    ('PT_ANY', 1, lambda c, p: True),
+    ('PT_PXGRAPH', 1, lambda c, p: low_categories[c][0] not in ('Z', 'C') or low_categories[c] == 'Cf'),
+    ('PT_PXPRINT', 1, lambda c, p: low_categories[c] not in
+     ('Zl', 'Zp') and (low_categories[c][0] != 'C' or low_categories[c] == 'Cf')),
+    ('PT_PXPUNCT', 1, lambda c, p: low_categories[c][0] == 'P' or (c < 128 and low_categories[c][0] == 'S')),
+    ('PT_PXXDIGIT', 1, lambda c, p: 0x30 <= c <= 0x39 or 0x41 <= c <= 0x46 or 0x61 <= c <= 0x66),
+]
+low_bitmaps = []
+low_bitmap_indexes = []
+low_bitmap_offsets = []
+for ptype, count, predicate in low_properties:
+    low_bitmap_offsets.append(len(low_properties) + len(low_bitmap_indexes))
+    for pdata in range(count):
+        bitmap = tuple(sum(1 << bit for bit in range(8) if predicate(byte * 8 + bit, pdata)) for byte in range(32))
+        if bitmap not in low_bitmaps:
+            low_bitmaps.append(bitmap)
+        low_bitmap_indexes.append(low_bitmaps.index(bitmap))
+
+low_bitmap_indexes = low_bitmap_offsets + low_bitmap_indexes
+assert max(low_bitmap_indexes) <= 0xffff
+
 # Open the output file (no return on failure). This call also writes standard
 # header boilerplate.
 
@@ -991,6 +1033,29 @@ const uint32_t PRIV(ucd_boolprop_sets)[] = {
 """)
 write_bitsets(bool_props_lists, bool_props_list_item_size)
 f.write("// clang-format on\n\n")
+
+# Output shared low-codepoint class bitmaps and their property indexes.
+
+f.write("""\
+/* Precomputed property bitmaps for code points below 256. The first
+PT_PXXDIGIT + 1 entries of ucd_low_bitmap_indexes give the offset of each
+property type's bitmap indexes; add the property's value to that offset. */
+
+// clang-format off
+const uint8_t PRIV(ucd_low_bitmaps)[][32] = {
+""")
+for bitmap in low_bitmaps:
+    f.write('  { ' + ', '.join('0x%02x' % byte for byte in bitmap) + ' },\n')
+f.write('};\n\n')
+f.write('const uint16_t PRIV(ucd_low_bitmap_indexes)[] = {\n')
+for ptype, offset in zip(low_properties, low_bitmap_offsets):
+    f.write('  %d, /* %s */\n' % (offset, ptype[0]))
+for i in range(len(low_properties), len(low_bitmap_indexes), 16):
+    f.write('  ' + ', '.join(str(index) for index in low_bitmap_indexes[i:i + 16]) + ',\n')
+f.write('};\n// clang-format on\n\n')
+for index, (ptype, _, _) in enumerate(low_properties):
+    f.write('#if %s != %d\n#error Please update low_properties in maint/GenerateUcd.py\n#endif\n' % (ptype, index))
+f.write('\n')
 
 # Output the main UCD tables.
 
