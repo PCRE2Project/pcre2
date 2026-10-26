@@ -22,6 +22,11 @@ backtracking after the recursive call.
 3. (#1040) Fixed the start_match field passed to interpreter callouts after \K
 resets the start of a match, including restoration on backtracking.
 
+4. Fixed \X so that an extended grapheme cluster continues after a regional
+indicator when extending characters, spacing marks or ZWJ follow (GB9 and GB9a
+in UAX #29), and after a prepend character when an Extended_Pictographic
+character follows (GB9b). Previously \X ended the cluster in both places.
+
 
 Version 10.49 28-September-2026
 -------------------------------

@@ -2733,9 +2733,30 @@ No match
     \x{261d}\x{200d}\x{1f308}B    Extended_Pictographic ZWJ Extended_Pictographic
  0: \x{261d}\x{200d}\x{1f308}
  0+ B    Extended_Pictographic ZWJ Extended_Pictographic
-    *There are no Prepend characters, so we can't test Prepend, CR
+    *Test regional indicators followed by extend, spacing mark and ZWJ
  0: *
- 0+ There are no Prepend characters, so we can't test Prepend, CR
+ 0+ Test regional indicators followed by extend, spacing mark and ZWJ
+    \x{1F1E6}\x{300}B              RegionalIndicator Extend
+ 0: \x{1f1e6}\x{300}
+ 0+ B              RegionalIndicator Extend
+    \x{1F1E6}\x{903}B              RegionalIndicator SpacingMark
+ 0: \x{1f1e6}\x{903}
+ 0+ B              RegionalIndicator SpacingMark
+    \x{1F1E6}\x{1F1E7}\x{200d}\x{1F1E8}B RegionalIndicator RegionalIndicator ZWJ RegionalIndicator
+ 0: \x{1f1e6}\x{1f1e7}\x{200d}
+ 0+ \x{1f1e8}B RegionalIndicator RegionalIndicator ZWJ RegionalIndicator
+    *Test Prepend
+ 0: *
+ 0+ Test Prepend
+    \x{6dd}\x{a9}B                 Prepend Extended_Pictographic
+ 0: \x{6dd}\x{a9}
+ 0+ B                 Prepend Extended_Pictographic
+    \x{600}AB                      Prepend Other
+ 0: \x{600}A
+ 0+ B                      Prepend Other
+    \x{600}\x{0d}B                 Prepend CR
+ 0: \x{600}
+ 0+ \x{0d}B                 Prepend CR
 
 /^.\X/utf,aftertext
     A\x{1F1E6}\x{1F1E7}\x{1F1E8}B
