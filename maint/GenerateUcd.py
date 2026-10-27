@@ -1052,10 +1052,10 @@ for ptype, offset in zip(low_properties, low_bitmap_offsets):
     f.write('  %d, /* %s */\n' % (offset, ptype[0]))
 for i in range(len(low_properties), len(low_bitmap_indexes), 16):
     f.write('  ' + ', '.join(str(index) for index in low_bitmap_indexes[i:i + 16]) + ',\n')
-f.write('};\n// clang-format on\n\n')
-for index, (ptype, _, _) in enumerate(low_properties):
-    f.write('#if %s != %d\n#error Please update low_properties in maint/GenerateUcd.py\n#endif\n' % (ptype, index))
-f.write('\n')
+f.write('};\n\n')
+checks = ['%s == %d' % (ptype, index) for index, (ptype, _, _) in enumerate(low_properties)]
+f.write('#if !(' + ' && \\\n      '.join(checks) + ')\n')
+f.write('#error Please update low_properties in maint/GenerateUcd.py\n#endif\n// clang-format on\n\n')
 
 # Output the main UCD tables.
 

@@ -686,62 +686,28 @@ const uint16_t PRIV(ucd_low_bitmap_indexes)[] = {
   54, 2, 3, 3, 3, 3, 55, 56, 3, 3, 57, 58, 3, 59, 3, 3,
   60, 61, 62, 3, 12, 3, 31, 54, 2, 63, 64, 65, 66, 44,
 };
-// clang-format on
 
-#if PT_LAMP != 0
+#if !(PT_LAMP == 0 && \
+      PT_GC == 1 && \
+      PT_PC == 2 && \
+      PT_SC == 3 && \
+      PT_SCX == 4 && \
+      PT_ALNUM == 5 && \
+      PT_SPACE == 6 && \
+      PT_PXSPACE == 7 && \
+      PT_WORD == 8 && \
+      PT_CLIST == 9 && \
+      PT_UCNC == 10 && \
+      PT_BIDICL == 11 && \
+      PT_BOOL == 12 && \
+      PT_ANY == 13 && \
+      PT_PXGRAPH == 14 && \
+      PT_PXPRINT == 15 && \
+      PT_PXPUNCT == 16 && \
+      PT_PXXDIGIT == 17)
 #error Please update low_properties in maint/GenerateUcd.py
 #endif
-#if PT_GC != 1
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_PC != 2
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_SC != 3
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_SCX != 4
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_ALNUM != 5
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_SPACE != 6
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_PXSPACE != 7
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_WORD != 8
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_CLIST != 9
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_UCNC != 10
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_BIDICL != 11
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_BOOL != 12
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_ANY != 13
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_PXGRAPH != 14
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_PXPRINT != 15
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_PXPUNCT != 16
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
-#if PT_PXXDIGIT != 17
-#error Please update low_properties in maint/GenerateUcd.py
-#endif
+// clang-format on
 
 /* These are the main two-stage UCD tables. The fields in each record are:
 script (8 bits), character type (8 bits), grapheme break property (8 bits),
