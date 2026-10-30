@@ -23761,6 +23761,97 @@ Failed: error 217 at offset 27: expected capture group number or name
  2: Sat
  3: urday
 
+# (*ACCEPT) in a called group must return the listed captures to the caller
+
+/(?&r(2))b(?(DEFINE)(?<r>(a)(*ACCEPT)x))/
+    ab
+ 0: ab
+ 1: <unset>
+ 2: a
+
+/(a)(?2(3))\1\3(?(DEFINE)(b(c)(*ACCEPT)x))/
+    abcac
+ 0: abcac
+ 1: a
+ 2: <unset>
+ 3: c
+\= Expect no match
+    abcab
+No match
+
+/^(?1(2,3))(?(DEFINE)((a)(*ACCEPT)(b)))/
+    ab
+ 0: a
+ 1: <unset>
+ 2: a
+
+/(?1(2))(?1(3))(?(DEFINE)((a)(*ACCEPT)|(b)))!/
+    ab!
+ 0: ab!
+ 1: <unset>
+ 2: a
+ 3: b
+
+/(?(R)(a)(*ACCEPT)x|(?R(1))b\1)/
+    aba
+ 0: aba
+ 1: a
+\= Expect no match
+    abx
+No match
+
+/(?1(2))c(?(DEFINE)((a)(*ACCEPT)|(ab)))/
+    ac
+ 0: ac
+ 1: <unset>
+ 2: a
+\= Expect no match
+    abc
+No match
+
+# Groups that are still open at (*ACCEPT) in a called group are closed before
+# the listed captures are returned, but groups opened outside the called group
+# are not. JIT does not yet close the open groups.
+
+/(*NO_JIT)^(?&r(2))b\2$(?(DEFINE)(?<r>(a(*ACCEPT)x)))/
+    aba
+ 0: aba
+ 1: <unset>
+ 2: a
+\= Expect no match
+    abb
+No match
+
+/(*NO_JIT)^(?&r(2,3))\2\3$(?(DEFINE)(?<r>(a(b(*ACCEPT)c))))/
+    ababb
+ 0: ababb
+ 1: <unset>
+ 2: ab
+ 3: b
+
+/(*NO_JIT)^(?&r(3))\3(?(2)x|y)$(?(DEFINE)(?<r>(a(b(*ACCEPT)c))))/
+    abby
+ 0: abby
+ 1: <unset>
+ 2: <unset>
+ 3: b
+\= Expect no match
+    abbx
+No match
+
+/(*NO_JIT)(?(R)(a(*ACCEPT)x)|(?R(1))b\1)/
+    aba
+ 0: aba
+ 1: a
+
+/^(x(?<r>a(*ACCEPT)b){0}(?&r(1))(?(1)y|z))/
+    xaz
+ 0: xaz
+ 1: xaz
+\= Expect no match
+    xay
+No match
+
 # --------------
 
 # Test that a memory leak has been fixed
