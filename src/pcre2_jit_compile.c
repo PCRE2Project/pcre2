@@ -2425,8 +2425,10 @@ get_framesize(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend, BOOL rec
   if (SLJIT_UNLIKELY(possessive == length))
     return stack_restore ? no_frame : no_stack;
 
+  SLJIT_ASSERT(length >= 0 && length < 0x1000000);
   if (length > 0)
     return length + 1;
+
   return stack_restore ? no_frame : no_stack;
 }
 
@@ -11136,11 +11138,10 @@ compile_bracket_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_c
     int data;
     int framesize = BACKTRACK_AS(bracket_backtrack)->u.framesize;
 
-    SLJIT_ASSERT(SHRT_MIN <= framesize && framesize < SHRT_MAX / 2);
     /* We temporarily encode the needs_control_head in the lowest bit.
        The real value should be short enough for this operation to work
        without triggering Undefined Behaviour. */
-    data = (int)((short)((unsigned short)framesize << 1) | (needs_control_head ? 1 : 0));
+    data = (int)(((unsigned int)framesize << 1) | (needs_control_head ? 1 : 0));
     BACKTRACK_AS(bracket_backtrack)->u.framesize = data;
   }
 
