@@ -1182,7 +1182,7 @@ clear_optimized_cbracket(compiler_common *common, sljit_s32 capture_index)
 static BOOL
 check_opcode_types(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend)
 {
-  int count;
+  sljit_s32 count;
   PCRE2_SPTR slot;
   PCRE2_SPTR assert_back_end = cc - 1;
   PCRE2_SPTR assert_na_end = cc - 1;
@@ -1222,8 +1222,17 @@ check_opcode_types(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend)
       if (common->utf && locals_size <= 3 * SSIZE_OF(sw))
         locals_size = 3 * SSIZE_OF(sw);
 #endif
-      if (cc[1 + IMM2_SIZE] == OP_EXTUNI && locals_size <= 3 * SSIZE_OF(sw))
-        locals_size = 3 * SSIZE_OF(sw);
+      if (cc[1 + IMM2_SIZE] == OP_EXTUNI)
+      {
+#if defined SUPPORT_UNICODE
+        count = (sljit_s32)(((common->invalid_utf) ? 4 : 3) * SSIZE_OF(sw));
+#else
+        count = 3 * SSIZE_OF(sw);
+#endif
+        if (locals_size < count) {
+          locals_size = count;
+        }
+      }
       cc += (2 + IMM2_SIZE) - 1;
       break;
 
@@ -12245,9 +12254,17 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL2, COUNT_MATCH, 0);
       OP1(SLJIT_MOV, COUNT_MATCH, 0, SLJIT_IMM, exact == max ? 0 : max);
 
+      tmp_base = TMP3;
+#ifdef SUPPORT_UNICODE
+      if (type == OP_EXTUNI && common->invalid_utf) {
+        /* Extuni only modifies TMP3 on successful match, except when invalid_utf is enabled. */
+        SLJIT_ASSERT(common->locals_size >= 4 * SSIZE_OF(sw));
+        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL3, STACK_LIMIT, 0);
+        tmp_base = STACK_LIMIT;
+      }
+#endif
       label = LABEL();
-      /* Extuni only modifies TMP3 on successful match. */
-      OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
+      OP1(SLJIT_MOV, tmp_base, 0, STR_PTR, 0);
       compile_char1_matchingpath(common, type, cc, &no_match, TRUE);
 
       if (exact == max)
@@ -12259,7 +12276,7 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
       {
         OP2(SLJIT_SUB | SLJIT_SET_Z, COUNT_MATCH, 0, COUNT_MATCH, 0, SLJIT_IMM, 1);
         JUMPTO(SLJIT_NOT_ZERO, label);
-        OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
+        OP1(SLJIT_MOV, tmp_base, 0, STR_PTR, 0);
       }
 
       set_jumps(no_match, LABEL());
@@ -12273,10 +12290,24 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
       }
 
       OP1(SLJIT_MOV, COUNT_MATCH, 0, SLJIT_MEM1(SLJIT_SP), LOCAL2);
+#ifdef SUPPORT_UNICODE
+      if (tmp_base != TMP3) {
+        SLJIT_ASSERT(tmp_base == STACK_LIMIT);
+        OP1(SLJIT_MOV, STR_PTR, 0, STACK_LIMIT, 0);
+        OP1(SLJIT_MOV, STACK_LIMIT, 0, SLJIT_MEM1(SLJIT_SP), LOCAL3);
+      }
+#endif
 
       if (exact > 0)
         add_jump(compiler, prev_backtracks, JUMP(exact == max ? SLJIT_LESS : SLJIT_GREATER));
+
+#ifdef SUPPORT_UNICODE
+      if (tmp_base == TMP3)
+        OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
+#else
+      SLJIT_ASSERT(tmp_base == TMP3);
       OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
+#endif
       break;
     }
 
