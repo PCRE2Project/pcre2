@@ -7017,6 +7017,17 @@ unittest(void)
       pcre2_compile(capture_pattern, PCRE2_ZERO_TERMINATED, 0, &errorcode, &erroroffset, NULL);
   ASSERT(test_compiled_code != NULL, "test pattern compilation");
 
+  {
+    PCRE2_SPTR first = NULL, last = NULL;
+    rc = pcre2_substring_nametable_scan(test_compiled_code, name_n, &first, &last);
+    ASSERT(rc > 0 && first != NULL && first == last, "pcre2_substring_nametable_scan(entries)");
+    rc = pcre2_substring_nametable_scan(test_compiled_code, name_n, NULL, NULL);
+    ASSERT(rc == 1, "pcre2_substring_nametable_scan(number)");
+    last = NULL;
+    rc = pcre2_substring_nametable_scan(test_compiled_code, name_n, NULL, &last);
+    ASSERT(rc == 1 && last == NULL, "pcre2_substring_nametable_scan(ignored lastptr)");
+  }
+
   pcre2_match_data_free(test_match_data);
   test_match_data = pcre2_match_data_create_from_pattern(test_compiled_code, test_gen_context);
   ASSERT(test_match_data != NULL, "pcre2_match_data_create()");
@@ -7046,6 +7057,14 @@ unittest(void)
   rc = pcre2_match(test_compiled_code, subject_abcz, PCRE2_ZERO_TERMINATED, 0, 0, test_match_data,
                    NULL);
   ASSERT(rc == 2, "pcre2_match()");
+
+  sizeval = 0;
+  rc = pcre2_substring_get_byname(test_match_data, name_n, &sptrval, &sizeval);
+  ASSERT(rc == 0 && sptrval != NULL && sizeval == 2 && sptrval[2] == 0 &&
+             memcmp(sptrval, subject_abcz + 1, 2 * sizeof(PCRE2_UCHAR)) == 0,
+         "pcre2_substring_get_byname()");
+  pcre2_substring_free(sptrval);
+  sptrval = NULL;
 
   /* Test the functions with insufficient buffer size. It hardly seems worth
   adding controls to the pcre2test input file format to exercise this case. */
