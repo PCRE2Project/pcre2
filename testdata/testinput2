@@ -8302,6 +8302,18 @@ a)"xI
 /()()()(?2(2,3,2,3,2))/B
   abc
 
+/^(?:(?&r(2))x|aa)(?(DEFINE)(?<r>(.)(.)(*ACCEPT)(.)))/
+    abx
+    aby
+
+/^(?:(?&r(2,3))x|aa)(?(DEFINE)(?<r>(.)(.)(*ACCEPT)(.)))/
+    abx
+    aby
+
+/^(?:(?&r(3,4))x|aa)(?(DEFINE)(?<r>(.)(.)(*ACCEPT)(.)))/
+    abx
+    aby
+
 # Test each syntax used for recursion
 
 /(?(R)(Sat)urday|(?R(1)),\1)/
