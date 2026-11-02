@@ -4124,6 +4124,9 @@ EXTRACTING CAPTURED SUBSTRINGS BY NUMBER
                                    (abc)|(def) and the subject is def, and the
                                    ovector contains at least two capturing
                                    slots, substring number 1 is unset.
+           PCRE2_ERROR_FRESHMATCHDATA
+                                   The match data block has not yet been used
+                                   by a matching function.
 
 EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS
        int pcre2_substring_list_get(pcre2_match_data *match_data,

@@ -6914,17 +6914,18 @@ unittest(void)
                              "replacement $' or $_ not supported with partial match") == 0,
          "pcre2_get_error_message(partial substitution)");
 
-  rc = pcre2_get_error_message(PCRE2_ERROR_BADOFFSETLIMITVALUE, errorbuffer,
+  rc = pcre2_get_error_message(PCRE2_ERROR_FRESHMATCHDATA, errorbuffer,
                               sizeof(errorbuffer) / sizeof(errorbuffer[0]));
   BUFFER_OUTPUT
-  ASSERT(rc == sizeof("bad offset limit value") - 1 &&
-             pcre2_strcmp_c8(errorbuffer, "bad offset limit value") == 0,
+  ASSERT(rc == sizeof("match data object has not been used by any match function") - 1 &&
+             pcre2_strcmp_c8(errorbuffer,
+                             "match data object has not been used by any match function") == 0,
          "pcre2_get_error_message(last match error)");
 
   {
     const int invalid_errorcodes[] = {
       INT_MIN, INT_MIN + 1, INT_MAX, 1, COMPILE_ERROR_BASE - 1,
-      PCRE2_ERROR_NULL_ERROROFFSET + 1, PCRE2_ERROR_BADOFFSETLIMITVALUE - 1
+      PCRE2_ERROR_NULL_ERROROFFSET + 1, PCRE2_ERROR_FRESHMATCHDATA - 1
     };
 
     for (size_t i = 0; i < sizeof(invalid_errorcodes) / sizeof(invalid_errorcodes[0]); i++)
@@ -7019,6 +7020,28 @@ unittest(void)
   pcre2_match_data_free(test_match_data);
   test_match_data = pcre2_match_data_create_from_pattern(test_compiled_code, test_gen_context);
   ASSERT(test_match_data != NULL, "pcre2_match_data_create()");
+
+  /* Test before any match has been attempted. */
+
+  sizeval = 4;
+  sptrval = NULL;
+  stringlist = NULL;
+  lengthslist = NULL;
+  rc = pcre2_substring_copy_byname(test_match_data, name_n, copy_buf, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA, "pcre2_substring_copy_byname(fresh)");
+  rc = pcre2_substring_copy_bynumber(test_match_data, 1, copy_buf, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA, "pcre2_substring_copy_bynumber(fresh)");
+  rc = pcre2_substring_get_byname(test_match_data, name_n, &sptrval, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA && sptrval == NULL, "pcre2_substring_get_byname(fresh)");
+  rc = pcre2_substring_get_bynumber(test_match_data, 1, &sptrval, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA && sptrval == NULL, "pcre2_substring_get_bynumber(fresh)");
+  rc = pcre2_substring_length_byname(test_match_data, name_n, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA, "pcre2_substring_length_byname(fresh)");
+  rc = pcre2_substring_length_bynumber(test_match_data, 1, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA, "pcre2_substring_length_bynumber(fresh)");
+  rc = pcre2_substring_list_get(test_match_data, &stringlist, &lengthslist);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA && stringlist == NULL && lengthslist == NULL,
+         "pcre2_substring_list_get(fresh)");
 
   rc = pcre2_match(test_compiled_code, subject_abcz, PCRE2_ZERO_TERMINATED, 0, 0, test_match_data,
                    NULL);

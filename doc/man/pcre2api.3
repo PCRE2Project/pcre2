@@ -4435,6 +4435,10 @@ could not be captured.
 The substring did not participate in the match. For example, if the pattern is
 \f(CI(abc)|(def)\fP and the subject is \f(CIdef\fP, and the ovector contains at least two
 capturing slots, substring number 1 is unset.
+.TP 24
+\f(CBPCRE2_ERROR_FRESHMATCHDATA\fP
+.ad l
+The match data block has not yet been used by a matching function.
 .PD
 .RE
 .PP

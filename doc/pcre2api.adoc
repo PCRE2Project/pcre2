@@ -3750,6 +3750,9 @@ const:PCRE2_ERROR_UNSET::
       [.regex]`+(abc)|(def)+` and the subject is [.subject]`def`, and the ovector contains at least two
       capturing slots, substring number 1 is unset.
 
+const:PCRE2_ERROR_FRESHMATCHDATA::
+      The match data block has not yet been used by a matching function.
+
 [[extracting-substrings-by-name]]
 == Extracting a list of all captured substrings
 
