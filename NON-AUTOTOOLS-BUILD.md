@@ -383,6 +383,11 @@ while static and import libraries install to `libdir`. Installed programs find
 their DLLs in the same directory; other consumers must put `bindir` on `PATH` or
 deploy the DLLs beside their executable.
 
+On Windows with MSVC-style import libraries, PCRE2's library targets use
+Meson's classic naming scheme even when `namingscheme=platform` is requested
+(Meson 1.10 or later). This preserves CMake-compatible import-library names
+rather than using `.dll.lib`.
+
 For MSVC consumers, `pkg-config --msvc-syntax` provides compiler and linker flags.
 A static-only installation supplies `PCRE2_STATIC` and the `-static` library names.
 When both variants are installed, the `.pc` files describe the shared variant,

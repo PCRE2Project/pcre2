@@ -2,7 +2,7 @@
 have_vscript = false
 vscript_flag = ''
 have_vscript_no_star = false
-if not msvc_like
+if cc.get_argument_syntax() != 'msvc'
   vscript_source = '''
     int hidethis(void) { return 0; }
     int exposethis(void) { return hidethis(); }
