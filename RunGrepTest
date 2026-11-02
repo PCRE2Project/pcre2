@@ -1211,6 +1211,15 @@ if [ $utf8 -ne 0 ] ; then
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts -M -N CRLF --line-offsets '\r' testtemp1grep >>testtrygrep 2>&1
   echo "crlf-mid-terminator-line-offsets RC=$?" >>testtrygrep
 
+  echo "---------------------------- Test U15 -----------------------------" >>testtrygrep
+  # Obsolete 5- and 6-byte forms must not be decoded as overlong newlines.
+  printf 'a\370\200\200\200\212b\374\200\200\200\200\212c\302\205Match\n' >testtemp1grep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -U -n -o --newline=any Match testtemp1grep >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -U -n -B1 --newline=any Match testtemp1grep >testtemp2grep
+  echo "RC=$?" >>testtemp2grep
+  tr '\200-\377' '?' <testtemp2grep >>testtrygrep
+
   $cf "$srcdir/testdata/grepoutput8" testtrygrep
   if [ $? != 0 ] ; then exit 1; fi
 

@@ -172,3 +172,8 @@ any-mid-terminator RC=0
 1:2,1
 1:6,1
 crlf-mid-terminator-line-offsets RC=0
+---------------------------- Test U15 -----------------------------
+2:Match
+RC=0
+1-a?????b??????c??2:Match
+RC=0

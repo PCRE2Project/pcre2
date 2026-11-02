@@ -1217,6 +1217,13 @@ if supports_utf8:
                              append_returncode=False)
     write_returncode(returncode, "crlf-mid-terminator-line-offsets")
 
+    write_test_output(b"---------------------------- Test U15 -----------------------------\n")
+    # Obsolete 5- and 6-byte forms must not be decoded as overlong newlines.
+    Path("testtemp1grep").write_bytes(b"a\xf8\x80\x80\x80\x8ab\xfc\x80\x80\x80\x80\x8ac\xc2\x85Match\n")
+    output([*pcre2grep_args, "-U", "-n", "-o", "--newline=any", "Match", "testtemp1grep"])
+    output([*pcre2grep_args, "-U", "-n", "-B1", "--newline=any", "Match", "testtemp1grep"],
+           transform=lambda data: data.translate(bytes(range(128)) + b"?" * 128))
+
     if not compare(srcdir / "testdata" / "grepoutput8", "testtrygrep"):
         sys.exit(1)
 else:

@@ -22,6 +22,11 @@ backtracking after the recursive call.
 3. (#1040) Fixed the start_match field passed to interpreter callouts after \K
 resets the start of a match, including restoration on backtracking.
 
+4. Removed obsolete 5- and 6-byte UTF-8 encoding and decoding from the library
+and pcre2grep. UTF validation now rejects these prefixes before checking
+continuation bytes. pcre2test retains local support for constructing invalid
+UTF test data.
+
 
 Version 10.49 28-September-2026
 -------------------------------

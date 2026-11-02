@@ -305,7 +305,7 @@ static BOOL utf = FALSE;
 static BOOL posix_digit = FALSE;
 static BOOL posix_pattern_file = FALSE;
 
-static uint8_t utf8_buffer[8];
+static uint8_t utf8_buffer[4];
 
 
 /* Structure for list of --only-matching capturing numbers. */
@@ -556,15 +556,14 @@ static const char *newlines[] = { "DEFAULT", "CR", "LF", "CRLF", "ANY", "ANYCRLF
 
 /* UTF-8 tables  */
 
-const int utf8_table1[] = { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff };
-const int utf8_table1_size = sizeof(utf8_table1) / sizeof(int);
+const int utf8_table1[] = { 0x7f, 0x7ff, 0xffff, 0x10ffff };
 
-const int utf8_table2[] = { 0, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc };
-const int utf8_table3[] = { 0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
+const int utf8_table2[] = { 0, 0xc0, 0xe0, 0xf0 };
+const int utf8_table3[] = { 0xff, 0x1f, 0x0f, 0x07 };
 
 const char utf8_table4[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                              1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-                             2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5 };
+                             2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3 };
 
 
 
@@ -579,7 +578,7 @@ ord2utf8(uint32_t value)
 {
   int i, j;
   uint8_t *utf8bytes = utf8_buffer;
-  for (i = 0; i < utf8_table1_size; i++)
+  for (i = 0; i < 3; i++)
     if (value <= (uint32_t)utf8_table1[i])
       break;
   utf8bytes += i;
@@ -1657,7 +1656,7 @@ end_of_line(char *p, char *endptr, int *lenptr)
       int extra = 0;
       int c = *((unsigned char *)p);
 
-      if (utf && c >= 0xc0)
+      if (utf && c >= 0xc0 && c < 0xf8)
       {
         int gcii, gcss;
         extra = utf8_table4[c & 0x3f]; // Number of additional bytes
@@ -1813,7 +1812,7 @@ previous_line(char *p, char *startptr)
         while (pp > startptr && (*pp & 0xc0) == 0x80)
           pp--;
         c = *((unsigned char *)pp);
-        if (c >= 0xc0)
+        if (c >= 0xc0 && c < 0xf8)
         {
           int gcii, gcss;
           extra = utf8_table4[c & 0x3f]; // Number of additional bytes

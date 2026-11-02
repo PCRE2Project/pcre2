@@ -4220,6 +4220,7 @@ process_data(void)
   uint32_t c, k;
   uint32_t g_notempty = 0;
   uint8_t *p; // Position within buffer (raw input line)
+  uint8_t *input_end;
   size_t len;
   size_t needlen; // Bytes, for sizing dbuffer
   pcre2_match_context *use_dat_context;
@@ -4279,6 +4280,7 @@ process_data(void)
     p++;
     len--;
   }
+  input_end = p + len;
 
   /* Check that the data is well-formed UTF-8 if we're in UTF mode. To create
   invalid input to pcre2_match(), you must use \x?? or \x{} sequences. */
@@ -4438,7 +4440,14 @@ process_data(void)
 #endif
       if ((utf || (pat_patctl.control & CTL_UTF8_INPUT) != 0) && HASUTF8EXTRALEN(c))
       {
-        GETUTF8INC(c, p);
+        int n = utf8_to_ord(p - 1, input_end, &c);
+        if (n <= 0)
+        {
+          cfprintf(clr_test_error, outfile,
+                   "** Failed: invalid UTF-8 string cannot be used as input\n");
+          return PR_OK;
+        }
+        p += n - 1;
       }
 
       c |= topbit;
