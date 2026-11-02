@@ -1043,8 +1043,36 @@ NEW_FRAME:
         P->eptr = Feptr;
         P->mark = Fmark;
         P->start_match = Fstart_match;
+        P->ecode += 1 + LINK_SIZE;
+        if (*P->ecode == OP_CREF)
+        {
+          PCRE2_SPTR ecode = P->ecode;
+          PCRE2_SIZE *dst = P->ovector;
+          PCRE2_SIZE *src = F->ovector;
+          PCRE2_SIZE max_offset = P->offset_top;
+          PCRE2_SIZE offset_top = Foffset_top;
+
+          do
+          {
+            PCRE2_SIZE ref_offset = (GET2(ecode, 1) << 1) - 2;
+            if (ref_offset > offset_top)
+            {
+              break;
+            }
+            dst[ref_offset] = src[ref_offset];
+            dst[ref_offset + 1] = src[ref_offset + 1];
+            if (src[ref_offset] != PCRE2_UNSET && ref_offset >= max_offset)
+            {
+              max_offset = ref_offset + 2;
+            }
+            ecode += 1 + IMM2_SIZE;
+          }
+          while (*ecode == OP_CREF);
+
+          P->ecode = ecode;
+          P->offset_top = max_offset;
+        }
         F = P;
-        Fecode += 1 + LINK_SIZE;
         continue;
       }
 
