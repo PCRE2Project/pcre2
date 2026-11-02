@@ -70,7 +70,7 @@ jobs:
         run: make -j$(nproc)
 
       - name: Test
-        run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+        run: (set +e; make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
   dragon:
     # Tests with: clang AB/UB; link-size=3. Clang's logo is a dragon.
@@ -99,7 +99,7 @@ jobs:
       - name: Test
         run: |
           ulimit -S -s 49152 # Raise stack limit; ASAN with -O0 is very stack-hungry
-          (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+          (set +e; make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
   puffin:
     # Tests with: GCC, -O3, very latest CMake, libedit
@@ -197,7 +197,7 @@ jobs:
         run: make -j$(nproc)
 
       - name: Test
-        run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+        run: (set +e; make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
       - name: Install
         run: |
@@ -255,7 +255,7 @@ jobs:
         run: make -j$(nproc)
 
       - name: Test
-        run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+        run: (set +e; make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
 
       - name: Install
