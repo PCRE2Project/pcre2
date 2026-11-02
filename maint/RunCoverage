@@ -78,7 +78,7 @@ else
   echo "== Generating HTML report =="
   mkdir -p coverage-html
   genhtml \
-    --highlight --branch-coverage --legend --title "PCRE2 code coverage report" --num-spaces 2 \
+    --branch-coverage --legend --title "PCRE2 code coverage report" --num-spaces 2 \
     -o coverage-html ./coverage-lcov.info
   echo ""
 
