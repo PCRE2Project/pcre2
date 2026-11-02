@@ -153,7 +153,8 @@ if(WIN32 AND (MSVC OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC"))
   set(PCRE2_MSVC_ABI TRUE)
 endif()
 
-if(PCRE2_MSVC_ABI)
+# Small over-approximation to detect linking against the Windows CRT.
+if(WIN32)
   add_compile_definitions(_CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
@@ -378,21 +379,21 @@ set(
   PCRE2_LINK_SIZE
   "2"
   CACHE STRING
-  "Internal link size (2, 3 or 4 allowed). See LINK_SIZE in config.h.in for details."
+  "Internal link size (2, 3 or 4 allowed). See LINK_SIZE in src/config.h.generic for details."
 )
 
 set(
   PCRE2_PARENS_NEST_LIMIT
   "250"
   CACHE STRING
-  "Default nested parentheses limit. See PARENS_NEST_LIMIT in config.h.in for details."
+  "Default nested parentheses limit. See PARENS_NEST_LIMIT in src/config.h.generic for details."
 )
 
 set(
   PCRE2_HEAP_LIMIT
   "20000000"
   CACHE STRING
-  "Default limit on heap memory (kibibytes). See HEAP_LIMIT in config.h.in for details."
+  "Default limit on heap memory (kibibytes). See HEAP_LIMIT in src/config.h.generic for details."
 )
 
 set(PCRE2_MAX_VARLOOKBEHIND "255" CACHE STRING "Default limit on variable lookbehinds.")
@@ -401,28 +402,28 @@ set(
   PCRE2_MATCH_LIMIT
   "10000000"
   CACHE STRING
-  "Default limit on internal looping. See MATCH_LIMIT in config.h.in for details."
+  "Default limit on internal looping. See MATCH_LIMIT in src/config.h.generic for details."
 )
 
 set(
   PCRE2_MATCH_LIMIT_DEPTH
   "MATCH_LIMIT"
   CACHE STRING
-  "Default limit on internal depth of search. See MATCH_LIMIT_DEPTH in config.h.in for details."
+  "Default limit on internal depth of search (an integer or MATCH_LIMIT). See MATCH_LIMIT_DEPTH in src/config.h.generic for details."
 )
 
 set(
   PCRE2GREP_BUFSIZE
   "20480"
   CACHE STRING
-  "Buffer starting size parameter for pcre2grep. See PCRE2GREP_BUFSIZE in config.h.in for details."
+  "Buffer starting size parameter for pcre2grep. See PCRE2GREP_BUFSIZE in src/config.h.generic for details."
 )
 
 set(
   PCRE2GREP_MAX_BUFSIZE
   "1048576"
   CACHE STRING
-  "Buffer maximum size parameter for pcre2grep. See PCRE2GREP_MAX_BUFSIZE in config.h.in for details."
+  "Buffer maximum size parameter for pcre2grep. See PCRE2GREP_MAX_BUFSIZE in src/config.h.generic for details."
 )
 
 set(PCRE2_NEWLINE "LF" CACHE STRING "What to recognize as a newline (one of CR, LF, CRLF, ANY, ANYCRLF, NUL).")
@@ -502,7 +503,7 @@ option(PCRE2_NEVER_BACKSLASH_C "If ON, backslash-C (upper case C) is locked out.
 
 option(PCRE2_SUPPORT_VALGRIND "Enable Valgrind support." OFF)
 
-option(PCRE2_FUZZ_SUPPORT "Enable fuzzer support" OFF)
+option(PCRE2_FUZZ_SUPPORT "Enable fuzzer support (requires the 8-bit library)." OFF)
 option(PCRE2_DIFF_FUZZ_SUPPORT "Enable differential fuzzer support (requires fuzz support and JIT)" OFF)
 
 option(PCRE2_SHOW_REPORT "Show the final configuration report" ON)
@@ -537,7 +538,7 @@ if(PCRE2_HAS_IMPORT_LIBRARY)
      "${CMAKE_STATIC_LIBRARY_SUFFIX}" STREQUAL "${CMAKE_IMPORT_LIBRARY_SUFFIX}")
     set(PCRE2_STATIC_LIBRARY_POSTFIX_DEFAULT "-static")
   endif()
-  set(PCRE2_STATIC_LIBRARY_POSTFIX "${PCRE2_STATIC_LIBRARY_POSTFIX_DEFAULT}" CACHE STRING "Postfix to append to static library output filenames, in addition to any suffix provided by the toolchain (CMAKE_STATIC_LIBRARY_SUFFIX). Static library .lib files may conflict with the import library .lib files corresponding to a shared library DLL. Must be set to a non-empty string if both static and shared library outputs, are selected and a name collision occurs.")
+  set(PCRE2_STATIC_LIBRARY_POSTFIX "${PCRE2_STATIC_LIBRARY_POSTFIX_DEFAULT}" CACHE STRING "Postfix to append to static library output names, before any suffix provided by the toolchain (CMAKE_STATIC_LIBRARY_SUFFIX). Static library .lib files may conflict with the import library .lib files corresponding to a shared library DLL. Must be set to a non-empty string if both static and shared library outputs are selected and a name collision occurs.")
 endif()
 
 if(HAVE_VSCRIPT)
@@ -556,12 +557,20 @@ endif()
 
 # editline lib
 if(Editline_FOUND)
-  option(PCRE2_SUPPORT_LIBEDIT "Enable support for linking pcre2test with libedit." OFF)
+  option(
+    PCRE2_SUPPORT_LIBEDIT
+    "Enable support for linking pcre2test with libedit. Cannot be combined with libreadline support."
+    OFF
+  )
 endif()
 
 # readline lib
 if(Readline_FOUND)
-  option(PCRE2_SUPPORT_LIBREADLINE "Enable support for linking pcre2test with libreadline." ON)
+  option(
+    PCRE2_SUPPORT_LIBREADLINE
+    "Enable support for linking pcre2test with libreadline. Cannot be combined with libedit support."
+    ON
+  )
 endif()
 
 # -----------------------------------------------------------------------------
@@ -1086,7 +1095,7 @@ if(PCRE2_BUILD_PCRE2_8)
       target_link_libraries(pcre2-8-shared Threads::Threads)
     endif()
     if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
-      target_link_options(pcre2-8-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-8.sym)
+      target_link_options(pcre2-8-shared PRIVATE LINKER:${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-8.sym)
       set_target_properties(pcre2-8-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-8.sym)
     endif()
     list(APPEND TARGETS pcre2-8-shared)
@@ -1108,7 +1117,7 @@ if(PCRE2_BUILD_PCRE2_8)
         OUTPUT_NAME pcre2-posix
     )
     if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
-      target_link_options(pcre2-posix-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-posix.sym)
+      target_link_options(pcre2-posix-shared PRIVATE LINKER:${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-posix.sym)
       set_target_properties(pcre2-posix-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-posix.sym)
     endif()
     target_compile_definitions(pcre2-posix-shared PUBLIC PCRE2POSIX_SHARED)
@@ -1176,7 +1185,7 @@ if(PCRE2_BUILD_PCRE2_16)
       target_link_libraries(pcre2-16-shared Threads::Threads)
     endif()
     if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
-      target_link_options(pcre2-16-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-16.sym)
+      target_link_options(pcre2-16-shared PRIVATE LINKER:${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-16.sym)
       set_target_properties(pcre2-16-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-16.sym)
     endif()
     list(APPEND TARGETS pcre2-16-shared)
@@ -1240,7 +1249,7 @@ if(PCRE2_BUILD_PCRE2_32)
       target_link_libraries(pcre2-32-shared Threads::Threads)
     endif()
     if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
-      target_link_options(pcre2-32-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-32.sym)
+      target_link_options(pcre2-32-shared PRIVATE LINKER:${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-32.sym)
       set_target_properties(pcre2-32-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-32.sym)
     endif()
     list(APPEND TARGETS pcre2-32-shared)
@@ -1380,9 +1389,9 @@ if(PCRE2_BUILD_TESTS)
     list(APPEND PCRE2TEST_LIBS pcre2-32)
   endif()
   target_link_libraries(pcre2test ${PCRE2TEST_LIBS})
-  if(MSVC)
+  if(PCRE2_MSVC_ABI)
     # This is needed to avoid a stack overflow error in the standard tests.
-    target_link_options(pcre2test PRIVATE /STACK:2500000)
+    target_link_options(pcre2test PRIVATE LINKER:/STACK:2500000)
   endif()
 
   if(PCRE2_BUILD_PCRE2_8)

@@ -14,8 +14,12 @@ project(
 
 cc = meson.get_compiler('c')
 fs = import('fs')
+
 host_is_windows = host_machine.system() == 'windows'
-msvc_like = cc.get_id() in ['msvc', 'clang-cl', 'intel-cl']
+host_has_import_library = host_is_windows or host_machine.system() == 'cygwin'
+msvc_syntax = cc.get_argument_syntax() == 'msvc'
+msvc_abi = host_is_windows and cc.get_linker_id() in ['link', 'lld-link', 'xilink', 'optlink']
+
 # Meson recognizes feature-version guards in if statements, not ternaries.
 if meson.version().version_compare('>=1.12.0')
   meson_default = default()
@@ -23,7 +27,8 @@ else
   meson_default = []
 endif
 
-if msvc_like
+# Small over-approximation to detect linking against the Windows CRT.
+if host_is_windows
   add_project_arguments('-D_CRT_SECURE_NO_DEPRECATE', '-D_CRT_SECURE_NO_WARNINGS', language: 'c')
 endif
 
@@ -108,7 +113,7 @@ config.set(
 )
 
 have_visibility = false
-if not msvc_like
+if not msvc_abi
   have_visibility = cc.links(
     '''
   extern __attribute__ ((visibility ("default"))) int f(void);
@@ -166,6 +171,17 @@ default_to_static = library_type == 'static' or \
 build_8 = get_option('pcre2_build_pcre2_8')
 build_16 = get_option('pcre2_build_pcre2_16')
 build_32 = get_option('pcre2_build_pcre2_32')
+
+# As on CMake, we provide our own (configurable) library name suffix for static
+# outputs, regardless of whether static/shared/both are requested, on all
+# Windows-hosted targets making use of DLL import libraries.
+static_library_postfix = ''
+if host_has_import_library
+  static_library_postfix = get_option('pcre2_static_library_postfix')
+  if static_library_postfix == 'auto'
+    static_library_postfix = '-static'
+  endif
+endif
 
 config_options = {
   'PCRE2_LINK_SIZE': 'pcre2_link_size',
@@ -431,11 +447,46 @@ pcre2_sources += [chartables, config_h, pcre2_h]
 # -----------------------------------------------------------------------------
 
 common_c_args = ['-DHAVE_CONFIG_H']
+
 debug_option = get_option('pcre2_debug')
 if debug_option == 'enabled' or (debug_option == 'auto' and get_option('buildtype') == 'debug')
   common_c_args += '-DPCRE2_DEBUG'
 endif
+
+# Use the conventional Windows suffix to allow debug and release libs to coexist.
 windows_debug_postfix = host_is_windows and get_option('buildtype') == 'debug' ? 'd' : ''
+
+# Meson has two conventions for the filenames of Windows DLL 'import library' files,
+# controlled by namingscheme=classic/platfom. Neither matches the scheme we use with
+# CMake, which we adopt here for compatibility on standard (non-Cygwin, non-MinGW) builds.
+override_import_library_naming = host_is_windows and cc.get_linker_id() in ['link', 'lld-link', 'xilink', 'optlink']
+static_name_prefix = meson_default
+static_name_suffix = meson_default
+library_naming_options = []
+if override_import_library_naming
+  if meson.version().version_compare('>=1.10.0')
+    # name_prefix/name_suffix do not override the platform scheme's .dll.lib import suffix.
+    library_naming_options = ['namingscheme=classic']
+  endif
+
+  static_name_prefix = ''
+  static_name_suffix = 'lib'
+
+  # For the cases where we override Meson's naming, we take responsibility for
+  # the outputs not to collide. Provide an explicit diagnostic.
+
+  nonconfigurable_classic_import_name_prefix = ''
+  nonconfigurable_classic_import_name_suffix = 'lib'
+  sample_shared_filename = '@0@X.@1@'.format(nonconfigurable_classic_import_name_prefix, nonconfigurable_classic_import_name_suffix)
+  sample_static_filename = '@0@X@1@.@2@'.format(static_name_prefix, static_library_postfix, static_name_suffix)
+
+  if build_static and build_shared and sample_shared_filename == sample_static_filename
+    error(
+      'Static and shared libraries are being built with colliding suffix "' + static_name_suffix + '"; pcre2_static_library_postfix must be used to avoid this.'
+    )
+  endif
+endif
+
 private_deps = jit_enabled ? [thread_dep] : []
 
 # Separate targets keep each variant's arguments and platform names explicit.
@@ -449,18 +500,16 @@ foreach width : ['8', '16', '32']
   width_args = common_c_args + ['-DPCRE2_CODE_UNIT_WIDTH=' + width]
 
   if build_static
-    static_name = name + windows_debug_postfix
-    if msvc_like
-      static_name = name + '-static' + windows_debug_postfix
-    endif
+    static_name = name + static_library_postfix + windows_debug_postfix
     static_lib = static_library(
       static_name,
       pcre2_sources,
       include_directories: pcre2_includes,
       dependencies: private_deps,
       c_args: width_args + ['-DPCRE2_STATIC'],
-      name_prefix: msvc_like ? '' : meson_default,
-      name_suffix: msvc_like ? 'lib' : meson_default,
+      name_prefix: static_name_prefix,
+      name_suffix: static_name_suffix,
+      override_options: library_naming_options,
       gnu_symbol_visibility: 'hidden',
       install: true,
     )
@@ -486,6 +535,7 @@ foreach width : ['8', '16', '32']
       'link_depends': use_vscript ? symbol_files[name] : [],
       'gnu_symbol_visibility': 'hidden',
       'install': true,
+      'override_options': library_naming_options,
     }
     if not host_is_windows
       shared_kwargs += {'version': lib_versions[width], 'soversion': lib_soversions[width]}
@@ -527,10 +577,7 @@ endforeach
 
 if build_8
   if build_static
-    posix_static_name = 'pcre2-posix' + windows_debug_postfix
-    if msvc_like
-      posix_static_name = 'pcre2-posix-static' + windows_debug_postfix
-    endif
+    posix_static_name = 'pcre2-posix' + static_library_postfix + windows_debug_postfix
     pcre2_posix_static = static_library(
       posix_static_name,
       'src/pcre2posix.c',
@@ -540,8 +587,9 @@ if build_8
       include_directories: pcre2_includes,
       dependencies: pcre2_8_static_dep,
       c_args: common_c_args + ['-DPCRE2_CODE_UNIT_WIDTH=8', '-DPCRE2_STATIC'],
-      name_prefix: msvc_like ? '' : meson_default,
-      name_suffix: msvc_like ? 'lib' : meson_default,
+      name_prefix: static_name_prefix,
+      name_suffix: static_name_suffix,
+      override_options: library_naming_options,
       gnu_symbol_visibility: 'hidden',
       install: true,
     )
@@ -565,6 +613,7 @@ if build_8
       'link_depends': use_vscript ? symbol_files['pcre2-posix'] : [],
       'gnu_symbol_visibility': 'hidden',
       'install': true,
+      'override_options': library_naming_options,
     }
     if not host_is_windows
       posix_shared_kwargs += {'version': lib_versions['posix'], 'soversion': lib_soversions['posix']}
@@ -662,8 +711,8 @@ pcre2_config_data = {
   'enable_pcre2_32': build_32 ? 'yes' : 'no',
   'PCRE2_STATIC_CFLAG': build_shared ? '' : '-DPCRE2_STATIC',
   'PCRE2POSIX_CFLAG': build_shared ? '-DPCRE2POSIX_SHARED' : '',
-  'LIB_POSTFIX': windows_debug_postfix,
-  # We have (as yet) no straightforward way to extract the pthread flags from
+  'LIB_POSTFIX': (build_shared ? '' : static_library_postfix) + windows_debug_postfix,
+  # TODO We have (as yet) no straightforward way to extract the pthread flags from
   # Meson, which is a shame. Leave them empty until this is supported.
   'PTHREAD_CFLAGS': '',
   'PTHREAD_LIBS': '',
@@ -719,7 +768,7 @@ if get_option('pcre2_build_tests')
     include_directories: pcre2_includes,
     dependencies: pcre2test_deps,
     c_args: common_c_args,
-    link_args: msvc_like ? ['/STACK:2500000'] : [],
+    link_args: msvc_syntax ? ['/STACK:2500000'] : [],
     install: true,
   )
   if build_8
