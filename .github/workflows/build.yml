@@ -231,6 +231,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
+          # The prepared VM snapshot includes the synced runner work directory.
+          persist-credentials: false
 
       - name: Prepare
         run: ./autogen.sh
@@ -239,7 +241,10 @@ jobs:
         uses: vmactions/freebsd-vm@c46abacb49f09938ca4e1702d15d836285d694cc # v1.5.9
         with:
           envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
-          usesh: true
+          sync: rsync
+          copyback: false
+          # Reuse installed tools, not build outputs; prepare changes invalidate this cache.
+          cache-after-prepare: true
           prepare: |
             set -e
             pkg install -y cmake meson
@@ -296,6 +301,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
+          persist-credentials: false
 
       - name: Prepare
         run: ./autogen.sh
@@ -304,7 +310,9 @@ jobs:
         uses: vmactions/openbsd-vm@f1ca8bc8ecc5b6ef7218e5b914836e067e1546d3 # v1.4.9
         with:
           envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
-          usesh: true
+          sync: rsync
+          copyback: false
+          cache-after-prepare: true
           prepare: |
             set -e
             pkg_add cmake
@@ -354,14 +362,18 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
+          persist-credentials: false
 
       - name: Transfer Oracle Studio certificates
         env:
           PKG_ORACLE_COM_CERTIFICATE_PEM: ${{ secrets.PKG_ORACLE_COM_CERTIFICATE_PEM }}
           PKG_ORACLE_COM_KEY_PEM: ${{ secrets.PKG_ORACLE_COM_KEY_PEM }}
         run: |
+          OLD_UMASK=`umask`
+          umask 077
           printenv PKG_ORACLE_COM_CERTIFICATE_PEM > pkg.oracle.com.certificate.pem
           printenv PKG_ORACLE_COM_KEY_PEM > pkg.oracle.com.key.pem
+          umask "$OLD_UMASK"
 
       - name: Prepare
         run: ./autogen.sh
@@ -370,15 +382,24 @@ jobs:
         uses: vmactions/solaris-vm@1c166978f5a2c1f87f1c9d4d8dd85ae3d1eff6f7 # v1.4.2
         with:
           envs: 'CFLAGS_SOLARIS_CC CFLAGS_GCC_STYLE CMAKE_FLAGS'
-          usesh: true
+          sync: rsync
+          copyback: false
+          # Because of this caching, we accept that the Oracle Studio credentials may not
+          # be entirely secret. We do some cleanup below, but not secure disk erasure.
+          cache-after-prepare: true
           # Seriously! Solaris is the only OS to actually ship without a C
           # compiler, and not even to provide a simple download to get one!
           # You have to actually register with Oracle to get an X.509
           # certificate before you can even download their compiler. Whatever.
           prepare: |
             set -e
+
+            OLD_UMASK=`umask`
+            umask 077
             cp "$GITHUB_WORKSPACE/pkg.oracle.com.key.pem" /root/pkg.oracle.com.key.pem
             cp "$GITHUB_WORKSPACE/pkg.oracle.com.certificate.pem" /root/pkg.oracle.com.certificate.pem
+            umask "$OLD_UMASK"
+
             sudo pkg set-publisher \
               -k /root/pkg.oracle.com.key.pem \
               -c /root/pkg.oracle.com.certificate.pem \
@@ -388,8 +409,20 @@ jobs:
             python3.11 -m venv /opt/meson
             /opt/meson/bin/python -m pip install --disable-pip-version-check --upgrade meson
 
+            KEY_HASH=$(digest -a sha1 /root/pkg.oracle.com.key.pem)
+            CERTIFICATE_HASH=$(digest -a sha1 /root/pkg.oracle.com.certificate.pem)
+            pkg unset-publisher solarisstudio
+            rm -f "$GITHUB_WORKSPACE/pkg.oracle.com.key.pem" \
+              "$GITHUB_WORKSPACE/pkg.oracle.com.certificate.pem" \
+              /root/pkg.oracle.com.key.pem /root/pkg.oracle.com.certificate.pem \
+              "/var/pkg/ssl/$KEY_HASH" "/var/pkg/ssl/$CERTIFICATE_HASH"
+
           run: |
             set -e
+
+            # Clean secrets if prepare was cached but the workspace is synced afresh.
+            rm -f pkg.oracle.com.key.pem pkg.oracle.com.certificate.pem
+
             PATH=/opt/meson/bin:/opt/developerstudio12.6/bin:"$PATH"
             export PATH
 
@@ -443,6 +476,10 @@ jobs:
             meson install -C build
             maint/RunManifestTest install-dir maint/manifest-install-solaris meson
             maint/RunSymbolTest install-dir/lib/ maint/
+
+      - name: Clean Oracle Studio certificates
+        if: always()
+        run: rm -f pkg.oracle.com.key.pem pkg.oracle.com.certificate.pem
 
   zos:
     name: z/OS
