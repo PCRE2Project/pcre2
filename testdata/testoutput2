@@ -23704,6 +23704,32 @@ No match
  2: 
  3: 
 
+/^(?:(?&r(2))x|aa)(?(DEFINE)(?<r>(.)(.)(*ACCEPT)(.)))/
+    abx
+ 0: abx
+ 1: <unset>
+ 2: a
+    aby
+No match
+
+/^(?:(?&r(2,3))x|aa)(?(DEFINE)(?<r>(.)(.)(*ACCEPT)(.)))/
+    abx
+ 0: abx
+ 1: <unset>
+ 2: a
+ 3: b
+    aby
+No match
+
+/^(?:(?&r(3,4))x|aa)(?(DEFINE)(?<r>(.)(.)(*ACCEPT)(.)))/
+    abx
+ 0: abx
+ 1: <unset>
+ 2: <unset>
+ 3: b
+    aby
+No match
+
 # Test each syntax used for recursion
 
 /(?(R)(Sat)urday|(?R(1)),\1)/
