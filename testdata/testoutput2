@@ -24043,6 +24043,19 @@ Callout (7): "after"
  +5   ^ ^     End of pattern
  0: BC
 
+/(?&r(2))b(?(DEFINE)(?<r>(a)(*ACCEPT)x))/
+    ab
+ 0: ab
+ 1: <unset>
+ 2: a
+
+/(?&r(2,3))c(?(DEFINE)(?<r>(a)(b)(*ACCEPT)x))/
+    abc
+ 0: abc
+ 1: <unset>
+ 2: a
+ 3: b
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

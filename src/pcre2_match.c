@@ -1005,13 +1005,27 @@ NEW_FRAME:
         /* N is now the frame of the recursion; the previous frame is at the
         OP_RECURSE position. Go back there, copying the current subject position
         and mark, and the start_match position (\K might have changed it), and
-        then move on past the OP_RECURSE. */
+        then move on past the OP_RECURSE. If trailing OP_CREF opcodes are
+        present for returned captures, preserve them before restoring P. */
 
         P->eptr = Feptr;
         P->mark = Fmark;
         P->start_match = Fstart_match;
-        F = P;
-        Fecode += 1 + LINK_SIZE;
+        P->ecode += 1 + LINK_SIZE;
+
+        if (*P->ecode != OP_CREF)
+        {
+          F = P;
+        }
+        else
+        {
+          Fecode = P->ecode;
+          recurse_update_offsets(F, P);
+          memcpy(P->ovector, F->ovector, Foffset_top * sizeof(PCRE2_SIZE));
+          P->offset_top = Foffset_top;
+          P->ecode = Fecode;
+          F = P;
+        }
         continue;
       }
 

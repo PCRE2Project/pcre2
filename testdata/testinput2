@@ -8486,4 +8486,10 @@ a)"xI
 /A\KBC/auto_callout
     _ABC_
 
+/(?&r(2))b(?(DEFINE)(?<r>(a)(*ACCEPT)x))/
+    ab
+
+/(?&r(2,3))c(?(DEFINE)(?<r>(a)(b)(*ACCEPT)x))/
+    abc
+
 # End of testinput2
