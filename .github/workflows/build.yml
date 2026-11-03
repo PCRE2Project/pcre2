@@ -631,6 +631,7 @@ jobs:
 
       - name: Test
         run: |
+          python3 -m unittest discover -s maint -p test_filter_coverage.py -v
           cd build
           ../maint/RunCoverage
 

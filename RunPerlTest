@@ -3,6 +3,7 @@
 # Script to run the Perl-compatible PCRE2 tests through Perl. For testing
 # with different versions of Perl, if the first argument is "-perl" then the
 # second is taken as the Perl command to use, and both are then removed.
+# Only the latest stable Perl release is a supported target; CI uses perl:stable.
 #
 # The argument can be the number of the specific Perl compatible test to run
 # (ex: "1", "4", "26" or "27"), otherwise it runs all tests and returns at

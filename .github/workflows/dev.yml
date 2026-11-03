@@ -420,7 +420,7 @@ jobs:
     # Job to execute RunPerlTest. "Camel bird" is another name for an ostrich (and it's Perl's logo).
     name: perl
     runs-on: ubuntu-latest
-    container: perl:devel
+    container: perl:stable
     if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'camel')
     steps:
       - name: Checkout

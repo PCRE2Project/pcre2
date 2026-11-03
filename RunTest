@@ -57,11 +57,11 @@
 # of them are modified (e.g. with -8 or -16) when used in the actual tests.
 
 title0="Test 0: Unchecked pcre2test argument tests (to improve coverage)"
-title1="Test 1: Main non-UTF, non-UCP functionality (compatible with Perl >= 5.10)"
+title1="Test 1: Main non-UTF, non-UCP functionality (compatible with current stable Perl)"
 title2="Test 2: API, errors, internals and non-Perl stuff"
 title3="Test 3: Locale-specific features"
 title4A="Test 4: UTF"
-title4B=" and Unicode property support (compatible with Perl >= 5.10)"
+title4B=" and Unicode property support (compatible with current stable Perl)"
 title5A="Test 5: API, internals, and non-Perl stuff for UTF"
 title5B=" and UCP support"
 title6="Test 6: DFA matching main non-UTF, non-UCP functionality"
@@ -85,7 +85,7 @@ title22="Test 22: \\C tests with UTF (not supported for DFA matching)"
 title23="Test 23: \\C disabled test"
 title24="Test 24: Non-UTF pattern conversion tests"
 title25="Test 25: UTF pattern conversion tests"
-title26="Test 26: Unicode property tests (compatible with Perl >= 5.38)"
+title26="Test 26: Unicode property tests (Perl needs the matching Unicode version)"
 title27="Test 27: Auto-generated unicode property tests"
 title28="Test 28: EBCDIC-specific tests"
 title29="Test 29: EBCDIC-specific tests (for NL=0x25)"
@@ -600,7 +600,7 @@ for bmode in "$test8" "$test16" "$test32"; do
     fi
   fi
 
-  # Primary non-UTF test, compatible with JIT and all versions of Perl >= 5.8
+  # Primary non-UTF test, compatible with JIT and current stable Perl
 
   if [ $do1 = yes ] ; then
     echo $title1

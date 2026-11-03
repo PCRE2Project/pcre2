@@ -745,7 +745,10 @@ UTF) and make no use of Unicode properties. The first test file can be fed
 directly into the `PerlTest.sh` script to check that Perl gives the same results.
 The `RunPerlTest` shell script runs and compares all Perl-compatible tests, or a
 single test selected by number (1, 4, 26, or 27). Use `-perl command` to select
-another Perl executable. To process a custom input file, use
+another Perl executable. These tests target only the latest stable Perl release
+(currently 5.44); CI uses `perl:stable`. Older and development releases are not
+supported targets. Tests 26 and 27 run only when Perl uses the Unicode version
+specified in the input file. To process a custom input file, use
 `PerlTest.sh [-w] [-utf8] [-locale[=name]] input [output]`; see `PerlTest.sh` for
 the input format. The only difference you should see is in the first few lines,
 where the Perl version is given instead of the PCRE2 version. Test 2 checks

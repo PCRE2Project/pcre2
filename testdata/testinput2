@@ -320,7 +320,7 @@
 \= Expect no match
     fooabar
 
-# Perl does not fail these two for the final subjects.
+# Perl before 5.38.0 did not fail these two for the final subjects.
 
 /^(xa|=?\1a){2}$/
     xa=xaa
@@ -8507,5 +8507,239 @@ a)"xI
 
 /A\KBC/auto_callout
     _ABC_
+
+# Perl 5.22.2: reject an unterminated class with a trailing backslash.
+
+/5b 61 62 63 5c/hex
+
+/5d 5d 5d 5d 5d 5d 5d 5d 5d 5b 5c/hex
+
+/5d 5d 5d 5d 5d 5b 5c/hex
+
+# Perl 5.24.0: reject surplus quantifiers even after an exact repeat.
+
+/.{1}??/
+
+/.{1}?+/
+
+# Perl 5.26.0, 5.28.0 and 5.30.0: literal braces in different contexts.
+
+/x{y/
+    x{y
+
+/{fee|{fie/
+    {fee
+    {fie
+
+/a{3,4/
+    a{3,4
+
+/\s{foo}/
+    \x20{foo}
+
+/( {foo)/x
+    {foo
+
+/({foo)/
+    {foo
+
+# Perl 5.28.0 again accepts these literals, which 5.26.0 rejected.
+
+/:{4,a}/
+    :{4,a}
+
+/xa{3\,4}y/
+    xa{3,4}y
+
+/\${[^\}]*}/
+    ${foo}
+
+# Announced future deprecation dates are not evidence of rejection:
+# these opening-parenthesis forms remain accepted in Perl 5.45.4.
+
+/foo({bar)/
+    foo{bar
+
+# Perl 5.38.0: captures in earlier alternatives of a repeated group.
+
+/((foo)baz|foo(bar))+/
+    foobazfoobar
+
+# Perl 5.36.0 changed variable-length lookbehind to try the longest span first.
+# PCRE2 does this within a branch, but tries top-level alternatives in order.
+
+/(?=z)(?<=(a|aa))/
+    aaz
+
+/(?=z)(?<=(a)|(aa))/
+    aaz
+
+# Perl 5.42.0: validate all of a braced backreference.
+
+/(a)\g{1 FOO}/
+
+/(a)\g{ 1 }/
+    aa
+
+# Perl 5.45.4: a nullable lookahead must not restrict the consuming start class.
+
+/\A(?=a*)[0-9]a\z/
+    0a
+    ba
+
+/\A(?=a*?)[0-9]a\z/
+    0a
+
+/\A(?=(?:ab)*)[0-9]a\z/
+    0a
+
+/\A(?=(?=a)b*)[a-z]a\z/
+    aa
+    ba
+
+# Perl 5.45.4: zero iterations clear captures; PCRE2 keeps earlier captures.
+
+/\A(?:(a)?b)+\z/
+    abb
+
+/\A(?:(a)?b)+\1\z/
+    abba
+
+/\A(?:(a+)?b)+\1\z/
+    abba
+
+/\A(?:(a(?:a+)?)?b)+\1\z/
+    abba
+
+/\A(?:(a*)*b)+\1\z/
+    abba
+
+/\A(?:(a)?b)+(?(1)a|c)\z/
+    abbc
+    abba
+
+/\A(?:(a*)b)+\z/
+    abb
+
+# Perl 5.45.4: failed/backtracked iterations of nested fixed-width repeats.
+
+/(?:(aa){2})*/
+    aa
+
+/\A(?:([a-d]{2}){2})*ccdd\z/
+    aabbccdd
+
+/\A(?:([a-d]{2}){2})*?ccdd\z/
+    aabbccdd
+
+/\A(?:(aa){2})*aa\z/
+    aa
+
+# Perl 5.45.4: negative assertions discard captures except PCRE2 false conditions.
+
+/\A(?!(a)b)a\z/
+    a
+
+/\A(?!(a)b)\1\z/
+    a
+
+/\A(?!(a)b)(?(1)a|b)\z/
+    a
+    b
+
+/\A..(?<!(a)b)c\z/
+    aac
+    abc
+
+/\A(?(?!(a)b)a|b)\z/
+    a
+
+/\A(?(?!(a))b|a)\1\z/
+    aa
+
+# Perl 5.45.4: width calculation after a preceding unbounded repeat.
+
+/x+(?:b{2}){2}/
+    xxbbbb
+
+# Perl 5.45.4: SKIP must not cause later candidate starts to be skipped.
+
+/(a+X(*SKIP)j)/
+    aXaXj
+
+/(a+X(*MARK:m)(*SKIP:m)j)/
+    aXaXj
+
+/a+X(*COMMIT)j/
+    aXaXj
+
+# Perl 5.45.4: anchored nullable repeat must not truncate the search range.
+
+/\A\ba*\z/m
+    a
+
+/^\ba*\z/m
+    a
+
+/\A^\ba*\z/m
+    a
+
+# These verbs fail only the subroutine in PCRE2, permitting the outer alternate.
+# Perl 5.44.0 fails the whole match for COMMIT, PRUNE and SKIP in these examples.
+
+/\A(?:(?&x)c|ab)(?(DEFINE)(?<x>a(*COMMIT)b))\z/
+    ab
+
+/\A(?:(?&x)c|ab)(?(DEFINE)(?<x>a(*PRUNE)b))\z/
+    ab
+
+/\A(?:(?&x)c|ab)(?(DEFINE)(?<x>a(*SKIP)b))\z/
+    ab
+
+/\A(?:(?&x)c|ab)(?(DEFINE)(?<x>a(*THEN)b))\z/
+    ab
+
+# ACCEPT returns successfully from a subroutine in both engines.
+
+/\A(?&x)b\z(?(DEFINE)(?<x>a(*ACCEPT)c))/
+    ab
+    ac
+
+# The first verb backtracked onto acts. Perl 5.44.0 does not match ABD.
+
+/(A(*COMMIT)B(*THEN)C|ABD)/
+    ABD
+    ABC
+
+# Both engines reject separated group-introducer tokens.
+# Perl deprecated these forms in 5.18.0 and rejected them in 5.22.0.
+
+/( ?=a)a/x
+
+/((?#comment)?=a)a/x
+
+# Quoting either repeat bound prevents recognition as a quantifier in PCRE2.
+# Perl's lexer removes this quoting before the regex compiler sees the bounds.
+# Quoting the comma prevents quantifier recognition in both engines.
+
+/a{1,\Q2\E}/
+    xa{1,2}x
+    xaax
+
+/a{1\Q,\E2}/
+    xa{1,2}x
+    xaax
+
+# The documented infinite-recursion difference needs at least two repeats:
+# Perl 5.44.0 matches abcd but raises an error for abcdabcd.
+
+/(?:|(?0)abcd)(?(R)|\z)/
+    abcd
+    abcdabcd
+    abcdabcdabcd
+
+# Numeric N escapes require UTF mode, even for an ASCII code point.
+
+/\N{U+0041}/
 
 # End of testinput2

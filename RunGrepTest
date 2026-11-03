@@ -1218,7 +1218,7 @@ if [ $utf8 -ne 0 ] ; then
   echo "RC=$?" >>testtrygrep
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts -U -n -B1 --newline=any Match testtemp1grep >testtemp2grep
   echo "RC=$?" >>testtemp2grep
-  tr '\200-\377' '?' <testtemp2grep >>testtrygrep
+  $tr '\200-\377' '?' <testtemp2grep >>testtrygrep
 
   $cf "$srcdir/testdata/grepoutput8" testtrygrep
   if [ $? != 0 ] ; then exit 1; fi
@@ -1320,21 +1320,12 @@ fi
 if $valgrind $vjs "$pcre2grep" $pcre2grep_opts --help | $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q 'callout scripts in patterns are supported'; then
   echo "Testing pcre2grep script callouts"
 
-  # pcre2grep runs a callout script with execv(), which does not search PATH,
-  # so the script must be named by an absolute path. /bin/echo is not present
-  # everywhere (NixOS, for example, keeps only /bin/sh there), so use the first
-  # echo executable found in an absolute PATH directory. Fall back to /bin/echo
-  # if none is found.
-
-  echo_prog=/bin/echo
-  saved_ifs=$IFS
-  IFS=:
-  for dir in $PATH; do
-    case $dir in
-      /*) if [ -f "$dir/echo" ] && [ -x "$dir/echo" ]; then echo_prog="$dir/echo"; break; fi ;;
-    esac
-  done
-  IFS=$saved_ifs
+  # Use our byte-preserving echo helper. A system echo may depend on PCRE2
+  # and load our instrumented library without the sanitizer runtime.
+  # Bypass libtool's wrapper: its external utilities have the same problem.
+  echo_prog="${pcre2test%/*}/.libs/${pcre2test##*/}"
+  if [ ! -x "$echo_prog" ]; then echo_prog="$pcre2test"; fi
+  echo_prog="$echo_prog|-echo"
 
   rm -f testtrygrep
   echo "--- Test 1 ---" >testtrygrep

@@ -74,7 +74,18 @@ FetchUcd.sh
   the Unicode.tables directory.
 
 FilterCoverage.py
-  A small helper used by the RunCoverage script.
+  Filters LLVM's LCOV export for RunCoverage. Applies source exclusions,
+  recomputes summaries from the retained records, and supplies missing DA
+  records for branch locations. Such inferred line counts are reported and
+  are lower bounds from branch outcomes; existing counters are never rewritten.
+
+  LLVM's summary records use function-instantiation groups and folded-branch
+  accounting, whereas its detailed LCOV records describe individual symbols
+  and export both branch outcomes. Summaries can therefore disagree with the
+  detailed records even before filtering; recounting is not an input error.
+
+  Run regression tests with:
+    python3 -m unittest discover -s maint -p test_filter_coverage.py -v
 
 manifest-*
   Data files used to verify the contents of the distribution tarball and
@@ -134,6 +145,19 @@ RunBenchmark
 RunCoverage
   A script used to generate the coverage report using Clang. It is called by
   the GitHub CI actions, and can also be run by a developer locally.
+  genhtml's "inconsistent" errors are retained as warnings because its
+  cross-metric checks are not valid for all LLVM coverage:
+  - An unselected switch case has a zero DA count for its body, but a nonzero
+    BRDA count for the dispatch that did not select it.
+  - A hit line may contain only unevaluated branches, because a preceding
+    condition short-circuited or a macro contains an unexecuted condition.
+  Neither discrepancy can be removed by changing counts without falsifying
+  coverage. Other genhtml error classes remain fatal. The warning about
+  missing function end lines also remains: LLVM's LCOV FN records do not
+  provide them, so genhtml must derive them. FilterCoverage.py accepts explicit
+  end lines when present, but does not guess them from C source.
+  To inspect every genhtml diagnostic without its default message limit, add
+  --rc max_message_count=0 to the genhtml invocation.
 
 RunManifestTest
 RunManifestTest.rb
@@ -284,7 +308,9 @@ new release.
     are using different Unicode releases. Tests 26 and 27 are also
     Perl-compatible when Perl uses the matching Unicode version. The
     RunPerlTest shell script in the repository root runs these tests and
-    compares their output in Unix-like environments.
+    compares their output in Unix-like environments. The only supported target
+    is the latest stable Perl release (currently 5.44); CI uses perl:stable.
+    Older and development releases are not supported targets.
 
   - Check the external testing tools. CodeQL & Clang Static Analyzer report
     their results to the GitHub "Security" dashboard. Coverity has its own
