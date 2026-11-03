@@ -932,28 +932,32 @@ NEW_FRAME:
       where we know the starting frame is at the top of the chained frames, in
       this case we have to search back for the relevant frame in case other types
       of group that use chained frames have intervened. Multiple OP_CLOSEs always
-      come innermost first, which matches the chain order. We can ignore this in
-      a recursion, because captures are not passed out of recursions. */
+      come innermost first, which matches the chain order.
+
+      In a recursion, the closed groups may be returned to the caller by a
+      capture list. Only groups that were opened within the recursion are closed,
+      so the search stops at the recursion's frame. */
 
     case OP_CLOSE:
-      if (Fcurrent_recurse == RECURSE_UNSET)
+      number = GET2(Fecode, 1);
+      offset = Flast_group_offset;
+      for (;;)
       {
-        number = GET2(Fecode, 1);
-        offset = Flast_group_offset;
-        for (;;)
-        {
-          /* Corrupted heapframes?. Trigger an assert and return an error */
-          PCRE2_ASSERT(offset != PCRE2_UNSET);
-          if (offset == PCRE2_UNSET)
-            return PCRE2_ERROR_INTERNAL;
+        /* Corrupted heapframes?. Trigger an assert and return an error */
+        PCRE2_ASSERT(offset != PCRE2_UNSET);
+        if (offset == PCRE2_UNSET)
+          return PCRE2_ERROR_INTERNAL;
 
-          N = (heapframe *)((char *)match_data->heapframes + offset);
-          P = (heapframe *)((char *)N - frame_size);
-          if (N->group_frame_type == (GF_CAPTURE | number))
-            break;
-          offset = P->last_group_offset;
-        }
+        N = (heapframe *)((char *)match_data->heapframes + offset);
+        P = (heapframe *)((char *)N - frame_size);
+        if (N->group_frame_type == (GF_CAPTURE | number) ||
+            GF_IDMASK(N->group_frame_type) == GF_RECURSE)
+          break;
+        offset = P->last_group_offset;
+      }
 
+      if (N->group_frame_type == (GF_CAPTURE | number))
+      {
         offset = (number << 1) - 2;
         Fcapture_last = number;
         Fovector[offset] = P->eptr - mb->start_subject;
@@ -1005,13 +1009,27 @@ NEW_FRAME:
         /* N is now the frame of the recursion; the previous frame is at the
         OP_RECURSE position. Go back there, copying the current subject position
         and mark, and the start_match position (\K might have changed it), and
-        then move on past the OP_RECURSE. */
+        then move on past the OP_RECURSE.
+
+        If the OP_RECURSE is followed by a list of capture groups to return,
+        build the caller's captures in the current frame, as is done when the
+        end of the recursion is reached, and copy them into the previous frame.
+        This also moves past the OP_CREF list. */
 
         P->eptr = Feptr;
         P->mark = Fmark;
         P->start_match = Fstart_match;
+
+        Fecode = P->ecode + 1 + LINK_SIZE;
+        if (*Fecode == OP_CREF)
+        {
+          recurse_update_offsets(F, P);
+          memcpy(P->ovector, F->ovector, Foffset_top * sizeof(PCRE2_SIZE));
+          P->offset_top = Foffset_top;
+        }
+        P->ecode = Fecode;
+
         F = P;
-        Fecode += 1 + LINK_SIZE;
         continue;
       }
 
