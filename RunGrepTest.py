@@ -1294,10 +1294,9 @@ if supports("callout scripts in patterns are supported"):
     print("Testing pcre2grep script callouts")
 
     # On Windows, we don't have a convenient echo binary, so it's built into
-    # pcre2test for convenience. Elsewhere pcre2grep runs the script with
-    # execv(), which does not search PATH, so it must be an absolute path.
-    # /bin/echo is not present everywhere (NixOS, for example, keeps only
-    # /bin/sh there), so use the first echo in an absolute PATH directory.
+    # pcre2test for convenience. /bin/echo is not present everywhere (NixOS,
+    # for example, keeps only /bin/sh there), so prefer an echo executable
+    # from an absolute PATH directory.
     if os.name == "nt":
         echo_prog = f"{pcre2test}|-echo"
     else:
@@ -1322,6 +1321,11 @@ if supports("callout scripts in patterns are supported"):
     output([*pcre2grep_args, '(T)(?C"|$0:$1$n")', srcdir / "testdata" / "grepinputv"])
     write_test_output(b"--- Test 4 ---\n")
     output([*pcre2grep_args, f'(T)(?C"{echo_prog}|$0:$1$n")', srcdir / "testdata" / "grepinputv"])
+    path_echo_prog = echo_prog if os.name == "nt" else "echo"
+    output([*pcre2grep_args, "-m1", f'^(T)(?C"{path_echo_prog}|Path: $1")', srcdir / "testdata" / "grepinputv"])
+    Path("testNinputgrep").write_bytes(b"T\n")
+    output([*pcre2grep_args, "-q", '^T(?C"pcre2grep-nonexistent-callout")', "testNinputgrep"])
+    output([*pcre2grep_args, "-q", f'^T(?C"{pcre2grep}|-q|(?!)|testNinputgrep")', "testNinputgrep"])
     write_test_output(b"--- Test 5 ---\n")
     output([*pcre2grep_args, '(T)(?C"|$1$n")(*F)', srcdir / "testdata" / "grepinputv"])
     write_test_output(b"--- Test 6 ---\n")

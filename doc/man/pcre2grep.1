@@ -1066,7 +1066,9 @@ pattern with \f(CI(*FAIL)\fP.
 This facility can be independently disabled when \f(CRpcre2grep\fP is built. It
 is supported for Windows, where a call to \f(CB_spawnvp\fP\f(CR()\fP is used, for VMS,
 where \f(CRlib$spawn()\fP is used, and for any Unix\-like environment where
-\f(CBfork\fP\f(CR()\fP and \f(CBexecv\fP\f(CR()\fP are available.
+\f(CBfork\fP\f(CR()\fP and \f(CBexecvp\fP\f(CR()\fP are available. On Unix\-like systems, executable
+names that do not contain a slash are searched for in the directories listed in
+the \f(CRPATH\fP environment variable.
 .sp
 If the callout string does not start with a pipe (vertical bar) character, it
 is parsed into a list of substrings separated by pipe characters. The first

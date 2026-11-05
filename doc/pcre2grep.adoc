@@ -972,7 +972,9 @@ pattern with [.regex]`+(*FAIL)+`.
 This facility can be independently disabled when `pcre2grep` is built. It
 is supported for Windows, where a call to [.c]`_spawnvp()` is used, for VMS,
 where [.c]`+lib$spawn()+` is used, and for any Unix-like environment where
-[.c]`fork()` and [.c]`execv()` are available.
+[.c]`fork()` and [.c]`execvp()` are available. On Unix-like systems, executable
+names that do not contain a slash are searched for in the directories listed in
+the `PATH` environment variable.
 
 If the callout string does not start with a pipe (vertical bar) character, it
 is parsed into a list of substrings separated by pipe characters. The first

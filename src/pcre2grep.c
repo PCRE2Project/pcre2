@@ -2783,15 +2783,25 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 #else  /* Neither Windows nor VMS */
   (void)fflush(stdout);
   pid_t pid = fork();
-  if (pid == 0)
+  if (pid < 0)
   {
-    (void)execv(argsvector[0], argsvector);
-    /* Control gets here if there is an error, e.g. a non-existent program */
-    exit(1);
+    result = 1;
   }
-  else if (pid > 0)
+  else if (pid == 0)
   {
-    (void)waitpid(pid, &result, 0);
+    (void)execvp(argsvector[0], argsvector);
+    /* Control gets here if there is an error, e.g. a non-existent program */
+    _exit(1);
+  }
+  else
+  {
+    int status;
+    pid_t waited;
+    do
+    {
+      waited = waitpid(pid, &status, 0);
+    } while (waited < 0 && errno == EINTR);
+    result = waited < 0 || !WIFEXITED(status) || WEXITSTATUS(status) != 0;
   }
 #endif /* End Windows/VMS/other handling */
 

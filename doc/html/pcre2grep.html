@@ -604,7 +604,9 @@ pattern with <code class="regex rouge"><span class="pcre2-semantic">(*FAIL)</spa
 <section class="doc-section level-2"><h3 id="_calling_external_programs_or_scripts">Calling external programs or scripts</h3><p>This facility can be independently disabled when <code>pcre2grep</code> is built. It
 is supported for Windows, where a call to <code class="c rouge" data-lang="c"><span class="nf">_spawnvp</span><span class="p">()</span></code> is used, for VMS,
 where <code class="c rouge" data-lang="c"><span class="nv">lib</span><span class="err">$</span><span class="nf">spawn</span><span class="p">()</span></code> is used, and for any Unix-like environment where
-<code class="c rouge" data-lang="c"><span class="nf">fork</span><span class="p">()</span></code> and <code class="c rouge" data-lang="c"><span class="nf">execv</span><span class="p">()</span></code> are available.</p>
+<code class="c rouge" data-lang="c"><span class="nf">fork</span><span class="p">()</span></code> and <code class="c rouge" data-lang="c"><span class="nf">execvp</span><span class="p">()</span></code> are available. On Unix-like systems, executable
+names that do not contain a slash are searched for in the directories listed in
+the <code>PATH</code> environment variable.</p>
 <p>If the callout string does not start with a pipe (vertical bar) character, it
 is parsed into a list of substrings separated by pipe characters. The first
 substring must be an executable name, with the following substrings specifying
