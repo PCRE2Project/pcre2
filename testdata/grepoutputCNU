@@ -12,6 +12,15 @@ The caterpillar sat on the mat
 0:¦
 The snowcat is not an animal
 RC=0
+¢€𐍈:¢€𐍈:T:|:$
+The quick brown
+RC=0
+¢€𐍈:¢€𐍈:T:|:$
+The quick brown
+RC=0
+¢€𐍈:¢€𐍈:T:|:$
+The quick brown
+RC=0
 --- Test 2 ---
 The quick brown
 This time it jumps and jumps and jumps.
@@ -19,4 +28,10 @@ This line contains \E and (regex) *meta* [characters].
 The word is cat in this line
 The caterpillar sat on the mat
 The snowcat is not an animal
+RC=0
+The quick brown
+RC=0
+The quick brown
+RC=0
+The quick brown
 RC=0

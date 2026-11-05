@@ -949,8 +949,10 @@ available, provided that callouts were not completely disabled when
 zero-terminated string, which means it should not contain any internal binary
 zeros. It is written to the output, having first been passed through the same
 escape processing as text from the `--output` (`-O`) option (see
-above). However, [.repl]`$0` or [.repl]`$&` cannot be used to insert a matched substring because
-the match is still in progress. Instead, the single character `0` is inserted.
+above). Literal text and captured substrings are copied byte for byte, preserving
+their UTF-8 encoding in Unicode mode. However, [.repl]`$0` or [.repl]`$&` cannot be
+used to insert a matched substring because the match is still in progress.
+Instead, the single character `0` is inserted.
 Any syntax errors in the string (for example, a dollar not followed by another
 character) causes the callout to be ignored. No terminator is added to the
 output string, so if you want a newline, you must include it explicitly using
@@ -987,7 +989,10 @@ started by a dollar character. These are the same as for the `--output`
 (`-O`) option documented above, except that [.repl]`$0` or [.repl]`$&` cannot insert the
 matched string because the match is still in progress. Instead, the character
 `0` is inserted. If you need a literal dollar or pipe character in any
-substring, use [.repl]`$$` or [.repl]`$|` respectively. Here is an example:
+substring, use [.repl]`$$` or [.repl]`$|` respectively. Literal text and captured
+substrings are copied byte for byte. Captured substrings and characters produced
+by escape sequences are not reinterpreted as separators or further escapes.
+Here is an example:
 
 [source,shell]
 ----

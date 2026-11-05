@@ -1041,8 +1041,10 @@ available, provided that callouts were not completely disabled when
 zero\-terminated string, which means it should not contain any internal binary
 zeros. It is written to the output, having first been passed through the same
 escape processing as text from the \f(CR\-\-output\fP (\f(CR\-O\fP) option (see
-above). However, \f(CI$0\fP or \f(CI$&\fP cannot be used to insert a matched substring because
-the match is still in progress. Instead, the single character \f(CR0\fP is inserted.
+above). Literal text and captured substrings are copied byte for byte, preserving
+their UTF\-8 encoding in Unicode mode. However, \f(CI$0\fP or \f(CI$&\fP cannot be
+used to insert a matched substring because the match is still in progress.
+Instead, the single character \f(CR0\fP is inserted.
 Any syntax errors in the string (for example, a dollar not followed by another
 character) causes the callout to be ignored. No terminator is added to the
 output string, so if you want a newline, you must include it explicitly using
@@ -1084,7 +1086,10 @@ started by a dollar character. These are the same as for the \f(CR\-\-output\fP
 (\f(CR\-O\fP) option documented above, except that \f(CI$0\fP or \f(CI$&\fP cannot insert the
 matched string because the match is still in progress. Instead, the character
 \f(CR0\fP is inserted. If you need a literal dollar or pipe character in any
-substring, use \f(CI$$\fP or \f(CI$|\fP respectively. Here is an example:
+substring, use \f(CI$$\fP or \f(CI$|\fP respectively. Literal text and captured
+substrings are copied byte for byte. Captured substrings and characters produced
+by escape sequences are not reinterpreted as separators or further escapes.
+Here is an example:
 .sp
 .ss \n[.ss]
 .nf

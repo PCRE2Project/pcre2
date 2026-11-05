@@ -1314,10 +1314,7 @@ if supports("callout scripts in patterns are supported"):
         *pcre2grep_args, f'(T)(..(.))()()()()()()()(..)(?C"{echo_prog}|Arg1: [$11] [${{11}}]")',
         srcdir / "testdata" / "grepinputv"
     ])
-    output([
-        *pcre2grep_args, "-m1", f'(T)(x)?()(?C"{echo_prog}|Unset: [$2] [$3]")',
-        srcdir / "testdata" / "grepinputv"
-    ])
+    output([*pcre2grep_args, "-m1", f'(T)(x)?()(?C"{echo_prog}|Unset: [$2] [$3]")', srcdir / "testdata" / "grepinputv"])
     Path("testNinputgrep").write_bytes(b"x" * 65536 + b"\n")
     callout_pattern = f'^(x+)(?C"{echo_prog}|' + "$1" * 512 + '")$'
     output([*pcre2grep_args, "-q", callout_pattern, "testNinputgrep"])
@@ -1329,8 +1326,7 @@ if supports("callout scripts in patterns are supported"):
     output([*pcre2grep_args, '(T)(?C"|$1$n")(*F)', srcdir / "testdata" / "grepinputv"])
     write_test_output(b"--- Test 6 ---\n")
     output([*pcre2grep_args, "-m1", '(T)(?C"|$0:$1:$x{41}$o{101}$n")', srcdir / "testdata" / "grepinputv"])
-    output([*pcre2grep_args, "-m1", '(T)(x)?()(?C"|Unset: [$2] [$3]$n")',
-            srcdir / "testdata" / "grepinputv"])
+    output([*pcre2grep_args, "-m1", '(T)(x)?()(?C"|Unset: [$2] [$3]$n")', srcdir / "testdata" / "grepinputv"])
     supports_nonfork_callouts = supports("Non-fork callout scripts in patterns are supported")
     if not compare(srcdir / "testdata" /
                    ("grepoutputCN" if supports_nonfork_callouts else "grepoutputC"), "testtrygrep"):
@@ -1339,8 +1335,17 @@ if supports("callout scripts in patterns are supported"):
         print("Testing pcre2grep script callout with UTF-8 features")
         write_test_output(b"--- Test 1 ---\n", append=False)
         output([*pcre2grep_args, "-u", '(T)(?C"|$0:$x{a6}$n")', srcdir / "testdata" / "grepinputv"])
+        utf8_text = "\u00a2\u20ac\U00010348"
+        utf8_escaped = "".join("$" + character for character in utf8_text)
+        Path("testtemp1grep").write_bytes(f'^(T)(?C"|{utf8_text}:{utf8_escaped}:$1:$|:$$$n")\n'.encode("utf-8"))
+        for options in (("-u", ), ("--no-jit", "-u"), ()):
+            output([*pcre2grep_args, *options, "-m1", "-f", "testtemp1grep", srcdir / "testdata" / "grepinputv"])
         write_test_output(b"--- Test 2 ---\n")
         output([*pcre2grep_args, "-u", f'(T)(?C"{echo_prog}|$0:$x{{a6}}$n")', srcdir / "testdata" / "grepinputv"])
+        Path("testtemp1grep").write_bytes(
+            f'^(T)(?C"{echo_prog}|{utf8_text}:{utf8_escaped}:$1:$|:$$")\n'.encode("utf-8"))
+        for options in (("-u", ), ("--no-jit", "-u"), ()):
+            output([*pcre2grep_args, *options, "-m1", "-f", "testtemp1grep", srcdir / "testdata" / "grepinputv"])
         if not compare(srcdir / "testdata" /
                        ("grepoutputCNU" if supports_nonfork_callouts else "grepoutputCU"), "testtrygrep"):
             sys.exit(1)

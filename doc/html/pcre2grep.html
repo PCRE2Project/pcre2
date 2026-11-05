@@ -589,8 +589,10 @@ available, provided that callouts were not completely disabled when
 zero-terminated string, which means it should not contain any internal binary
 zeros. It is written to the output, having first been passed through the same
 escape processing as text from the <code>--output</code> (<code>-O</code>) option (see
-above). However, <code class="repl rouge"><span class="pcre2-semantic">$0</span></code> or <code class="repl rouge"><span class="pcre2-semantic">$&amp;</span></code> cannot be used to insert a matched substring because
-the match is still in progress. Instead, the single character <code>0</code> is inserted.
+above). Literal text and captured substrings are copied byte for byte, preserving
+their UTF-8 encoding in Unicode mode. However, <code class="repl rouge"><span class="pcre2-semantic">$0</span></code> or <code class="repl rouge"><span class="pcre2-semantic">$&amp;</span></code> cannot be
+used to insert a matched substring because the match is still in progress.
+Instead, the single character <code>0</code> is inserted.
 Any syntax errors in the string (for example, a dollar not followed by another
 character) causes the callout to be ignored. No terminator is added to the
 output string, so if you want a newline, you must include it explicitly using
@@ -613,7 +615,10 @@ started by a dollar character. These are the same as for the <code>--output</cod
 (<code>-O</code>) option documented above, except that <code class="repl rouge"><span class="pcre2-semantic">$0</span></code> or <code class="repl rouge"><span class="pcre2-semantic">$&amp;</span></code> cannot insert the
 matched string because the match is still in progress. Instead, the character
 <code>0</code> is inserted. If you need a literal dollar or pipe character in any
-substring, use <code class="repl rouge"><span class="pcre2-semantic">$$</span></code> or <code class="repl rouge"><span class="pcre2-semantic">$|</span></code> respectively. Here is an example:</p>
+substring, use <code class="repl rouge"><span class="pcre2-semantic">$$</span></code> or <code class="repl rouge"><span class="pcre2-semantic">$|</span></code> respectively. Literal text and captured
+substrings are copied byte for byte. Captured substrings and characters produced
+by escape sequences are not reinterpreted as separators or further escapes.
+Here is an example:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nb">echo</span> <span class="nt">-e</span> <span class="s2">"abcde</span><span class="se">\n</span><span class="s2">12345"</span> | pcre2grep <span class="se">\</span>
   <span class="s1">'(?x)(.)(..(.))
   (?C"/bin/echo|Arg1: [$1] [$2] [$3]|Arg2: $|${1}$| ($4)")()'</span> -</code></pre></div>

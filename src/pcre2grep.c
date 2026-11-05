@@ -178,7 +178,7 @@ enum { BIN_BINARY, BIN_NOMATCH, BIN_TEXT };
 
 /* Return values from decode_dollar_escape() */
 
-enum { DDE_ERROR, DDE_CAPTURE, DDE_CHAR };
+enum { DDE_ERROR, DDE_CAPTURE, DDE_CHAR, DDE_BYTE };
 
 /* In newer versions of gcc, with FORTIFY_SOURCE set (the default in some
 environments), a warning is issued if the value of fwrite() is ignored.
@@ -1510,7 +1510,7 @@ read_one_line(char *buffer, PCRE2_SIZE length, FILE *f)
   PCRE2_SIZE yield = 0;
   while ((c = fgetc(f)) != EOF)
   {
-    buffer[yield++] = c;
+    buffer[yield++] = (char)c;
     if (c == '\n' || yield >= length)
       break;
   }
@@ -2112,6 +2112,7 @@ Arguments:
 Returns:     DDE_ERROR    after a syntax error
              DDE_CAPTURE  if *value is a capture number
              DDE_CHAR     if *value is a character code
+             DDE_BYTE     if *value is a literal byte
 */
 
 static int
@@ -2294,6 +2295,7 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
 
   default:
     *value = *string;
+    rc = DDE_BYTE;
     break;
   }
 
@@ -2406,11 +2408,14 @@ display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject, PCRE2_S
 
   for (; *string != 0; string++)
   {
+    BOOL literal_byte = TRUE;
+
     if (*string == '$')
     {
       switch (decode_dollar_escape(begin, string, callout, &value, &string))
       {
       case DDE_CHAR:
+        literal_byte = FALSE;
         if (value == STDOUT_NL_CODE)
         {
           fprintf(stdout, "%s", stdout_nl);
@@ -2419,6 +2424,9 @@ display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject, PCRE2_S
         }
 
         break; // Will print value
+
+      case DDE_BYTE:
+        break;
 
       case DDE_CAPTURE:
         if (value < capture_top && ovector[2 * value] != PCRE2_UNSET)
@@ -2460,7 +2468,7 @@ display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject, PCRE2_S
     else
       value = *string; // Not a $ escape
 
-    if (!utf || value <= 127)
+    if (literal_byte || !utf || value <= 127)
     {
       fprintf(stdout, "%c", value);
     }
@@ -2505,8 +2513,8 @@ follows:
 
 Alternatively, if string starts with pipe, the remainder is taken as an output
 string, same as --output. This is the only form that is supported if
-SUPPORT_PCRE2GREP_FORK is not defined. In this case, --om-separator is used to
-separate each callout, defaulting to newline.
+SUPPORT_PCRE2GREP_CALLOUT_FORK is not defined. No terminator is added to the
+output string.
 
 Example:
 
@@ -2581,6 +2589,9 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 
       switch (decode_dollar_escape(begin, string, TRUE, &value, &string))
       {
+      case DDE_BYTE:
+        break;
+
       case DDE_CAPTURE:
         extra = 0;
         if (value < capture_top && ovector[2 * value] != PCRE2_UNSET)
@@ -2590,7 +2601,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
           /* The use of \K may make the end offset earlier than the start. */
 
           extra = (ovector[value + 1] > ovector[value]) ? ovector[value + 1] - ovector[value]
-                                                       : ovector[value] - ovector[value + 1];
+                                                        : ovector[value] - ovector[value + 1];
         }
 
         break;
@@ -2662,6 +2673,10 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 
       switch (decode_dollar_escape(begin, string, TRUE, &value, &string))
       {
+      case DDE_BYTE:
+        *argsptr++ = (char)value;
+        break;
+
       case DDE_CAPTURE:
         if (value < capture_top && ovector[2 * value] != PCRE2_UNSET)
         {
@@ -2701,7 +2716,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
         }
         else
         {
-          *argsptr++ = value;
+          *argsptr++ = (char)value;
         }
 
         break;
@@ -2722,7 +2737,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
     }
 
     else
-      *argsptr++ = *string;
+      *argsptr++ = (char)*string;
 
     /* Advance along the string */
 

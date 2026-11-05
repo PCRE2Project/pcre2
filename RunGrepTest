@@ -1377,9 +1377,26 @@ if $valgrind $vjs "$pcre2grep" $pcre2grep_opts --help | $valgrind $vjs "$pcre2gr
     echo "--- Test 1 ---" >testtrygrep
     $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u '(T)(?C"|$0:$x{a6}$n")' "$srcdir/testdata/grepinputv" >>testtrygrep
     echo "RC=$?" >>testtrygrep
+    utf8_text=`printf '\302\242\342\202\254\360\220\215\210'`
+    utf8_escaped=`printf '$\302\242$\342\202\254$\360\220\215\210'`
+    printf '^(T)(?C"|%s:%s:$1:$|:$$$n")\n' "$utf8_text" "$utf8_escaped" >testtemp1grep
+    $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u -m1 -f testtemp1grep "$srcdir/testdata/grepinputv" >>testtrygrep
+    echo "RC=$?" >>testtrygrep
+    $valgrind $vjs "$pcre2grep" $pcre2grep_opts --no-jit -u -m1 -f testtemp1grep "$srcdir/testdata/grepinputv" >>testtrygrep
+    echo "RC=$?" >>testtrygrep
+    $valgrind $vjs "$pcre2grep" $pcre2grep_opts -m1 -f testtemp1grep "$srcdir/testdata/grepinputv" >>testtrygrep
+    echo "RC=$?" >>testtrygrep
     echo "--- Test 2 ---" >>testtrygrep
     $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u '(T)(?C"'"$echo_prog"'|$0:$x{a6}$n")' "$srcdir/testdata/grepinputv" >>testtrygrep
     echo "RC=$?" >>testtrygrep
+    printf '^(T)(?C"%s|%s:%s:$1:$|:$$")\n' "$echo_prog" "$utf8_text" "$utf8_escaped" >testtemp1grep
+    $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u -m1 -f testtemp1grep "$srcdir/testdata/grepinputv" >>testtrygrep
+    echo "RC=$?" >>testtrygrep
+    $valgrind $vjs "$pcre2grep" $pcre2grep_opts --no-jit -u -m1 -f testtemp1grep "$srcdir/testdata/grepinputv" >>testtrygrep
+    echo "RC=$?" >>testtrygrep
+    $valgrind $vjs "$pcre2grep" $pcre2grep_opts -m1 -f testtemp1grep "$srcdir/testdata/grepinputv" >>testtrygrep
+    echo "RC=$?" >>testtrygrep
+    unset utf8_text utf8_escaped
 
     if [ $nonfork = 1 ] ; then
       $cf "$srcdir/testdata/grepoutputCNU" testtrygrep
