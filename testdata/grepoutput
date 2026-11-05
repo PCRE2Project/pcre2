@@ -1375,5 +1375,9 @@ pcre2grep: Out-of-range number "18446744073709551616M" after --max-buffer-size
 Usage: pcre2grep [-AaBCcDdEeFfHhIilLMmNnOoPqrstuUVvwxZ] [long options] [pattern] [files]
 Type "pcre2grep --help" for more information and the long options.
 RC=2
+pcre2grep: Out-of-range number "18446744073709551615" after --buffer-size
+Usage: pcre2grep [-AaBCcDdEeFfHhIilLMmNnOoPqrstuUVvwxZ] [long options] [pattern] [files]
+Type "pcre2grep --help" for more information and the long options.
+RC=2
 pattern
 RC=0

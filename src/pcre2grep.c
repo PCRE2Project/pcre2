@@ -1386,7 +1386,8 @@ just keep it simple.
 
 A value that does not fit the variable behind the option is an error, because a
 wrapped value could get past the later checks: a negative -o group number would
-index before the ovector, and 3 * bufthird must not exceed PCRE2_SIZE.
+index before the ovector. The size of the main buffer, 3 * bufthird, is checked
+when it is allocated.
 
 Arguments:
   option_data   the option data string
@@ -1412,7 +1413,7 @@ decode_number(char *option_data, option_item *op, BOOL longop)
     break;
 
   case OP_SIZE:
-    limit = PCRE2_SIZE_MAX / 3;
+    limit = PCRE2_SIZE_MAX;
     break;
 
   default:
@@ -4676,9 +4677,9 @@ main(int argc, char **argv)
 
     if (op->type == OP_OP_NUMBERS)
     {
-      uint64_t n = decode_number(option_data, op, longop);
+      int n = (int)decode_number(option_data, op, longop);
       omdatastr *omd = (omdatastr *)op->dataptr;
-      *(omd->lastptr) = add_number((int)n, *(omd->lastptr));
+      *(omd->lastptr) = add_number(n, *(omd->lastptr));
       if (*(omd->anchor) == NULL)
         *(omd->anchor) = *(omd->lastptr);
     }
@@ -4753,13 +4754,12 @@ main(int argc, char **argv)
     }
     else
     {
-      uint64_t n = decode_number(option_data, op, longop);
       if (op->type == OP_U32NUMBER)
-        *((uint32_t *)op->dataptr) = (uint32_t)n;
+        *((uint32_t *)op->dataptr) = (uint32_t)decode_number(option_data, op, longop);
       else if (op->type == OP_SIZE)
-        *((PCRE2_SIZE *)op->dataptr) = (PCRE2_SIZE)n;
+        *((PCRE2_SIZE *)op->dataptr) = (PCRE2_SIZE)decode_number(option_data, op, longop);
       else
-        *((int *)op->dataptr) = (int)n;
+        *((int *)op->dataptr) = (int)decode_number(option_data, op, longop);
     }
   }
 
@@ -5043,6 +5043,20 @@ main(int argc, char **argv)
     fprintf(stderr, "pcre2grep: --buffer-size must be greater than zero\n");
     goto EXIT2;
   }
+
+  /* The main buffer is three times bufthird, and it grows up to three times
+  max_bufthird. */
+
+  if (bufthird > PCRE2_SIZE_MAX / 3)
+  {
+    fprintf(stderr, "pcre2grep: Out-of-range number \"%" SIZ_FORM "\" after --buffer-size\n",
+            bufthird);
+    (void)usage(2);
+    goto EXIT2;
+  }
+
+  if (max_bufthird > PCRE2_SIZE_MAX / 3)
+    max_bufthird = PCRE2_SIZE_MAX / 3;
 
   bufsize = 3 * bufthird;
   main_buffer = (char *)malloc(bufsize);

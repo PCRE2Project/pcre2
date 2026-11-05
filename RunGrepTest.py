@@ -950,6 +950,7 @@ output_both([*pcre2grep_args, "--max-count=2147483648", "pattern", "testdata/gre
 output_both([*pcre2grep_args, "--om-capture=4294967296", "pattern", "testdata/grepinput"], cwd=srcdir)
 output_both([*pcre2grep_args, "--buffer-size=18446744073709551617", "pattern", "testdata/grepinput"], cwd=srcdir)
 output_both([*pcre2grep_args, "--max-buffer-size=18446744073709551616M", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--buffer-size=18446744073709551615", "pattern", "testdata/grepinput"], cwd=srcdir)
 output_both([*pcre2grep_args, "--om-capture=4294967295", "-m1", "-o1", "(pattern)", "testdata/grepinput"], cwd=srcdir)
 
 # Now compare the results.
