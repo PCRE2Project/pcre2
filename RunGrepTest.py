@@ -943,6 +943,15 @@ output([*pcre2grep_args, "--allow-lookaround-bsk", "--output", "$0", r"(?=foo\K)
 output([*pcre2grep_args, "--allow-lookaround-bsk", "--line-offsets", r"(?=foo\K)", "testNinputgrep"])
 output([*pcre2grep_args, "--allow-lookaround-bsk", "--file-offsets", r"(?=foo\K)", "testNinputgrep"])
 
+write_test_output(b"---------------------------- Test 162 -----------------------------\n")
+output_both([*pcre2grep_args, "--only-matching=3000000000", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-o4294967295", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--max-count=2147483648", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--om-capture=4294967296", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--buffer-size=18446744073709551617", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--max-buffer-size=18446744073709551616M", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--om-capture=4294967295", "-m1", "-o1", "(pattern)", "testdata/grepinput"], cwd=srcdir)
+
 # Now compare the results.
 
 if not compare(srcdir / "testdata" / "grepoutput", "testtrygrep"):

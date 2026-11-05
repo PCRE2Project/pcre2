@@ -22,6 +22,11 @@ backtracking after the recursive call.
 3. (#1040) Fixed the start_match field passed to interpreter callouts after \K
 resets the start of a match, including restoration on backtracking.
 
+4. pcre2grep now rejects numeric option values that do not fit the option's
+variable. They used to wrap silently, so that a large -o group number could
+become negative and read outside the ovector, and --buffer-size could make the
+size of the main buffer wrap.
+
 
 Version 10.49 28-September-2026
 -------------------------------

@@ -1384,46 +1384,84 @@ test_incexc(char *path, patstr *ip, patstr *ep)
 because SunOS4 doesn't have it. This is used only for unpicking arguments, so
 just keep it simple.
 
+A value that does not fit the variable behind the option is an error, because a
+wrapped value could get past the later checks: a negative -o group number would
+index before the ovector, and 3 * bufthird must not exceed PCRE2_SIZE.
+
 Arguments:
   option_data   the option data string
-  op            the option item (for error messages)
+  op            the option item (for the limit and error messages)
   longop        TRUE if option given in long form
 
-Returns:        a long integer
+Returns:        the value, within the range of the option's variable
 */
 
-static long int
+static uint64_t
 decode_number(char *option_data, option_item *op, BOOL longop)
 {
-  unsigned long int n = 0;
+  uint64_t n = 0;
+  uint64_t limit;
+  uint64_t multiplier = 1;
+  BOOL too_large = FALSE;
   char *endptr = option_data;
+
+  switch (op->type)
+  {
+  case OP_U32NUMBER:
+    limit = UINT32_MAX;
+    break;
+
+  case OP_SIZE:
+    limit = PCRE2_SIZE_MAX / 3;
+    break;
+
+  default:
+    limit = INT_MAX;
+    break;
+  }
+
   while (*endptr != 0 && isspace((unsigned char)(*endptr)))
     endptr++;
   while (isdigit((unsigned char)(*endptr)))
-    n = n * 10 + (int)(*endptr++ - '0');
+  {
+    unsigned int digit = (unsigned int)(*endptr++ - '0');
+    if (n > (limit - digit) / 10)
+      too_large = TRUE;
+    else
+      n = n * 10 + digit;
+  }
+
   if (toupper(*endptr) == 'K')
   {
-    n *= 1024;
+    multiplier = 1024;
     endptr++;
   }
   else if (toupper(*endptr) == 'M')
   {
-    n *= 1024 * 1024;
+    multiplier = 1024 * 1024;
     endptr++;
   }
 
-  if (*endptr != 0) // Error
+  if (n > limit / multiplier)
+    too_large = TRUE;
+  else
+    n *= multiplier;
+
+  if (*endptr != 0 || too_large) // Error
   {
+    const char *problem = (*endptr != 0) ? "Malformed" : "Out-of-range";
+
     if (longop)
     {
       const char *equals = strchr(op->long_name, '=');
       int nlen = (equals == NULL) ? (int)strlen(op->long_name) : (int)(equals - op->long_name);
-      fprintf(stderr, "pcre2grep: Malformed number \"%s\" after --%.*s\n", option_data, nlen,
+      fprintf(stderr, "pcre2grep: %s number \"%s\" after --%.*s\n", problem, option_data, nlen,
               op->long_name);
     }
     else
     {
-      fprintf(stderr, "pcre2grep: Malformed number \"%s\" after -%c\n", option_data, op->one_char);
+      fprintf(stderr, "pcre2grep: %s number \"%s\" after -%c\n", problem, option_data,
+              op->one_char);
     }
 
     pcre2grep_exit(usage(2));
@@ -4638,7 +4676,7 @@ main(int argc, char **argv)
 
     if (op->type == OP_OP_NUMBERS)
     {
-      unsigned long int n = decode_number(option_data, op, longop);
+      uint64_t n = decode_number(option_data, op, longop);
       omdatastr *omd = (omdatastr *)op->dataptr;
       *(omd->lastptr) = add_number((int)n, *(omd->lastptr));
       if (*(omd->anchor) == NULL)
@@ -4715,11 +4753,11 @@ main(int argc, char **argv)
     }
     else
     {
-      unsigned long int n = decode_number(option_data, op, longop);
+      uint64_t n = decode_number(option_data, op, longop);
       if (op->type == OP_U32NUMBER)
         *((uint32_t *)op->dataptr) = (uint32_t)n;
       else if (op->type == OP_SIZE)
-        *((PCRE2_SIZE *)op->dataptr) = n;
+        *((PCRE2_SIZE *)op->dataptr) = (PCRE2_SIZE)n;
       else
         *((int *)op->dataptr) = (int)n;
     }
@@ -4772,7 +4810,7 @@ main(int argc, char **argv)
   for (om = only_matching; om != NULL; om = om->next)
   {
     int n = om->groupnum;
-    if (n > (int)capture_max)
+    if ((uint32_t)n > capture_max)
     {
       fprintf(stderr, "pcre2grep: Requested group %d cannot be captured.\n", n);
       fprintf(stderr, "pcre2grep: Use --om-capture to increase the size of the capture vector.\n");
@@ -4787,7 +4825,7 @@ main(int argc, char **argv)
 
   /* Set up default compile and match contexts and match data blocks. */
 
-  offset_size = capture_max + 1;
+  offset_size = (capture_max == UINT32_MAX) ? capture_max : capture_max + 1;
   compile_context = pcre2_compile_context_create(NULL);
   match_context = pcre2_match_context_create(NULL);
   match_data_pair[0] = pcre2_match_data_create(offset_size, NULL);
