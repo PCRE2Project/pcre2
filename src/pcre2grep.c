@@ -249,6 +249,11 @@ static PCRE2_SIZE bufthird = PCRE2GREP_BUFSIZE;
 static PCRE2_SIZE max_bufthird = PCRE2GREP_MAX_BUFSIZE;
 static PCRE2_SIZE bufsize = 3 * PCRE2GREP_BUFSIZE;
 
+#if defined(SUPPORT_PCRE2GREP_CALLOUT) && defined(SUPPORT_PCRE2GREP_CALLOUT_FORK)
+static const PCRE2_SIZE max_callout_argsvectorlen = 32 * 1024;
+static const PCRE2_SIZE max_callout_argslen = 32 * 1024 * 1024;
+#endif
+
 #ifdef WIN32
 static int dee_action = dee_SKIP;
 #else
@@ -2518,7 +2523,7 @@ Example:
 Arguments:
   blockptr     the callout block
 
-Returns:       currently it always returns with 0
+Returns:       zero to continue matching, non-zero for a local matching failure
 */
 
 static int
@@ -2529,19 +2534,6 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
   PCRE2_SPTR subject = calloutptr->subject;
   PCRE2_SIZE *ovector = calloutptr->offset_vector;
   PCRE2_SIZE capture_top = calloutptr->capture_top;
-
-#ifdef SUPPORT_PCRE2GREP_CALLOUT_FORK
-  PCRE2_SIZE argsvectorlen = 2;
-  PCRE2_SIZE argslen = 1;
-  char *args;
-  char *argsptr;
-  char **argsvector;
-  char **argsvectorptr;
-#ifndef WIN32
-  pid_t pid;
-#endif
-  int result = 0;
-#endif /* SUPPORT_PCRE2GREP_CALLOUT_FORK */
 
   (void)unused; // Avoid compiler warning
 
@@ -2568,13 +2560,18 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
   /* Checking syntax and compute the number of string fragments. Callout strings
   are silently ignored in the event of a syntax error. */
 
+  PCRE2_SIZE argsvectorlen = 2;
+  PCRE2_SIZE argslen = 1;
+
   while (length > 0)
   {
+    PCRE2_SIZE extra = 1;
+
     if (*string == '|')
     {
-      argsvectorlen++;
-      if (argsvectorlen > 10000)
+      if (argsvectorlen >= max_callout_argsvectorlen)
         return 0; // Too many args
+      argsvectorlen++;
     }
 
     else if (*string == '$')
@@ -2585,24 +2582,24 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
       switch (decode_dollar_escape(begin, string, TRUE, &value, &string))
       {
       case DDE_CAPTURE:
+        extra = 0;
         if (value < capture_top && ovector[2 * value] != PCRE2_UNSET)
         {
           value *= 2;
 
           /* The use of \K may make the end offset earlier than the start. */
 
-          argslen += (ovector[value + 1] > ovector[value]) ? ovector[value + 1] - ovector[value]
-                                                           : ovector[value] - ovector[value + 1];
+          extra = (ovector[value + 1] > ovector[value]) ? ovector[value + 1] - ovector[value]
+                                                       : ovector[value] - ovector[value + 1];
         }
 
-        argslen--; // Negate the effect of argslen++ below.
         break;
 
       case DDE_CHAR:
         if (value == STDOUT_NL_CODE)
-          argslen += strlen(stdout_nl) - 1;
+          extra = strlen(stdout_nl);
         else if (utf && value > 127)
-          argslen += ord2utf8(value) - 1;
+          extra = ord2utf8(value);
         break;
 
       case DDE_ERROR: // Invalid syntax; silently ignore
@@ -2618,18 +2615,21 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
       length -= (string - begin);
     }
 
+    if (extra > max_callout_argslen - argslen)
+      return 0; // Too much argument data
+    argslen += extra;
+
     string++;
     length--;
-    argslen++;
   }
 
   /* Get memory for the argument vector and its strings. */
 
-  args = (char *)malloc(argslen);
+  char *args = (char *)malloc(argslen);
   if (args == NULL)
     return 0;
 
-  argsvector = (char **)malloc(argsvectorlen * sizeof(char *));
+  char **argsvector = (char **)malloc(argsvectorlen * sizeof(char *));
   if (argsvector == NULL)
   {
     /* LCOV_EXCL_START */
@@ -2640,8 +2640,8 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 
   /* Now reprocess the string and set up the arguments. */
 
-  argsptr = args;
-  argsvectorptr = argsvector;
+  char *argsptr = args;
+  char **argsvectorptr = argsvector;
   *argsvectorptr++ = argsptr;
 
   length = calloutptr->callout_string_length;
@@ -2736,6 +2736,8 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
   /* Running an external command is system-dependent. Handle Windows and VMS as
   necessary, otherwise assume fork(). */
 
+  int result = 0;
+
 #ifdef WIN32
   (void)fflush(stdout);
   result = _spawnvp(_P_WAIT, argsvector[0], (const char *const *)argsvector) != 0;
@@ -2765,7 +2767,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 
 #else  /* Neither Windows nor VMS */
   (void)fflush(stdout);
-  pid = fork();
+  pid_t pid = fork();
   if (pid == 0)
   {
     (void)execv(argsvector[0], argsvector);

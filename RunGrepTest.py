@@ -1318,6 +1318,9 @@ if supports("callout scripts in patterns are supported"):
         *pcre2grep_args, "-m1", f'(T)(x)?()(?C"{echo_prog}|Unset: [$2] [$3]")',
         srcdir / "testdata" / "grepinputv"
     ])
+    Path("testNinputgrep").write_bytes(b"x" * 65536 + b"\n")
+    callout_pattern = f'^(x+)(?C"{echo_prog}|' + "$1" * 512 + '")$'
+    output([*pcre2grep_args, "-q", callout_pattern, "testNinputgrep"])
     write_test_output(b"--- Test 3 ---\n")
     output([*pcre2grep_args, '(T)(?C"|$0:$1$n")', srcdir / "testdata" / "grepinputv"])
     write_test_output(b"--- Test 4 ---\n")
