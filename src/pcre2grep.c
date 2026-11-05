@@ -2416,7 +2416,7 @@ display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject, PCRE2_S
         break; // Will print value
 
       case DDE_CAPTURE:
-        if (value < capture_top)
+        if (value < capture_top && ovector[2 * value] != PCRE2_UNSET)
         {
           PCRE2_SIZE capturesize, start, end;
           value *= 2;
@@ -2585,7 +2585,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
       switch (decode_dollar_escape(begin, string, TRUE, &value, &string))
       {
       case DDE_CAPTURE:
-        if (value < capture_top)
+        if (value < capture_top && ovector[2 * value] != PCRE2_UNSET)
         {
           value *= 2;
 
@@ -2663,7 +2663,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
       switch (decode_dollar_escape(begin, string, TRUE, &value, &string))
       {
       case DDE_CAPTURE:
-        if (value < capture_top)
+        if (value < capture_top && ovector[2 * value] != PCRE2_UNSET)
         {
           PCRE2_SIZE capturesize, start, end;
           value *= 2;

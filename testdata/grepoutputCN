@@ -14,6 +14,8 @@ The word is cat in this line
 The caterpillar sat on the mat
 The snowcat is not an animal
 RC=0
+The quick brown
+RC=0
 --- Test 3 ---
 0:T
 The quick brown
@@ -46,5 +48,8 @@ T
 RC=1
 --- Test 6 ---
 0:T:AA
+The quick brown
+RC=0
+Unset: [] []
 The quick brown
 RC=0

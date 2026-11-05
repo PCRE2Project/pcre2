@@ -1314,6 +1314,10 @@ if supports("callout scripts in patterns are supported"):
         *pcre2grep_args, f'(T)(..(.))()()()()()()()(..)(?C"{echo_prog}|Arg1: [$11] [${{11}}]")',
         srcdir / "testdata" / "grepinputv"
     ])
+    output([
+        *pcre2grep_args, "-m1", f'(T)(x)?()(?C"{echo_prog}|Unset: [$2] [$3]")',
+        srcdir / "testdata" / "grepinputv"
+    ])
     write_test_output(b"--- Test 3 ---\n")
     output([*pcre2grep_args, '(T)(?C"|$0:$1$n")', srcdir / "testdata" / "grepinputv"])
     write_test_output(b"--- Test 4 ---\n")
@@ -1322,6 +1326,8 @@ if supports("callout scripts in patterns are supported"):
     output([*pcre2grep_args, '(T)(?C"|$1$n")(*F)', srcdir / "testdata" / "grepinputv"])
     write_test_output(b"--- Test 6 ---\n")
     output([*pcre2grep_args, "-m1", '(T)(?C"|$0:$1:$x{41}$o{101}$n")', srcdir / "testdata" / "grepinputv"])
+    output([*pcre2grep_args, "-m1", '(T)(x)?()(?C"|Unset: [$2] [$3]$n")',
+            srcdir / "testdata" / "grepinputv"])
     supports_nonfork_callouts = supports("Non-fork callout scripts in patterns are supported")
     if not compare(srcdir / "testdata" /
                    ("grepoutputCN" if supports_nonfork_callouts else "grepoutputC"), "testtrygrep"):
