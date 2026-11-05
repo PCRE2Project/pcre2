@@ -1341,6 +1341,30 @@ if $valgrind $vjs "$pcre2grep" $pcre2grep_opts --help | $valgrind $vjs "$pcre2gr
   }'`
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q "$callout_pattern" testNinputgrep >>testtrygrep
   echo "RC=$?" >>testtrygrep
+  printf 'T\n' >testNinputgrep
+  for callout_pattern in \
+    '^T(?C"pcre2grep-nonexistent-callout$x{0}suffix|arg")' \
+    '^T(?C"pcre2grep-nonexistent-callout$x{0}suffix")' \
+    '^T(?C"pcre2grep-nonexistent-callout|arg$x{0}suffix|tail")' \
+    '^T(?C"pcre2grep-nonexistent-callout|arg$o{0}suffix")'
+  do
+    $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q "$callout_pattern" testNinputgrep >>testtrygrep 2>&1
+    echo "RC=$?" >>testtrygrep
+  done
+  printf '^T(?C"pcre2grep-nonexistent-callout|arg\0suffix|tail")\n' >testtemp1grep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q -f testtemp1grep testNinputgrep >>testtrygrep 2>&1
+  echo "RC=$?" >>testtrygrep
+  printf '^T(?C"pcre2grep-nonexistent-callout|arg\0suffix")\n' >testtemp1grep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q -f testtemp1grep testNinputgrep >>testtrygrep 2>&1
+  echo "RC=$?" >>testtrygrep
+  printf 'T\0X\n' >testNinputgrep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -qa '^(T\x00X)(?C"pcre2grep-nonexistent-callout|$1")' testNinputgrep >>testtrygrep 2>&1
+  echo "RC=$?" >>testtrygrep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -qa '^(T\x00X)(?C"pcre2grep-nonexistent-callout$1|tail")' testNinputgrep >>testtrygrep 2>&1
+  echo "RC=$?" >>testtrygrep
+  printf 'T\n' >testNinputgrep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q '^T(?C"pcre2grep-nonexistent-callout||")' testNinputgrep >>testtrygrep 2>&1
+  echo "RC=$?" >>testtrygrep
   unset callout_pattern
   echo "--- Test 3 ---" >>testtrygrep
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts '(T)(?C"|$0:$1$n")' "$srcdir/testdata/grepinputv" >>testtrygrep
@@ -1363,6 +1387,27 @@ if $valgrind $vjs "$pcre2grep" $pcre2grep_opts --help | $valgrind $vjs "$pcre2gr
   echo "RC=$?" >>testtrygrep
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts -m1 '(T)(x)?()(?C"|Unset: [$2] [$3]$n")' "$srcdir/testdata/grepinputv" >>testtrygrep
   echo "RC=$?" >>testtrygrep
+  printf '^(T)(?C"|A\0B:$1:$x{00}:$\0Z$n")\n' >testtemp1grep
+  for jit_option in '' --no-jit; do
+    run_null_translated $valgrind $vjs "$pcre2grep" $pcre2grep_opts $jit_option -q -f testtemp1grep testNinputgrep >>testtrygrep
+    echo "RC=$?" >>testtrygrep
+  done
+  printf 'T\0X\n' >testNinputgrep
+  run_null_translated $valgrind $vjs "$pcre2grep" $pcre2grep_opts -qa '^(T\x00X)(?C"|$1:$x{00}$n")' testNinputgrep >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+  printf 'T\n' >testNinputgrep
+  printf '^(T)(?C"|$1\0$1$n")\n' >testtemp1grep
+  run_null_translated $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q -f testtemp1grep testNinputgrep >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+  printf '^T(?C"|tail\0")\n' >testtemp1grep
+  run_null_translated $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q -f testtemp1grep testNinputgrep >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+  for escape in '$' '${' '$x{'; do
+    printf '^T(?C"|ignored\0%s")\n' "$escape" >testtemp1grep
+    $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q -f testtemp1grep testNinputgrep >>testtrygrep 2>&1
+    echo "RC=$?" >>testtrygrep
+  done
+  unset jit_option escape
 
   if $valgrind $vjs "$pcre2grep" $pcre2grep_opts --help | $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q 'Non-fork callout scripts in patterns are supported'; then
     nonfork=1

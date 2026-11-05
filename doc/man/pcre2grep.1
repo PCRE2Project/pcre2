@@ -1037,9 +1037,8 @@ only callouts with string arguments are useful.
 Starting the callout string with a pipe character invokes an echoing facility
 that avoids calling an external program or script. This facility is always
 available, provided that callouts were not completely disabled when
-\f(CRpcre2grep\fP was built. The rest of the callout string is processed as a
-zero\-terminated string, which means it should not contain any internal binary
-zeros. It is written to the output, having first been passed through the same
+\f(CRpcre2grep\fP was built. The rest of the callout string, which may contain binary
+zeros, is written to the output, having first been passed through the same
 escape processing as text from the \f(CR\-\-output\fP (\f(CR\-O\fP) option (see
 above). Literal text and captured substrings are copied byte for byte, preserving
 their UTF\-8 encoding in Unicode mode. However, \f(CI$0\fP or \f(CI$&\fP cannot be
@@ -1118,10 +1117,10 @@ Arg1: [1] [234] [4] Arg2: |1| ()
 .ss \n[.ss] 0
 .sp
 The parameters for the system call that is used to run the program or script
-are zero\-terminated strings. This means that binary zero characters in the
-callout argument will cause premature termination of their substrings, and
-therefore should not be present. Any syntax errors in the string (for example,
-a dollar not followed by another character) causes the callout to be ignored.
+are zero\-terminated strings. If an executable name or argument contains a binary
+zero after escape processing and capture substitution, the entire callout is
+silently ignored. Any syntax errors in the string (for example, a dollar not
+followed by another character) also cause the callout to be ignored.
 If running the program fails for any reason (including the non\-existence of the
 executable), a local matching failure occurs and the matcher backtracks in the
 normal way.

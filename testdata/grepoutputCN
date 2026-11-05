@@ -17,6 +17,15 @@ RC=0
 The quick brown
 RC=0
 RC=0
+RC=0
+RC=0
+RC=0
+RC=0
+RC=0
+RC=0
+RC=0
+RC=0
+RC=0
 --- Test 3 ---
 0:T
 The quick brown
@@ -57,4 +66,16 @@ The quick brown
 RC=0
 Unset: [] []
 The quick brown
+RC=0
+A@B:T:@:@Z
+RC=0
+A@B:T:@:@Z
+RC=0
+T@X:@
+RC=0
+T@T
+RC=0
+tail@RC=0
+RC=0
+RC=0
 RC=0

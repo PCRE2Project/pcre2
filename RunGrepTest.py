@@ -1317,6 +1317,25 @@ if supports("callout scripts in patterns are supported"):
     Path("testNinputgrep").write_bytes(b"x" * 65536 + b"\n")
     callout_pattern = f'^(x+)(?C"{echo_prog}|' + "$1" * 512 + '")$'
     output([*pcre2grep_args, "-q", callout_pattern, "testNinputgrep"])
+    Path("testNinputgrep").write_bytes(b"T\n")
+    for callout_pattern in (
+            '^T(?C"pcre2grep-nonexistent-callout$x{0}suffix|arg")',
+            '^T(?C"pcre2grep-nonexistent-callout$x{0}suffix")',
+            '^T(?C"pcre2grep-nonexistent-callout|arg$x{0}suffix|tail")',
+            '^T(?C"pcre2grep-nonexistent-callout|arg$o{0}suffix")',
+    ):
+        output_both([*pcre2grep_args, "-q", callout_pattern, "testNinputgrep"])
+    for callout_pattern in (
+            b'^T(?C"pcre2grep-nonexistent-callout|arg\0suffix|tail")\n',
+            b'^T(?C"pcre2grep-nonexistent-callout|arg\0suffix")\n',
+    ):
+        Path("testtemp1grep").write_bytes(callout_pattern)
+        output_both([*pcre2grep_args, "-q", "-f", "testtemp1grep", "testNinputgrep"])
+    Path("testNinputgrep").write_bytes(b"T\0X\n")
+    output_both([*pcre2grep_args, "-qa", r'^(T\x00X)(?C"pcre2grep-nonexistent-callout|$1")', "testNinputgrep"])
+    output_both([*pcre2grep_args, "-qa", r'^(T\x00X)(?C"pcre2grep-nonexistent-callout$1|tail")', "testNinputgrep"])
+    Path("testNinputgrep").write_bytes(b"T\n")
+    output_both([*pcre2grep_args, "-q", '^T(?C"pcre2grep-nonexistent-callout||")', "testNinputgrep"])
     write_test_output(b"--- Test 3 ---\n")
     output([*pcre2grep_args, '(T)(?C"|$0:$1$n")', srcdir / "testdata" / "grepinputv"])
     write_test_output(b"--- Test 4 ---\n")
@@ -1331,6 +1350,23 @@ if supports("callout scripts in patterns are supported"):
     write_test_output(b"--- Test 6 ---\n")
     output([*pcre2grep_args, "-m1", '(T)(?C"|$0:$1:$x{41}$o{101}$n")', srcdir / "testdata" / "grepinputv"])
     output([*pcre2grep_args, "-m1", '(T)(x)?()(?C"|Unset: [$2] [$3]$n")', srcdir / "testdata" / "grepinputv"])
+    Path("testtemp1grep").write_bytes(b'^(T)(?C"|A\0B:$1:$x{00}:$\0Z$n")\n')
+    for options in ((), ("--no-jit", )):
+        output([*pcre2grep_args, *options, "-q", "-f", "testtemp1grep", "testNinputgrep"],
+               transform=lambda data: data.replace(b"\0", b"@"))
+    Path("testNinputgrep").write_bytes(b"T\0X\n")
+    output([*pcre2grep_args, "-qa", r'^(T\x00X)(?C"|$1:$x{00}$n")', "testNinputgrep"],
+           transform=lambda data: data.replace(b"\0", b"@"))
+    Path("testNinputgrep").write_bytes(b"T\n")
+    Path("testtemp1grep").write_bytes(b'^(T)(?C"|$1\0$1$n")\n')
+    output([*pcre2grep_args, "-q", "-f", "testtemp1grep", "testNinputgrep"],
+           transform=lambda data: data.replace(b"\0", b"@"))
+    Path("testtemp1grep").write_bytes(b'^T(?C"|tail\0")\n')
+    output([*pcre2grep_args, "-q", "-f", "testtemp1grep", "testNinputgrep"],
+           transform=lambda data: data.replace(b"\0", b"@"))
+    for escape in (b"$", b"${", b"$x{"):
+        Path("testtemp1grep").write_bytes(b'^T(?C"|ignored\0' + escape + b'")\n')
+        output_both([*pcre2grep_args, "-q", "-f", "testtemp1grep", "testNinputgrep"])
     supports_nonfork_callouts = supports("Non-fork callout scripts in patterns are supported")
     if not compare(srcdir / "testdata" /
                    ("grepoutputCN" if supports_nonfork_callouts else "grepoutputC"), "testtrygrep"):

@@ -227,6 +227,7 @@ static const char *group_separator = "--";
 static const char *om_separator = NULL;
 static const char *stdin_name = "(standard input)";
 static const char *output_text = NULL;
+static PCRE2_SIZE output_text_length;
 
 static char *main_buffer = NULL;
 
@@ -2105,6 +2106,7 @@ dollar.
 Arguments:
   begin      the start of the whole string
   string     points to the $
+  end        points just past the whole string
   callout    TRUE if in a callout (inhibits error messages)
   value      where to return a value
   last       where to return pointer to the last used character
@@ -2116,8 +2118,8 @@ Returns:     DDE_ERROR    after a syntax error
 */
 
 static int
-decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t *value,
-                     PCRE2_SPTR *last)
+decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, PCRE2_SPTR end, BOOL callout,
+                     uint32_t *value, PCRE2_SPTR *last)
 {
   uint32_t c = 0;
   int base = 10;
@@ -2125,15 +2127,17 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
   int rc = DDE_CHAR;
   BOOL brace = FALSE;
 
-  switch (*(++string))
+  if (++string >= end)
   {
-  case 0: // Syntax error:   a character must be present after $.
     if (!callout)
       fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n", (int)(string - begin),
               "no character after $");
     *last = string;
     return DDE_ERROR;
+  }
 
+  switch (*string)
+  {
   case '&':
     /* In a callout, no capture is available. Return the character '0' for
     consistency with $0. */
@@ -2153,14 +2157,14 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
   case '{':
     brace = TRUE;
     string++;
-    if (!isdigit((unsigned char)(*string)))
+    if (string >= end || !isdigit((unsigned char)(*string)))
     {
       /* Syntax error: a decimal number required. */
       if (!callout)
         fprintf(stderr, "pcre2grep: Error in output text at offset %d: %s\n", (int)(string - begin),
                 "decimal number expected");
-      rc = DDE_ERROR;
-      break;
+      *last = string;
+      return DDE_ERROR;
     }
 
     PCRE2_FALLTHROUGH /* Fall through */
@@ -2184,7 +2188,7 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
       if (c <= 65535)
         c = c * 10 + (*string - '0');
       string++;
-    } while (*string >= '0' && *string <= '9');
+    } while (string < end && *string >= '0' && *string <= '9');
 
     string--; // Point to last digit
 
@@ -2209,7 +2213,7 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
   case 'o':
     base = 8;
     string++;
-    if (*string == '{')
+    if (string < end && *string == '{')
     {
       brace = TRUE;
       string++;
@@ -2220,7 +2224,7 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
       dcount = 3;
     }
 
-    for (; dcount > 0; dcount--)
+    for (; string < end && dcount > 0; dcount--)
     {
       if (*string < '0' || *string > '7')
         break;
@@ -2237,7 +2241,7 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
   case 'x':
     base = 16;
     string++;
-    if (*string == '{')
+    if (string < end && *string == '{')
     {
       brace = TRUE;
       string++;
@@ -2248,7 +2252,7 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
       dcount = 2;
     }
 
-    for (; dcount > 0; dcount--)
+    for (; string < end && dcount > 0; dcount--)
     {
       if (!isxdigit(*string))
         break;
@@ -2301,7 +2305,7 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
 
   if (brace)
   {
-    c = string[1];
+    c = string + 1 < end ? string[1] : 0;
     if (c != '}')
     {
       rc = DDE_ERROR;
@@ -2358,21 +2362,23 @@ from callouts to check before outputting.
 
 Arguments:
   string    an --output text string
+  length    length of the string in bytes
   callout   TRUE if in a callout (stops printing errors)
 
 Returns:    TRUE if OK, FALSE on error
 */
 
 static BOOL
-syntax_check_output_text(PCRE2_SPTR string, BOOL callout)
+syntax_check_output_text(PCRE2_SPTR string, PCRE2_SIZE length, BOOL callout)
 {
   uint32_t value;
   PCRE2_SPTR begin = string;
+  PCRE2_SPTR end = string + length;
 
-  for (; *string != 0; string++)
+  for (; string < end; string++)
   {
     if (*string == '$' &&
-        decode_dollar_escape(begin, string, callout, &value, &string) == DDE_ERROR)
+        decode_dollar_escape(begin, string, end, callout, &value, &string) == DDE_ERROR)
       return FALSE;
   }
 
@@ -2389,6 +2395,7 @@ checked. Output may contain escape sequences started by the dollar sign.
 
 Arguments:
   string:       the output text
+  length:       length of the text in bytes
   callout:      TRUE for the builtin callout, FALSE for --output
   subject       the start of the subject
   ovector:      capture offsets
@@ -2399,20 +2406,21 @@ Returns:        TRUE if something was output, other than newline
 */
 
 static BOOL
-display_output_text(PCRE2_SPTR string, BOOL callout, PCRE2_SPTR subject, PCRE2_SIZE *ovector,
-                    PCRE2_SIZE capture_top)
+display_output_text(PCRE2_SPTR string, PCRE2_SIZE length, BOOL callout, PCRE2_SPTR subject,
+                    PCRE2_SIZE *ovector, PCRE2_SIZE capture_top)
 {
   uint32_t value;
   BOOL printed = FALSE;
   PCRE2_SPTR begin = string;
+  PCRE2_SPTR string_end = string + length;
 
-  for (; *string != 0; string++)
+  for (; string < string_end; string++)
   {
     BOOL literal_byte = TRUE;
 
     if (*string == '$')
     {
-      switch (decode_dollar_escape(begin, string, callout, &value, &string))
+      switch (decode_dollar_escape(begin, string, string_end, callout, &value, &string))
       {
       case DDE_CHAR:
         literal_byte = FALSE;
@@ -2555,9 +2563,9 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
   if (*string == '|')
   {
     string++;
-    if (!syntax_check_output_text(string, TRUE))
+    if (!syntax_check_output_text(string, length - 1, TRUE))
       return 0;
-    (void)display_output_text(string, TRUE, subject, ovector, capture_top);
+    (void)display_output_text(string, length - 1, TRUE, subject, ovector, capture_top);
     return 0;
   }
 
@@ -2570,6 +2578,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
 
   PCRE2_SIZE argsvectorlen = 2;
   PCRE2_SIZE argslen = 1;
+  PCRE2_SPTR string_end = string + length;
 
   while (length > 0)
   {
@@ -2587,7 +2596,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
       uint32_t value;
       PCRE2_SPTR begin = string;
 
-      switch (decode_dollar_escape(begin, string, TRUE, &value, &string))
+      switch (decode_dollar_escape(begin, string, string_end, TRUE, &value, &string))
       {
       case DDE_BYTE:
         break;
@@ -2652,6 +2661,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
   /* Now reprocess the string and set up the arguments. */
 
   char *argsptr = args;
+  char *argstart = args;
   char **argsvectorptr = argsvector;
   *argsvectorptr++ = argsptr;
 
@@ -2662,7 +2672,14 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
   {
     if (*string == '|')
     {
-      *argsptr++ = '\0';
+      *argsptr = '\0';
+      if (strlen(argstart) != (PCRE2_SIZE)(argsptr - argstart))
+      {
+        free(args);
+        free(argsvector);
+        return 0; // Embedded NUL; silently skip
+      }
+      argstart = ++argsptr;
       *argsvectorptr++ = argsptr;
     }
 
@@ -2671,7 +2688,7 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
       uint32_t value;
       PCRE2_SPTR begin = string;
 
-      switch (decode_dollar_escape(begin, string, TRUE, &value, &string))
+      switch (decode_dollar_escape(begin, string, string_end, TRUE, &value, &string))
       {
       case DDE_BYTE:
         *argsptr++ = (char)value;
@@ -2745,7 +2762,13 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
     length--;
   }
 
-  *argsptr++ = '\0';
+  *argsptr = '\0';
+  if (strlen(argstart) != (PCRE2_SIZE)(argsptr - argstart))
+  {
+    free(args);
+    free(argsvector);
+    return 0; // Embedded NUL; silently skip
+  }
   *argsvectorptr = NULL;
 
   /* Running an external command is system-dependent. Handle Windows and VMS as
@@ -3177,8 +3200,8 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
 
           else if (output_text != NULL)
           {
-            (void)display_output_text((PCRE2_SPTR)output_text, FALSE, (PCRE2_SPTR)ptr, offsets,
-                                      mrc);
+            (void)display_output_text((PCRE2_SPTR)output_text, output_text_length, FALSE,
+                                      (PCRE2_SPTR)ptr, offsets, mrc);
             fprintf(stdout, "%s", stdout_nl);
           }
 
@@ -4809,8 +4832,12 @@ main(int argc, char **argv)
 
   /* Check the text supplied to --output for errors. */
 
-  if (output_text != NULL && !syntax_check_output_text((PCRE2_SPTR)output_text, FALSE))
-    goto EXIT2;
+  if (output_text != NULL)
+  {
+    output_text_length = strlen(output_text);
+    if (!syntax_check_output_text((PCRE2_SPTR)output_text, output_text_length, FALSE))
+      goto EXIT2;
+  }
 
   /* Set up default compile and match contexts and match data blocks. */
 
