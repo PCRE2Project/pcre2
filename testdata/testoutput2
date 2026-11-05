@@ -23942,6 +23942,22 @@ Failed: error -72: substitute subject differs from prior match call
  1: X::textY
 
 # --------------
+# An unterminated \Q applies to one replacement, not to those for later matches
+# --------------
+
+/x/g,replace=\Qabc,substitute_extended
+    xx
+ 2: abcabc
+
+/x/g,replace=\Qa$$,substitute_extended
+    xxx
+ 3: a$$a$$a$$
+
+/x/g,replace=\Qa\Eb,substitute_extended
+    xx
+ 2: abab
+
+# --------------
 # Tests for substitution with partial
 # --------------
 
