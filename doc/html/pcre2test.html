@@ -18,7 +18,12 @@ subject is processed, and what output is produced.</p>
 use in conjunction with the test script and data files that are distributed as
 part of PCRE2. All the modifiers are documented here, some without much
 justification, but many of them are unlikely to be of use except when testing
-the libraries.</p></section>
+the libraries.</p>
+<p>On Windows 10 version 1903 and later, the application manifest selects UTF-8
+for command-line arguments and file names, including input and output file
+names. Older Windows versions, or executables built without the manifest, use
+the system’s active code page instead. This does not change the interpretation
+of the contents of test files.</p></section>
 <section class="doc-section level-1"><h2 id="_pcre2s_8_bit_16_bit_and_32_bit_libraries">PCRE2’s 8-bit, 16-bit and 32-bit libraries</h2><p>Different versions of the PCRE2 library can be built to support character
 strings that are encoded in 8-bit, 16-bit, or 32-bit code units. One, two, or
 all three of these libraries may be simultaneously installed. The
@@ -102,7 +107,10 @@ form and information about the compiled pattern is output after compilation;
 <code>-d</code> is equivalent to <code>-b -i</code>.</dd></div><div class="dlist-item"><dt><span><code>-dfa</code></span></dt><dd>Behave as if each subject line has the <code>dfa</code> modifier; matching is done
 using the <code class="function pcre2-api rouge"><span class="nf">pcre2_dfa_match()</span></code> function instead of the default
 <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>.</dd></div><div class="dlist-item"><dt><span><code>-E</code></span></dt><dd>Run in "preprocess only" mode (similar to <code>gcc -E</code>). The <code>#if ... #endif</code>
-commands are processed, and all other lines are printed verbatim.</dd></div><div class="dlist-item"><dt><span><code>-error <em>number</em>[,<em>number</em>,...]</code></span></dt><dd>Call <code class="function pcre2-api rouge"><span class="nf">pcre2_get_error_message()</span></code> for each of the error numbers in the
+commands are processed, and all other lines are printed verbatim.</dd></div><div class="dlist-item"><dt><span><code>-echo</code></span></dt><dd>Write the remaining arguments separated by spaces, followed by a newline, then
+exit. This facility is intended for testing <code>pcre2grep</code> callouts. Argument bytes
+are written unchanged; on Windows, the application manifest selects UTF-8 for
+these bytes on supported Windows versions, as described above.</dd></div><div class="dlist-item"><dt><span><code>-error <em>number</em>[,<em>number</em>,...]</code></span></dt><dd>Call <code class="function pcre2-api rouge"><span class="nf">pcre2_get_error_message()</span></code> for each of the error numbers in the
 comma-separated list, display the resulting messages on the standard output,
 then exit with zero exit code. The numbers may be positive or negative. This is
 a convenience facility for PCRE2 maintainers.</dd></div><div class="dlist-item"><dt><span><code>-help</code></span></dt><dd>Output a brief summary these options and then exit.</dd></div><div class="dlist-item"><dt><span><code>-i</code></span></dt><dd>Behave as if each pattern has the <code>info</code> modifier; information about the

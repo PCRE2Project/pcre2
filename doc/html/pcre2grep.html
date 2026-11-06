@@ -20,6 +20,12 @@ pattern to be matched when neither <code>-e</code> nor <code>-f</code> is presen
 Conversely, when one or both of these options are used to specify patterns, all
 arguments are treated as path names. At least one of <code>-e</code>, <code>-f</code>, or an
 argument pattern must be provided.</p>
+<p>On Windows 10 version 1903 and later, the application manifest selects UTF-8
+for command-line arguments and file names, including names passed to the C
+library’s <code class="c rouge" data-lang="c"><span class="nf">fopen</span><span class="p">()</span></code> function. Older Windows versions, or executables built
+without the manifest, use the system’s active code page instead. This does not
+change how patterns or file contents are interpreted: the <code>-u</code> option still
+controls UTF-8 matching.</p>
 <p>If no files are specified, <code>pcre2grep</code> reads the standard input. The
 standard input can also be referenced by a name consisting of a single hyphen.
 For example:</p>
@@ -601,7 +607,7 @@ the escape <code class="repl rouge"><span class="pcre2-semantic">$n</span></code
 the callout output but not any output from an actual match, you should end the
 pattern with <code class="regex rouge"><span class="pcre2-semantic">(*FAIL)</span></code>.</p></section>
 <section class="doc-section level-2"><h3 id="_calling_external_programs_or_scripts">Calling external programs or scripts</h3><p>This facility can be independently disabled when <code>pcre2grep</code> is built. It
-is supported for Windows, where a call to <code class="c rouge" data-lang="c"><span class="nf">_spawnvp</span><span class="p">()</span></code> is used, for VMS,
+is supported for Windows, where a call to <code class="c rouge" data-lang="c"><span class="nf">_wspawnvp</span><span class="p">()</span></code> is used, for VMS,
 where <code class="c rouge" data-lang="c"><span class="nv">lib</span><span class="err">$</span><span class="nf">spawn</span><span class="p">()</span></code> is used, and for any Unix-like environment where
 <code class="c rouge" data-lang="c"><span class="nf">fork</span><span class="p">()</span></code> and <code class="c rouge" data-lang="c"><span class="nf">execvp</span><span class="p">()</span></code> are available. On Unix-like systems, executable
 names that do not contain a slash are searched for in the directories listed in
@@ -617,7 +623,7 @@ started by a dollar character. These are the same as for the <code>--output</cod
 matched string because the match is still in progress. Instead, the character
 <code>0</code> is inserted. If you need a literal dollar or pipe character in any
 substring, use <code class="repl rouge"><span class="pcre2-semantic">$$</span></code> or <code class="repl rouge"><span class="pcre2-semantic">$|</span></code> respectively. Literal text and captured
-substrings are copied byte for byte. Captured substrings and characters produced
+substrings are copied byte for byte during argument construction. Captured substrings and characters produced
 by escape sequences are not reinterpreted as separators or further escapes.
 Here is an example:</p>
 <div class="listing-block"><pre class="rouge highlight"><code data-lang="shell"><span class="nb">echo</span> <span class="nt">-e</span> <span class="s2">"abcde</span><span class="se">\n</span><span class="s2">12345"</span> | pcre2grep <span class="se">\</span>
@@ -635,7 +641,12 @@ silently ignored. Any syntax errors in the string (for example, a dollar not
 followed by another character) also cause the callout to be ignored.
 If running the program fails for any reason (including the non-existence of the
 executable), a local matching failure occurs and the matcher backtracks in the
-normal way.</p></section></section>
+normal way.</p>
+<p>On Windows, external callout arguments are converted to UTF-16: bytes map to
+Latin-1 code units in non-UTF mode, or are decoded leniently as UTF-8 in UTF mode.
+Decoding never introduces a binary zero from an overlong encoding.
+Arguments are quoted for the Windows CRT; Unicode fidelity requires a wide-aware
+receiver. The built-in leading-pipe echo remains byte-oriented.</p></section></section>
 <section class="doc-section level-1"><h2 id="_matching_errors">Matching errors</h2><p>It is possible to supply a regular expression that takes a very long time to
 fail to match certain lines. Such patterns normally involve nested indefinite
 repeats, for example: <code class="regex rouge"><span class="pcre2-semantic">(a+)*\d</span></code> when matched against a line of <code class="subject rouge"><span class="pcre2-semantic">a</span></code>s with no final

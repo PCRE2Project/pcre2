@@ -1352,8 +1352,21 @@ file(GENERATE OUTPUT "${CONFIG_BINARY_DIR}/pcre2-config" INPUT "${PROJECT_BINARY
 # Executables
 # -----------------------------------------------------------------------------
 
+set(PCRE2_TOOL_RESOURCES)
+if(WIN32 AND (PCRE2_BUILD_PCRE2GREP OR PCRE2_BUILD_TESTS))
+  if(MSVC OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
+    set(PCRE2_TOOL_RESOURCES src/pcre2-windows-exe.manifest)
+  else()
+    enable_language(RC)
+    set(PCRE2_TOOL_RESOURCES src/pcre2-windows-exe.rc)
+    set_source_files_properties(
+      src/pcre2-windows-exe.rc PROPERTIES OBJECT_DEPENDS "${PROJECT_SOURCE_DIR}/src/pcre2-windows-exe.manifest"
+    )
+  endif()
+endif()
+
 if(PCRE2_BUILD_PCRE2GREP)
-  add_executable(pcre2grep src/pcre2grep.c)
+  add_executable(pcre2grep src/pcre2grep.c ${PCRE2_TOOL_RESOURCES})
   set_property(TARGET pcre2grep PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8)
   list(APPEND PRIVATE_TARGETS pcre2grep)
   target_link_libraries(pcre2grep pcre2-posix ${PCRE2GREP_LIBS})
@@ -1366,7 +1379,7 @@ endif()
 if(PCRE2_BUILD_TESTS)
   enable_testing()
 
-  set(PCRE2TEST_SOURCES src/pcre2test.c)
+  set(PCRE2TEST_SOURCES src/pcre2test.c ${PCRE2_TOOL_RESOURCES})
 
   add_executable(pcre2test ${PCRE2TEST_SOURCES})
   list(APPEND PRIVATE_TARGETS pcre2test)

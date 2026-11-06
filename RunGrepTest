@@ -1375,6 +1375,8 @@ if $valgrind $vjs "$pcre2grep" $pcre2grep_opts --help | $valgrind $vjs "$pcre2gr
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts -m1 '^(T)(?C"echo|Path: $1")' "$srcdir/testdata/grepinputv" >>testtrygrep
   echo "RC=$?" >>testtrygrep
   printf 'T\n' >testNinputgrep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q '^T(?C"'"$echo_prog"'|left right||$x{22}|\|$$$||End")' testNinputgrep >>testtrygrep
+  echo "RC=$?" >>testtrygrep
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q '^T(?C"pcre2grep-nonexistent-callout")' testNinputgrep >>testtrygrep
   echo "RC=$?" >>testtrygrep
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts -q '^T(?C"'"$pcre2grep"'|-q|(?!)|testNinputgrep")' testNinputgrep >>testtrygrep
@@ -1444,6 +1446,10 @@ if $valgrind $vjs "$pcre2grep" $pcre2grep_opts --help | $valgrind $vjs "$pcre2gr
     $valgrind $vjs "$pcre2grep" $pcre2grep_opts --no-jit -u -m1 -f testtemp1grep "$srcdir/testdata/grepinputv" >>testtrygrep
     echo "RC=$?" >>testtrygrep
     $valgrind $vjs "$pcre2grep" $pcre2grep_opts -m1 -f testtemp1grep "$srcdir/testdata/grepinputv" >>testtrygrep
+    echo "RC=$?" >>testtrygrep
+    echo "--- Test 3 ---" >>testtrygrep
+    printf '^(T)(?C"%s|-echo|%s:$x{20ac}:$1")\n' "$pcre2test" "$utf8_text" >testtemp1grep
+    $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u -m1 -f testtemp1grep "$srcdir/testdata/grepinputv" >>testtrygrep
     echo "RC=$?" >>testtrygrep
     unset utf8_text utf8_escaped
 

@@ -32,6 +32,13 @@ DESCRIPTION
        patterns, all arguments are treated as path names. At least one of -e,
        -f, or an argument pattern must be provided.
 
+       On Windows 10 version 1903 and later, the application manifest selects
+       UTF-8 for command-line arguments and file names, including names passed
+       to the C library’s fopen() function. Older Windows versions, or
+       executables built without the manifest, use the system’s active code
+       page instead. This does not change how patterns or file contents are
+       interpreted: the -u option still controls UTF-8 matching.
+
        If no files are specified, pcre2grep reads the standard input. The
        standard input can also be referenced by a name consisting of a single
        hyphen. For example:
@@ -1059,7 +1066,7 @@ USING PCRE2’S CALLOUT FACILITY
 
    Calling external programs or scripts
        This facility can be independently disabled when pcre2grep is built. It
-       is supported for Windows, where a call to _spawnvp() is used, for VMS,
+       is supported for Windows, where a call to _wspawnvp() is used, for VMS,
        where lib$spawn() is used, and for any Unix-like environment where
        fork() and execvp() are available. On Unix-like systems, executable
        names that do not contain a slash are searched for in the directories
@@ -1078,9 +1085,10 @@ USING PCRE2’S CALLOUT FACILITY
        insert the matched string because the match is still in progress.
        Instead, the character 0 is inserted. If you need a literal dollar or
        pipe character in any substring, use $$ or $| respectively. Literal
-       text and captured substrings are copied byte for byte. Captured
-       substrings and characters produced by escape sequences are not
-       reinterpreted as separators or further escapes. Here is an example:
+       text and captured substrings are copied byte for byte during argument
+       construction. Captured substrings and characters produced by escape
+       sequences are not reinterpreted as separators or further escapes. Here
+       is an example:
 
        echo -e "abcde\n12345" | pcre2grep \
          '(?x)(.)(..(.))
@@ -1101,6 +1109,13 @@ USING PCRE2’S CALLOUT FACILITY
        also cause the callout to be ignored. If running the program fails for
        any reason (including the non-existence of the executable), a local
        matching failure occurs and the matcher backtracks in the normal way.
+
+       On Windows, external callout arguments are converted to UTF-16: bytes
+       map to Latin-1 code units in non-UTF mode, or are decoded leniently as
+       UTF-8 in UTF mode. Decoding never introduces a binary zero from an
+       overlong encoding. Arguments are quoted for the Windows CRT; Unicode
+       fidelity requires a wide-aware receiver. The built-in leading-pipe echo
+       remains byte-oriented.
 
 MATCHING ERRORS
        It is possible to supply a regular expression that takes a very long

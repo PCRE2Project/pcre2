@@ -232,6 +232,9 @@ pub fn build(b: *std.Build) !void {
     });
 
     pcre2test_mod.linkLibrary(lib);
+    if (!is_unix) {
+        pcre2test_mod.addWin32ResourceFile(.{ .file = b.path("src/pcre2-windows-exe.rc") });
+    }
 
     if (build_tests) {
         b.installArtifact(pcre2test);

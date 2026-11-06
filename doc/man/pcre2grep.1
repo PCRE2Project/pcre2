@@ -72,6 +72,13 @@ Conversely, when one or both of these options are used to specify patterns, all
 arguments are treated as path names. At least one of \f(CR\-e\fP, \f(CR\-f\fP, or an
 argument pattern must be provided.
 .sp
+On Windows 10 version 1903 and later, the application manifest selects UTF\-8
+for command\-line arguments and file names, including names passed to the C
+library\(cqs \f(CBfopen\fP\f(CR()\fP function. Older Windows versions, or executables built
+without the manifest, use the system\(cqs active code page instead. This does not
+change how patterns or file contents are interpreted: the \f(CR\-u\fP option still
+controls UTF\-8 matching.
+.sp
 If no files are specified, \f(CRpcre2grep\fP reads the standard input. The
 standard input can also be referenced by a name consisting of a single hyphen.
 For example:
@@ -1063,7 +1070,7 @@ pattern with \f(CI(*FAIL)\fP.
 .SS "Calling external programs or scripts"
 .sp
 This facility can be independently disabled when \f(CRpcre2grep\fP is built. It
-is supported for Windows, where a call to \f(CB_spawnvp\fP\f(CR()\fP is used, for VMS,
+is supported for Windows, where a call to \f(CB_wspawnvp\fP\f(CR()\fP is used, for VMS,
 where \f(CRlib$spawn()\fP is used, and for any Unix\-like environment where
 \f(CBfork\fP\f(CR()\fP and \f(CBexecvp\fP\f(CR()\fP are available. On Unix\-like systems, executable
 names that do not contain a slash are searched for in the directories listed in
@@ -1088,7 +1095,7 @@ started by a dollar character. These are the same as for the \f(CR\-\-output\fP
 matched string because the match is still in progress. Instead, the character
 \f(CR0\fP is inserted. If you need a literal dollar or pipe character in any
 substring, use \f(CI$$\fP or \f(CI$|\fP respectively. Literal text and captured
-substrings are copied byte for byte. Captured substrings and characters produced
+substrings are copied byte for byte during argument construction. Captured substrings and characters produced
 by escape sequences are not reinterpreted as separators or further escapes.
 Here is an example:
 .sp
@@ -1124,6 +1131,12 @@ followed by another character) also cause the callout to be ignored.
 If running the program fails for any reason (including the non\-existence of the
 executable), a local matching failure occurs and the matcher backtracks in the
 normal way.
+.sp
+On Windows, external callout arguments are converted to UTF\-16: bytes map to
+Latin\-1 code units in non\-UTF mode, or are decoded leniently as UTF\-8 in UTF mode.
+Decoding never introduces a binary zero from an overlong encoding.
+Arguments are quoted for the Windows CRT; Unicode fidelity requires a wide\-aware
+receiver. The built\-in leading\-pipe echo remains byte\-oriented.
 .SH "MATCHING ERRORS"
 .sp
 It is possible to supply a regular expression that takes a very long time to

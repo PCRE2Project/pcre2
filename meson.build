@@ -681,15 +681,37 @@ pcre2_config = configure_file(
 # Executables
 # -----------------------------------------------------------------------------
 
+tool_resources = []
+tool_manifest_args = []
+tool_manifest_depends = []
+if host_is_windows and (build_grep or get_option('pcre2_build_tests'))
+  tool_manifest_depends = files('src/pcre2-windows-exe.manifest')
+  if msvc_like
+    tool_manifest_args = [
+      '/MANIFEST:EMBED',
+      '/MANIFESTINPUT:' + (meson.project_source_root() / 'src/pcre2-windows-exe.manifest'),
+    ]
+  else
+    tool_resources = import('windows').compile_resources(
+      'src/pcre2-windows-exe.rc',
+      include_directories: include_directories('src'),
+      depend_files: tool_manifest_depends,
+    )
+  endif
+endif
+
 if build_grep
   pcre2grep = executable(
     'pcre2grep',
     'src/pcre2grep.c',
+    tool_resources,
     config_h,
     pcre2_h,
     include_directories: pcre2_includes,
     dependencies: [libpcre2_posix] + pcre2grep_deps,
     c_args: common_c_args + ['-DPCRE2_CODE_UNIT_WIDTH=8'],
+    link_args: tool_manifest_args,
+    link_depends: tool_manifest_depends,
     install: true,
   )
 endif
@@ -714,12 +736,14 @@ if get_option('pcre2_build_tests')
   pcre2test = executable(
     'pcre2test',
     'src/pcre2test.c',
+    tool_resources,
     config_h,
     pcre2_h,
     include_directories: pcre2_includes,
     dependencies: pcre2test_deps,
     c_args: common_c_args,
-    link_args: msvc_like ? ['/STACK:2500000'] : [],
+    link_args: tool_manifest_args + (msvc_like ? ['/STACK:2500000'] : []),
+    link_depends: tool_manifest_depends,
     install: true,
   )
   if build_8

@@ -76,6 +76,8 @@ RC=0
 Path: T
 The quick brown
 RC=0
+left right  " \ $| End
+RC=0
 RC=1
 RC=1
 --- Test 5 ---

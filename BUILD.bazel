@@ -162,9 +162,22 @@ cc_library(
 cc_binary(
     name = "pcre2test",
     srcs = ["src/pcre2test.c"],
+    additional_linker_inputs = select({
+        "@rules_cc//cc/compiler:clang-cl": ["src/pcre2-windows-exe.manifest"],
+        "@rules_cc//cc/compiler:msvc-cl": ["src/pcre2-windows-exe.manifest"],
+        "//conditions:default": [],
+    }),
     linkopts = select({
-        "@rules_cc//cc/compiler:clang-cl": ["/STACK:2500000"],
-        "@rules_cc//cc/compiler:msvc-cl": ["/STACK:2500000"],
+        "@rules_cc//cc/compiler:clang-cl": [
+            "/STACK:2500000",
+            "/MANIFEST:EMBED",
+            "/MANIFESTINPUT:$(location src/pcre2-windows-exe.manifest)",
+        ],
+        "@rules_cc//cc/compiler:msvc-cl": [
+            "/STACK:2500000",
+            "/MANIFEST:EMBED",
+            "/MANIFESTINPUT:$(location src/pcre2-windows-exe.manifest)",
+        ],
         "//conditions:default": [],
     }),
     local_defines = LOCAL_DEFINES,

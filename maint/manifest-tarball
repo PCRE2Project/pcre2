@@ -492,6 +492,8 @@ drwxr-xr-x tarball-dir/pcre2-SNAPSHOT/src
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-32.sym.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-8.sym.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/libpcre2-posix.sym.in
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2-windows-exe.manifest
+-rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2-windows-exe.rc
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2.h.generic
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2.h.in
 -rw-r--r-- tarball-dir/pcre2-SNAPSHOT/src/pcre2_auto_possess.c

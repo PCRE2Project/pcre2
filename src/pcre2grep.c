@@ -599,6 +599,18 @@ ord2utf8(uint32_t value)
   return i + 1;
 }
 
+/* Decode a character with the given number of additional bytes. The caller
+must check that these bytes are available. */
+
+static uint32_t
+utf8_to_ord(const char *p, int extra)
+{
+  uint32_t value = (unsigned char)*p & utf8_table3[extra];
+  while (extra-- > 0)
+    value = (value << 6) | (*++p & 0x3f);
+  return value;
+}
+
 
 
 /*************************************************
@@ -1665,7 +1677,6 @@ end_of_line(char *p, char *endptr, int *lenptr)
 
       if (utf && c >= 0xc0)
       {
-        int gcii, gcss;
         extra = utf8_table4[c & 0x3f]; // Number of additional bytes
         if (endptr - p < 1 + extra)
         {
@@ -1673,13 +1684,7 @@ end_of_line(char *p, char *endptr, int *lenptr)
           return endptr;
         }
 
-        gcss = 6 * extra;
-        c = (c & utf8_table3[extra]) << gcss;
-        for (gcii = 1; gcii <= extra; gcii++)
-        {
-          gcss -= 6;
-          c |= (p[gcii] & 0x3f) << gcss;
-        }
+        c = (int)utf8_to_ord(p, extra);
       }
 
       p += 1 + extra;
@@ -1821,7 +1826,6 @@ previous_line(char *p, char *startptr)
         c = *((unsigned char *)pp);
         if (c >= 0xc0)
         {
-          int gcii, gcss;
           extra = utf8_table4[c & 0x3f]; // Number of additional bytes
           if (p - pp < 1 + extra)
           {
@@ -1829,13 +1833,7 @@ previous_line(char *p, char *startptr)
             continue;
           }
 
-          gcss = 6 * extra;
-          c = (c & utf8_table3[extra]) << gcss;
-          for (gcii = 1; gcii <= extra; gcii++)
-          {
-            gcss -= 6;
-            c |= (pp[gcii] & 0x3f) << gcss;
-          }
+          c = (int)utf8_to_ord(pp, extra);
         }
       }
       else
@@ -2500,6 +2498,86 @@ display_output_text(PCRE2_SPTR string, PCRE2_SIZE length, BOOL callout, PCRE2_SP
 *        Parse and execute callout scripts       *
 *************************************************/
 
+#if defined(WIN32) && defined(SUPPORT_PCRE2GREP_CALLOUT_FORK)
+static wchar_t **
+make_callout_vector(char **argsvector, PCRE2_SIZE argsvectorlen, PCRE2_SIZE argslen,
+                    wchar_t **filename)
+{
+  PCRE2_SIZE maximum = ~(PCRE2_SIZE)0;
+  if (argsvectorlen > maximum / sizeof(wchar_t *))
+    return NULL;
+  PCRE2_SIZE vectorbytes = argsvectorlen * sizeof(wchar_t *);
+  PCRE2_SIZE maxunits = (maximum - vectorbytes) / sizeof(wchar_t);
+  if (argsvectorlen > maxunits || argslen > (maxunits - argsvectorlen) / 3)
+    return NULL;
+
+  /* At most argslen units for the filename, twice argslen for escaped tokens,
+  and argsvectorlen for their quotes and terminators beyond the packed data. */
+  /* Windows pointer sizes preserve wchar_t alignment after the vector. */
+  wchar_t **vector = (wchar_t **)malloc(vectorbytes +
+                                       (3 * argslen + argsvectorlen) * sizeof(wchar_t));
+  if (vector == NULL)
+    return NULL;
+  wchar_t *out = *filename = (wchar_t *)((char *)vector + vectorbytes);
+
+  /* Write the raw filename, quoted argv[0], then the ordinary argument tokens.
+  argv[0] uses the CRT's distinct program-name parser. */
+  for (PCRE2_SIZE i = 0; i < argsvectorlen; i++)
+  {
+    PCRE2_SIZE backslashes = 0;
+    const char *p = argsvector[i == 0 ? 0 : i - 1];
+    const char *end = p + strlen(p);
+    if (i != 0)
+    {
+      vector[i - 1] = out;
+      *out++ = L'"';
+    }
+    while (p < end)
+    {
+      uint32_t value = (unsigned char)*p++;
+      if (utf && value >= 0xc0)
+      {
+        int extra = utf8_table4[value & 0x3f];
+        if (end - p >= extra)
+        {
+          uint32_t decoded = utf8_to_ord(p - 1, extra);
+          /* Do not introduce NUL via an overlong encoding, or values that
+          cannot be represented in UTF-16. Otherwise use the loose decoder. */
+          if (decoded != 0 && decoded <= 0x10ffff)
+          {
+            value = decoded;
+            p += extra;
+          }
+        }
+      }
+      if (i > 1 && value == '\\')
+      {
+        backslashes++;
+        continue;
+      }
+      PCRE2_SIZE count = i > 1 && value == '"' ? 2 * backslashes + 1 : backslashes;
+      for (PCRE2_SIZE j = 0; j < count; j++)
+        *out++ = L'\\';
+      backslashes = 0;
+      if (value > 0xffff)
+      {
+        value -= 0x10000;
+        *out++ = (wchar_t)(0xd800 + (value >> 10));
+        value = 0xdc00 + (value & 0x3ff);
+      }
+      *out++ = (wchar_t)value;
+    }
+    for (PCRE2_SIZE j = 0; j < 2 * backslashes; j++)
+      *out++ = L'\\';
+    if (i != 0)
+      *out++ = L'"';
+    *out++ = 0;
+  }
+  vector[argsvectorlen - 1] = NULL;
+  return vector;
+}
+#endif
+
 /* If SUPPORT_PCRE2GREP_CALLOUT_FORK is defined, this function parses a callout
 string block and executes the program specified by the string. The string is a
 list of substrings separated by pipe characters. The first substring represents
@@ -2777,8 +2855,14 @@ pcre2grep_callout(pcre2_callout_block *calloutptr, void *unused)
   int result = 0;
 
 #ifdef WIN32
-  (void)fflush(stdout);
-  result = _spawnvp(_P_WAIT, argsvector[0], (const char *const *)argsvector) != 0;
+  wchar_t *filename;
+  wchar_t **widevector = make_callout_vector(argsvector, argsvectorlen, argslen, &filename);
+  if (widevector != NULL)
+  {
+    (void)fflush(stdout);
+    result = _wspawnvp(_P_WAIT, filename, (const wchar_t *const *)widevector) != 0;
+    free(widevector);
+  }
 
 #elif defined __VMS
   {

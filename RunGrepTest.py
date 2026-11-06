@@ -9,6 +9,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -124,15 +125,19 @@ def write_returncode(returncode, label=None):
     write_test_output(f"{prefix}RC={returncode}\n".encode("latin-1"))
 
 
-def compare(expected, actual):
-    if Path(expected).read_bytes() == Path(actual).read_bytes():
+def compare(expected, actual, expected_end=None):
+    expected_data = Path(expected).read_bytes()
+    if expected_end is not None:
+        expected_data = expected_data.split(expected_end, 1)[0]
+    actual_data = Path(actual).read_bytes()
+    if expected_data == actual_data:
         return True
     expected_mtime = datetime.fromtimestamp(Path(expected).stat().st_mtime).astimezone().isoformat()
     actual_mtime = datetime.fromtimestamp(Path(actual).stat().st_mtime).astimezone().isoformat()
     print("".join(
         difflib.unified_diff(
-            Path(expected).read_bytes().decode("latin-1").splitlines(keepends=True),
-            Path(actual).read_bytes().decode("latin-1").splitlines(keepends=True),
+            expected_data.decode("latin-1").splitlines(keepends=True),
+            actual_data.decode("latin-1").splitlines(keepends=True),
             fromfile=str(expected),
             tofile=str(actual),
             fromfiledate=expected_mtime,
@@ -205,6 +210,47 @@ def supports(text):
                           input=help_process.stdout,
                           stdout=subprocess.DEVNULL,
                           check=False).returncode == 0
+
+
+supports_unicode_cli = os.name != "nt" or sys.getwindowsversion().build >= 18362
+
+
+def test_unicode_filenames():
+    if not supports_unicode_cli:
+        print("Skipping Unicode CLI tests: UTF-8 manifests require Windows 10 version 1903")
+        return
+    print("Testing Unicode command-line arguments and filenames")
+
+    def check(args, expected):
+        process = subprocess.run(valgrind + vjs + [str(arg) for arg in args],
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+        if process.returncode != 0 or process.stdout != expected or process.stderr:
+            print(f"Unicode CLI test failed: arguments={ascii(args)}, RC={process.returncode}, "
+                  f"stdout={process.stdout!r}, stderr={process.stderr!r}")
+            sys.exit(1)
+
+    with tempfile.TemporaryDirectory(prefix="test-unicodegrep-", dir=builddir) as directory:
+        directory = Path(directory)
+        name = "\u00e9-\u20ac-\U00010348 file"
+        subject = directory / (name + ".txt")
+        pattern = directory / (name + ".pat")
+        result = directory / (name + ".out")
+        check([pcre2test, "-echo", name], name.encode("utf-8") + b"\n")
+        subject.write_bytes(b"T\x80\xe9\xff\n")
+        pattern.write_bytes(b"^T\n")
+        check([*pcre2grep_args, "-ah", "T", subject], subject.read_bytes())
+        check([*pcre2grep_args, "-ah", "-f", pattern, subject], subject.read_bytes())
+        if supports_utf8:
+            subject.write_bytes(name.encode("utf-8") + b"\n")
+            check([*pcre2grep_args, "-uh", name, subject], subject.read_bytes())
+        subject.write_bytes(b"/T/\nT\n\n")
+        check([pcre2test, "-q", subject, result], b"")
+        if result.read_bytes() != b"/T/\nT\n 0: T\n\n":
+            print(f"Unexpected pcre2test output: {result.read_bytes()!r}")
+            sys.exit(1)
+
+
+test_unicode_filenames()
 
 
 # ------ Function to run and check a special pcre2grep arguments test -------
@@ -1343,6 +1389,8 @@ if supports("callout scripts in patterns are supported"):
     path_echo_prog = echo_prog if os.name == "nt" else "echo"
     output([*pcre2grep_args, "-m1", f'^(T)(?C"{path_echo_prog}|Path: $1")', srcdir / "testdata" / "grepinputv"])
     Path("testNinputgrep").write_bytes(b"T\n")
+    output([*pcre2grep_args, "-q",
+            f'^T(?C"{echo_prog}|left right||$x{{22}}|\\|$$$||End")', "testNinputgrep"])
     output([*pcre2grep_args, "-q", '^T(?C"pcre2grep-nonexistent-callout")', "testNinputgrep"])
     output([*pcre2grep_args, "-q", f'^T(?C"{pcre2grep}|-q|(?!)|testNinputgrep")', "testNinputgrep"])
     write_test_output(b"--- Test 5 ---\n")
@@ -1380,15 +1428,28 @@ if supports("callout scripts in patterns are supported"):
         Path("testtemp1grep").write_bytes(f'^(T)(?C"|{utf8_text}:{utf8_escaped}:$1:$|:$$$n")\n'.encode("utf-8"))
         for options in (("-u", ), ("--no-jit", "-u"), ()):
             output([*pcre2grep_args, *options, "-m1", "-f", "testtemp1grep", srcdir / "testdata" / "grepinputv"])
-        write_test_output(b"--- Test 2 ---\n")
-        output([*pcre2grep_args, "-u", f'(T)(?C"{echo_prog}|$0:$x{{a6}}$n")', srcdir / "testdata" / "grepinputv"])
-        Path("testtemp1grep").write_bytes(
-            f'^(T)(?C"{echo_prog}|{utf8_text}:{utf8_escaped}:$1:$|:$$")\n'.encode("utf-8"))
-        for options in (("-u", ), ("--no-jit", "-u"), ()):
-            output([*pcre2grep_args, *options, "-m1", "-f", "testtemp1grep", srcdir / "testdata" / "grepinputv"])
-        if not compare(srcdir / "testdata" /
-                       ("grepoutputCNU" if supports_nonfork_callouts else "grepoutputCU"), "testtrygrep"):
-            sys.exit(1)
+        expected_file = srcdir / "testdata" / ("grepoutputCNU" if supports_nonfork_callouts else "grepoutputCU")
+        if not supports_unicode_cli:
+            print("Skipping external Unicode callouts: UTF-8 manifests require Windows 10 version 1903")
+            if not compare(expected_file, "testtrygrep", expected_end=b"--- Test 2 ---\n"):
+                sys.exit(1)
+        else:
+            write_test_output(b"--- Test 2 ---\n")
+            output([*pcre2grep_args, "-u", f'(T)(?C"{echo_prog}|$0:$x{{a6}}$n")', srcdir / "testdata" / "grepinputv"])
+            Path("testtemp1grep").write_bytes(
+                f'^(T)(?C"{echo_prog}|{utf8_text}:{utf8_escaped}:$1:$|:$$")\n'.encode("utf-8"))
+            for options in (("-u", ), ("--no-jit", "-u"), ()):
+                # Windows non-UTF callouts map each byte to Latin-1 before launch.
+                # Reverse that mapping for comparison with the shared byte fixture.
+                transform = (lambda data: data.decode("utf-8").encode("latin-1")) if os.name == "nt" and not options else None
+                output([*pcre2grep_args, *options, "-m1", "-f", "testtemp1grep", srcdir / "testdata" / "grepinputv"],
+                       transform=transform)
+            write_test_output(b"--- Test 3 ---\n")
+            Path("testtemp1grep").write_bytes(
+                f'^(T)(?C"{pcre2test}|-echo|{utf8_text}:$x{{20ac}}:$1")\n'.encode("utf-8"))
+            output([*pcre2grep_args, "-u", "-m1", "-f", "testtemp1grep", srcdir / "testdata" / "grepinputv"])
+            if not compare(expected_file, "testtrygrep"):
+                sys.exit(1)
     else:
         print("Skipping pcre2grep script callout UTF-8 tests: no UTF-8 support in PCRE2 library")
 else:

@@ -3828,8 +3828,8 @@ main(int argc, char **argv)
       goto EXIT;
     }
 
-    /* Echo the remaining arguments. This provides a byte-preserving command for
-    testing pcre2grep callout scripts on platforms without a suitable echo. */
+    /* Echo the remaining arguments. The Windows application manifest selects
+    UTF-8 for narrow command-line arguments on supported Windows versions. */
 
     if (strcmp(arg, "-echo") == 0)
     {

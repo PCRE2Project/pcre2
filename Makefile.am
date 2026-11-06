@@ -294,7 +294,8 @@ CLEANFILES = \
   pcre2fuzzcheck-8 \
   pcre2fuzzcheck-16 \
   pcre2fuzzcheck-32 \
-  pcre2demo
+  pcre2demo \
+  pcre2-windows-exe.$(OBJEXT)
 
 DISTCLEANFILES = src/config.h.in~
 MAINTAINERCLEANFILES =
@@ -302,7 +303,7 @@ MAINTAINERCLEANFILES =
 # Additional files to bundle with the distribution, over and above what
 # the Autotools include by default.
 
-EXTRA_DIST =
+EXTRA_DIST = src/pcre2-windows-exe.manifest src/pcre2-windows-exe.rc
 
 # These files contain additional m4 macros that are used by autoconf.
 
@@ -759,7 +760,8 @@ if WITH_PCRE2_8
 bin_PROGRAMS += pcre2grep
 pcre2grep_SOURCES = src/pcre2grep.c
 pcre2grep_CFLAGS = $(AM_CFLAGS)
-pcre2grep_LDADD = $(LIBZ) $(LIBBZ2)
+pcre2grep_LDADD = $(LIBZ) $(LIBBZ2) $(PCRE2_WIN32_RESOURCE)
+EXTRA_pcre2grep_DEPENDENCIES = $(PCRE2_WIN32_RESOURCE)
 pcre2grep_LDADD += libpcre2-8.la
 if WITH_GCOV
 pcre2grep_CFLAGS += $(GCOV_CFLAGS)
@@ -864,7 +866,8 @@ endif # WITH_JIT
 bin_PROGRAMS += pcre2test
 pcre2test_SOURCES = src/pcre2test.c src/pcre2test_inc.h
 pcre2test_CFLAGS = $(AM_CFLAGS)
-pcre2test_LDADD = $(LIBREADLINE)
+pcre2test_LDADD = $(LIBREADLINE) $(PCRE2_WIN32_RESOURCE)
+EXTRA_pcre2test_DEPENDENCIES = $(PCRE2_WIN32_RESOURCE)
 
 if WITH_PCRE2_8
 pcre2test_LDADD += libpcre2-8.la libpcre2-posix.la
@@ -886,6 +889,9 @@ if WITH_GCOV
 pcre2test_CFLAGS += $(GCOV_CFLAGS)
 pcre2test_LDADD += $(GCOV_LIBS)
 endif # WITH_GCOV
+
+pcre2-windows-exe.$(OBJEXT): $(srcdir)/src/pcre2-windows-exe.rc $(srcdir)/src/pcre2-windows-exe.manifest
+	$(AM_V_GEN)$(WINDRES) -I "$(srcdir)/src" -i "$(srcdir)/src/pcre2-windows-exe.rc" -o $@
 
 ## The main library tests. Each test is a binary plus a script that runs that
 ## binary in various ways. We install these test binaries in case folks find it

@@ -27,6 +27,12 @@ SYNOPSIS
        here, some without much justification, but many of them are unlikely to
        be of use except when testing the libraries.
 
+       On Windows 10 version 1903 and later, the application manifest selects
+       UTF-8 for command-line arguments and file names, including input and
+       output file names. Older Windows versions, or executables built without
+       the manifest, use the system’s active code page instead. This does not
+       change the interpretation of the contents of test files.
+
 PCRE2’S 8-BIT, 16-BIT AND 32-BIT LIBRARIES
        Different versions of the PCRE2 library can be built to support
        character strings that are encoded in 8-bit, 16-bit, or 32-bit code
@@ -213,6 +219,15 @@ COMMAND LINE OPTIONS
                                   gcc -E). The #if ... #endif commands are
                                   processed, and all other lines are printed
                                   verbatim.
+
+           -echo                  Write the remaining arguments separated by
+                                  spaces, followed by a newline, then exit.
+                                  This facility is intended for testing
+                                  pcre2grep callouts. Argument bytes are
+                                  written unchanged; on Windows, the
+                                  application manifest selects UTF-8 for these
+                                  bytes on supported Windows versions, as
+                                  described above.
 
            -error number[,number,...]
                                   Call pcre2_get_error_message() for each of

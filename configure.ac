@@ -1052,6 +1052,19 @@ if test "$enable_valgrind" = "yes"; then
 fi
 
 # Platform specific issues
+PCRE2_WIN32_RESOURCE=
+case $host_os in
+  mingw* )
+    AC_CHECK_TOOL([WINDRES], [windres])
+    if test -n "$WINDRES"; then
+      PCRE2_WIN32_RESOURCE='pcre2-windows-exe.$(OBJEXT)'
+    else
+      AC_MSG_WARN([windres not found; UTF-8 application manifests will not be embedded])
+    fi
+    ;;
+esac
+AC_SUBST(PCRE2_WIN32_RESOURCE)
+
 NO_UNDEFINED=
 case $host_os in
   cygwin* | mingw* )

@@ -9,6 +9,8 @@ maint/ucptestdata -text
 *.sh              text eol=lf
 *.py              text eol=lf
 *.bat             text eol=crlf
+*.rc              text eol=crlf
+*.manifest        text eol=crlf
 pcre2-config.in   text eol=lf
 RunTest           text eol=lf
 RunGrepTest       text eol=lf
