@@ -1632,7 +1632,14 @@
     \x{1F1E6}\x{1F1E7}\x{1F1E8}\x{1F1E9}B RegionalIndicator RegionalIndicator RegionalIndicator RegionalIndicator
     \x{200d}\x{1f308}B             ZWJ without Extended_Pictographic
     \x{261d}\x{200d}\x{1f308}B    Extended_Pictographic ZWJ Extended_Pictographic
-    *There are no Prepend characters, so we can't test Prepend, CR
+    *Test regional indicators followed by extend, spacing mark and ZWJ
+    \x{1F1E6}\x{300}B              RegionalIndicator Extend
+    \x{1F1E6}\x{903}B              RegionalIndicator SpacingMark
+    \x{1F1E6}\x{1F1E7}\x{200d}\x{1F1E8}B RegionalIndicator RegionalIndicator ZWJ RegionalIndicator
+    *Test Prepend
+    \x{6dd}\x{a9}B                 Prepend Extended_Pictographic
+    \x{600}AB                      Prepend Other
+    \x{600}\x{0d}B                 Prepend CR
 
 /^.\X/utf,aftertext
     A\x{1F1E6}\x{1F1E7}\x{1F1E8}B

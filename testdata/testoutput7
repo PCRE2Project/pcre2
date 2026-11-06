@@ -3036,7 +3036,26 @@ Partial match: AA
     \x09\x{1b04}Control, spacingmark
  0: \x{09}
  0+ \x{1b04}Control, spacingmark
-\= There are no Prepend characters, so we can't test Prepend, CR
+\= Test regional indicators followed by extend, spacing mark and ZWJ
+    \x{1F1E6}\x{300}B              RegionalIndicator Extend
+ 0: \x{1f1e6}\x{300}
+ 0+ B              RegionalIndicator Extend
+    \x{1F1E6}\x{903}B              RegionalIndicator SpacingMark
+ 0: \x{1f1e6}\x{903}
+ 0+ B              RegionalIndicator SpacingMark
+    \x{1F1E6}\x{1F1E7}\x{200d}\x{1F1E8}B RegionalIndicator RegionalIndicator ZWJ RegionalIndicator
+ 0: \x{1f1e6}\x{1f1e7}\x{200d}
+ 0+ \x{1f1e8}B RegionalIndicator RegionalIndicator ZWJ RegionalIndicator
+\= Test Prepend
+    \x{6dd}\x{a9}B                 Prepend Extended_Pictographic
+ 0: \x{6dd}\x{a9}
+ 0+ B                 Prepend Extended_Pictographic
+    \x{600}AB                      Prepend Other
+ 0: \x{600}A
+ 0+ B                      Prepend Other
+    \x{600}\x{0d}B                 Prepend CR
+ 0: \x{600}
+ 0+ \x{0d}B                 Prepend CR
     
 /^(?>\X{2})X/utf,aftertext
     \x{1111}\x{ae4c}\x{1111}\x{ae4c}X
