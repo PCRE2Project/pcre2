@@ -2232,6 +2232,7 @@ extern const uint8_t PRIV(utf8_table4)[];
 #define _pcre2_ucd_boolprop_sets            PCRE2_SUFFIX(_pcre2_ucd_boolprop_sets_)
 #define _pcre2_ucd_low_bitmaps              PCRE2_SUFFIX(_pcre2_ucd_low_bitmaps_)
 #define _pcre2_ucd_low_bitmap_indexes       PCRE2_SUFFIX(_pcre2_ucd_low_bitmap_indexes_)
+#define _pcre2_ucd_low_bitmap_offsets       PCRE2_SUFFIX(_pcre2_ucd_low_bitmap_offsets_)
 #define _pcre2_ucd_caseless_sets            PCRE2_SUFFIX(_pcre2_ucd_caseless_sets_)
 #define _pcre2_ucd_turkish_dotted_i_caseset PCRE2_SUFFIX(_pcre2_ucd_turkish_dotted_i_caseset_)
 #define _pcre2_ucd_nocase_ranges            PCRE2_SUFFIX(_pcre2_ucd_nocase_ranges_)
@@ -2262,7 +2263,8 @@ extern const uint32_t PRIV(hspace_list)[];
 extern const uint32_t PRIV(vspace_list)[];
 extern const uint32_t PRIV(ucd_boolprop_sets)[];
 extern const uint8_t PRIV(ucd_low_bitmaps)[][32];
-extern const uint16_t PRIV(ucd_low_bitmap_indexes)[];
+extern const uint8_t PRIV(ucd_low_bitmap_indexes)[];
+extern const uint16_t PRIV(ucd_low_bitmap_offsets)[];
 extern const uint32_t PRIV(ucd_caseless_sets)[];
 extern const uint32_t PRIV(ucd_turkish_dotted_i_caseset);
 extern const uint32_t PRIV(ucd_nocase_ranges)[];

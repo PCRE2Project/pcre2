@@ -22,7 +22,12 @@ backtracking after the recursive call.
 3. (#1040) Fixed the start_match field passed to interpreter callouts after \K
 resets the start of a match, including restoration on backtracking.
 
-4. Restore Unicode-property character class compilation performance using
+4. In pcre2_substitute() with PCRE2_SUBSTITUTE_EXTENDED and
+PCRE2_SUBSTITUTE_GLOBAL, a \Q that was not closed by \E stayed in effect for
+the replacement of the next match, whose text was then copied literally,
+including the \Q itself.
+
+5. Restore Unicode-property character class compilation performance using
 shared precomputed bitmaps for code points below 256.
 
 

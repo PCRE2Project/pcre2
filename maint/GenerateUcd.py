@@ -815,15 +815,16 @@ low_bitmaps = []
 low_bitmap_indexes = []
 low_bitmap_offsets = []
 for ptype, count, predicate in low_properties:
-    low_bitmap_offsets.append(len(low_properties) + len(low_bitmap_indexes))
+    low_bitmap_offsets.append(len(low_bitmap_indexes))
     for pdata in range(count):
         bitmap = tuple(sum(1 << bit for bit in range(8) if predicate(byte * 8 + bit, pdata)) for byte in range(32))
         if bitmap not in low_bitmaps:
             low_bitmaps.append(bitmap)
         low_bitmap_indexes.append(low_bitmaps.index(bitmap))
 
-low_bitmap_indexes = low_bitmap_offsets + low_bitmap_indexes
-assert max(low_bitmap_indexes) <= 0xffff
+low_bitmap_offsets.append(len(low_bitmap_indexes))
+assert max(low_bitmap_offsets) <= 0xffff
+assert max(low_bitmap_indexes) <= 0xff
 
 # Open the output file (no return on failure). This call also writes standard
 # header boilerplate.
@@ -1037,9 +1038,9 @@ f.write("// clang-format on\n\n")
 # Output shared low-codepoint class bitmaps and their property indexes.
 
 f.write("""\
-/* Precomputed property bitmaps for code points below 256. The first
-PT_PXXDIGIT + 1 entries of ucd_low_bitmap_indexes give the offset of each
-property type's bitmap indexes; add the property's value to that offset. */
+/* Precomputed property bitmaps for code points below 256. The
+ucd_low_bitmap_offsets give the offset of each property type's bitmap
+indexes, followed by the end offset; add the property's value to its offset. */
 
 // clang-format off
 const uint8_t PRIV(ucd_low_bitmaps)[][32] = {
@@ -1047,10 +1048,12 @@ const uint8_t PRIV(ucd_low_bitmaps)[][32] = {
 for bitmap in low_bitmaps:
     f.write('  { ' + ', '.join('0x%02x' % byte for byte in bitmap) + ' },\n')
 f.write('};\n\n')
-f.write('const uint16_t PRIV(ucd_low_bitmap_indexes)[] = {\n')
+f.write('const uint16_t PRIV(ucd_low_bitmap_offsets)[] = {\n')
 for ptype, offset in zip(low_properties, low_bitmap_offsets):
     f.write('  %d, /* %s */\n' % (offset, ptype[0]))
-for i in range(len(low_properties), len(low_bitmap_indexes), 16):
+f.write('  %d, /* End */\n};\n\n' % low_bitmap_offsets[-1])
+f.write('const uint8_t PRIV(ucd_low_bitmap_indexes)[] = {\n')
+for i in range(0, len(low_bitmap_indexes), 16):
     f.write('  ' + ', '.join(str(index) for index in low_bitmap_indexes[i:i + 16]) + ',\n')
 f.write('};\n\n')
 checks = ['%s == %d' % (ptype, index) for index, (ptype, _, _) in enumerate(low_properties)]

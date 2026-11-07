@@ -1687,6 +1687,22 @@ No match
     \x{dc00}s
  0: s
 
+/\X{0,3}+/utf,match_invalid_utf
+   \x{dc00}
+ 0: 
+   a\x{dc00}
+ 0: a
+   abc\x{dc00}
+ 0: abc
+
+/\X{1,3}+/utf,match_invalid_utf
+   \x{dc00}
+No match
+   a\x{dc00}
+ 0: a
+   abc\x{dc00}
+ 0: abc
+
 # ---------------------------------------------------- 
 
 /(*UTF)(?=\x{123})/I

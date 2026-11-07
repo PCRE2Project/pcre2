@@ -5527,11 +5527,33 @@ a)"xI
     aa
     aaaa
 
-/a+?b|a+?(*THEN)/endanchored
+/a+?b|a+?(*THEN:arg)/endanchored
     aaxaa
     aaxaab
 
 /a+?(?:b(*THEN)c|c(*THEN)b)/endanchored
+    aaabcaaacbaaabc
+
+/a+?(*SKIP)/endanchored
+    aa
+    aaaa
+
+/a+?b|a+?(*SKIP:arg)/endanchored
+    aaxaa
+    aaxaab
+
+/a+?(?:b(*SKIP)c|c(*SKIP)b)/endanchored
+    aaabcaaacbaaabc
+
+/a+?(*PRUNE)/endanchored
+    aa
+    aaaa
+
+/a+?b|a+?(*PRUNE:arg)/endanchored
+    aaxaa
+    aaxaab
+
+/a+?(?:b(*PRUNE)c|c(*PRUNE)b)/endanchored
     aaabcaaacbaaabc
 
 # Check auto-anchoring when there is a group that is never obeyed at
@@ -8423,6 +8445,19 @@ a)"xI
 /foo(?<Bar>BAR)?/substitute_extended,replace=X${Bar:+\:\:text}Y
     foo
     fooBAR
+
+# --------------
+# An unterminated \Q applies to one replacement, not to those for later matches
+# --------------
+
+/x/g,replace=\Qabc,substitute_extended
+    xx
+
+/x/g,replace=\Qa$$,substitute_extended
+    xxx
+
+/x/g,replace=\Qa\Eb,substitute_extended
+    xx
 
 # --------------
 # Tests for substitution with partial

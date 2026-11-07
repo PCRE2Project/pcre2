@@ -219,6 +219,8 @@ typedef struct stub_list {
 
 enum frame_types { no_frame = -1, no_stack = -2 };
 
+enum verb_offset_types { verb_offset_then = 0x1, verb_offset_any = 0x2 };
+
 enum control_types { type_mark = 0, type_then_trap = 1 };
 
 enum early_fail_types { type_skip = 0, type_fail = 1, type_fail_range = 2 };
@@ -403,7 +405,7 @@ typedef struct compiler_common {
   /* Bitset for tracking capture bracket status. */
   sljit_u8 *cbracket_bitset;
   /* Tells whether the starting offset is a target of then. */
-  sljit_u8 *then_offsets;
+  sljit_u8 *verb_offsets;
   /* Current position where a THEN must jump. */
   then_trap_backtrack *then_trap;
   /* Starting offset of private data for capturing brackets. */
@@ -1180,7 +1182,7 @@ clear_optimized_cbracket(compiler_common *common, sljit_s32 capture_index)
 static BOOL
 check_opcode_types(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend)
 {
-  int count;
+  sljit_s32 count;
   PCRE2_SPTR slot;
   PCRE2_SPTR assert_back_end = cc - 1;
   PCRE2_SPTR assert_na_end = cc - 1;
@@ -1220,8 +1222,17 @@ check_opcode_types(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend)
       if (common->utf && locals_size <= 3 * SSIZE_OF(sw))
         locals_size = 3 * SSIZE_OF(sw);
 #endif
-      if (cc[1 + IMM2_SIZE] == OP_EXTUNI && locals_size <= 3 * SSIZE_OF(sw))
-        locals_size = 3 * SSIZE_OF(sw);
+      if (cc[1 + IMM2_SIZE] == OP_EXTUNI)
+      {
+#if defined SUPPORT_UNICODE
+        count = (sljit_s32)(((common->invalid_utf) ? 4 : 3) * SSIZE_OF(sw));
+#else
+        count = 3 * SSIZE_OF(sw);
+#endif
+        if (locals_size < count) {
+          locals_size = count;
+        }
+      }
       cc += (2 + IMM2_SIZE) - 1;
       break;
 
@@ -1302,31 +1313,40 @@ check_opcode_types(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend)
       cc += 1 + LINK_SIZE;
       break;
 
+    case OP_THEN:
+      common->has_then = TRUE;
+      common->control_head_ptr = 1;
+      PCRE2_FALLTHROUGH /* Fall through */
+
+    case OP_PRUNE:
+      common->verb_offsets = (sljit_u8*)1;
+      cc += 1;
+      break;
+
     case OP_THEN_ARG:
       common->has_then = TRUE;
       common->control_head_ptr = 1;
       PCRE2_FALLTHROUGH /* Fall through */
 
-    case OP_COMMIT_ARG:
     case OP_PRUNE_ARG:
+      common->verb_offsets = (sljit_u8*)1;
+      PCRE2_FALLTHROUGH /* Fall through */
+
+    case OP_COMMIT_ARG:
     case OP_MARK:
       set_mark = TRUE;
       cc += 1 + 2 + cc[1];
       break;
 
-    case OP_THEN:
-      common->has_then = TRUE;
-      common->control_head_ptr = 1;
-      cc += 1;
-      break;
-
     case OP_SKIP:
+      common->verb_offsets = (sljit_u8*)1;
       if (cc < assert_back_end)
         common->has_skip_in_assert_back = TRUE;
       cc += 1;
       break;
 
     case OP_SKIP_ARG:
+      common->verb_offsets = (sljit_u8*)1;
       common->control_head_ptr = 1;
       common->has_skip_arg = TRUE;
       if (cc < assert_back_end)
@@ -1434,7 +1454,7 @@ detect_early_fail(compiler_common *common, PCRE2_SPTR cc, int *private_data_star
     count = start;
     cc += 1 + LINK_SIZE + ((*cc == OP_CBRA) ? IMM2_SIZE : 0);
 
-    if (!common->has_then || common->then_offsets[cc - common->start] == 0)
+    if (common->verb_offsets == NULL || common->verb_offsets[cc - common->start] == 0)
     {
       while (TRUE)
       {
@@ -3492,31 +3512,25 @@ copy_recurse_data(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend, int 
   delayed_mem_copy_finish(&status);
 }
 
-static SLJIT_INLINE void set_then_offsets(compiler_common *common)
+static SLJIT_INLINE void set_verb_offsets(compiler_common *common)
 {
   PCRE2_SPTR cc = common->start;
-  PCRE2_SPTR end;
+  PCRE2_SPTR next_top_alternative = cc + GET(cc, 1);
   BOOL has_alternatives = TRUE;
-  sljit_s32 start = 1 + LINK_SIZE;
-  sljit_s32 last_alternative, end_offset;
+  sljit_s32 start = 1 + LINK_SIZE, top_start = 1 + LINK_SIZE;
+  sljit_s32 end_offset;
 
   SLJIT_ASSERT(*cc == OP_BRA);
-  end = cc;
-  do
-  {
-    last_alternative = (sljit_s32)((end - cc) + 1 + LINK_SIZE);
-    end += GET(end, 1);
-  }
-  while (*end == OP_ALT);
+  SLJIT_ASSERT(*next_top_alternative == OP_ALT || *next_top_alternative == OP_KET);
   cc += 1 + LINK_SIZE;
 
-  while (cc < end)
+  while (*cc != OP_END)
   {
     if (*cc >= OP_ASSERT && *cc <= OP_SCOND)
     {
       end_offset = (sljit_s32)((bracketend(cc) - common->start) - (1 + LINK_SIZE));
-      common->then_offsets[end_offset] = (sljit_u8)has_alternatives;
-      SLJIT_ASSERT(common->private_data_ptrs[end - common->start] == 0);
+      common->verb_offsets[end_offset] = (sljit_u8)has_alternatives;
+      SLJIT_ASSERT(common->private_data_ptrs[end_offset] == 0);
       common->private_data_ptrs[end_offset] = start;
 
       has_alternatives = cc[GET(cc, 1)] == OP_ALT;
@@ -3554,9 +3568,9 @@ static SLJIT_INLINE void set_then_offsets(compiler_common *common)
 
     if (*cc >= OP_KET && *cc <= OP_KETRPOS)
     {
-      has_alternatives = (BOOL)common->then_offsets[cc - common->start];
+      has_alternatives = (BOOL)common->verb_offsets[cc - common->start];
       start = common->private_data_ptrs[cc - common->start];
-      common->then_offsets[cc - common->start] = 0;
+      common->verb_offsets[cc - common->start] = 0;
       common->private_data_ptrs[cc - common->start] = 0;
       cc += 1 + LINK_SIZE;
       continue;
@@ -3564,6 +3578,12 @@ static SLJIT_INLINE void set_then_offsets(compiler_common *common)
 
     if (*cc == OP_ALT)
     {
+      if (cc == next_top_alternative) {
+          next_top_alternative += GET(next_top_alternative, 1);
+          SLJIT_ASSERT(*next_top_alternative == OP_ALT || *next_top_alternative == OP_KET);
+          top_start = (sljit_s32)(cc + 1 + LINK_SIZE - common->start);
+      }
+
       cc += 1 + LINK_SIZE;
 
       if (has_alternatives)
@@ -3578,9 +3598,21 @@ static SLJIT_INLINE void set_then_offsets(compiler_common *common)
       continue;
     }
 
-    if (*cc >= OP_THEN && *cc <= OP_THEN_ARG && start != 0)
-      common->then_offsets[start] = (start == last_alternative) + 1;
+    switch (*cc)
+    {
+    case OP_THEN:
+    case OP_THEN_ARG:
+      if (start != 0)
+        common->verb_offsets[start] |= (start == top_start && *next_top_alternative == OP_KET) ? verb_offset_any : verb_offset_then;
+      break;
 
+    case OP_PRUNE:
+    case OP_PRUNE_ARG:
+    case OP_SKIP:
+    case OP_SKIP_ARG:
+      common->verb_offsets[top_start] |= verb_offset_any;
+      break;
+    }
     cc = next_opcode(common, cc);
   }
 }
@@ -12222,9 +12254,17 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
       OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL2, COUNT_MATCH, 0);
       OP1(SLJIT_MOV, COUNT_MATCH, 0, SLJIT_IMM, exact == max ? 0 : max);
 
+      tmp_base = TMP3;
+#ifdef SUPPORT_UNICODE
+      if (type == OP_EXTUNI && common->invalid_utf) {
+        /* Extuni only modifies TMP3 on successful match, except when invalid_utf is enabled. */
+        SLJIT_ASSERT(common->locals_size >= 4 * SSIZE_OF(sw));
+        OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL3, STACK_LIMIT, 0);
+        tmp_base = STACK_LIMIT;
+      }
+#endif
       label = LABEL();
-      /* Extuni only modifies TMP3 on successful match. */
-      OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
+      OP1(SLJIT_MOV, tmp_base, 0, STR_PTR, 0);
       compile_char1_matchingpath(common, type, cc, &no_match, TRUE);
 
       if (exact == max)
@@ -12236,7 +12276,7 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
       {
         OP2(SLJIT_SUB | SLJIT_SET_Z, COUNT_MATCH, 0, COUNT_MATCH, 0, SLJIT_IMM, 1);
         JUMPTO(SLJIT_NOT_ZERO, label);
-        OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
+        OP1(SLJIT_MOV, tmp_base, 0, STR_PTR, 0);
       }
 
       set_jumps(no_match, LABEL());
@@ -12250,10 +12290,24 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
       }
 
       OP1(SLJIT_MOV, COUNT_MATCH, 0, SLJIT_MEM1(SLJIT_SP), LOCAL2);
+#ifdef SUPPORT_UNICODE
+      if (tmp_base != TMP3) {
+        SLJIT_ASSERT(tmp_base == STACK_LIMIT);
+        OP1(SLJIT_MOV, STR_PTR, 0, STACK_LIMIT, 0);
+        OP1(SLJIT_MOV, STACK_LIMIT, 0, SLJIT_MEM1(SLJIT_SP), LOCAL3);
+      }
+#endif
 
       if (exact > 0)
         add_jump(compiler, prev_backtracks, JUMP(exact == max ? SLJIT_LESS : SLJIT_GREATER));
+
+#ifdef SUPPORT_UNICODE
+      if (tmp_base == TMP3)
+        OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
+#else
+      SLJIT_ASSERT(tmp_base == TMP3);
       OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
+#endif
       break;
     }
 
@@ -12479,7 +12533,7 @@ compile_matchingpath(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend,
 
   SLJIT_ASSERT(*ccend == OP_END || (*ccend >= OP_ALT && *ccend <= OP_KETRPOS));
 
-  if (common->has_then && common->then_offsets[cc - common->start] == 1)
+  if (common->has_then && (common->verb_offsets[cc - common->start] & verb_offset_then) != 0)
   {
     SLJIT_ASSERT(*ccend != OP_END && common->control_head_ptr != 0);
     has_then_trap = TRUE;
@@ -14671,18 +14725,18 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   common->cbra_ptr = OVECTOR_START + (re->top_bracket + 1) * 2 * sizeof(sljit_sw);
   private_data_size = common->cbra_ptr + (re->top_bracket + 1) * sizeof(sljit_sw);
 
-  if (common->has_then)
+  if (common->verb_offsets != NULL)
   {
     total_length = ccend - common->start;
-    common->then_offsets = (sljit_u8 *)SLJIT_MALLOC(total_length, allocator_data);
-    if (!common->then_offsets)
+    common->verb_offsets = (sljit_u8 *)SLJIT_MALLOC(total_length, allocator_data);
+    if (!common->verb_offsets)
     {
       SLJIT_FREE(common->private_data_ptrs, allocator_data);
       return PCRE2_ERROR_NOMEMORY;
     }
 
-    memset(common->then_offsets, 0, total_length);
-    set_then_offsets(common);
+    memset(common->verb_offsets, 0, total_length);
+    set_verb_offsets(common);
   }
 
   if ((re->overall_options & PCRE2_ANCHORED) == 0 &&
@@ -14697,8 +14751,8 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   if (private_data_size > 65536)
   {
     SLJIT_FREE(common->private_data_ptrs, allocator_data);
-    if (common->has_then)
-      SLJIT_FREE(common->then_offsets, allocator_data);
+    if (common->verb_offsets != NULL)
+      SLJIT_FREE(common->verb_offsets, allocator_data);
     return PCRE2_ERROR_JIT_UNSUPPORTED;
   }
 
@@ -14706,8 +14760,8 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   if (!compiler)
   {
     SLJIT_FREE(common->private_data_ptrs, allocator_data);
-    if (common->has_then)
-      SLJIT_FREE(common->then_offsets, allocator_data);
+    if (common->verb_offsets != NULL)
+      SLJIT_FREE(common->verb_offsets, allocator_data);
     return PCRE2_ERROR_NOMEMORY;
   }
 
@@ -14809,8 +14863,8 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   {
     sljit_free_compiler(compiler);
     SLJIT_FREE(common->private_data_ptrs, allocator_data);
-    if (common->has_then)
-      SLJIT_FREE(common->then_offsets, allocator_data);
+    if (common->verb_offsets != NULL)
+      SLJIT_FREE(common->verb_offsets, allocator_data);
     PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
     return PCRE2_ERROR_NOMEMORY;
   }
@@ -14894,8 +14948,8 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   {
     sljit_free_compiler(compiler);
     SLJIT_FREE(common->private_data_ptrs, allocator_data);
-    if (common->has_then)
-      SLJIT_FREE(common->then_offsets, allocator_data);
+    if (common->verb_offsets != NULL)
+      SLJIT_FREE(common->verb_offsets, allocator_data);
     PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
     return PCRE2_ERROR_NOMEMORY;
   }
@@ -15013,8 +15067,8 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
 
       sljit_free_compiler(compiler);
       SLJIT_FREE(common->private_data_ptrs, allocator_data);
-      if (common->has_then)
-        SLJIT_FREE(common->then_offsets, allocator_data);
+      if (common->verb_offsets != NULL)
+        SLJIT_FREE(common->verb_offsets, allocator_data);
       PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
       return PCRE2_ERROR_NOMEMORY;
     }
@@ -15182,8 +15236,8 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
 #endif /* SUPPORT_UNICODE */
 
   SLJIT_FREE(common->private_data_ptrs, allocator_data);
-  if (common->has_then)
-    SLJIT_FREE(common->then_offsets, allocator_data);
+  if (common->verb_offsets != NULL)
+    SLJIT_FREE(common->verb_offsets, allocator_data);
 
   executable_func = sljit_generate_code(compiler, 0, NULL);
   executable_size = sljit_get_generated_code_size(compiler);

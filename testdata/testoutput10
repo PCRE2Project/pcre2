@@ -1821,6 +1821,22 @@ No match
     \xf0s
  0: s
 
+/\X{0,3}+/utf,match_invalid_utf
+   \xc0\x80
+ 0: 
+   a\xc0\x80
+ 0: a
+   abc\xc0\x80
+ 0: abc
+
+/\X{1,3}+/utf,match_invalid_utf
+   \xc0\x80
+No match
+   a\xc0\x80
+ 0: a
+   abc\xc0\x80
+ 0: abc
+
 # -------------------------------------
 
 /(*UTF)(?=\x{123})/I

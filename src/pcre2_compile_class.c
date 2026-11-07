@@ -804,8 +804,10 @@ PRIV(update_classbits)(uint32_t ptype, uint32_t pdata, BOOL negated, uint8_t *cl
   }
 
   PCRE2_ASSERT(ptype <= PT_PXXDIGIT && ptype != PT_CLIST);
+  PCRE2_ASSERT(PRIV(ucd_low_bitmap_offsets)[ptype] + pdata <
+               PRIV(ucd_low_bitmap_offsets)[ptype + 1]);
   bitmap = PRIV(
-      ucd_low_bitmaps)[PRIV(ucd_low_bitmap_indexes)[PRIV(ucd_low_bitmap_indexes)[ptype] + pdata]];
+      ucd_low_bitmaps)[PRIV(ucd_low_bitmap_indexes)[PRIV(ucd_low_bitmap_offsets)[ptype] + pdata]];
 
   for (i = 0; i < 32; i++)
     classbits[i] |= negated ? (uint8_t)~bitmap[i] : bitmap[i];

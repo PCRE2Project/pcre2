@@ -561,9 +561,9 @@ const uint32_t PRIV(ucd_boolprop_sets)[] = {
 };
 // clang-format on
 
-/* Precomputed property bitmaps for code points below 256. The first
-PT_PXXDIGIT + 1 entries of ucd_low_bitmap_indexes give the offset of each
-property type's bitmap indexes; add the property's value to that offset. */
+/* Precomputed property bitmaps for code points below 256. The
+ucd_low_bitmap_offsets give the offset of each property type's bitmap
+indexes, followed by the end offset; add the property's value to its offset. */
 
 // clang-format off
 const uint8_t PRIV(ucd_low_bitmaps)[][32] = {
@@ -636,25 +636,29 @@ const uint8_t PRIV(ucd_low_bitmaps)[][32] = {
   { 0x00, 0x00, 0x00, 0x00, 0xfe, 0xff, 0x00, 0xfc, 0x01, 0x00, 0x00, 0xf8, 0x01, 0x00, 0x00, 0x78, 0x00, 0x00, 0x00, 0x00, 0x82, 0x08, 0xc0, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
 };
 
-const uint16_t PRIV(ucd_low_bitmap_indexes)[] = {
-  18, /* PT_LAMP */
-  19, /* PT_GC */
-  26, /* PT_PC */
-  56, /* PT_SC */
-  231, /* PT_SCX */
-  406, /* PT_ALNUM */
-  407, /* PT_SPACE */
-  408, /* PT_PXSPACE */
-  409, /* PT_WORD */
-  410, /* PT_CLIST */
-  410, /* PT_UCNC */
-  411, /* PT_BIDICL */
-  434, /* PT_BOOL */
-  491, /* PT_ANY */
-  492, /* PT_PXGRAPH */
-  493, /* PT_PXPRINT */
-  494, /* PT_PXPUNCT */
-  495, /* PT_PXXDIGIT */
+const uint16_t PRIV(ucd_low_bitmap_offsets)[] = {
+  0, /* PT_LAMP */
+  1, /* PT_GC */
+  8, /* PT_PC */
+  38, /* PT_SC */
+  213, /* PT_SCX */
+  388, /* PT_ALNUM */
+  389, /* PT_SPACE */
+  390, /* PT_PXSPACE */
+  391, /* PT_WORD */
+  392, /* PT_CLIST */
+  392, /* PT_UCNC */
+  393, /* PT_BIDICL */
+  416, /* PT_BOOL */
+  473, /* PT_ANY */
+  474, /* PT_PXGRAPH */
+  475, /* PT_PXPRINT */
+  476, /* PT_PXPUNCT */
+  477, /* PT_PXXDIGIT */
+  478, /* End */
+};
+
+const uint8_t PRIV(ucd_low_bitmap_indexes)[] = {
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 3, 3, 3, 10, 3, 11,
   3, 12, 3, 3, 3, 13, 3, 14, 15, 16, 17, 18, 19, 20, 21, 22,
   23, 24, 25, 3, 3, 7, 26, 3, 3, 3, 3, 3, 3, 3, 3, 3,

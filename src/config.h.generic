@@ -89,13 +89,13 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 /* Define to 1 if you have the <limits.h> header file. */
 /* #undef HAVE_LIMITS_H */
 
-/* Define to 1 if you have the `memfd_create' function. */
+/* Define to 1 if you have the 'memfd_create' function. */
 /* #undef HAVE_MEMFD_CREATE */
 
 /* Define to 1 if you have the <minix/config.h> header file. */
 /* #undef HAVE_MINIX_CONFIG_H */
 
-/* Define to 1 if you have the `mkostemp' function. */
+/* Define to 1 if you have the 'mkostemp' function. */
 /* #undef HAVE_MKOSTEMP */
 
 /* Define if you have POSIX threads libraries and header files. */
@@ -116,10 +116,10 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 /* Define to 1 if you have the `realpath' function. */
 /* #undef HAVE_REALPATH */
 
-/* Define to 1 if you have the `secure_getenv' function. */
+/* Define to 1 if you have the 'secure_getenv' function. */
 /* #undef HAVE_SECURE_GETENV */
 
-/* Define to 1 if you have the `setrlimit' function. */
+/* Define to 1 if you have the 'setrlimit' function. */
 /* #undef HAVE_SETRLIMIT */
 
 /* Define to 1 if stardard (C11 or later) atomics are available. */
@@ -338,7 +338,7 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
    unless SUPPORT_JIT is also defined. */
 /* #undef SLJIT_PROT_EXECUTABLE_ALLOCATOR */
 
-/* Define to 1 if all of the C90 standard headers exist (not just the ones
+/* Define to 1 if all of the C89 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
    backward compatibility; new code need not use it. */
 /* #undef STDC_HEADERS */
@@ -393,7 +393,7 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 /* Define to any value for valgrind support to find invalid memory reads. */
 /* #undef SUPPORT_VALGRIND */
 
-/* Enable extensions on AIX 3, Interix.  */
+/* Enable extensions on AIX, Interix, z/OS.  */
 #ifndef _ALL_SOURCE
 # define _ALL_SOURCE 1
 #endif
@@ -454,11 +454,15 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 #ifndef __STDC_WANT_IEC_60559_DFP_EXT__
 # define __STDC_WANT_IEC_60559_DFP_EXT__ 1
 #endif
+/* Enable extensions specified by C23 Annex F.  */
+#ifndef __STDC_WANT_IEC_60559_EXT__
+# define __STDC_WANT_IEC_60559_EXT__ 1
+#endif
 /* Enable extensions specified by ISO/IEC TS 18661-4:2015.  */
 #ifndef __STDC_WANT_IEC_60559_FUNCS_EXT__
 # define __STDC_WANT_IEC_60559_FUNCS_EXT__ 1
 #endif
-/* Enable extensions specified by ISO/IEC TS 18661-3:2015.  */
+/* Enable extensions specified by C23 Annex H and ISO/IEC TS 18661-3:2015.  */
 #ifndef __STDC_WANT_IEC_60559_TYPES_EXT__
 # define __STDC_WANT_IEC_60559_TYPES_EXT__ 1
 #endif
@@ -486,12 +490,18 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 /* Number of bits in a file offset, on hosts where this is settable. */
 /* #undef _FILE_OFFSET_BITS */
 
-/* Define for large files, on AIX-style hosts. */
+/* Define to 1 on platforms where this makes off_t a 64-bit type. */
 /* #undef _LARGE_FILES */
+
+/* Number of bits in time_t, on hosts where this is settable. */
+/* #undef _TIME_BITS */
+
+/* Define to 1 on platforms where this makes time_t a 64-bit type. */
+/* #undef __MINGW_USE_VC2005_COMPAT */
 
 /* Define to the type of a signed integer type of width exactly 64 bits if
    such a type exists and the standard includes do not define it. */
 /* #undef int64_t */
 
-/* Define to `unsigned int' if <sys/types.h> does not define. */
+/* Define as 'unsigned int' if <stddef.h> doesn't define. */
 /* #undef size_t */
