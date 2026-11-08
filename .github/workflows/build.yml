@@ -510,48 +510,64 @@ jobs:
           ZOS_PRIVATE_KEY: ${{ secrets.ZOS_PRIVATE_KEY }}
           ZOS_KNOWN_HOSTS: ${{ secrets.ZOS_KNOWN_HOSTS }}
         run: |
-          (umask 0077 && printenv ZOS_PRIVATE_KEY > id_rsa_zos)
+          key_file="$RUNNER_TEMP/id_rsa_zos"
+          (umask 0077 && printenv ZOS_PRIVATE_KEY > "$key_file")
           mkdir -p ~/.ssh
           printenv ZOS_KNOWN_HOSTS > ~/.ssh/known_hosts
 
-          tar czf ../pcre2-build.tar.gz --exclude=.git .
-          mv ../pcre2-build.tar.gz .
+          # Build the artifacts to upload: a tarball, and a script file
+          tarball_file="$RUNNER_TEMP/pcre2-build.tar.gz"
+          build_script_file="$RUNNER_TEMP/build_script.sh"
 
-          scp -i id_rsa_zos -P "$ZOS_PORT" pcre2-build.tar.gz "$ZOS_HOST:/data/"
-          ssh -i id_rsa_zos -p "$ZOS_PORT" "$ZOS_HOST" /data/zopen/usr/local/bin/bash -c \
-            'export _BPXK_AUTOCVT=ON;
-            export _CEE_RUNOPTS="FILETAG(AUTOCVT,AUTOTAG) POSIX(ON)";
-            export _TAG_REDIR_ERR=txt;
-            export _TAG_REDIR_IN=txt;
-            export _TAG_REDIR_OUT=txt;
-            export PATH="/data/zopen/usr/local/bin:/data/zopen/usr/bin:/data/zopen/bin:/data/zopen/boot:/bin:/usr/lpp/IBM/cnw/v2r1/openxl/bin";
-            . /data/zopen/etc/zopen-config;
-            set -e;
-            set -x;
-            cd /data;
+          tar czf "$tarball_file" --exclude=.git .
 
-            echo "== Autoconf, XLC compiler ==";
-            rm -rf pcre2-build;
-            mkdir pcre2-build;
-            gtar xzf pcre2-build.tar.gz -C pcre2-build;
-            cd pcre2-build;
-            chtag -R -tc ISO8859-1 .;
-            MAKE=gmake CC=xlc ./configure --enable-ebcdic --disable-unicode;
-            gmake;
-            (set +e; gmake check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc);
+          echo >"$build_script_file"
+          printf 'CMAKE_FLAGS=%q\n' "$CMAKE_FLAGS" >>"$build_script_file"
+          printf 'CFLAGS_GCC_STYLE=%q\n' "$CFLAGS_GCC_STYLE" >>"$build_script_file"
+          cat <<'ZOS_BUILD_SCRIPT' >>"$build_script_file"
+          export _BPXK_AUTOCVT=ON
+          export _CEE_RUNOPTS="FILETAG(AUTOCVT,AUTOTAG) POSIX(ON)"
+          export _TAG_REDIR_ERR=txt
+          export _TAG_REDIR_IN=txt
+          export _TAG_REDIR_OUT=txt
+          export PATH="/data/zopen/usr/local/bin:/data/zopen/usr/bin:/data/zopen/bin:/data/zopen/boot:/bin:/usr/lpp/IBM/cnw/v2r1/openxl/bin"
+          . /data/zopen/etc/zopen-config
+          set -ex # Enable warnings after zopen-config
+          cd /data
 
-            echo "== CMake, IBM-Clang -m64 compiler ==";
-            cd ..;
-            rm -rf pcre2-build;
-            mkdir pcre2-build;
-            gtar xzf pcre2-build.tar.gz -C pcre2-build;
-            cd pcre2-build;
-            chtag -R -tc ISO8859-1 .;
-            cmake $CMAKE_FLAGS -G Ninja -DPCRE2_EBCDIC=ON -DPCRE2_SUPPORT_UNICODE=OFF -DCMAKE_C_COMPILER=ibm-clang -DCMAKE_C_FLAGS="-m64 $CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
-            cd build;
-            ninja;
-            ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
-            '
+          echo "== Autoconf, XLC compiler =="
+          rm -rf pcre2-build
+          mkdir pcre2-build
+          gtar xzf pcre2-build.tar.gz -C pcre2-build
+          cd pcre2-build
+          chtag -R -tc ISO8859-1 .
+          MAKE=gmake CC=xlc ./configure --enable-ebcdic --disable-unicode
+          gmake
+          (set +e; gmake check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+
+          echo "== CMake, IBM-Clang -m64 compiler =="
+          cd ..
+          rm -rf pcre2-build
+          mkdir pcre2-build
+          gtar xzf pcre2-build.tar.gz -C pcre2-build
+          cd pcre2-build
+          chtag -R -tc ISO8859-1 .
+          cmake $CMAKE_FLAGS -G Ninja -DPCRE2_EBCDIC=ON -DPCRE2_SUPPORT_UNICODE=OFF -DCMAKE_C_COMPILER=ibm-clang -DCMAKE_C_FLAGS="-m64 $CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+          cmake --build build
+          cd build
+          ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+          ZOS_BUILD_SCRIPT
+
+          # Upload files and execute remotely
+          workspace="/data"
+          scp -i "$key_file" -P "$ZOS_PORT" "$tarball_file" "$ZOS_HOST:$workspace/"
+          scp -i "$key_file" -P "$ZOS_PORT" "$build_script_file" "$ZOS_HOST:$workspace/"
+          ssh -i "$key_file" -p "$ZOS_PORT" "$ZOS_HOST" /data/zopen/usr/local/bin/bash /data/build_script.sh
+
+      - name: Clean up z/OS workspace
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/id_rsa_zos"
 
   distcheck:
     name: Build & verify distribution
