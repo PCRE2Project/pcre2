@@ -27,6 +27,9 @@ PCRE2_SUBSTITUTE_GLOBAL, a \Q that was not closed by \E stayed in effect for
 the replacement of the next match, whose text was then copied literally,
 including the \Q itself.
 
+5. Restore Unicode-property character class compilation performance using
+shared precomputed bitmaps for code points below 256.
+
 
 Version 10.49 28-September-2026
 -------------------------------

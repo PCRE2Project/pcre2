@@ -5003,6 +5003,57 @@ No match
     A
 No match
 
+# Low-codepoint property bitmaps in mixed classes.
+
+/^[\p{Nd}\x{100}]+$/utf
+    09\x{100}
+ 0: 09\x{100}
+    A
+No match
+
+/^[\P{Nd}\x{100}]+$/utf
+    A\x{ff}\x{100}
+ 0: A\x{ff}\x{100}
+    0
+No match
+
+/^[\p{scx=Latin}\x{100}]+$/utf
+    A\x{b7}\x{ff}\x{100}
+ 0: A\x{b7}\x{ff}\x{100}
+    0
+No match
+
+/^[\p{sc=Latin}\x{100}]+$/utf
+    A\x{ff}\x{100}
+ 0: A\x{ff}\x{100}
+    \x{b7}
+No match
+
+/^[\p{Bidi_Class=ON}\p{White_Space}\x{100}]+$/utf
+    \x{85}\x{b7}\x{100}
+ 0: \x{85}\x{b7}\x{100}
+    0
+No match
+
+/^[[:punct:]\x{100}]+$/ucp,utf
+    $!\x{a1}\x{100}
+ 0: $!\x{a1}\x{100}
+    \x{a3}
+No match
+
+/^[[:print:]\x{100}]+$/ucp,utf
+    \x{a0}\x{ad}\x{100}
+ 0: \x{a0}\x{ad}\x{100}
+    \x{1f}
+No match
+
+/^[\P{ASCII}\p{Nd}\x{100}]+$/utf
+    09\x{ff}\x{100}
+ 0: 09\x{ff}\x{100}
+    A
+No match
+
+
 # --------------
 
 # End of testinput4
