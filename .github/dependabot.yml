@@ -9,3 +9,12 @@ updates:
         update-types:
           - "minor"
           - "patch"
+  - package-ecosystem: bundler
+    directory: /pages
+    schedule:
+      interval: monthly
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
