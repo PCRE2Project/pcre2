@@ -8447,6 +8447,19 @@ a)"xI
     fooBAR
 
 # --------------
+# An unterminated \Q applies to one replacement, not to those for later matches
+# --------------
+
+/x/g,replace=\Qabc,substitute_extended
+    xx
+
+/x/g,replace=\Qa$$,substitute_extended
+    xxx
+
+/x/g,replace=\Qa\Eb,substitute_extended
+    xx
+
+# --------------
 # Tests for substitution with partial
 # --------------
 
