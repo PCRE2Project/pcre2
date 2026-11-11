@@ -18,7 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/pages/Gemfile
-      BUNDLE_PATH: ${{ github.workspace }}/pages/vendor/bundle
     steps:
       - name: Setup
         run: |
@@ -31,9 +30,10 @@ jobs:
 
       - name: Install locked website dependencies
         run: |
+          bundle config set --local path vendor/bundle
           bundle config set --local frozen true
           bundle install
-          bundle exec ruby -rjekyll -rasciidoctor -rrouge -e \
+          ruby -rbundler/setup -rjekyll -rasciidoctor -rrouge -e \
             'puts "Jekyll #{Jekyll::VERSION}, Asciidoctor #{Asciidoctor::VERSION}, Rouge #{Rouge.version}"'
 
       - name: Setup Pages

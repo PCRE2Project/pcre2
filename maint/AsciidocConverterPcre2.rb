@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../pages/Gemfile', __dir__)
+require 'bundler/setup'
+
 # PCRE2's Asciidoctor extension defines a small semantic inline vocabulary and
 # backend-specific presentation for HTML and manpage output. Keep the extension
 # backend-neutral until conversion so all outputs consume the same AST.
