@@ -1174,6 +1174,15 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
 
 #define JIT_HAS_FAST_FORWARD_CHAR_SIMD 1
 
+// AdvSIMD OPCODES:
+#define CMEQ_V   0x6e208c00
+#define ORR_V    0x4ea01c00
+#define SHRN_V   0x0f0c8400
+#define SHRN2_V  0x4f0c8400
+#define MOV_VD   0x6e080400
+#define SHL_V2D  0x4f405400
+#define USHR_V2D 0x6f400400
+
 static void
 fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler,
                                     vector_compare_type compare_type, int step, sljit_u32 dst_ind,
@@ -1195,7 +1204,7 @@ fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler,
   if (step == 1)
   {
     /* CMEQ */
-    instruction = 0x6e208c00 | size | (cmp1_ind << 16) | (dst_ind << 5) | dst_ind;
+    instruction = CMEQ_V | size | (cmp1_ind << 16) | (dst_ind << 5) | dst_ind;
     sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
     return;
   }
@@ -1205,7 +1214,7 @@ fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler,
     if (step == 0 && compare_type == vector_compare_match1i)
     {
       /* ORR */
-      instruction = 0x4ea01c00 | (cmp2_ind << 16) | (dst_ind << 5) | dst_ind;
+      instruction = ORR_V | (cmp2_ind << 16) | (dst_ind << 5) | dst_ind;
       sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
     }
 
@@ -1216,13 +1225,13 @@ fast_forward_char_pair_sse2_compare(struct sljit_compiler *compiler,
   {
   case 0:
     /* CMEQ */
-    instruction = 0x6e208c00 | size | (cmp2_ind << 16) | (dst_ind << 5) | tmp_ind;
+    instruction = CMEQ_V | size | (cmp2_ind << 16) | (dst_ind << 5) | tmp_ind;
     sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
     return;
 
   case 2:
     /* ORR */
-    instruction = 0x4ea01c00 | (tmp_ind << 16) | (dst_ind << 5) | dst_ind;
+    instruction = ORR_V | (tmp_ind << 16) | (dst_ind << 5) | dst_ind;
     sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
     return;
   }
@@ -1293,10 +1302,10 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
 
 #if (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
   /* SHRN */
-  instruction = 0x0f0c8400 | (data_ind << 5) | data_ind;
+  instruction = SHRN_V | (data_ind << 5) | data_ind;
 #else
   /* SHRN2 */
-  instruction = 0x4f0c8400 | (data_ind << 5) | data_ind;
+  instruction = SHRN2_V | (data_ind << 5) | data_ind;
 #endif
   sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
 
@@ -1331,10 +1340,10 @@ fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR c
 
 #if (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
   /* SHRN */
-  instruction = 0x0f0c8400 | (data_ind << 5) | data_ind;
+  instruction = SHRN_V | (data_ind << 5) | data_ind;
 #else
   /* SHRN2 */
-  instruction = 0x4f0c8400 | (data_ind << 5) | data_ind;
+  instruction = SHRN2_V | (data_ind << 5) | data_ind;
 #endif
   sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
 
@@ -1437,10 +1446,10 @@ fast_requested_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR
 
 #if (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
   /* SHRN */
-  instruction = 0x0f0c8400 | (data_ind << 5) | data_ind;
+  instruction = SHRN_V | (data_ind << 5) | data_ind;
 #else
   /* SHRN2 */
-  instruction = 0x4f0c8400 | (data_ind << 5) | data_ind;
+  instruction = SHRN2_V | (data_ind << 5) | data_ind;
 #endif
   sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
 
@@ -1474,10 +1483,10 @@ fast_requested_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR
 
 #if (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
   /* SHRN */
-  instruction = 0x0f0c8400 | (data_ind << 5) | data_ind;
+  instruction = SHRN_V | (data_ind << 5) | data_ind;
 #else
   /* SHRN2 */
-  instruction = 0x4f0c8400 | (data_ind << 5) | data_ind;
+  instruction = SHRN2_V | (data_ind << 5) | data_ind;
 #endif
   sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
 
@@ -1609,9 +1618,9 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
   {
     /* MOV (element) */
 #if (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
-      instruction = 0x6e180400 | (data1_ind << 5) | data2_ind;
+      instruction = MOV_VD | (1 << 20) | (0 << 14) | (data1_ind << 5) | data2_ind;
 #else
-      instruction = 0x6e084400 | (data1_ind << 5) | data2_ind;
+      instruction = MOV_VD | (0 << 20) | (1 << 14) | (data1_ind << 5) | data2_ind;
 #endif
       sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
 
@@ -1619,10 +1628,10 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
     {
 #if (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
       /* SHL */
-      instruction = 0x4f405400 | ((diff - 8) << 19) | (data2_ind << 5) | data2_ind;
+      instruction = SHL_V2D | ((diff - 8) << 19) | (data2_ind << 5) | data2_ind;
 #else
       /* USHR */
-      instruction = 0x6f400400 | ((16 - diff) << 19) | (data2_ind << 5) | data2_ind;
+      instruction = USHR_V2D | ((16 - diff) << 19) | (data2_ind << 5) | data2_ind;
 #endif
       sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
     }
@@ -1631,27 +1640,27 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
   {
     /* MOV (element) */
 #if (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
-    instruction = 0x6e180400 | (data1_ind << 5) | tmp1_ind;
+    instruction = MOV_VD | (1 << 20) | (0 << 14) | (data1_ind << 5) | tmp1_ind;
 #else
-    instruction = 0x6e084400 | (data1_ind << 5) | tmp1_ind;
+    instruction = MOV_VD | (0 << 20) | (1 << 14) | (data1_ind << 5) | tmp1_ind;
 #endif
     sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
 
 #if (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
     /* SHL */
-    instruction = 0x4f405400 | (diff << 19) | (data1_ind << 5) | data2_ind;
+    instruction = SHL_V2D | (diff << 19) | (data1_ind << 5) | data2_ind;
 #else
     /* USHR */
-    instruction = 0x6f400400 | ((8 - diff) << 19) | (data1_ind << 5) | data2_ind;
+    instruction = USHR_V2D | ((8 - diff) << 19) | (data1_ind << 5) | data2_ind;
 #endif
     sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
 
 #if (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
     /* USHR */
-    instruction = 0x6f400400 | (diff << 19) | (tmp1_ind << 5) | tmp1_ind;
+    instruction = USHR_V2D | (diff << 19) | (tmp1_ind << 5) | tmp1_ind;
 #else
     /* SHL */
-    instruction = 0x4f405400 | ((8 - diff) << 19) | (tmp1_ind << 5) | tmp1_ind;
+    instruction = SHL_V2D | ((8 - diff) << 19) | (tmp1_ind << 5) | tmp1_ind;
 #endif
     sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
 
@@ -1676,10 +1685,10 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
 
 #if (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
   /* SHRN */
-  instruction = 0x0f0c8400 | (data1_ind << 5) | data1_ind;
+  instruction = SHRN_V | (data1_ind << 5) | data1_ind;
 #else
   /* SHRN2 */
-  instruction = 0x4f0c8400 | (data1_ind << 5) | data1_ind;
+  instruction = SHRN2_V | (data1_ind << 5) | data1_ind;
 #endif
   sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
 
@@ -1722,10 +1731,10 @@ fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1, PCRE2_UCHA
 
 #if (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
   /* SHRN */
-  instruction = 0x0f0c8400 | (data1_ind << 5) | data1_ind;
+  instruction = SHRN_V | (data1_ind << 5) | data1_ind;
 #else
   /* SHRN2 */
-  instruction = 0x4f0c8400 | (data1_ind << 5) | data1_ind;
+  instruction = SHRN2_V | (data1_ind << 5) | data1_ind;
 #endif
   sljit_emit_op_custom(compiler, &instruction, sizeof(sljit_u32));
 
