@@ -27,6 +27,11 @@ PCRE2_SUBSTITUTE_GLOBAL, a \Q that was not closed by \E stayed in effect for
 the replacement of the next match, whose text was then copied literally,
 including the \Q itself.
 
+5. pcre2grep now rejects numeric option values that do not fit the option's
+variable. They used to wrap silently, so that a large -o group number could
+become negative and read outside the ovector, and --buffer-size could make the
+size of the main buffer wrap.
+
 
 Version 10.49 28-September-2026
 -------------------------------
