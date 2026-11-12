@@ -632,7 +632,7 @@ AC_TYPE_SIZE_T
 
 # Checks for library functions.
 
-AC_CHECK_FUNCS(memfd_create mkostemp secure_getenv setrlimit)
+AC_CHECK_FUNCS(fseeko ftello memfd_create mkostemp secure_getenv setrlimit)
 
 AC_LANG_PUSH([C])
 AC_CACHE_CHECK([for standard C atomics], [pcre2_cv_c_atomics], [

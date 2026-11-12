@@ -999,6 +999,76 @@ echo "RC=$?" >>testtrygrep
 (cd "$srcdir"; $valgrind $vjs "$pcre2grep" $pcre2grep_opts --om-capture=4294967295 -m1 -o1 '(pattern)' testdata/grepinput) >>testtrygrep 2>&1
 echo "RC=$?" >>testtrygrep
 
+echo "---------------------------- Test 163 -----------------------------" >>testtrygrep
+# Large file offsets: a match beyond 4GiB in a sparse file exercises the -m
+# shared-stdin resume path, which must reposition the stream with a true
+# 64-bit file offset. The first variant scans to the match; the second starts
+# from a descriptor prepositioned beyond 4GiB, exercising the initial
+# stream_start tell. If sparse large files cannot be created here, the
+# expected output is written (as for the locale test above) so the comparison
+# stays stable, but the skip and its reason are reported loudly on stdout.
+large_offset_skip_reason="perl unavailable"
+large_offset_file_ok=0
+if command -v perl >/dev/null 2>&1; then
+  if perl -e '
+    # Cheap upfront sparse-capability probe before any large allocation.
+    open(my $p, ">", "testtemp2grep") or exit 1;
+    binmode($p);
+    print $p "x" or exit 1;
+    seek($p, 2097152, 0) or exit 1;
+    print $p "y" or exit 1;
+    close($p) or exit 1;
+    my ($psize, $pblocks) = (stat("testtemp2grep"))[7,12];
+    exit 1 unless defined($psize) && $psize == 2097153 && defined($pblocks) && $pblocks*512 <= 65536;
+    unlink("testtemp2grep");
+    my $target = 4*1024*1024*1024 + 1024*1024;
+    my $tail = "hello world target line\nresume-from-here MARKER\nlast line\n";
+    open(my $fh, ">", "testNinputgrep") or exit 1;
+    binmode($fh);
+    print $fh "filler line\n" x 100 or exit 1;
+    for (my $o = 65536; $o < $target; $o += 65536) {
+      seek($fh, $o, 0) or exit 1;
+      print $fh "\n" or exit 1;
+    }
+    seek($fh, $target, 0) or exit 1;
+    print $fh $tail or exit 1;
+    close($fh) or exit 1;
+    my ($size, $blocks) = (stat("testNinputgrep"))[7,12];
+    exit(($size == $target + length($tail) && defined($blocks) && $blocks*512 < 1024*1024*1024) ? 0 : 1);
+  '; then
+    large_offset_file_ok=1
+  else
+    large_offset_skip_reason="sparse large files unsupported here"
+  fi
+fi
+if [ $large_offset_file_ok -eq 1 ]; then
+  ( exec 3<testNinputgrep
+    $valgrind $vjs "$pcre2grep" $pcre2grep_opts --binary-files=text -o -m1 'hello' <&3
+    echo "RC=$?"
+    head -c 24 <&3
+    exec 3<&- ) >>testtrygrep 2>&1
+  # Prepositioned-fd variant: start the scan beyond 4GiB, then observe the
+  # resumed descriptor. Perl forks so its own handle shares the child's open
+  # file description and can read the position after pcre2grep exits.
+  perl -e '
+    my $pos = 4*1024*1024*1024 + 1024*1024 - 65535;  # start of the matched line
+    open(my $fh, "<", "testNinputgrep") or exit 1;
+    seek($fh, $pos, 0) or exit 1;
+    my $pid = fork();
+    if ($pid == 0) { open(STDIN, "<&", $fh) or exit 1; exec @ARGV; exit 127; }
+    waitpid($pid, 0);
+    print "RC=", ($? >> 8), "\n";
+    my $buf = "";
+    my $got = read($fh, $buf, 24);
+    print $buf;
+    exit(($got == 24) ? 0 : 1);
+  ' $valgrind $vjs "$pcre2grep" $pcre2grep_opts --binary-files=text -o -m1 'hello' >>testtrygrep 2>&1
+else
+  echo "** Test 163 SKIPPED: $large_offset_skip_reason - large-offset regression coverage absent"
+  printf 'hello\nRC=0\nresume-from-here MARKER\nhello\nRC=0\nresume-from-here MARKER\n' >>testtrygrep
+fi
+rm -f testNinputgrep testtemp2grep
+
 
 # Now compare the results.
 

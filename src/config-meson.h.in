@@ -6,6 +6,8 @@
 #mesondefine HAVE_BUILTIN_UNREACHABLE
 #mesondefine HAVE_ATTRIBUTE_UNINITIALIZED
 #mesondefine HAVE_DIRENT_H
+#mesondefine HAVE_FSEEKO
+#mesondefine HAVE_FTELLO
 #mesondefine HAVE_SYS_STAT_H
 #mesondefine HAVE_SYS_TYPES_H
 #mesondefine HAVE_UNISTD_H
