@@ -527,6 +527,21 @@
    a\x{dc00}
    abc\x{dc00}
 
+/\X*/utf,match_invalid_utf
+   \x{dc00}
+   abc\x{dc00}
+   a\x{dc00}bc
+
+/\X+/utf,match_invalid_utf
+   \x{dc00}
+   abc\x{dc00}
+   a\x{dc00}bc
+
+/\X{2,}+/utf,match_invalid_utf
+   \x{dc00}
+   abc\x{dc00}
+   a\x{dc00}bc
+
 # ---------------------------------------------------- 
 
 /(*UTF)(?=\x{123})/I
