@@ -3421,7 +3421,7 @@ func:pcre2_compile() or by starting the pattern with [.regex]`+(*NO_START_OPT)+`
 ====
 
 After a successful match, a partial match, or one of the invalid UTF errors
-(for example, const:PCRE2_ERROR_UTF8_ERR5), func:pcre2_get_startchar() can be
+(for example, const:PCRE2_ERROR_UTF8_ERR3), func:pcre2_get_startchar() can be
 called. After a successful or partial match it returns the code unit offset of
 the character at which the match started. For a non-partial match, this can be
 different to the value of [.c]`+ovector[0]+` if the pattern contains the [.regex]`\K`
