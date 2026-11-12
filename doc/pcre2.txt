@@ -3818,7 +3818,7 @@ OTHER INFORMATION ABOUT A MATCH
            pcre2_compile() or by starting the pattern with (*NO_START_OPT).
 
        After a successful match, a partial match, or one of the invalid UTF
-       errors (for example, PCRE2_ERROR_UTF8_ERR5), pcre2_get_startchar() can
+       errors (for example, PCRE2_ERROR_UTF8_ERR3), pcre2_get_startchar() can
        be called. After a successful or partial match it returns the code unit
        offset of the character at which the match started. For a non-partial
        match, this can be different to the value of ovector[0] if the pattern
@@ -4124,6 +4124,9 @@ EXTRACTING CAPTURED SUBSTRINGS BY NUMBER
                                    (abc)|(def) and the subject is def, and the
                                    ovector contains at least two capturing
                                    slots, substring number 1 is unset.
+           PCRE2_ERROR_FRESHMATCHDATA
+                                   The match data block has not yet been used
+                                   by a matching function.
 
 EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS
        int pcre2_substring_list_get(pcre2_match_data *match_data,
@@ -4777,15 +4780,16 @@ DUPLICATE CAPTURE GROUP NAMES
        If you want to get full details of all captured substrings for a given
        name, you must use the pcre2_substring_nametable_scan() function. The
        first argument is the compiled pattern, and the second is the name. If
-       the third and fourth arguments are NULL, the function returns a group
-       number for a unique name, or PCRE2_ERROR_NOUNIQUESUBSTRING otherwise.
+       the third argument is NULL, the function returns a group number for a
+       unique name, or PCRE2_ERROR_NOUNIQUESUBSTRING otherwise.
 
-       When the third and fourth arguments are not NULL, they must be pointers
-       to variables that are updated by the function. After it has run, they
-       point to the first and last entries in the name-to-number table for the
-       given name, and the function returns the length of each entry in code
-       units. In both cases, PCRE2_ERROR_NOSUBSTRING is returned if there are
-       no entries for the given name.
+       When the third argument is not NULL, the fourth must not be NULL
+       either. Both must be pointers to variables that are updated by the
+       function. After it has run, they point to the first and last entries in
+       the name-to-number table for the given name, and the function returns
+       the length of each entry in code units. In both cases,
+       PCRE2_ERROR_NOSUBSTRING is returned if there are no entries for the
+       given name.
 
        The format of the name table is described above in the section
        INFORMATION ABOUT A COMPILED PATTERN. Given all the relevant entries
@@ -13277,32 +13281,36 @@ VALIDITY OF UTF STRINGS
 
            PCRE2_ERROR_UTF8_ERR1
            PCRE2_ERROR_UTF8_ERR2
-           PCRE2_ERROR_UTF8_ERR3
-           PCRE2_ERROR_UTF8_ERR4
-           PCRE2_ERROR_UTF8_ERR5  The string ends with a truncated UTF-8
+           PCRE2_ERROR_UTF8_ERR3  The string ends with a truncated UTF-8
                                   character; the code specifies how many bytes
-                                  are missing (1 to 5). Although RFC 3629
-                                  restricts UTF-8 characters to be no longer
-                                  than 4 bytes, the encoding scheme
-                                  (originally defined by RFC 2279) allows for
-                                  up to 6 bytes, and this is checked first;
-                                  hence the possibility of 4 or 5 missing
-                                  bytes.
+                                  are missing (1 to 3).
+
+           PCRE2_ERROR_UTF8_ERR4
+           PCRE2_ERROR_UTF8_ERR5  These codes are no longer returned. They
+                                  indicated 4 or 5 missing bytes in an
+                                  obsolete 5- or 6-byte sequence, which is now
+                                  rejected immediately.
 
            PCRE2_ERROR_UTF8_ERR6
            PCRE2_ERROR_UTF8_ERR7
-           PCRE2_ERROR_UTF8_ERR8
+           PCRE2_ERROR_UTF8_ERR8  The two most significant bits of the 2nd,
+                                  3rd, or 4th byte of the character do not
+                                  have the binary value 0b10 (that is, either
+                                  the most significant bit is 0, or the next
+                                  bit is 1).
+
            PCRE2_ERROR_UTF8_ERR9
-           PCRE2_ERROR_UTF8_ERR10 The two most significant bits of the 2nd,
-                                  3rd, 4th, 5th, or 6th byte of the character
-                                  do not have the binary value 0b10 (that is,
-                                  either the most significant bit is 0, or the
-                                  next bit is 1).
+           PCRE2_ERROR_UTF8_ERR10 These codes are no longer returned. They
+                                  indicated an invalid 5th or 6th byte in an
+                                  obsolete 5- or 6-byte sequence, which is now
+                                  rejected immediately.
 
            PCRE2_ERROR_UTF8_ERR11
-           PCRE2_ERROR_UTF8_ERR12 A character that is valid by the RFC 2279
-                                  rules is either 5 or 6 bytes long; these
-                                  code points are excluded by RFC 3629.
+           PCRE2_ERROR_UTF8_ERR12 The first byte indicates an obsolete 5- or
+                                  6-byte sequence, which is excluded by RFC
+                                  3629. This error is returned without
+                                  checking continuation bytes, even if the
+                                  sequence is truncated or malformed.
 
            PCRE2_ERROR_UTF8_ERR13 A 4-byte character has a value greater than
                                   0x10ffff; these code points are excluded by
@@ -13315,14 +13323,17 @@ VALIDITY OF UTF STRINGS
 
            PCRE2_ERROR_UTF8_ERR15
            PCRE2_ERROR_UTF8_ERR16
-           PCRE2_ERROR_UTF8_ERR17
+           PCRE2_ERROR_UTF8_ERR17 A 2-, 3-, or 4-byte character is "overlong",
+                                  that is, it codes for a value that can be
+                                  represented by fewer bytes, which is
+                                  invalid. For example, the two bytes 0xc0,
+                                  0xae give the value 0x2e, whose correct
+                                  coding uses just one byte.
+
            PCRE2_ERROR_UTF8_ERR18
-           PCRE2_ERROR_UTF8_ERR19 A 2-, 3-, 4-, 5-, or 6-byte character is
-                                  "overlong", that is, it codes for a value
-                                  that can be represented by fewer bytes,
-                                  which is invalid. For example, the two bytes
-                                  0xc0, 0xae give the value 0x2e, whose
-                                  correct coding uses just one byte.
+           PCRE2_ERROR_UTF8_ERR19 These codes are no longer returned. They
+                                  indicated an overlong obsolete 5- or 6-byte
+                                  sequence, which is now rejected immediately.
 
            PCRE2_ERROR_UTF8_ERR20 The two most significant bits of the first
                                   byte of a character have the binary value
