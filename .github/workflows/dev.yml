@@ -58,6 +58,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       # Empty CMAKE_BUILD_TYPE to set -O0 explicitly
@@ -83,6 +84,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       # Empty CMAKE_BUILD_TYPE to set -O options explicitly
@@ -113,19 +115,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Check latest CMake
         id: get-cmake-ver
         run: |
-          CMAKE_VER=$(curl -s https://api.github.com/repos/Kitware/CMake/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          CMAKE_RELEASE=$(curl --fail --silent --show-error --location --retry 3 https://api.github.com/repos/Kitware/CMake/releases/latest)
+          CMAKE_VER=$(jq -er '.tag_name | ltrimstr("v")' <<< "$CMAKE_RELEASE")
           if ! echo "$CMAKE_VER" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$' ; then
             echo "Extracted CMake version: '$CMAKE_VER'" >&2
             echo "This does not match the expected version format" >&2
             exit 1
           fi
-          echo "CMAKE_VER=$CMAKE_VER" >> $GITHUB_OUTPUT
-          echo "CMAKE_VER=$CMAKE_VER" >> $GITHUB_ENV
+          CMAKE_SHA256=$(jq -er --arg name "cmake-${CMAKE_VER}-linux-x86_64.tar.gz" '
+            [.assets[] | select(.name == $name) | .digest] |
+            if length == 1 then .[0] else error("Expected exactly one CMake archive digest") end |
+            if type != "string" then error("Missing CMake archive digest")
+            elif test("^sha256:[0-9a-f]{64}$") then ltrimstr("sha256:")
+            else error("Invalid CMake archive SHA-256 digest") end
+          ' <<< "$CMAKE_RELEASE")
+          echo "CMAKE_VER=$CMAKE_VER" >> "$GITHUB_OUTPUT"
+          echo "CMAKE_VER=$CMAKE_VER" >> "$GITHUB_ENV"
+          echo "CMAKE_SHA256=$CMAKE_SHA256" >> "$GITHUB_ENV"
           echo "Latest CMake version is $CMAKE_VER"
 
       - name: Cache CMake
@@ -136,7 +148,8 @@ jobs:
 
       - name: Install CMake
         run: |
-          [ -f cmake-${CMAKE_VER}-linux-x86_64.tar.gz ] || curl -L -S -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-linux-x86_64.tar.gz"
+          [ -f cmake-${CMAKE_VER}-linux-x86_64.tar.gz ] || curl --fail --location --retry 3 -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-linux-x86_64.tar.gz"
+          printf '%s  %s\n' "$CMAKE_SHA256" "cmake-${CMAKE_VER}-linux-x86_64.tar.gz" | sha256sum --check --strict
           tar -xz -f cmake-${CMAKE_VER}-linux-x86_64.tar.gz -C "$RUNNER_TEMP"
           realpath "$RUNNER_TEMP/cmake-${CMAKE_VER}-linux-x86_64/bin" >> "$GITHUB_PATH"
 
@@ -181,6 +194,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Prepare
@@ -239,6 +253,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Prepare
@@ -277,6 +292,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Configure
@@ -318,6 +334,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Cache CMake
@@ -328,7 +345,10 @@ jobs:
 
       - name: Install CMake
         run: |
-          [ -f cmake-${CMAKE_VER}-Linux-x86_64.tar.gz ] || curl -L -S -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-Linux-x86_64.tar.gz"
+          [ -f cmake-${CMAKE_VER}-Linux-x86_64.tar.gz ] || curl --fail --location --retry 3 -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-Linux-x86_64.tar.gz"
+          printf '%s  %s\n' \
+            8456a10ac2fd0dc97d13aa4753431a232cf32aecb0976541f7bf867a3f90ec57 \
+            "cmake-${CMAKE_VER}-Linux-x86_64.tar.gz" | sha256sum --check --strict
           tar -xz -f cmake-${CMAKE_VER}-Linux-x86_64.tar.gz -C "$RUNNER_TEMP"
           realpath "$RUNNER_TEMP/cmake-${CMAKE_VER}-Linux-x86_64/bin" >> "$GITHUB_PATH"
 
@@ -359,6 +379,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Configure
@@ -379,6 +400,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Configure
@@ -405,6 +427,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Run
@@ -422,6 +445,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: yes
 
       - name: Test
@@ -444,6 +468,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Configure
@@ -479,6 +504,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Setup
@@ -538,6 +564,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Prepare
@@ -638,6 +665,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Prepare
@@ -696,6 +724,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Install Meson
@@ -733,6 +762,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Install Meson 1.6.1
@@ -770,6 +800,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: false
 
       # The zig version from minimum_zig_version in build.zig.zon will be installed.
@@ -796,6 +827,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Build

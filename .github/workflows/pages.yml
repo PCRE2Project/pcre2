@@ -14,7 +14,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  Build:
+  build:
+    name: Build
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/pages/Gemfile
@@ -27,6 +28,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install locked website dependencies
         run: |
@@ -50,8 +53,9 @@ jobs:
         with:
           path: ./pages/public
 
-  Deploy:
-    needs: Build
+  deploy:
+    name: Deploy
+    needs: build
 
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 

@@ -4,6 +4,8 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     groups:
       minor-and-patch:
         update-types:
@@ -13,6 +15,8 @@ updates:
     directory: /pages
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     groups:
       minor-and-patch:
         update-types:
