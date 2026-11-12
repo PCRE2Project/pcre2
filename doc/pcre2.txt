@@ -4124,6 +4124,9 @@ EXTRACTING CAPTURED SUBSTRINGS BY NUMBER
                                    (abc)|(def) and the subject is def, and the
                                    ovector contains at least two capturing
                                    slots, substring number 1 is unset.
+           PCRE2_ERROR_FRESHMATCHDATA
+                                   The match data block has not yet been used
+                                   by a matching function.
 
 EXTRACTING A LIST OF ALL CAPTURED SUBSTRINGS
        int pcre2_substring_list_get(pcre2_match_data *match_data,
@@ -4777,15 +4780,16 @@ DUPLICATE CAPTURE GROUP NAMES
        If you want to get full details of all captured substrings for a given
        name, you must use the pcre2_substring_nametable_scan() function. The
        first argument is the compiled pattern, and the second is the name. If
-       the third and fourth arguments are NULL, the function returns a group
-       number for a unique name, or PCRE2_ERROR_NOUNIQUESUBSTRING otherwise.
+       the third argument is NULL, the function returns a group number for a
+       unique name, or PCRE2_ERROR_NOUNIQUESUBSTRING otherwise.
 
-       When the third and fourth arguments are not NULL, they must be pointers
-       to variables that are updated by the function. After it has run, they
-       point to the first and last entries in the name-to-number table for the
-       given name, and the function returns the length of each entry in code
-       units. In both cases, PCRE2_ERROR_NOSUBSTRING is returned if there are
-       no entries for the given name.
+       When the third argument is not NULL, the fourth must not be NULL
+       either. Both must be pointers to variables that are updated by the
+       function. After it has run, they point to the first and last entries in
+       the name-to-number table for the given name, and the function returns
+       the length of each entry in code units. In both cases,
+       PCRE2_ERROR_NOSUBSTRING is returned if there are no entries for the
+       given name.
 
        The format of the name table is described above in the section
        INFORMATION ABOUT A COMPILED PATTERN. Given all the relevant entries

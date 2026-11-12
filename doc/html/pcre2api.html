@@ -2457,7 +2457,7 @@ greater than the number of capturing parentheses.</dd></div><div class="dlist-it
 pattern, is greater than the number of slots in the ovector, so the substring
 could not be captured.</dd></div><div class="dlist-item"><dt><span><code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_UNSET</span></code></span></dt><dd>The substring did not participate in the match. For example, if the pattern is
 <code class="regex rouge"><span class="pcre2-semantic">(abc)|(def)</span></code> and the subject is <code class="subject rouge"><span class="pcre2-semantic">def</span></code>, and the ovector contains at least two
-capturing slots, substring number 1 is unset.</dd></div></dl></section>
+capturing slots, substring number 1 is unset.</dd></div><div class="dlist-item"><dt><span><code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_FRESHMATCHDATA</span></code></span></dt><dd>The match data block has not yet been used by a matching function.</dd></div></dl></section>
 <section class="doc-section level-1"><h2 id="extracting-substrings-by-name">Extracting a list of all captured substrings</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nf">pcre2_substring_list_get</span><span class="p">(</span><span class="kt">pcre2_match_data</span> <span class="p">*</span><span class="nv">match_data</span><span class="p">,</span>
                              <span class="kt">PCRE2_UCHAR</span> <span class="p">*</span><span class="p">*</span><span class="p">*</span><span class="nv">listptr</span><span class="p">,</span>
                              <span class="kt">PCRE2_SIZE</span> <span class="p">*</span><span class="p">*</span><span class="nv">lengthsptr</span><span class="p">);</span>
@@ -2951,10 +2951,11 @@ returned. The <code class="function pcre2-api rouge"><span class="nf">pcre2_subs
 error <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_NOUNIQUESUBSTRING</span></code> when there are duplicate names.</p>
 <p>If you want to get full details of all captured substrings for a given name,
 you must use the <code class="function pcre2-api rouge"><span class="nf">pcre2_substring_nametable_scan()</span></code> function. The first
-argument is the compiled pattern, and the second is the name. If the third and
-fourth arguments are <code class="constant pcre2-api rouge"><span class="kc">NULL</span></code>, the function returns a group number for a unique
+argument is the compiled pattern, and the second is the name. If the third
+argument is <code class="constant pcre2-api rouge"><span class="kc">NULL</span></code>, the function returns a group number for a unique
 name, or <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_NOUNIQUESUBSTRING</span></code> otherwise.</p>
-<p>When the third and fourth arguments are not <code class="constant pcre2-api rouge"><span class="kc">NULL</span></code>, they must be pointers to
+<p>When the third argument is not <code class="constant pcre2-api rouge"><span class="kc">NULL</span></code>, the fourth must not be <code class="constant pcre2-api rouge"><span class="kc">NULL</span></code> either.
+Both must be pointers to
 variables that are updated by the function. After it has run, they point to the
 first and last entries in the name-to-number table for the given name, and the
 function returns the length of each entry in code units. In both cases,
