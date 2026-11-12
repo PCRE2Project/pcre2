@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
-# Script which is a simple LCOV filter: removes DA/BRDA entries for lines marked in-source with
-# "LCOV_EXCL_LINE" or "LCOV_EXCL_START"/"LCOV_EXCL_STOP".
+# Filter LLVM's LCOV export: apply source exclusions, supply missing line
+# coverpoints for branches, and recompute summaries from the retained records.
 #
 # Usage: python3 FilterCoverage.py coverage-lcov.info > coverage-lcov.filtered.info
 
@@ -43,215 +43,116 @@ def scan_exclusions(srcpath):
 
 
 DA_RE = re.compile(r'^\s*DA:(\d+),(\d+)(,.*)?\s*$')
-LF_RE = re.compile(r'^\s*LF:(\d+)\s*$')
-LH_RE = re.compile(r'^\s*LH:(\d+)\s*$')
-BRDA_RE = re.compile(r'^\s*BRDA:(\d+),([e\d]+),(.*),([-\d]+)\s*$')
-BRF_RE = re.compile(r'^\s*BRF:(\d+)\s*$')
-BRH_RE = re.compile(r'^\s*BRH:(\d+)\s*$')
-FN_RE = re.compile(r'^\s*FN:(\d+),([^,\s]*)\s*$')
+BRDA_RE = re.compile(r'^\s*BRDA:(\d+),(e?\d+),(.*),(-|\d+)\s*$')
+FN_RE = re.compile(r'^\s*FN:(\d+),(?:(\d+),)?([^,\s]+)\s*$')
 FNDA_RE = re.compile(r'^\s*FNDA:(\d+),([^,\s]*)\s*$')
-FNF_RE = re.compile(r'^\s*FNF:(\d+)\s*$')
-FNH_RE = re.compile(r'^\s*FNH:(\d+)\s*$')
+SUMMARY_RE = re.compile(r'^\s*(LF|LH|BRF|BRH|FNF|FNH):(\d+)\s*$')
 
 
 def process_block(block_lines):
-    """Return processed block lines with excluded DA/BRDA removed and LF/LH fixed."""
+    """Apply exclusions and regenerate LCOV summary records."""
     if not block_lines:
         return block_lines
-    # get SF path from first 'SF:' line (should be first)
     first = block_lines[0]
     assert first.lstrip().startswith('SF:')
     sf_path = first.split(':', 1)[1].strip()
     exclusions = scan_exclusions(sf_path)
 
     new_lines = []
-    da_orig_found = 0
-    da_orig_hit = 0
-    da_new_found = 0
-    da_new_hit = 0
-    brda_orig_found = 0
-    brda_orig_hit = 0
+    line_counts = {}
+    branch_counts = {}
+    function_counts = {}
+    functions = set()
     brda_new_found = 0
     brda_new_hit = 0
-    fnda_orig_found = 0
-    fnda_orig_hit = 0
-    fnda_new_found = 0
-    fnda_new_hit = 0
-
     fn_exclusions = set()
 
-    # Pass 1: identify FN exclusions
     for line in block_lines:
         m_fn = FN_RE.match(line)
         assert (m_fn is not None) == line.lstrip().startswith('FN:')
         if m_fn:
             fn_line = int(m_fn.group(1))
-            fn_name = m_fn.group(2)
+            fn_name = m_fn.group(3)
             if fn_line in exclusions:
                 fn_exclusions.add(fn_name)
+            else:
+                functions.add(fn_name)
 
-    # Pass 2: filter DA, BRDA, FN/FNDA; copy others verbatim
     for line in block_lines:
         m_da = DA_RE.match(line)
         assert (m_da is not None) == line.lstrip().startswith('DA:')
         if m_da:
             line_num = int(m_da.group(1))
             execution_count = int(m_da.group(2))
-            da_orig_found += 1
-            if execution_count > 0:
-                da_orig_hit += 1
             if line_num in exclusions:
-                # drop this DA line
                 continue
-            da_new_found += 1
-            if execution_count > 0:
-                da_new_hit += 1
+            line_counts[line_num] = line_counts.get(line_num, 0) + execution_count
             new_lines.append(line)
             continue
         m_brda = BRDA_RE.match(line)
         assert (m_brda is not None) == line.lstrip().startswith('BRDA:')
         if m_brda:
-            brda_orig_found += 1
             taken = m_brda.group(4)
-            if taken != '-' and int(taken) > 0:
-                brda_orig_hit += 1
-            if int(m_brda.group(1)) in exclusions:
-                # drop this BRDA line
+            line_num = int(m_brda.group(1))
+            if line_num in exclusions:
                 continue
             brda_new_found += 1
             if taken != '-' and int(taken) > 0:
                 brda_new_hit += 1
+            blocks = branch_counts.setdefault(line_num, {})
+            block = m_brda.group(2)
+            blocks[block] = blocks.get(block, 0) + (0 if taken == '-' else int(taken))
             new_lines.append(line)
             continue
         m_fnda = FNDA_RE.match(line)
         assert (m_fnda is not None) == line.lstrip().startswith('FNDA:')
         if m_fnda:
-            fnda_orig_found += 1
             fn_name = m_fnda.group(2)
             count = int(m_fnda.group(1))
-            if count > 0:
-                fnda_orig_hit += 1
             if fn_name in fn_exclusions:
-                # drop this FNDA line
                 continue
-            fnda_new_found += 1
-            if count > 0:
-                fnda_new_hit += 1
+            function_counts[fn_name] = function_counts.get(fn_name, 0) + count
             new_lines.append(line)
             continue
         m_fn = FN_RE.match(line)
-        assert (m_fn is not None) == line.lstrip().startswith('FN:')
-        if m_fn:
-            fn_line = int(m_fn.group(1))
-            fn_name = m_fn.group(2)
-            if fn_name in fn_exclusions:
-                # drop this FN line
-                continue
-            new_lines.append(line)
+        if m_fn and m_fn.group(3) in fn_exclusions:
             continue
-        # other lines: append unchanged
         new_lines.append(line)
 
-    # Pass 3: fix LF/LH, BRF/BRH, FNF/FNH
-    # Mutate new_lines. If we find any LF/LH lines, check they have the expected original values.
-    # If so, replace with new values. If not, print a warning.
+    # LLVM can emit a branch without a mapped line (e.g. a memchr builtin).
+    # Outcomes within one block are mutually exclusive. Their sum is a lower
+    # bound on line executions; separate blocks may short-circuit.
+    missing_lines = []
+    for line_num, blocks in sorted(branch_counts.items()):
+        if line_num in line_counts:
+            continue
+        count = max(blocks.values())
+        line_counts[line_num] = count
+        missing_lines.append(f"DA:{line_num},{count}\n")
+        print(f"warning: inferred DA count {count} from branches at {sf_path}:{line_num}",
+              file=sys.stderr)
+
+    # LLVM's summaries aggregate function instantiations and folded branches
+    # differently from its detailed LCOV records. Recount the records we emit,
+    # rather than treating those known metric differences as corrupt input.
+    summaries = {
+        "LF": len(line_counts),
+        "LH": sum(count > 0 for count in line_counts.values()),
+        "BRF": brda_new_found,
+        "BRH": brda_new_hit,
+        "FNF": len(functions),
+        "FNH": sum(function_counts.get(name, 0) > 0 for name in functions),
+    }
     for i, line in enumerate(new_lines):
-        # LF
-        m_lf = LF_RE.match(line)
-        assert (m_lf is not None) == line.lstrip().startswith('LF:')
-        if m_lf:
-            # preserve leading whitespace exactly
+        match = SUMMARY_RE.match(line)
+        if match:
             leading = re.match(r'^(\s*)', line).group(1)
-            # replace with recomputed value (number of DA entries remaining)
-            new_lines[i] = f"{leading}LF:{da_new_found}\n"
-            # warn if original disagreed (useful for debugging)
-            try:
-                lf_orig = int(m_lf.group(1))
-                if lf_orig != da_orig_found:
-                    print(f"warning: original LF ({lf_orig}) != counted DA entries ({da_orig_found}) for {sf_path}",
-                          file=sys.stderr)
-            except Exception:
-                pass
-            continue
+            kind = match.group(1)
+            new_lines[i] = f"{leading}{kind}:{summaries[kind]}\n"
 
-        # LH
-        m_lh = LH_RE.match(line)
-        assert (m_lh is not None) == line.lstrip().startswith('LH:')
-        if m_lh:
-            leading = re.match(r'^(\s*)', line).group(1)
-            new_lines[i] = f"{leading}LH:{da_new_hit}\n"
-            try:
-                lh_orig = int(m_lh.group(1))
-                if lh_orig != da_orig_hit:
-                    print(f"warning: original LH ({lh_orig}) != counted DA hits ({da_orig_hit}) for {sf_path}",
-                          file=sys.stderr)
-            except Exception:
-                pass
-            continue
-
-        # BRF
-        m_brf = BRF_RE.match(line)
-        assert (m_brf is not None) == line.lstrip().startswith('BRF:')
-        if m_brf:
-            leading = re.match(r'^(\s*)', line).group(1)
-            # replace with recomputed branch-found (if you computed brda_new_found above)
-            new_lines[i] = f"{leading}BRF:{brda_new_found}\n"
-            try:
-                brf_orig = int(m_brf.group(1))
-                if brf_orig != brda_orig_found:
-                    print(
-                        f"warning: original BRF ({brf_orig}) != counted BRDA entries ({brda_orig_found}) for {sf_path}",
-                        file=sys.stderr)
-            except Exception:
-                pass
-            continue
-
-        # BRH
-        m_brh = BRH_RE.match(line)
-        assert (m_brh is not None) == line.lstrip().startswith('BRH:')
-        if m_brh:
-            leading = re.match(r'^(\s*)', line).group(1)
-            new_lines[i] = f"{leading}BRH:{brda_new_hit}\n"
-            try:
-                brh_orig = int(m_brh.group(1))
-                if brh_orig != brda_orig_hit:
-                    print(f"warning: original BRH ({brh_orig}) != counted BRDA hits ({brda_orig_hit}) for {sf_path}",
-                          file=sys.stderr)
-            except Exception:
-                pass
-            continue
-
-        # FNF
-        m_fnf = FNF_RE.match(line)
-        assert (m_fnf is not None) == line.lstrip().startswith('FNF:')
-        if m_fnf:
-            leading = re.match(r'^(\s*)', line).group(1)
-            new_lines[i] = f"{leading}FNF:{fnda_new_found}\n"
-            try:
-                fnf_orig = int(m_fnf.group(1))
-                if fnf_orig != fnda_orig_found:
-                    print(
-                        f"warning: original FNF ({fnf_orig}) != counted FNDA entries ({fnda_orig_found}) for {sf_path}",
-                        file=sys.stderr)
-            except Exception:
-                pass
-            continue
-
-        # FNH
-        m_fnh = FNH_RE.match(line)
-        assert (m_fnh is not None) == line.lstrip().startswith('FNH:')
-        if m_fnh:
-            leading = re.match(r'^(\s*)', line).group(1)
-            new_lines[i] = f"{leading}FNH:{fnda_new_hit}\n"
-            try:
-                fnh_orig = int(m_fnh.group(1))
-                if fnh_orig != fnda_orig_hit:
-                    print(f"warning: original FNH ({fnh_orig}) != counted FNDA hits ({fnda_orig_hit}) for {sf_path}",
-                          file=sys.stderr)
-            except Exception:
-                pass
-            continue
-
+    end = next((i for i, line in enumerate(new_lines)
+                if line.strip() == "end_of_record"), len(new_lines))
+    new_lines[end:end] = missing_lines
     return new_lines
 
 
