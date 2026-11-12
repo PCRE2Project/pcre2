@@ -57,6 +57,29 @@ endforeach
 # OS functionality to be exposed.
 subdir('meson/PCRE2UseSystemExtensions')
 
+# pcre2grep positions streams with fseeko/ftello, which requires a 64-bit
+# off_t. On platforms where off_t is not already 64-bit (mainly 32-bit
+# systems), enable the same large-file transition that AC_SYS_LARGEFILE
+# performs when it works.
+largefile_args = []
+if host_machine.system() != 'windows'
+  if cc.sizeof('off_t', prefix: '#include <sys/types.h>', args: system_extension_args) < 8
+    if cc.sizeof('off_t', prefix: '#include <sys/types.h>', args: system_extension_args + ['-D_FILE_OFFSET_BITS=64']) == 8
+      largefile_args = ['-D_FILE_OFFSET_BITS=64']
+      add_project_arguments(largefile_args, language: 'c')
+    endif
+  endif
+endif
+
+config.set(
+  'HAVE_FSEEKO',
+  cc.has_function('fseeko', prefix: '#include <stdio.h>', args: system_extension_args + largefile_args) ? 1 : false,
+)
+config.set(
+  'HAVE_FTELLO',
+  cc.has_function('ftello', prefix: '#include <stdio.h>', args: system_extension_args + largefile_args) ? 1 : false,
+)
+
 config.set(
   'HAVE_MEMFD_CREATE',
   cc.has_function('memfd_create', prefix: '#include <sys/mman.h>', args: system_extension_args) ? 1 : false,

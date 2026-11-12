@@ -99,6 +99,27 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #endif
 
+/* The -m option's shared-stdin resume feature must reposition a stream using
+true file offsets, which can exceed the range of long on 32-bit platforms and
+on Windows. Use 64-bit capable positioning where available: _fseeki64 and
+_ftelli64 on Windows, fseeko and ftello with a large-file-aware off_t on POSIX
+systems (AC_SYS_LARGEFILE or the CMake/Meson equivalents ensure off_t is
+64-bit there), and plain fseek/ftell as a last resort. */
+
+#ifdef WIN32
+typedef __int64 grep_file_offset;
+#define GREP_FSEEK(f, o) _fseeki64((f), (o), SEEK_SET)
+#define GREP_FTELL(f) _ftelli64(f)
+#elif defined(HAVE_FSEEKO) && defined(HAVE_FTELLO)
+typedef off_t grep_file_offset;
+#define GREP_FSEEK(f, o) fseeko((f), (o), SEEK_SET)
+#define GREP_FTELL(f) ftello(f)
+#else
+typedef long grep_file_offset;
+#define GREP_FSEEK(f, o) fseek((f), (o), SEEK_SET)
+#define GREP_FTELL(f) ftell(f)
+#endif
+
 #ifdef SUPPORT_LIBZ
 #include <zlib.h>
 #endif
@@ -2919,7 +2940,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
   BOOL lines_printed = FALSE;
   BOOL input_line_buffered = line_buffered;
   FILE *in = NULL;        // Ensure initialized
-  long stream_start = -1; // Only non-negative if relevant
+  grep_file_offset stream_start = -1; // Only non-negative if relevant
 
   /* Do the first read into the start of the buffer and set up the pointer to end
   of what we have. In the case of libz, a non-zipped .gz file will be read as a
@@ -2938,7 +2959,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
     else
     {
       if (count_limit >= 0 && filename == stdin_name)
-        stream_start = ftell(in);
+        stream_start = GREP_FTELL(in);
     }
   }
   else
@@ -2996,7 +3017,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
     if (count_limit >= 0 && count_matched_lines >= count_limit)
     {
       if (stream_start >= 0)
-        (void)fseek(handle, stream_start + (long int)filepos, SEEK_SET);
+        (void)GREP_FSEEK(handle, stream_start + (grep_file_offset)filepos);
       rc = (count_limit == 0) ? 1 : 0;
       break;
     }

@@ -1381,3 +1381,10 @@ Type "pcre2grep --help" for more information and the long options.
 RC=2
 pattern
 RC=0
+---------------------------- Test 163 -----------------------------
+hello
+RC=0
+resume-from-here MARKER
+hello
+RC=0
+resume-from-here MARKER

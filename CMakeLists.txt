@@ -206,6 +206,24 @@ check_include_file(windows.h HAVE_WINDOWS_H)
 # OS functionality to be exposed.
 pcre2_use_system_extensions()
 
+# pcre2grep positions streams with fseeko/ftello (see the Autoconf build's
+# AC_SYS_LARGEFILE), which requires a 64-bit off_t. On platforms where off_t
+# is not already 64-bit (mainly 32-bit systems), enable the same large-file
+# transition that AC_SYS_LARGEFILE performs when it works.
+if(NOT WIN32)
+  include(CheckTypeSize)
+  check_type_size("off_t" SIZEOF_OFF_T LANGUAGE C)
+  if(NOT SIZEOF_OFF_T OR SIZEOF_OFF_T LESS 8)
+    cmake_push_check_state(RESET)
+    set(CMAKE_REQUIRED_DEFINITIONS "-D_FILE_OFFSET_BITS=64")
+    check_type_size("off_t" SIZEOF_OFF_T_WITH_FILE_OFFSET_BITS LANGUAGE C)
+    cmake_pop_check_state()
+    if(SIZEOF_OFF_T_WITH_FILE_OFFSET_BITS EQUAL 8)
+      add_compile_definitions(_FILE_OFFSET_BITS=64)
+    endif()
+  endif()
+endif()
+
 cmake_push_check_state(RESET)
 # Propagate the _GNU_SOURCE definition (added to COMPILE_DEFINITIONS by
 # pcre2_use_system_extensions()) so that these check_symbol_exists() calls
@@ -220,11 +238,17 @@ if(DEFINED _pcre2_compile_definitions)
   if(_idx GREATER -1)
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")
   endif()
+  list(FIND _pcre2_compile_definitions "_FILE_OFFSET_BITS=64" _idx)
+  if(_idx GREATER -1)
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_FILE_OFFSET_BITS=64")
+  endif()
 endif()
 
 check_symbol_exists(memfd_create "sys/mman.h" HAVE_MEMFD_CREATE) # glibc 2.27
 check_symbol_exists(secure_getenv "stdlib.h" HAVE_SECURE_GETENV) # glibc 2.17
 check_symbol_exists(setrlimit "sys/resource.h" HAVE_SETRLIMIT)
+check_symbol_exists(fseeko "stdio.h" HAVE_FSEEKO)
+check_symbol_exists(ftello "stdio.h" HAVE_FTELLO)
 cmake_pop_check_state()
 
 check_c_source_compiles(

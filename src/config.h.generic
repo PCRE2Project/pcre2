@@ -73,6 +73,8 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
 
 /* Define to 1 if you have the <dirent.h> header file. */
 /* #undef HAVE_DIRENT_H */
+/* #undef HAVE_FSEEKO */
+/* #undef HAVE_FTELLO */
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 /* #undef HAVE_DLFCN_H */

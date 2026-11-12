@@ -953,6 +953,69 @@ output_both([*pcre2grep_args, "--max-buffer-size=18446744073709551616M", "patter
 output_both([*pcre2grep_args, "--buffer-size=18446744073709551615", "pattern", "testdata/grepinput"], cwd=srcdir)
 output_both([*pcre2grep_args, "--om-capture=4294967295", "-m1", "-o1", "(pattern)", "testdata/grepinput"], cwd=srcdir)
 
+write_test_output(b"---------------------------- Test 163 -----------------------------\n")
+# Large file offsets: a match beyond 4GiB in a sparse file exercises the -m
+# shared-stdin resume path, which must reposition the stream with a true
+# 64-bit file offset. The first variant scans to the match; the second starts
+# from a descriptor prepositioned beyond 4GiB, exercising the initial
+# stream_start tell. If sparse large files cannot be created here, the
+# expected output is written (as for the locale test above) so the comparison
+# stays stable, but the skip and its reason are reported loudly on stdout.
+large_offset_expected = (
+    b"hello\nRC=0\nresume-from-here MARKER\n"
+    b"hello\nRC=0\nresume-from-here MARKER\n"
+)
+large_offset_ok = False
+try:
+    # Cheap upfront sparse-capability probe before any large allocation. A
+    # missing st_blocks field cannot prove sparsity, so it means unsupported.
+    with open("testtemp2grep", "wb") as probe:
+        probe.write(b"x")
+        probe.seek(2097152)
+        probe.write(b"y")
+    probe_stat = os.stat("testtemp2grep")
+    probe_blocks = getattr(probe_stat, "st_blocks", None)
+    sparse_supported = (
+        probe_stat.st_size == 2097153
+        and probe_blocks is not None
+        and probe_blocks * 512 <= 65536
+    )
+    os.remove("testtemp2grep")
+    if sparse_supported:
+        sparse_target = 4 * 1024**3 + 1024**2
+        sparse_tail = b"hello world target line\nresume-from-here MARKER\nlast line\n"
+        with open("testNinputgrep", "wb") as sparse:
+            sparse.write(b"filler line\n" * 100)
+            for hole in range(65536, sparse_target, 65536):
+                sparse.seek(hole)
+                sparse.write(b"\n")
+            sparse.seek(sparse_target)
+            sparse.write(sparse_tail)
+        sparse_stat = os.stat("testNinputgrep")
+        sparse_blocks = getattr(sparse_stat, "st_blocks", None)
+        large_offset_ok = (
+            sparse_stat.st_size == sparse_target + len(sparse_tail)
+            and sparse_blocks is not None
+            and sparse_blocks * 512 < 1024**3
+        )
+except OSError:
+    large_offset_ok = False
+
+if large_offset_ok:
+    with open("testNinputgrep", "rb", buffering=0) as stream:
+        output([*pcre2grep_args, "--binary-files=text", "-o", "-m1", "hello"], stdin=stream)
+        write_test_output(stream.read(24))
+    with open("testNinputgrep", "rb", buffering=0) as stream:
+        stream.seek(sparse_target - 65535)  # start of the matched line
+        output([*pcre2grep_args, "--binary-files=text", "-o", "-m1", "hello"], stdin=stream)
+        write_test_output(stream.read(24))
+else:
+    print("** Test 163 SKIPPED: sparse large files unsupported here - "
+          "large-offset regression coverage absent")
+    write_test_output(large_offset_expected)
+Path("testNinputgrep").unlink(missing_ok=True)
+Path("testtemp2grep").unlink(missing_ok=True)
+
 # Now compare the results.
 
 if not compare(srcdir / "testdata" / "grepoutput", "testtrygrep"):
