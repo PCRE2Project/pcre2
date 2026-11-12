@@ -2295,7 +2295,7 @@ run_invalid_utf8_test(const struct invalid_utf8_regression_test_case *current, i
 {
   pcre2_code_8 *code;
   int result, errorcode;
-  PCRE2_SIZE length, erroroffset;
+  PCRE2_SIZE erroroffset;
   PCRE2_SIZE *ovector = pcre2_get_ovector_pointer_8(mdata);
 
   if (current->pattern[i] == NULL)
@@ -2317,7 +2317,8 @@ run_invalid_utf8_test(const struct invalid_utf8_regression_test_case *current, i
     return 0;
   }
 
-  length = (PCRE2_SIZE)(strlen(current->input) - current->skip_left - current->skip_right);
+  PCRE2_SIZE length =
+      (PCRE2_SIZE)(strlen(current->input) - current->skip_left - current->skip_right);
 
   if (current->jit_compile_options & PCRE2_JIT_COMPLETE)
   {
@@ -2354,16 +2355,14 @@ static int
 invalid_utf8_regression_tests(void)
 {
   const struct invalid_utf8_regression_test_case *current;
-  pcre2_compile_context_8 *ccontext;
-  pcre2_match_data_8 *mdata;
   int total = 0, successful = 0;
   int result;
 
   printf("\nRunning invalid-utf8 JIT regression tests\n");
 
-  ccontext = pcre2_compile_context_create_8(NULL);
+  pcre2_compile_context_8 *ccontext = pcre2_compile_context_create_8(NULL);
   pcre2_set_newline_8(ccontext, PCRE2_NEWLINE_ANY);
-  mdata = pcre2_match_data_create_8(4, NULL);
+  pcre2_match_data_8 *mdata = pcre2_match_data_create_8(4, NULL);
 
   for (current = invalid_utf8_regression_test_cases; current->pattern[0]; current++)
   {
@@ -2526,8 +2525,7 @@ run_invalid_utf16_test(const struct invalid_utf16_regression_test_case *current,
 {
   pcre2_code_16 *code;
   int result, errorcode;
-  PCRE2_SIZE length, erroroffset;
-  const PCRE2_UCHAR16 *input;
+  PCRE2_SIZE erroroffset;
   PCRE2_SIZE *ovector = pcre2_get_ovector_pointer_16(mdata);
 
   if (current->pattern[i] == NULL)
@@ -2549,8 +2547,8 @@ run_invalid_utf16_test(const struct invalid_utf16_regression_test_case *current,
     return 0;
   }
 
-  input = current->input;
-  length = 0;
+  const PCRE2_UCHAR16 *input = current->input;
+  PCRE2_SIZE length = 0;
 
   while (*input++ != 0)
     length++;
@@ -2592,16 +2590,14 @@ static int
 invalid_utf16_regression_tests(void)
 {
   const struct invalid_utf16_regression_test_case *current;
-  pcre2_compile_context_16 *ccontext;
-  pcre2_match_data_16 *mdata;
   int total = 0, successful = 0;
   int result;
 
   printf("\nRunning invalid-utf16 JIT regression tests\n");
 
-  ccontext = pcre2_compile_context_create_16(NULL);
+  pcre2_compile_context_16 *ccontext = pcre2_compile_context_create_16(NULL);
   pcre2_set_newline_16(ccontext, PCRE2_NEWLINE_ANY);
-  mdata = pcre2_match_data_create_16(4, NULL);
+  pcre2_match_data_16 *mdata = pcre2_match_data_create_16(4, NULL);
 
   for (current = invalid_utf16_regression_test_cases; current->pattern[0]; current++)
   {
@@ -2731,8 +2727,7 @@ run_invalid_utf32_test(const struct invalid_utf32_regression_test_case *current,
 {
   pcre2_code_32 *code;
   int result, errorcode;
-  PCRE2_SIZE length, erroroffset;
-  const PCRE2_UCHAR32 *input;
+  PCRE2_SIZE erroroffset;
   PCRE2_SIZE *ovector = pcre2_get_ovector_pointer_32(mdata);
 
   if (current->pattern[i] == NULL)
@@ -2754,8 +2749,8 @@ run_invalid_utf32_test(const struct invalid_utf32_regression_test_case *current,
     return 0;
   }
 
-  input = current->input;
-  length = 0;
+  const PCRE2_UCHAR32 *input = current->input;
+  PCRE2_SIZE length = 0;
 
   while (*input++ != 0)
     length++;
@@ -2797,16 +2792,14 @@ static int
 invalid_utf32_regression_tests(void)
 {
   const struct invalid_utf32_regression_test_case *current;
-  pcre2_compile_context_32 *ccontext;
-  pcre2_match_data_32 *mdata;
   int total = 0, successful = 0;
   int result;
 
   printf("\nRunning invalid-utf32 JIT regression tests\n");
 
-  ccontext = pcre2_compile_context_create_32(NULL);
+  pcre2_compile_context_32 *ccontext = pcre2_compile_context_create_32(NULL);
   pcre2_set_newline_32(ccontext, PCRE2_NEWLINE_ANY);
-  mdata = pcre2_match_data_create_32(4, NULL);
+  pcre2_match_data_32 *mdata = pcre2_match_data_create_32(4, NULL);
 
   for (current = invalid_utf32_regression_test_cases; current->pattern[0]; current++)
   {

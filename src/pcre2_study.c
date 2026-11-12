@@ -137,7 +137,6 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
   for (;;)
   {
     int d, min, recno;
-    PCRE2_UCHAR op;
     PCRE2_SPTR cs, ce;
 
     if (branchlength >= (int)UINT16_MAX)
@@ -146,7 +145,7 @@ find_minlength(const pcre2_real_code *re, PCRE2_SPTR code, PCRE2_SPTR startcode,
       cc = nextbranch;
     }
 
-    op = *cc;
+    PCRE2_UCHAR op = *cc;
     switch (op)
     {
     case OP_COND:
@@ -1004,21 +1003,19 @@ Returns:         nothing
 static void
 study_char_list(PCRE2_SPTR code, uint8_t *start_bitmap, const uint8_t *char_lists_end)
 {
-  uint32_t type, list_ind;
   uint32_t char_list_add = XCL_CHAR_LIST_LOW_16_ADD;
   uint32_t range_start = ~(uint32_t)0, range_end = 0;
-  const uint8_t *next_char;
   PCRE2_UCHAR start_buffer[6], end_buffer[6];
   PCRE2_UCHAR start, end;
 
   /* Only needed in 8-bit mode at the moment. */
-  type = (uint32_t)(code[0] << 8) | code[1];
+  uint32_t type = (uint32_t)(code[0] << 8) | code[1];
   code += 2;
 
   /* Align characters. */
-  next_char = char_lists_end - (GET(code, 0) << 1);
+  const uint8_t *next_char = char_lists_end - (GET(code, 0) << 1);
   type &= XCL_TYPE_MASK;
-  list_ind = 0;
+  uint32_t list_ind = 0;
 
   if ((type & XCL_BEGIN_WITH_RANGE) != 0)
     range_start = XCL_CHAR_LIST_LOW_16_START;
@@ -2021,13 +2018,12 @@ int
 PRIV(study)(pcre2_real_code *re)
 {
   int count = 0;
-  PCRE2_UCHAR *code;
   BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
   BOOL ucp = (re->overall_options & PCRE2_UCP) != 0;
 
   /* Find start of compiled code */
 
-  code = (PCRE2_UCHAR *)((uint8_t *)re + re->code_start);
+  PCRE2_UCHAR *code = (PCRE2_UCHAR *)((uint8_t *)re + re->code_start);
 
   /* For a pattern that has a first code unit, or a multiline pattern that
   matches only at "line start", there is no point in seeking a list of starting
@@ -2066,7 +2062,6 @@ PRIV(study)(pcre2_real_code *re)
         uint8_t x = *p;
         if (x != 0)
         {
-          int c;
           uint8_t y = x & (~x + 1); // Least significant bit
           if (y != x)
             goto DONE; // More than one bit set
@@ -2081,7 +2076,7 @@ PRIV(study)(pcre2_real_code *re)
 
           /* Compute the character value */
 
-          c = i;
+          int c = i;
           switch (x)
           {
           case 1:
@@ -2192,10 +2187,9 @@ PRIV(study)(pcre2_real_code *re)
   if ((re->flags & (PCRE2_MATCH_EMPTY | PCRE2_HASACCEPT)) == 0 &&
       re->top_backref <= MAX_CACHE_BACKREF)
   {
-    int min;
     int backref_cache[MAX_CACHE_BACKREF + 1];
     backref_cache[0] = 0; // Highest one that is set
-    min = find_minlength(re, code, code, utf, NULL, &count, backref_cache);
+    int min = find_minlength(re, code, code, utf, NULL, &count, backref_cache);
     switch (min)
     {
     case -1: // \C in UTF mode or over-complex regex

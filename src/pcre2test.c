@@ -1209,10 +1209,9 @@ static int
 cfprintf(int clr, FILE *file, const char *fmt, ...)
 {
   va_list args;
-  int ret;
   va_start(args, fmt);
   colour_begin(clr, file);
-  ret = vfprintf(file, fmt, args);
+  int ret = vfprintf(file, fmt, args);
   va_end(args);
   colour_end(file);
   return ret;
@@ -1580,15 +1579,13 @@ reset_callout_state(void)
 static void *
 my_malloc(size_t size, void *data)
 {
-  void *block;
-
   (void)data;
 
   mallocs_called++;
   if (mallocs_until_failure != INT_MAX && mallocs_until_failure-- <= 0)
     return NULL;
 
-  block = malloc(size);
+  void *block = malloc(size);
   if (show_memory && outfile != NULL)
   {
     if (block == NULL)
@@ -1871,12 +1868,10 @@ utf16_to_ord(PCRE2_SPTR16 utf16units, PCRE2_SPTR16 end, uint32_t *vptr)
 
   if (c >= 0xd800 && c < 0xdc00)
   {
-    uint32_t c2;
-
     if (utf16units >= end)
       return -1;
 
-    c2 = *utf16units++;
+    uint32_t c2 = *utf16units++;
     if (c2 < 0xdc00 || c2 > 0xdfff)
       return -1;
     *vptr = ((c & 0x3ff) << 10) + (c2 & 0x3ff) + 0x10000;
@@ -2068,7 +2063,6 @@ extend_inputline(FILE *f, uint8_t *start, const char *prompt)
     {
       char promptbuf[80];
       int snprintf_rc;
-      char *s;
       if (should_print_colour(clr_prompt, stdout))
         /* libedit cannot handle ANSI escapes as the final character of a prompt,
         so we ensure a trailing space comes after the last escape. */
@@ -2083,7 +2077,7 @@ extend_inputline(FILE *f, uint8_t *start, const char *prompt)
         exit(1);
       }
 
-      s = readline(promptbuf);
+      char *s = readline(promptbuf);
       if (s == NULL)
         return (here == start) ? NULL : start;
       dlen = strlen(s);
@@ -2693,11 +2687,10 @@ Returns:      PR_OK or PR_ABEND
 static int
 open_file(uint8_t *buffptr, const char *mode, FILE **fptr, const char *name)
 {
-  char *endf;
   char *filename = (char *)buffptr;
   while (isspace((unsigned char)*filename))
     filename++;
-  endf = filename + strlen(filename);
+  char *endf = filename + strlen(filename);
   while (endf > filename && isspace((unsigned char)endf[-1]))
     endf--;
 
@@ -3531,7 +3524,6 @@ display_properties(BOOL wantscripts)
   {
     int k;
     int m = 0;
-    int16_t *fv;
     const ucp_type_table *t = PRIV(utt) + i;
     unsigned int value = t->value;
 
@@ -3558,7 +3550,7 @@ display_properties(BOOL wantscripts)
     seentypes[seencount] = t->type;
     seenvalues[seencount++] = t->value;
 
-    fv = found[fc++];
+    int16_t *fv = found[fc++];
     fv[m++] = t->name_offset;
 
     for (size_t j = i + 1; j < PRIV(utt_size); j++)
@@ -3587,12 +3579,11 @@ display_properties(BOOL wantscripts)
 
   for (int k = 0; k < (n + 1) / 2; k++)
   {
-    int x;
     char buff1[128];
     char buff2[128];
 
     format_list_item(found[k], buff1, wantscripts);
-    x = k + (n + 1) / 2;
+    int x = k + (n + 1) / 2;
     if (x < n)
       format_list_item(found[x], buff2, wantscripts);
     else
@@ -3907,7 +3898,6 @@ main(int argc, char **argv)
       exit(1);
 #else
       int rc = 0;
-      uint32_t stack_size;
       struct rlimit rlim, rlim_old;
       if (uli > INT32_MAX / (1024 * 1024))
       {
@@ -3915,7 +3905,7 @@ main(int argc, char **argv)
         exit(1);
       }
 
-      stack_size = (uint32_t)uli;
+      uint32_t stack_size = (uint32_t)uli;
       getrlimit(RLIMIT_STACK, &rlim_old);
       rlim = rlim_old;
       rlim.rlim_cur = stack_size * 1024 * 1024;
@@ -4213,11 +4203,9 @@ main(int argc, char **argv)
 
   while (notdone)
   {
-    const uint8_t *p;
     const uint8_t *p_notsp;
     int rc = PR_OK;
     BOOL expectdata = have_active_pattern();
-    BOOL is_pattern_comment;
     BOOL is_data_comment;
 #ifdef SUPPORT_PCRE2_8
     expectdata |= preg.re_pcre2_code != NULL;
@@ -4237,11 +4225,11 @@ main(int argc, char **argv)
 
     /* Begin processing the line. */
 
-    p = p_notsp = buffer;
+    const uint8_t *p = p_notsp = buffer;
     while (isspace(*p_notsp))
       p_notsp++;
 
-    is_pattern_comment = p[0] == '#' && (isspace(p[1]) || p[1] == '!' || p[1] == 0);
+    BOOL is_pattern_comment = p[0] == '#' && (isspace(p[1]) || p[1] == '!' || p[1] == 0);
     is_data_comment = expectdata && p_notsp[0] == '\\' && p_notsp[1] == '=' &&
                       (isspace(p_notsp[2]) || p_notsp[2] == 0);
 

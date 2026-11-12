@@ -881,10 +881,8 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
 
     else
     {
-      uint32_t leftop, rightop;
-
-      leftop = base_list[0];
-      rightop = list[0];
+      uint32_t leftop = base_list[0];
+      uint32_t rightop = list[0];
 
 #ifdef SUPPORT_UNICODE
       accepted = FALSE; // Always set in non-unicode case.
@@ -896,7 +894,6 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
         }
         else if (rightop == OP_PROP || rightop == OP_NOTPROP)
         {
-          int n;
           const uint8_t *p;
           BOOL same = leftop == rightop;
           BOOL lisprop = leftop == OP_PROP;
@@ -912,7 +909,7 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
             ... see comments below
           */
 
-          n = propposstab[base_list[2]][list[2]];
+          int n = propposstab[base_list[2]][list[2]];
           switch (n)
           {
           case 0:
