@@ -8461,4 +8461,69 @@ a)"xI
 /(a)(*scs:(1)(b|(*ACCEPT)))(?2)a/
     aa
 
+# An assertion inside a subroutine must not cause an early subroutine return.
+
+/(?1)(?(DEFINE)((?!a(*ACCEPT)x)a))/
+\= Expect no match
+    a
+
+/(?1)(?(DEFINE)((?=a(*ACCEPT)x)ab))/
+    ab
+
+# Conditional assertion inside a recursion must not end the call.
+
+/(?1)(?(DEFINE)((?(?=a(*ACCEPT)x)ab|c)))/
+    ab
+
+/(?1)(?(DEFINE)((?(?!a(*ACCEPT)x)c|ab)))/
+    ab
+
+# Scan-substring assertion inside a recursion must not end the call.
+
+/(a)(?2)(?(DEFINE)((*scs:(1)a(*ACCEPT)x)b))/
+    ab
+
+# Non-atomic assertion, lookbehind, and intervening group-frame controls.
+
+/(?1)(?(DEFINE)((*napla:a(*ACCEPT)x)ab))/
+    ab
+
+/aa(?1)(?(DEFINE)((?<=a(*ACCEPT)x)b))/
+    aab
+
+/aa(?1)(?(DEFINE)((?<!a(*ACCEPT)x)b))/
+    aab
+
+/(?1)(?(DEFINE)((?=(?>a(*ACCEPT)x))ab))/
+    ab
+
+# A completed assertion is no longer an active ACCEPT boundary.
+
+/(?=(a|(*ACCEPT)))(?1)b/
+    ab
+
+# The three ACCEPT contexts: whole expression, subroutine, and assertion.
+
+/a(*ACCEPT)x/
+    ab
+
+/(?1)b(?(DEFINE)(a(*ACCEPT)x))/
+    ab
+
+/(?=a(*ACCEPT)x)ab/
+    ab
+
+/(?!a(*ACCEPT)x)ab/
+    ab
+
+# An open capture must be skipped when finding the active recursion.
+
+/(?=((a(*ACCEPT))))(?1)x/
+    ax
+
+# Alternate assertion/recursion boundaries inside another recursion.
+
+/(?1)c(?(DEFINE)((?=(a|(*ACCEPT))(?2)x)ab))/
+    abc
+
 # End of testinput2

@@ -23908,6 +23908,91 @@ No match
  1: a
  2: 
 
+# An assertion inside a subroutine must not cause an early subroutine return.
+
+/(?1)(?(DEFINE)((?!a(*ACCEPT)x)a))/
+\= Expect no match
+    a
+No match
+
+/(?1)(?(DEFINE)((?=a(*ACCEPT)x)ab))/
+    ab
+ 0: ab
+
+# Conditional assertion inside a recursion must not end the call.
+
+/(?1)(?(DEFINE)((?(?=a(*ACCEPT)x)ab|c)))/
+    ab
+ 0: ab
+
+/(?1)(?(DEFINE)((?(?!a(*ACCEPT)x)c|ab)))/
+    ab
+ 0: ab
+
+# Scan-substring assertion inside a recursion must not end the call.
+
+/(a)(?2)(?(DEFINE)((*scs:(1)a(*ACCEPT)x)b))/
+    ab
+ 0: ab
+ 1: a
+
+# Non-atomic assertion, lookbehind, and intervening group-frame controls.
+
+/(?1)(?(DEFINE)((*napla:a(*ACCEPT)x)ab))/
+    ab
+ 0: ab
+
+/aa(?1)(?(DEFINE)((?<=a(*ACCEPT)x)b))/
+    aab
+ 0: aab
+
+/aa(?1)(?(DEFINE)((?<!a(*ACCEPT)x)b))/
+    aab
+No match
+
+/(?1)(?(DEFINE)((?=(?>a(*ACCEPT)x))ab))/
+    ab
+ 0: ab
+
+# A completed assertion is no longer an active ACCEPT boundary.
+
+/(?=(a|(*ACCEPT)))(?1)b/
+    ab
+ 0: ab
+ 1: a
+
+# The three ACCEPT contexts: whole expression, subroutine, and assertion.
+
+/a(*ACCEPT)x/
+    ab
+ 0: a
+
+/(?1)b(?(DEFINE)(a(*ACCEPT)x))/
+    ab
+ 0: ab
+
+/(?=a(*ACCEPT)x)ab/
+    ab
+ 0: ab
+
+/(?!a(*ACCEPT)x)ab/
+    ab
+No match
+
+# An open capture must be skipped when finding the active recursion.
+
+/(?=((a(*ACCEPT))))(?1)x/
+    ax
+ 0: ax
+ 1: a
+ 2: a
+
+# Alternate assertion/recursion boundaries inside another recursion.
+
+/(?1)c(?(DEFINE)((?=(a|(*ACCEPT))(?2)x)ab))/
+    abc
+ 0: abc
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
