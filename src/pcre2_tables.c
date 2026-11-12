@@ -52,10 +52,6 @@ defined. */
 #endif
 
 
-/* Utility macros */
-#define ARR_SIZE(x) sizeof(x) / sizeof(x[0])
-
-
 #if !defined(PCRE2_PCRE2TEST) && !defined(PCRE2_DFTABLES) && !defined(PCRE2_PCRE2POSIX)
 
 /* Table of sizes for the fixed-length opcodes. It's defined in a macro so that
@@ -110,23 +106,22 @@ handling wide characters. */
 /* These are the breakpoints for different numbers of bytes in a UTF-8
 character. */
 
-const int PRIV(utf8_table1)[] = { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff };
-
-const unsigned PRIV(utf8_table1_size) = ARR_SIZE(PRIV(utf8_table1));
+const int PRIV(utf8_table1)[] = { 0x7f, 0x7ff, 0xffff, 0x10ffff };
 
 /* These are the indicator bits and the mask for the data bits to set in the
 first byte of a character, indexed by the number of additional bytes. */
 
-const int PRIV(utf8_table2)[] = { 0, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc };
-const int PRIV(utf8_table3)[] = { 0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
+const int PRIV(utf8_table2)[] = { 0, 0xc0, 0xe0, 0xf0 };
+const int PRIV(utf8_table3)[] = { 0xff, 0x1f, 0x0f, 0x07 };
 
 /* Table of the number of extra bytes, indexed by the first byte masked with
-0x3f. The highest number for a valid UTF-8 first byte is in fact 0x3d. */
+0x3f, for leading bytes 0xc0 to 0xf7. The validator handles the illegal
+5- and 6-byte prefixes separately. */
 
 const uint8_t PRIV(utf8_table4)[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                       2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-                                      3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5 };
+                                      3, 3, 3, 3, 3, 3, 3, 3 };
 
 #endif /* UTF-8 support needed */
 

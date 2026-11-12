@@ -78,6 +78,7 @@ zero in order to simply clear the previous macros. */
 #undef IMM2_SIZE
 #undef MAX_255
 #undef MAX_MARK
+#undef MAX_NON_UTF_CHAR
 #undef MAX_PATTERN_SIZE
 #undef DEFAULT_MAX_PATTERN_SIZE_8_16
 #undef MAX_UTF_SINGLE_CU
@@ -216,6 +217,10 @@ macros to load and store such a value. */
 #define GET2(a, n)    ((unsigned int)(a)[n])
 #define PUT2(a, n, d) (a[n] = (PCRE2_UCHAR)(d))
 #endif
+
+/* This is the largest non-UTF code point. */
+
+#define MAX_NON_UTF_CHAR (0xffffffffU >> (32 - PCRE2_CODE_UNIT_WIDTH))
 
 /* Other macros that are different for 8-bit mode. The MAX_255 macro checks
 whether its argument, which is assumed to be one code unit, is less than 256.

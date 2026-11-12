@@ -4280,6 +4280,8 @@ process_data(void)
     len--;
   }
 
+  uint8_t *input_end = p + len;
+
   /* Check that the data is well-formed UTF-8 if we're in UTF mode. To create
   invalid input to pcre2_match(), you must use \x?? or \x{} sequences. */
 
@@ -4436,9 +4438,18 @@ process_data(void)
         c = *p++;
       }
 #endif
-      if ((utf || (pat_patctl.control & CTL_UTF8_INPUT) != 0) && HASUTF8EXTRALEN(c))
+      if ((utf || (pat_patctl.control & CTL_UTF8_INPUT) != 0) && c >= 0xc0)
       {
-        GETUTF8INC(c, p);
+        /* We cannot use the shared macros such as GETUTF8, since they assume
+        RFC 3629 input, but pcre2test also handles RFC 2279 encodings. */
+        int n = utf8_to_ord(p - 1, input_end, &c);
+        if (n <= 0)
+        {
+          cfprintf(clr_test_error, outfile,
+                   "** Failed: invalid UTF-8 string cannot be used as input\n");
+          return PR_OK;
+        }
+        p += n - 1;
       }
 
       c |= topbit;
