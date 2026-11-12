@@ -1235,10 +1235,8 @@ if [ $utf8 -ne 0 ] ; then
   printf 'A\nB\rC\r\nD\vE\fF\302\205G\342\200\250H\342\200\251I' >testtemp1grep
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u -N ANY -n -o '[A-I]' testtemp1grep >>testtrygrep
   echo "RC=$?" >>testtrygrep
-  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u -N ANY -n -B3 '^I$' testtemp1grep >testtemp2grep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u -N ANY -n -B3 '^I$' testtemp1grep >>testtrygrep
   rc=$?
-  # Repeat explicitly: Solaris tr does not pad a short replacement string.
-  $tr '\200-\377' '[?*]' <testtemp2grep >>testtrygrep
   echo "RC=$rc" >>testtrygrep
 
   echo "---------------------------- Test U16 -----------------------------" >>testtrygrep
@@ -1248,9 +1246,8 @@ if [ $utf8 -ne 0 ] ; then
   echo "RC=$?" >>testtrygrep
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts -U -N ANY '^B$' testtemp1grep >>testtrygrep
   echo "RC=$?" >>testtrygrep
-  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -U -N ANY -n -B2 '^C$' testtemp1grep >testtemp2grep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -U -N ANY -n -B2 '^C$' testtemp1grep >>testtrygrep
   rc=$?
-  $tr '\200-\377' '[?*]' <testtemp2grep >>testtrygrep
   echo "RC=$rc" >>testtrygrep
   printf 'A\205B\n' >testtemp1grep
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts -U -N ANY -n '^B$' testtemp1grep >>testtrygrep
