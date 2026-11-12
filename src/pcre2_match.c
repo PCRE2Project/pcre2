@@ -979,15 +979,20 @@ NEW_FRAME:
       OP_ASSERT_ACCEPT is compiled for an (*ACCEPT) that is lexically inside an
       assertion, but the group containing it may have been called as a
       subroutine from outside that assertion. In that case the recursion is
-      the innermost construct, and (*ACCEPT) must end only the recursion, as
-      it does in JIT. Look for whichever of the two was entered most recently. */
+      the innermost construct, and (*ACCEPT) must end only the recursion. Look
+      for whichever of the two was entered most recently. */
 
     case OP_ASSERT_ACCEPT:
       if (Fcurrent_recurse != RECURSE_UNSET)
       {
         offset = Flast_group_offset;
-        while (offset != PCRE2_UNSET)
+        for (;;)
         {
+          /* An active recursion must have a frame on the group chain. */
+          PCRE2_ASSERT(offset != PCRE2_UNSET);
+          if (offset == PCRE2_UNSET)
+            return PCRE2_ERROR_INTERNAL;
+
           N = (heapframe *)((char *)match_data->heapframes + offset);
           P = (heapframe *)((char *)N - frame_size);
           if (GF_IDMASK(N->group_frame_type) == GF_ASSERT ||
