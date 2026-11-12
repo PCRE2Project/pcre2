@@ -616,6 +616,9 @@ jobs:
           # named instead, because the defaults predate release 6.
           - { name: mips32r6el,  triple: mipsisa32r6el-linux-gnu,     qemu: mipsel,      libc: mipsr6el,   container: "ubuntu:24.04", qemu_cpu: mips32r6-generic }
           - { name: mips64r6el,  triple: mipsisa64r6el-linux-gnuabi64, qemu: mips64el,   libc: mips64r6el, container: "ubuntu:24.04", qemu_cpu: I6400 }
+          # Big endian aarch64 requires libs not provided by libc6-arm64-cross,
+          # therefore a separate sysroot is used
+          - { name: aarch64_be,  triple: aarch64-linux-gnu,           qemu: aarch64_be,  libc: arm64,      container: "ubuntu:24.04", cflags: "-mbig-endian --sysroot /sysroot -B/sysroot/usr/lib/gcc/aarch64_be-unknown-linux-gnu/16 -B/sysroot/lib64", sysroot: "https://distfiles.gentoo.org/releases/arm64/autobuilds/20261107T164547Z/stage3-aarch64_be-openrc-20261107T164547Z.tar.xz" }
     if: |
       (github.event_name == 'workflow_dispatch' && (inputs.job_id == 'all' || inputs.job_id == 'coelacanth')) ||
       github.event_name == 'push'
@@ -629,12 +632,17 @@ jobs:
           apt-get -qq install -y git autoconf automake libtool make \
                                  gcc${{ matrix.config.gcc_suffix }}-${{ matrix.config.triple }} \
                                  libc6-dev-${{ matrix.config.libc }}-cross \
-                                 qemu-user
+                                 qemu-user wget xz-utils
 
           # Not set unconditionally: an empty QEMU_CPU makes qemu fail to find
           # a CPU definition.
           if [ -n "${{ matrix.config.qemu_cpu }}" ]; then
             echo "QEMU_CPU=${{ matrix.config.qemu_cpu }}" >> "$GITHUB_ENV"
+          fi
+
+          if [ -n "${{ matrix.config.sysroot }}" ]; then
+            mkdir /sysroot && ( cd /sysroot && wget "${{ matrix.config.sysroot }}" && tar -x -f $(echo "${{ matrix.config.sysroot }}" | sed -e 's:.*/::g') )
+            echo "QEMU_LD_PREFIX=/sysroot" >> "$GITHUB_ENV"
           fi
         env:
           DEBIAN_FRONTEND: noninteractive
