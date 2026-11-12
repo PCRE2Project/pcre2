@@ -832,7 +832,7 @@ Subject length lower bound = 3
     fooabar
 No match
 
-# Perl does not fail these two for the final subjects.
+# Perl before 5.38.0 did not fail these two for the final subjects.
 
 /^(xa|=?\1a){2}$/
     xa=xaa
@@ -24090,6 +24090,344 @@ Callout (7): "after"
  +4   ^^      C
  +5   ^ ^     End of pattern
  0: BC
+
+# Perl 5.22.2: reject an unterminated class with a trailing backslash.
+
+/5b 61 62 63 5c/hex
+Failed: error 101 at offset 5: \ at end of pattern
+        here: [abc\ |<--|
+
+/5d 5d 5d 5d 5d 5d 5d 5d 5d 5b 5c/hex
+Failed: error 101 at offset 11: \ at end of pattern
+        here: ...]]]]]]]][\ |<--|
+
+/5d 5d 5d 5d 5d 5b 5c/hex
+Failed: error 101 at offset 7: \ at end of pattern
+        here: ]]]]][\ |<--|
+
+# Perl 5.24.0: reject surplus quantifiers even after an exact repeat.
+
+/.{1}??/
+Failed: error 109 at offset 6: quantifier does not follow a repeatable item
+        here: .{1}?? |<--|
+
+/.{1}?+/
+Failed: error 109 at offset 6: quantifier does not follow a repeatable item
+        here: .{1}?+ |<--|
+
+# Perl 5.26.0, 5.28.0 and 5.30.0: literal braces in different contexts.
+
+/x{y/
+    x{y
+ 0: x{y
+
+/{fee|{fie/
+    {fee
+ 0: {fee
+    {fie
+ 0: {fie
+
+/a{3,4/
+    a{3,4
+ 0: a{3,4
+
+/\s{foo}/
+    \x20{foo}
+ 0:  {foo}
+
+/( {foo)/x
+    {foo
+ 0: {foo
+ 1: {foo
+
+/({foo)/
+    {foo
+ 0: {foo
+ 1: {foo
+
+# Perl 5.28.0 again accepts these literals, which 5.26.0 rejected.
+
+/:{4,a}/
+    :{4,a}
+ 0: :{4,a}
+
+/xa{3\,4}y/
+    xa{3,4}y
+ 0: xa{3,4}y
+
+/\${[^\}]*}/
+    ${foo}
+ 0: ${foo}
+
+# Announced future deprecation dates are not evidence of rejection:
+# these opening-parenthesis forms remain accepted in Perl 5.45.4.
+
+/foo({bar)/
+    foo{bar
+ 0: foo{bar
+ 1: {bar
+
+# Perl 5.38.0: captures in earlier alternatives of a repeated group.
+
+/((foo)baz|foo(bar))+/
+    foobazfoobar
+ 0: foobazfoobar
+ 1: foobar
+ 2: foo
+ 3: bar
+
+# Perl 5.36.0 changed variable-length lookbehind to try the longest span first.
+# PCRE2 does this within a branch, but tries top-level alternatives in order.
+
+/(?=z)(?<=(a|aa))/
+    aaz
+ 0: 
+ 1: aa
+
+/(?=z)(?<=(a)|(aa))/
+    aaz
+ 0: 
+ 1: a
+
+# Perl 5.42.0: validate all of a braced backreference.
+
+/(a)\g{1 FOO}/
+Failed: error 219 at offset 8: syntax error in subpattern number (missing terminator?)
+        here: (a)\g{1  |<--| FOO}
+
+/(a)\g{ 1 }/
+    aa
+ 0: aa
+ 1: a
+
+# Perl 5.45.4: a nullable lookahead must not restrict the consuming start class.
+
+/\A(?=a*)[0-9]a\z/
+    0a
+ 0: 0a
+    ba
+No match
+
+/\A(?=a*?)[0-9]a\z/
+    0a
+ 0: 0a
+
+/\A(?=(?:ab)*)[0-9]a\z/
+    0a
+ 0: 0a
+
+/\A(?=(?=a)b*)[a-z]a\z/
+    aa
+ 0: aa
+    ba
+No match
+
+# Perl 5.45.4: zero iterations clear captures; PCRE2 keeps earlier captures.
+
+/\A(?:(a)?b)+\z/
+    abb
+ 0: abb
+ 1: a
+
+/\A(?:(a)?b)+\1\z/
+    abba
+ 0: abba
+ 1: a
+
+/\A(?:(a+)?b)+\1\z/
+    abba
+ 0: abba
+ 1: a
+
+/\A(?:(a(?:a+)?)?b)+\1\z/
+    abba
+ 0: abba
+ 1: a
+
+/\A(?:(a*)*b)+\1\z/
+    abba
+ 0: abba
+ 1: a
+
+/\A(?:(a)?b)+(?(1)a|c)\z/
+    abbc
+No match
+    abba
+ 0: abba
+ 1: a
+
+/\A(?:(a*)b)+\z/
+    abb
+ 0: abb
+ 1: 
+
+# Perl 5.45.4: failed/backtracked iterations of nested fixed-width repeats.
+
+/(?:(aa){2})*/
+    aa
+ 0: 
+
+/\A(?:([a-d]{2}){2})*ccdd\z/
+    aabbccdd
+ 0: aabbccdd
+ 1: bb
+
+/\A(?:([a-d]{2}){2})*?ccdd\z/
+    aabbccdd
+ 0: aabbccdd
+ 1: bb
+
+/\A(?:(aa){2})*aa\z/
+    aa
+ 0: aa
+
+# Perl 5.45.4: negative assertions discard captures except PCRE2 false conditions.
+
+/\A(?!(a)b)a\z/
+    a
+ 0: a
+
+/\A(?!(a)b)\1\z/
+    a
+No match
+
+/\A(?!(a)b)(?(1)a|b)\z/
+    a
+No match
+    b
+ 0: b
+
+/\A..(?<!(a)b)c\z/
+    aac
+ 0: aac
+    abc
+No match
+
+/\A(?(?!(a)b)a|b)\z/
+    a
+ 0: a
+
+/\A(?(?!(a))b|a)\1\z/
+    aa
+ 0: aa
+ 1: a
+
+# Perl 5.45.4: width calculation after a preceding unbounded repeat.
+
+/x+(?:b{2}){2}/
+    xxbbbb
+ 0: xxbbbb
+
+# Perl 5.45.4: SKIP must not cause later candidate starts to be skipped.
+
+/(a+X(*SKIP)j)/
+    aXaXj
+ 0: aXj
+ 1: aXj
+
+/(a+X(*MARK:m)(*SKIP:m)j)/
+    aXaXj
+ 0: aXj
+ 1: aXj
+
+/a+X(*COMMIT)j/
+    aXaXj
+No match
+
+# Perl 5.45.4: anchored nullable repeat must not truncate the search range.
+
+/\A\ba*\z/m
+    a
+ 0: a
+
+/^\ba*\z/m
+    a
+ 0: a
+
+/\A^\ba*\z/m
+    a
+ 0: a
+
+# These verbs fail only the subroutine in PCRE2, permitting the outer alternate.
+# Perl 5.44.0 fails the whole match for COMMIT, PRUNE and SKIP in these examples.
+
+/\A(?:(?&x)c|ab)(?(DEFINE)(?<x>a(*COMMIT)b))\z/
+    ab
+ 0: ab
+
+/\A(?:(?&x)c|ab)(?(DEFINE)(?<x>a(*PRUNE)b))\z/
+    ab
+ 0: ab
+
+/\A(?:(?&x)c|ab)(?(DEFINE)(?<x>a(*SKIP)b))\z/
+    ab
+ 0: ab
+
+/\A(?:(?&x)c|ab)(?(DEFINE)(?<x>a(*THEN)b))\z/
+    ab
+ 0: ab
+
+# ACCEPT returns successfully from a subroutine in both engines.
+
+/\A(?&x)b\z(?(DEFINE)(?<x>a(*ACCEPT)c))/
+    ab
+ 0: ab
+    ac
+No match
+
+# The first verb backtracked onto acts. Perl 5.44.0 does not match ABD.
+
+/(A(*COMMIT)B(*THEN)C|ABD)/
+    ABD
+ 0: ABD
+ 1: ABD
+    ABC
+ 0: ABC
+ 1: ABC
+
+# Both engines reject separated group-introducer tokens.
+# Perl deprecated these forms in 5.18.0 and rejected them in 5.22.0.
+
+/( ?=a)a/x
+Failed: error 109 at offset 3: quantifier does not follow a repeatable item
+        here: ( ? |<--| =a)a
+
+/((?#comment)?=a)a/x
+Failed: error 109 at offset 13: quantifier does not follow a repeatable item
+        here: ...#comment)? |<--| =a)a
+
+# Quoting either repeat bound prevents recognition as a quantifier in PCRE2.
+# Perl's lexer removes this quoting before the regex compiler sees the bounds.
+# Quoting the comma prevents quantifier recognition in both engines.
+
+/a{1,\Q2\E}/
+    xa{1,2}x
+ 0: a{1,2}
+    xaax
+No match
+
+/a{1\Q,\E2}/
+    xa{1,2}x
+ 0: a{1,2}
+    xaax
+No match
+
+# The documented infinite-recursion difference needs at least two repeats:
+# Perl 5.44.0 matches abcd but raises an error for abcdabcd.
+
+/(?:|(?0)abcd)(?(R)|\z)/
+    abcd
+ 0: abcd
+    abcdabcd
+ 0: abcdabcd
+    abcdabcdabcd
+ 0: abcdabcdabcd
+
+# Numeric N escapes require UTF mode, even for an ASCII code point.
+
+/\N{U+0041}/
+Failed: error 193 at offset 10: \N{U+dddd} is supported only in Unicode (UTF) mode
+        here: \N{U+0041} |<--|
 
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)

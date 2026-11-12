@@ -2160,8 +2160,7 @@
 /(?<=abc(?=X(*sr:BXY)CCC)XBXYCCC)./B
    abcXBXYCCC!
 
-# Some script run patterns are broken in Perl 5.28.0. These can be moved into
-# test 4 when a mended version of Perl is released.
+# These script run cases pin fixes released in Perl 5.28.2 and 5.30.0.
 
 /^(*sr:.{4})/utf
     \x{0980}12\x{0993}     Bengali Common-digits Bengali
@@ -2172,8 +2171,7 @@
     A\x{ff10}\x{ff19}B     Latin Common-notascii-digits Latin 
     A\x{1d7ce}\x{1d7cf}B   Latin fancy-common-digits Latin
     
-# These ones involve non-ASCII but nevertheless Common digits. As of October
-# 2018 even blead Perl wasn't handling all of these - but is going to. 
+# Non-ASCII digits in the Common script were fixed in Perl 5.28.2.
 
 /^(*sr:.{4})/utf
     A\x{ff10}\x{ff19}B     Latin Common-notascii-digits Latin 
@@ -3683,5 +3681,88 @@
 /\x{10400}\x{10401}\x{10402}Z/i,utf
     ---\x{10428}\x{10429}\x{1042a}z
     ---\x{10428}\x{10429}\x{1042a}z\=dfa
+
+# Perl 5.24.0: property validity is checked even in an unreachable branch.
+
+/a|b\p{Not_A_Unicode_Property}/utf
+
+# Perl 5.30.0: Unicode multi-character folds.
+# PCRE2 only supports single-character folds.
+
+/^ss$/i,utf
+    \x{df}
+    ss
+
+/^z{260}ffi$/i,utf
+    \[z]{260}\x{fb03}
+
+# Perl 5.30.0: variable-length lookbehind, including the longest capture
+# documented explicitly in Perl 5.36.0.
+
+/(?=z)(?<=(a|aa))/utf
+    aaz
+
+/(?=z)(?<=(a)|(aa))/utf
+    aaz
+
+/(?<=ab{1,2})c/utf
+    abc
+    abbc
+    abbbc
+
+/(?<!ab{1,2})c/utf
+    xc
+    abc
+    abbc
+
+# Perl 5.44.0: XID continuation rules for non-ASCII capture names.
+
+/(?<aⒶ>x)/utf
+
+/(?<aͺ>x)/utf
+    x
+
+# Perl 5.45.4: Unicode captures from unsuccessful nested repeat iterations.
+
+/(?:(\x{100}\x{101}){2})*/utf
+    \x{100}\x{101}
+
+/\A(?:([\x{100}-\x{103}]{2}){2})*\x{102}\x{102}\x{103}\x{103}\z/utf
+    \x{100}\x{100}\x{101}\x{101}\x{102}\x{102}\x{103}\x{103}
+
+/\A..(?<!(\x{100})b)c\z/utf
+    \x{100}\x{100}c
+
+/\A(?(?!(\x{100}))b|\x{100})\1\z/utf
+    \x{100}\x{100}
+
+# Perl 5.45.4: retries must compare whole characters, not just leading UTF-8 bytes.
+
+/\x{e0}+j/utf
+    \x{e0}\x{e9}\x{e0}j
+    \x{e0}\x{e9}\x{e0}\x{e0}j
+
+/(\x{100}+X(*SKIP)j)/utf
+    \x{100}X\x{100}Xj
+
+/(\x{100}+X(*MARK:m)(*SKIP:m)j)/utf
+    \x{100}X\x{100}Xj
+
+/\x{100}+X(*COMMIT)j/utf
+    \x{100}X\x{100}Xj
+
+# Perl 5.45.4: a failed lazy repeat must not affect a subsequent greedy repeat.
+
+/(?:x??\x{100})*a+/utf
+    aaaa
+
+/(?:(x)??\x{100})*a+/utf
+    aaaa
+
+/(?:x+?\x{100})*a+/utf
+    aaaa
+
+/(?:x*?\x{100})*a+/utf
+    aaaa
 
 # End of testinput5
