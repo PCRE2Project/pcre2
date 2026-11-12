@@ -2252,7 +2252,7 @@ of <code class="subject rouge"><span class="pcre2-semantic">c</span></code> in t
 start-of-match optimizations by setting the <code class="constant pcre2-api rouge"><span class="no">PCRE2_NO_START_OPTIMIZE</span></code> option for
 <code class="function pcre2-api rouge"><span class="nf">pcre2_compile()</span></code> or by starting the pattern with <code class="regex rouge"><span class="pcre2-semantic">(*NO_START_OPT)</span></code>.</p></section>
 <p>After a successful match, a partial match, or one of the invalid UTF errors
-(for example, <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_UTF8_ERR5</span></code>), <code class="function pcre2-api rouge"><span class="nf">pcre2_get_startchar()</span></code> can be
+(for example, <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_UTF8_ERR3</span></code>), <code class="function pcre2-api rouge"><span class="nf">pcre2_get_startchar()</span></code> can be
 called. After a successful or partial match it returns the code unit offset of
 the character at which the match started. For a non-partial match, this can be
 different to the value of <code class="c rouge" data-lang="c"><span class="nv">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></code> if the pattern contains the <code class="regex rouge"><span class="pcre2-semantic">\K</span></code>
