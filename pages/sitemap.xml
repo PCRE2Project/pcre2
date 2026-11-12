@@ -1,0 +1,10 @@
+---
+layout: null
+---
+<?xml version="1.0" encoding="utf-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{% assign entries = site.pages | sort: 'url' %}
+{% for entry in entries %}{% unless entry.url == '/404.html' or entry.url == '/sitemap.xml' %}
+  <url><loc>{{ entry.url | absolute_url | xml_escape }}</loc></url>
+{% endunless %}{% endfor %}
+</urlset>

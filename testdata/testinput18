@@ -166,4 +166,17 @@
 \= Expect error
     xxxx 
 
+/(*LIMIT_DEPTH=1)(a)/
+    a
+
+/(*LIMIT_MATCH=1)(a)/
+    a
+
+/(?R)/
+    a
+
+/(?(DEFINE)(?<sneaky>b\K))a(?=(?&sneaky))/
+    ab
+    zz
+
 # End of testdata/testinput18

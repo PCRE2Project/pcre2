@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: pcre2_code_free
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 28 June 2018
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_CODE_FREE" "3" "28 June 2018" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_CODE_FREE" "3" "28 June 2018" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -34,18 +34,18 @@ pcre2_code_free \- free a compiled pattern
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\fBvoid\fP pcre2_code_free(\fBpcre2_code\fP *\fIcode\fP);
+void\fP \f(CBpcre2_code_free\fP\f(CR(pcre2_code *\fP\f(CIcode\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
-If \fIcode\fP is \f(CRNULL\fP, this function does nothing. Otherwise, \fIcode\fP must
+If \f(CIcode\fP is \f(CBNULL\fP, this function does nothing. Otherwise, \f(CIcode\fP must
 point to a compiled pattern. This function frees its memory, including any
 memory used by the JIT compiler. If the compiled pattern was created by a call
-to pcre2_code_copy_with_tables(), the memory for the character tables is
+to \f(CBpcre2_code_copy_with_tables()\fP, the memory for the character tables is
 also freed.
 .sp
 There is a complete description of the PCRE2 native API in the

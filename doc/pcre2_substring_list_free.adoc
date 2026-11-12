@@ -4,7 +4,7 @@
 :manpurpose: free list of extracted substrings
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 26 February 2025
 :revdate: 26 February 2025
 
@@ -21,7 +21,7 @@ void pcre2_substring_list_free(PCRE2_UCHAR **list);
 
 This is a convenience function for freeing the store obtained by a previous
 call to func:pcre2_substring_list_get(). Its only argument is a pointer to
-the list of string pointers. If the argument is [.c]`NULL`, the function returns
+the list of string pointers. If the argument is const:NULL, the function returns
 immediately, without doing anything.
 
 There is a complete description of the PCRE2 native API in the

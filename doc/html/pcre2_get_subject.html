@@ -1,0 +1,22 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Asciidoctor 2.0.26"><title>pcre2_get_subject(3)</title><link rel="stylesheet" href="./css/document.css"><link rel="stylesheet" href="./css/standalone.css"><meta name="color-scheme" content="light dark"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff"></head><body class="manpage offline-manual"><header class="offline-nav"><nav><a class="offline-index" href="./index.html">Index</a><a class="offline-home" href="https://www.pcre2.org/"><span aria-hidden="true">🌐︎</span> PCRE2 homepage</a></nav></header><main class="document-page"><header class="document-title"><h1>pcre2_get_subject(3)</h1><p class="document-meta">PCRE2 10.50-DEV manual; updated <time datetime="2026-09-22">22 Sep 2026</time></p></header><div class="document-layout"><article class="prose" id="content"><section class="doc-section level-1"><h2 id="_synopsis">Synopsis</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;pcre2.h&gt;</span><span class="cp">
+</span>
+<span class="kt">PCRE2_SPTR</span> <span class="nf">pcre2_get_subject</span><span class="p">(</span><span class="kt">pcre2_match_data</span> <span class="p">*</span><span class="nv">match_data</span><span class="p">,</span>
+                             <span class="kt">PCRE2_SIZE</span> <span class="p">*</span><span class="nv">lengthptr</span><span class="p">);</span></code></pre></div></section>
+<section class="doc-section level-1"><h2 id="_description">Description</h2><p>After a successful match, a partial match, or a failure to match, this function
+returns the subject pointer that was passed to the matching function. For a
+successful match with <code class="constant pcre2-api rouge"><span class="no">PCRE2_COPY_MATCHED_SUBJECT</span></code>, it returns a pointer to
+a copy of the subject that is owned by the match data block instead (except for
+<code class="function pcre2-api rouge"><span class="nf">pcre2_jit_match()</span></code> which ignores <code class="constant pcre2-api rouge"><span class="no">PCRE2_COPY_MATCHED_SUBJECT</span></code>). The copy
+is exactly the same length as the subject that was passed to the matching
+function and is additionally zero-terminated. The copy is freed when the match
+data block is reused for another match or is freed. If there is any match error
+other than <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_NOMATCH</span></code> or <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_PARTIAL</span></code>,
+<code class="function pcre2-api rouge"><span class="nf">pcre2_get_subject()</span></code> may return <code class="constant pcre2-api rouge"><span class="kc">NULL</span></code>.</p>
+<p>If the <code class="parameter pcre2-api rouge"><span class="nv">lengthptr</span></code> argument is not <code class="constant pcre2-api rouge"><span class="kc">NULL</span></code>, it receives the length in code
+units of the string which is returned, excluding the terminating zero (the
+subject string may contain embedded NUL characters).</p>
+<p>There is a complete description of the PCRE2 native API in the
+<a href="./pcre2api.html"><code>pcre2api</code></a>
+page and a description of the POSIX API in the
+<a href="./pcre2posix.html"><code>pcre2posix</code></a>
+page.</p></section></article></div></main><footer class="offline-footer"></footer></body></html>

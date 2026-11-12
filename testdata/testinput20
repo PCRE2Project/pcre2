@@ -1,5 +1,41 @@
 # This set of tests exercises the serialization/deserialization and code copy
-# functions in the library. It does not use UTF or JIT.
+# functions in the library. The first section requires Unicode support; the
+# remaining tests do not use UTF. None of the tests use JIT.
+
+#if unicode
+
+# Six disjoint characters above 255 require character lists. Vary the name
+# length to exercise padding between the name table and the aligned lists.
+
+/(?<A>[\x{100}\x{200}\x{300}\x{400}\x{500}\x{600}])/utf,push
+/(?<AB>[\x{100}\x{200}\x{300}\x{400}\x{500}\x{600}])/utf,push
+/(?<ABC>[\x{100}\x{200}\x{300}\x{400}\x{500}\x{600}])/utf,push
+/(?<ABCD>[\x{100}\x{200}\x{300}\x{400}\x{500}\x{600}])/utf,push
+
+#save testsaved1
+#load testsaved1
+
+#pop
+    \x{100}
+    \x{600}
+    \x{150}
+
+#pop
+    \x{100}
+    \x{600}
+    \x{150}
+
+#pop
+    \x{100}
+    \x{600}
+    \x{150}
+
+#pop
+    \x{100}
+    \x{600}
+    \x{150}
+
+#endif
 
 #forbid_utf
 

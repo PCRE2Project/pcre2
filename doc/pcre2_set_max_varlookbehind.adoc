@@ -4,7 +4,7 @@
 :manpurpose: set the maximum match length for a variable-length lookbehind
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 11 August 2023
 :revdate: 11 August 2023
 
@@ -22,7 +22,7 @@ int pcre2_set_max_varlookbehind(pcre2_compile_context *ccontext,
 
 This sets a maximum length for the number of characters matched by a
 variable-length lookbehind assertion. The default is set when PCRE2 is built,
-with the ultimate default being 255, the same as Perl. Lookbehind assertions
+with the ultimate default being macroval:MAX_VARLOOKBEHIND, the same as Perl. Lookbehind assertions
 without a bounding length are not supported. The result is always zero.
 
 There is a complete description of the PCRE2 native API in the

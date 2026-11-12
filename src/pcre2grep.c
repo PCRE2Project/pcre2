@@ -137,12 +137,15 @@ be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 
 typedef int BOOL;
 
-#define DEFAULT_CAPTURE_MAX 50
+#define PCRE2GREP_DEFAULT_CAPTURE_MAX 50
+#define PCRE2GREP_MAXPATLEN_MIN       8192
+#define PCRE2GREP_MAX_ERRORS          20
+#define PCRE2GREP_BINARY_CHECK_SIZE   1024
 
-#if BUFSIZ > 8192
+#if BUFSIZ > PCRE2GREP_MAXPATLEN_MIN
 #define MAXPATLEN BUFSIZ
 #else
-#define MAXPATLEN 8192
+#define MAXPATLEN PCRE2GREP_MAXPATLEN_MIN
 #endif
 
 #define FNBUFSIZ  2048
@@ -276,7 +279,7 @@ static pcre2_match_data *match_data, *match_data_pair[2];
 static PCRE2_SIZE *offsets, *offsets_pair[2];
 static int match_data_toggle;
 static uint32_t offset_size;
-static uint32_t capture_max = DEFAULT_CAPTURE_MAX;
+static uint32_t capture_max = PCRE2GREP_DEFAULT_CAPTURE_MAX;
 
 static BOOL all_matches = FALSE;
 static BOOL case_restrict = FALSE;
@@ -302,7 +305,7 @@ static BOOL utf = FALSE;
 static BOOL posix_digit = FALSE;
 static BOOL posix_pattern_file = FALSE;
 
-static uint8_t utf8_buffer[8];
+static uint8_t utf8_buffer[4];
 
 
 /* Structure for list of --only-matching capturing numbers. */
@@ -553,15 +556,9 @@ static const char *newlines[] = { "DEFAULT", "CR", "LF", "CRLF", "ANY", "ANYCRLF
 
 /* UTF-8 tables  */
 
-const int utf8_table1[] = { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff };
-const int utf8_table1_size = sizeof(utf8_table1) / sizeof(int);
+const int utf8_table1[] = { 0x7f, 0x7ff, 0xffff, 0x10ffff };
 
-const int utf8_table2[] = { 0, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc };
-const int utf8_table3[] = { 0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
-
-const char utf8_table4[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-                             2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5 };
+const int utf8_table2[] = { 0, 0xc0, 0xe0, 0xf0 };
 
 
 
@@ -576,7 +573,7 @@ ord2utf8(uint32_t value)
 {
   int i, j;
   uint8_t *utf8bytes = utf8_buffer;
-  for (i = 0; i < utf8_table1_size; i++)
+  for (i = 0; i < 3; i++)
     if (value <= (uint32_t)utf8_table1[i])
       break;
   utf8bytes += i;
@@ -1381,46 +1378,85 @@ test_incexc(char *path, patstr *ip, patstr *ep)
 because SunOS4 doesn't have it. This is used only for unpicking arguments, so
 just keep it simple.
 
+A value that does not fit the variable behind the option is an error, because a
+wrapped value could get past the later checks: a negative -o group number would
+index before the ovector. The size of the main buffer, 3 * bufthird, is checked
+when it is allocated.
+
 Arguments:
   option_data   the option data string
-  op            the option item (for error messages)
+  op            the option item (for the limit and error messages)
   longop        TRUE if option given in long form
 
-Returns:        a long integer
+Returns:        the value, within the range of the option's variable
 */
 
-static long int
+static uint64_t
 decode_number(char *option_data, option_item *op, BOOL longop)
 {
-  unsigned long int n = 0;
+  uint64_t n = 0;
+  uint64_t limit;
+  uint64_t multiplier = 1;
+  BOOL too_large = FALSE;
   char *endptr = option_data;
+
+  switch (op->type)
+  {
+  case OP_U32NUMBER:
+    limit = UINT32_MAX;
+    break;
+
+  case OP_SIZE:
+    limit = PCRE2_SIZE_MAX;
+    break;
+
+  default:
+    limit = INT_MAX;
+    break;
+  }
+
   while (*endptr != 0 && isspace((unsigned char)(*endptr)))
     endptr++;
   while (isdigit((unsigned char)(*endptr)))
-    n = n * 10 + (int)(*endptr++ - '0');
+  {
+    unsigned int digit = (unsigned int)(*endptr++ - '0');
+    if (n > (limit - digit) / 10)
+      too_large = TRUE;
+    else
+      n = n * 10 + digit;
+  }
+
   if (toupper(*endptr) == 'K')
   {
-    n *= 1024;
+    multiplier = 1024;
     endptr++;
   }
   else if (toupper(*endptr) == 'M')
   {
-    n *= 1024 * 1024;
+    multiplier = 1024 * 1024;
     endptr++;
   }
 
-  if (*endptr != 0) // Error
+  if (n > limit / multiplier)
+    too_large = TRUE;
+  else
+    n *= multiplier;
+
+  if (*endptr != 0 || too_large) // Error
   {
+    const char *problem = (*endptr != 0) ? "Malformed" : "Out-of-range";
+
     if (longop)
     {
       const char *equals = strchr(op->long_name, '=');
       int nlen = (equals == NULL) ? (int)strlen(op->long_name) : (int)(equals - op->long_name);
-      fprintf(stderr, "pcre2grep: Malformed number \"%s\" after --%.*s\n", option_data, nlen,
+      fprintf(stderr, "pcre2grep: %s number \"%s\" after --%.*s\n", problem, option_data, nlen,
               op->long_name);
     }
     else
     {
-      fprintf(stderr, "pcre2grep: Malformed number \"%s\" after -%c\n", option_data, op->one_char);
+      fprintf(stderr, "pcre2grep: %s number \"%s\" after -%c\n", problem, option_data,
+              op->one_char);
     }
 
     pcre2grep_exit(usage(2));
@@ -1651,60 +1687,59 @@ end_of_line(char *p, char *endptr, int *lenptr)
   case PCRE2_NEWLINE_ANY:
     while (p < endptr)
     {
-      int extra = 0;
-      int c = *((unsigned char *)p);
-
-      if (utf && c >= 0xc0)
-      {
-        int gcii, gcss;
-        extra = utf8_table4[c & 0x3f]; // Number of additional bytes
-        if (endptr - p < 1 + extra)
-        {
-          *lenptr = 0; // Hit the end, halfway through a character
-          return endptr;
-        }
-
-        gcss = 6 * extra;
-        c = (c & utf8_table3[extra]) << gcss;
-        for (gcii = 1; gcii <= extra; gcii++)
-        {
-          gcss -= 6;
-          c |= (p[gcii] & 0x3f) << gcss;
-        }
-      }
-
-      p += 1 + extra;
+      int c = *((unsigned char *)p++);
 
       switch (c)
       {
       case '\n': // LF
       case '\v': // VT
       case '\f': // FF
-        *lenptr = 1 + extra;
+        *lenptr = 1;
         return p;
 
       case '\r': // CR
-        if (extra == 0 && p < endptr && *p == '\n')
+        if (p < endptr && *p == '\n')
         {
           *lenptr = 2;
           p++;
         }
         else
         {
-          *lenptr = 1 + extra;
+          *lenptr = 1;
         }
 
         return p;
 
 #ifndef EBCDIC
-      case 0x85: // Unicode NEL
-        *lenptr = 1 + extra;
-        return p;
+      case 0x85: // Unicode NEL U+0085 encoded as 0x85 in non-UTF mode
+        if (!utf)
+        {
+          *lenptr = 1;
+          return p;
+        }
+        break;
 
-      case 0x2028: // Unicode LS
-      case 0x2029: // Unicode PS
-        *lenptr = 1 + extra;
-        return p;
+        /* Match exact UTF-8 newline encodings, even within invalid input.
+        Unicode NEL U+0085 encoded as 0xc2 0x85
+        Unicode LS U+2028 encoded as 0xe2 0x80 0xa8
+        Unicode PS U+2029 encoded as 0xe2 0x80 0xa9 */
+
+      case 0xc2:
+        if (utf && p < endptr && (unsigned char)p[0] == 0x85)
+        {
+          *lenptr = 2;
+          return p + 1;
+        }
+        break;
+
+      case 0xe2:
+        if (utf && endptr - p >= 2 && (unsigned char)p[0] == 0x80 &&
+            ((unsigned char)p[1] == 0xa8 || (unsigned char)p[1] == 0xa9))
+        {
+          *lenptr = 3;
+          return p + 2;
+        }
+        break;
 #endif /* Not EBCDIC */
 
       default:
@@ -1757,6 +1792,11 @@ previous_line(char *p, char *startptr)
     return p;
 
   case PCRE2_NEWLINE_CRLF:
+    /* Skip the previous line's terminating CRLF, then look backwards for the
+    preceding CRLF. A lone LF does not end a line in this mode, so keep looking
+    unless it is preceded by CR. Return just after the LF, or at startptr if
+    there is no earlier CRLF. */
+
     p -= 2;
     for (;;)
     {
@@ -1772,6 +1812,11 @@ previous_line(char *p, char *startptr)
     return p;
 
   case PCRE2_NEWLINE_ANYCRLF:
+    /* Skip the previous line's terminating newline, treating CRLF as a single
+    sequence. Then look backwards for either CR or LF. If the preceding newline
+    is CRLF, its LF is encountered first, so the result is after the whole
+    sequence. */
+
     if (p - startptr >= 2 && p[-2] == '\r' && p[-1] == '\n')
       p -= 2;
     else
@@ -1786,53 +1831,40 @@ previous_line(char *p, char *startptr)
     return p;
 
   case PCRE2_NEWLINE_ANY:
+    /* Skip the previous line's terminating newline. CRLF occupies two bytes;
+    in UTF mode, NEL occupies two and LS/PS occupy three. All other newline
+    sequences occupy one byte. */
+
     if (p - startptr >= 2 && p[-2] == '\r' && p[-1] == '\n')
     {
       p -= 2;
     }
+#ifndef EBCDIC
+    else if (utf && p - startptr >= 2 && (unsigned char)p[-2] == 0xc2 &&
+             (unsigned char)p[-1] == 0x85)
+    {
+      p -= 2;
+    }
+    else if (utf && p - startptr >= 3 && (unsigned char)p[-3] == 0xe2 &&
+             (unsigned char)p[-2] == 0x80 &&
+             ((unsigned char)p[-1] == 0xa8 || (unsigned char)p[-1] == 0xa9))
+    {
+      p -= 3;
+    }
+#endif
     else
     {
-      if (utf)
-        while (p > startptr && (p[-1] & 0xc0) == 0x80)
-          p--;
       if (p > startptr)
         p--;
     }
 
+    /* Scan bytes backwards, matching exact newline encodings even within
+    invalid input, as in end_of_line(). Look for the final byte of each
+    sequence, then check any preceding bytes before recognizing the newline. */
+
     while (p > startptr)
     {
-      int c;
-      char *pp = p - 1;
-
-      if (utf)
-      {
-        int extra = 0;
-        while (pp > startptr && (*pp & 0xc0) == 0x80)
-          pp--;
-        c = *((unsigned char *)pp);
-        if (c >= 0xc0)
-        {
-          int gcii, gcss;
-          extra = utf8_table4[c & 0x3f]; // Number of additional bytes
-          if (p - pp < 1 + extra)
-          {
-            p = pp; // Rewind over the broken character
-            continue;
-          }
-
-          gcss = 6 * extra;
-          c = (c & utf8_table3[extra]) << gcss;
-          for (gcii = 1; gcii <= extra; gcii++)
-          {
-            gcss -= 6;
-            c |= (pp[gcii] & 0x3f) << gcss;
-          }
-        }
-      }
-      else
-      {
-        c = *((unsigned char *)pp);
-      }
+      int c = *((unsigned char *)--p);
 
       switch (c)
       {
@@ -1840,18 +1872,25 @@ previous_line(char *p, char *startptr)
       case '\v': // VT
       case '\f': // FF
       case '\r': // CR
+        return p + 1;
+
 #ifndef EBCDIC
-      case 0x85:   // Unicode NEL
-      case 0x2028: // Unicode LS
-      case 0x2029: // Unicode PS
-#endif             /* Not EBCDIC */
-        return p;
+      case 0x85: // Unicode NEL U+0085: 0x85 in non-UTF mode, 0xc2 0x85 in UTF mode
+        if (!utf || (p > startptr && (unsigned char)p[-1] == 0xc2))
+          return p + 1;
+        break;
+
+      case 0xa8: // Unicode LS U+2028 encoded as 0xe2 0x80 0xa8 in UTF mode
+      case 0xa9: // Unicode PS U+2029 encoded as 0xe2 0x80 0xa9 in UTF mode
+        if (utf && p - startptr >= 2 && (unsigned char)p[-2] == 0xe2 &&
+            (unsigned char)p[-1] == 0x80)
+          return p + 1;
+        break;
+#endif /* Not EBCDIC */
 
       default:
         break;
       }
-
-      p = pp; // Back one character
     } // End of loop for ANY case
 
     return p;
@@ -2039,7 +2078,7 @@ match_patterns(char *matchptr, PCRE2_SIZE length, unsigned int options, PCRE2_SI
     if (rc == PCRE2_ERROR_MATCHLIMIT || rc == PCRE2_ERROR_DEPTHLIMIT ||
         rc == PCRE2_ERROR_HEAPLIMIT || rc == PCRE2_ERROR_JIT_STACKLIMIT)
       resource_error = TRUE;
-    if (error_count++ > 20)
+    if (error_count++ > PCRE2GREP_MAX_ERRORS)
     {
       fprintf(stderr, "pcre2grep: Too many errors - abandoned.\n");
       pcre2grep_exit(2);
@@ -2329,6 +2368,15 @@ decode_dollar_escape(PCRE2_SPTR begin, PCRE2_SPTR string, BOOL callout, uint32_t
                 "pcre2grep: Error in output text at offset %d: "
                 "code point greater than 0x%x is invalid\n",
                 (int)(string - begin), max);
+      rc = DDE_ERROR;
+    }
+    else if (utf && *value >= 0xd800 && *value <= 0xdfff)
+    {
+      if (!callout)
+        fprintf(stderr,
+                "pcre2grep: Error in output text at offset %d: "
+                "surrogate code point 0x%x is invalid\n",
+                (int)(string - begin), *value);
       rc = DDE_ERROR;
     }
   }
@@ -2856,7 +2904,7 @@ static int
 pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
 {
   int rc = 1;
-  int filepos = 0;
+  int64_t filepos = 0;
   unsigned long int linenumber = 1;
   unsigned long int lastmatchnumber = 0;
   unsigned long int count = 0;
@@ -2919,7 +2967,8 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
   if (binary_files != BIN_TEXT)
   {
     if (endlinetype != PCRE2_NEWLINE_NUL)
-      binary = memchr(main_buffer, 0, (bufflength > 1024) ? 1024 : bufflength) != NULL;
+      binary = memchr(main_buffer, 0,
+        (bufflength > PCRE2GREP_BINARY_CHECK_SIZE) ? PCRE2GREP_BINARY_CHECK_SIZE : bufflength) != NULL;
     if (binary && binary_files == BIN_NOMATCH)
       return 1;
   }
@@ -3136,9 +3185,10 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
             }
 
             if (line_offsets)
-              fprintf(stdout, "%d,%d%s", (int)start, (int)(end - start), stdout_nl);
+              fprintf(stdout, "%lld,%llu%s", (long long)start, (unsigned long long)(end - start), stdout_nl);
             else
-              fprintf(stdout, "%d,%d%s", (int)(filepos + start), (int)(end - start), stdout_nl);
+              fprintf(stdout, "%lld,%llu%s", (long long)(filepos + start),
+                  (unsigned long long)(end - start), stdout_nl);
           }
 
           /* Handle --output (which has already been syntax checked) */
@@ -3223,7 +3273,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
           while (endlinelength != 0 && startoffset >= linelength + endlinelength)
           {
             ptr += linelength + endlinelength;
-            filepos += (int)(linelength + endlinelength);
+            filepos += linelength + endlinelength;
             linenumber++;
             startoffset -= (int)(linelength + endlinelength);
             t = end_of_line(ptr, endptr, &endlinelength);
@@ -3413,7 +3463,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
               }
 
               ptr += lineadvance;
-              filepos += (int)lineadvance;
+              filepos += lineadvance;
               linenumber++;
               startoffset -= lineadvance;
               t = end_of_line(ptr, endptr, &endlinelength);
@@ -3510,7 +3560,7 @@ pcre2grep(void *handle, int frtype, const char *filename, const char *printname)
 
   END_ONE_MATCH:
     ptr += linelength + endlinelength;
-    filepos += (int)(linelength + endlinelength);
+    filepos += linelength + endlinelength;
     linenumber++;
 
     /* If there was at least one match (or a non-match, as required) in the line,
@@ -4633,9 +4683,9 @@ main(int argc, char **argv)
 
     if (op->type == OP_OP_NUMBERS)
     {
-      unsigned long int n = decode_number(option_data, op, longop);
+      int n = (int)decode_number(option_data, op, longop);
       omdatastr *omd = (omdatastr *)op->dataptr;
-      *(omd->lastptr) = add_number((int)n, *(omd->lastptr));
+      *(omd->lastptr) = add_number(n, *(omd->lastptr));
       if (*(omd->anchor) == NULL)
         *(omd->anchor) = *(omd->lastptr);
     }
@@ -4710,13 +4760,12 @@ main(int argc, char **argv)
     }
     else
     {
-      unsigned long int n = decode_number(option_data, op, longop);
       if (op->type == OP_U32NUMBER)
-        *((uint32_t *)op->dataptr) = (uint32_t)n;
+        *((uint32_t *)op->dataptr) = (uint32_t)decode_number(option_data, op, longop);
       else if (op->type == OP_SIZE)
-        *((PCRE2_SIZE *)op->dataptr) = n;
+        *((PCRE2_SIZE *)op->dataptr) = (PCRE2_SIZE)decode_number(option_data, op, longop);
       else
-        *((int *)op->dataptr) = (int)n;
+        *((int *)op->dataptr) = (int)decode_number(option_data, op, longop);
     }
   }
 
@@ -4767,7 +4816,7 @@ main(int argc, char **argv)
   for (om = only_matching; om != NULL; om = om->next)
   {
     int n = om->groupnum;
-    if (n > (int)capture_max)
+    if ((uint32_t)n > capture_max)
     {
       fprintf(stderr, "pcre2grep: Requested group %d cannot be captured.\n", n);
       fprintf(stderr, "pcre2grep: Use --om-capture to increase the size of the capture vector.\n");
@@ -4782,11 +4831,19 @@ main(int argc, char **argv)
 
   /* Set up default compile and match contexts and match data blocks. */
 
-  offset_size = capture_max + 1;
+  offset_size = (capture_max == UINT32_MAX) ? capture_max : capture_max + 1;
   compile_context = pcre2_compile_context_create(NULL);
   match_context = pcre2_match_context_create(NULL);
   match_data_pair[0] = pcre2_match_data_create(offset_size, NULL);
   match_data_pair[1] = pcre2_match_data_create(offset_size, NULL);
+  if (compile_context == NULL || match_context == NULL ||
+      match_data_pair[0] == NULL || match_data_pair[1] == NULL)
+  {
+    /* LCOV_EXCL_START */
+    fprintf(stderr, "pcre2grep: malloc failed\n");
+    goto EXIT2;
+    /* LCOV_EXCL_STOP */
+  }
   offsets_pair[0] = pcre2_get_ovector_pointer(match_data_pair[0]);
   offsets_pair[1] = pcre2_get_ovector_pointer(match_data_pair[1]);
   match_data = match_data_pair[0];
@@ -4992,6 +5049,20 @@ main(int argc, char **argv)
     fprintf(stderr, "pcre2grep: --buffer-size must be greater than zero\n");
     goto EXIT2;
   }
+
+  /* The main buffer is three times bufthird, and it grows up to three times
+  max_bufthird. */
+
+  if (bufthird > PCRE2_SIZE_MAX / 3)
+  {
+    fprintf(stderr, "pcre2grep: Out-of-range number \"%" SIZ_FORM "\" after --buffer-size\n",
+            bufthird);
+    (void)usage(2);
+    goto EXIT2;
+  }
+
+  if (max_bufthird > PCRE2_SIZE_MAX / 3)
+    max_bufthird = PCRE2_SIZE_MAX / 3;
 
   bufsize = 3 * bufthird;
   main_buffer = (char *)malloc(bufsize);

@@ -1,15 +1,12 @@
 PCRE2-CONFIG(1)                      PCRE2                     PCRE2-CONFIG(1)
 
-
 NAME
        pcre2-config - program to return PCRE2 configuration
-
 
 SYNOPSIS
        pcre2-config [--prefix] [--exec-prefix] [--version]
                     [--libs8] [--libs16] [--libs32] [--libs-posix]
                     [--cflags] [--cflags-posix]
-
 
 DESCRIPTION
        pcre2-config returns the configuration of the installed PCRE2 libraries
@@ -18,7 +15,6 @@ DESCRIPTION
        respectively, and are not available for libraries that have not been
        built. If an unavailable option is encountered, the "usage" information
        is output.
-
 
 OPTIONS
            --prefix       Writes the directory prefix used in the PCRE2
@@ -41,7 +37,7 @@ OPTIONS
                           options required to link with the 32-bit PCRE2
                           library (-lpcre2-32 on many systems).
            --libs-posix   Writes to the standard output the command line
-                          options required to link with PCRE2's POSIX API
+                          options required to link with PCRE2’s POSIX API
                           wrapper library (-lpcre2-posix -lpcre2-8 on many
                           systems).
            --cflags       Writes to the standard output the command line
@@ -49,23 +45,19 @@ OPTIONS
                           (this may include some -I options, but is blank on
                           many systems).
            --cflags-posix Writes to the standard output the command line
-                          options required to compile files that use PCRE2's
+                          options required to compile files that use PCRE2’s
                           POSIX API wrapper library (this may include some -I
                           options, but is blank on many systems).
 
-
 SEE ALSO
-       pcre2(3)
+       pcre2.
 
-
-AUTHOR
+   Author
        This manual page was originally written by Mark Baker for the Debian
        GNU/Linux system. It has been subsequently revised as a generic PCRE2
        man page.
 
-
-REVISION
+   Revision
        Last updated: 22 February 2025
 
-
-PCRE2 10.49-DEV                22 February 2025                PCRE2-CONFIG(1)
+PCRE2 10.50-DEV                22 February 2025                PCRE2-CONFIG(1)

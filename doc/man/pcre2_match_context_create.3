@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: pcre2_match_context_create
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 25 October 2014
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_MATCH_CONTEXT_CREATE" "3" "25 October 2014" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_MATCH_CONTEXT_CREATE" "3" "25 October 2014" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -34,18 +34,18 @@ pcre2_match_context_create \- create a match context
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\fBpcre2_match_context\fP *pcre2_match_context_create(
-      \fBpcre2_general_context\fP *\fIgcontext\fP);
+pcre2_match_context *\fP\f(CBpcre2_match_context_create\fP\f(CR(
+      pcre2_general_context *\fP\f(CIgcontext\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function creates and initializes a new match context. If its argument is
-\f(CRNULL\fP, \f(CRmalloc()\fP is used to get the necessary memory; otherwise the memory
-allocation function within the general context is used. The result is \f(CRNULL\fP if
+\f(CBNULL\fP, \f(CBmalloc\fP\f(CR()\fP is used to get the necessary memory; otherwise the memory
+allocation function within the general context is used. The result is \f(CBNULL\fP if
 the memory could not be obtained.
 .sp
 There is a complete description of the PCRE2 native API in the

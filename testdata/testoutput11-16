@@ -767,7 +767,7 @@ Failed: error 134 at offset 34: character code point value in \x{} or \o{} is to
  0: abcd!
 
 /i/turkish_casing
-Failed: error 204 at offset 0: PCRE2_EXTRA_TURKISH_CASING require Unicode (UTF or UCP) mode
+Failed: error 204 at offset 0: PCRE2_EXTRA_TURKISH_CASING requires Unicode (UTF or UCP) mode
 
 # Character list tests
 

@@ -4,7 +4,7 @@
 :manpurpose: free unused JIT memory
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 24 April 2020
 :revdate: 24 April 2020
 
@@ -20,7 +20,7 @@ void pcre2_jit_free_unused_memory(pcre2_general_context *gcontext);
 == Description
 
 This function frees unused JIT executable memory. The argument is a general
-context, for custom memory management, or [.c]`NULL` for standard memory management.
+context, for custom memory management, or const:NULL for standard memory management.
 JIT memory allocation retains some memory in order to improve future JIT
 compilation speed. In low memory conditions,
 func:pcre2_jit_free_unused_memory() can be used to cause this memory to be

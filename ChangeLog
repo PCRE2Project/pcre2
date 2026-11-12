@@ -8,10 +8,44 @@ Internal changes which are not visible to clients of the library are mostly not
 listed here.
 
 
-Version 10.49 xx-xxx-2026
+Version 10.50 xx-xxx-2026
 -------------------------
 
-...
+1. Fixed the CMake-generated pkg-config files and pcre2-config script to use
+the configured header installation directory and handle absolute header and
+library installation directories.
+
+2. (#1034) Fixed auto-possessification of terminal iterators when the whole
+pattern is called recursively, which could prevent valid matches requiring
+backtracking after the recursive call.
+
+3. (#1040) Fixed the start_match field passed to interpreter callouts after \K
+resets the start of a match, including restoration on backtracking.
+
+4. In pcre2_substitute() with PCRE2_SUBSTITUTE_EXTENDED and
+PCRE2_SUBSTITUTE_GLOBAL, a \Q that was not closed by \E stayed in effect for
+the replacement of the next match, whose text was then copied literally,
+including the \Q itself.
+
+5. pcre2grep now rejects numeric option values that do not fit the option's
+variable. They used to wrap silently, so that a large -o group number could
+become negative and read outside the ovector, and --buffer-size could make the
+size of the main buffer wrap.
+
+
+Version 10.49 28-September-2026
+-------------------------------
+
+1. (GHSA-r9hj-j2rw-4q3m) Security fix to prevent an out-of-bounds write with
+arbitrary data. Applications are only affected if using the
+pcre2_jit_stack_create() and pcre2_jit_stack_assign() APIs to provide a growable
+JIT stack, and then matching against a pattern with unusually high JIT stack
+usage, such as a large number of capturing groups.
+
+The implications of an out-of-bounds write could include arbitrary code
+execution.
+
+The issue is not a regression and affects releases 10.48 and earlier.
 
 
 Version 10.48 31-August-2026

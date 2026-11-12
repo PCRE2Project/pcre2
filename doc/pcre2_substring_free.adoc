@@ -4,7 +4,7 @@
 :manpurpose: free extracted substring
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 26 February 2025
 :revdate: 26 February 2025
 
@@ -22,7 +22,7 @@ void pcre2_substring_free(PCRE2_UCHAR *string);
 This is a convenience function for freeing the memory obtained by a previous
 call to func:pcre2_substring_get_byname() or
 func:pcre2_substring_get_bynumber(). Its only argument is a pointer to the
-string. If the argument is [.c]`NULL`, the function does nothing.
+string. If the argument is const:NULL, the function does nothing.
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

@@ -4,7 +4,7 @@
 :manpurpose: set the offset limit
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 22 September 2015
 :revdate: 22 September 2015
 
@@ -23,6 +23,11 @@ int pcre2_set_offset_limit(pcre2_match_context *mcontext,
 This function sets the offset limit field in a match context. The result is
 always zero. The largest value a type:PCRE2_SIZE variable can hold removes the
 offset limit.
+
+Any other value must not exceed the subject length when matching.
+func:pcre2_match() and func:pcre2_dfa_match() return
+const:PCRE2_ERROR_BADOFFSETLIMITVALUE if it does. The setter cannot check this
+condition because it does not receive the subject.
 
 There is a complete description of the PCRE2 native API in the
 xref:pcre2api.adoc[`pcre2api`]

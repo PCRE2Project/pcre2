@@ -1,0 +1,65 @@
+'\" t
+.\"     Title: pcre2_get_subject
+.\"    Author: [see the "AUTHOR(S)" section]
+.\" Generator: Asciidoctor 2.0.26
+.\"      Date: 22 September 2026
+.\"    Manual: PCRE2
+.\"    Source: PCRE2 10.50-DEV
+.\"  Language: English
+.\"
+.TH "PCRE2_GET_SUBJECT" "3" "22 September 2026" "PCRE2 10.50\-DEV" "PCRE2"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.ss \n[.ss] 0
+.nh
+.ad l
+.de URL
+\fI\\$2\fP <\\$1>\\$3
+..
+.als MTO URL
+.if \n[.g] \{\
+.  mso www.tmac
+.  am URL
+.    ad l
+.  .
+.  am MTO
+.    ad l
+.  .
+.  LINKSTYLE blue R < >
+.\}
+.SH "NAME"
+pcre2_get_subject \- get a match subject pointer
+.SH "SYNOPSIS"
+.sp
+.ss \n[.ss]
+.nf
+.fam C
+\f(CR\&#include <pcre2.h>
+
+PCRE2_SPTR\fP \f(CBpcre2_get_subject\fP\f(CR(pcre2_match_data *\fP\f(CImatch_data\fP\f(CR,
+                             PCRE2_SIZE *\fP\f(CIlengthptr\fP\f(CR);\fP
+.fam
+.fi
+.ss \n[.ss] 0
+.SH "DESCRIPTION"
+.sp
+After a successful match, a partial match, or a failure to match, this function
+returns the subject pointer that was passed to the matching function. For a
+successful match with \f(CBPCRE2_COPY_MATCHED_SUBJECT\fP, it returns a pointer to
+a copy of the subject that is owned by the match data block instead (except for
+\f(CBpcre2_jit_match()\fP which ignores \f(CBPCRE2_COPY_MATCHED_SUBJECT\fP). The copy
+is exactly the same length as the subject that was passed to the matching
+function and is additionally zero\-terminated. The copy is freed when the match
+data block is reused for another match or is freed. If there is any match error
+other than \f(CBPCRE2_ERROR_NOMATCH\fP or \f(CBPCRE2_ERROR_PARTIAL\fP,
+\f(CBpcre2_get_subject()\fP may return \f(CBNULL\fP.
+.sp
+If the \f(CIlengthptr\fP argument is not \f(CBNULL\fP, it receives the length in code
+units of the string which is returned, excluding the terminating zero (the
+subject string may contain embedded NUL characters).
+.sp
+There is a complete description of the PCRE2 native API in the
+\f(CRpcre2api\fP
+page and a description of the POSIX API in the
+\f(CRpcre2posix\fP
+page.

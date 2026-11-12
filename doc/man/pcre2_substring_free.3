@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: pcre2_substring_free
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 26 February 2025
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_SUBSTRING_FREE" "3" "26 February 2025" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_SUBSTRING_FREE" "3" "26 February 2025" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -34,18 +34,18 @@ pcre2_substring_free \- free extracted substring
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\fBvoid\fP pcre2_substring_free(\fBPCRE2_UCHAR\fP *\fIstring\fP);
+void\fP \f(CBpcre2_substring_free\fP\f(CR(PCRE2_UCHAR *\fP\f(CIstring\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This is a convenience function for freeing the memory obtained by a previous
-call to pcre2_substring_get_byname() or
-pcre2_substring_get_bynumber(). Its only argument is a pointer to the
-string. If the argument is \f(CRNULL\fP, the function does nothing.
+call to \f(CBpcre2_substring_get_byname()\fP or
+\f(CBpcre2_substring_get_bynumber()\fP. Its only argument is a pointer to the
+string. If the argument is \f(CBNULL\fP, the function does nothing.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

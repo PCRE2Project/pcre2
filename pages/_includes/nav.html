@@ -1,0 +1,15 @@
+<header>
+<div class="header-content">
+
+    <nav>
+        <a class="nav-home" href="{{ '/' | relative_url }}" aria-label="Home"></a>
+        <div class="nav-glue"></div>
+        {% include nav-lhs.html %}
+        <div class="nav-glue"></div>
+        {% include nav-rhs.html %}
+    </nav>
+
+    {% include header-search-results.html %}
+
+</div>
+</header>

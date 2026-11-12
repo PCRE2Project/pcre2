@@ -1,0 +1,23 @@
+# (Run from the same directory as the Gemfile.)
+#
+# Check available releases without changing either file:
+#   bundle outdated --strict   # Newer versions allowed by these constraints.
+#   bundle outdated            # Also show versions outside these constraints.
+#
+# Update Gemfile.lock to the newest compatible stable versions, keeping Gemfile:
+#   bundle update              # Update all gems and their dependencies.
+#   bundle update nokogiri     # Update one gem and dependencies as needed.
+# Other gems' requirements and the Ruby/platform version can limit the result.
+# Bundler's update command does not rewrite Gemfile constraints.
+#
+# Commit both Gemfile and Gemfile.lock when changing dependency constraints.
+
+source "https://rubygems.org"
+
+gem "jekyll", "~> 4.4"
+gem "kramdown-parser-gfm", "~> 1.1"
+gem "asciidoctor", "~> 2.0"
+gem "asciidoctor-html5s", "~> 0.5"
+gem "rouge", "~> 4.6"
+gem "nokogiri", "~> 1.18"
+gem "unicode-name", "~> 1.15"

@@ -4,7 +4,7 @@
 :manpurpose: set the newline convention
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 19 July 2017
 :revdate: 19 July 2017
 
@@ -30,13 +30,13 @@ const:PCRE2_NEWLINE_CR::
 const:PCRE2_NEWLINE_LF::
     Linefeed only
 const:PCRE2_NEWLINE_CRLF::
-    `CR` followed by `LF` only
+    CR followed by LF only
 const:PCRE2_NEWLINE_ANYCRLF::
     Any of the above
 const:PCRE2_NEWLINE_ANY::
     Any Unicode newline sequence
 const:PCRE2_NEWLINE_NUL::
-    The `NUL` character (binary zero)
+    The NUL character (binary zero)
 
 The result is zero for success or const:PCRE2_ERROR_BADDATA if the second argument is
 invalid.

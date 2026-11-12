@@ -115,11 +115,6 @@ find_text_end(const pcre2_code *code, PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOO
 
     else if (*ptr == CHAR_BACKSLASH)
     {
-      int erc;
-      int errorcode;
-      uint32_t ch;
-      PCRE2_SPTR esc_end_ptr;
-
       if (ptr < ptrend - 1)
       {
         switch (ptr[1])
@@ -134,8 +129,10 @@ find_text_end(const pcre2_code *code, PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOO
       }
 
       ptr += 1; // Must point after \ (backslash)
-      erc = PRIV(check_escape)(&ptr, ptrend, &ch, &errorcode, code->overall_options,
-                               code->extra_options, code->top_bracket, FALSE, NULL);
+      int errorcode;
+      uint32_t ch;
+      int erc = PRIV(check_escape)(&ptr, ptrend, &ch, &errorcode, code->overall_options,
+                                   code->extra_options, code->top_bracket, FALSE, NULL);
       if (errorcode != 0)
       {
         /* errorcode from check_escape is positive, so must not be returned by
@@ -144,7 +141,7 @@ find_text_end(const pcre2_code *code, PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOO
         goto EXIT;
       }
 
-      esc_end_ptr = ptr;
+      PCRE2_SPTR esc_end_ptr = ptr;
       ptr -= 1; // Rewind by one, because the for-loop will increment it
 
       switch (erc)
@@ -222,12 +219,11 @@ read_name_subst(PCRE2_SPTR *ptrptr, PCRE2_SPTR ptrend, BOOL utf, const uint8_t *
 #ifdef SUPPORT_UNICODE
   if (utf)
   {
-    uint32_t c, type;
-
     while (ptr < ptrend)
     {
+      uint32_t c;
       GETCHAR(c, ptr);
-      type = UCD_CHARTYPE(c);
+      uint32_t type = UCD_CHARTYPE(c);
       if (type != ucp_Nd && PRIV(ucp_gentype)[type] != ucp_L && c != CHAR_UNDERSCORE)
         break;
       ptr++;
@@ -304,14 +300,8 @@ default_substitute_case_callout(PCRE2_SPTR input, PCRE2_SIZE input_len, PCRE2_UC
                                 PCRE2_SIZE output_cap, case_state *state, const pcre2_code *code)
 {
   PCRE2_SPTR input_end = input + input_len;
-#ifdef SUPPORT_UNICODE
-  BOOL utf;
-  BOOL ucp;
-#endif
-  PCRE2_UCHAR temp[6];
   BOOL next_to_upper;
   BOOL rest_to_upper;
-  BOOL single_char;
   BOOL overflow = FALSE;
   PCRE2_SIZE written = 0;
 
@@ -324,8 +314,8 @@ default_substitute_case_callout(PCRE2_SPTR input, PCRE2_SIZE input_len, PCRE2_UC
                (char *)(output + output_cap) <= (char *)input);
 
 #ifdef SUPPORT_UNICODE
-  utf = (code->overall_options & PCRE2_UTF) != 0;
-  ucp = (code->overall_options & PCRE2_UCP) != 0;
+  BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
+  BOOL ucp = (code->overall_options & PCRE2_UCP) != 0;
 #endif
 
   if (input_len == 0)
@@ -357,15 +347,13 @@ default_substitute_case_callout(PCRE2_SPTR input, PCRE2_SIZE input_len, PCRE2_UC
     break;
   }
 
-  single_char = state->single_char;
+  BOOL single_char = state->single_char;
   if (single_char)
     state->to_case = PCRE2_SUBSTITUTE_CASE_NONE;
 
   while (input < input_end)
   {
     uint32_t ch;
-    unsigned int chlen;
-
     GETCHARINCTEST(ch, input);
 
 #ifdef SUPPORT_UNICODE
@@ -390,6 +378,8 @@ default_substitute_case_callout(PCRE2_SPTR input, PCRE2_SIZE input_len, PCRE2_UC
         ch = (code->tables + fcc_offset)[ch];
     }
 
+    PCRE2_UCHAR temp[6];
+    unsigned int chlen;
 #ifdef SUPPORT_UNICODE
     if (utf)
       chlen = PRIV(ord2utf)(ch, temp);
@@ -453,16 +443,8 @@ do_case_copy(PCRE2_UCHAR *input_output, PCRE2_SIZE input_len, PCRE2_SIZE output_
 {
   PCRE2_SPTR input = input_output;
   PCRE2_UCHAR *output = input_output;
-  PCRE2_SIZE rc;
-  PCRE2_SIZE rc2;
   int ch1_to_case;
   int rest_to_case;
-  PCRE2_UCHAR ch1[6];
-  PCRE2_SIZE ch1_len;
-  PCRE2_SPTR rest;
-  PCRE2_SIZE rest_len;
-  BOOL ch1_overflow = FALSE;
-  BOOL rest_overflow = FALSE;
 
 #if PCRE2_CODE_UNIT_WIDTH == 32 || !defined(SUPPORT_UNICODE)
   (void)utf; // Avoid compiler warning.
@@ -487,8 +469,8 @@ do_case_copy(PCRE2_UCHAR *input_output, PCRE2_SIZE input_len, PCRE2_SIZE output_
 
     if (state->single_char == FALSE)
     {
-      rc = substitute_case_callout(input, input_len, output, output_cap, state->to_case,
-                                   substitute_case_callout_data);
+      PCRE2_SIZE rc = substitute_case_callout(input, input_len, output, output_cap, state->to_case,
+                                              substitute_case_callout_data);
 
       if (state->to_case == PCRE2_SUBSTITUTE_CASE_TITLE_FIRST)
         state->to_case = PCRE2_SUBSTITUTE_CASE_LOWER;
@@ -509,6 +491,8 @@ do_case_copy(PCRE2_UCHAR *input_output, PCRE2_SIZE input_len, PCRE2_SIZE output_
   /* Identify the leading character. Take copy, because its storage overlaps with
   `output`, and hence may be scrambled by the callout. */
 
+  PCRE2_UCHAR ch1[6];
+  PCRE2_SIZE ch1_len;
   {
     PCRE2_SPTR ch_end = input;
     uint32_t ch;
@@ -520,8 +504,11 @@ do_case_copy(PCRE2_UCHAR *input_output, PCRE2_SIZE input_len, PCRE2_SIZE output_
     memcpy(ch1, input, CU2BYTES(ch1_len));
   }
 
-  rest = input + ch1_len;
-  rest_len = input_len - ch1_len;
+  PCRE2_SPTR rest = input + ch1_len;
+  PCRE2_SIZE rest_len = input_len - ch1_len;
+  PCRE2_SIZE rc;
+  BOOL ch1_overflow = FALSE;
+  BOOL rest_overflow = FALSE;
 
   /* Transform just ch1. The buffers are always in-place (input == output). With a
   custom callout, we need a loop to discover its required buffer size. The loop
@@ -530,12 +517,9 @@ do_case_copy(PCRE2_UCHAR *input_output, PCRE2_SIZE input_len, PCRE2_SIZE output_
   exact same input! */
 
   {
-    PCRE2_SIZE ch1_cap;
-    PCRE2_SIZE max_ch1_cap;
-
-    ch1_cap = ch1_len; // First attempt uses the space vacated by ch1.
+    PCRE2_SIZE ch1_cap = ch1_len; // First attempt uses the space vacated by ch1.
     PCRE2_ASSERT(output_cap >= input_len && input_len >= rest_len);
-    max_ch1_cap = output_cap - rest_len;
+    PCRE2_SIZE max_ch1_cap = output_cap - rest_len;
 
     while (TRUE)
     {
@@ -565,6 +549,7 @@ do_case_copy(PCRE2_UCHAR *input_output, PCRE2_SIZE input_len, PCRE2_SIZE output_
     }
   }
 
+  PCRE2_SIZE rc2;
   if (rest_to_case == PCRE2_SUBSTITUTE_CASE_NONE)
   {
     if (!ch1_overflow)
@@ -752,38 +737,40 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
                  PCRE2_UCHAR *buffer, PCRE2_SIZE *blength)
 {
   int rc;
-  int subs;
-  uint32_t ovector_count;
   uint32_t goptions = 0;
-  uint32_t suboptions;
   pcre2_match_data *internal_match_data = NULL;
-  BOOL escaped_literal = FALSE;
   BOOL overflowed = FALSE;
-  BOOL use_existing_match;
-  BOOL replacement_only;
-  BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
-  BOOL partial = (options & (PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT)) != 0;
-  PCRE2_UCHAR temp[6];
   PCRE2_UCHAR null_str[1] = { 0xcd };
   PCRE2_UCHAR null_buffer[1] = { 0xcd };
   PCRE2_SPTR original_subject = subject;
   PCRE2_UCHAR *original_buffer = buffer;
-  PCRE2_SPTR ptr;
-  PCRE2_SPTR repend = NULL;
   PCRE2_SIZE extra_needed = 0;
-  PCRE2_SIZE buff_offset, buff_length, lengthleft, fraglength;
-  PCRE2_SIZE *ovector;
   PCRE2_SIZE ovecsave[2] = { 0, 0 };
-  pcre2_substitute_callout_block scb;
-  PCRE2_SIZE sub_start_extra_needed;
   PCRE2_SIZE (*substitute_case_callout)(PCRE2_SPTR, PCRE2_SIZE, PCRE2_UCHAR *, PCRE2_SIZE, int,
                                         void *) = NULL;
   void *substitute_case_callout_data = NULL;
 
+  if (code == NULL || blength == NULL)
+    return PCRE2_ERROR_NULL;
+
+  /* Check that the first field in the block is the magic number. */
+
+  if (code->magic_number != MAGIC_NUMBER)
+    return PCRE2_ERROR_BADMAGIC;
+
+  /* Check the code unit width. */
+
+  if ((code->flags & PCRE2_MODE_MASK) != PCRE2_CODE_UNIT_WIDTH / 8)
+    return PCRE2_ERROR_BADMODE;
+
+  BOOL utf = (code->overall_options & PCRE2_UTF) != 0;
+  BOOL partial = (options & (PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT)) != 0;
+
   /* General initialization */
 
-  buff_offset = 0;
-  lengthleft = buff_length = *blength;
+  PCRE2_SIZE buff_offset = 0;
+  PCRE2_SIZE buff_length = *blength;
+  PCRE2_SIZE lengthleft = buff_length;
   *blength = PCRE2_UNSET;
 
   if (mcontext != NULL)
@@ -816,7 +803,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
   if (rlength == PCRE2_ZERO_TERMINATED)
     rlength = PRIV(strlen)(replacement);
-  repend = replacement + rlength;
+  PCRE2_SPTR repend = replacement + rlength;
 
   /* A NULL subject of zero length is treated as an empty string. */
 
@@ -843,8 +830,8 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   /* Check for using a match that has already happened. Note that the subject
   pointer in the match data may be NULL after a no-match. */
 
-  use_existing_match = ((options & PCRE2_SUBSTITUTE_MATCHED) != 0);
-  replacement_only = ((options & PCRE2_SUBSTITUTE_REPLACEMENT_ONLY) != 0);
+  BOOL use_existing_match = ((options & PCRE2_SUBSTITUTE_MATCHED) != 0);
+  BOOL replacement_only = ((options & PCRE2_SUBSTITUTE_REPLACEMENT_ONLY) != 0);
 
   if (use_existing_match && match_data == NULL)
     return PCRE2_ERROR_NULL;
@@ -897,9 +884,9 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   match data block. We create an internal match_data block in two cases: (a) an
   external one is not supplied (and we are not starting from an existing match);
   (b) an existing match is to be used for the first substitution. In the latter
-  case, we copy the existing match into the internal block, except for any cached
-  heap frame size and pointer. This ensures that no changes are made to the
-  external match data block. */
+  case, we copy the existing match into the internal block, retaining its new
+  allocator and clearing any cached heap frame size and pointer. This ensures
+  that no changes are made to the external match data block. */
 
   /* WARNING: In both cases below a general context is constructed "by hand"
   because calling pcre2_general_context_create() involves a memory allocation. If
@@ -918,17 +905,17 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
   else if (use_existing_match)
   {
-    int pairs;
     pcre2_general_context gcontext;
     gcontext.memctl = (mcontext == NULL) ? ((pcre2_real_code *)code)->memctl
                                          : ((pcre2_real_match_context *)mcontext)->memctl;
-    pairs = (code->top_bracket + 1 < match_data->oveccount) ? code->top_bracket + 1
-                                                            : match_data->oveccount;
+    int pairs = (code->top_bracket + 1 < match_data->oveccount) ? code->top_bracket + 1
+                                                                : match_data->oveccount;
     internal_match_data = pcre2_match_data_create(match_data->oveccount, &gcontext);
     if (internal_match_data == NULL)
       return PCRE2_ERROR_NOMEMORY;
     memcpy(internal_match_data, match_data,
            offsetof(pcre2_match_data, ovector) + 2 * pairs * sizeof(PCRE2_SIZE));
+    internal_match_data->memctl = gcontext.memctl;
     internal_match_data->heapframes = NULL;
     internal_match_data->heapframes_size = 0;
     /* Ensure that the subject is not freed when internal_match_data is */
@@ -943,11 +930,12 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
   /* Remember ovector details */
 
-  ovector = pcre2_get_ovector_pointer(match_data);
-  ovector_count = pcre2_get_ovector_count(match_data);
+  PCRE2_SIZE *ovector = pcre2_get_ovector_pointer(match_data);
+  uint32_t ovector_count = pcre2_get_ovector_count(match_data);
 
   /* Fixed things in the callout block */
 
+  pcre2_substitute_callout_block scb;
   scb.version = 0;
   scb.input = original_subject;
   scb.output = (PCRE2_SPTR)original_buffer;
@@ -969,7 +957,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
   /* Save the substitute options and remove them from the match options. */
 
-  suboptions = options & SUBSTITUTE_OPTIONS;
+  uint32_t suboptions = options & SUBSTITUTE_OPTIONS;
   options &= ~SUBSTITUTE_OPTIONS;
 
   /* Error if the start match offset is greater than the length of the subject. */
@@ -989,12 +977,16 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   /* Loop for global substituting. If PCRE2_SUBSTITUTE_MATCHED is set, the first
   match is taken from the match_data that was passed in. */
 
-  subs = 0;
+  PCRE2_UCHAR temp[6];
+  PCRE2_SPTR ptr;
+  PCRE2_SIZE fraglength;
+  int subs = 0;
   for (;;)
   {
     PCRE2_SPTR ptrstack[PTR_STACK_SIZE];
     uint32_t ptrstackptr = 0;
     case_state forcecase = { PCRE2_SUBSTITUTE_CASE_NONE, FALSE };
+    BOOL escaped_literal = FALSE;
     PCRE2_SIZE casestart_offset = 0;
     PCRE2_SIZE casestart_extra_needed = 0;
 
@@ -1075,7 +1067,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
       CHECKMEMCPY(subject + start_offset, fraglength);
     scb.output_offsets[0] = buff_offset;
     scb.oveccount = rc;
-    sub_start_extra_needed = extra_needed;
+    PCRE2_SIZE sub_start_extra_needed = extra_needed;
 
     /* Process the replacement string. If the entire replacement is literal, just
     copy it with length check. */
@@ -1095,7 +1087,6 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
       for (;;)
       {
         uint32_t ch;
-        unsigned int chlen;
         int group;
         uint32_t special;
         PCRE2_SPTR text1_start = NULL;
@@ -1133,16 +1124,12 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
         if (*ptr == CHAR_DOLLAR_SIGN)
         {
-          BOOL inparens;
-          BOOL inangle;
-          BOOL star;
           PCRE2_SIZE sublength;
-          PCRE2_UCHAR next;
-          PCRE2_SPTR subptr, subptrend;
 
           if (++ptr >= repend)
             goto BAD;
-          if ((next = *ptr) == CHAR_DOLLAR_SIGN)
+          PCRE2_UCHAR next = *ptr;
+          if (next == CHAR_DOLLAR_SIGN)
             goto LOADLITERAL;
 
           special = 0;
@@ -1151,11 +1138,11 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           text2_start = NULL;
           text2_end = NULL;
           group = -1;
-          inparens = FALSE;
-          inangle = FALSE;
-          star = FALSE;
-          subptr = NULL;
-          subptrend = NULL;
+          BOOL inparens = FALSE;
+          BOOL inangle = FALSE;
+          BOOL star = FALSE;
+          PCRE2_SPTR subptr = NULL;
+          PCRE2_SPTR subptrend = NULL;
 
           /* Special $ sequences, as supported by Perl, JavaScript, .NET and others. */
           if (next == CHAR_AMPERSAND)
@@ -1218,13 +1205,13 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           if (next == CHAR_PLUS && !(ptr + 1 < repend && ptr[1] == CHAR_LEFT_CURLY_BRACKET))
           {
             /* Perl supports $+ for "highest captured group" (not the same as $^N
-          which is mainly only useful inside Perl's match callbacks). We also
-          don't accept "$+{..." since that's Perl syntax for our ${name}. */
+            which is mainly only useful inside Perl's match callbacks). We also
+            don't accept "$+{..." since that's Perl syntax for our ${name}. */
             ++ptr;
             if (code->top_bracket == 0)
             {
               /* Treat either as "no such group" or "all groups unset" based on the
-            PCRE2_SUBSTITUTE_UNKNOWN_UNSET option. */
+              PCRE2_SUBSTITUTE_UNKNOWN_UNSET option. */
               if ((suboptions & PCRE2_SUBSTITUTE_UNKNOWN_UNSET) == 0)
               {
                 rc = PCRE2_ERROR_NOSUBSTRING;
@@ -1236,7 +1223,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
             else
             {
               /* If we have any capture groups, then the ovector needs to be large
-            enough for all of them, or the result won't be accurate. */
+              enough for all of them, or the result won't be accurate. */
               if (match_data->oveccount < code->top_bracket + 1)
               {
                 rc = PCRE2_ERROR_UNAVAILABLE;
@@ -1269,8 +1256,8 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           else if (next == CHAR_LESS_THAN_SIGN)
           {
             /* JavaScript compatibility syntax, $<name>. Processes only named
-          groups (not numbered) and does not support extensions such as star
-          (you can do ${name} and ${*name}, but not $<*name>). */
+            groups (not numbered) and does not support extensions such as star
+            (you can do ${name} and ${*name}, but not $<*name>). */
             if (++ptr >= repend)
               goto BAD;
             next = *ptr;
@@ -1296,9 +1283,9 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
               group = group * 10 + (next - CHAR_0);
 
               /* A check for a number greater than the hightest captured group
-            is sufficient here; no need for a separate overflow check. If unknown
-            groups are to be treated as unset, just skip over any remaining
-            digits and carry on. */
+              is sufficient here; no need for a separate overflow check. If unknown
+              groups are to be treated as unset, just skip over any remaining
+              digits and carry on. */
 
               if (group > code->top_bracket)
               {
@@ -1318,11 +1305,10 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           }
           else
           {
-            PCRE2_SIZE name_len;
             PCRE2_SPTR name_start = ptr;
             if (!read_name_subst(&ptr, repend, utf, code->tables + ctypes_offset))
               goto BAD;
-            name_len = ptr - name_start;
+            PCRE2_SIZE name_len = ptr - name_start;
             memcpy(name, name_start, CU2BYTES(name_len));
             name[name_len] = 0;
           }
@@ -1331,7 +1317,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           (void)next;
 
           /* In extended mode we recognize ${name:+set text:unset text} and
-        ${name:-default text}. */
+          ${name:-default text}. */
 
           if (inparens)
           {
@@ -1381,7 +1367,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           }
 
           /* Have found a syntactically correct group number or name, or *name.
-        Only *MARK is currently recognized. */
+          Only *MARK is currently recognized. */
 
           if (star)
           {
@@ -1391,7 +1377,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
               if (mark != NULL)
               {
                 /* Peek backwards one code unit to obtain the length of the mark.
-              It can (theoretically) contain an embedded NUL. */
+                It can (theoretically) contain an embedded NUL. */
                 fraglength = mark[-1];
                 if (forcecase.to_case != PCRE2_SUBSTITUTE_CASE_NONE &&
                     substitute_case_callout == NULL)
@@ -1405,19 +1391,19 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           }
 
           /* Substitute the contents of a group. We don't use substring_copy
-        functions any more, in order to support case forcing. */
+          functions any more, in order to support case forcing. */
 
           else
           {
           GROUP_SUBSTITUTE:
             /* Find a number for a named group. In case there are duplicate names,
-          search for the first one that is set. If the name is not found when
-          PCRE2_SUBSTITUTE_UNKNOWN_EMPTY is set, set the group number to a
-          non-existent group. */
+            search for the first one that is set. If the name is not found when
+            PCRE2_SUBSTITUTE_UNKNOWN_EMPTY is set, set the group number to a
+            non-existent group. */
 
             if (group < 0)
             {
-              PCRE2_SPTR first, last, entry;
+              PCRE2_SPTR first, last;
               rc = pcre2_substring_nametable_scan(code, name, &first, &last);
               if (rc == PCRE2_ERROR_NOSUBSTRING &&
                   (suboptions & PCRE2_SUBSTITUTE_UNKNOWN_UNSET) != 0)
@@ -1428,7 +1414,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
               {
                 if (rc < 0)
                   goto PTREXIT;
-                for (entry = first; entry <= last; entry += rc)
+                for (PCRE2_SPTR entry = first; entry <= last; entry += rc)
                 {
                   uint32_t ng = GET2(entry, 0);
                   if (ng < ovector_count)
@@ -1444,7 +1430,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
                 }
 
                 /* If group is still negative, it means we did not find a group
-              that is in the ovector. Just set the first group. */
+                that is in the ovector. Just set the first group. */
 
                 if (group < 0)
                   group = GET2(first, 0);
@@ -1452,8 +1438,8 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
             }
 
             /* We now have a group that is identified by number. Find the length of
-          the captured string. If a group in a non-special substitution is unset
-          when PCRE2_SUBSTITUTE_UNSET_EMPTY is set, substitute nothing. */
+            the captured string. If a group in a non-special substitution is unset
+            when PCRE2_SUBSTITUTE_UNSET_EMPTY is set, substitute nothing. */
 
             rc = pcre2_substring_length_bynumber(match_data, group, &sublength);
             if (rc < 0)
@@ -1475,8 +1461,8 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
             }
 
             /* If special is '+' we have a 'set' and possibly an 'unset' text,
-          both of which are reprocessed when used. If special is '-' we have a
-          default text for when the group is unset; it must be reprocessed. */
+            both of which are reprocessed when used. If special is '-' we have a
+            default text for when the group is unset; it must be reprocessed. */
 
             if (special != 0)
             {
@@ -1524,13 +1510,12 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
         } // End of $ processing
 
         /* Handle an escape sequence in extended mode. We can use check_escape()
-      to process \Q, \E, \c, \o, \x and \ followed by non-alphanumerics, but
-      the case-forcing escapes are not supported in pcre2_compile() so must be
-      recognized here. */
+        to process \Q, \E, \c, \o, \x and \ followed by non-alphanumerics, but
+        the case-forcing escapes are not supported in pcre2_compile() so must be
+        recognized here. */
 
         else if ((suboptions & PCRE2_SUBSTITUTE_EXTENDED) != 0 && *ptr == CHAR_BACKSLASH)
         {
-          int errorcode;
           case_state new_forcecase = { PCRE2_SUBSTITUTE_CASE_NONE, FALSE };
 
           if (ptr < repend - 1)
@@ -1587,10 +1572,10 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           SETFORCECASE:
 
             /* If the substitute_case_callout is unset, our case-forcing is done
-          immediately. If there is a callout however, then its action is delayed
-          until all the characters have been collected.
+            immediately. If there is a callout however, then its action is delayed
+            until all the characters have been collected.
 
-          Apply the callout now, before we set the new casing mode. */
+            Apply the callout now, before we set the new casing mode. */
 
             if (substitute_case_callout != NULL && forcecase.to_case != PCRE2_SUBSTITUTE_CASE_NONE)
               DELAYEDFORCECASE();
@@ -1602,6 +1587,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           }
 
           ptr++; // Point after \ (backslash)
+          int errorcode;
           rc = PRIV(check_escape)(&ptr, repend, &ch, &errorcode, code->overall_options,
                                   code->extra_options, code->top_bracket, FALSE, NULL);
           if (errorcode != 0)
@@ -1619,42 +1605,43 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
           case 0:     // Data character
           case ESC_b: // \b is backspace in a substitution
           case ESC_v: // \v is vertical tab in a substitution
-
-            if (rc == ESC_b)
-              ch = CHAR_BS;
-            if (rc == ESC_v)
-              ch = CHAR_VT;
-
-#ifdef SUPPORT_UNICODE
-            if (utf)
-              chlen = PRIV(ord2utf)(ch, temp);
-            else
-#endif
             {
-              temp[0] = ch;
-              chlen = 1;
-            }
 
-            if (forcecase.to_case != PCRE2_SUBSTITUTE_CASE_NONE && substitute_case_callout == NULL)
-              CHECKCASECPY_DEFAULT(temp, chlen);
-            else
-              CHECKMEMCPY(temp, chlen);
-            continue;
+              if (rc == ESC_b)
+                ch = CHAR_BS;
+              if (rc == ESC_v)
+                ch = CHAR_VT;
+
+              unsigned int chlen;
+#ifdef SUPPORT_UNICODE
+              if (utf)
+                chlen = PRIV(ord2utf)(ch, temp);
+              else
+#endif
+              {
+                temp[0] = ch;
+                chlen = 1;
+              }
+
+              if (forcecase.to_case != PCRE2_SUBSTITUTE_CASE_NONE &&
+                  substitute_case_callout == NULL)
+                CHECKCASECPY_DEFAULT(temp, chlen);
+              else
+                CHECKMEMCPY(temp, chlen);
+              continue;
+            }
 
           case ESC_g:
             {
-              PCRE2_SIZE name_len;
-              PCRE2_SPTR name_start;
-
               /* Parse the \g<name> form (\g<number> already handled by check_escape) */
               if (ptr >= repend || *ptr != CHAR_LESS_THAN_SIGN)
                 goto BADESCAPE;
               ++ptr;
 
-              name_start = ptr;
+              PCRE2_SPTR name_start = ptr;
               if (!read_name_subst(&ptr, repend, utf, code->tables + ctypes_offset))
                 goto BADESCAPE;
-              name_len = ptr - name_start;
+              PCRE2_SIZE name_len = ptr - name_start;
 
               if (ptr >= repend || *ptr != CHAR_GREATER_THAN_SIGN)
                 goto BADESCAPE;

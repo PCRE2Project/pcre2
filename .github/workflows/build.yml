@@ -28,7 +28,7 @@ permissions:
   contents: read
 
 env:
-  CFLAGS_GCC_STYLE: '-Wall -Wextra -pedantic -Wdeclaration-after-statement -Wshadow -Wno-overlength-strings -Wimplicit-fallthrough'
+  CFLAGS_GCC_STYLE: '-Wall -Wextra -pedantic -Wshadow -Wno-overlength-strings -Wimplicit-fallthrough'
   CFLAGS_MSVC: '/W3'
   CFLAGS_SOLARIS_CC: '-errtags=yes -erroff=E_STATEMENT_NOT_REACHED'
   # For CMake 4.4 we could use (stronger): -Werror=author -Werror=uninitialized -Werror=unused-cli
@@ -49,6 +49,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Prepare
@@ -81,8 +82,8 @@ jobs:
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
-          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
-          maint/RunSymbolTest install-dir/usr/local/lib/ maint/
+          ruby maint/RunManifestTest.rb install-dir/usr/local maint/manifest-install-linux autoconf
+          ruby maint/RunSymbolTest.rb install-dir/usr/local/lib/ maint/
 
   alpine:
     name: alpine
@@ -96,6 +97,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Prepare
@@ -128,7 +130,7 @@ jobs:
       - name: Install
         run: |
           make install "DESTDIR=`pwd`/install-dir"
-          maint/RunManifestTest install-dir maint/manifest-makeinstall-linux
+          maint/RunManifestTest install-dir/usr/local maint/manifest-install-linux autoconf
           maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
   macos:
@@ -139,6 +141,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Configure
@@ -160,52 +163,14 @@ jobs:
         run: |
           cd build
           cmake --install . --prefix install-dir
-          ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-macos
-          ../maint/RunSymbolTest install-dir/lib/ ../maint/
+          ruby ../maint/RunManifestTest.rb install-dir ../maint/manifest-install-macos cmake
+          ruby ../maint/RunSymbolTest.rb install-dir/lib/ ../maint/
 
-      - name: Test CMake install interface
-        run: |
-          INSTALL_PREFIX=`pwd`/build/install-dir
-          cd maint/cmake-tests/install-interface
+      - name: Test installed CMake package with CMake
+        run: python3 maint/cmake-tests/check-interface.py install build/install-dir --build-type Release
 
-          for useStaticLibs in ON OFF; do
-            echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
-            rm -rf build
-            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" -DPCRE2_USE_STATIC_LIBS=$useStaticLibs -B build
-            (cd build; make)
-            ./build/test_executable
-            otool -L ./build/test_executable
-            if [ $useStaticLibs = ON ]; then
-              (otool -L ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in otool output" && exit 1)
-            else
-              # Test that the shared library is actually linked in
-              (otool -L ./build/test_executable | grep -q "@rpath/libpcre2-8.0.dylib") || (echo "Error: Shared library not linked in" && exit 1)
-            fi
-          done
-
-      - name: Test CMake build interface
-        run: |
-          BUILD_DIR=`pwd`
-          cp -rp maint/cmake-tests/build-interface ../cmake-tests-build-interface
-          cd ../cmake-tests-build-interface
-          ln -s "$BUILD_DIR" pcre2
-
-          for buildLibs in "ON;OFF" "OFF;ON"; do
-            static=`echo $buildLibs | cut -d';' -f1`
-            shared=`echo $buildLibs | cut -d';' -f2`
-            echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$static and BUILD_SHARED_LIBS=$shared =="
-            rm -rf build
-            cmake $CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC_LIBS=$static -DBUILD_SHARED_LIBS=$shared -B build
-            (cd build; make)
-            ./build/test_executable
-            otool -L ./build/test_executable
-            if [ $static = ON ]; then
-              (otool -L ./build/test_executable | grep -q "pcre2") && (echo "Error: PCRE2 found in ldd output" && exit 1)
-            else
-              # Test that the shared library is actually linked in
-              (otool -L ./build/test_executable | grep -q "@rpath/libpcre2-8.0.dylib") || (echo "Error: Shared library not linked in" && exit 1)
-            fi
-          done
+      - name: Test CMake build-tree interface
+        run: python3 maint/cmake-tests/check-interface.py build-tree . --build-type Debug
 
   windows:
     name: Windows
@@ -232,6 +197,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Configure
@@ -249,68 +215,14 @@ jobs:
         run: |
           cd build
           cmake --install . --config Release --prefix install-dir
-          ../maint/RunManifestTest.ps1 install-dir ../maint/manifest-cmakeinstall-windows
-          ../maint/RunSymbolTest.ps1 install-dir/bin ../maint/
+          ruby ../maint/RunManifestTest.rb install-dir ../maint/manifest-install-windows cmake
+          ruby ../maint/RunSymbolTest.rb install-dir/bin ../maint/
 
-      - name: Test CMake install interface
-        run: |
-          $INSTALL_PREFIX = (pwd).Path + "\build\install-dir"
-          cd maint/cmake-tests/install-interface
+      - name: Test installed CMake package with CMake
+        run: python maint/cmake-tests/check-interface.py install build/install-dir --build-type Release --architecture ${{ matrix.arch }}
 
-          $vswhere = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
-          $dumpbin = & $vswhere -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe | Select-Object -First 1
-
-          foreach ($useStaticLibs in @("ON", "OFF")) {
-            echo "== Testing CMake install interface with PCRE2_USE_STATIC_LIBS=$useStaticLibs =="
-            if (Test-Path build) { rm -Recurse -Force build }
-            cmake $CMAKE_FLAGS "-DCMAKE_PREFIX_PATH=$INSTALL_PREFIX" "-DPCRE2_USE_STATIC_LIBS=$useStaticLibs" -B build -A ${{ matrix.arch }}
-            cmake --build build --config Release
-            ./build/Release/test_executable.exe
-            & $dumpbin /dependents ./build/Release/test_executable.exe
-            if ($useStaticLibs -eq "ON") {
-                if ((& $dumpbin /dependents ./build/Release/test_executable.exe | Out-String).Contains("pcre2")) {
-                  Write-Error "Error: PCRE2 found in dumpbin output"
-                  exit 1
-                }
-            } else {
-              # Test that the shared library is actually linked in
-              if (-not ((& $dumpbin /dependents ./build/Release/test_executable.exe | Out-String).Contains("pcre2-8.dll"))) {
-                Write-Error "Error: Shared library not linked in"
-                exit 1
-              }
-            }
-          }
-
-      - name: Test CMake build interface
-        run: |
-          $BUILD_DIR = (pwd).Path
-          cp -Recurse -Path maint/cmake-tests/build-interface ../cmake-tests-build-interface
-          cd ../cmake-tests-build-interface
-          New-Item -ItemType SymbolicLink -Path "pcre2" -Target "$BUILD_DIR"
-
-          $vswhere = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
-          $dumpbin = & $vswhere -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -find VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe | Select-Object -First 1
-
-          foreach ($buildLibs in @(@{static="ON"; shared="OFF"}, @{static="OFF"; shared="ON"})) {
-            echo "== Testing CMake build interface with BUILD_STATIC_LIBS=$($buildLibs.static) =="
-            if (Test-Path build) { rm -Recurse -Force build }
-            cmake $CMAKE_FLAGS "-DBUILD_STATIC_LIBS=$($buildLibs.static)" "-DBUILD_SHARED_LIBS=$($buildLibs.shared)" -B build -A ${{ matrix.arch }}
-            cmake --build build --config Debug
-            ./build/Debug/test_executable.exe
-            & $dumpbin /dependents ./build/Debug/test_executable.exe
-            if ($buildLibs.static -eq "ON") {
-                if ((& $dumpbin /dependents ./build/Debug/test_executable.exe | Out-String).Contains("pcre2")) {
-                  Write-Error "Error: PCRE2 found in dumpbin output"
-                  exit 1
-                }
-            } else {
-              # Test that the shared library is actually linked in
-              if (-not ((& $dumpbin /dependents ./build/Debug/test_executable.exe | Out-String).Contains("pcre2-8d.dll"))) {
-                Write-Error "Error: Shared library not linked in"
-                exit 1
-              }
-            }
-          }
+      - name: Test CMake build-tree interface
+        run: python maint/cmake-tests/check-interface.py build-tree . --build-type Debug --architecture ${{ matrix.arch }}
 
   freebsd:
     name: FreeBSD
@@ -323,18 +235,23 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
+          # The prepared VM snapshot includes the synced runner work directory.
+          persist-credentials: false
 
       - name: Prepare
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/freebsd-vm@f0552d3b69211736abd97f02ff3d4674c56b73b1 # v1.5.5
+        uses: vmactions/freebsd-vm@c46abacb49f09938ca4e1702d15d836285d694cc # v1.5.9
         with:
           envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
-          usesh: true
+          sync: rsync
+          copyback: false
+          # Reuse installed tools, not build outputs; prepare changes invalidate this cache.
+          cache-after-prepare: true
           prepare: |
             set -e
-            pkg install -y cmake
+            pkg install -y cmake meson
 
           run: |
             set -e
@@ -343,16 +260,17 @@ jobs:
 
             cp -rp . ../build-autoconf
             cp -rp . ../build-cmake
+            cp -rp . ../build-meson
 
             echo "== Autoconf =="
             cd ../build-autoconf
 
             ./configure CFLAGS="$CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-Werror
             make -j$NPROC
-            (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+            (set +e; make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
-            maint/RunManifestTest install-dir maint/manifest-makeinstall-freebsd
+            maint/RunManifestTest install-dir/usr/local maint/manifest-install-freebsd autoconf
             maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake =="
@@ -363,8 +281,18 @@ jobs:
             make -j$NPROC
             ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
-            ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-freebsd
+            ../maint/RunManifestTest install-dir ../maint/manifest-install-freebsd cmake
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
+
+            echo "== Meson =="
+            cd ../../build-meson
+
+            CFLAGS="$CFLAGS_GCC_STYLE" meson setup build --buildtype=release --prefix="`pwd`/install-dir" --libdir=lib -Ddefault_library=both -Dpcre2_build_pcre2_16=true -Dpcre2_build_pcre2_32=true -Dpcre2_build_tests=true -Dpcre2_debug=enabled -Dpcre2_support_jit=enabled -Dwerror=true
+            meson compile -C build -j$NPROC
+            meson test -C build --print-errorlogs
+            meson install -C build
+            maint/RunManifestTest install-dir maint/manifest-install-freebsd meson
+            maint/RunSymbolTest install-dir/lib/ maint/
 
   openbsd:
     name: OpenBSD
@@ -377,15 +305,18 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
+          persist-credentials: false
 
       - name: Prepare
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/openbsd-vm@86cdc08415d9d0865267e686561e276c52d62530 # v1.4.7
+        uses: vmactions/openbsd-vm@f1ca8bc8ecc5b6ef7218e5b914836e067e1546d3 # v1.4.9
         with:
           envs: 'CFLAGS_GCC_STYLE CMAKE_FLAGS'
-          usesh: true
+          sync: rsync
+          copyback: false
+          cache-after-prepare: true
           prepare: |
             set -e
             pkg_add cmake
@@ -405,12 +336,12 @@ jobs:
 
             ./configure CFLAGS="$CFLAGS_GCC_STYLE $EXTRA_CFLAGS" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-Werror
             make -j$NPROC
-            (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+            (set +e; make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
             # I don't really know enough about OpenBSD to say whether the unusually-numbered .so files
             # with no symlinks are correct or not.
-            # maint/RunManifestTest install-dir maint/manifest-makeinstall-openbsd
+            # maint/RunManifestTest install-dir/usr/local maint/manifest-install-openbsd autoconf
             # maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake =="
@@ -421,7 +352,7 @@ jobs:
             make -j$NPROC
             ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
-            # ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-openbsd
+            # ../maint/RunManifestTest install-dir ../maint/manifest-install-openbsd cmake
             # ../maint/RunSymbolTest install-dir/lib/ ../maint/
 
   solaris:
@@ -435,41 +366,68 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
+          persist-credentials: false
 
       - name: Transfer Oracle Studio certificates
         env:
           PKG_ORACLE_COM_CERTIFICATE_PEM: ${{ secrets.PKG_ORACLE_COM_CERTIFICATE_PEM }}
           PKG_ORACLE_COM_KEY_PEM: ${{ secrets.PKG_ORACLE_COM_KEY_PEM }}
         run: |
+          OLD_UMASK=`umask`
+          umask 077
           printenv PKG_ORACLE_COM_CERTIFICATE_PEM > pkg.oracle.com.certificate.pem
           printenv PKG_ORACLE_COM_KEY_PEM > pkg.oracle.com.key.pem
+          umask "$OLD_UMASK"
 
       - name: Prepare
         run: ./autogen.sh
 
       - name: Build & test
-        uses: vmactions/solaris-vm@96d8d976f9e67d82ec6c7e8ce9c1060731f9e21c # v1.3.9
+        uses: vmactions/solaris-vm@1c166978f5a2c1f87f1c9d4d8dd85ae3d1eff6f7 # v1.4.2
         with:
-          envs: 'CFLAGS_SOLARIS_CC CMAKE_FLAGS'
-          usesh: true
+          envs: 'CFLAGS_SOLARIS_CC CFLAGS_GCC_STYLE CMAKE_FLAGS'
+          sync: rsync
+          copyback: false
+          # Because of this caching, we accept that the Oracle Studio credentials may not
+          # be entirely secret. We do some cleanup below, but not secure disk erasure.
+          cache-after-prepare: true
           # Seriously! Solaris is the only OS to actually ship without a C
           # compiler, and not even to provide a simple download to get one!
           # You have to actually register with Oracle to get an X.509
           # certificate before you can even download their compiler. Whatever.
           prepare: |
             set -e
+
+            OLD_UMASK=`umask`
+            umask 077
             cp "$GITHUB_WORKSPACE/pkg.oracle.com.key.pem" /root/pkg.oracle.com.key.pem
             cp "$GITHUB_WORKSPACE/pkg.oracle.com.certificate.pem" /root/pkg.oracle.com.certificate.pem
+            umask "$OLD_UMASK"
+
             sudo pkg set-publisher \
               -k /root/pkg.oracle.com.key.pem \
               -c /root/pkg.oracle.com.certificate.pem \
               -G "*" -g https://pkg.oracle.com/solarisstudio/release solarisstudio
-            pkg install developer/build/make developer/build/cmake system/header
+            pkg install developer/build/make developer/build/cmake developer/build/ninja developer/gcc system/header runtime/python-311 library/python/pip-311
             pkg install --accept developerstudio-126/cc
+            python3.11 -m venv /opt/meson
+            /opt/meson/bin/python -m pip install --disable-pip-version-check --upgrade meson
+
+            KEY_HASH=$(digest -a sha1 /root/pkg.oracle.com.key.pem)
+            CERTIFICATE_HASH=$(digest -a sha1 /root/pkg.oracle.com.certificate.pem)
+            pkg unset-publisher solarisstudio
+            rm -f "$GITHUB_WORKSPACE/pkg.oracle.com.key.pem" \
+              "$GITHUB_WORKSPACE/pkg.oracle.com.certificate.pem" \
+              /root/pkg.oracle.com.key.pem /root/pkg.oracle.com.certificate.pem \
+              "/var/pkg/ssl/$KEY_HASH" "/var/pkg/ssl/$CERTIFICATE_HASH"
 
           run: |
             set -e
-            PATH=/opt/developerstudio12.6/bin:"$PATH"
+
+            # Clean secrets if prepare was cached but the workspace is synced afresh.
+            rm -f pkg.oracle.com.key.pem pkg.oracle.com.certificate.pem
+
+            PATH=/opt/meson/bin:/opt/developerstudio12.6/bin:"$PATH"
             export PATH
 
             NPROC=`nproc 2>/dev/null || echo 2`
@@ -477,16 +435,17 @@ jobs:
             cp -rp . ../build-autoconf-32
             cp -rp . ../build-autoconf-64
             cp -rp . ../build-cmake-64
+            cp -rp . ../build-meson-64
 
             echo "== Autoconf, 32-bit =="
             cd ../build-autoconf-32
 
             ./configure CC="cc -m32" CFLAGS="$CFLAGS_SOLARIS_CC" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-errwarn
             make
-            (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+            (set +e; make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
-            maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
+            maint/RunManifestTest install-dir/usr/local maint/manifest-install-solaris autoconf
             maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== Autoconf, 64-bit =="
@@ -494,10 +453,10 @@ jobs:
 
             ./configure CC="cc -m64" CFLAGS="$CFLAGS_SOLARIS_CC" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-errwarn
             make
-            (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+            (set +e; make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
             make install "DESTDIR=`pwd`/install-dir"
-            maint/RunManifestTest install-dir maint/manifest-makeinstall-solaris
+            maint/RunManifestTest install-dir/usr/local maint/manifest-install-solaris autoconf
             maint/RunSymbolTest install-dir/usr/local/lib/ maint/
 
             echo "== CMake, 64-bit =="
@@ -508,8 +467,23 @@ jobs:
             make
             ctest -j$NPROC --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
             cmake --install . --prefix install-dir
-            ../maint/RunManifestTest install-dir ../maint/manifest-cmakeinstall-solaris
+            ../maint/RunManifestTest install-dir ../maint/manifest-install-solaris cmake
             ../maint/RunSymbolTest install-dir/lib/ ../maint/
+
+            echo "== Meson, 64-bit =="
+            cd ../../build-meson-64
+
+            CC="gcc -m64" CXX="g++ -m64" CFLAGS="$CFLAGS_GCC_STYLE" meson setup build --buildtype=release --prefix="`pwd`/install-dir" --libdir=lib -Ddefault_library=both -Dpcre2_build_pcre2_16=true -Dpcre2_build_pcre2_32=true -Dpcre2_build_tests=true -Dpcre2_debug=enabled -Dwerror=true
+            meson --version
+            meson compile -C build -j$NPROC
+            meson test -C build --print-errorlogs
+            meson install -C build
+            maint/RunManifestTest install-dir maint/manifest-install-solaris meson
+            maint/RunSymbolTest install-dir/lib/ maint/
+
+      - name: Clean Oracle Studio certificates
+        if: always()
+        run: rm -f pkg.oracle.com.key.pem pkg.oracle.com.certificate.pem
 
   zos:
     name: z/OS
@@ -523,6 +497,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Prepare
@@ -535,48 +510,64 @@ jobs:
           ZOS_PRIVATE_KEY: ${{ secrets.ZOS_PRIVATE_KEY }}
           ZOS_KNOWN_HOSTS: ${{ secrets.ZOS_KNOWN_HOSTS }}
         run: |
-          (umask 0077 && printenv ZOS_PRIVATE_KEY > id_rsa_zos)
+          key_file="$RUNNER_TEMP/id_rsa_zos"
+          (umask 0077 && printenv ZOS_PRIVATE_KEY > "$key_file")
           mkdir -p ~/.ssh
           printenv ZOS_KNOWN_HOSTS > ~/.ssh/known_hosts
 
-          tar czf ../pcre2-build.tar.gz --exclude=.git .
-          mv ../pcre2-build.tar.gz .
+          # Build the artifacts to upload: a tarball, and a script file
+          tarball_file="$RUNNER_TEMP/pcre2-build.tar.gz"
+          build_script_file="$RUNNER_TEMP/build_script.sh"
 
-          scp -i id_rsa_zos -P "$ZOS_PORT" pcre2-build.tar.gz "$ZOS_HOST:/data/"
-          ssh -i id_rsa_zos -p "$ZOS_PORT" "$ZOS_HOST" /data/zopen/usr/local/bin/bash -c \
-            'export _BPXK_AUTOCVT=ON;
-            export _CEE_RUNOPTS="FILETAG(AUTOCVT,AUTOTAG) POSIX(ON)";
-            export _TAG_REDIR_ERR=txt;
-            export _TAG_REDIR_IN=txt;
-            export _TAG_REDIR_OUT=txt;
-            export PATH="/data/zopen/usr/local/bin:/data/zopen/usr/bin:/data/zopen/bin:/data/zopen/boot:/bin:/usr/lpp/IBM/cnw/v2r1/openxl/bin";
-            . /data/zopen/etc/zopen-config;
-            set -e;
-            set -x;
-            cd /data;
+          tar czf "$tarball_file" --exclude=.git .
 
-            echo "== Autoconf, XLC compiler ==";
-            rm -rf pcre2-build;
-            mkdir pcre2-build;
-            gtar xzf pcre2-build.tar.gz -C pcre2-build;
-            cd pcre2-build;
-            chtag -R -tc ISO8859-1 .;
-            MAKE=gmake CC=xlc ./configure --enable-ebcdic --disable-unicode;
-            gmake;
-            (gmake check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc);
+          echo >"$build_script_file"
+          printf 'CMAKE_FLAGS=%q\n' "$CMAKE_FLAGS" >>"$build_script_file"
+          printf 'CFLAGS_GCC_STYLE=%q\n' "$CFLAGS_GCC_STYLE" >>"$build_script_file"
+          cat <<'ZOS_BUILD_SCRIPT' >>"$build_script_file"
+          export _BPXK_AUTOCVT=ON
+          export _CEE_RUNOPTS="FILETAG(AUTOCVT,AUTOTAG) POSIX(ON)"
+          export _TAG_REDIR_ERR=txt
+          export _TAG_REDIR_IN=txt
+          export _TAG_REDIR_OUT=txt
+          export PATH="/data/zopen/usr/local/bin:/data/zopen/usr/bin:/data/zopen/bin:/data/zopen/boot:/bin:/usr/lpp/IBM/cnw/v2r1/openxl/bin"
+          . /data/zopen/etc/zopen-config
+          set -ex # Enable warnings after zopen-config
+          cd /data
 
-            echo "== CMake, IBM-Clang -m64 compiler ==";
-            cd ..;
-            rm -rf pcre2-build;
-            mkdir pcre2-build;
-            gtar xzf pcre2-build.tar.gz -C pcre2-build;
-            cd pcre2-build;
-            chtag -R -tc ISO8859-1 .;
-            cmake $CMAKE_FLAGS -G Ninja -DPCRE2_EBCDIC=ON -DPCRE2_SUPPORT_UNICODE=OFF -DCMAKE_C_COMPILER=ibm-clang -DCMAKE_C_FLAGS="-m64 $CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
-            cd build;
-            ninja;
-            ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
-            '
+          echo "== Autoconf, XLC compiler =="
+          rm -rf pcre2-build
+          mkdir pcre2-build
+          gtar xzf pcre2-build.tar.gz -C pcre2-build
+          cd pcre2-build
+          chtag -R -tc ISO8859-1 .
+          MAKE=gmake CC=xlc ./configure --enable-ebcdic --disable-unicode
+          gmake
+          (set +e; gmake check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+
+          echo "== CMake, IBM-Clang -m64 compiler =="
+          cd ..
+          rm -rf pcre2-build
+          mkdir pcre2-build
+          gtar xzf pcre2-build.tar.gz -C pcre2-build
+          cd pcre2-build
+          chtag -R -tc ISO8859-1 .
+          cmake $CMAKE_FLAGS -G Ninja -DPCRE2_EBCDIC=ON -DPCRE2_SUPPORT_UNICODE=OFF -DCMAKE_C_COMPILER=ibm-clang -DCMAKE_C_FLAGS="-m64 $CFLAGS_GCC_STYLE" -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_BUILD_TYPE=Release -B build
+          cmake --build build
+          cd build
+          ctest -j3 --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
+          ZOS_BUILD_SCRIPT
+
+          # Upload files and execute remotely
+          workspace="/data"
+          scp -i "$key_file" -P "$ZOS_PORT" "$tarball_file" "$ZOS_HOST:$workspace/"
+          scp -i "$key_file" -P "$ZOS_PORT" "$build_script_file" "$ZOS_HOST:$workspace/"
+          ssh -i "$key_file" -p "$ZOS_PORT" "$ZOS_HOST" /data/zopen/usr/local/bin/bash /data/build_script.sh
+
+      - name: Clean up z/OS workspace
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/id_rsa_zos"
 
   distcheck:
     name: Build & verify distribution
@@ -591,6 +582,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Prepare
@@ -615,10 +607,10 @@ jobs:
           # Budge the directory, so we don't bake the version number into the
           # `manifest-tarball` file:
           mv tarball-dir/pcre2-* tarball-dir/pcre2-SNAPSHOT
-          maint/RunManifestTest tarball-dir maint/manifest-tarball
+          ruby maint/RunManifestTest.rb tarball-dir maint/manifest-tarball tarball
 
       - name: Upload to GitHub artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: "Distribution release"
           path: |
@@ -649,6 +641,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Configure
@@ -665,14 +658,14 @@ jobs:
           ../maint/RunCoverage
 
       - name: Upload report to GitHub artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: "Coverage report"
           path: './build/coverage-html'
           if-no-files-found: error
 
       - name: Upload report to Codecov
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true

@@ -3983,6 +3983,31 @@
 
 /[a-c]{0,6}d/IB
 
+# Whole-pattern recursion may backtrack through terminal iterators.
+
+/(?:b(?R)a|a+)/B
+    baa
+    bbaaa
+    baaa
+
+/(?:b(?0)a|a+)/B
+    baa
+
+# Local subroutine calls do not re-enter the whole pattern.
+
+/(?<r>b(?&r)a|x)a+/B
+    xaa
+    bxaaa
+
+# Confirm that non-terminal auto-possessification applies even with (?R)
+
+/(?:b(?R)a|a+b)/B
+
+# Confirm behaviour with character class possessification as well
+
+/(?:b(?R)a|[ac]+)/B
+    baa
+
 # End of special auto-possessive tests
 
 /^A\o{1239}B/
@@ -4879,6 +4904,8 @@ B)x/alt_verbnames,mark
 
 /abc/use_offset_limit
     1234abcde\=offset_limit=100
+    1234abcde\=offset_limit=4294967294
+    1234abcde\=offset_limit=4294967294,offset=4
     1234abcde\=offset_limit=9
     1234abcde\=offset_limit=4
     1234abcde\=offset_limit=4,offset=4
@@ -4897,6 +4924,7 @@ B)x/alt_verbnames,mark
 /abc/
 \= Expect error
     1234abcde\=offset_limit=4
+    1234abcde\=offset_limit=100
 
 /^\w/m,use_offset_limit
     \n..\naa\=offset_limit=3
@@ -5494,6 +5522,39 @@ a)"xI
 
 /a(*ACCEPT)x|aa/endanchored
     aaa
+
+/a+?(*THEN)/endanchored
+    aa
+    aaaa
+
+/a+?b|a+?(*THEN:arg)/endanchored
+    aaxaa
+    aaxaab
+
+/a+?(?:b(*THEN)c|c(*THEN)b)/endanchored
+    aaabcaaacbaaabc
+
+/a+?(*SKIP)/endanchored
+    aa
+    aaaa
+
+/a+?b|a+?(*SKIP:arg)/endanchored
+    aaxaa
+    aaxaab
+
+/a+?(?:b(*SKIP)c|c(*SKIP)b)/endanchored
+    aaabcaaacbaaabc
+
+/a+?(*PRUNE)/endanchored
+    aa
+    aaaa
+
+/a+?b|a+?(*PRUNE:arg)/endanchored
+    aaxaa
+    aaxaab
+
+/a+?(?:b(*PRUNE)c|c(*PRUNE)b)/endanchored
+    aaabcaaacbaaabc
 
 # Check auto-anchoring when there is a group that is never obeyed at
 # the start of a branch.
@@ -8386,6 +8447,19 @@ a)"xI
     fooBAR
 
 # --------------
+# An unterminated \Q applies to one replacement, not to those for later matches
+# --------------
+
+/x/g,replace=\Qabc,substitute_extended
+    xx
+
+/x/g,replace=\Qa$$,substitute_extended
+    xxx
+
+/x/g,replace=\Qa\Eb,substitute_extended
+    xx
+
+# --------------
 # Tests for substitution with partial
 # --------------
 
@@ -8525,5 +8599,38 @@ a)"xI
 
 /(?1)c(?(DEFINE)((?=(a|(*ACCEPT))(?2)x)ab))/
     abc
+
+# Callout start offsets after resetting the start of a match.
+
+/(?C1)A\K(?C2)B(?C3)C/
+    _ABC_
+    _ABC_ABC_\=offset=4
+
+/A\K(?C"after")BC/
+    _ABC_
+
+/A\K(?C1)B\K(?C2)C/
+    _ABC_
+
+/A(?:B\K(?C1)D|(?C2)B)(?C3)C/
+    _ABC_
+
+/A\K(?(?C1)(?=B)B|D)C/
+    _ABC_\=no_jit
+
+/(?(DEFINE)(?<x>A\K(?C1)B))(?&x)(?C2)C/
+    _ABC_
+
+/A\K(?C1)B/
+    _AC_AB_
+
+/(?C1)A\K(?C2)B/no_start_optimize
+    _AC_AB_
+
+/(?C1)A(?C2)B(?C3)C/
+    _ABC_
+
+/A\KBC/auto_callout
+    _ABC_
 
 # End of testinput2

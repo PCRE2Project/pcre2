@@ -4,7 +4,7 @@
 :manpurpose: set the match backtracking heap limit
 :manvolnum: 3
 :manmanual: PCRE2
-:mansource: PCRE2 10.49-DEV
+:mansource: PCRE2 10.50-DEV
 :docdate: 17 June 2018
 :revdate: 17 June 2018
 

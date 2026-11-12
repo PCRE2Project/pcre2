@@ -24,18 +24,18 @@ Both administrators are volunteers acting in a personal capacity.
 <tr>
   <th>Name</th>
   <th>Role</th>
-<tr>
+</tr>
 </thead>
 <tbody>
 <tr>
-  <td>
+  <td markdown="block">
 
   Nicholas Wilson<br/>
   `nicholas@nicholaswilson.me.uk`<br/>
   Currently of Microsoft Research Cambridge, UK
 
   </td>
-  <td>
+  <td markdown="block">
 
   * General project administration & maintenance
   * Release management
@@ -44,14 +44,14 @@ Both administrators are volunteers acting in a personal capacity.
   </td>
 </tr>
 <tr>
-  <td>
+  <td markdown="block">
 
   Zoltán Herczeg<br/>
   `hzmester@freemail.hu`<br/>
   Currently of the University of Szeged, Hungary
 
   </td>
-  <td>
+  <td markdown="block">
 
   * Code maintenance
   * Ownership of `sljit` and PCRE2's JIT

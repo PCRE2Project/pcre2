@@ -6,6 +6,14 @@ pub const CodeUnitWidth = enum {
     @"32",
 };
 
+/// `std.Build.build_root` (a `Cache.Directory`) became `std.Build.root`
+/// (a `Cache.Path`) in Zig 0.17.
+fn accessBuildRoot(b: *std.Build, sub_path: []const u8) !void {
+    if (comptime @hasField(std.Build, "root"))
+        return b.root.access(b.graph.io, sub_path, .{});
+    return b.build_root.handle.access(b.graph.io, sub_path, .{});
+}
+
 pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
     const target = b.standardTargetOptions(.{});
@@ -15,14 +23,11 @@ pub fn build(b: *std.Build) !void {
     const sanitize_c = b.option(std.zig.SanitizeC, "sanitize_c", "whether to build with undefined behaviour sanitizer enabled") orelse .off;
     const codeUnitWidth = b.option(CodeUnitWidth, "code-unit-width", "Sets the code unit width") orelse .@"8";
     const support_jit = b.option(bool, "support_jit", "Enable/disable JIT compiler support") orelse false;
+    const build_tests = b.option(bool, "build_tests", "Build the tests") orelse true;
 
     const sljit_is_checked_out = if (!support_jit)
         false
-    else if (b.build_root.handle.access(
-        b.graph.io,
-        "deps/sljit/sljit_src/sljitLir.c",
-        .{},
-    )) |_| true else |err| switch (err) {
+    else if (accessBuildRoot(b, "deps/sljit/sljit_src/sljitLir.c")) |_| true else |err| switch (err) {
         error.FileNotFound => false,
         else => return err,
     };
@@ -227,7 +232,10 @@ pub fn build(b: *std.Build) !void {
     });
 
     pcre2test_mod.linkLibrary(lib);
-    b.installArtifact(pcre2test);
+
+    if (build_tests) {
+        b.installArtifact(pcre2test);
+    }
 
     // pcre2-posix library
     if (codeUnitWidth == CodeUnitWidth.@"8") {

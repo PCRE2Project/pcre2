@@ -1,0 +1,24 @@
+FONTS:
+
+https://fonts.google.com/specimen/Fira+Sans
+Fira Sans
+
+Fallbacks:
+https://github.com/system-fonts/modern-font-stacks?tab=readme-ov-file#classical-humanist
+font-family: Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif;
+
+LIGHT:
+
+text: #262626
+bg:   #fafafa
+primary: #0085cc
+secondary: #006094
+
+
+DARK:
+
+bg: #0d1417
+text: #f0f6fc
+primary: #33b8ff
+secondary: #0075b4
+

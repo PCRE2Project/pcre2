@@ -389,55 +389,57 @@ functions, context functions, and serializing functions. They are in numerical
 order. Originally they were in alphabetical order too, but now that PCRE2 is
 released, the numbers must not be changed. */
 
-#define PCRE2_ERROR_BADDATA           (-29)
-#define PCRE2_ERROR_MIXEDTABLES       (-30) /* Name was changed */
-#define PCRE2_ERROR_BADMAGIC          (-31)
-#define PCRE2_ERROR_BADMODE           (-32)
-#define PCRE2_ERROR_BADOFFSET         (-33)
-#define PCRE2_ERROR_BADOPTION         (-34)
-#define PCRE2_ERROR_BADREPLACEMENT    (-35)
-#define PCRE2_ERROR_BADUTFOFFSET      (-36)
-#define PCRE2_ERROR_CALLOUT           (-37) /* Never used by PCRE2 itself */
-#define PCRE2_ERROR_DFA_BADRESTART    (-38)
-#define PCRE2_ERROR_DFA_RECURSE       (-39)
-#define PCRE2_ERROR_DFA_UCOND         (-40)
-#define PCRE2_ERROR_DFA_UFUNC         (-41)
-#define PCRE2_ERROR_DFA_UITEM         (-42)
-#define PCRE2_ERROR_DFA_WSSIZE        (-43)
-#define PCRE2_ERROR_INTERNAL          (-44)
-#define PCRE2_ERROR_JIT_BADOPTION     (-45)
-#define PCRE2_ERROR_JIT_STACKLIMIT    (-46)
-#define PCRE2_ERROR_MATCHLIMIT        (-47)
-#define PCRE2_ERROR_NOMEMORY          (-48)
-#define PCRE2_ERROR_NOSUBSTRING       (-49)
-#define PCRE2_ERROR_NOUNIQUESUBSTRING (-50)
-#define PCRE2_ERROR_NULL              (-51)
-#define PCRE2_ERROR_RECURSELOOP       (-52)
-#define PCRE2_ERROR_DEPTHLIMIT        (-53)
-#define PCRE2_ERROR_RECURSIONLIMIT    (-53) /* Obsolete synonym */
-#define PCRE2_ERROR_UNAVAILABLE       (-54)
-#define PCRE2_ERROR_UNSET             (-55)
-#define PCRE2_ERROR_BADOFFSETLIMIT    (-56)
-#define PCRE2_ERROR_BADREPESCAPE      (-57)
-#define PCRE2_ERROR_REPMISSINGBRACE   (-58)
-#define PCRE2_ERROR_BADSUBSTITUTION   (-59)
-#define PCRE2_ERROR_BADSUBSPATTERN    (-60)
-#define PCRE2_ERROR_TOOMANYREPLACE    (-61)
-#define PCRE2_ERROR_BADSERIALIZEDDATA (-62)
-#define PCRE2_ERROR_HEAPLIMIT         (-63)
-#define PCRE2_ERROR_CONVERT_SYNTAX    (-64)
-#define PCRE2_ERROR_INTERNAL_DUPMATCH (-65)
-#define PCRE2_ERROR_DFA_UINVALID_UTF  (-66)
-#define PCRE2_ERROR_INVALIDOFFSET     (-67)
-#define PCRE2_ERROR_JIT_UNSUPPORTED   (-68)
-#define PCRE2_ERROR_REPLACECASE       (-69)
-#define PCRE2_ERROR_TOOLARGEREPLACE   (-70)
-#define PCRE2_ERROR_DIFFSUBSPATTERN   (-71)
-#define PCRE2_ERROR_DIFFSUBSSUBJECT   (-72)
-#define PCRE2_ERROR_DIFFSUBSOFFSET    (-73)
-#define PCRE2_ERROR_DIFFSUBSOPTIONS   (-74)
-#define PCRE2_ERROR_BAD_BACKSLASH_K   (-75)
-#define PCRE2_ERROR_PARTIALSUBS       (-76)
+#define PCRE2_ERROR_BADDATA             (-29)
+#define PCRE2_ERROR_MIXEDTABLES         (-30) /* Name was changed */
+#define PCRE2_ERROR_BADMAGIC            (-31)
+#define PCRE2_ERROR_BADMODE             (-32)
+#define PCRE2_ERROR_BADOFFSET           (-33)
+#define PCRE2_ERROR_BADOPTION           (-34)
+#define PCRE2_ERROR_BADREPLACEMENT      (-35)
+#define PCRE2_ERROR_BADUTFOFFSET        (-36)
+#define PCRE2_ERROR_CALLOUT             (-37) /* Never used by PCRE2 itself */
+#define PCRE2_ERROR_DFA_BADRESTART      (-38)
+#define PCRE2_ERROR_DFA_RECURSE         (-39)
+#define PCRE2_ERROR_DFA_UCOND           (-40)
+#define PCRE2_ERROR_DFA_UFUNC           (-41)
+#define PCRE2_ERROR_DFA_UITEM           (-42)
+#define PCRE2_ERROR_DFA_WSSIZE          (-43)
+#define PCRE2_ERROR_INTERNAL            (-44)
+#define PCRE2_ERROR_JIT_BADOPTION       (-45)
+#define PCRE2_ERROR_JIT_STACKLIMIT      (-46)
+#define PCRE2_ERROR_MATCHLIMIT          (-47)
+#define PCRE2_ERROR_NOMEMORY            (-48)
+#define PCRE2_ERROR_NOSUBSTRING         (-49)
+#define PCRE2_ERROR_NOUNIQUESUBSTRING   (-50)
+#define PCRE2_ERROR_NULL                (-51)
+#define PCRE2_ERROR_RECURSELOOP         (-52)
+#define PCRE2_ERROR_DEPTHLIMIT          (-53)
+#define PCRE2_ERROR_RECURSIONLIMIT      (-53) /* Obsolete synonym */
+#define PCRE2_ERROR_UNAVAILABLE         (-54)
+#define PCRE2_ERROR_UNSET               (-55)
+#define PCRE2_ERROR_BADOFFSETLIMIT      (-56)
+#define PCRE2_ERROR_BADREPESCAPE        (-57)
+#define PCRE2_ERROR_REPMISSINGBRACE     (-58)
+#define PCRE2_ERROR_BADSUBSTITUTION     (-59)
+#define PCRE2_ERROR_BADSUBSPATTERN      (-60)
+#define PCRE2_ERROR_TOOMANYREPLACE      (-61)
+#define PCRE2_ERROR_BADSERIALIZEDDATA   (-62)
+#define PCRE2_ERROR_HEAPLIMIT           (-63)
+#define PCRE2_ERROR_CONVERT_SYNTAX      (-64)
+#define PCRE2_ERROR_INTERNAL_DUPMATCH   (-65)
+#define PCRE2_ERROR_DFA_UINVALID_UTF    (-66)
+#define PCRE2_ERROR_INVALIDOFFSET       (-67)
+#define PCRE2_ERROR_JIT_UNSUPPORTED     (-68)
+#define PCRE2_ERROR_REPLACECASE         (-69)
+#define PCRE2_ERROR_TOOLARGEREPLACE     (-70)
+#define PCRE2_ERROR_DIFFSUBSPATTERN     (-71)
+#define PCRE2_ERROR_DIFFSUBSSUBJECT     (-72)
+#define PCRE2_ERROR_DIFFSUBSOFFSET      (-73)
+#define PCRE2_ERROR_DIFFSUBSOPTIONS     (-74)
+#define PCRE2_ERROR_BAD_BACKSLASH_K     (-75)
+#define PCRE2_ERROR_PARTIALSUBS         (-76)
+#define PCRE2_ERROR_BADOFFSETLIMITVALUE (-77)
+#define PCRE2_ERROR_FRESHMATCHDATA      (-78)
 
 
 /* Request types for pcre2_pattern_info() */
@@ -663,7 +665,7 @@ information. */
   pcre2_compile_context_free(pcre2_compile_context *ccontext);               \
                                                                              \
   PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION                                   \
-  pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *length);          \
+  pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *value);           \
                                                                              \
   PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION                                   \
   pcre2_get_max_pattern_length(pcre2_compile_context *ccontext,              \
@@ -861,6 +863,9 @@ information. */
                                                                              \
   PCRE2_EXP_DECL PCRE2_SIZE PCRE2_CALL_CONVENTION                            \
   pcre2_get_startchar(pcre2_match_data *match_data);                         \
+                                                                             \
+  PCRE2_EXP_DECL PCRE2_SPTR PCRE2_CALL_CONVENTION                            \
+  pcre2_get_subject(pcre2_match_data *match_data, PCRE2_SIZE *lengthptr);    \
                                                                              \
   PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION                                   \
   pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, \
@@ -1099,6 +1104,7 @@ pcre2_compile are called by application code. */
 #define pcre2_get_ovector_pointer             PCRE2_SUFFIX(pcre2_get_ovector_pointer_)
 #define pcre2_get_parens_nest_limit           PCRE2_SUFFIX(pcre2_get_parens_nest_limit_)
 #define pcre2_get_startchar                   PCRE2_SUFFIX(pcre2_get_startchar_)
+#define pcre2_get_subject                     PCRE2_SUFFIX(pcre2_get_subject_)
 #define pcre2_jit_compile                     PCRE2_SUFFIX(pcre2_jit_compile_)
 #define pcre2_jit_free_unused_memory          PCRE2_SUFFIX(pcre2_jit_free_unused_memory_)
 #define pcre2_jit_match                       PCRE2_SUFFIX(pcre2_jit_match_)

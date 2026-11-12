@@ -1,0 +1,235 @@
+# -----------------------------------------------------------------------------
+# Meson options declarations
+# -----------------------------------------------------------------------------
+
+# The names chosen here match those of the corresponding CMake options, where
+# possible. The feature set mirrors that of CMake. Where there is a native
+# Meson capability, we prefer to use it.
+
+option('pcre2_build_pcre2_8', type: 'boolean', value: true, description: 'Build 8 bit PCRE2 library')
+option('pcre2_build_pcre2_16', type: 'boolean', value: false, description: 'Build 16 bit PCRE2 library')
+option('pcre2_build_pcre2_32', type: 'boolean', value: false, description: 'Build 32 bit PCRE2 library')
+option(
+  'pcre2_debug',
+  type: 'combo',
+  choices: ['auto', 'enabled', 'disabled'],
+  value: 'auto',
+  description: 'Include debugging code (enabled, disabled, or auto; auto enables it only when buildtype=debug).',
+)
+option(
+  'pcre2_disable_percent_zt',
+  type: 'boolean',
+  value: false,
+  description: 'Disable the use of %zu and %td (rarely needed)',
+)
+option(
+  'pcre2_ebcdic',
+  type: 'boolean',
+  value: false,
+  description: 'Use EBCDIC coding instead of ASCII. (This is rarely used outside of mainframe systems.)',
+)
+option(
+  'pcre2_ebcdic_nl25',
+  type: 'boolean',
+  value: false,
+  description: 'Use 0x25 as EBCDIC NL character instead of 0x15; implies EBCDIC.',
+)
+option(
+  'pcre2_ebcdic_ignoring_compiler',
+  type: 'boolean',
+  value: false,
+  description: 'Force EBCDIC 1047 using numeric literals rather than C character literals; implies EBCDIC.',
+)
+option('pcre2_rebuild_chartables', type: 'boolean', value: false, description: 'Rebuild char tables')
+option(
+  'pcre2_link_size',
+  type: 'integer',
+  min: 2,
+  max: 4,
+  value: 2,
+  description: 'Internal link size (2, 3 or 4 allowed). See LINK_SIZE in src/config.h.generic for details.',
+)
+option(
+  'pcre2_parens_nest_limit',
+  type: 'integer',
+  min: 0,
+  value: 250,
+  description: 'Default nested parentheses limit. See PARENS_NEST_LIMIT in src/config.h.generic for details.',
+)
+option(
+  'pcre2_heap_limit',
+  type: 'integer',
+  min: 0,
+  value: 20000000,
+  description: 'Default limit on heap memory (kibibytes). See HEAP_LIMIT in src/config.h.generic for details.',
+)
+option(
+  'pcre2_max_varlookbehind',
+  type: 'integer',
+  min: 0,
+  value: 255,
+  description: 'Default limit on variable lookbehinds.',
+)
+option(
+  'pcre2_match_limit',
+  type: 'integer',
+  min: 0,
+  value: 10000000,
+  description: 'Default limit on internal looping. See MATCH_LIMIT in src/config.h.generic for details.',
+)
+option(
+  'pcre2_match_limit_depth',
+  type: 'string',
+  value: 'MATCH_LIMIT',
+  description: 'Default limit on internal depth of search (an integer or MATCH_LIMIT). See MATCH_LIMIT_DEPTH in src/config.h.generic for details.',
+)
+option(
+  'pcre2grep_bufsize',
+  type: 'integer',
+  min: 1,
+  value: 20480,
+  description: 'Buffer starting size parameter for pcre2grep. See PCRE2GREP_BUFSIZE in src/config.h.generic for details.',
+)
+option(
+  'pcre2grep_max_bufsize',
+  type: 'integer',
+  min: 1,
+  value: 1048576,
+  description: 'Buffer maximum size parameter for pcre2grep. See PCRE2GREP_MAX_BUFSIZE in src/config.h.generic for details.',
+)
+option(
+  'pcre2_newline',
+  type: 'combo',
+  choices: ['CR', 'LF', 'CRLF', 'ANY', 'ANYCRLF', 'NUL'],
+  value: 'LF',
+  description: 'What to recognize as a newline (one of CR, LF, CRLF, ANY, ANYCRLF, NUL).',
+)
+option(
+  'pcre2_support_jit',
+  type: 'feature',
+  value: 'disabled',
+  deprecated: {'OFF': 'disabled', 'ON': 'enabled', 'AUTO': 'auto', 'false': 'disabled', 'true': 'enabled'},
+  description: 'Enable support for Just-in-time compiling (disabled, enabled, or auto).',
+)
+option(
+  'pcre2_support_jit_sealloc',
+  type: 'boolean',
+  value: false,
+  description: 'Enable SELinux compatible execmem allocator in JIT (experimental).',
+)
+option(
+  'pcre2grep_support_jit',
+  type: 'boolean',
+  value: true,
+  description: 'Enable use of Just-in-time compiling in pcre2grep.',
+)
+option(
+  'pcre2grep_support_callout',
+  type: 'boolean',
+  value: true,
+  description: 'Enable callout string support in pcre2grep.',
+)
+option(
+  'pcre2grep_support_callout_fork',
+  type: 'boolean',
+  value: true,
+  description: 'Enable callout string fork support in pcre2grep.',
+)
+option(
+  'pcre2_support_unicode',
+  type: 'boolean',
+  value: true,
+  description: 'Enable support for Unicode and UTF-8/UTF-16/UTF-32 encoding.',
+)
+option(
+  'pcre2_support_bsr_anycrlf',
+  type: 'boolean',
+  value: false,
+  description: 'true=Backslash-R matches only LF CR and CRLF, false=Backslash-R matches all Unicode Linebreaks',
+)
+option(
+  'pcre2_never_backslash_c',
+  type: 'boolean',
+  value: false,
+  description: 'If true, backslash-C (upper case C) is locked out.',
+)
+option('pcre2_support_valgrind', type: 'boolean', value: false, description: 'Enable Valgrind support.')
+option(
+  'pcre2_fuzz_support',
+  type: 'boolean',
+  value: false,
+  description: 'Enable fuzzer support (requires the 8-bit library).',
+)
+option(
+  'pcre2_diff_fuzz_support',
+  type: 'boolean',
+  value: false,
+  description: 'Enable differential fuzzer support (requires fuzz support and JIT)',
+)
+option('pcre2_show_report', type: 'boolean', value: true, description: 'Show the final configuration report')
+option('pcre2_build_pcre2grep', type: 'boolean', value: true, description: 'Build pcre2grep')
+option('pcre2_build_tests', type: 'boolean', value: true, description: 'Build the tests')
+option(
+  'pcre2_static_library_postfix',
+  type: 'string',
+  value: 'auto',
+  description: 'Postfix to append to static library output names, before any suffix provided by the toolchain. Used on Windows and Cygwin; ignored on other platforms. auto selects -static; an explicit string, including an empty one, overrides it. Static library .lib files may conflict with the import library .lib files corresponding to a shared library DLL. With MSVC-style import libraries, must be set to a non-empty string if both static and shared library outputs are selected and a name collision occurs.',
+)
+option('pcre2_symvers', type: 'boolean', value: true, description: 'Enable library symbol versioning')
+option(
+  'pcre2_support_libbz2',
+  type: 'feature',
+  value: 'auto',
+  description: 'Enable support for linking pcre2grep with libbz2. auto enables support if the dependency is found.',
+)
+option(
+  'pcre2_support_libz',
+  type: 'feature',
+  value: 'auto',
+  description: 'Enable support for linking pcre2grep with libz. auto enables support if the dependency is found.',
+)
+option(
+  'pcre2_support_libedit',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Enable support for linking pcre2test with libedit. Cannot be combined with libreadline support. auto enables support if the dependency is found.',
+)
+option(
+  'pcre2_support_libreadline',
+  type: 'feature',
+  value: 'auto',
+  description: 'Enable support for linking pcre2test with libreadline. Cannot be combined with libedit support. auto enables support if the dependency is found.',
+)
+
+# Compatibility aliases for the former WrapDB Meson port.
+#
+# These will be removed in a future release.
+
+option(
+  'grep',
+  type: 'boolean',
+  value: true,
+  deprecated: 'pcre2_build_pcre2grep',
+  description: 'Deprecated alias for pcre2_build_pcre2grep.',
+)
+option(
+  'jit',
+  type: 'boolean',
+  value: false,
+  deprecated: 'pcre2_support_jit',
+  description: 'Deprecated alias for pcre2_support_jit.',
+)
+option(
+  'jit_sealloc',
+  type: 'boolean',
+  value: false,
+  deprecated: 'pcre2_support_jit_sealloc',
+  description: 'Deprecated alias for pcre2_support_jit_sealloc.',
+)
+option(
+  'test',
+  type: 'boolean',
+  value: true,
+  deprecated: 'pcre2_build_tests',
+  description: 'Deprecated alias for pcre2_build_tests.',
+)

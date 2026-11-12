@@ -1,10 +1,10 @@
 # This set of tests is for features that are compatible with all versions of
 # Perl >= 5.10, in non-UTF mode. It should run clean for the 8-bit, 16-bit, and
-# 32-bit PCRE libraries, and also using the perltest.sh script.
+# 32-bit PCRE libraries, and also using the PerlTest.sh script.
 
 # WARNING: Use only / as the pattern delimiter. Although pcre2test supports
 # a number of delimiters, all those other than / give problems with the
-# perltest.sh script.
+# PerlTest.sh script.
     
 #forbid_utf
 #newline_default lf any anycrlf
@@ -6004,7 +6004,7 @@ ef) x/x,mark
 # This pattern uses a lot of named subpatterns in order to match email
 # addresses in various formats. It's a heavy test for named subpatterns. In the
 # <atext> group, slash is coded as \x{2f} so that this pattern can also be
-# processed by perltest.sh, which does not cater for an escaped delimiter
+# processed by PerlTest.sh, which does not cater for an escaped delimiter
 # within the pattern. $ within the pattern must also be escaped. All $ and @
 # characters in subject strings are escaped so that Perl doesn't interpret them
 # as variable insertions and " characters must also be escaped for Perl.
@@ -6013,7 +6013,7 @@ ef) x/x,mark
 # definitions in RFC2822, without any of the obsolete features. The addition of
 # a possessive + to the definition of <phrase> reduced the match limit in PCRE2
 # from over 5 million to just under 400, and eliminated a very noticeable delay
-# when this file was passed to perltest.sh.
+# when this file was passed to PerlTest.sh.
 
 /(?ix)(?(DEFINE)
 (?<addr_spec>       (?&local_part) \@ (?&domain) )

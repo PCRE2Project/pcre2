@@ -126,7 +126,7 @@ static int patstacknext = 0;
 static PCRE2_UCHAR *rep_in_buffer = NULL;
 static size_t rep_in_buffer_size = REPLACE_MODSIZE; // Code units
 static PCRE2_UCHAR *rep_out_buffer = NULL;
-static size_t rep_out_buffer_size = REPLACE_BUFFSIZE; // Code units
+static size_t rep_out_buffer_size = PCRE2TEST_REPLACE_BUFFSIZE; // Code units
 
 
 
@@ -1800,7 +1800,7 @@ show_pattern_info(void)
           ? callout_enumerate_function
           :
           /* Exercise the callout enumeration code with a dummy callback to make sure
-    it works. */
+          it works. */
           callout_enumerate_function_void,
       NULL);
   if (rc != 0)
@@ -2253,7 +2253,7 @@ process_pattern(void)
   uint8_t *serialized_bytes;
   PCRE2_SIZE serialized_size;
 
-  /* The perltest.sh script supports only / as a delimiter. */
+  /* The PerlTest.sh script supports only / as a delimiter. */
 
   if (restrict_for_perl_test && delimiter != '/')
   {
@@ -2672,7 +2672,7 @@ process_pattern(void)
       prmsg(&msg, "max_pattern_length");
     if (pat_context->max_pattern_compiled_length != PCRE2_UNSET)
       prmsg(&msg, "max_pattern_compiled_length");
-    if (pat_context->parens_nest_limit != PARENS_NEST_DEFAULT)
+    if (pat_context->parens_nest_limit != PCRE2TEST_PARENS_NEST_DEFAULT)
       prmsg(&msg, "parens_nest_limit");
 
     if (msg[0] == 0)
@@ -3788,7 +3788,7 @@ callout_function(pcre2_callout_block *cb, void *callout_data_ptr)
     strings, show the number here. A callout with a string argument has been
     displayed above. */
 
-    if (cb->callout_number == 255)
+    if (cb->callout_number == MAX_CALLOUT_NUMBER)
     {
       fprintf(outfile, "%+3d ", (int)cb->pattern_position);
       if (cb->pattern_position > 99)
@@ -4280,6 +4280,8 @@ process_data(void)
     len--;
   }
 
+  uint8_t *input_end = p + len;
+
   /* Check that the data is well-formed UTF-8 if we're in UTF mode. To create
   invalid input to pcre2_match(), you must use \x?? or \x{} sequences. */
 
@@ -4436,9 +4438,18 @@ process_data(void)
         c = *p++;
       }
 #endif
-      if ((utf || (pat_patctl.control & CTL_UTF8_INPUT) != 0) && HASUTF8EXTRALEN(c))
+      if ((utf || (pat_patctl.control & CTL_UTF8_INPUT) != 0) && c >= 0xc0)
       {
-        GETUTF8INC(c, p);
+        /* We cannot use the shared macros such as GETUTF8, since they assume
+        RFC 3629 input, but pcre2test also handles RFC 2279 encodings. */
+        int n = utf8_to_ord(p - 1, input_end, &c);
+        if (n <= 0)
+        {
+          cfprintf(clr_test_error, outfile,
+                   "** Failed: invalid UTF-8 string cannot be used as input\n");
+          return PR_OK;
+        }
+        p += n - 1;
       }
 
       c |= topbit;
@@ -6074,7 +6085,7 @@ init_globals(void)
   /* Set a default parentheses nest limit that is large enough to run the
   standard tests (this also exercises the function). */
 
-  pcre2_set_parens_nest_limit(default_pat_context, PARENS_NEST_DEFAULT);
+  pcre2_set_parens_nest_limit(default_pat_context, PCRE2TEST_PARENS_NEST_DEFAULT);
 }
 
 /* Frees the global variables used for the current test mode. */
@@ -6257,29 +6268,67 @@ unittest(void)
   rc = pcre2_config(PCRE2_CONFIG_UNICODE, NULL);
   ASSERT(rc == (int)sizeof(uint32_t), "pcre2_config(NULL)");
 
-#ifdef SUPPORT_JIT
-  rc = pcre2_config(PCRE2_CONFIG_JITTARGET, NULL);
-  ASSERT(rc > 0, "pcre2_config(NULL)");
+  {
+    const uint32_t string_options[] = {
+      PCRE2_CONFIG_JITTARGET, PCRE2_CONFIG_UNICODE_VERSION, PCRE2_CONFIG_VERSION
+    };
+    for (size_t i = 0; i < sizeof(string_options) / sizeof(string_options[0]); i++)
+    {
+      int length = pcre2_config(string_options[i], NULL);
+      errorbuffer[0] = CHAR_A;
+#ifndef SUPPORT_JIT
+      if (string_options[i] == PCRE2_CONFIG_JITTARGET)
+      {
+        rc = pcre2_config(string_options[i], errorbuffer);
+        ASSERT(length == PCRE2_ERROR_BADOPTION && rc == PCRE2_ERROR_BADOPTION &&
+                   errorbuffer[0] == CHAR_A, "pcre2_config(disabled JIT target)");
+        continue;
+      }
 #endif
-  rc = pcre2_config(PCRE2_CONFIG_UNICODE_VERSION, NULL);
-  ASSERT(rc > 4, "pcre2_config(NULL)");
-  rc = pcre2_config(PCRE2_CONFIG_VERSION, NULL);
-  ASSERT(rc > 4, "pcre2_config(NULL)");
+      ASSERT(length > 1 && length < (int)(sizeof(errorbuffer) / sizeof(errorbuffer[0])),
+             "pcre2_config(string size)");
+      for (int j = 0; j <= length; j++)
+        errorbuffer[j] = CHAR_A;
+      rc = pcre2_config(string_options[i], errorbuffer);
+      ASSERT(rc == length && pcre2_strlen(errorbuffer) == (size_t)length - 1 &&
+                 errorbuffer[length - 1] == 0 && errorbuffer[length] == CHAR_A,
+             "pcre2_config(string contents and terminator)");
+    }
+  }
 
-  rc = pcre2_config(PCRE2_CONFIG_MATCHLIMIT, &uval);
-  ASSERT(rc == 0, "pcre2_config(PCRE2_CONFIG_MATCHLIMIT)");
+  {
+    const struct { uint32_t option; uint32_t expected; } numeric_options[] = {
+      { PCRE2_CONFIG_BSR, BSR_DEFAULT },
+      { PCRE2_CONFIG_DEPTHLIMIT, MATCH_LIMIT_DEPTH },
+      { PCRE2_CONFIG_RECURSIONLIMIT, MATCH_LIMIT_DEPTH },
+      { PCRE2_CONFIG_HEAPLIMIT, HEAP_LIMIT },
+      { PCRE2_CONFIG_MATCHLIMIT, MATCH_LIMIT },
+      { PCRE2_CONFIG_NEWLINE, NEWLINE_DEFAULT },
+      { PCRE2_CONFIG_PARENSLIMIT, PARENS_NEST_LIMIT },
+      { PCRE2_CONFIG_STACKRECURSE, 0 },
+      { PCRE2_CONFIG_TABLES_LENGTH, TABLES_LENGTH }
+    };
+    for (size_t i = 0; i < sizeof(numeric_options) / sizeof(numeric_options[0]); i++)
+    {
+      uint32_t values[] = { 123, 0, 456 };
+      rc = pcre2_config(numeric_options[i].option, &values[1]);
+      ASSERT(rc == 0 && values[1] == numeric_options[i].expected &&
+                 values[0] == 123 && values[2] == 456, "pcre2_config(numeric value)");
+    }
+  }
 
   rc = pcre2_config(999, NULL);
   ASSERT(rc == PCRE2_ERROR_BADOPTION, "pcre2_config(bad option)");
 
+  uval = 123;
   rc = pcre2_config(999, &uval);
-  ASSERT(rc == PCRE2_ERROR_BADOPTION, "pcre2_config(bad option)");
+  ASSERT(rc == PCRE2_ERROR_BADOPTION && uval == 123, "pcre2_config(bad option)");
 
   rc = pcre2_config(PCRE2_CONFIG_STACKRECURSE, &uval);
-  ASSERT(rc == 0, "pcre2_config(PCRE2_CONFIG_STACKRECURSE)");
+  ASSERT(rc == 0 && uval == 0, "pcre2_config(PCRE2_CONFIG_STACKRECURSE)");
 
   rc = pcre2_config(PCRE2_CONFIG_LINKSIZE, &uval);
-  ASSERT(rc == 0, "pcre2_config(PCRE2_CONFIG_LINKSIZE)");
+  ASSERT(rc == 0 && uval == CONFIGURED_LINK_SIZE, "pcre2_config(PCRE2_CONFIG_LINKSIZE)");
 
   /* ------------------------ Context functions ------------------------------ */
 
@@ -6340,6 +6389,11 @@ unittest(void)
   test_con_context_copy = pcre2_convert_context_copy(test_con_context);
   ASSERT(test_con_context_copy != NULL, "pcre2_convert_context_copy()");
 
+  ASSERT(pcre2_general_context_copy(NULL) == NULL, "pcre2_general_context_copy(null)");
+  ASSERT(pcre2_compile_context_copy(NULL) == NULL, "pcre2_compile_context_copy(null)");
+  ASSERT(pcre2_match_context_copy(NULL) == NULL, "pcre2_match_context_copy(null)");
+  ASSERT(pcre2_convert_context_copy(NULL) == NULL, "pcre2_convert_context_copy(null)");
+
   /* Test default context values. */
   uval = 123;
   rc = pcre2_get_bsr(test_pat_context, &uval);
@@ -6381,63 +6435,14 @@ unittest(void)
   ASSERT(rc == 0, "pcre2_get_match_limit()");
   ASSERT(uval == MATCH_LIMIT, "pcre2_get_match_limit()");
 
-  rc = pcre2_get_bsr(NULL, &uval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_bsr(null context)");
-  rc = pcre2_get_bsr(test_pat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_bsr(null value)");
-
-  rc = pcre2_get_max_pattern_length(NULL, &sizeval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_max_pattern_length(null context)");
-  rc = pcre2_get_max_pattern_length(test_pat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_max_pattern_length(null value)");
-
-  rc = pcre2_get_newline(NULL, &uval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_newline(null context)");
-  rc = pcre2_get_newline(test_pat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_newline(null value)");
-
-  rc = pcre2_get_parens_nest_limit(NULL, &uval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_parens_nest_limit(null context)");
-  rc = pcre2_get_parens_nest_limit(test_pat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_parens_nest_limit(null value)");
-
-  rc = pcre2_get_offset_limit(NULL, &sizeval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_offset_limit(null context)");
-  rc = pcre2_get_offset_limit(test_dat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_offset_limit(null value)");
-
-  rc = pcre2_get_depth_limit(NULL, &uval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_depth_limit(null context)");
-  rc = pcre2_get_depth_limit(test_dat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_depth_limit(null value)");
-
-  rc = pcre2_get_heap_limit(NULL, &uval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_heap_limit(null context)");
-  rc = pcre2_get_heap_limit(test_dat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_heap_limit(null value)");
-
-  rc = pcre2_get_match_limit(NULL, &uval);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_match_limit(null context)");
-  rc = pcre2_get_match_limit(test_dat_context, NULL);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_get_match_limit(null value)");
-
   rc = pcre2_set_compile_extra_options(test_pat_context, 0);
   ASSERT(rc == 0, "pcre2_set_compile_extra_options()");
-
-  rc = pcre2_set_compile_extra_options(NULL, 0);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_compile_extra_options(null)");
 
   rc = pcre2_set_max_pattern_length(test_pat_context, 10);
   ASSERT(rc == 0, "pcre2_set_max_pattern_length()");
 
-  rc = pcre2_set_max_pattern_length(NULL, 10);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_max_pattern_length(null)");
-
   rc = pcre2_set_max_pattern_compiled_length(test_pat_context, 256);
   ASSERT(rc == 0, "pcre2_set_max_pattern_compiled_length()");
-
-  rc = pcre2_set_max_pattern_compiled_length(NULL, 256);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_max_pattern_compiled_length(null)");
 
   rc = pcre2_set_max_varlookbehind(test_pat_context, 0);
   ASSERT(rc == 0, "pcre2_set_max_varlookbehind()");
@@ -6446,9 +6451,6 @@ unittest(void)
   /* test setting offset limit */
   rc = pcre2_set_offset_limit(test_dat_context, 999);
   ASSERT(rc == 0, "pcre2_set_offset_limit()");
-
-  rc = pcre2_set_offset_limit(NULL, 999);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_offset_limit(null)");
 
   sizeval = 123;
   rc = pcre2_get_offset_limit(test_dat_context, &sizeval);
@@ -6518,9 +6520,6 @@ unittest(void)
   rc = pcre2_set_parens_nest_limit(test_pat_context, 100);
   ASSERT(rc == 0, "pcre2_set_parens_nest_limit()");
 
-  rc = pcre2_set_parens_nest_limit(NULL, 100);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_parens_nest_limit(null)");
-
   uval = 123;
   rc = pcre2_get_parens_nest_limit(test_pat_context, &uval);
   ASSERT(rc == 0, "pcre2_get_parens_nest_limit()");
@@ -6557,9 +6556,6 @@ unittest(void)
   rc = pcre2_set_depth_limit(test_dat_context, 123456);
   ASSERT(rc == 0, "pcre2_set_depth_limit()");
 
-  rc = pcre2_set_depth_limit(NULL, 123456);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_depth_limit(null)");
-
   uval = 123;
   rc = pcre2_get_depth_limit(test_dat_context, &uval);
   ASSERT(rc == 0, "pcre2_get_depth_limit()");
@@ -6578,9 +6574,6 @@ unittest(void)
   rc = pcre2_set_heap_limit(test_dat_context, 123456);
   ASSERT(rc == 0, "pcre2_set_heap_limit()");
 
-  rc = pcre2_set_heap_limit(NULL, 123456);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_heap_limit(null)");
-
   uval = 123;
   rc = pcre2_get_heap_limit(test_dat_context, &uval);
   ASSERT(rc == 0, "pcre2_get_heap_limit()");
@@ -6598,9 +6591,6 @@ unittest(void)
   /* test setting match_limit */
   rc = pcre2_set_match_limit(test_dat_context, 123456);
   ASSERT(rc == 0, "pcre2_set_match_limit()");
-
-  rc = pcre2_set_match_limit(NULL, 123456);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_match_limit(null)");
 
   uval = 123;
   rc = pcre2_get_match_limit(test_dat_context, &uval);
@@ -6621,9 +6611,6 @@ unittest(void)
 
   rc = pcre2_set_recursion_memory_management(test_dat_context, NULL, NULL, NULL);
   ASSERT(rc == 0, "pcre2_set_recursion_memory_management()");
-
-  rc = pcre2_set_optimize(NULL, PCRE2_OPTIMIZATION_NONE);
-  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_set_optimize(null)");
 
   rc = pcre2_set_optimize(test_pat_context, PCRE2_AUTO_POSSESS - 1);
   ASSERT(rc == PCRE2_ERROR_BADOPTION, "pcre2_set_optimize(bad option)");
@@ -6673,7 +6660,8 @@ unittest(void)
   ASSERT(pcre2_get_ovector_count(test_match_data) == 10, "pcre2_get_ovector_count()");
 
   sizeval = pcre2_get_match_data_size(test_match_data);
-  ASSERT(sizeval >= 2, "pcre2_get_match_data_size()");
+  ASSERT(sizeval == offsetof(pcre2_match_data, ovector) + 20 * sizeof(PCRE2_SIZE),
+         "pcre2_get_match_data_size()");
 
   mallocs_until_failure = INT_MAX;
 
@@ -6681,6 +6669,10 @@ unittest(void)
   test_match_data = pcre2_match_data_create(0, test_gen_context);
   ASSERT(test_match_data != NULL, "pcre2_match_data_create()");
   ASSERT(pcre2_get_ovector_count(test_match_data) == 1, "pcre2_get_ovector_count()");
+
+  ASSERT(pcre2_get_match_data_size(test_match_data) ==
+             offsetof(pcre2_match_data, ovector) + 2 * sizeof(PCRE2_SIZE),
+         "pcre2_get_match_data_size(minimum)");
 
   pcre2_match_data_free(test_match_data);
   test_match_data = pcre2_match_data_create_from_pattern(NULL, NULL);
@@ -6701,8 +6693,20 @@ unittest(void)
   ASSERT(test_match_data != NULL, "pcre2_match_data_create_from_pattern()");
 
   rc = pcre2_match(test_compiled_code, pattern, PCRE2_ZERO_TERMINATED, 0,
+                   0, test_match_data, NULL);
+  ASSERT(rc == 1, "pcre2_match()");
+  ASSERT(pcre2_get_subject(test_match_data, NULL) == pattern, "pcre2_get_subject()");
+  sizeval = 123;
+  ASSERT(pcre2_get_subject(test_match_data, &sizeval) == pattern, "pcre2_get_subject()");
+  ASSERT(sizeval == pcre2_strlen(pattern), "pcre2_get_subject() length");
+
+  rc = pcre2_match(test_compiled_code, pattern, PCRE2_ZERO_TERMINATED, 0,
                    PCRE2_COPY_MATCHED_SUBJECT, test_match_data, NULL);
   ASSERT(rc == 1, "pcre2_match()");
+  ASSERT(pcre2_get_subject(test_match_data, NULL) != pattern, "pcre2_get_subject()");
+  sizeval = 123;
+  ASSERT(memcmp(pattern, pcre2_get_subject(test_match_data, &sizeval), (pcre2_strlen(pattern) + 1) * sizeof(PCRE2_UCHAR)) == 0, "pcre2_get_subject()");
+  ASSERT(sizeval == pcre2_strlen(pattern), "pcre2_get_subject() length");
 
   pcre2_match_data_free(test_match_data);
   test_match_data = NULL;
@@ -6711,6 +6715,9 @@ unittest(void)
 
   rc = pcre2_pattern_info(NULL, PCRE2_INFO_NEWLINE, &uval);
   ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_pattern_info(null)");
+
+  rc = pcre2_pattern_info(NULL, 999, NULL);
+  ASSERT(rc == PCRE2_ERROR_BADOPTION, "pcre2_pattern_info(bad option, null code)");
 
   rc = pcre2_pattern_info(test_compiled_code, 999, NULL);
   ASSERT(rc == PCRE2_ERROR_BADOPTION, "pcre2_pattern_info(bad option)");
@@ -6721,12 +6728,23 @@ unittest(void)
   invalid_code = malloc(1024);
   ASSERT(invalid_code != NULL, "malloc()");
   memset(invalid_code, 0, 1024);
+
   rc = pcre2_pattern_info(invalid_code, PCRE2_INFO_NEWLINE, &uval);
   ASSERT(rc == PCRE2_ERROR_BADMAGIC, "pcre2_pattern_info(bad magic)");
+
+#ifdef SUPPORT_JIT
+  rc = pcre2_jit_compile(invalid_code, PCRE2_JIT_COMPLETE);
+  ASSERT(rc == PCRE2_ERROR_BADMAGIC, "pcre2_jit_compile(bad magic)");
+#endif
 
 #ifdef BITOTHER
   rc = pcre2_pattern_info((pcre2_code *)bitother_code, PCRE2_INFO_NEWLINE, &uval);
   ASSERT(rc == PCRE2_ERROR_BADMODE, "pcre2_pattern_info(bitmode mismatch)");
+
+#ifdef SUPPORT_JIT
+  rc = pcre2_jit_compile((pcre2_code *)bitother_code, PCRE2_JIT_COMPLETE);
+  ASSERT(rc == PCRE2_ERROR_BADMODE, "pcre2_jit_compile(bitmode mismatch)");
+#endif
 #endif
 
 #ifdef SUPPORT_JIT
@@ -6769,8 +6787,12 @@ unittest(void)
 
     test_match_data = pcre2_match_data_create(100000, test_gen_context);
     ASSERT(test_match_data != NULL, "pcre2_match_data_create(100000)");
-    ASSERT(pcre2_get_ovector_count(test_match_data) == 65535,
+    ASSERT(pcre2_get_ovector_count(test_match_data) == MAX_OVECTOR_COUNT,
            "pcre2_get_ovector_count(UINT32_MAX) <= UINT16_MAX)");
+    ASSERT(pcre2_get_match_data_size(test_match_data) ==
+               offsetof(pcre2_match_data, ovector) +
+               2 * (PCRE2_SIZE)MAX_OVECTOR_COUNT * sizeof(PCRE2_SIZE),
+           "pcre2_get_match_data_size(clamped count)");
 
     rc = pcre2_jit_match(test_compiled_code, subject_abcz, 4, 0, PCRE2_NO_JIT, test_match_data,
                          NULL);
@@ -6860,6 +6882,84 @@ unittest(void)
   ASSERT(rc == 14 && pcre2_strcmp_c8(errorbuffer, "bad data value") == 0,
          "pcre2_get_error_message(null)");
 
+  rc = pcre2_get_error_message(0, NULL, 0);
+  ASSERT(rc == PCRE2_ERROR_NOMEMORY, "pcre2_get_error_message(0, null)");
+
+  errorbuffer[0] = CHAR_A;
+  errorbuffer[1] = CHAR_B;
+  rc = pcre2_get_error_message(0, errorbuffer, 0);
+  ASSERT(rc == PCRE2_ERROR_NOMEMORY && errorbuffer[0] == CHAR_A && errorbuffer[1] == CHAR_B,
+         "pcre2_get_error_message(0, zero code units)");
+
+  rc = pcre2_get_error_message(0, errorbuffer, 1);
+  ASSERT(rc == PCRE2_ERROR_NOMEMORY && errorbuffer[0] == 0 && errorbuffer[1] == CHAR_B,
+         "pcre2_get_error_message(0, one code unit)");
+
+  rc = pcre2_get_error_message(0, errorbuffer, 8);
+  BUFFER_OUTPUT
+  ASSERT(rc == PCRE2_ERROR_NOMEMORY && pcre2_strcmp_c8(errorbuffer, "no erro") == 0,
+         "pcre2_get_error_message(0, truncated)");
+
+  rc = pcre2_get_error_message(0, errorbuffer, 9);
+  BUFFER_OUTPUT
+  ASSERT(rc == 8 && pcre2_strcmp_c8(errorbuffer, "no error") == 0,
+         "pcre2_get_error_message(0)");
+
+  rc = pcre2_get_error_message(COMPILE_ERROR_BASE, errorbuffer, 9);
+  BUFFER_OUTPUT
+  ASSERT(rc == 8 && pcre2_strcmp_c8(errorbuffer, "no error") == 0,
+         "pcre2_get_error_message(COMPILE_ERROR_BASE)");
+
+  int last_compile_error = PCRE2_ERROR_NULL_ERROROFFSET;
+
+  rc = pcre2_get_error_message(last_compile_error, errorbuffer,
+                              sizeof(errorbuffer) / sizeof(errorbuffer[0]));
+  BUFFER_OUTPUT
+  ASSERT(rc == sizeof("erroroffset passed as NULL") - 1 &&
+             pcre2_strcmp_c8(errorbuffer, "erroroffset passed as NULL") == 0,
+         "pcre2_get_error_message(last compile error)");
+
+  rc = pcre2_get_error_message(PCRE2_ERROR_PARTIALSUBS, errorbuffer,
+                               sizeof(errorbuffer) / sizeof(errorbuffer[0]));
+  BUFFER_OUTPUT
+  ASSERT(rc == sizeof("replacement $' or $_ not supported with partial match") - 1 &&
+             pcre2_strcmp_c8(errorbuffer,
+                             "replacement $' or $_ not supported with partial match") == 0,
+         "pcre2_get_error_message(partial substitution)");
+
+  int last_match_error = PCRE2_ERROR_FRESHMATCHDATA;
+
+  rc = pcre2_get_error_message(last_match_error, errorbuffer,
+                               sizeof(errorbuffer) / sizeof(errorbuffer[0]));
+  BUFFER_OUTPUT
+  ASSERT(rc == sizeof("match data object has not been used by any match function") - 1 &&
+             pcre2_strcmp_c8(errorbuffer,
+                             "match data object has not been used by any match function") == 0,
+         "pcre2_get_error_message(last match error)");
+
+  {
+    const int invalid_errorcodes[] = {
+      INT_MIN, INT_MIN + 1, INT_MAX, 1, COMPILE_ERROR_BASE - 1,
+      last_compile_error + 1, last_match_error - 1
+    };
+
+    for (size_t i = 0; i < sizeof(invalid_errorcodes) / sizeof(invalid_errorcodes[0]); i++)
+    {
+      rc = pcre2_get_error_message(invalid_errorcodes[i], NULL, 0);
+      ASSERT(rc == PCRE2_ERROR_BADDATA, "pcre2_get_error_message(invalid code, null)");
+
+      errorbuffer[0] = CHAR_A;
+      errorbuffer[1] = CHAR_B;
+      rc = pcre2_get_error_message(invalid_errorcodes[i], errorbuffer, 0);
+      ASSERT(rc == PCRE2_ERROR_BADDATA && errorbuffer[0] == CHAR_A && errorbuffer[1] == CHAR_B,
+             "pcre2_get_error_message(invalid code, zero code units)");
+
+      rc = pcre2_get_error_message(invalid_errorcodes[i], errorbuffer, 9);
+      ASSERT(rc == PCRE2_ERROR_BADDATA && errorbuffer[0] == CHAR_A && errorbuffer[1] == CHAR_B,
+             "pcre2_get_error_message(invalid code)");
+    }
+  }
+
 #undef BUFFER_OUTPUT
 
   /* ----------------------- pcre2_maketables -------------------------------- */
@@ -6871,6 +6971,8 @@ unittest(void)
   test_tables = pcre2_maketables(test_gen_context);
   ASSERT(test_tables != NULL, "pcre2_maketables()");
   pcre2_maketables_free(test_gen_context, test_tables);
+  pcre2_maketables_free(test_gen_context, NULL);
+  pcre2_maketables_free(NULL, NULL);
 
   mallocs_until_failure = 0;
   test_tables = pcre2_maketables(test_gen_context);
@@ -6882,6 +6984,9 @@ unittest(void)
 
   rc = pcre2_callout_enumerate(NULL, callout_enumerate_function_void, NULL);
   ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_callout_enumerate(null)");
+
+  rc = pcre2_callout_enumerate(invalid_code, NULL, NULL);
+  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_callout_enumerate(null callback)");
 
   rc = pcre2_callout_enumerate(invalid_code, callout_enumerate_function_void, NULL);
   ASSERT(rc == PCRE2_ERROR_BADMAGIC, "pcre2_callout_enumerate(invalid)");
@@ -6895,6 +7000,10 @@ unittest(void)
   test_compiled_code =
       pcre2_compile(callout_int_pattern, PCRE2_ZERO_TERMINATED, 0, &errorcode, &erroroffset, NULL);
   ASSERT(test_compiled_code != NULL, "test pattern compilation");
+
+  rc = pcre2_callout_enumerate(test_compiled_code, NULL, &errorcode);
+  ASSERT(rc == PCRE2_ERROR_NULL,
+         "pcre2_callout_enumerate(null callback, valid code)");
 
   rc = pcre2_callout_enumerate(test_compiled_code, callout_enumerate_function_void, &errorcode);
   ASSERT(rc == 0, "pcre2_callout_enumerate(void)");
@@ -6923,13 +7032,54 @@ unittest(void)
       pcre2_compile(capture_pattern, PCRE2_ZERO_TERMINATED, 0, &errorcode, &erroroffset, NULL);
   ASSERT(test_compiled_code != NULL, "test pattern compilation");
 
+  {
+    PCRE2_SPTR first = NULL, last = NULL;
+    rc = pcre2_substring_nametable_scan(test_compiled_code, name_n, &first, &last);
+    ASSERT(rc > 0 && first != NULL && first == last, "pcre2_substring_nametable_scan(entries)");
+    rc = pcre2_substring_nametable_scan(test_compiled_code, name_n, NULL, NULL);
+    ASSERT(rc == 1, "pcre2_substring_nametable_scan(number)");
+    last = NULL;
+    rc = pcre2_substring_nametable_scan(test_compiled_code, name_n, NULL, &last);
+    ASSERT(rc == 1 && last == NULL, "pcre2_substring_nametable_scan(ignored lastptr)");
+  }
+
   pcre2_match_data_free(test_match_data);
   test_match_data = pcre2_match_data_create_from_pattern(test_compiled_code, test_gen_context);
   ASSERT(test_match_data != NULL, "pcre2_match_data_create()");
 
+  /* Test before any match has been attempted. */
+
+  sizeval = 4;
+  sptrval = NULL;
+  stringlist = NULL;
+  lengthslist = NULL;
+  rc = pcre2_substring_copy_byname(test_match_data, name_n, copy_buf, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA, "pcre2_substring_copy_byname(fresh)");
+  rc = pcre2_substring_copy_bynumber(test_match_data, 1, copy_buf, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA, "pcre2_substring_copy_bynumber(fresh)");
+  rc = pcre2_substring_get_byname(test_match_data, name_n, &sptrval, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA && sptrval == NULL, "pcre2_substring_get_byname(fresh)");
+  rc = pcre2_substring_get_bynumber(test_match_data, 1, &sptrval, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA && sptrval == NULL, "pcre2_substring_get_bynumber(fresh)");
+  rc = pcre2_substring_length_byname(test_match_data, name_n, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA, "pcre2_substring_length_byname(fresh)");
+  rc = pcre2_substring_length_bynumber(test_match_data, 1, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA, "pcre2_substring_length_bynumber(fresh)");
+  rc = pcre2_substring_list_get(test_match_data, &stringlist, &lengthslist);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA && stringlist == NULL && lengthslist == NULL,
+         "pcre2_substring_list_get(fresh)");
+
   rc = pcre2_match(test_compiled_code, subject_abcz, PCRE2_ZERO_TERMINATED, 0, 0, test_match_data,
                    NULL);
   ASSERT(rc == 2, "pcre2_match()");
+
+  sizeval = 0;
+  rc = pcre2_substring_get_byname(test_match_data, name_n, &sptrval, &sizeval);
+  ASSERT(rc == 0 && sptrval != NULL && sizeval == 2 && sptrval[2] == 0 &&
+             memcmp(sptrval, subject_abcz + 1, 2 * sizeof(PCRE2_UCHAR)) == 0,
+         "pcre2_substring_get_byname()");
+  pcre2_substring_free(sptrval);
+  sptrval = NULL;
 
   /* Test the functions with insufficient buffer size. It hardly seems worth
   adding controls to the pcre2test input file format to exercise this case. */
@@ -7015,6 +7165,23 @@ unittest(void)
   rc = pcre2_substring_get_bynumber(test_match_data, 1, &sptrval, &sizeval);
   ASSERT(rc == PCRE2_ERROR_NOMATCH && sptrval == NULL, "pcre2_substring_get_bynumber(no match)");
 
+  /* Test after an early match failure where match_data->code was not set. */
+
+  pcre2_match_data_free(test_match_data);
+  test_match_data = pcre2_match_data_create(10, NULL);
+  ASSERT(test_match_data != NULL, "pcre2_match_data_create(early failure)");
+
+  rc = pcre2_match(test_compiled_code, subject_abcz, 4, 10, 0, test_match_data, NULL);
+  ASSERT(rc == PCRE2_ERROR_BADOFFSET, "pcre2_match(badoffset)");
+
+  sizeval = 4;
+  rc = pcre2_substring_copy_byname(test_match_data, name_n, copy_buf, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_BADOFFSET, "pcre2_substring_copy_byname(early failure)");
+  rc = pcre2_substring_get_byname(test_match_data, name_n, &sptrval, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_BADOFFSET && sptrval == NULL, "pcre2_substring_get_byname(early failure)");
+  rc = pcre2_substring_length_byname(test_match_data, name_n, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_BADOFFSET, "pcre2_substring_length_byname(early failure)");
+
   /* ------------- pcre2_substitute with PCRE2_SUBSTITUTE_MATCHED ------------ */
 
   /* There are some specific edge cases here that would be a pain to exercise via
@@ -7047,6 +7214,17 @@ unittest(void)
                         PCRE2_SUBSTITUTE_MATCHED, test_match_data, NULL, NULL, 0, replace_buf,
                         &sizeval);
   ASSERT(rc == 1, "pcre2_substitute(baseline)");
+
+  /* NULL code or NULL blength should return PCRE2_ERROR_NULL */
+  rc = pcre2_substitute(NULL, substitute_subject, PCRE2_ZERO_TERMINATED, 0,
+                        PCRE2_SUBSTITUTE_MATCHED, test_match_data, NULL,
+                        NULL, 0, replace_buf, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_substitute(NULL code)");
+
+  rc = pcre2_substitute(test_compiled_code, substitute_subject,
+                        PCRE2_ZERO_TERMINATED, 0, PCRE2_SUBSTITUTE_MATCHED,
+                        test_match_data, NULL, NULL, 0, replace_buf, NULL);
+  ASSERT(rc == PCRE2_ERROR_NULL, "pcre2_substitute(NULL blength)");
 
   /* Move the subject pointer, but keep the contents and length the same */
   memcpy(substitute_subject + 1, subject_abcz, sizeof(subject_abcz));
@@ -7102,8 +7280,56 @@ unittest(void)
     ASSERT(serialize_code != NULL, "serialize setup");
     rc = pcre2_serialize_encode((const pcre2_code **)&serialize_code, 1, &serialized_bytes,
                                 &serialized_size, NULL);
-    pcre2_code_free(serialize_code);
     ASSERT(rc == 1 && serialized_bytes != NULL, "serialize setup");
+
+    {
+      uint8_t *null_bytes = (uint8_t *)1;
+      PCRE2_SIZE null_size = 999;
+      rc = pcre2_serialize_encode(NULL, 1, &null_bytes, &null_size, NULL);
+      ASSERT(rc == PCRE2_ERROR_NULL && null_bytes == NULL && null_size == 0,
+             "pcre2_serialize_encode(null codes)");
+
+      null_bytes = (uint8_t *)1;
+      null_size = 999;
+      rc = pcre2_serialize_encode((const pcre2_code **)&serialize_code, 0, &null_bytes, &null_size, NULL);
+      ASSERT(rc == PCRE2_ERROR_BADDATA && null_bytes == NULL && null_size == 0,
+             "pcre2_serialize_encode(zero codes)");
+    }
+
+    {
+      uint8_t *shifted = malloc(serialized_size + sizeof(pcre2_serialized_data));
+      ASSERT(shifted != NULL, "serialized stream copy");
+      for (size_t offset = 0; offset < sizeof(pcre2_serialized_data); offset++)
+      {
+        memcpy(shifted + offset, serialized_bytes, serialized_size);
+        ASSERT(pcre2_serialize_get_number_of_codes(shifted + offset) == 1,
+               "serialized count at arbitrary byte alignment");
+        rc = pcre2_serialize_decode(decode_codes, 1, shifted + offset, NULL);
+        ASSERT(rc == 1 && decode_codes[0] != NULL, "decode at arbitrary byte alignment");
+        pcre2_code_free(decode_codes[0]);
+        decode_codes[0] = NULL;
+      }
+      free(shifted);
+
+      int32_t counts[] = { 0, -1, INT32_MIN };
+      pcre2_serialized_data saved_header;
+      memcpy(&saved_header, serialized_bytes, sizeof(saved_header));
+      for (size_t i = 0; i < sizeof(counts) / sizeof(counts[0]); i++)
+      {
+        memcpy(serialized_bytes + offsetof(pcre2_serialized_data, number_of_codes),
+               &counts[i], sizeof(counts[i]));
+        decode_codes[0] = serialize_code;
+        ASSERT(pcre2_serialize_get_number_of_codes(serialized_bytes) == PCRE2_ERROR_BADSERIALIZEDDATA,
+               "serialized count sanity check");
+        rc = pcre2_serialize_decode(decode_codes, 1, serialized_bytes, NULL);
+        ASSERT(rc == PCRE2_ERROR_BADSERIALIZEDDATA && decode_codes[0] == serialize_code,
+               "decode count error leaves output unchanged");
+      }
+      memcpy(serialized_bytes, &saved_header, sizeof(saved_header));
+      decode_codes[0] = NULL;
+    }
+
+    pcre2_code_free(serialize_code);
 
     /* goto 1: blocksize <= sizeof(pcre2_real_code) */
     {

@@ -84,6 +84,8 @@ there will be many irrelevant consequential errors. */
 #include <stdlib.h>
 #include <string.h>
 
+#include "pcre2_util.h"
+
 /* Macros to make boolean values more obvious. The #ifndef is to pacify
 compiler warnings in environments where these macros are defined elsewhere.
 Unfortunately, there is no way to do the same for the typedef. */
@@ -93,12 +95,6 @@ typedef int BOOL;
 #define FALSE 0
 #define TRUE  1
 #endif
-
-/* Helper macro for static (compile-time) assertions. Can be used inside
-functions, or at the top-level of a file. */
-#define STATIC_ASSERT_JOIN(a, b) a##b
-#define STATIC_ASSERT(cond, msg) \
-  typedef int STATIC_ASSERT_JOIN(static_assertion_, msg)[(cond) ? 1 : -1]
 
 /* Valgrind (memcheck) support */
 
@@ -217,14 +213,22 @@ not rely on this. */
 
 #define COMPILE_ERROR_BASE 100
 
-/* The initial frames vector for remembering pcre2_match() backtracking points
-is allocated on the heap, of this size (bytes) or ten times the frame size if
-larger, unless the heap limit is smaller. Typical frame sizes are a few hundred
-bytes (it depends on the number of capturing parentheses) so 20KiB handles
-quite a few frames. A larger vector on the heap is obtained for matches that
-need more frames, subject to the heap limit. */
+/* Some non-configurable limits, based on the current implementation. The field
+sizes used do not currently allow higher values. */
 
-#define START_FRAMES_SIZE 20480
+#define MAX_CALLOUT_NUMBER 255
+#define MAX_OVECTOR_COUNT  65535u
+
+/* The initial frames vector for remembering pcre2_match() backtracking points
+is allocated on the heap, of size START_FRAMES_SIZE (bytes), or,
+START_FRAMES_COUNT times the frame size if larger, unless the heap limit is
+smaller. Typical frame sizes are a few hundred bytes (it depends on the number
+of capturing parentheses) so 20KiB handles quite a few frames. A larger vector
+on the heap is obtained for matches that need more frames, subject to the heap
+limit. */
+
+#define START_FRAMES_SIZE  20480
+#define START_FRAMES_COUNT 10
 
 /* For DFA matching, an initial internal workspace vector is allocated on the
 stack. The heap is used only if this turns out to be too small. */
@@ -256,6 +260,8 @@ rewritten by a user so as not to use loops, because in some environments this
 gives a significant performance advantage, and it seems never to do any harm.
 */
 
+/* These macros assume valid UTF-8. */
+
 /* Base macro to pick up the remaining bytes of a UTF-8 character, not
 advancing the pointer. */
 
@@ -265,15 +271,9 @@ advancing the pointer. */
       c = ((c & 0x1fu) << 6) | (eptr[1] & 0x3fu);                                       \
     else if ((c & 0x10u) == 0)                                                          \
       c = ((c & 0x0fu) << 12) | ((eptr[1] & 0x3fu) << 6) | (eptr[2] & 0x3fu);           \
-    else if ((c & 0x08u) == 0)                                                          \
+    else                                                                               \
       c = ((c & 0x07u) << 18) | ((eptr[1] & 0x3fu) << 12) | ((eptr[2] & 0x3fu) << 6) |  \
           (eptr[3] & 0x3fu);                                                            \
-    else if ((c & 0x04u) == 0)                                                          \
-      c = ((c & 0x03u) << 24) | ((eptr[1] & 0x3fu) << 18) | ((eptr[2] & 0x3fu) << 12) | \
-          ((eptr[3] & 0x3fu) << 6) | (eptr[4] & 0x3fu);                                 \
-    else                                                                                \
-      c = ((c & 0x01u) << 30) | ((eptr[1] & 0x3fu) << 24) | ((eptr[2] & 0x3fu) << 18) | \
-          ((eptr[3] & 0x3fu) << 12) | ((eptr[4] & 0x3fu) << 6) | (eptr[5] & 0x3fu);     \
   }
 
 /* Base macro to pick up the remaining bytes of a UTF-8 character, advancing
@@ -288,23 +288,11 @@ the pointer. */
       c = ((c & 0x0fu) << 12) | ((*eptr & 0x3fu) << 6) | (eptr[1] & 0x3fu);           \
       eptr += 2;                                                                      \
     }                                                                                 \
-    else if ((c & 0x08u) == 0)                                                        \
+    else                                                                             \
     {                                                                                 \
       c = ((c & 0x07u) << 18) | ((*eptr & 0x3fu) << 12) | ((eptr[1] & 0x3fu) << 6) |  \
           (eptr[2] & 0x3fu);                                                          \
       eptr += 3;                                                                      \
-    }                                                                                 \
-    else if ((c & 0x04u) == 0)                                                        \
-    {                                                                                 \
-      c = ((c & 0x03u) << 24) | ((*eptr & 0x3fu) << 18) | ((eptr[1] & 0x3fu) << 12) | \
-          ((eptr[2] & 0x3fu) << 6) | (eptr[3] & 0x3fu);                               \
-      eptr += 4;                                                                      \
-    }                                                                                 \
-    else                                                                              \
-    {                                                                                 \
-      c = ((c & 0x01u) << 30) | ((*eptr & 0x3fu) << 24) | ((eptr[1] & 0x3fu) << 18) | \
-          ((eptr[2] & 0x3fu) << 12) | ((eptr[3] & 0x3fu) << 6) | (eptr[4] & 0x3fu);   \
-      eptr += 5;                                                                      \
     }                                                                                 \
   }
 
@@ -323,23 +311,11 @@ advancing the pointer, incrementing the length. */
       c = ((c & 0x0fu) << 12) | ((eptr[1] & 0x3fu) << 6) | (eptr[2] & 0x3fu);           \
       len += 2;                                                                         \
     }                                                                                   \
-    else if ((c & 0x08u) == 0)                                                          \
+    else                                                                               \
     {                                                                                   \
       c = ((c & 0x07u) << 18) | ((eptr[1] & 0x3fu) << 12) | ((eptr[2] & 0x3fu) << 6) |  \
           (eptr[3] & 0x3fu);                                                            \
       len += 3;                                                                         \
-    }                                                                                   \
-    else if ((c & 0x04u) == 0)                                                          \
-    {                                                                                   \
-      c = ((c & 0x03u) << 24) | ((eptr[1] & 0x3fu) << 18) | ((eptr[2] & 0x3fu) << 12) | \
-          ((eptr[3] & 0x3fu) << 6) | (eptr[4] & 0x3fu);                                 \
-      len += 4;                                                                         \
-    }                                                                                   \
-    else                                                                                \
-    {                                                                                   \
-      c = ((c & 0x01u) << 30) | ((eptr[1] & 0x3fu) << 24) | ((eptr[2] & 0x3fu) << 18) | \
-          ((eptr[3] & 0x3fu) << 12) | ((eptr[4] & 0x3fu) << 6) | (eptr[5] & 0x3fu);     \
-      len += 5;                                                                         \
     }                                                                                   \
   }
 
@@ -582,7 +558,12 @@ total length of the tables. */
 #define fcc_offset    256                          /* Flip case */
 #define cbits_offset  512                          /* Character classes */
 #define ctypes_offset (cbits_offset + cbit_length) /* Character types */
-#define TABLES_LENGTH (ctypes_offset + 256)
+#define ctypes_end    (ctypes_offset + 256)
+
+#define TABLES_LENGTH 1088
+#if TABLES_LENGTH != ctypes_end
+#error "TABLES_LENGTH must be updated to match ctypes_end"
+#endif
 
 /* Private flags used in compile_context.optimization_flags */
 
@@ -2189,10 +2170,6 @@ typedef struct pcre2_serialized_data {
 #error EBCDIC is not supported for the 16-bit or 32-bit libraries
 #endif
 
-/* This is the largest non-UTF code point. */
-
-#define MAX_NON_UTF_CHAR (0xffffffffU >> (32 - PCRE2_CODE_UNIT_WIDTH))
-
 /* Internal shared data tables and variables. These are used by more than one
 of the exported public functions. They have to be "external" in the C sense,
 but are not part of the PCRE2 public API. Although the data for some of them is
@@ -2201,11 +2178,10 @@ libraries can be simultaneously linked to a single application. However, UTF-8
 tables are needed only when compiling the 8-bit library. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
-extern const int PRIV(utf8_table1)[];
-extern const unsigned PRIV(utf8_table1_size);
-extern const int PRIV(utf8_table2)[];
-extern const int PRIV(utf8_table3)[];
-extern const uint8_t PRIV(utf8_table4)[];
+extern const int PRIV(utf8_table1)[4];
+extern const int PRIV(utf8_table2)[4];
+extern const int PRIV(utf8_table3)[4];
+extern const uint8_t PRIV(utf8_table4)[56];
 #endif
 
 #define _pcre2_OP_lengths              PCRE2_SUFFIX(_pcre2_OP_lengths_)
@@ -2348,8 +2324,6 @@ extern BOOL _pcre2_xclass(uint32_t, PCRE2_SPTR, const uint8_t *, BOOL);
 extern BOOL _pcre2_eclass(uint32_t, PCRE2_SPTR, PCRE2_SPTR, const uint8_t *, BOOL);
 
 #endif /* PCRE2_CODE_UNIT_WIDTH */
-
-#include "pcre2_util.h"
 
 #endif /* PCRE2_INTERNAL_H_IDEMPOTENT_GUARD */
 

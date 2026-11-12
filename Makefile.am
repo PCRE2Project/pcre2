@@ -17,11 +17,10 @@ PHONY_TARGETS=
 
 dist_doc_DATA = \
   AUTHORS.md \
-  COPYING \
   ChangeLog \
   LICENCE.md \
   NEWS \
-  README \
+  README.md \
   SECURITY.md \
   SUPPORT-LIFECYCLE.md \
   doc/pcre2.txt \
@@ -67,6 +66,7 @@ dist_html_DATA = \
   doc/html/pcre2_get_ovector_pointer.html \
   doc/html/pcre2_get_parens_nest_limit.html \
   doc/html/pcre2_get_startchar.html \
+  doc/html/pcre2_get_subject.html \
   doc/html/pcre2_jit_compile.html \
   doc/html/pcre2_jit_free_unused_memory.html \
   doc/html/pcre2_jit_match.html \
@@ -142,6 +142,17 @@ dist_html_DATA = \
   doc/html/pcre2test.html \
   doc/html/pcre2unicode.html
 
+dist_htmlcss_DATA = doc/html/css/document.css doc/html/css/standalone.css
+htmlcssdir = $(htmldir)/css
+dist_htmlimages_DATA = \
+  doc/html/images/pcre2-header-dark.svg \
+  doc/html/images/pcre2-header-light.svg \
+  doc/html/images/pcre2-hero-dark-hover.svg \
+  doc/html/images/pcre2-hero-dark.svg \
+  doc/html/images/pcre2-hero-light-hover.svg \
+  doc/html/images/pcre2-hero-light.svg
+htmlimagesdir = $(htmldir)/images
+
 dist_man_MANS = \
   doc/man/pcre2-config.1 \
   doc/man/pcre2.3 \
@@ -177,6 +188,7 @@ dist_man_MANS = \
   doc/man/pcre2_get_ovector_pointer.3 \
   doc/man/pcre2_get_parens_nest_limit.3 \
   doc/man/pcre2_get_startchar.3 \
+  doc/man/pcre2_get_subject.3 \
   doc/man/pcre2_jit_compile.3 \
   doc/man/pcre2_jit_free_unused_memory.3 \
   doc/man/pcre2_jit_match.3 \
@@ -303,13 +315,14 @@ EXTRA_DIST += \
 # These files contain maintenance information
 
 EXTRA_DIST += \
-  NON-AUTOTOOLS-BUILD \
+  NON-AUTOTOOLS-BUILD.md \
   HACKING
 
 # These are the documentation files that are included in the tarball but not
 # installed in the system.
 
 EXTRA_DIST += \
+  doc/index.adoc \
   doc/pcre2-config.adoc \
   doc/pcre2.adoc \
   doc/pcre2_callout_enumerate.adoc \
@@ -344,6 +357,7 @@ EXTRA_DIST += \
   doc/pcre2_get_ovector_pointer.adoc \
   doc/pcre2_get_parens_nest_limit.adoc \
   doc/pcre2_get_startchar.adoc \
+  doc/pcre2_get_subject.adoc \
   doc/pcre2_jit_compile.adoc \
   doc/pcre2_jit_free_unused_memory.adoc \
   doc/pcre2_jit_match.adoc \
@@ -443,7 +457,8 @@ EXTRA_DIST += \
   patches/pcre2-10.48-Fix-repeated-substitute-escapes.patch \
   patches/pcre2-10.48-Fix-scan-prefix-repeat-reset.patch \
   patches/pcre2-10.48-Keep-escape-error-offset-in-pattern.patch \
-  patches/pcre2-10.48-Write-serialization-padding.patch
+  patches/pcre2-10.48-Write-serialization-padding.patch \
+  patches/pcre2-10.49-Fix-large-stack-allocation.patch
 
 # These are support files for building with Bazel or Zig
 
@@ -879,6 +894,10 @@ endif # WITH_GCOV
 TESTS += RunTest
 dist_noinst_SCRIPTS += RunTest RunTest.py
 
+## The Perl-comparison tests.
+
+dist_noinst_SCRIPTS += PerlTest.sh RunPerlTest
+
 ## When the 8-bit library is configured, pcre2grep will have been built.
 
 if WITH_PCRE2_8
@@ -998,13 +1017,13 @@ EXTRA_DIST += \
   testdata/testoutputheap-16 \
   testdata/testoutputheap-32 \
   testdata/testoutputheap-8 \
-  testdata/valgrind-jit.supp \
-  perltest.sh
+  testdata/valgrind-jit.supp
 
-# RunTest and RunGrepTest should clean up after themselves, but just in case
-# they don't, add their working files to CLEANFILES.
+# RunTest(.py) and RunGrepTest(.py) should clean up after themselves, but just
+# in case they don't, add their working files to CLEANFILES.
 
 CLEANFILES += \
+  testbtables \
   testSinput \
   testSoutput \
   test3input \
@@ -1015,14 +1034,19 @@ CLEANFILES += \
   test3outputD \
   test3outputE \
   test3outputF \
+  testsaved1 \
+  testsaved2 \
   testtry \
+  testtry2 \
   teststdout \
-  teststderr \
+  teststdoutgrep \
   teststderrgrep \
   testtemp1grep \
   testtemp2grep \
   testtrygrep \
-  testNinputgrep
+  testNinputgrep \
+  ./-testtemp1grep \
+  ./--
 
 testoutput-clean:
 	-rm -rf testoutput8 testoutput8-jit testoutput8-dfa
@@ -1180,6 +1204,19 @@ EXTRA_DIST += \
   cmake/PCRE2WarningAsError.cmake \
   src/config-cmake.h.in \
   CMakeLists.txt
+
+## Meson support
+
+EXTRA_DIST += \
+  meson/FindBZip2/meson.build \
+  meson/FindEditline/meson.build \
+  meson/FindReadline/meson.build \
+  meson/PCRE2CheckVscript/meson.build \
+  meson/PCRE2CheckVscript/test-map-file.sym.in \
+  meson/PCRE2UseSystemExtensions/meson.build \
+  src/config-meson.h.in \
+  meson.build \
+  meson.options
 
 ## Set the special make and Automake targets. We could very easily simply
 ## redefine these targets to append prerequisites to them, rather than

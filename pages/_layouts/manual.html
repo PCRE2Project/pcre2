@@ -1,0 +1,10 @@
+---
+layout: base
+---
+{% unless page.manual_index %}<script src="{{ '/js/toc.js' | relative_url }}" defer></script>{% endunless %}
+{% include nav.html %}
+<main>
+<div class="main-content document-page">
+    {{ content }}
+</div>
+</main>

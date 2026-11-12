@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: pcre2_substring_length_byname
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 26 September 2025
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_SUBSTRING_LENGTH_BYNAME" "3" "26 September 2025" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_SUBSTRING_LENGTH_BYNAME" "3" "26 September 2025" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -34,11 +34,11 @@ pcre2_substring_length_byname \- find length of named substring
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\fBint\fP pcre2_substring_length_byname(\fBpcre2_match_data\fP *\fImatch_data\fP,
-                                  \fBPCRE2_SPTR\fP \fIstringname\fP,
-                                  \fBPCRE2_SIZE\fP *\fIsizeptr\fP);
+int\fP \f(CBpcre2_substring_length_byname\fP\f(CR(pcre2_match_data *\fP\f(CImatch_data\fP\f(CR,
+                                  PCRE2_SPTR\fP \f(CIstringname\fP\f(CR,
+                                  PCRE2_SIZE *\fP\f(CIsizeptr\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -50,23 +50,23 @@ The arguments are:
 .RS 4
 .PD 0
 .TP 11
-\fImatch_data\fP
+\f(CImatch_data\fP
 .ad l
 The match data block for the match
 .TP 11
-\fIstringname\fP
+\f(CIstringname\fP
 .ad l
 The substring name
 .TP 11
-\fIsizeptr\fP
+\f(CIsizeptr\fP
 .ad l
-Where to return the length, or \f(CRNULL\fP
+Where to return the length, or \f(CBNULL\fP
 .PD
 .RE
 .PP
 .ad l
 .sp
-The third argument may be \f(CRNULL\fP if all you want to know is whether or not a
+The third argument may be \f(CBNULL\fP if all you want to know is whether or not a
 substring is set. The yield is zero on success, or a negative error code
 otherwise.
 .sp

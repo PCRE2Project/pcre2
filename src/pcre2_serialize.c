@@ -70,16 +70,14 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
                        uint8_t **serialized_bytes, PCRE2_SIZE *serialized_size,
                        pcre2_general_context *gcontext)
 {
-  uint8_t *bytes;
-  uint8_t *dst_bytes;
-  int32_t i;
-  PCRE2_SIZE total_size;
-  const pcre2_real_code *re;
-  const uint8_t *tables;
-  pcre2_serialized_data *data;
-
   const pcre2_memctl *memctl =
       (gcontext != NULL) ? &gcontext->memctl : &PRIV(default_compile_context).memctl;
+
+  if (serialized_bytes != NULL)
+    *serialized_bytes = NULL;
+
+  if (serialized_size != NULL)
+    *serialized_size = 0;
 
   if (codes == NULL || serialized_bytes == NULL || serialized_size == NULL)
     return PCRE2_ERROR_NULL;
@@ -88,25 +86,30 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
     return PCRE2_ERROR_BADDATA;
 
   /* Compute total size. */
-  total_size = sizeof(pcre2_serialized_data) + TABLES_LENGTH;
-  tables = NULL;
+  PCRE2_SIZE total_size = sizeof(pcre2_serialized_data) + TABLES_LENGTH;
+  const uint8_t *tables = NULL;
 
-  for (i = 0; i < number_of_codes; i++)
+  for (int32_t i = 0; i < number_of_codes; i++)
   {
     if (codes[i] == NULL)
       return PCRE2_ERROR_NULL;
-    re = (const pcre2_real_code *)(codes[i]);
+    const pcre2_code *re = (const pcre2_code *)(codes[i]);
     if (re->magic_number != MAGIC_NUMBER)
       return PCRE2_ERROR_BADMAGIC;
     if (tables == NULL)
       tables = re->tables;
     else if (tables != re->tables)
       return PCRE2_ERROR_MIXEDTABLES;
+    if (PCRE2_SIZE_MAX - re->blocksize < total_size)
+      return PCRE2_ERROR_NOMEMORY;
     total_size += re->blocksize;
   }
 
   /* Initialize the byte stream. */
-  bytes = memctl->malloc(total_size + sizeof(pcre2_memctl), memctl->memory_data);
+  if (PCRE2_SIZE_MAX - sizeof(pcre2_memctl) < total_size)
+    return PCRE2_ERROR_NOMEMORY;
+
+  uint8_t *bytes = memctl->malloc(total_size + sizeof(pcre2_memctl), memctl->memory_data);
   if (bytes == NULL)
     return PCRE2_ERROR_NOMEMORY;
 
@@ -114,20 +117,20 @@ pcre2_serialize_encode(const pcre2_code **codes, int32_t number_of_codes,
   memcpy(bytes, memctl, sizeof(pcre2_memctl));
   bytes += sizeof(pcre2_memctl);
 
-  data = (pcre2_serialized_data *)bytes;
+  pcre2_serialized_data *data = (pcre2_serialized_data *)bytes;
   data->magic = SERIALIZED_DATA_MAGIC;
   data->version = SERIALIZED_DATA_VERSION;
   data->config = SERIALIZED_DATA_CONFIG;
   data->number_of_codes = number_of_codes;
 
   /* Copy all compiled code data. */
-  dst_bytes = bytes + sizeof(pcre2_serialized_data);
+  uint8_t *dst_bytes = bytes + sizeof(pcre2_serialized_data);
   memcpy(dst_bytes, tables, TABLES_LENGTH);
   dst_bytes += TABLES_LENGTH;
 
-  for (i = 0; i < number_of_codes; i++)
+  for (int32_t i = 0; i < number_of_codes; i++)
   {
-    re = (const pcre2_real_code *)(codes[i]);
+    const pcre2_code *re = (const pcre2_code *)(codes[i]);
     (void)memcpy(dst_bytes, (const char *)re, re->blocksize);
 
     /* Certain fields in the compiled code block are re-set during
@@ -161,40 +164,35 @@ PCRE2_EXP_DEFN int32_t PCRE2_CALL_CONVENTION
 pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes, const uint8_t *bytes,
                        pcre2_general_context *gcontext)
 {
-  const pcre2_serialized_data *data = (const pcre2_serialized_data *)bytes;
   const pcre2_memctl *memctl =
       (gcontext != NULL) ? &gcontext->memctl : &PRIV(default_compile_context).memctl;
 
-  const uint8_t *src_bytes;
-  pcre2_real_code *dst_re = NULL;
-  uint8_t *tables;
-  int32_t i, j;
-  int32_t error;
-
   /* Sanity checks. */
 
-  if (data == NULL || codes == NULL)
+  if (bytes == NULL || codes == NULL)
     return PCRE2_ERROR_NULL;
   if (number_of_codes <= 0)
     return PCRE2_ERROR_BADDATA;
-  if (data->number_of_codes <= 0)
+  pcre2_serialized_data data;
+  memcpy(&data, bytes, sizeof(data));
+  if (data.number_of_codes <= 0)
     return PCRE2_ERROR_BADSERIALIZEDDATA;
-  if (data->magic != SERIALIZED_DATA_MAGIC)
+  if (data.magic != SERIALIZED_DATA_MAGIC)
     return PCRE2_ERROR_BADMAGIC;
-  if (data->version != SERIALIZED_DATA_VERSION)
+  if (data.version != SERIALIZED_DATA_VERSION)
     return PCRE2_ERROR_BADMODE;
-  if (data->config != SERIALIZED_DATA_CONFIG)
+  if (data.config != SERIALIZED_DATA_CONFIG)
     return PCRE2_ERROR_BADMODE;
 
-  if (number_of_codes > data->number_of_codes)
-    number_of_codes = data->number_of_codes;
+  if (number_of_codes > data.number_of_codes)
+    number_of_codes = data.number_of_codes;
 
-  src_bytes = bytes + sizeof(pcre2_serialized_data);
+  const uint8_t *src_bytes = bytes + sizeof(pcre2_serialized_data);
 
   /* Decode tables. The reference count for the tables is stored immediately
   following them. */
 
-  tables = memctl->malloc(TABLES_LENGTH + sizeof(PCRE2_SIZE), memctl->memory_data);
+  uint8_t *tables = memctl->malloc(TABLES_LENGTH + sizeof(PCRE2_SIZE), memctl->memory_data);
   if (tables == NULL)
     return PCRE2_ERROR_NOMEMORY;
 
@@ -208,6 +206,9 @@ pcre2_serialize_decode(pcre2_code **codes, int32_t number_of_codes, const uint8_
   of the blocksize field is given its own name to ensure that it is the same here
   as in the block. */
 
+  pcre2_real_code *dst_re = NULL;
+  int32_t i;
+  int32_t error;
   for (i = 0; i < number_of_codes; i++)
   {
     CODE_BLOCKSIZE_TYPE blocksize;
@@ -257,7 +258,7 @@ cleanup:
   if (dst_re != NULL)
     memctl->free(dst_re, memctl->memory_data);
   memctl->free(tables, memctl->memory_data);
-  for (j = 0; j < i; j++)
+  for (int32_t j = 0; j < i; j++)
   {
     memctl->free(codes[j], memctl->memory_data);
     codes[j] = NULL;
@@ -274,18 +275,20 @@ cleanup:
 PCRE2_EXP_DEFN int32_t PCRE2_CALL_CONVENTION
 pcre2_serialize_get_number_of_codes(const uint8_t *bytes)
 {
-  const pcre2_serialized_data *data = (const pcre2_serialized_data *)bytes;
-
-  if (data == NULL)
+  if (bytes == NULL)
     return PCRE2_ERROR_NULL;
-  if (data->magic != SERIALIZED_DATA_MAGIC)
+  pcre2_serialized_data data;
+  memcpy(&data, bytes, sizeof(data));
+  if (data.number_of_codes <= 0)
+    return PCRE2_ERROR_BADSERIALIZEDDATA;
+  if (data.magic != SERIALIZED_DATA_MAGIC)
     return PCRE2_ERROR_BADMAGIC;
-  if (data->version != SERIALIZED_DATA_VERSION)
+  if (data.version != SERIALIZED_DATA_VERSION)
     return PCRE2_ERROR_BADMODE;
-  if (data->config != SERIALIZED_DATA_CONFIG)
+  if (data.config != SERIALIZED_DATA_CONFIG)
     return PCRE2_ERROR_BADMODE;
 
-  return data->number_of_codes;
+  return data.number_of_codes;
 }
 
 

@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: pcre2_maketables_free
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 03 September 2019
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_MAKETABLES_FREE" "3" "03 September 2019" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_MAKETABLES_FREE" "3" "03 September 2019" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -34,22 +34,21 @@ pcre2_maketables_free \- free character tables
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\fBvoid\fP pcre2_maketables_free(\fBpcre2_general_context\fP *\fIgcontext\fP,
-                           \fBconst\fP \fBuint8_t\fP *\fItables\fP);
+void\fP \f(CBpcre2_maketables_free\fP\f(CR(pcre2_general_context *\fP\f(CIgcontext\fP\f(CR,
+                           const uint8_t *\fP\f(CItables\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
 This function discards a set of character tables that were created by a call
-to
-pcre2_maketables().
+to \f(CBpcre2_maketables()\fP.
 .sp
-The \fIgcontext\fP parameter should match what was used in that call to
-account for any custom allocators that might be in use; if it is \f(CRNULL\fP
-the system \f(CRfree()\fP is used.
+The \f(CIgcontext\fP parameter should match what was used in that call to
+account for any custom allocators that might be in use; if it is \f(CBNULL\fP
+the system \f(CBfree\fP\f(CR()\fP is used.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

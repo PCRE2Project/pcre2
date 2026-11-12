@@ -617,12 +617,13 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
 
     switch (c)
     {
-      /* We can always possessify a greedy iterator at the end of the pattern,
-      which is reached after skipping over the final OP_KET. A non-greedy
-      iterator must never be possessified. */
+      /* A greedy iterator at the end of the pattern can be possessified unless
+      the whole pattern is called recursively, in which case it may have to
+      backtrack after returning from the call. A non-greedy iterator must never
+      be possessified. */
 
     case OP_END:
-      return base_list[1] != 0;
+      return base_list[1] != 0 && !cb->had_whole_pattern_recurse;
 
       /* When an iterator is at the end of certain kinds of group we can inspect
       what follows the group by skipping over the closing ket. Note that this

@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: pcre2_callout_enumerate
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 23 March 2017
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_CALLOUT_ENUMERATE" "3" "23 March 2017" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_CALLOUT_ENUMERATE" "3" "23 March 2017" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -34,34 +34,34 @@ pcre2_callout_enumerate \- enumerate callouts in a compiled pattern
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\fBint\fP pcre2_callout_enumerate(
-      \fBconst\fP \fBpcre2_code\fP *\fIcode\fP,
-      \fBint\fP (*\fIcallback\fP)(\fBpcre2_callout_enumerate_block\fP *\fIcallout_block\fP,
-                      \fBvoid\fP *\fIcallout_data\fP),
-      \fBvoid\fP *\fIcallout_data\fP);
+int\fP \f(CBpcre2_callout_enumerate\fP\f(CR(
+      const pcre2_code *\fP\f(CIcode\fP\f(CR,
+      int (*\fP\f(CIcallback\fP\f(CR)(pcre2_callout_enumerate_block *\fP\f(CIcallout_block\fP\f(CR,
+                      void *\fP\f(CIcallout_data\fP\f(CR),
+      void *\fP\f(CIcallout_data\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
-This function scans a compiled regular expression and calls the \f(CRcallback()\fP
+This function scans a compiled regular expression and calls the \f(CBcallback\fP\f(CR()\fP
 function for each callout within the pattern. The yield of the function is zero
 for success and non\-zero otherwise. The arguments are:
 .sp
 .RS 4
 .PD 0
 .TP 13
-\fIcode\fP
+\f(CIcode\fP
 .ad l
 Points to the compiled pattern
 .TP 13
-\fIcallback\fP
+\f(CIcallback\fP
 .ad l
 The callback function
 .TP 13
-\fIcallout_data\fP
+\f(CIcallout_data\fP
 .ad l
 User data that is passed to the callback
 .PD
@@ -69,49 +69,29 @@ User data that is passed to the callback
 .PP
 .ad l
 .sp
-The \f(CRcallback()\fP function is passed a pointer to a data block containing
+The \f(CBcallback\fP\f(CR()\fP function is passed a pointer to a data block containing
 the following fields (not necessarily in this order):
 .sp
-.RS 4
-.PD 0
-.TP 24
-\f(CRuint32_t\fP \fIversion\fP
-.ad l
-Block version number
-.TP 24
-\f(CRuint32_t\fP \fIcallout_number\fP
-.ad l
-Number for numbered callouts
-.TP 24
-\fBPCRE2_SIZE\fP \fIpattern_position\fP
-.ad l
-Offset to next item in pattern
-.TP 24
-\fBPCRE2_SIZE\fP \fInext_item_length\fP
-.ad l
-Length of next item in pattern
-.TP 24
-\fBPCRE2_SIZE\fP \fIcallout_string_offset\fP
-.ad l
-Offset to string within pattern
-.TP 24
-\fBPCRE2_SIZE\fP \fIcallout_string_length\fP
-.ad l
-Length of callout string
-.TP 24
-\fBPCRE2_SPTR\fP \fIcallout_string\fP
-.ad l
-Points to callout string or is \f(CRNULL\fP
-.PD
-.RE
-.PP
-.ad l
+.ss \n[.ss]
+.nf
+.fam C
+\f(CRuint32_t\fP \f(CIversion\fP\f(CR;\fP\&                 \f(CI/* Block version number */\fP
+\f(CRuint32_t\fP \f(CIcallout_number\fP\f(CR;\fP\&          \f(CI/* Number for numbered callouts */\fP
+\f(CRPCRE2_SIZE\fP \f(CIpattern_position\fP\f(CR;\fP\&      \f(CI/* Offset to next item in pattern */\fP
+\f(CRPCRE2_SIZE\fP \f(CInext_item_length\fP\f(CR;\fP\&      \f(CI/* Length of next item in pattern */\fP
+\f(CRPCRE2_SIZE\fP \f(CIcallout_string_offset\fP\f(CR;\fP \f(CI/* Offset to string within pattern */\fP
+\f(CRPCRE2_SIZE\fP \f(CIcallout_string_length\fP\f(CR;\fP \f(CI/* Length of callout string */\fP
+\f(CRPCRE2_SPTR\fP \f(CIcallout_string\fP\f(CR;\fP\&        \f(CI/* Points to callout string or is
+                                     NULL */\fP
+.fam
+.fi
+.ss \n[.ss] 0
 .sp
-The second argument passed to the \f(CRcallback()\fP function is the callout data
-that was passed to pcre2_callout_enumerate(). The \f(CRcallback()\fP
+The second argument passed to the \f(CBcallback\fP\f(CR()\fP function is the callout data
+that was passed to \f(CBpcre2_callout_enumerate()\fP. The \f(CBcallback\fP\f(CR()\fP
 function must return zero for success. Any other value causes the pattern scan
 to stop, with the value being passed back as the result of
-pcre2_callout_enumerate().
+\f(CBpcre2_callout_enumerate()\fP.
 .sp
 There is a complete description of the PCRE2 native API in the
 \f(CRpcre2api\fP

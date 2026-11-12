@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: pcre2_set_newline
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 19 July 2017
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_SET_NEWLINE" "3" "19 July 2017" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_SET_NEWLINE" "3" "19 July 2017" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -34,10 +34,10 @@ pcre2_set_newline \- set the newline convention
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\fBint\fP pcre2_set_newline(\fBpcre2_compile_context\fP *\fIccontext\fP,
-                      \fBuint32_t\fP \fInewline\fP);
+int\fP \f(CBpcre2_set_newline\fP\f(CR(pcre2_compile_context *\fP\f(CIccontext\fP\f(CR,
+                      uint32_t\fP \f(CInewline\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -50,35 +50,35 @@ matching patterns. The second argument must be one of:
 .RS 4
 .PD 0
 .TP 22
-\fBPCRE2_NEWLINE_CR\fP
+\f(CBPCRE2_NEWLINE_CR\fP
 .ad l
 Carriage return only
 .TP 22
-\fBPCRE2_NEWLINE_LF\fP
+\f(CBPCRE2_NEWLINE_LF\fP
 .ad l
 Linefeed only
 .TP 22
-\fBPCRE2_NEWLINE_CRLF\fP
+\f(CBPCRE2_NEWLINE_CRLF\fP
 .ad l
-\f(CRCR\fP followed by \f(CRLF\fP only
+CR followed by LF only
 .TP 22
-\fBPCRE2_NEWLINE_ANYCRLF\fP
+\f(CBPCRE2_NEWLINE_ANYCRLF\fP
 .ad l
 Any of the above
 .TP 22
-\fBPCRE2_NEWLINE_ANY\fP
+\f(CBPCRE2_NEWLINE_ANY\fP
 .ad l
 Any Unicode newline sequence
 .TP 22
-\fBPCRE2_NEWLINE_NUL\fP
+\f(CBPCRE2_NEWLINE_NUL\fP
 .ad l
-The \f(CRNUL\fP character (binary zero)
+The NUL character (binary zero)
 .PD
 .RE
 .PP
 .ad l
 .sp
-The result is zero for success or \fBPCRE2_ERROR_BADDATA\fP if the second argument is
+The result is zero for success or \f(CBPCRE2_ERROR_BADDATA\fP if the second argument is
 invalid.
 .sp
 There is a complete description of the PCRE2 native API in the

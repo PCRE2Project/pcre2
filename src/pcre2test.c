@@ -209,20 +209,21 @@ claim to be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 #endif
 #endif
 
+#define PCRE2TEST_DEFAULT_OVECCOUNT   15         /* Default ovector count */
+#define PCRE2TEST_LOOPREPEAT          500000     /* Default loop count for timing */
+#define PCRE2TEST_PARENS_NEST_DEFAULT 220        /* Default parentheses nest limit */
+#define PCRE2TEST_REPLACE_BUFFSIZE    256        /* Code units for replacement buffer */
+
 #define CFORE_UNSET                UINT32_MAX /* Unset value for startend/cfail/cerror fields */
 #define CONVERT_UNSET              UINT32_MAX /* Unset value for convert_type/convert_length fields */
 #define MOD_STR_UNSET              UINT8_MAX  /* Sentinel length for unset string options */
 #define DFA_WS_DIMENSION           1000       /* Size of DFA workspace */
-#define DEFAULT_OVECCOUNT          15         /* Default ovector count */
 #define JUNK_OFFSET                0xdeadbeef /* For initializing ovector */
 #define LOCALESIZE                 32         /* Size of locale name */
-#define LOOPREPEAT                 500000     /* Default loop count for timing */
 #define MALLOCLISTSIZE             20         /* For remembering mallocs */
-#define PARENS_NEST_DEFAULT        220        /* Default parentheses nest limit */
 #define PATSTACKSIZE               20         /* Pattern stack for save/restore testing */
 #define REPLACE_MODSIZE            100        /* Field for reading 8-bit replacement */
 #define SUBSTITUTE_SUBJECT_MODSIZE 100        /* Field for reading 8-bit subject for substitute */
-#define REPLACE_BUFFSIZE           256        /* Code units for replacement buffer */
 
 /* Default JIT compile options */
 
@@ -306,6 +307,7 @@ needs to be when compiling one of the libraries). */
 #include "pcre2.h"
 #include "pcre2posix.h"
 #include "pcre2_internal.h"
+#include "pcre2_util.h"
 
 /* We need access to some of the data tables that PCRE2 uses. The previous
 definition of PCRE2_PCRE2TEST makes some minor changes in the files. The
@@ -674,7 +676,7 @@ datctl_zero(datctl *d)
   memset(d, 0, sizeof(datctl));
   d->replacement[0] = MOD_STR_UNSET;
   d->substitute_subject[0] = MOD_STR_UNSET;
-  d->oveccount = DEFAULT_OVECCOUNT;
+  d->oveccount = PCRE2TEST_DEFAULT_OVECCOUNT;
   d->copy_numbers[0] = -1;
   d->get_numbers[0] = -1;
   d->startend[0] = d->startend[1] = CFORE_UNSET;
@@ -1201,6 +1203,8 @@ colour_end(FILE *f)
 }
 
 /* cfprintf is like fprintf but takes a colour to wrap its output. */
+
+PCRE2_FORMAT_PRINTF(3, 4)
 static int
 cfprintf(int clr, FILE *file, const char *fmt, ...)
 {
@@ -1763,6 +1767,13 @@ ebcdic_to_ascii(uint32_t c)
 
 
 
+/* RFC 2279 encodings are confined to pcre2test, for constructing invalid UTF
+and representing non-UTF 32-bit values. The library tables support only RFC 3629. */
+
+static const int rfc2279_utf8_table1[] = { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff };
+static const int rfc2279_utf8_table2[] = { 0, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc };
+static const int rfc2279_utf8_table3[] = { 0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
+
 /*************************************************
 *      Convert UTF-8 character to code point     *
 *************************************************/
@@ -1810,7 +1821,7 @@ utf8_to_ord(PCRE2_SPTR8 utf8bytes, PCRE2_SPTR8 end, uint32_t *vptr)
   /* i now has a value in the range 1-5 */
 
   s = 6 * i;
-  d = (c & utf8_table3[i]) << s;
+  d = (c & rfc2279_utf8_table3[i]) << s;
 
   for (j = 0; j < i; j++)
   {
@@ -1826,8 +1837,8 @@ utf8_to_ord(PCRE2_SPTR8 utf8bytes, PCRE2_SPTR8 end, uint32_t *vptr)
 
   /* Check that encoding was the correct unique one */
 
-  for (j = 0; j < (int)utf8_table1_size; j++)
-    if (d <= (uint32_t)utf8_table1[j])
+  for (j = 0; j < (int)(sizeof(rfc2279_utf8_table1) / sizeof(rfc2279_utf8_table1[0])); j++)
+    if (d <= (uint32_t)rfc2279_utf8_table1[j])
       break;
   if (j != i)
     return -(i + 1);
@@ -1891,7 +1902,7 @@ utf16_to_ord(PCRE2_SPTR16 utf16units, PCRE2_SPTR16 end, uint32_t *vptr)
 *************************************************/
 
 /* This function takes an integer value in the range 0 - 0x7fffffff
-and encodes it as a UTF-8 character in 0 to 6 bytes. It is needed even when the
+and encodes it as a UTF-8 character in 1 to 6 bytes. It is needed even when the
 8-bit library is not supported, to generate UTF-8 output for non-ASCII
 characters.
 
@@ -1908,8 +1919,8 @@ ord_to_utf8(uint32_t cvalue, uint8_t *utf8bytes)
   int i, j;
   if (cvalue > 0x7fffffffu)
     return -1;
-  for (i = 0; i < (int)utf8_table1_size; i++)
-    if (cvalue <= (uint32_t)utf8_table1[i])
+  for (i = 0; i < (int)(sizeof(rfc2279_utf8_table1) / sizeof(rfc2279_utf8_table1[0])); i++)
+    if (cvalue <= (uint32_t)rfc2279_utf8_table1[i])
       break;
   utf8bytes += i;
   for (j = i; j > 0; j--)
@@ -1918,7 +1929,7 @@ ord_to_utf8(uint32_t cvalue, uint8_t *utf8bytes)
     cvalue >>= 6;
   }
 
-  *utf8bytes = utf8_table2[i] | cvalue;
+  *utf8bytes = rfc2279_utf8_table2[i] | cvalue;
   return i + 1;
 }
 
@@ -2459,7 +2470,7 @@ show_controls(int clr, uint32_t controls, uint32_t controls2, const char *before
   cfprintf(
       clr, outfile,
       "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%"
-      "s%s%s%s%s%s%s",
+      "s%s%s%s%s%s%s%s",
       before, ((controls & CTL_AFTERTEXT) != 0) ? " aftertext" : "",
       ((controls & CTL_ALLAFTERTEXT) != 0) ? " allaftertext" : "",
       ((controls & CTL_ALLCAPTURES) != 0) ? " allcaptures" : "",
@@ -3298,7 +3309,7 @@ c_option(const char *arg)
     }
 
     /* For VMS, return the value by setting a symbol, for certain values only. This
-  is contributed code which the PCRE2 developers have no means of testing. */
+    is contributed code which the PCRE2 developers have no means of testing. */
 
 #ifdef __VMS
 
@@ -3418,17 +3429,17 @@ c_option(const char *arg)
   printf("  \\C is %ssupported\n", optval ? "not " : "");
   printf("  Internal link size\n");
   (void)pcre2_config(PCRE2_CONFIG_LINKSIZE, &optval);
-  printf("    Requested = %d\n", optval);
+  printf("    Requested = %lu\n", (unsigned long)optval);
   (void)pcre2_config(PCRE2_CONFIG_EFFECTIVE_LINKSIZE, &optval);
-  printf("    Effective = %d\n", optval);
+  printf("    Effective = %lu\n", (unsigned long)optval);
   (void)pcre2_config(PCRE2_CONFIG_PARENSLIMIT, &optval);
-  printf("  Parentheses nest limit = %d\n", optval);
+  printf("  Parentheses nest limit = %lu\n", (unsigned long)optval);
   (void)pcre2_config(PCRE2_CONFIG_HEAPLIMIT, &optval);
-  printf("  Default heap limit = %d kibibytes\n", optval);
+  printf("  Default heap limit = %lu kibibytes\n", (unsigned long)optval);
   (void)pcre2_config(PCRE2_CONFIG_MATCHLIMIT, &optval);
-  printf("  Default match limit = %d\n", optval);
+  printf("  Default match limit = %lu\n", (unsigned long)optval);
   (void)pcre2_config(PCRE2_CONFIG_DEPTHLIMIT, &optval);
-  printf("  Default depth limit = %d\n", optval);
+  printf("  Default depth limit = %lu\n", (unsigned long)optval);
 
 #if defined SUPPORT_LIBREADLINE
   printf("  pcre2test has libreadline support\n");
@@ -4004,7 +4015,7 @@ main(int argc, char **argv)
       }
       else
       {
-        timeitm = LOOPREPEAT;
+        timeitm = PCRE2TEST_LOOPREPEAT;
       }
 
       if (both)
@@ -4143,7 +4154,7 @@ main(int argc, char **argv)
   /* Initialize things that cannot be done until we know which test mode we are
   running in. */
 
-  max_oveccount = DEFAULT_OVECCOUNT;
+  max_oveccount = PCRE2TEST_DEFAULT_OVECCOUNT;
 
   /* Initialise the globals for the current mode. */
 

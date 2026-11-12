@@ -1,6 +1,6 @@
 module(
     name = "pcre2",
-    version = "10.49-DEV",
+    version = "10.50-DEV",
     # Newer versions of Bazel complain about this setting. The change to ignore
     # compatibility_level was backported to Bazel 8.6 and Bazel 9.1, but not
     # Bazel 7. Removing it would therefore be equivalent to changing the

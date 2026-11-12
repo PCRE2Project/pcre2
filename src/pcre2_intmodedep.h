@@ -78,7 +78,9 @@ zero in order to simply clear the previous macros. */
 #undef IMM2_SIZE
 #undef MAX_255
 #undef MAX_MARK
+#undef MAX_NON_UTF_CHAR
 #undef MAX_PATTERN_SIZE
+#undef DEFAULT_MAX_PATTERN_SIZE_8_16
 #undef MAX_UTF_SINGLE_CU
 #undef NOT_FIRSTCU
 #undef PUT
@@ -107,7 +109,12 @@ easier to maintain, the storing and loading of offsets from the compiled code
 unit string is now handled by the macros that are defined here.
 
 The macros are controlled by the value of LINK_SIZE. This defaults to 2, but
-values of 3 or 4 are also supported. */
+values of 3 or 4 are also supported.
+
+GET and GET2 cast every code unit to unsigned int, including single-code-unit
+reads. The casts must precede any shifts: otherwise, integer promotion can
+convert code units to signed int, and shifting into the sign bit would be
+undefined behaviour. Casting the result of the shift is too late. */
 
 #ifndef CONFIGURED_LINK_SIZE
 #if LINK_SIZE == 2
@@ -121,20 +128,27 @@ values of 3 or 4 are also supported. */
 #endif
 #endif /* CONFIGURED_LINK_SIZE */
 
+/* The macros below define MAX_PATTERN_SIZE conditionally. For the sake of
+documentation only, this is the value used by almost all consumers (8-bit or
+16-bit, and LINK_SIZE at its default value). */
+
+#define DEFAULT_MAX_PATTERN_SIZE_8_16 65535
+
 /* ------------------- 8-bit support  ------------------ */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 
 #if CONFIGURED_LINK_SIZE == 2
 #define PUT(a, n, d)     (a[n] = (PCRE2_UCHAR)((d) >> 8)), (a[(n) + 1] = (PCRE2_UCHAR)((d) & 255))
-#define GET(a, n)        (unsigned int)(((a)[n] << 8) | (a)[(n) + 1])
+#define GET(a, n)        (((unsigned int)(a)[n] << 8) | (unsigned int)(a)[(n) + 1])
 #define MAX_PATTERN_SIZE (1 << 16)
 
 #elif CONFIGURED_LINK_SIZE == 3
 #define PUT(a, n, d)                                                         \
   (a[n] = (PCRE2_UCHAR)((d) >> 16)), (a[(n) + 1] = (PCRE2_UCHAR)((d) >> 8)), \
       (a[(n) + 2] = (PCRE2_UCHAR)((d) & 255))
-#define GET(a, n)        (unsigned int)(((a)[n] << 16) | ((a)[(n) + 1] << 8) | (a)[(n) + 2])
+#define GET(a, n) \
+  (((unsigned int)(a)[n] << 16) | ((unsigned int)(a)[(n) + 1] << 8) | (unsigned int)(a)[(n) + 2])
 #define MAX_PATTERN_SIZE (1 << 24)
 
 #elif CONFIGURED_LINK_SIZE == 4
@@ -142,7 +156,8 @@ values of 3 or 4 are also supported. */
   (a[n] = (PCRE2_UCHAR)((d) >> 24)), (a[(n) + 1] = (PCRE2_UCHAR)((d) >> 16)), \
       (a[(n) + 2] = (PCRE2_UCHAR)((d) >> 8)), (a[(n) + 3] = (PCRE2_UCHAR)((d) & 255))
 #define GET(a, n) \
-  (unsigned int)(((a)[n] << 24) | ((a)[(n) + 1] << 16) | ((a)[(n) + 2] << 8) | (a)[(n) + 3])
+  (((unsigned int)(a)[n] << 24) | ((unsigned int)(a)[(n) + 1] << 16) | \
+   ((unsigned int)(a)[(n) + 2] << 8) | (unsigned int)(a)[(n) + 3])
 #define MAX_PATTERN_SIZE (1 << 30) /* Keep it positive */
 
 #endif
@@ -156,14 +171,14 @@ values of 3 or 4 are also supported. */
 #undef LINK_SIZE
 #define LINK_SIZE        1
 #define PUT(a, n, d)     (a[n] = (PCRE2_UCHAR)(d))
-#define GET(a, n)        (a[n])
+#define GET(a, n)        ((unsigned int)(a)[n])
 #define MAX_PATTERN_SIZE (1 << 16)
 
 #elif CONFIGURED_LINK_SIZE == 3 || CONFIGURED_LINK_SIZE == 4
 #undef LINK_SIZE
 #define LINK_SIZE        2
 #define PUT(a, n, d)     (a[n] = (PCRE2_UCHAR)((d) >> 16)), (a[(n) + 1] = (PCRE2_UCHAR)((d) & 65535))
-#define GET(a, n)        (unsigned int)(((a)[n] << 16) | (a)[(n) + 1])
+#define GET(a, n)        (((unsigned int)(a)[n] << 16) | (unsigned int)(a)[(n) + 1])
 #define MAX_PATTERN_SIZE (1 << 30) /* Keep it positive */
 
 #endif
@@ -174,8 +189,8 @@ values of 3 or 4 are also supported. */
 #elif PCRE2_CODE_UNIT_WIDTH == 32
 #undef LINK_SIZE
 #define LINK_SIZE        1
-#define PUT(a, n, d)     (a[n] = (d))
-#define GET(a, n)        (a[n])
+#define PUT(a, n, d)     (a[n] = (PCRE2_UCHAR)(d))
+#define GET(a, n)        ((unsigned int)(a)[n])
 #define MAX_PATTERN_SIZE (1 << 30) /* Keep it positive */
 
 #else
@@ -186,25 +201,26 @@ values of 3 or 4 are also supported. */
 /* --------------- Other mode-specific macros ----------------- */
 
 /* PCRE uses some other (at least) 16-bit quantities that do not change when
-the size of offsets changes. There are used for repeat counts and for other
+the size of offsets changes. These are used for repeat counts and for other
 things such as capturing parenthesis numbers in back references.
 
 Define the number of code units required to hold a 16-bit count/offset, and
-macros to load and store such a value. For reasons that I do not understand,
-the expression in the 8-bit GET2 macro is treated by gcc as a signed
-expression, even when a is declared as unsigned. It seems that any kind of
-arithmetic results in a signed value. Hence the cast. */
+macros to load and store such a value. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 #define IMM2_SIZE     2
-#define GET2(a, n)    (unsigned int)(((a)[n] << 8) | (a)[(n) + 1])
-#define PUT2(a, n, d) a[n] = (d) >> 8, a[(n) + 1] = (d) & 255
+#define GET2(a, n)    (((unsigned int)(a)[n] << 8) | (unsigned int)(a)[(n) + 1])
+#define PUT2(a, n, d) (a[n] = (PCRE2_UCHAR)((d) >> 8)), (a[(n) + 1] = (PCRE2_UCHAR)((d) & 255))
 
 #elif PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
 #define IMM2_SIZE     1
-#define GET2(a, n)    a[n]
-#define PUT2(a, n, d) a[n] = d
+#define GET2(a, n)    ((unsigned int)(a)[n])
+#define PUT2(a, n, d) (a[n] = (PCRE2_UCHAR)(d))
 #endif
+
+/* This is the largest non-UTF code point. */
+
+#define MAX_NON_UTF_CHAR (0xffffffffU >> (32 - PCRE2_CODE_UNIT_WIDTH))
 
 /* Other macros that are different for 8-bit mode. The MAX_255 macro checks
 whether its argument, which is assumed to be one code unit, is less than 256.
@@ -216,7 +232,8 @@ check is needed before accessing these tables. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 #define MAX_255(c)                   TRUE
-#define MAX_MARK                     ((1u << 8) - 1)
+#define MAX_MARK_8                   255u
+#define MAX_MARK                     MAX_MARK_8
 #define TABLE_GET(c, table, default) ((table)[c])
 #ifdef SUPPORT_UNICODE
 #define SUPPORT_WIDE_CHARS
@@ -226,12 +243,21 @@ check is needed before accessing these tables. */
 #endif /* SUPPORT_UNICODE */
 
 #elif PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
-#define CHMAX_255(c) ((c) <= 255u)
-#define MAX_255(c)   ((c) <= 255u)
-#define MAX_MARK     ((1u << 16) - 1)
+#define CHMAX_255(c)   ((c) <= 255u)
+#define MAX_255(c)     ((c) <= 255u)
+#define MAX_MARK_16_32 65535u
+#define MAX_MARK       MAX_MARK_16_32
 #define SUPPORT_WIDE_CHARS
 #define TABLE_GET(c, table, default) (MAX_255(c) ? ((table)[c]) : (default))
 #endif
+
+/* LOOKBEHIND_MAX specifies the largest lookbehind that is supported.
+(OP_REVERSE and OP_VREVERSE in a pattern have 16-bit arguments in 8-bit and
+16-bit modes, so we require these values to fit in a 16-bit field.) Its value
+could be made-dependent, and be larger for the 32-bit library. */
+
+#undef LOOKBEHIND_MAX
+#define LOOKBEHIND_MAX 65535
 
 
 /* ----------------- Character-handling macros ----------------- */
@@ -614,8 +640,8 @@ memory control. */
 
 /* WARNING: if this is ever changed, code in pcre2_substitute.c will have to be
 changed because it builds a general context "by hand" in order to avoid the
-malloc() call in pcre2_general_context)_create(). There is also code in
-pcre2_match.c that makes the same assumption. */
+malloc() call in pcre2_general_context_create(). There is also a cast in
+pcre2_match_data_create_from_pattern() that makes the same assumption. */
 
 typedef struct pcre2_real_general_context {
   pcre2_memctl memctl;
@@ -671,16 +697,10 @@ typedef struct pcre2_real_convert_context {
 defined specially because it is required in pcre2_serialize_decode() when
 copying the size from possibly unaligned memory into a variable of the same
 type. Use a macro rather than a typedef to avoid compiler warnings when this
-file is included multiple times by pcre2test. LOOKBEHIND_MAX specifies the
-largest lookbehind that is supported. (OP_REVERSE and OP_VREVERSE in a pattern
-have 16-bit arguments in 8-bit and 16-bit modes, so we need no more than a
-16-bit field here.) */
+file is included multiple times by pcre2test. */
 
 #undef CODE_BLOCKSIZE_TYPE
 #define CODE_BLOCKSIZE_TYPE PCRE2_SIZE
-
-#undef LOOKBEHIND_MAX
-#define LOOKBEHIND_MAX ((int)UINT16_MAX)
 
 typedef struct pcre2_real_code {
   pcre2_memctl memctl;            // Memory control fields
@@ -866,6 +886,7 @@ typedef struct compile_block {
   BOOL had_accept;                          // (*ACCEPT) encountered
   BOOL had_pruneorskip;                     // (*PRUNE) or (*SKIP) encountered
   BOOL had_recurse;                         // Had a pattern recursion or subroutine call
+  BOOL had_whole_pattern_recurse;           // Had a recursion to group 0
   BOOL dupnames;                            // Duplicate names exist
   compile_data *first_data;                 // First item in the compile data list
   compile_data *last_data;                  // Last item in the compile data list

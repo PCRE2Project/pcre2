@@ -147,8 +147,8 @@ PRIV(find_bracket)(PCRE2_SPTR code, BOOL utf, int number)
       code += PRIV(OP_lengths)[c];
 
       /* In UTF-8 and UTF-16 modes, opcodes that are followed by a character may be
-    followed by a multi-byte character. The length in the table is a minimum, so
-    we have to arrange to skip the extra bytes. */
+      followed by a multi-byte character. The length in the table is a minimum, so
+      we have to arrange to skip the extra bytes. */
 
 #ifdef MAYBE_UTF_MULTI
       if (utf)

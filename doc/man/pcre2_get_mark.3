@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: pcre2_get_mark
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 13 January 2018
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_GET_MARK" "3" "13 January 2018" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_GET_MARK" "3" "13 January 2018" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -34,19 +34,19 @@ pcre2_get_mark \- get a (*MARK) name
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\fBPCRE2_SPTR\fP pcre2_get_mark(\fBpcre2_match_data\fP *\fImatch_data\fP);
+PCRE2_SPTR\fP \f(CBpcre2_get_mark\fP\f(CR(pcre2_match_data *\fP\f(CImatch_data\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
 .SH "DESCRIPTION"
 .sp
-After a call of pcre2_match() that was passed the match block that is
-this function\(cqs argument, this function returns a pointer to the last \f(CR(*MARK)\fP,
-\f(CR(*PRUNE)\fP, or \f(CR(*THEN)\fP name that was encountered during the matching process. The
+After a call of \f(CBpcre2_match()\fP that was passed the match block that is
+this function\(cqs argument, this function returns a pointer to the last \f(CI(*MARK)\fP,
+\f(CI(*PRUNE)\fP, or \f(CI(*THEN)\fP name that was encountered during the matching process. The
 name is zero\-terminated, and is within the compiled pattern. The length of the
-name is in the preceding code unit. If no name is available, \f(CRNULL\fP is returned.
+name is in the preceding code unit. If no name is available, \f(CBNULL\fP is returned.
 .sp
 After a successful match, the name that is returned is the last one on the
 matching path. After a failed match or a partial match, the last encountered

@@ -611,6 +611,16 @@
     \x{10000}s
     \xf0s
 
+/\X{0,3}+/utf,match_invalid_utf
+   \xc0\x80
+   a\xc0\x80
+   abc\xc0\x80
+
+/\X{1,3}+/utf,match_invalid_utf
+   \xc0\x80
+   a\xc0\x80
+   abc\xc0\x80
+
 # -------------------------------------
 
 /(*UTF)(?=\x{123})/I
@@ -748,5 +758,15 @@
 
 /[\x00-\x2f\x11-\xff]{4,}/B,utf
     abcd
+
+# Reject obsolete UTF-8 prefixes before checking continuation bytes.
+
+/badutf/utf
+    \xf8
+    X\xf9
+    XX\xfa\x7f
+    XXX\xfb\x7f
+    XXXX\xfc
+    XXXXX\xfd\x7f
 
 # End of testinput10

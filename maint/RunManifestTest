@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # Script to test a directory listing. We use this to verify that the list of
-# files installed by "make install" or "cmake --install" matches what we expect.
+# files installed by Autoconf, CMake, or Meson matches what we expect.
 
 set -e
 
@@ -10,37 +10,160 @@ LANG=C
 LC_ALL=C
 export LANG LC_ALL
 
-if [ "$1" = "" -o "$2" = "" ] ; then
-  echo "Usage: $0 <dir> <manifest name> [<build type>]" >&2
+if [ "$#" -lt 3 ] || [ "$#" -gt 4 ]; then
+  echo "Usage: $0 <dir> <manifest name> <producer> [<build type>]" >&2
   exit 1
 fi
 
 input_dir="$1"
 expected_manifest="$2"
-build_type="${3:-release}"
+producer="$3"
+build_type="${4:-release}"
 
-actual_file=`basename $expected_manifest`.actual
-expected_file=`basename $expected_manifest`.expected
+die()
+{
+  echo "$*" >&2
+  exit 1
+}
+
+case "$producer" in
+  autoconf|cmake|meson|tarball) ;;
+  *)
+    die "Unknown producer: $producer (expected autoconf, cmake, meson, or tarball)"
+    ;;
+esac
+
+actual_file=`basename "$expected_manifest"`.actual
+expected_file=`basename "$expected_manifest"`.expected
+expected_temp="$expected_file.$$"
+
+trap 'rm -f "$expected_temp"' 0 1 2 15
 
 sed=sed
-# Helper for Solaris
-if [ -f /usr/bin/gsed ] ; then
+# Solaris' native sed does not support all the expressions used below.
+if [ -f /usr/bin/gsed ]; then
   sed=/usr/bin/gsed
 fi
 
-find "$input_dir" -print | \
-  sort | \
-  xargs -n1 -- ls -l -d -n | \
-  $sed -E -e 's/ {2,}/ /g' | \
-  cut -d' ' -f '1,9-' \
-  > "$actual_file"
+# Compare relative to the installed prefix, independently of DESTDIR staging.
+# For example, an Autoconf install staged at install-dir/usr/local must have
+# the same manifest paths as a CMake or Meson install at install-dir.
+read -r root_mode root_path < "$expected_manifest"
+(
+  cd "$input_dir"
+  find . -print | \
+    sort | \
+    while IFS= read -r path; do
+      ls -l -d -n "$path"
+    done | \
+    "$sed" -e 's/  */ /g' -e 's/^\(..........\). /\1 /' | \
+    cut -d' ' -f '1,9-' | \
+    "$sed" -e "s@^\([^ ]* \)\.@\1$root_path@"
+) > "$actual_file"
 
-# The CMake install is a bit annoying now. Its installed files are actually
-# dependent on the build type. So, if the build type is not "release", we need
-# to modify the expected manifest to match the actual one. 
-cat "$expected_manifest" | \
-  $sed -E -e "s/pcre2-targets-release.cmake/pcre2-targets-$build_type.cmake/" \
-  > "$expected_file"
+transform_expected()
+{
+  "$sed" "$@" "$expected_file" > "$expected_temp"
+  mv "$expected_temp" "$expected_file"
+}
+
+library_tuple()
+{
+  library="$1"
+  tuple=$("$sed" -n "s/^m4_define(libpcre2_${library}_version,[[:space:]]*\[\([^]]*\)\]).*/\1/p" "$configure_ac")
+  [ -n "$tuple" ] || die "Missing libpcre2_${library}_version in $configure_ac"
+  case "$tuple" in
+    *'
+'*) die "Duplicate libpcre2_${library}_version in $configure_ac" ;;
+  esac
+  printf '%s\n' "$tuple"
+}
+
+library_filename_versions()
+{
+  original_tuple="$1"
+  tuple=$(printf '%s\n' "$original_tuple" | "$sed" 's/[[:space:]]//g')
+  IFS=: read -r current revision age extra <<EOF
+$tuple
+EOF
+  [ -z "$extra" ] || die "Invalid libtool version: $original_tuple"
+  for component in "$current" "$revision" "$age"; do
+    case "$component" in
+      ''|*[!0123456789]*) die "Invalid libtool version: $original_tuple" ;;
+    esac
+  done
+  soname=$((current - age))
+  printf '%s %s\n' "$soname.$age.$revision" "$soname"
+}
+
+cp "$expected_manifest" "$expected_file"
+
+if [ "$producer" != "tarball" ]; then
+  # The common install manifests include both CMake and libtool metadata. Adjust
+  # only the expected listing: unexpected installed files must still fail the
+  # check, even if another build system would legitimately install them.
+  if [ "$producer" != "cmake" ]; then
+    # Only CMake installs find_package(CONFIG) metadata and exported targets.
+    # Autoconf and Meson provide pkg-config metadata, but not these CMake files.
+    transform_expected \
+      -e '/\/lib\/cmake$/d' \
+      -e '/\/lib\/cmake\/pcre2$/d' \
+      -e '/\/lib\/cmake\/pcre2\/pcre2-config\.cmake$/d' \
+      -e '/\/lib\/cmake\/pcre2\/pcre2-config-version\.cmake$/d' \
+      -e '/\/lib\/cmake\/pcre2\/pcre2-targets\.cmake$/d' \
+      -e '/\/lib\/cmake\/pcre2\/pcre2-targets-@CMAKE_BUILD@\.cmake$/d'
+
+    # The manifests use CMake's native ELF shared-library modes, which can be
+    # 0644. Autoconf and Meson install the real .so files as 0755 instead.
+    transform_expected \
+      -e '/\/libpcre2-[^/]*\.so\.@LIB_[^@]*_VERSION@$/s/^-rw-r--r-- /-rwxr-xr-x /'
+  fi
+
+  if [ "$producer" != "autoconf" ]; then
+    # Only Autoconf's libtool build installs .la archives containing link metadata.
+    transform_expected -e '/\/lib\/libpcre2-[^/]*\.la$/d'
+  fi
+
+  if [ "$producer" = "meson" ]; then
+    # On macOS, Meson installs a real major-version dylib instead of the
+    # full-version dylib and its major-version symlink.
+    transform_expected \
+      -e '/^l[^ ]* .*\/libpcre2-[^/]*\.@LIB_[^@]*_SONAME@\.dylib -> /d' \
+      -e '/^-[^ ]* .*\/libpcre2-[^/]*\.@LIB_[^@]*_VERSION@\.dylib$/s/_VERSION@\.dylib$/_SONAME@.dylib/'
+  fi
+
+  # CMake's configuration name is lower-case in its exported target filename.
+  transform_expected -e "s/@CMAKE_BUILD@/$build_type/g"
+
+  if [ "$producer" = "autoconf" ]; then
+    unversioned_target=VERSION
+  else
+    unversioned_target=SONAME
+  fi
+  transform_expected -e "s/_UNVERSIONED_TARGET@/_${unversioned_target}@/g"
+
+  manifest_dir=$(dirname "$expected_manifest")
+  configure_ac="$manifest_dir/../configure.ac"
+  [ -f "$configure_ac" ] || die "Missing configure.ac: $configure_ac"
+
+  for library in 8 16 32 posix; do
+    case "$library" in
+      posix) placeholder_library=POSIX ;;
+      *) placeholder_library="$library" ;;
+    esac
+    version_values=$(library_filename_versions "$(library_tuple "$library")")
+    set -- $version_values
+    library_version="$1"
+    library_soname="$2"
+    transform_expected \
+      -e "s/@LIB_${placeholder_library}_VERSION@/$library_version/g" \
+      -e "s/@LIB_${placeholder_library}_SONAME@/$library_soname/g"
+  done
+
+  if "$sed" -n '/@LIB_/p; /@CMAKE_BUILD@/p' "$expected_file" | grep . >/dev/null; then
+    die "Unexpanded placeholders in $expected_file"
+  fi
+fi
 
 if ! diff -u "$expected_file" "$actual_file"; then
   echo "Installed files differ from expected"

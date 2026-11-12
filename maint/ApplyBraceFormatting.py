@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#! /usr/bin/env python3
 """Apply PCRE2's post-clang-format brace and spacing policies.
 
 THIS IS NOT SAFE.

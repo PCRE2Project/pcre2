@@ -83,11 +83,11 @@ Returns:      pointer to memory or NULL on failure
 extern void *
 PRIV(memctl_malloc)(size_t size, pcre2_memctl *memctl)
 {
-  pcre2_memctl *newmemctl;
   void *yield = (memctl == NULL) ? malloc(size) : memctl->malloc(size, memctl->memory_data);
   if (yield == NULL)
     return NULL;
-  newmemctl = (pcre2_memctl *)yield;
+
+  pcre2_memctl *newmemctl = (pcre2_memctl *)yield;
   if (memctl == NULL)
   {
     newmemctl->malloc = default_malloc;
@@ -108,23 +108,22 @@ PRIV(memctl_malloc)(size_t size, pcre2_memctl *memctl)
 *          Create and initialize contexts        *
 *************************************************/
 
-/* Initializing for compile and match contexts is done in separate, private
-functions so that these can be called from functions such as pcre2_compile()
-when an external context is not supplied. The initializing functions have an
-option to set up default memory management. */
+/* Specialized contexts copy static default templates, replacing the memory
+management functions when a general context is supplied. */
 
 PCRE2_EXP_DEFN pcre2_general_context *PCRE2_CALL_CONVENTION
 pcre2_general_context_create(void *(*private_malloc)(size_t size, void *memory_data),
                              void (*private_free)(void *ptr, void *memory_data), void *memory_data)
 {
-  pcre2_general_context *gcontext;
   if (private_malloc == NULL)
     private_malloc = default_malloc;
   if (private_free == NULL)
     private_free = default_free;
-  gcontext = private_malloc(sizeof(pcre2_real_general_context), memory_data);
+
+  pcre2_general_context *gcontext = private_malloc(sizeof(pcre2_real_general_context), memory_data);
   if (gcontext == NULL)
     return NULL;
+
   gcontext->memctl.malloc = private_malloc;
   gcontext->memctl.free = private_free;
   gcontext->memctl.memory_data = memory_data;
@@ -160,9 +159,10 @@ pcre2_compile_context_create(pcre2_general_context *gcontext)
       PRIV(memctl_malloc)(sizeof(pcre2_real_compile_context), (pcre2_memctl *)gcontext);
   if (ccontext == NULL)
     return NULL;
+
   *ccontext = PRIV(default_compile_context);
   if (gcontext != NULL)
-    *((pcre2_memctl *)ccontext) = *((pcre2_memctl *)gcontext);
+    ccontext->memctl = gcontext->memctl;
   return ccontext;
 }
 
@@ -198,9 +198,10 @@ pcre2_match_context_create(pcre2_general_context *gcontext)
       PRIV(memctl_malloc)(sizeof(pcre2_real_match_context), (pcre2_memctl *)gcontext);
   if (mcontext == NULL)
     return NULL;
+
   *mcontext = PRIV(default_match_context);
   if (gcontext != NULL)
-    *((pcre2_memctl *)mcontext) = *((pcre2_memctl *)gcontext);
+    mcontext->memctl = gcontext->memctl;
   return mcontext;
 }
 
@@ -229,9 +230,10 @@ pcre2_convert_context_create(pcre2_general_context *gcontext)
       PRIV(memctl_malloc)(sizeof(pcre2_real_convert_context), (pcre2_memctl *)gcontext);
   if (ccontext == NULL)
     return NULL;
+
   *ccontext = PRIV(default_convert_context);
   if (gcontext != NULL)
-    *((pcre2_memctl *)ccontext) = *((pcre2_memctl *)gcontext);
+    ccontext->memctl = gcontext->memctl;
   return ccontext;
 }
 
@@ -243,10 +245,14 @@ pcre2_convert_context_create(pcre2_general_context *gcontext)
 PCRE2_EXP_DEFN pcre2_general_context *PCRE2_CALL_CONVENTION
 pcre2_general_context_copy(pcre2_general_context *gcontext)
 {
+  if (gcontext == NULL)
+    return NULL;
+
   pcre2_general_context *newcontext =
       gcontext->memctl.malloc(sizeof(pcre2_real_general_context), gcontext->memctl.memory_data);
   if (newcontext == NULL)
     return NULL;
+
   memcpy(newcontext, gcontext, sizeof(pcre2_real_general_context));
   return newcontext;
 }
@@ -255,10 +261,14 @@ pcre2_general_context_copy(pcre2_general_context *gcontext)
 PCRE2_EXP_DEFN pcre2_compile_context *PCRE2_CALL_CONVENTION
 pcre2_compile_context_copy(pcre2_compile_context *ccontext)
 {
+  if (ccontext == NULL)
+    return NULL;
+
   pcre2_compile_context *newcontext =
       ccontext->memctl.malloc(sizeof(pcre2_real_compile_context), ccontext->memctl.memory_data);
   if (newcontext == NULL)
     return NULL;
+
   memcpy(newcontext, ccontext, sizeof(pcre2_real_compile_context));
   return newcontext;
 }
@@ -267,10 +277,14 @@ pcre2_compile_context_copy(pcre2_compile_context *ccontext)
 PCRE2_EXP_DEFN pcre2_match_context *PCRE2_CALL_CONVENTION
 pcre2_match_context_copy(pcre2_match_context *mcontext)
 {
+  if (mcontext == NULL)
+    return NULL;
+
   pcre2_match_context *newcontext =
       mcontext->memctl.malloc(sizeof(pcre2_real_match_context), mcontext->memctl.memory_data);
   if (newcontext == NULL)
     return NULL;
+
   memcpy(newcontext, mcontext, sizeof(pcre2_real_match_context));
   return newcontext;
 }
@@ -279,10 +293,14 @@ pcre2_match_context_copy(pcre2_match_context *mcontext)
 PCRE2_EXP_DEFN pcre2_convert_context *PCRE2_CALL_CONVENTION
 pcre2_convert_context_copy(pcre2_convert_context *ccontext)
 {
+  if (ccontext == NULL)
+    return NULL;
+
   pcre2_convert_context *newcontext =
       ccontext->memctl.malloc(sizeof(pcre2_real_convert_context), ccontext->memctl.memory_data);
   if (newcontext == NULL)
     return NULL;
+
   memcpy(newcontext, ccontext, sizeof(pcre2_real_convert_context));
   return newcontext;
 }
@@ -328,9 +346,10 @@ pcre2_convert_context_free(pcre2_convert_context *ccontext)
 *             Set values in contexts             *
 *************************************************/
 
-/* All these functions return 0 for success or PCRE2_ERROR_BADDATA if invalid
-data is given. Only some of the functions are able to test the validity of the
-data. */
+/* Setters and getters require a non-NULL context and return 0 for success.
+Functions that validate their data return PCRE2_ERROR_BADDATA, or
+PCRE2_ERROR_BADOPTION in the case of pcre2_set_optimize(). Only some of the
+functions are able to test the validity of the data. */
 
 
 /* ------------ Compile context ------------ */
@@ -338,6 +357,7 @@ data. */
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_character_tables(pcre2_compile_context *ccontext, const uint8_t *tables)
 {
+  PCRE2_ASSERT(ccontext != NULL);
   ccontext->tables = tables;
   return 0;
 }
@@ -345,6 +365,7 @@ pcre2_set_character_tables(pcre2_compile_context *ccontext, const uint8_t *table
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_bsr(pcre2_compile_context *ccontext, uint32_t value)
 {
+  PCRE2_ASSERT(ccontext != NULL);
   switch (value)
   {
   case PCRE2_BSR_ANYCRLF:
@@ -358,27 +379,19 @@ pcre2_set_bsr(pcre2_compile_context *ccontext, uint32_t value)
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
-pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *length)
+pcre2_get_bsr(pcre2_compile_context *ccontext, uint32_t *value)
 {
-  if (ccontext == NULL)
-    return PCRE2_ERROR_NULL;
-
-  if (length == NULL)
-    return PCRE2_ERROR_NULL;
-
-  *length = ccontext->bsr_convention;
+  PCRE2_ASSERT(ccontext != NULL);
+  PCRE2_ASSERT(value != NULL);
+  *value = ccontext->bsr_convention;
   return 0;
 }
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_max_pattern_length(pcre2_compile_context *ccontext, PCRE2_SIZE *length)
 {
-  if (ccontext == NULL)
-    return PCRE2_ERROR_NULL;
-
-  if (length == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(ccontext != NULL);
+  PCRE2_ASSERT(length != NULL);
   *length = ccontext->max_pattern_length;
   return 0;
 }
@@ -386,9 +399,7 @@ pcre2_get_max_pattern_length(pcre2_compile_context *ccontext, PCRE2_SIZE *length
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_max_pattern_length(pcre2_compile_context *ccontext, PCRE2_SIZE length)
 {
-  if (ccontext == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(ccontext != NULL);
   ccontext->max_pattern_length = length;
   return 0;
 }
@@ -396,9 +407,7 @@ pcre2_set_max_pattern_length(pcre2_compile_context *ccontext, PCRE2_SIZE length)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_max_pattern_compiled_length(pcre2_compile_context *ccontext, PCRE2_SIZE length)
 {
-  if (ccontext == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(ccontext != NULL);
   ccontext->max_pattern_compiled_length = length;
   return 0;
 }
@@ -406,6 +415,7 @@ pcre2_set_max_pattern_compiled_length(pcre2_compile_context *ccontext, PCRE2_SIZ
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_newline(pcre2_compile_context *ccontext, uint32_t newline)
 {
+  PCRE2_ASSERT(ccontext != NULL);
   switch (newline)
   {
   case PCRE2_NEWLINE_CR:
@@ -425,12 +435,8 @@ pcre2_set_newline(pcre2_compile_context *ccontext, uint32_t newline)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_newline(pcre2_compile_context *ccontext, uint32_t *newline)
 {
-  if (ccontext == NULL)
-    return PCRE2_ERROR_NULL;
-
-  if (newline == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(ccontext != NULL);
+  PCRE2_ASSERT(newline != NULL);
   *newline = ccontext->newline_convention;
   return 0;
 }
@@ -438,6 +444,7 @@ pcre2_get_newline(pcre2_compile_context *ccontext, uint32_t *newline)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_max_varlookbehind(pcre2_compile_context *ccontext, uint32_t limit)
 {
+  PCRE2_ASSERT(ccontext != NULL);
   ccontext->max_varlookbehind = limit;
   return 0;
 }
@@ -445,12 +452,8 @@ pcre2_set_max_varlookbehind(pcre2_compile_context *ccontext, uint32_t limit)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_parens_nest_limit(pcre2_compile_context *ccontext, uint32_t *limit)
 {
-  if (ccontext == NULL)
-    return PCRE2_ERROR_NULL;
-
-  if (limit == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(ccontext != NULL);
+  PCRE2_ASSERT(limit != NULL);
   *limit = ccontext->parens_nest_limit;
   return 0;
 }
@@ -458,9 +461,7 @@ pcre2_get_parens_nest_limit(pcre2_compile_context *ccontext, uint32_t *limit)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_parens_nest_limit(pcre2_compile_context *ccontext, uint32_t limit)
 {
-  if (ccontext == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(ccontext != NULL);
   ccontext->parens_nest_limit = limit;
   return 0;
 }
@@ -468,9 +469,7 @@ pcre2_set_parens_nest_limit(pcre2_compile_context *ccontext, uint32_t limit)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_compile_extra_options(pcre2_compile_context *ccontext, uint32_t options)
 {
-  if (ccontext == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(ccontext != NULL);
   ccontext->extra_options = options;
   return 0;
 }
@@ -479,6 +478,7 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext,
                                   int (*guard)(uint32_t depth, void *user_data), void *user_data)
 {
+  PCRE2_ASSERT(ccontext != NULL);
   ccontext->stack_guard = guard;
   ccontext->stack_guard_data = user_data;
   return 0;
@@ -487,8 +487,7 @@ pcre2_set_compile_recursion_guard(pcre2_compile_context *ccontext,
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_optimize(pcre2_compile_context *ccontext, uint32_t directive)
 {
-  if (ccontext == NULL)
-    return PCRE2_ERROR_NULL;
+  PCRE2_ASSERT(ccontext != NULL);
 
   switch (directive)
   {
@@ -525,6 +524,7 @@ pcre2_set_callout(pcre2_match_context *mcontext,
                   int (*callout)(pcre2_callout_block *callout_block, void *callout_data),
                   void *callout_data)
 {
+  PCRE2_ASSERT(mcontext != NULL);
   mcontext->callout = callout;
   mcontext->callout_data = callout_data;
   return 0;
@@ -537,6 +537,7 @@ pcre2_set_substitute_callout(
                               void *substitute_callout_data),
     void *substitute_callout_data)
 {
+  PCRE2_ASSERT(mcontext != NULL);
   mcontext->substitute_callout = substitute_callout;
   mcontext->substitute_callout_data = substitute_callout_data;
   return 0;
@@ -550,6 +551,7 @@ pcre2_set_substitute_case_callout(
                                           int case_operation, void *substitute_case_callout_data),
     void *substitute_case_callout_data)
 {
+  PCRE2_ASSERT(mcontext != NULL);
   mcontext->substitute_case_callout = substitute_case_callout;
   mcontext->substitute_case_callout_data = substitute_case_callout_data;
   return 0;
@@ -558,9 +560,7 @@ pcre2_set_substitute_case_callout(
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_heap_limit(pcre2_match_context *mcontext, uint32_t limit)
 {
-  if (mcontext == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(mcontext != NULL);
   mcontext->heap_limit = limit;
   return 0;
 }
@@ -568,9 +568,7 @@ pcre2_set_heap_limit(pcre2_match_context *mcontext, uint32_t limit)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_match_limit(pcre2_match_context *mcontext, uint32_t limit)
 {
-  if (mcontext == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(mcontext != NULL);
   mcontext->match_limit = limit;
   return 0;
 }
@@ -578,9 +576,7 @@ pcre2_set_match_limit(pcre2_match_context *mcontext, uint32_t limit)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_depth_limit(pcre2_match_context *mcontext, uint32_t limit)
 {
-  if (mcontext == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(mcontext != NULL);
   mcontext->depth_limit = limit;
   return 0;
 }
@@ -588,9 +584,7 @@ pcre2_set_depth_limit(pcre2_match_context *mcontext, uint32_t limit)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_offset_limit(pcre2_match_context *mcontext, PCRE2_SIZE limit)
 {
-  if (mcontext == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(mcontext != NULL);
   mcontext->offset_limit = limit;
   return 0;
 }
@@ -598,12 +592,8 @@ pcre2_set_offset_limit(pcre2_match_context *mcontext, PCRE2_SIZE limit)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_heap_limit(pcre2_match_context *mcontext, uint32_t *limit)
 {
-  if (mcontext == NULL)
-    return PCRE2_ERROR_NULL;
-
-  if (limit == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(mcontext != NULL);
+  PCRE2_ASSERT(limit != NULL);
   *limit = mcontext->heap_limit;
   return 0;
 }
@@ -611,12 +601,8 @@ pcre2_get_heap_limit(pcre2_match_context *mcontext, uint32_t *limit)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_match_limit(pcre2_match_context *mcontext, uint32_t *limit)
 {
-  if (mcontext == NULL)
-    return PCRE2_ERROR_NULL;
-
-  if (limit == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(mcontext != NULL);
+  PCRE2_ASSERT(limit != NULL);
   *limit = mcontext->match_limit;
   return 0;
 }
@@ -624,12 +610,8 @@ pcre2_get_match_limit(pcre2_match_context *mcontext, uint32_t *limit)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_depth_limit(pcre2_match_context *mcontext, uint32_t *limit)
 {
-  if (mcontext == NULL)
-    return PCRE2_ERROR_NULL;
-
-  if (limit == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(mcontext != NULL);
+  PCRE2_ASSERT(limit != NULL);
   *limit = mcontext->depth_limit;
   return 0;
 }
@@ -637,12 +619,8 @@ pcre2_get_depth_limit(pcre2_match_context *mcontext, uint32_t *limit)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_offset_limit(pcre2_match_context *mcontext, PCRE2_SIZE *limit)
 {
-  if (mcontext == NULL)
-    return PCRE2_ERROR_NULL;
-
-  if (limit == NULL)
-    return PCRE2_ERROR_NULL;
-
+  PCRE2_ASSERT(mcontext != NULL);
+  PCRE2_ASSERT(limit != NULL);
   *limit = mcontext->offset_limit;
   return 0;
 }
@@ -674,26 +652,29 @@ pcre2_set_recursion_memory_management(pcre2_match_context *mcontext,
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_glob_separator(pcre2_convert_context *ccontext, uint32_t separator_char)
 {
+  PCRE2_ASSERT(ccontext != NULL);
   if (separator_char != CHAR_SLASH && separator_char != CHAR_BACKSLASH &&
       separator_char != CHAR_DOT)
     return PCRE2_ERROR_BADDATA;
+
   ccontext->glob_separator = separator_char;
   return 0;
 }
 
-static const char *globpunct = STR_EXCLAMATION_MARK STR_QUOTATION_MARK STR_NUMBER_SIGN
-    STR_DOLLAR_SIGN STR_PERCENT_SIGN STR_AMPERSAND STR_APOSTROPHE STR_LEFT_PARENTHESIS
-        STR_RIGHT_PARENTHESIS STR_ASTERISK STR_PLUS STR_COMMA STR_MINUS STR_DOT STR_SLASH STR_COLON
-            STR_SEMICOLON STR_LESS_THAN_SIGN STR_EQUALS_SIGN STR_GREATER_THAN_SIGN STR_QUESTION_MARK
-                STR_COMMERCIAL_AT STR_LEFT_SQUARE_BRACKET STR_BACKSLASH STR_RIGHT_SQUARE_BRACKET
-                    STR_CIRCUMFLEX_ACCENT STR_UNDERSCORE STR_GRAVE_ACCENT STR_LEFT_CURLY_BRACKET
-                        STR_VERTICAL_LINE STR_RIGHT_CURLY_BRACKET STR_TILDE;
+/* Glob syntax characters cannot also be escape characters. */
+static const char globpunct[] = STR_QUOTATION_MARK STR_NUMBER_SIGN STR_DOLLAR_SIGN STR_PERCENT_SIGN
+    STR_AMPERSAND STR_APOSTROPHE STR_LEFT_PARENTHESIS STR_RIGHT_PARENTHESIS STR_PLUS STR_COMMA
+        STR_DOT STR_SLASH STR_SEMICOLON STR_LESS_THAN_SIGN STR_EQUALS_SIGN STR_GREATER_THAN_SIGN
+            STR_COMMERCIAL_AT STR_BACKSLASH STR_UNDERSCORE STR_GRAVE_ACCENT STR_LEFT_CURLY_BRACKET
+                STR_VERTICAL_LINE STR_RIGHT_CURLY_BRACKET STR_TILDE;
 
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_glob_escape(pcre2_convert_context *ccontext, uint32_t escape_char)
 {
+  PCRE2_ASSERT(ccontext != NULL);
   if (escape_char > 255 || (escape_char != 0 && strchr(globpunct, escape_char) == NULL))
     return PCRE2_ERROR_BADDATA;
+
   ccontext->glob_escape = escape_char;
   return 0;
 }

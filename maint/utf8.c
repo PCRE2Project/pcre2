@@ -90,14 +90,14 @@ Returns:     number of bytes placed in the buffer
 static size_t
 ord2utf8(unsigned long int cvalue, unsigned char *buffer)
 {
-  size_t i, j;
+  size_t i;
   for (i = 0; i < sizeof(utf8_table1) / sizeof(int); i++)
     if (cvalue <= utf8_table1[i])
       break;
   if (i >= sizeof(utf8_table1) / sizeof(int))
     return 0;
   buffer += i;
-  for (j = i; j > 0; j--)
+  for (size_t j = i; j > 0; j--)
   {
     *buffer-- = 0x80 | (cvalue & 0x3f);
     cvalue >>= 6;
@@ -137,7 +137,7 @@ utf82ord(const unsigned char *buffer, const unsigned char *buffend, long unsigne
 {
   unsigned int c = *buffer++;
   unsigned int d = c;
-  int i, j, s;
+  int i;
 
   /* Check for an ASCII character, or find the number of additional bytes in a
 multibyte character. */
@@ -169,10 +169,10 @@ multibyte character. */
 
   /* i now has a value in the range 1-5 */
 
-  s = 6 * i;
+  int s = 6 * i;
   d = (c & utf8_table3[i]) << s;
 
-  for (j = 0; j < i; j++)
+  for (int j = 0; j < i; j++)
   {
     if (buffer >= buffend)
     {
@@ -195,6 +195,7 @@ multibyte character. */
 
   /* Check that encoding was the correct one, not overlong */
 
+  int j;
   for (j = 0; j < (int)(sizeof(utf8_table1) / sizeof(int)); j++)
     if (d <= utf8_table1[j])
       break;
@@ -289,13 +290,11 @@ main(int argc, char **argv)
 
     if (strlen(x) >= 3 && (strncmp(x, "0x", 2) == 0 || strncmp(x, "U+", 2) == 0) && isxdigit(x[2]))
     {
-      size_t rc;
-      unsigned long d;
-      char *endptr;
       int utf8_input = 0;
 
       errno = 0;
-      d = strtoul(x + 2, &endptr, 16);
+      char *endptr;
+      unsigned long d = strtoul(x + 2, &endptr, 16);
       if (errno != 0 || *endptr != 0)
       {
         printf("** Invalid hex number %s\n", x);
@@ -314,15 +313,13 @@ main(int argc, char **argv)
         d &= 0x7fffffff;
       }
 
-      rc = ord2utf8(d, buffer);
+      size_t rc = ord2utf8(d, buffer);
       printf("U+%08lx => ", d);
       if (rc == 0)
         fputs("** -b needed for codepoints greater than 0x7fffffff", stdout);
       else
       {
-        size_t j;
-
-        for (j = 0; j < rc; j++)
+        for (size_t j = 0; j < rc; j++)
           printf("%02x ", buffer[j]);
         if (f != NULL)
           fwrite(buffer, rc, 1, f);
@@ -335,7 +332,7 @@ main(int argc, char **argv)
         else if (show)
         {
           putchar('>');
-          for (j = 0; j < rc; j++)
+          for (size_t j = 0; j < rc; j++)
             printf("%c", buffer[j]);
           putchar('<');
         }
@@ -344,8 +341,6 @@ main(int argc, char **argv)
     }
     else
     {
-      unsigned char *bptr;
-      const unsigned char *buffend;
       unsigned char y = 0;
       int len = 0;
       int z = 0;
@@ -375,25 +370,24 @@ main(int argc, char **argv)
       if (len < 0)
         continue; /* With next argument after malformation */
 
-      bptr = buffer;
-      buffend = buffer + len;
+      unsigned char *bptr = buffer;
+      const unsigned char *buffend = buffer + len;
 
       while (bptr < buffend)
       {
         unsigned long int d;
-        int j;
         int offset;
         int rc = utf82ord(bptr, buffend, &d, &offset);
 
         if (rc > 0)
         {
           printf("U+%08lx <= ", d);
-          for (j = 0; j < rc; j++)
+          for (int j = 0; j < rc; j++)
             printf("%02x ", bptr[j]);
           if (d <= 0x10ffff && (d < 0xd800 || 0xdfff < d) && show)
           {
             putchar('>');
-            for (j = 0; j < rc; j++)
+            for (int j = 0; j < rc; j++)
               printf("%c", bptr[j]);
             putchar('<');
           }
@@ -403,7 +397,7 @@ main(int argc, char **argv)
         else if (rc == -4)
         {
           printf("U+%08lx <= ", d);
-          for (j = 0; j < offset; j++)
+          for (int j = 0; j < offset; j++)
             printf("%02x ", bptr[j]);
           puts("** Overlong UTF-8 sequence");
           bptr += offset;

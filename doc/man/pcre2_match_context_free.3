@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: pcre2_match_context_free
 .\"    Author: [see the "AUTHOR(S)" section]
-.\" Generator: Asciidoctor 2.0.20
+.\" Generator: Asciidoctor 2.0.26
 .\"      Date: 28 June 2018
 .\"    Manual: PCRE2
-.\"    Source: PCRE2 10.49-DEV
+.\"    Source: PCRE2 10.50-DEV
 .\"  Language: English
 .\"
-.TH "PCRE2_MATCH_CONTEXT_FREE" "3" "28 June 2018" "PCRE2 10.49\-DEV" "PCRE2"
+.TH "PCRE2_MATCH_CONTEXT_FREE" "3" "28 June 2018" "PCRE2 10.50\-DEV" "PCRE2"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .ss \n[.ss] 0
@@ -34,9 +34,9 @@ pcre2_match_context_free \- free a match context
 .ss \n[.ss]
 .nf
 .fam C
-\fB\&#include\fP \fB<pcre2.h>\fP
+\f(CR\&#include <pcre2.h>
 
-\fBvoid\fP pcre2_match_context_free(\fBpcre2_match_context\fP *\fImcontext\fP);
+void\fP \f(CBpcre2_match_context_free\fP\f(CR(pcre2_match_context *\fP\f(CImcontext\fP\f(CR);\fP
 .fam
 .fi
 .ss \n[.ss] 0
@@ -44,7 +44,7 @@ pcre2_match_context_free \- free a match context
 .sp
 This function frees the memory occupied by a match context, using the memory
 freeing function from the general context with which it was created, or
-\f(CRfree()\fP if that was not set. If the argument is \f(CRNULL\fP, the function returns
+\f(CBfree\fP\f(CR()\fP if that was not set. If the argument is \f(CBNULL\fP, the function returns
 immediately without doing anything.
 .sp
 There is a complete description of the PCRE2 native API in the
