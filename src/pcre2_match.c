@@ -8827,6 +8827,12 @@ FRAGMENT_RESTART:
       rc = MATCH_NOMATCH;
       goto ENDLOOP;
 
+    case MATCH_ACCEPT:
+    case MATCH_KETRPOS:
+      PCRE2_DEBUG_UNREACHABLE();
+      rc = PCRE2_ERROR_INTERNAL;
+      goto ENDLOOP;
+
       /* Any other return is either a match, or some kind of error. */
 
     default:
