@@ -24003,6 +24003,162 @@ Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported
 Failed: error -76 at offset 3 in replacement: replacement $' or $_ not supported with partial match
         here: >$' |<--| <
 
+# (*ACCEPT) inside a group that is called as a subroutine ends only the
+# subroutine, even when the group itself is inside an assertion.
+
+/(?=(a|(*ACCEPT))(?1)x)/
+    a
+ 0: 
+ 1: 
+
+/(?=(()|(*ACCEPT))(?1)x)/
+    a
+ 0: 
+ 1: 
+
+/(?=(a|(*ACCEPT))(?1)x)a/
+    a
+ 0: a
+ 1: 
+
+/^(?!(a|(*ACCEPT))(?1)x)/
+    a
+No match
+
+/(?<=(a|(*ACCEPT))(?1)x)/
+    a
+ 0: 
+ 1: 
+
+# An assertion entered inside the subroutine is still ended by (*ACCEPT).
+
+/(?1)(?(DEFINE)((?=a(*ACCEPT)x)a))/
+    a
+ 0: a
+
+/(?1)(?(DEFINE)((?=(a)(*ACCEPT)x)a))/
+    a
+ 0: a
+
+/(?1)(?(DEFINE)((?(?=a(*ACCEPT)x)a|b)))/
+    a
+ 0: a
+    b
+ 0: b
+
+/(?(?=(a|(*ACCEPT))(?1)x)a|b)/
+    a
+ 0: a
+ 1: 
+    b
+No match
+
+# A group inside an assertion that is called from outside any assertion. The
+# interpreter used to return an internal code (-999) here.
+
+/(?=(b|(*ACCEPT)))(?1)x/
+    ax
+ 0: x
+ 1: 
+    bx
+ 0: bx
+ 1: b
+
+/(?!(b|(*ACCEPT)))|(?1)a/
+    a
+ 0: a
+
+/(a)(*scs:(1)(b|(*ACCEPT)))(?2)a/
+    aa
+ 0: aa
+ 1: a
+ 2: 
+
+# An assertion inside a subroutine must not cause an early subroutine return.
+
+/(?1)(?(DEFINE)((?!a(*ACCEPT)x)a))/
+\= Expect no match
+    a
+No match
+
+/(?1)(?(DEFINE)((?=a(*ACCEPT)x)ab))/
+    ab
+ 0: ab
+
+# Conditional assertion inside a recursion must not end the call.
+
+/(?1)(?(DEFINE)((?(?=a(*ACCEPT)x)ab|c)))/
+    ab
+ 0: ab
+
+/(?1)(?(DEFINE)((?(?!a(*ACCEPT)x)c|ab)))/
+    ab
+ 0: ab
+
+# Scan-substring assertion inside a recursion must not end the call.
+
+/(a)(?2)(?(DEFINE)((*scs:(1)a(*ACCEPT)x)b))/
+    ab
+ 0: ab
+ 1: a
+
+# Non-atomic assertion, lookbehind, and intervening group-frame controls.
+
+/(?1)(?(DEFINE)((*napla:a(*ACCEPT)x)ab))/
+    ab
+ 0: ab
+
+/aa(?1)(?(DEFINE)((?<=a(*ACCEPT)x)b))/
+    aab
+ 0: aab
+
+/aa(?1)(?(DEFINE)((?<!a(*ACCEPT)x)b))/
+    aab
+No match
+
+/(?1)(?(DEFINE)((?=(?>a(*ACCEPT)x))ab))/
+    ab
+ 0: ab
+
+# A completed assertion is no longer an active ACCEPT boundary.
+
+/(?=(a|(*ACCEPT)))(?1)b/
+    ab
+ 0: ab
+ 1: a
+
+# The three ACCEPT contexts: whole expression, subroutine, and assertion.
+
+/a(*ACCEPT)x/
+    ab
+ 0: a
+
+/(?1)b(?(DEFINE)(a(*ACCEPT)x))/
+    ab
+ 0: ab
+
+/(?=a(*ACCEPT)x)ab/
+    ab
+ 0: ab
+
+/(?!a(*ACCEPT)x)ab/
+    ab
+No match
+
+# An open capture must be skipped when finding the active recursion.
+
+/(?=((a(*ACCEPT))))(?1)x/
+    ax
+ 0: ax
+ 1: a
+ 2: a
+
+# Alternate assertion/recursion boundaries inside another recursion.
+
+/(?1)c(?(DEFINE)((?=(a|(*ACCEPT))(?2)x)ab))/
+    abc
+ 0: abc
+
 # Callout start offsets after resetting the start of a match.
 
 /(?C1)A\K(?C2)B(?C3)C/
