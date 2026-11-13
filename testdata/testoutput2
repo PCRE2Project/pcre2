@@ -17527,6 +17527,149 @@ Failed: error -37: callout error code
   1 ^^      B
 Failed: error -37: callout error code
 
+# Callout return values. A positive value causes backtracking and zero lets
+# matching continue. PCRE2_ERROR_NOMATCH ends the match with "no match". Other
+# values from -2 to -999 are reserved, and end the match with
+# PCRE2_ERROR_CALLOUT. Values at or below PCRE2_ERROR_CALLOUT_MAX (-1000) end
+# the match and are returned unchanged.
+
+/(?C1)a/
+    a\=callout_data=-1
+--->a
+  1 ^     a
+Callout data = -1
+No match
+    a\=callout_data=-2
+--->a
+  1 ^     a
+Callout data = -2
+Failed: error -37: callout error code
+    a\=callout_data=-37
+--->a
+  1 ^     a
+Callout data = -37
+Failed: error -37: callout error code
+    a\=callout_data=-47
+--->a
+  1 ^     a
+Callout data = -47
+Failed: error -37: callout error code
+    a\=callout_data=-79
+--->a
+  1 ^     a
+Callout data = -79
+Failed: error -37: callout error code
+    a\=callout_data=-993
+--->a
+  1 ^     a
+Callout data = -993
+Failed: error -37: callout error code
+    a\=callout_data=-994
+--->a
+  1 ^     a
+Callout data = -994
+Failed: error -37: callout error code
+    a\=callout_data=-998
+--->a
+  1 ^     a
+Callout data = -998
+Failed: error -37: callout error code
+    a\=callout_data=-999
+--->a
+  1 ^     a
+Callout data = -999
+Failed: error -37: callout error code
+    a\=callout_data=-1000
+--->a
+  1 ^     a
+Callout data = -1000
+Failed: error -1000: callout-defined error
+    a\=callout_data=-2147483648
+--->a
+  1 ^     a
+Callout data = -2147483648
+Failed: error -2147483648: callout-defined error
+
+# Values that the interpreter uses internally must not be acted on when a
+# callout returns them from inside groups and assertions.
+
+/(?=(?C1)a)a/
+    a\=callout_data=-999
+--->a
+  1 ^     a
+Callout data = -999
+Failed: error -37: callout error code
+
+/(?=(a)(*ACCEPT))(?=(?C1)b)/
+    ab\=callout_data=-999
+--->ab
+  1 ^      b
+Callout data = -999
+Failed: error -37: callout error code
+
+/(?:(?C1)a)++b/no_start_optimize
+    b\=callout_data=-998
+--->b
+  1 ^     a
+Callout data = -998
+Failed: error -37: callout error code
+
+/(?!(?C1)x)a/
+    a\=callout_data=-1
+--->a
+  1 ^     x
+Callout data = -1
+No match
+    a\=callout_data=-997
+--->a
+  1 ^     x
+Callout data = -997
+Failed: error -37: callout error code
+
+/(a|ab)(?C1)c/
+    abc\=callout_data=-996
+--->abc
+  1 ^^      c
+Callout data = -996
+Failed: error -37: callout error code
+
+/(?!aa(*SKIP)x)(?C1)./
+    aabcd\=callout_data=-995
+--->aabcd
+  1 ^         .
+Callout data = -995
+Failed: error -37: callout error code
+
+/^(*MARK:A)(?C1)a/
+    a\=callout_data=-994
+--->a
+  1 ^     a
+Latest Mark: A
+Callout data = -994
+Failed: error -37: callout error code
+
+/(?:(?C1)ab|ac)|(*THEN)z/
+    ac\=callout_data=-993
+--->ac
+  1 ^      a
+Callout data = -993
+Failed: error -37: callout error code
+
+# A callout's "no match" or reserved value must not be reported as a partial
+# match found at an earlier starting position.
+
+/xab|a(?C1)/no_start_optimize
+    xa\=ps,callout_data=-1
+--->xa
+  1  ^^    End of pattern
+Callout data = -1
+No match
+    xa\=ps,callout_data=-2
+--->xa
+  1  ^^    End of pattern
+Callout data = -2
+Failed: error -37: callout error code
+
 # ----------------------------------------------------------------------
 
 /[a b c]/BxxI

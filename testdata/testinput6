@@ -5278,4 +5278,27 @@
     baa
     baaa
 
+# Callout return values. PCRE2_ERROR_NOMATCH ends the match with "no match".
+# Other values from -2 to -999 are reserved, and end the match with
+# PCRE2_ERROR_CALLOUT. Values at or below PCRE2_ERROR_CALLOUT_MAX (-1000) end
+# the match and are returned unchanged.
+
+/(?C1)a/
+    a\=callout_data=-1
+    a\=callout_data=-2
+    a\=callout_data=-999
+    a\=callout_data=-1000
+
+/(?=(?C1)a)a/
+    a\=callout_data=-999
+
+/(?:(?C1)a)++b/no_start_optimize
+    b\=callout_data=-998
+
+# A callout's "no match" ends the whole match, not just the assertion.
+
+/(?!(?C1)x)a/
+    a\=callout_data=-1
+    a\=callout_data=-997
+
 # End of testinput6

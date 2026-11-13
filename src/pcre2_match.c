@@ -98,6 +98,8 @@ for any one of them can use a range. */
 #define MATCH_BACKTRACK_MAX MATCH_THEN
 #define MATCH_BACKTRACK_MIN MATCH_COMMIT
 
+STATIC_ASSERT(PCRE2_ERROR_CALLOUT_MAX < MATCH_ACCEPT, callout_max_less_than_match_accept);
+
 /* Group frame type values. Zero means the frame is not a group frame. The
 lower 16 bits are used for data (e.g. the capture number). Group frames are
 used for most groups so that information about the start is easily available at
@@ -343,7 +345,7 @@ do_callout(heapframe *F, match_block *mb, PCRE2_SIZE *lengthptr)
   callout_ovector[0] = save0;
   callout_ovector[1] = save1;
   cb->callout_flags = 0;
-  return rc;
+  return CALLOUT_RESULT(rc);
 }
 
 
@@ -9013,9 +9015,11 @@ ENDLOOP:
 
   match_data->mark = mb->nomatch_mark;
 
-  /* For anything other than nomatch or partial match, just return the code. */
+  /* For anything other than nomatch or partial match, just return the code.
+  PCRE2_ERROR_NOMATCH can come only from a callout, which ends the match
+  without a partial match. */
 
-  if (rc != MATCH_NOMATCH && rc != PCRE2_ERROR_PARTIAL)
+  if (rc != MATCH_NOMATCH && rc != PCRE2_ERROR_NOMATCH && rc != PCRE2_ERROR_PARTIAL)
     match_data->rc = rc;
 
   /* Handle a partial match. If a "soft" partial match was requested, searching
@@ -9023,7 +9027,7 @@ ENDLOOP:
   will be MATCH_NOMATCH. For a "hard" partial match, it will already be
   PCRE2_ERROR_PARTIAL. */
 
-  else if (match_partial != NULL)
+  else if (rc != PCRE2_ERROR_NOMATCH && match_partial != NULL)
   {
     match_data->subject = original_subject;
     match_data->subject_length = length;

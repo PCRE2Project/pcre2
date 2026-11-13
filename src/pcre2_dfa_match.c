@@ -85,6 +85,15 @@ in others, so I abandoned this code. */
    PCRE2_NOTEMPTY_ATSTART | PCRE2_NO_UTF_CHECK | PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT | \
    PCRE2_DFA_SHORTEST | PCRE2_DFA_RESTART | PCRE2_COPY_MATCHED_SUBJECT)
 
+/* A callout's PCRE2_ERROR_NOMATCH ends the whole match, but internal recursive
+calls use PCRE2_ERROR_NOMATCH to mean only that an assertion or group did not
+match. The callout's value is therefore passed back as this private value,
+which CALLOUT_RESULT() never returns, until it reaches the top level. */
+
+#define DFA_CALLOUT_NOMATCH (-999)
+
+STATIC_ASSERT(PCRE2_ERROR_CALLOUT_MAX < DFA_CALLOUT_NOMATCH, callout_max_less_than_dfa_nomatch);
+
 
 /*************************************************
 *      Code parameters and static tables         *
@@ -364,13 +373,15 @@ Arguments:
   extracode         extra code offset when called from condition
   lengthptr         where to return the callout length
 
-Returns:            the return from the callout
+Returns:            the return from the callout, after CALLOUT_RESULT(), with
+                    PCRE2_ERROR_NOMATCH changed to DFA_CALLOUT_NOMATCH
 */
 
 static int
 do_callout_dfa(PCRE2_SPTR code, PCRE2_SIZE *offsets, PCRE2_SPTR current_subject, PCRE2_SPTR ptr,
                dfa_match_block *mb, PCRE2_SIZE extracode, PCRE2_SIZE *lengthptr)
 {
+  int rc;
   pcre2_callout_block *cb = mb->cb;
 
   *lengthptr = (code[extracode] == OP_CALLOUT)
@@ -404,7 +415,9 @@ do_callout_dfa(PCRE2_SPTR code, PCRE2_SIZE *offsets, PCRE2_SPTR current_subject,
     cb->callout_string_length = *lengthptr - (1 + 4 * LINK_SIZE) - 2;
   }
 
-  return (mb->callout)(cb, mb->callout_data);
+  rc = (mb->callout)(cb, mb->callout_data);
+  rc = CALLOUT_RESULT(rc);
+  return (rc == PCRE2_ERROR_NOMATCH) ? DFA_CALLOUT_NOMATCH : rc;
 }
 
 
@@ -4487,7 +4500,10 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
                             base_recursion_workspace);           // initial workspace for recursion
 
     /* Anything other than "no match" means we are done, always; otherwise, carry
-    on only if not anchored. */
+    on only if not anchored. A callout's "no match" ends the match. */
+
+    if (rc == DFA_CALLOUT_NOMATCH)
+      goto NOMATCH_EXIT;
 
     if (rc != PCRE2_ERROR_NOMATCH || anchored)
     {

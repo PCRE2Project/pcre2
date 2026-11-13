@@ -397,7 +397,7 @@ released, the numbers must not be changed. */
 #define PCRE2_ERROR_BADOPTION           (-34)
 #define PCRE2_ERROR_BADREPLACEMENT      (-35)
 #define PCRE2_ERROR_BADUTFOFFSET        (-36)
-#define PCRE2_ERROR_CALLOUT             (-37) /* Never used by PCRE2 itself */
+#define PCRE2_ERROR_CALLOUT             (-37)
 #define PCRE2_ERROR_DFA_BADRESTART      (-38)
 #define PCRE2_ERROR_DFA_RECURSE         (-39)
 #define PCRE2_ERROR_DFA_UCOND           (-40)
@@ -440,6 +440,13 @@ released, the numbers must not be changed. */
 #define PCRE2_ERROR_PARTIALSUBS         (-76)
 #define PCRE2_ERROR_BADOFFSETLIMITVALUE (-77)
 #define PCRE2_ERROR_FRESHMATCHDATA      (-78)
+
+
+/* The maximum error code that a match callout may return to have it passed
+unchanged to the caller. Callouts may return values from here downwards for
+application-defined errors. */
+
+#define PCRE2_ERROR_CALLOUT_MAX (-1000)
 
 
 /* Request types for pcre2_pattern_info() */
