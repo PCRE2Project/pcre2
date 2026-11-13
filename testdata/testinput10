@@ -636,6 +636,11 @@
    abc\xc0\x80
    a\xc0\x80bc
 
+/\X?+/utf,match_invalid_utf
+   \xc0\x80
+   abc\xc0\x80
+   a\xc0\x80bc
+
 # -------------------------------------
 
 /(*UTF)(?=\x{123})/I

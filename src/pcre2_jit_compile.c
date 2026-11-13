@@ -1210,6 +1210,24 @@ check_opcode_types(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend)
       break;
 
     case OP_TYPEPOSSTAR:
+      /* In OP_TYPEPOSSTAR, extuni only uses LOCAL2 when it takes the
+      save/restore path in compile_iterator_matchingpath. */
+#if defined SUPPORT_UNICODE
+      if (cc[1] == OP_EXTUNI
+#if PCRE2_CODE_UNIT_WIDTH != 32
+          && common->utf
+#else
+          && common->invalid_utf
+#endif
+          && locals_size <= 3 * SSIZE_OF(sw)
+      )
+      {
+        locals_size = 3 * SSIZE_OF(sw);
+      }
+#endif /* SUPPORT_UNICODE */
+      cc += 2 - 1;
+      break;
+
     case OP_TYPEPOSPLUS:
     case OP_TYPEPOSQUERY:
       if (cc[1] == OP_EXTUNI && locals_size <= 3 * SSIZE_OF(sw))
@@ -12225,7 +12243,10 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
 #endif
 
     if (exact == 1)
+    {
+      SLJIT_ASSERT(tmp_base == TMP3 || common->locals_size >= 3 * SSIZE_OF(sw));
       OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
+    }
 
     detect_partial_match(common, &no_match);
     label = LABEL();

@@ -1861,6 +1861,14 @@ No match
    a\xc0\x80bc
  0: bc
 
+/\X?+/utf,match_invalid_utf
+   \xc0\x80
+ 0: 
+   abc\xc0\x80
+ 0: a
+   a\xc0\x80bc
+ 0: a
+
 # -------------------------------------
 
 /(*UTF)(?=\x{123})/I
