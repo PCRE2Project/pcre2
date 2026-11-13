@@ -210,19 +210,22 @@ check_include_file(windows.h HAVE_WINDOWS_H)
 pcre2_use_system_extensions(SYSTEM_EXTENSION_COMPILE_DEFINITIONS)
 list(APPEND ALL_COMPILE_DEFINITIONS ${SYSTEM_EXTENSION_COMPILE_DEFINITIONS})
 
-cmake_push_check_state(RESET)
 # Propagate _GNU_SOURCE from our system-extension checks so that these
 # check_symbol_exists() calls can find GNU-specific symbols.
-# The CMAKE_REQUIRED_DEFINITIONS API is a bit legacy and needs the -D prefix.
-set(tmp_compile_definitions "${SYSTEM_EXTENSION_COMPILE_DEFINITIONS}")
-list(TRANSFORM tmp_compile_definitions PREPEND "-D")
-list(APPEND CMAKE_REQUIRED_DEFINITIONS ${tmp_compile_definitions})
-unset(tmp_compile_definitions)
+macro(pcre2_check_with_system_extensions)
+  cmake_push_check_state(RESET)
+  # The CMAKE_REQUIRED_DEFINITIONS API is a bit legacy and needs the -D prefix.
+  set(tmp_compile_definitions "${SYSTEM_EXTENSION_COMPILE_DEFINITIONS}")
+  list(TRANSFORM tmp_compile_definitions PREPEND "-D")
+  list(APPEND CMAKE_REQUIRED_DEFINITIONS ${tmp_compile_definitions})
+  unset(tmp_compile_definitions)
 
-check_symbol_exists(memfd_create "sys/mman.h" HAVE_MEMFD_CREATE) # glibc 2.27
-check_symbol_exists(secure_getenv "stdlib.h" HAVE_SECURE_GETENV) # glibc 2.17
-check_symbol_exists(setrlimit "sys/resource.h" HAVE_SETRLIMIT)
-cmake_pop_check_state()
+  check_symbol_exists(memfd_create "sys/mman.h" HAVE_MEMFD_CREATE) # glibc 2.27
+  check_symbol_exists(secure_getenv "stdlib.h" HAVE_SECURE_GETENV) # glibc 2.17
+  check_symbol_exists(setrlimit "sys/resource.h" HAVE_SETRLIMIT)
+  cmake_pop_check_state()
+endmacro()
+pcre2_check_with_system_extensions()
 
 check_c_source_compiles(
   [=[
@@ -252,53 +255,56 @@ check_c_source_compiles(
 # (for example, calling a function with the wrong signature just to see whether
 # the linker can find it). These couple of tests here though need to be compiled
 # with -Werror to be effective.
-cmake_push_check_state()
-if(NOT DEFINED CMAKE_REQUIRED_FLAGS)
-  set(CMAKE_REQUIRED_FLAGS "")
-endif()
-pcre2_warning_as_error(WARNING_AS_ERROR_FLAGS)
-set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${WARNING_AS_ERROR_FLAGS}")
+macro(pcre2_check_with_werror)
+  cmake_push_check_state()
+  if(NOT DEFINED CMAKE_REQUIRED_FLAGS)
+    set(CMAKE_REQUIRED_FLAGS "")
+  endif()
+  pcre2_warning_as_error(WARNING_AS_ERROR_FLAGS)
+  set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${WARNING_AS_ERROR_FLAGS}")
 
-check_c_source_compiles(
-  "int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }"
-  HAVE_ATTRIBUTE_UNINITIALIZED
-)
-
-if(PCRE2_MSVC_ABI)
-  set(HAVE_VISIBILITY 0)
-else()
   check_c_source_compiles(
-    [=[
-    extern __attribute__ ((visibility ("default"))) int f(void);
-    int main(void) { return f(); }
-    int f(void) { return 42; }
-    ]=]
-    HAVE_VISIBILITY
+    "int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }"
+    HAVE_ATTRIBUTE_UNINITIALIZED
   )
-endif()
-if(CMAKE_C_COMPILE_OPTIONS_VISIBILITY AND NOT HAVE_VISIBILITY)
-  # Hmm. We don't know of any way to set a symbol to have default visibility, other
-  # than the common "__attribute__((visibility("default")))". But CMake thinks that
-  # the compiler supports CMAKE_C_VISIBILITY_PRESET. The build is likely to fail to
-  # generate a usable shared library.
-  message(
-    WARNING
-    "C compiler uses the visibility flag ${CMAKE_C_COMPILE_OPTIONS_VISIBILITY}. We did not detect support for __attribute__((visibility(\"default\"))). We do not know how to set a symbol to have default visibility."
-  )
-elseif(HAVE_VISIBILITY AND NOT CMAKE_C_COMPILE_OPTIONS_VISIBILITY)
-  # Here, the build may well work, but it's possible that CMake isn't correctly
-  # suppressing the visibility of private symbols.
-  message(
-    WARNING
-    "C compiler appears to support __attribute__((visibility(\"default\"))). However, CMake is not using a visibility flag. The visibility of private symbols may not be correct."
-  )
-endif()
-if(HAVE_VISIBILITY)
-  set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
-else()
-  set(PCRE2_EXPORT "")
-endif()
-cmake_pop_check_state()
+
+  if(PCRE2_MSVC_ABI)
+    set(HAVE_VISIBILITY 0)
+  else()
+    check_c_source_compiles(
+      [=[
+      extern __attribute__ ((visibility ("default"))) int f(void);
+      int main(void) { return f(); }
+      int f(void) { return 42; }
+      ]=]
+      HAVE_VISIBILITY
+    )
+  endif()
+  if(CMAKE_C_COMPILE_OPTIONS_VISIBILITY AND NOT HAVE_VISIBILITY)
+    # Hmm. We don't know of any way to set a symbol to have default visibility, other
+    # than the common "__attribute__((visibility("default")))". But CMake thinks that
+    # the compiler supports CMAKE_C_VISIBILITY_PRESET. The build is likely to fail to
+    # generate a usable shared library.
+    message(
+      WARNING
+      "C compiler uses the visibility flag ${CMAKE_C_COMPILE_OPTIONS_VISIBILITY}. We did not detect support for __attribute__((visibility(\"default\"))). We do not know how to set a symbol to have default visibility."
+    )
+  elseif(HAVE_VISIBILITY AND NOT CMAKE_C_COMPILE_OPTIONS_VISIBILITY)
+    # Here, the build may well work, but it's possible that CMake isn't correctly
+    # suppressing the visibility of private symbols.
+    message(
+      WARNING
+      "C compiler appears to support __attribute__((visibility(\"default\"))). However, CMake is not using a visibility flag. The visibility of private symbols may not be correct."
+    )
+  endif()
+  if(HAVE_VISIBILITY)
+    set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
+  else()
+    set(PCRE2_EXPORT "")
+  endif()
+  cmake_pop_check_state()
+endmacro()
+pcre2_check_with_werror()
 
 check_c_source_compiles("int main(void) { __assume(1); return 0; }" HAVE_BUILTIN_ASSUME)
 
@@ -430,51 +436,6 @@ mark_as_advanced(PCRE2_HEAP_MATCH_RECURSE)
 
 set(PCRE2_SUPPORT_JIT "OFF" CACHE STRING "Enable support for Just-in-time compiling (OFF, ON, or AUTO).")
 set_property(CACHE PCRE2_SUPPORT_JIT PROPERTY STRINGS "OFF" "ON" "AUTO")
-
-# Handle JIT auto-detection
-if(PCRE2_SUPPORT_JIT STREQUAL "AUTO")
-  # Try to compile a test that checks if SLJIT supports this CPU
-
-  set(first_run FALSE)
-  if(NOT DEFINED SLJIT_SUPPORTS_THIS_CPU)
-    set(first_run TRUE)
-  endif()
-
-  cmake_push_check_state(RESET)
-  set(CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/deps/sljit")
-  set(
-    _jit_test_source
-    "
-    #define SLJIT_CONFIG_AUTO 1
-    #include \"./sljit_src/sljitConfigCPU.h\"
-    #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
-    #error unsupported
-    #endif
-    int main(void) { return 0; }
-  "
-  )
-  check_c_source_compiles("${_jit_test_source}" SLJIT_SUPPORTS_THIS_CPU)
-  cmake_pop_check_state()
-
-  if(SLJIT_SUPPORTS_THIS_CPU)
-    if(first_run)
-      message(STATUS "JIT auto-detection: supported on this CPU")
-    endif()
-    set(PCRE2_SUPPORT_JIT_DETECTED ON)
-  else()
-    if(first_run)
-      message(STATUS "JIT auto-detection: not supported on this CPU")
-    endif()
-    set(PCRE2_SUPPORT_JIT_DETECTED OFF)
-  endif()
-
-  unset(_jit_test_source)
-  unset(first_run)
-elseif(PCRE2_SUPPORT_JIT)
-  set(PCRE2_SUPPORT_JIT_DETECTED ON)
-else()
-  set(PCRE2_SUPPORT_JIT_DETECTED OFF)
-endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES Linux|NetBSD)
   option(PCRE2_SUPPORT_JIT_SEALLOC "Enable SELinux compatible execmem allocator in JIT (experimental)." OFF)
@@ -672,6 +633,51 @@ endif()
 
 if(PCRE2_SUPPORT_UNICODE)
   set(SUPPORT_UNICODE 1)
+endif()
+
+# Handle JIT auto-detection
+if(PCRE2_SUPPORT_JIT STREQUAL "AUTO")
+  # Try to compile a test that checks if SLJIT supports this CPU
+  function(pcre2_check_sljit_supports_this_cpu out_var)
+    set(first_run FALSE)
+    if(NOT DEFINED SLJIT_SUPPORTS_THIS_CPU)
+      set(first_run TRUE)
+    endif()
+
+    cmake_push_check_state(RESET)
+    set(CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/deps/sljit")
+    set(
+      _jit_test_source
+      "
+      #define SLJIT_CONFIG_AUTO 1
+      #include \"./sljit_src/sljitConfigCPU.h\"
+      #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
+      #error unsupported
+      #endif
+      int main(void) { return 0; }
+    "
+    )
+    check_c_source_compiles("${_jit_test_source}" SLJIT_SUPPORTS_THIS_CPU)
+    cmake_pop_check_state()
+
+    if(SLJIT_SUPPORTS_THIS_CPU)
+      if(first_run)
+        message(STATUS "JIT auto-detection: supported on this CPU")
+      endif()
+      set(${out_var} ON PARENT_SCOPE)
+    else()
+      if(first_run)
+        message(STATUS "JIT auto-detection: not supported on this CPU")
+      endif()
+      set(${out_var} OFF PARENT_SCOPE)
+    endif()
+  endfunction()
+
+  pcre2_check_sljit_supports_this_cpu(PCRE2_SUPPORT_JIT_DETECTED)
+elseif(PCRE2_SUPPORT_JIT)
+  set(PCRE2_SUPPORT_JIT_DETECTED ON)
+else()
+  set(PCRE2_SUPPORT_JIT_DETECTED OFF)
 endif()
 
 if(PCRE2_SUPPORT_JIT_DETECTED)

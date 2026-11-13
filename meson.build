@@ -197,6 +197,42 @@ foreach config_name, option_name : config_options
   config.set(config_name, get_option(option_name))
 endforeach
 
+# -----------------------------------------------------------------------------
+# Build configuration
+# -----------------------------------------------------------------------------
+
+pcre2_includes = include_directories('.', 'src')
+
+common_c_args = ['-DHAVE_CONFIG_H']
+
+debug_option = get_option('pcre2_debug')
+if debug_option == 'enabled' or (debug_option == 'auto' and get_option('buildtype') == 'debug')
+  common_c_args += '-DPCRE2_DEBUG'
+endif
+
+if not build_8 and not build_16 and not build_32
+  error('At least one PCRE2 code unit width must be enabled.')
+endif
+
+config.set('SUPPORT_PCRE2_8', build_8 ? 1 : false)
+config.set('SUPPORT_PCRE2_16', build_16 ? 1 : false)
+config.set('SUPPORT_PCRE2_32', build_32 ? 1 : false)
+
+build_grep = get_option('pcre2_build_pcre2grep')
+if build_grep and not build_8
+  message('PCRE2_BUILD_PCRE2_8 must be enabled for pcre2grep; disabling pcre2grep.')
+  build_grep = false
+endif
+
+# The dependency finders have already checked explicitly requested libraries.
+if editline_dep.found() and readline_dep.found()
+  error('Only one of PCRE2_SUPPORT_LIBREADLINE and PCRE2_SUPPORT_LIBEDIT can be enabled.')
+endif
+
+config.set('BSR_ANYCRLF', get_option('pcre2_support_bsr_anycrlf') ? 1 : false)
+config.set('NEVER_BACKSLASH_C', get_option('pcre2_never_backslash_c') ? 1 : false)
+config.set('SUPPORT_UNICODE', get_option('pcre2_support_unicode') ? 1 : false)
+
 jit_option = get_option('pcre2_support_jit')
 jit_enabled = jit_option.enabled()
 if jit_option.auto()
@@ -213,36 +249,6 @@ if jit_option.auto()
     name: 'JIT support on this CPU',
   )
 endif
-
-build_grep = get_option('pcre2_build_pcre2grep')
-
-# -----------------------------------------------------------------------------
-# Build configuration
-# -----------------------------------------------------------------------------
-
-pcre2_includes = include_directories('.', 'src')
-
-if not build_8 and not build_16 and not build_32
-  error('At least one PCRE2 code unit width must be enabled.')
-endif
-
-config.set('SUPPORT_PCRE2_8', build_8 ? 1 : false)
-config.set('SUPPORT_PCRE2_16', build_16 ? 1 : false)
-config.set('SUPPORT_PCRE2_32', build_32 ? 1 : false)
-
-if build_grep and not build_8
-  message('PCRE2_BUILD_PCRE2_8 must be enabled for pcre2grep; disabling pcre2grep.')
-  build_grep = false
-endif
-
-# The dependency finders have already checked explicitly requested libraries.
-if editline_dep.found() and readline_dep.found()
-  error('Only one of PCRE2_SUPPORT_LIBREADLINE and PCRE2_SUPPORT_LIBEDIT can be enabled.')
-endif
-
-config.set('BSR_ANYCRLF', get_option('pcre2_support_bsr_anycrlf') ? 1 : false)
-config.set('NEVER_BACKSLASH_C', get_option('pcre2_never_backslash_c') ? 1 : false)
-config.set('SUPPORT_UNICODE', get_option('pcre2_support_unicode') ? 1 : false)
 
 config.set('SUPPORT_JIT', jit_enabled ? 1 : false)
 thread_dep = dependency('threads', required: jit_enabled)
@@ -445,13 +451,6 @@ pcre2_sources += [chartables, config_h, pcre2_h]
 # -----------------------------------------------------------------------------
 # Libraries
 # -----------------------------------------------------------------------------
-
-common_c_args = ['-DHAVE_CONFIG_H']
-
-debug_option = get_option('pcre2_debug')
-if debug_option == 'enabled' or (debug_option == 'auto' and get_option('buildtype') == 'debug')
-  common_c_args += '-DPCRE2_DEBUG'
-endif
 
 # Use the conventional Windows suffix to allow debug and release libs to coexist.
 windows_debug_postfix = host_is_windows and get_option('buildtype') == 'debug' ? 'd' : ''
