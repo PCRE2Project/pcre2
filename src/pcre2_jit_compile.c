@@ -1210,6 +1210,24 @@ check_opcode_types(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend)
       break;
 
     case OP_TYPEPOSSTAR:
+      /* In OP_TYPEPOSSTAR, extuni only uses LOCAL2 when it takes the
+      save/restore path in compile_iterator_matchingpath. */
+#if defined SUPPORT_UNICODE
+      if (cc[1] == OP_EXTUNI
+#if PCRE2_CODE_UNIT_WIDTH != 32
+          && common->utf
+#else
+          && common->invalid_utf
+#endif
+          && locals_size <= 3 * SSIZE_OF(sw)
+      )
+      {
+        locals_size = 3 * SSIZE_OF(sw);
+      }
+#endif /* SUPPORT_UNICODE */
+      cc += 2 - 1;
+      break;
+
     case OP_TYPEPOSPLUS:
     case OP_TYPEPOSQUERY:
       if (cc[1] == OP_EXTUNI && locals_size <= 3 * SSIZE_OF(sw))
@@ -12200,8 +12218,19 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
       break;
     }
 
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+#if defined SUPPORT_UNICODE
+    /* We must restore the position if matching fails. This block is for the
+    tricky cases where the restart position must be kept in a saved register.
+    This is needed when a failed item may have advanced STR_PTR by anything
+    other than one code unit: so any UTF-8/16 character, or an extuni that fails
+    because of invalid_utf (its helper call has clobbered STR_PTR, and TMP3).
+    For every other case, the cheaper code underneath restores the previous
+    position with a simple decrement. */
+#if PCRE2_CODE_UNIT_WIDTH != 32
     if (common->utf)
+#else
+    if (type == OP_EXTUNI && common->invalid_utf)
+#endif
     {
       SLJIT_ASSERT(tmp_base == TMP3 || common->locals_size >= 3 * SSIZE_OF(sw));
 
@@ -12234,12 +12263,18 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
 #endif
 
     if (exact == 1)
+    {
+      SLJIT_ASSERT(tmp_base == TMP3 || common->locals_size >= 3 * SSIZE_OF(sw));
       OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
+    }
 
     detect_partial_match(common, &no_match);
     label = LABEL();
-    /* Extuni never fails, so no_char1_match is not used in that case.
-       Anynl optionally reads an extra character on success. */
+    /* Every item here advances STR_PTR by exactly one code unit before it can
+    fail, so a failure is undone by stepping back one code unit. Extuni cannot
+    be undone that way, but it never fails without invalid_utf (handled
+    above), so no_char1_match is not used in that case.
+    Anynl optionally reads an extra character on success. */
     compile_char1_matchingpath(common, type, cc, &no_char1_match, FALSE);
     detect_partial_match_to(common, label);
     if (type != OP_EXTUNI)
@@ -12262,6 +12297,10 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
     SLJIT_ASSERT(backtrack == NULL && early_fail_ptr == 0);
     max += exact;
 
+    /* The code below keeps its counter in TMP3 and undoes a failed item by
+    stepping back one code unit. Extuni clobbers TMP3 (helper call) and may
+    span several code units, as may UTF-8/16 characters, so these need a
+    counter which survives the call and a saved restore position. */
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
     if (type == OP_EXTUNI || common->utf)
 #else
@@ -12277,7 +12316,9 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
       tmp_base = TMP3;
 #ifdef SUPPORT_UNICODE
       if (type == OP_EXTUNI && common->invalid_utf) {
-        /* Extuni only modifies TMP3 on successful match, except when invalid_utf is enabled. */
+        /* The extuni helper call clobbers TMP3. That is harmless on success,
+        as TMP3 is reloaded before it is read, but with invalid_utf extuni
+        can fail, so the restore position must survive the call. */
         SLJIT_ASSERT(common->locals_size >= 4 * SSIZE_OF(sw));
         OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL3, STACK_LIMIT, 0);
         tmp_base = STACK_LIMIT;

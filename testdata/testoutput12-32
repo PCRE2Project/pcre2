@@ -1702,6 +1702,38 @@ No match
    abc\x{dc00}
  0: abc
 
+/\X*/utf,match_invalid_utf
+   \x{dc00}
+ 0: 
+   abc\x{dc00}
+ 0: abc
+   a\x{dc00}bc
+ 0: a
+
+/\X+/utf,match_invalid_utf
+   \x{dc00}
+No match
+   abc\x{dc00}
+ 0: abc
+   a\x{dc00}bc
+ 0: a
+
+/\X{2,}+/utf,match_invalid_utf
+   \x{dc00}
+No match
+   abc\x{dc00}
+ 0: abc
+   a\x{dc00}bc
+ 0: bc
+
+/\X?+/utf,match_invalid_utf
+   \x{dc00}
+ 0: 
+   abc\x{dc00}
+ 0: a
+   a\x{dc00}bc
+ 0: a
+
 # ---------------------------------------------------- 
 
 /(*UTF)(?=\x{123})/I

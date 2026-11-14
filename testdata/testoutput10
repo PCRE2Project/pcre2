@@ -1837,6 +1837,38 @@ No match
    abc\xc0\x80
  0: abc
 
+/\X*/utf,match_invalid_utf
+   \xc0\x80
+ 0: 
+   abc\xc0\x80
+ 0: abc
+   a\xc0\x80bc
+ 0: a
+
+/\X+/utf,match_invalid_utf
+   \xc0\x80
+No match
+   abc\xc0\x80
+ 0: abc
+   a\xc0\x80bc
+ 0: a
+
+/\X{2,}+/utf,match_invalid_utf
+   \xc0\x80
+No match
+   abc\xc0\x80
+ 0: abc
+   a\xc0\x80bc
+ 0: bc
+
+/\X?+/utf,match_invalid_utf
+   \xc0\x80
+ 0: 
+   abc\xc0\x80
+ 0: a
+   a\xc0\x80bc
+ 0: a
+
 # -------------------------------------
 
 /(*UTF)(?=\x{123})/I
