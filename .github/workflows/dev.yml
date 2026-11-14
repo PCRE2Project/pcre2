@@ -58,19 +58,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
-      - name: Prepare
-        run: ./autogen.sh
-
+      # Empty CMAKE_BUILD_TYPE to set -O0 explicitly
       - name: Configure
-        run: ./configure CC='gcc -fsanitize=undefined,address -fsanitize-undefined-trap-on-error' CFLAGS="-O0 $CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --enable-Werror --enable-pcre2test-libedit --with-link-size=4
+        run: cmake $CMAKE_FLAGS -DCMAKE_C_COMPILER=gcc -DCMAKE_C_FLAGS="-O0 $CFLAGS_GCC_STYLE -fsanitize=undefined,address -fsanitize-undefined-trap-on-error" -DCMAKE_BUILD_TYPE= -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DPCRE2_SUPPORT_LIBEDIT=ON -DPCRE2_SUPPORT_LIBREADLINE=OFF -DPCRE2_SUPPORT_LIBZ=OFF -DPCRE2_SUPPORT_LIBBZ2=OFF -DPCRE2_LINK_SIZE=4 -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -B build
 
       - name: Build
-        run: make -j$(nproc)
+        run: cmake --build build -j$(nproc)
 
       - name: Test
-        run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+        run: cd build && ctest -j$(nproc) --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   dragon:
     # Tests with: clang AB/UB; link-size=3. Clang's logo is a dragon.
@@ -85,21 +84,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
-      - name: Prepare
-        run: ./autogen.sh
-
+      # Empty CMAKE_BUILD_TYPE to set -O options explicitly
       - name: Configure
-        run: ./configure CC='clang -fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-integer-overflow,unsigned-shift-base,function' CFLAGS="${{ matrix.opt }} $CFLAGS_GCC_STYLE" --enable-jit --enable-pcre2-16 --enable-pcre2-32 --enable-debug --enable-Werror --with-link-size=3
+        run: cmake $CMAKE_FLAGS -DCMAKE_C_COMPILER=clang -DCMAKE_C_FLAGS="${{ matrix.opt }} $CFLAGS_GCC_STYLE -fsanitize=undefined,address,integer -fno-sanitize-recover=undefined,integer -fno-sanitize=unsigned-integer-overflow,unsigned-shift-base,function" -DCMAKE_BUILD_TYPE= -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DPCRE2_SUPPORT_LIBREADLINE=OFF -DPCRE2_SUPPORT_LIBZ=OFF -DPCRE2_SUPPORT_LIBBZ2=OFF -DPCRE2_LINK_SIZE=3 -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -B build
 
       - name: Build
-        run: make -j$(nproc)
+        run: cmake --build build -j$(nproc)
 
       - name: Test
         run: |
           ulimit -S -s 49152 # Raise stack limit; ASAN with -O0 is very stack-hungry
-          (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+          cd build && ctest -j$(nproc) --output-on-failure && (cat ./Testing/Temporary/LastTest.log || true)
 
   puffin:
     # Tests with: GCC, -O3, very latest CMake, libedit
@@ -117,19 +115,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Check latest CMake
         id: get-cmake-ver
         run: |
-          CMAKE_VER=$(curl -s https://api.github.com/repos/Kitware/CMake/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          CMAKE_RELEASE=$(curl --fail --silent --show-error --location --retry 3 https://api.github.com/repos/Kitware/CMake/releases/latest)
+          CMAKE_VER=$(jq -er '.tag_name | ltrimstr("v")' <<< "$CMAKE_RELEASE")
           if ! echo "$CMAKE_VER" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$' ; then
             echo "Extracted CMake version: '$CMAKE_VER'" >&2
             echo "This does not match the expected version format" >&2
             exit 1
           fi
-          echo "CMAKE_VER=$CMAKE_VER" >> $GITHUB_OUTPUT
-          echo "CMAKE_VER=$CMAKE_VER" >> $GITHUB_ENV
+          CMAKE_SHA256=$(jq -er --arg name "cmake-${CMAKE_VER}-linux-x86_64.tar.gz" '
+            [.assets[] | select(.name == $name) | .digest] |
+            if length == 1 then .[0] else error("Expected exactly one CMake archive digest") end |
+            if type != "string" then error("Missing CMake archive digest")
+            elif test("^sha256:[0-9a-f]{64}$") then ltrimstr("sha256:")
+            else error("Invalid CMake archive SHA-256 digest") end
+          ' <<< "$CMAKE_RELEASE")
+          echo "CMAKE_VER=$CMAKE_VER" >> "$GITHUB_OUTPUT"
+          echo "CMAKE_VER=$CMAKE_VER" >> "$GITHUB_ENV"
+          echo "CMAKE_SHA256=$CMAKE_SHA256" >> "$GITHUB_ENV"
           echo "Latest CMake version is $CMAKE_VER"
 
       - name: Cache CMake
@@ -140,7 +148,8 @@ jobs:
 
       - name: Install CMake
         run: |
-          [ -f cmake-${CMAKE_VER}-linux-x86_64.tar.gz ] || curl -L -S -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-linux-x86_64.tar.gz"
+          [ -f cmake-${CMAKE_VER}-linux-x86_64.tar.gz ] || curl --fail --location --retry 3 -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-linux-x86_64.tar.gz"
+          printf '%s  %s\n' "$CMAKE_SHA256" "cmake-${CMAKE_VER}-linux-x86_64.tar.gz" | sha256sum --check --strict
           tar -xz -f cmake-${CMAKE_VER}-linux-x86_64.tar.gz -C "$RUNNER_TEMP"
           realpath "$RUNNER_TEMP/cmake-${CMAKE_VER}-linux-x86_64/bin" >> "$GITHUB_PATH"
 
@@ -185,6 +194,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Prepare
@@ -197,7 +207,7 @@ jobs:
         run: make -j$(nproc)
 
       - name: Test
-        run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+        run: (set +e; make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
       - name: Install
         run: |
@@ -243,6 +253,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Prepare
@@ -255,7 +266,7 @@ jobs:
         run: make -j$(nproc)
 
       - name: Test
-        run: (make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
+        run: (set +e; make check; rc=$?; for i in test-suite.log Run*Test.log pcre2*_test.log; do echo "== $i =="; cat $i; done; exit $rc)
 
 
       - name: Install
@@ -281,6 +292,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Configure
@@ -322,6 +334,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Cache CMake
@@ -332,7 +345,10 @@ jobs:
 
       - name: Install CMake
         run: |
-          [ -f cmake-${CMAKE_VER}-Linux-x86_64.tar.gz ] || curl -L -S -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-Linux-x86_64.tar.gz"
+          [ -f cmake-${CMAKE_VER}-Linux-x86_64.tar.gz ] || curl --fail --location --retry 3 -O "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-Linux-x86_64.tar.gz"
+          printf '%s  %s\n' \
+            8456a10ac2fd0dc97d13aa4753431a232cf32aecb0976541f7bf867a3f90ec57 \
+            "cmake-${CMAKE_VER}-Linux-x86_64.tar.gz" | sha256sum --check --strict
           tar -xz -f cmake-${CMAKE_VER}-Linux-x86_64.tar.gz -C "$RUNNER_TEMP"
           realpath "$RUNNER_TEMP/cmake-${CMAKE_VER}-Linux-x86_64/bin" >> "$GITHUB_PATH"
 
@@ -363,6 +379,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Configure
@@ -383,6 +400,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Configure
@@ -409,6 +427,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Run
@@ -420,12 +439,13 @@ jobs:
     # Job to execute RunPerlTest. "Camel bird" is another name for an ostrich (and it's Perl's logo).
     name: perl
     runs-on: ubuntu-latest
-    container: perl:devel
+    container: perl:stable
     if: github.event_name != 'workflow_dispatch' || (inputs.job_id == 'all' || inputs.job_id == 'camel')
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: yes
 
       - name: Test
@@ -448,6 +468,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Configure
@@ -483,6 +504,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Setup
@@ -542,6 +564,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Prepare
@@ -642,6 +665,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Prepare
@@ -700,6 +724,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Install Meson
@@ -737,6 +762,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Install Meson 1.6.1
@@ -774,6 +800,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: false
 
       # The zig version from minimum_zig_version in build.zig.zon will be installed.
@@ -800,6 +827,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           submodules: true
 
       - name: Build

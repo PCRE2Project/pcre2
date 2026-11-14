@@ -981,6 +981,25 @@ $valgrind $vjs "$pcre2grep" $pcre2grep_opts --allow-lookaround-bsk --file-offset
 echo "RC=$?" >>testtrygrep
 
 
+echo "---------------------------- Test 162 -----------------------------" >>testtrygrep
+(cd "$srcdir"; $valgrind $vjs "$pcre2grep" $pcre2grep_opts --only-matching=3000000000 pattern testdata/grepinput) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
+(cd "$srcdir"; $valgrind $vjs "$pcre2grep" $pcre2grep_opts -o4294967295 pattern testdata/grepinput) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
+(cd "$srcdir"; $valgrind $vjs "$pcre2grep" $pcre2grep_opts --max-count=2147483648 pattern testdata/grepinput) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
+(cd "$srcdir"; $valgrind $vjs "$pcre2grep" $pcre2grep_opts --om-capture=4294967296 pattern testdata/grepinput) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
+(cd "$srcdir"; $valgrind $vjs "$pcre2grep" $pcre2grep_opts --buffer-size=18446744073709551617 pattern testdata/grepinput) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
+(cd "$srcdir"; $valgrind $vjs "$pcre2grep" $pcre2grep_opts --max-buffer-size=18446744073709551616M pattern testdata/grepinput) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
+(cd "$srcdir"; $valgrind $vjs "$pcre2grep" $pcre2grep_opts --buffer-size=18446744073709551615 pattern testdata/grepinput) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
+(cd "$srcdir"; $valgrind $vjs "$pcre2grep" $pcre2grep_opts --om-capture=4294967295 -m1 -o1 '(pattern)' testdata/grepinput) >>testtrygrep 2>&1
+echo "RC=$?" >>testtrygrep
+
+
 # Now compare the results.
 
 $cf "$srcdir/testdata/grepoutput" testtrygrep
@@ -1210,6 +1229,42 @@ if [ $utf8 -ne 0 ] ; then
   echo "any-mid-terminator RC=$?" >>testtrygrep
   $valgrind $vjs "$pcre2grep" $pcre2grep_opts -M -N CRLF --line-offsets '\r' testtemp1grep >>testtrygrep 2>&1
   echo "crlf-mid-terminator-line-offsets RC=$?" >>testtrygrep
+
+  echo "---------------------------- Test U15 -----------------------------" >>testtrygrep
+  # All valid newline encodings, including backward context across NEL, LS, PS.
+  printf 'A\nB\rC\r\nD\vE\fF\302\205G\342\200\250H\342\200\251I' >testtemp1grep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u -N ANY -n -o '[A-I]' testtemp1grep >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u -N ANY -n -B3 '^I$' testtemp1grep >>testtrygrep
+  rc=$?
+  echo "RC=$rc" >>testtrygrep
+
+  echo "---------------------------- Test U16 -----------------------------" >>testtrygrep
+  # Invalid UTF must neither invent newlines nor swallow a following LF.
+  printf 'A\370\210\200\200\205B\nA\374\204\200\200\200\205B\nA\300\212B\nA\302\005B\nA\340\200\212B\nA\360\200\200\212B\nA\342\200\nC\n' >testtemp1grep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -U -N ANY -n -o '[BC]' testtemp1grep >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -U -N ANY '^B$' testtemp1grep >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -U -N ANY -n -B2 '^C$' testtemp1grep >>testtrygrep
+  rc=$?
+  echo "RC=$rc" >>testtrygrep
+  printf 'A\205B\n' >testtemp1grep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -U -N ANY -n '^B$' testtemp1grep >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -N ANY -n '^B$' testtemp1grep >>testtrygrep
+  echo "RC=$?" >>testtrygrep
+
+  echo "---------------------------- Test U17 -----------------------------" >>testtrygrep
+  printf 'x\n' >testtemp1grep
+  for text in '$x{d800}' '$o{157777}' '$x{110000}'; do
+    $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u -O "$text" x testtemp1grep >>testtrygrep 2>&1
+    echo "RC=$?" >>testtrygrep
+  done
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u -O '$x{d7ff}$x{e000}$x{10ffff}' x testtemp1grep >testtemp2grep
+  echo "RC=$?" >>testtrygrep
+  $valgrind $vjs "$pcre2grep" $pcre2grep_opts -u -q '^\x{d7ff}\x{e000}\x{10ffff}$' testtemp2grep >>testtrygrep
+  echo "RC=$?" >>testtrygrep
 
   $cf "$srcdir/testdata/grepoutput8" testtrygrep
   if [ $? != 0 ] ; then exit 1; fi

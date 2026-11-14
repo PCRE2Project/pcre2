@@ -4280,6 +4280,8 @@ process_data(void)
     len--;
   }
 
+  uint8_t *input_end = p + len;
+
   /* Check that the data is well-formed UTF-8 if we're in UTF mode. To create
   invalid input to pcre2_match(), you must use \x?? or \x{} sequences. */
 
@@ -4436,9 +4438,18 @@ process_data(void)
         c = *p++;
       }
 #endif
-      if ((utf || (pat_patctl.control & CTL_UTF8_INPUT) != 0) && HASUTF8EXTRALEN(c))
+      if ((utf || (pat_patctl.control & CTL_UTF8_INPUT) != 0) && c >= 0xc0)
       {
-        GETUTF8INC(c, p);
+        /* We cannot use the shared macros such as GETUTF8, since they assume
+        RFC 3629 input, but pcre2test also handles RFC 2279 encodings. */
+        int n = utf8_to_ord(p - 1, input_end, &c);
+        if (n <= 0)
+        {
+          cfprintf(clr_test_error, outfile,
+                   "** Failed: invalid UTF-8 string cannot be used as input\n");
+          return PR_OK;
+        }
+        p += n - 1;
       }
 
       c |= topbit;
@@ -6899,7 +6910,9 @@ unittest(void)
   ASSERT(rc == 8 && pcre2_strcmp_c8(errorbuffer, "no error") == 0,
          "pcre2_get_error_message(COMPILE_ERROR_BASE)");
 
-  rc = pcre2_get_error_message(PCRE2_ERROR_NULL_ERROROFFSET, errorbuffer,
+  int last_compile_error = PCRE2_ERROR_NULL_ERROROFFSET;
+
+  rc = pcre2_get_error_message(last_compile_error, errorbuffer,
                               sizeof(errorbuffer) / sizeof(errorbuffer[0]));
   BUFFER_OUTPUT
   ASSERT(rc == sizeof("erroroffset passed as NULL") - 1 &&
@@ -6907,24 +6920,27 @@ unittest(void)
          "pcre2_get_error_message(last compile error)");
 
   rc = pcre2_get_error_message(PCRE2_ERROR_PARTIALSUBS, errorbuffer,
-                              sizeof(errorbuffer) / sizeof(errorbuffer[0]));
+                               sizeof(errorbuffer) / sizeof(errorbuffer[0]));
   BUFFER_OUTPUT
   ASSERT(rc == sizeof("replacement $' or $_ not supported with partial match") - 1 &&
              pcre2_strcmp_c8(errorbuffer,
                              "replacement $' or $_ not supported with partial match") == 0,
          "pcre2_get_error_message(partial substitution)");
 
-  rc = pcre2_get_error_message(PCRE2_ERROR_BADOFFSETLIMITVALUE, errorbuffer,
-                              sizeof(errorbuffer) / sizeof(errorbuffer[0]));
+  int last_match_error = PCRE2_ERROR_FRESHMATCHDATA;
+
+  rc = pcre2_get_error_message(last_match_error, errorbuffer,
+                               sizeof(errorbuffer) / sizeof(errorbuffer[0]));
   BUFFER_OUTPUT
-  ASSERT(rc == sizeof("bad offset limit value") - 1 &&
-             pcre2_strcmp_c8(errorbuffer, "bad offset limit value") == 0,
+  ASSERT(rc == sizeof("match data object has not been used by any match function") - 1 &&
+             pcre2_strcmp_c8(errorbuffer,
+                             "match data object has not been used by any match function") == 0,
          "pcre2_get_error_message(last match error)");
 
   {
     const int invalid_errorcodes[] = {
       INT_MIN, INT_MIN + 1, INT_MAX, 1, COMPILE_ERROR_BASE - 1,
-      PCRE2_ERROR_NULL_ERROROFFSET + 1, PCRE2_ERROR_BADOFFSETLIMITVALUE - 1
+      last_compile_error + 1, last_match_error - 1
     };
 
     for (size_t i = 0; i < sizeof(invalid_errorcodes) / sizeof(invalid_errorcodes[0]); i++)
@@ -7016,13 +7032,54 @@ unittest(void)
       pcre2_compile(capture_pattern, PCRE2_ZERO_TERMINATED, 0, &errorcode, &erroroffset, NULL);
   ASSERT(test_compiled_code != NULL, "test pattern compilation");
 
+  {
+    PCRE2_SPTR first = NULL, last = NULL;
+    rc = pcre2_substring_nametable_scan(test_compiled_code, name_n, &first, &last);
+    ASSERT(rc > 0 && first != NULL && first == last, "pcre2_substring_nametable_scan(entries)");
+    rc = pcre2_substring_nametable_scan(test_compiled_code, name_n, NULL, NULL);
+    ASSERT(rc == 1, "pcre2_substring_nametable_scan(number)");
+    last = NULL;
+    rc = pcre2_substring_nametable_scan(test_compiled_code, name_n, NULL, &last);
+    ASSERT(rc == 1 && last == NULL, "pcre2_substring_nametable_scan(ignored lastptr)");
+  }
+
   pcre2_match_data_free(test_match_data);
   test_match_data = pcre2_match_data_create_from_pattern(test_compiled_code, test_gen_context);
   ASSERT(test_match_data != NULL, "pcre2_match_data_create()");
 
+  /* Test before any match has been attempted. */
+
+  sizeval = 4;
+  sptrval = NULL;
+  stringlist = NULL;
+  lengthslist = NULL;
+  rc = pcre2_substring_copy_byname(test_match_data, name_n, copy_buf, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA, "pcre2_substring_copy_byname(fresh)");
+  rc = pcre2_substring_copy_bynumber(test_match_data, 1, copy_buf, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA, "pcre2_substring_copy_bynumber(fresh)");
+  rc = pcre2_substring_get_byname(test_match_data, name_n, &sptrval, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA && sptrval == NULL, "pcre2_substring_get_byname(fresh)");
+  rc = pcre2_substring_get_bynumber(test_match_data, 1, &sptrval, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA && sptrval == NULL, "pcre2_substring_get_bynumber(fresh)");
+  rc = pcre2_substring_length_byname(test_match_data, name_n, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA, "pcre2_substring_length_byname(fresh)");
+  rc = pcre2_substring_length_bynumber(test_match_data, 1, &sizeval);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA, "pcre2_substring_length_bynumber(fresh)");
+  rc = pcre2_substring_list_get(test_match_data, &stringlist, &lengthslist);
+  ASSERT(rc == PCRE2_ERROR_FRESHMATCHDATA && stringlist == NULL && lengthslist == NULL,
+         "pcre2_substring_list_get(fresh)");
+
   rc = pcre2_match(test_compiled_code, subject_abcz, PCRE2_ZERO_TERMINATED, 0, 0, test_match_data,
                    NULL);
   ASSERT(rc == 2, "pcre2_match()");
+
+  sizeval = 0;
+  rc = pcre2_substring_get_byname(test_match_data, name_n, &sptrval, &sizeval);
+  ASSERT(rc == 0 && sptrval != NULL && sizeval == 2 && sptrval[2] == 0 &&
+             memcmp(sptrval, subject_abcz + 1, 2 * sizeof(PCRE2_UCHAR)) == 0,
+         "pcre2_substring_get_byname()");
+  pcre2_substring_free(sptrval);
+  sptrval = NULL;
 
   /* Test the functions with insufficient buffer size. It hardly seems worth
   adding controls to the pcre2test input file format to exercise this case. */

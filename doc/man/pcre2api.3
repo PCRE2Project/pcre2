@@ -4041,7 +4041,7 @@ start\-of\-match optimizations by setting the \f(CBPCRE2_NO_START_OPTIMIZE\fP op
 .RE
 .sp
 After a successful match, a partial match, or one of the invalid UTF errors
-(for example, \f(CBPCRE2_ERROR_UTF8_ERR5\fP), \f(CBpcre2_get_startchar()\fP can be
+(for example, \f(CBPCRE2_ERROR_UTF8_ERR3\fP), \f(CBpcre2_get_startchar()\fP can be
 called. After a successful or partial match it returns the code unit offset of
 the character at which the match started. For a non\-partial match, this can be
 different to the value of \f(CRovector[0]\fP if the pattern contains the \f(CI\(rsK\fP
@@ -4435,6 +4435,10 @@ could not be captured.
 The substring did not participate in the match. For example, if the pattern is
 \f(CI(abc)|(def)\fP and the subject is \f(CIdef\fP, and the ovector contains at least two
 capturing slots, substring number 1 is unset.
+.TP 24
+\f(CBPCRE2_ERROR_FRESHMATCHDATA\fP
+.ad l
+The match data block has not yet been used by a matching function.
 .PD
 .RE
 .PP
@@ -5208,11 +5212,12 @@ error \f(CBPCRE2_ERROR_NOUNIQUESUBSTRING\fP when there are duplicate names.
 .sp
 If you want to get full details of all captured substrings for a given name,
 you must use the \f(CBpcre2_substring_nametable_scan()\fP function. The first
-argument is the compiled pattern, and the second is the name. If the third and
-fourth arguments are \f(CBNULL\fP, the function returns a group number for a unique
+argument is the compiled pattern, and the second is the name. If the third
+argument is \f(CBNULL\fP, the function returns a group number for a unique
 name, or \f(CBPCRE2_ERROR_NOUNIQUESUBSTRING\fP otherwise.
 .sp
-When the third and fourth arguments are not \f(CBNULL\fP, they must be pointers to
+When the third argument is not \f(CBNULL\fP, the fourth must not be \f(CBNULL\fP either.
+Both must be pointers to
 variables that are updated by the function. After it has run, they point to the
 first and last entries in the name\-to\-number table for the given name, and the
 function returns the length of each entry in code units. In both cases,

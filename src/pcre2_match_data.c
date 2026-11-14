@@ -78,7 +78,7 @@ pcre2_match_data_create(uint32_t oveccount, pcre2_general_context *gcontext)
   yield->flags = 0;
   yield->oveccount = oveccount;
   yield->options = 0;
-  yield->rc = 0;
+  yield->rc = PCRE2_ERROR_FRESHMATCHDATA;
   return yield;
 }
 

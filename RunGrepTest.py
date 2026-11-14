@@ -943,6 +943,16 @@ output([*pcre2grep_args, "--allow-lookaround-bsk", "--output", "$0", r"(?=foo\K)
 output([*pcre2grep_args, "--allow-lookaround-bsk", "--line-offsets", r"(?=foo\K)", "testNinputgrep"])
 output([*pcre2grep_args, "--allow-lookaround-bsk", "--file-offsets", r"(?=foo\K)", "testNinputgrep"])
 
+write_test_output(b"---------------------------- Test 162 -----------------------------\n")
+output_both([*pcre2grep_args, "--only-matching=3000000000", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "-o4294967295", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--max-count=2147483648", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--om-capture=4294967296", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--buffer-size=18446744073709551617", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--max-buffer-size=18446744073709551616M", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--buffer-size=18446744073709551615", "pattern", "testdata/grepinput"], cwd=srcdir)
+output_both([*pcre2grep_args, "--om-capture=4294967295", "-m1", "-o1", "(pattern)", "testdata/grepinput"], cwd=srcdir)
+
 # Now compare the results.
 
 if not compare(srcdir / "testdata" / "grepoutput", "testtrygrep"):
@@ -1216,6 +1226,40 @@ if supports_utf8:
     returncode = output_both([*pcre2grep_args, "-M", "-N", "CRLF", "--line-offsets", r"\r", "testtemp1grep"],
                              append_returncode=False)
     write_returncode(returncode, "crlf-mid-terminator-line-offsets")
+
+    write_test_output(b"---------------------------- Test U15 -----------------------------\n")
+    # All valid newline encodings, including backward context across NEL, LS, PS.
+    Path("testtemp1grep").write_bytes(b"A\nB\rC\r\nD\vE\fF\302\205G\342\200\250H\342\200\251I")
+    output_both([*pcre2grep_args, "-u", "-N", "ANY", "-n", "-o", "[A-I]", "testtemp1grep"])
+    output_both([*pcre2grep_args, "-u", "-N", "ANY", "-n", "-B3", "^I$", "testtemp1grep"])
+
+    write_test_output(b"---------------------------- Test U16 -----------------------------\n")
+    # Invalid UTF must neither invent newlines nor swallow a following LF.
+    Path("testtemp1grep").write_bytes(
+        b"A\370\210\200\200\205B\nA\374\204\200\200\200\205B\nA\300\212B\nA\302\005B\n"
+        b"A\340\200\212B\nA\360\200\200\212B\nA\342\200\nC\n")
+    output_both([*pcre2grep_args, "-U", "-N", "ANY", "-n", "-o", "[BC]", "testtemp1grep"])
+    output_both([*pcre2grep_args, "-U", "-N", "ANY", "^B$", "testtemp1grep"])
+    output_both([*pcre2grep_args, "-U", "-N", "ANY", "-n", "-B2", "^C$", "testtemp1grep"])
+    Path("testtemp1grep").write_bytes(b"A\205B\n")
+    output_both([*pcre2grep_args, "-U", "-N", "ANY", "-n", "^B$", "testtemp1grep"])
+    output_both([*pcre2grep_args, "-N", "ANY", "-n", "^B$", "testtemp1grep"])
+
+    write_test_output(b"---------------------------- Test U17 -----------------------------\n")
+    Path("testtemp1grep").write_bytes(b"x\n")
+    for text in ("$x{d800}", "$o{157777}", "$x{110000}"):
+        output_both([*pcre2grep_args, "-u", "-O", text, "x", "testtemp1grep"])
+    with open("testtemp2grep", "wb") as stream:
+        returncode = invoke(*pcre2grep_args,
+                            "-u",
+                            "-O",
+                            "$x{d7ff}$x{e000}$x{10ffff}",
+                            "x",
+                            "testtemp1grep",
+                            stdout=stream,
+                            use_vjs=True)
+    write_returncode(returncode)
+    output_both([*pcre2grep_args, "-u", "-q", r"^\x{d7ff}\x{e000}\x{10ffff}$", "testtemp2grep"])
 
     if not compare(srcdir / "testdata" / "grepoutput8", "testtrygrep"):
         sys.exit(1)

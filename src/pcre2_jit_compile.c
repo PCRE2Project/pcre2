@@ -2724,6 +2724,8 @@ get_recurse_data_length(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend
       recurse_check_bit(common, OVECTOR(offset << 1));
       cref += 1 + IMM2_SIZE;
     } while (*cref == OP_CREF);
+
+    SLJIT_ASSERT((sljit_u8*)cref == (sljit_u8*)common->currententry->arg_start + common->currententry->arg_size);
   }
 
 #if defined DEBUG_FORCE_CONTROL_HEAD && DEBUG_FORCE_CONTROL_HEAD
@@ -2988,6 +2990,7 @@ get_recurse_data_length(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend
 
   if (recurse_flags & recurse_flag_control_head_found)
     length++;
+
   if (recurse_flags & recurse_flag_quit_found)
   {
     if (recurse_flags & recurse_flag_setsom_found)
@@ -2995,6 +2998,9 @@ get_recurse_data_length(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend
     if (recurse_flags & recurse_flag_setmark_found)
       length++;
   }
+
+  if ((recurse_flags & recurse_flag_accept_found) && common->currententry->arg_size > 0)
+    length += 2 * (common->currententry->arg_size / IN_UCHARS(1 + IMM2_SIZE));
 
   *result_flags = recurse_flags;
   return length;
@@ -3021,18 +3027,6 @@ copy_recurse_data(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend, int 
   int from_sp, base_reg, offset, i;
 
   memset(common->recurse_bitset, 0, common->recurse_bitset_size);
-
-  if (common->currententry->arg_size > 0)
-  {
-    cref = common->currententry->arg_start;
-
-    do
-    {
-      offset = GET2(cref, 1);
-      recurse_check_bit(common, OVECTOR(offset << 1));
-      cref += 1 + IMM2_SIZE;
-    } while (*cref == OP_CREF);
-  }
 
 #if defined DEBUG_FORCE_CONTROL_HEAD && DEBUG_FORCE_CONTROL_HEAD
   SLJIT_ASSERT(common->control_head_ptr != 0);
@@ -3087,6 +3081,33 @@ copy_recurse_data(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend, int 
     status.tmp_regs[2] = TMP3;
 
   delayed_mem_copy_init(&status, common);
+
+  if (common->currententry->arg_size > 0)
+  {
+    cref = common->currententry->arg_start;
+
+    do
+    {
+      offset = OVECTOR(GET2(cref, 1) << 1);
+      recurse_check_bit(common, offset);
+
+      if (SLJIT_UNLIKELY(recurse_flags & recurse_flag_accept_found))
+      {
+        if (type == recurse_copy_kept_shared_to_global)
+        {
+          delayed_mem_copy_move(&status, base_reg, stackptr, SLJIT_SP, offset);
+          delayed_mem_copy_move(&status, base_reg, stackptr + SSIZE_OF(sw), SLJIT_SP, offset + SSIZE_OF(sw));
+        }
+        else if (type == recurse_copy_from_global)
+        {
+          delayed_mem_copy_move(&status, SLJIT_SP, offset, base_reg, stackptr);
+          delayed_mem_copy_move(&status, SLJIT_SP, offset + SSIZE_OF(sw), base_reg, stackptr + SSIZE_OF(sw));
+        }
+        stackptr += sizeof(sljit_sw) * 2;
+      }
+      cref += 1 + IMM2_SIZE;
+    } while (*cref == OP_CREF);
+  }
 
   if (type != recurse_copy_shared_to_global && type != recurse_copy_kept_shared_to_global)
   {
@@ -3496,8 +3517,7 @@ copy_recurse_data(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend, int 
         if (!from_sp)
           delayed_mem_copy_move(&status, base_reg, stackptr, SLJIT_SP,
                                 (sljit_s32)kept_shared_srcw[i]);
-
-        if (from_sp || type == recurse_swap_global)
+        else
           delayed_mem_copy_move(&status, SLJIT_SP, kept_shared_srcw[i], base_reg, stackptr);
 
         stackptr += sizeof(sljit_sw);

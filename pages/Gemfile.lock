@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.9.0)
+    addressable (2.9.2)
       public_suffix (>= 2.0.2, < 8.0)
     asciidoctor (2.0.26)
     asciidoctor-html5s (0.5.1)
@@ -11,13 +11,21 @@ GEM
     bigdecimal (4.1.3)
     colorator (1.1.0)
     concurrent-ruby (1.3.8)
-    csv (3.3.6)
+    csv (3.3.7)
     em-websocket (0.5.3)
       eventmachine (>= 0.12.9)
       http_parser.rb (~> 0)
     eventmachine (1.2.7)
+    ffi (1.17.4-aarch64-linux-gnu)
+    ffi (1.17.4-arm64-darwin)
     ffi (1.17.4-x86_64-linux-gnu)
     forwardable-extended (2.6.0)
+    google-protobuf (4.36.2-aarch64-linux-gnu)
+      bigdecimal
+      rake (~> 13.3)
+    google-protobuf (4.36.2-arm64-darwin)
+      bigdecimal
+      rake (~> 13.3)
     google-protobuf (4.36.2-x86_64-linux-gnu)
       bigdecimal
       rake (~> 13.3)
@@ -59,7 +67,11 @@ GEM
       rb-inotify (~> 0.9, >= 0.9.10)
     logger (1.7.0)
     mercenary (0.4.0)
-    nokogiri (1.19.4-x86_64-linux-gnu)
+    nokogiri (1.19.7-aarch64-linux-gnu)
+      racc (~> 1.4)
+    nokogiri (1.19.7-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.19.7-x86_64-linux-gnu)
       racc (~> 1.4)
     pathutil (0.16.2)
       forwardable-extended (~> 2.6)
@@ -72,7 +84,11 @@ GEM
     rexml (3.4.4)
     rouge (4.7.0)
     safe_yaml (1.0.5)
-    sass-embedded (1.105.1-x86_64-linux-gnu)
+    sass-embedded (1.108.2-aarch64-linux-gnu)
+      google-protobuf (~> 4.31)
+    sass-embedded (1.108.2-arm64-darwin)
+      google-protobuf (~> 4.31)
+    sass-embedded (1.108.2-x86_64-linux-gnu)
       google-protobuf (~> 4.31)
     terminal-table (3.0.2)
       unicode-display_width (>= 1.1.1, < 3)
@@ -84,6 +100,8 @@ GEM
     webrick (1.9.2)
 
 PLATFORMS
+  aarch64-linux-gnu
+  arm64-darwin
   x86_64-linux-gnu
 
 DEPENDENCIES
@@ -96,4 +114,4 @@ DEPENDENCIES
   unicode-name (~> 1.15)
 
 BUNDLED WITH
-   2.4.19
+   2.6.7

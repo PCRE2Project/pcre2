@@ -1,3 +1,17 @@
+# (Run from the same directory as the Gemfile.)
+#
+# Check available releases without changing either file:
+#   bundle outdated --strict   # Newer versions allowed by these constraints.
+#   bundle outdated            # Also show versions outside these constraints.
+#
+# Update Gemfile.lock to the newest compatible stable versions, keeping Gemfile:
+#   bundle update              # Update all gems and their dependencies.
+#   bundle update nokogiri     # Update one gem and dependencies as needed.
+# Other gems' requirements and the Ruby/platform version can limit the result.
+# Bundler's update command does not rewrite Gemfile constraints.
+#
+# Commit both Gemfile and Gemfile.lock when changing dependency constraints.
+
 source "https://rubygems.org"
 
 gem "jekyll", "~> 4.4"

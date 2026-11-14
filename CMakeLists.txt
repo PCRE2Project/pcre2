@@ -129,6 +129,9 @@ endif()
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 
+set(ALL_COMPILE_DEFINITIONS "")
+set(ALL_INCLUDE_DIRECTORIES "")
+
 # Solaris-specific fix for "CMAKE_C_VISIBILITY_PRESET": this feature was only
 # recently added to CMake for the `cc` compiler (Oracle Developer Studio). The
 # CMake version from OpenCSW and Oracle's package repository is too old and
@@ -153,8 +156,9 @@ if(WIN32 AND (MSVC OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC"))
   set(PCRE2_MSVC_ABI TRUE)
 endif()
 
-if(PCRE2_MSVC_ABI)
-  add_compile_definitions(_CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS)
+# Small over-approximation to detect linking against the Windows CRT.
+if(WIN32)
+  list(APPEND ALL_COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
 # For our modules in cmake/. This uses list(APPEND) rather than set() to allow
@@ -164,7 +168,7 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 # Useful properties for working with multi/single-config generators.
 get_property(PCRE2_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(PCRE2_MULTI_CONFIG)
-  set(PCRE2_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}")
+  set(PCRE2_CONFIGURATION_TYPES ${CMAKE_CONFIGURATION_TYPES})
 else()
   set(PCRE2_CONFIGURATION_TYPES "${CMAKE_BUILD_TYPE}")
 endif()
@@ -203,28 +207,25 @@ check_include_file(windows.h HAVE_WINDOWS_H)
 
 # Check whether any system-wide extensions need to be enabled, in order for
 # OS functionality to be exposed.
-pcre2_use_system_extensions()
+pcre2_use_system_extensions(SYSTEM_EXTENSION_COMPILE_DEFINITIONS)
+list(APPEND ALL_COMPILE_DEFINITIONS ${SYSTEM_EXTENSION_COMPILE_DEFINITIONS})
 
-cmake_push_check_state(RESET)
-# Propagate the _GNU_SOURCE definition (added to COMPILE_DEFINITIONS by
-# pcre2_use_system_extensions()) so that these check_symbol_exists() calls
-# can find symbols only exposed with _GNU_SOURCE.
-# We only pass through known plain-text definitions (like _GNU_SOURCE) and
-# skip anything else (e.g. generator expressions inherited from a parent
-# project), because try_compile() cannot handle generator expressions.
-get_directory_property(_pcre2_compile_definitions COMPILE_DEFINITIONS)
-if(DEFINED _pcre2_compile_definitions)
-  set(CMAKE_REQUIRED_DEFINITIONS "")
-  list(FIND _pcre2_compile_definitions "_GNU_SOURCE" _idx)
-  if(_idx GREATER -1)
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")
-  endif()
-endif()
+# Propagate _GNU_SOURCE from our system-extension checks so that these
+# check_symbol_exists() calls can find GNU-specific symbols.
+macro(pcre2_check_with_system_extensions)
+  cmake_push_check_state(RESET)
+  # The CMAKE_REQUIRED_DEFINITIONS API is a bit legacy and needs the -D prefix.
+  set(tmp_compile_definitions "${SYSTEM_EXTENSION_COMPILE_DEFINITIONS}")
+  list(TRANSFORM tmp_compile_definitions PREPEND "-D")
+  list(APPEND CMAKE_REQUIRED_DEFINITIONS ${tmp_compile_definitions})
+  unset(tmp_compile_definitions)
 
-check_symbol_exists(memfd_create "sys/mman.h" HAVE_MEMFD_CREATE) # glibc 2.27
-check_symbol_exists(secure_getenv "stdlib.h" HAVE_SECURE_GETENV) # glibc 2.17
-check_symbol_exists(setrlimit "sys/resource.h" HAVE_SETRLIMIT)
-cmake_pop_check_state()
+  check_symbol_exists(memfd_create "sys/mman.h" HAVE_MEMFD_CREATE) # glibc 2.27
+  check_symbol_exists(secure_getenv "stdlib.h" HAVE_SECURE_GETENV) # glibc 2.17
+  check_symbol_exists(setrlimit "sys/resource.h" HAVE_SETRLIMIT)
+  cmake_pop_check_state()
+endmacro()
+pcre2_check_with_system_extensions()
 
 check_c_source_compiles(
   [=[
@@ -254,53 +255,56 @@ check_c_source_compiles(
 # (for example, calling a function with the wrong signature just to see whether
 # the linker can find it). These couple of tests here though need to be compiled
 # with -Werror to be effective.
-cmake_push_check_state()
-if(NOT DEFINED CMAKE_REQUIRED_FLAGS)
-  set(CMAKE_REQUIRED_FLAGS "")
-endif()
-pcre2_warning_as_error(WARNING_AS_ERROR_FLAGS)
-set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${WARNING_AS_ERROR_FLAGS}")
+macro(pcre2_check_with_werror)
+  cmake_push_check_state()
+  if(NOT DEFINED CMAKE_REQUIRED_FLAGS)
+    set(CMAKE_REQUIRED_FLAGS "")
+  endif()
+  pcre2_warning_as_error(WARNING_AS_ERROR_FLAGS)
+  set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${WARNING_AS_ERROR_FLAGS}")
 
-check_c_source_compiles(
-  "int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }"
-  HAVE_ATTRIBUTE_UNINITIALIZED
-)
-
-if(PCRE2_MSVC_ABI)
-  set(HAVE_VISIBILITY 0)
-else()
   check_c_source_compiles(
-    [=[
-    extern __attribute__ ((visibility ("default"))) int f(void);
-    int main(void) { return f(); }
-    int f(void) { return 42; }
-    ]=]
-    HAVE_VISIBILITY
+    "int main(void) { char buf[128] __attribute__((uninitialized)); (void)buf; return 0; }"
+    HAVE_ATTRIBUTE_UNINITIALIZED
   )
-endif()
-if(CMAKE_C_COMPILE_OPTIONS_VISIBILITY AND NOT HAVE_VISIBILITY)
-  # Hmm. We don't know of any way to set a symbol to have default visibility, other
-  # than the common "__attribute__((visibility("default")))". But CMake thinks that
-  # the compiler supports CMAKE_C_VISIBILITY_PRESET. The build is likely to fail to
-  # generate a usable shared library.
-  message(
-    WARNING
-    "C compiler uses the visibility flag ${CMAKE_C_COMPILE_OPTIONS_VISIBILITY}. We did not detect support for __attribute__((visibility(\"default\"))). We do not know how to set a symbol to have default visibility."
-  )
-elseif(HAVE_VISIBILITY AND NOT CMAKE_C_COMPILE_OPTIONS_VISIBILITY)
-  # Here, the build may well work, but it's possible that CMake isn't correctly
-  # suppressing the visibility of private symbols.
-  message(
-    WARNING
-    "C compiler appears to support __attribute__((visibility(\"default\"))). However, CMake is not using a visibility flag. The visibility of private symbols may not be correct."
-  )
-endif()
-if(HAVE_VISIBILITY)
-  set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
-else()
-  set(PCRE2_EXPORT "")
-endif()
-cmake_pop_check_state()
+
+  if(PCRE2_MSVC_ABI)
+    set(HAVE_VISIBILITY 0)
+  else()
+    check_c_source_compiles(
+      [=[
+      extern __attribute__ ((visibility ("default"))) int f(void);
+      int main(void) { return f(); }
+      int f(void) { return 42; }
+      ]=]
+      HAVE_VISIBILITY
+    )
+  endif()
+  if(CMAKE_C_COMPILE_OPTIONS_VISIBILITY AND NOT HAVE_VISIBILITY)
+    # Hmm. We don't know of any way to set a symbol to have default visibility, other
+    # than the common "__attribute__((visibility("default")))". But CMake thinks that
+    # the compiler supports CMAKE_C_VISIBILITY_PRESET. The build is likely to fail to
+    # generate a usable shared library.
+    message(
+      WARNING
+      "C compiler uses the visibility flag ${CMAKE_C_COMPILE_OPTIONS_VISIBILITY}. We did not detect support for __attribute__((visibility(\"default\"))). We do not know how to set a symbol to have default visibility."
+    )
+  elseif(HAVE_VISIBILITY AND NOT CMAKE_C_COMPILE_OPTIONS_VISIBILITY)
+    # Here, the build may well work, but it's possible that CMake isn't correctly
+    # suppressing the visibility of private symbols.
+    message(
+      WARNING
+      "C compiler appears to support __attribute__((visibility(\"default\"))). However, CMake is not using a visibility flag. The visibility of private symbols may not be correct."
+    )
+  endif()
+  if(HAVE_VISIBILITY)
+    set(PCRE2_EXPORT [=[__attribute__ ((visibility ("default")))]=])
+  else()
+    set(PCRE2_EXPORT "")
+  endif()
+  cmake_pop_check_state()
+endmacro()
+pcre2_check_with_werror()
 
 check_c_source_compiles("int main(void) { __assume(1); return 0; }" HAVE_BUILTIN_ASSUME)
 
@@ -378,21 +382,21 @@ set(
   PCRE2_LINK_SIZE
   "2"
   CACHE STRING
-  "Internal link size (2, 3 or 4 allowed). See LINK_SIZE in config.h.in for details."
+  "Internal link size (2, 3 or 4 allowed). See LINK_SIZE in src/config.h.generic for details."
 )
 
 set(
   PCRE2_PARENS_NEST_LIMIT
   "250"
   CACHE STRING
-  "Default nested parentheses limit. See PARENS_NEST_LIMIT in config.h.in for details."
+  "Default nested parentheses limit. See PARENS_NEST_LIMIT in src/config.h.generic for details."
 )
 
 set(
   PCRE2_HEAP_LIMIT
   "20000000"
   CACHE STRING
-  "Default limit on heap memory (kibibytes). See HEAP_LIMIT in config.h.in for details."
+  "Default limit on heap memory (kibibytes). See HEAP_LIMIT in src/config.h.generic for details."
 )
 
 set(PCRE2_MAX_VARLOOKBEHIND "255" CACHE STRING "Default limit on variable lookbehinds.")
@@ -401,28 +405,28 @@ set(
   PCRE2_MATCH_LIMIT
   "10000000"
   CACHE STRING
-  "Default limit on internal looping. See MATCH_LIMIT in config.h.in for details."
+  "Default limit on internal looping. See MATCH_LIMIT in src/config.h.generic for details."
 )
 
 set(
   PCRE2_MATCH_LIMIT_DEPTH
   "MATCH_LIMIT"
   CACHE STRING
-  "Default limit on internal depth of search. See MATCH_LIMIT_DEPTH in config.h.in for details."
+  "Default limit on internal depth of search (an integer or MATCH_LIMIT). See MATCH_LIMIT_DEPTH in src/config.h.generic for details."
 )
 
 set(
   PCRE2GREP_BUFSIZE
   "20480"
   CACHE STRING
-  "Buffer starting size parameter for pcre2grep. See PCRE2GREP_BUFSIZE in config.h.in for details."
+  "Buffer starting size parameter for pcre2grep. See PCRE2GREP_BUFSIZE in src/config.h.generic for details."
 )
 
 set(
   PCRE2GREP_MAX_BUFSIZE
   "1048576"
   CACHE STRING
-  "Buffer maximum size parameter for pcre2grep. See PCRE2GREP_MAX_BUFSIZE in config.h.in for details."
+  "Buffer maximum size parameter for pcre2grep. See PCRE2GREP_MAX_BUFSIZE in src/config.h.generic for details."
 )
 
 set(PCRE2_NEWLINE "LF" CACHE STRING "What to recognize as a newline (one of CR, LF, CRLF, ANY, ANYCRLF, NUL).")
@@ -432,51 +436,6 @@ mark_as_advanced(PCRE2_HEAP_MATCH_RECURSE)
 
 set(PCRE2_SUPPORT_JIT "OFF" CACHE STRING "Enable support for Just-in-time compiling (OFF, ON, or AUTO).")
 set_property(CACHE PCRE2_SUPPORT_JIT PROPERTY STRINGS "OFF" "ON" "AUTO")
-
-# Handle JIT auto-detection
-if(PCRE2_SUPPORT_JIT STREQUAL "AUTO")
-  # Try to compile a test that checks if SLJIT supports this CPU
-
-  set(first_run FALSE)
-  if(NOT DEFINED SLJIT_SUPPORTS_THIS_CPU)
-    set(first_run TRUE)
-  endif()
-
-  cmake_push_check_state(RESET)
-  set(CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/deps/sljit")
-  set(
-    _jit_test_source
-    "
-    #define SLJIT_CONFIG_AUTO 1
-    #include \"./sljit_src/sljitConfigCPU.h\"
-    #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
-    #error unsupported
-    #endif
-    int main(void) { return 0; }
-  "
-  )
-  check_c_source_compiles("${_jit_test_source}" SLJIT_SUPPORTS_THIS_CPU)
-  cmake_pop_check_state()
-
-  if(SLJIT_SUPPORTS_THIS_CPU)
-    if(first_run)
-      message(STATUS "JIT auto-detection: supported on this CPU")
-    endif()
-    set(PCRE2_SUPPORT_JIT_DETECTED ON)
-  else()
-    if(first_run)
-      message(STATUS "JIT auto-detection: not supported on this CPU")
-    endif()
-    set(PCRE2_SUPPORT_JIT_DETECTED OFF)
-  endif()
-
-  unset(_jit_test_source)
-  unset(first_run)
-elseif(PCRE2_SUPPORT_JIT)
-  set(PCRE2_SUPPORT_JIT_DETECTED ON)
-else()
-  set(PCRE2_SUPPORT_JIT_DETECTED OFF)
-endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES Linux|NetBSD)
   option(PCRE2_SUPPORT_JIT_SEALLOC "Enable SELinux compatible execmem allocator in JIT (experimental)." OFF)
@@ -502,7 +461,7 @@ option(PCRE2_NEVER_BACKSLASH_C "If ON, backslash-C (upper case C) is locked out.
 
 option(PCRE2_SUPPORT_VALGRIND "Enable Valgrind support." OFF)
 
-option(PCRE2_FUZZ_SUPPORT "Enable fuzzer support" OFF)
+option(PCRE2_FUZZ_SUPPORT "Enable fuzzer support (requires the 8-bit library)." OFF)
 option(PCRE2_DIFF_FUZZ_SUPPORT "Enable differential fuzzer support (requires fuzz support and JIT)" OFF)
 
 option(PCRE2_SHOW_REPORT "Show the final configuration report" ON)
@@ -537,7 +496,7 @@ if(PCRE2_HAS_IMPORT_LIBRARY)
      "${CMAKE_STATIC_LIBRARY_SUFFIX}" STREQUAL "${CMAKE_IMPORT_LIBRARY_SUFFIX}")
     set(PCRE2_STATIC_LIBRARY_POSTFIX_DEFAULT "-static")
   endif()
-  set(PCRE2_STATIC_LIBRARY_POSTFIX "${PCRE2_STATIC_LIBRARY_POSTFIX_DEFAULT}" CACHE STRING "Postfix to append to static library output filenames, in addition to any suffix provided by the toolchain (CMAKE_STATIC_LIBRARY_SUFFIX). Static library .lib files may conflict with the import library .lib files corresponding to a shared library DLL. Must be set to a non-empty string if both static and shared library outputs, are selected and a name collision occurs.")
+  set(PCRE2_STATIC_LIBRARY_POSTFIX "${PCRE2_STATIC_LIBRARY_POSTFIX_DEFAULT}" CACHE STRING "Postfix to append to static library output names, before any suffix provided by the toolchain (CMAKE_STATIC_LIBRARY_SUFFIX). Static library .lib files may conflict with the import library .lib files corresponding to a shared library DLL. Must be set to a non-empty string if both static and shared library outputs are selected and a name collision occurs.")
 endif()
 
 if(HAVE_VSCRIPT)
@@ -556,19 +515,35 @@ endif()
 
 # editline lib
 if(Editline_FOUND)
-  option(PCRE2_SUPPORT_LIBEDIT "Enable support for linking pcre2test with libedit." OFF)
+  option(
+    PCRE2_SUPPORT_LIBEDIT
+    "Enable support for linking pcre2test with libedit. Cannot be combined with libreadline support."
+    OFF
+  )
 endif()
 
 # readline lib
 if(Readline_FOUND)
-  option(PCRE2_SUPPORT_LIBREADLINE "Enable support for linking pcre2test with libreadline." ON)
+  option(
+    PCRE2_SUPPORT_LIBREADLINE
+    "Enable support for linking pcre2test with libreadline. Cannot be combined with libedit support."
+    ON
+  )
 endif()
 
 # -----------------------------------------------------------------------------
 # Build configuration
 # -----------------------------------------------------------------------------
 
-include_directories(${PROJECT_BINARY_DIR}/interface ${PROJECT_BINARY_DIR}/src ${PROJECT_SOURCE_DIR}/src)
+list(APPEND ALL_INCLUDE_DIRECTORIES ${PROJECT_BINARY_DIR}/interface ${PROJECT_BINARY_DIR}/src ${PROJECT_SOURCE_DIR}/src)
+
+list(APPEND ALL_COMPILE_DEFINITIONS "HAVE_CONFIG_H")
+
+if(PCRE2_DEBUG STREQUAL "IfDebugBuild")
+  list(APPEND ALL_COMPILE_DEFINITIONS "$<$<CONFIG:Debug>:PCRE2_DEBUG>")
+elseif(PCRE2_DEBUG)
+  list(APPEND ALL_COMPILE_DEFINITIONS "PCRE2_DEBUG")
+endif()
 
 if(NOT BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)
   message(FATAL_ERROR "At least one of BUILD_SHARED_LIBS or BUILD_STATIC_LIBS must be enabled.")
@@ -599,9 +574,7 @@ if(PCRE2_BUILD_PCRE2GREP AND NOT PCRE2_BUILD_PCRE2_8)
 endif()
 
 if(PCRE2_SUPPORT_LIBBZ2)
-  if(BZip2_FOUND)
-    include_directories(${BZIP2_INCLUDE_DIRS})
-  else()
+  if(NOT BZip2_FOUND)
     message(
       FATAL_ERROR
       " libbz2 not found. Set BZIP2_INCLUDE_DIRS to a compatible header\n"
@@ -611,9 +584,7 @@ if(PCRE2_SUPPORT_LIBBZ2)
 endif()
 
 if(PCRE2_SUPPORT_LIBZ)
-  if(ZLIB_FOUND)
-    include_directories(${ZLIB_INCLUDE_DIRS})
-  else()
+  if(NOT ZLIB_FOUND)
     message(
       FATAL_ERROR
       " zlib not found. Set ZLIB_INCLUDE_DIRS to a compatible header\n"
@@ -623,9 +594,7 @@ if(PCRE2_SUPPORT_LIBZ)
 endif()
 
 if(PCRE2_SUPPORT_LIBEDIT)
-  if(Editline_FOUND)
-    include_directories(${EDITLINE_INCLUDE_DIRS})
-  else()
+  if(NOT Editline_FOUND)
     message(
       FATAL_ERROR
       " libedit not found. Set EDITLINE_INCLUDE_DIRS to a compatible header\n"
@@ -635,9 +604,7 @@ if(PCRE2_SUPPORT_LIBEDIT)
 endif()
 
 if(PCRE2_SUPPORT_LIBREADLINE)
-  if(Readline_FOUND)
-    include_directories(${READLINE_INCLUDE_DIRS})
-  else()
+  if(NOT Readline_FOUND)
     message(
       FATAL_ERROR
       " libreadline not found. Set READLINE_INCLUDE_DIRS to a compatible header\n"
@@ -666,6 +633,51 @@ endif()
 
 if(PCRE2_SUPPORT_UNICODE)
   set(SUPPORT_UNICODE 1)
+endif()
+
+# Handle JIT auto-detection
+if(PCRE2_SUPPORT_JIT STREQUAL "AUTO")
+  # Try to compile a test that checks if SLJIT supports this CPU
+  function(pcre2_check_sljit_supports_this_cpu out_var)
+    set(first_run FALSE)
+    if(NOT DEFINED SLJIT_SUPPORTS_THIS_CPU)
+      set(first_run TRUE)
+    endif()
+
+    cmake_push_check_state(RESET)
+    set(CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/deps/sljit")
+    set(
+      _jit_test_source
+      "
+      #define SLJIT_CONFIG_AUTO 1
+      #include \"./sljit_src/sljitConfigCPU.h\"
+      #if (defined SLJIT_CONFIG_UNSUPPORTED && SLJIT_CONFIG_UNSUPPORTED)
+      #error unsupported
+      #endif
+      int main(void) { return 0; }
+    "
+    )
+    check_c_source_compiles("${_jit_test_source}" SLJIT_SUPPORTS_THIS_CPU)
+    cmake_pop_check_state()
+
+    if(SLJIT_SUPPORTS_THIS_CPU)
+      if(first_run)
+        message(STATUS "JIT auto-detection: supported on this CPU")
+      endif()
+      set(${out_var} ON PARENT_SCOPE)
+    else()
+      if(first_run)
+        message(STATUS "JIT auto-detection: not supported on this CPU")
+      endif()
+      set(${out_var} OFF PARENT_SCOPE)
+    endif()
+  endfunction()
+
+  pcre2_check_sljit_supports_this_cpu(PCRE2_SUPPORT_JIT_DETECTED)
+elseif(PCRE2_SUPPORT_JIT)
+  set(PCRE2_SUPPORT_JIT_DETECTED ON)
+else()
+  set(PCRE2_SUPPORT_JIT_DETECTED OFF)
 endif()
 
 if(PCRE2_SUPPORT_JIT_DETECTED)
@@ -720,10 +732,13 @@ endif()
 
 set(PCRE2TEST_LIBS "")
 set(PCRE2GREP_LIBS "")
+set(PCRE2TEST_INCLUDE_DIRECTORIES "")
+set(PCRE2GREP_INCLUDE_DIRECTORIES "")
 
 if(PCRE2_SUPPORT_LIBREADLINE)
   set(SUPPORT_LIBREADLINE 1)
   list(APPEND PCRE2TEST_LIBS ${READLINE_LIBRARIES})
+  list(APPEND PCRE2TEST_INCLUDE_DIRECTORIES ${READLINE_INCLUDE_DIRS})
 endif()
 
 # libedit is a plug-compatible alternative to libreadline
@@ -731,16 +746,19 @@ endif()
 if(PCRE2_SUPPORT_LIBEDIT)
   set(SUPPORT_LIBEDIT 1)
   list(APPEND PCRE2TEST_LIBS ${EDITLINE_LIBRARIES})
+  list(APPEND PCRE2TEST_INCLUDE_DIRECTORIES ${EDITLINE_INCLUDE_DIRS})
 endif()
 
 if(PCRE2_SUPPORT_LIBZ)
   set(SUPPORT_LIBZ 1)
   list(APPEND PCRE2GREP_LIBS ${ZLIB_LIBRARIES})
+  list(APPEND PCRE2GREP_INCLUDE_DIRECTORIES ${ZLIB_INCLUDE_DIRS})
 endif()
 
 if(PCRE2_SUPPORT_LIBBZ2)
   set(SUPPORT_LIBBZ2 1)
   list(APPEND PCRE2GREP_LIBS ${BZIP2_LIBRARIES})
+  list(APPEND PCRE2GREP_INCLUDE_DIRECTORIES ${BZIP2_INCLUDE_DIRS})
 endif()
 
 set(NEWLINE_DEFAULT "")
@@ -895,6 +913,8 @@ endif()
 
 if(REBUILD_CHARTABLES)
   add_executable(pcre2_dftables src/pcre2_dftables.c)
+  target_compile_definitions(pcre2_dftables PRIVATE ${ALL_COMPILE_DEFINITIONS})
+  target_include_directories(pcre2_dftables PRIVATE ${ALL_INCLUDE_DIRECTORIES})
   add_custom_command(
     OUTPUT ${PROJECT_BINARY_DIR}/src/pcre2_chartables.c
     COMMAND pcre2_dftables
@@ -987,14 +1007,6 @@ endif()
 # Libraries
 # -----------------------------------------------------------------------------
 
-add_compile_definitions(HAVE_CONFIG_H)
-
-if(PCRE2_DEBUG STREQUAL "IfDebugBuild")
-  add_compile_definitions("$<$<CONFIG:Debug>:PCRE2_DEBUG>")
-elseif(PCRE2_DEBUG)
-  add_compile_definitions("PCRE2_DEBUG")
-endif()
-
 # Make sure to not link debug libs against release libs and vice versa.
 if(WIN32 AND NOT DEFINED CMAKE_DEBUG_POSTFIX)
   set(CMAKE_DEBUG_POSTFIX "d")
@@ -1015,67 +1027,87 @@ if(PCRE2_HAS_IMPORT_LIBRARY)
   set(STATIC_LIB_POSTFIX "${PCRE2_STATIC_LIBRARY_POSTFIX}")
 endif()
 
-set(TARGETS "")
-set(PRIVATE_TARGETS "")
-set(DLL_PDB_FILES "")
+set(EXPORT_INSTALL_TARGETS "") # Registered for installation and exported for CMake consumers
+set(PRIVATE_INSTALL_TARGETS "") # Registered for installation but not exported for CMake consumers
+set(INSTALL_DLL_PDB_FILES "")
 
 # 8-bit library
 
 if(PCRE2_BUILD_PCRE2_8)
   if(BUILD_STATIC_LIBS)
+    # Static 8-bit library
+
     add_library(pcre2-8-static STATIC ${PCRE2_HEADERS} ${PCRE2_SOURCES})
+    list(APPEND EXPORT_INSTALL_TARGETS pcre2-8-static)
+
+    target_compile_definitions(
+      pcre2-8-static
+      PRIVATE ${ALL_COMPILE_DEFINITIONS} PCRE2_CODE_UNIT_WIDTH=8
+      PUBLIC PCRE2_STATIC
+    )
+    target_include_directories(
+      pcre2-8-static
+      PRIVATE ${ALL_INCLUDE_DIRECTORIES}
+      PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    )
     set_target_properties(
       pcre2-8-static
       PROPERTIES
-        COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8
         MACHO_COMPATIBILITY_VERSION "${LIBPCRE2_8_MACHO_COMPATIBILITY_VERSION}"
         MACHO_CURRENT_VERSION "${LIBPCRE2_8_MACHO_CURRENT_VERSION}"
         VERSION ${LIBPCRE2_8_VERSION}
         SOVERSION ${LIBPCRE2_8_SOVERSION}
-    )
-    target_compile_definitions(pcre2-8-static PUBLIC PCRE2_STATIC)
-    target_include_directories(
-      pcre2-8-static
-      PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+        OUTPUT_NAME "pcre2-8${STATIC_LIB_POSTFIX}"
     )
     if(REQUIRE_PTHREAD)
       target_link_libraries(pcre2-8-static Threads::Threads)
     endif()
-    list(APPEND TARGETS pcre2-8-static)
+    if(PCRE2_STATIC_PIC)
+      set_target_properties(pcre2-8-static PROPERTIES POSITION_INDEPENDENT_CODE 1)
+    endif()
+
+    # Static POSIX library
+
     add_library(pcre2-posix-static STATIC ${PCRE2POSIX_HEADERS} ${PCRE2POSIX_SOURCES})
+    list(APPEND EXPORT_INSTALL_TARGETS pcre2-posix-static)
+
+    target_compile_definitions(pcre2-posix-static PRIVATE ${ALL_COMPILE_DEFINITIONS} PCRE2_CODE_UNIT_WIDTH=8)
+    target_include_directories(
+      pcre2-posix-static
+      PRIVATE ${ALL_INCLUDE_DIRECTORIES}
+      PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    )
     set_target_properties(
       pcre2-posix-static
       PROPERTIES
-        COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8
         MACHO_COMPATIBILITY_VERSION "${LIBPCRE2_POSIX_MACHO_COMPATIBILITY_VERSION}"
         MACHO_CURRENT_VERSION "${LIBPCRE2_POSIX_MACHO_CURRENT_VERSION}"
         VERSION ${LIBPCRE2_POSIX_VERSION}
         SOVERSION ${LIBPCRE2_POSIX_SOVERSION}
+        OUTPUT_NAME "pcre2-posix${STATIC_LIB_POSTFIX}"
     )
     target_link_libraries(pcre2-posix-static pcre2-8-static)
-    target_include_directories(
-      pcre2-posix-static
-      PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-    )
-    list(APPEND TARGETS pcre2-posix-static)
-
-    set_target_properties(pcre2-8-static PROPERTIES OUTPUT_NAME "pcre2-8${STATIC_LIB_POSTFIX}")
-    set_target_properties(pcre2-posix-static PROPERTIES OUTPUT_NAME "pcre2-posix${STATIC_LIB_POSTFIX}")
     if(PCRE2_STATIC_PIC)
-      set_target_properties(pcre2-8-static pcre2-posix-static PROPERTIES POSITION_INDEPENDENT_CODE 1)
+      set_target_properties(pcre2-posix-static PROPERTIES POSITION_INDEPENDENT_CODE 1)
     endif()
   endif()
 
   if(BUILD_SHARED_LIBS)
+    # Shared 8-bit library
+
     add_library(pcre2-8-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PCRE2_SHARED_SOURCES})
+    list(APPEND EXPORT_INSTALL_TARGETS pcre2-8-shared)
+    list(APPEND INSTALL_DLL_PDB_FILES "$<TARGET_PDB_FILE:pcre2-8-shared>")
+
+    target_compile_definitions(pcre2-8-shared PRIVATE ${ALL_COMPILE_DEFINITIONS} PCRE2_CODE_UNIT_WIDTH=8)
     target_include_directories(
       pcre2-8-shared
+      PRIVATE ${ALL_INCLUDE_DIRECTORIES}
       PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
     )
     set_target_properties(
       pcre2-8-shared
       PROPERTIES
-        COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8
         MACHO_COMPATIBILITY_VERSION "${LIBPCRE2_8_MACHO_COMPATIBILITY_VERSION}"
         MACHO_CURRENT_VERSION "${LIBPCRE2_8_MACHO_CURRENT_VERSION}"
         VERSION ${LIBPCRE2_8_VERSION}
@@ -1086,21 +1118,30 @@ if(PCRE2_BUILD_PCRE2_8)
       target_link_libraries(pcre2-8-shared Threads::Threads)
     endif()
     if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
-      target_link_options(pcre2-8-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-8.sym)
+      target_link_options(pcre2-8-shared PRIVATE LINKER:${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-8.sym)
       set_target_properties(pcre2-8-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-8.sym)
     endif()
-    list(APPEND TARGETS pcre2-8-shared)
-    list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE:pcre2-8-shared>)
+
+    # Shared POSIX library
 
     add_library(pcre2-posix-shared SHARED ${PCRE2POSIX_HEADERS} ${PCRE2POSIX_SOURCES} ${PCRE2POSIX_SHARED_SOURCES})
+    list(APPEND EXPORT_INSTALL_TARGETS pcre2-posix-shared)
+    list(APPEND INSTALL_DLL_PDB_FILES "$<TARGET_PDB_FILE:pcre2-posix-shared>")
+
+    target_compile_definitions(
+      pcre2-posix-shared
+      PRIVATE ${ALL_COMPILE_DEFINITIONS} PCRE2_CODE_UNIT_WIDTH=8
+      PUBLIC PCRE2POSIX_SHARED
+    )
     target_include_directories(
       pcre2-posix-shared
+      PRIVATE ${ALL_INCLUDE_DIRECTORIES}
       PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
     )
+    target_link_libraries(pcre2-posix-shared pcre2-8-shared)
     set_target_properties(
       pcre2-posix-shared
       PROPERTIES
-        COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8
         MACHO_COMPATIBILITY_VERSION "${LIBPCRE2_POSIX_MACHO_COMPATIBILITY_VERSION}"
         MACHO_CURRENT_VERSION "${LIBPCRE2_POSIX_MACHO_CURRENT_VERSION}"
         VERSION ${LIBPCRE2_POSIX_VERSION}
@@ -1108,13 +1149,9 @@ if(PCRE2_BUILD_PCRE2_8)
         OUTPUT_NAME pcre2-posix
     )
     if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
-      target_link_options(pcre2-posix-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-posix.sym)
+      target_link_options(pcre2-posix-shared PRIVATE LINKER:${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-posix.sym)
       set_target_properties(pcre2-posix-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-posix.sym)
     endif()
-    target_compile_definitions(pcre2-posix-shared PUBLIC PCRE2POSIX_SHARED)
-    target_link_libraries(pcre2-posix-shared pcre2-8-shared)
-    list(APPEND TARGETS pcre2-posix-shared)
-    list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE:pcre2-posix-shared>)
   endif()
 
   if(BUILD_STATIC_LIBS)
@@ -1130,42 +1167,54 @@ endif()
 
 if(PCRE2_BUILD_PCRE2_16)
   if(BUILD_STATIC_LIBS)
+    # Static 16-bit library
+
     add_library(pcre2-16-static STATIC ${PCRE2_HEADERS} ${PCRE2_SOURCES})
+    list(APPEND EXPORT_INSTALL_TARGETS pcre2-16-static)
+
+    target_compile_definitions(
+      pcre2-16-static
+      PRIVATE ${ALL_COMPILE_DEFINITIONS} PCRE2_CODE_UNIT_WIDTH=16
+      PUBLIC PCRE2_STATIC
+    )
     target_include_directories(
       pcre2-16-static
+      PRIVATE ${ALL_INCLUDE_DIRECTORIES}
       PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
     )
     set_target_properties(
       pcre2-16-static
       PROPERTIES
-        COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=16
         MACHO_COMPATIBILITY_VERSION "${LIBPCRE2_16_MACHO_COMPATIBILITY_VERSION}"
         MACHO_CURRENT_VERSION "${LIBPCRE2_16_MACHO_CURRENT_VERSION}"
         VERSION ${LIBPCRE2_16_VERSION}
         SOVERSION ${LIBPCRE2_16_SOVERSION}
+        OUTPUT_NAME "pcre2-16${STATIC_LIB_POSTFIX}"
     )
-    target_compile_definitions(pcre2-16-static PUBLIC PCRE2_STATIC)
     if(REQUIRE_PTHREAD)
       target_link_libraries(pcre2-16-static Threads::Threads)
     endif()
-    list(APPEND TARGETS pcre2-16-static)
-
-    set_target_properties(pcre2-16-static PROPERTIES OUTPUT_NAME "pcre2-16${STATIC_LIB_POSTFIX}")
     if(PCRE2_STATIC_PIC)
       set_target_properties(pcre2-16-static PROPERTIES POSITION_INDEPENDENT_CODE 1)
     endif()
   endif()
 
   if(BUILD_SHARED_LIBS)
+    # Shared 16-bit library
+
     add_library(pcre2-16-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PCRE2_SHARED_SOURCES})
+    list(APPEND EXPORT_INSTALL_TARGETS pcre2-16-shared)
+    list(APPEND INSTALL_DLL_PDB_FILES "$<TARGET_PDB_FILE:pcre2-16-shared>")
+
+    target_compile_definitions(pcre2-16-shared PRIVATE ${ALL_COMPILE_DEFINITIONS} PCRE2_CODE_UNIT_WIDTH=16)
     target_include_directories(
       pcre2-16-shared
+      PRIVATE ${ALL_INCLUDE_DIRECTORIES}
       PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
     )
     set_target_properties(
       pcre2-16-shared
       PROPERTIES
-        COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=16
         MACHO_COMPATIBILITY_VERSION "${LIBPCRE2_16_MACHO_COMPATIBILITY_VERSION}"
         MACHO_CURRENT_VERSION "${LIBPCRE2_16_MACHO_CURRENT_VERSION}"
         VERSION ${LIBPCRE2_16_VERSION}
@@ -1176,11 +1225,9 @@ if(PCRE2_BUILD_PCRE2_16)
       target_link_libraries(pcre2-16-shared Threads::Threads)
     endif()
     if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
-      target_link_options(pcre2-16-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-16.sym)
+      target_link_options(pcre2-16-shared PRIVATE LINKER:${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-16.sym)
       set_target_properties(pcre2-16-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-16.sym)
     endif()
-    list(APPEND TARGETS pcre2-16-shared)
-    list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE:pcre2-16-shared>)
   endif()
 
   if(BUILD_STATIC_LIBS)
@@ -1194,42 +1241,54 @@ endif()
 
 if(PCRE2_BUILD_PCRE2_32)
   if(BUILD_STATIC_LIBS)
+    # Static 32-bit library
+
     add_library(pcre2-32-static STATIC ${PCRE2_HEADERS} ${PCRE2_SOURCES})
+    list(APPEND EXPORT_INSTALL_TARGETS pcre2-32-static)
+
+    target_compile_definitions(
+      pcre2-32-static
+      PRIVATE ${ALL_COMPILE_DEFINITIONS} PCRE2_CODE_UNIT_WIDTH=32
+      PUBLIC PCRE2_STATIC
+    )
     target_include_directories(
       pcre2-32-static
+      PRIVATE ${ALL_INCLUDE_DIRECTORIES}
       PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
     )
     set_target_properties(
       pcre2-32-static
       PROPERTIES
-        COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=32
         MACHO_COMPATIBILITY_VERSION "${LIBPCRE2_32_MACHO_COMPATIBILITY_VERSION}"
         MACHO_CURRENT_VERSION "${LIBPCRE2_32_MACHO_CURRENT_VERSION}"
         VERSION ${LIBPCRE2_32_VERSION}
         SOVERSION ${LIBPCRE2_32_SOVERSION}
+        OUTPUT_NAME "pcre2-32${STATIC_LIB_POSTFIX}"
     )
-    target_compile_definitions(pcre2-32-static PUBLIC PCRE2_STATIC)
     if(REQUIRE_PTHREAD)
       target_link_libraries(pcre2-32-static Threads::Threads)
     endif()
-    list(APPEND TARGETS pcre2-32-static)
-
-    set_target_properties(pcre2-32-static PROPERTIES OUTPUT_NAME "pcre2-32${STATIC_LIB_POSTFIX}")
     if(PCRE2_STATIC_PIC)
       set_target_properties(pcre2-32-static PROPERTIES POSITION_INDEPENDENT_CODE 1)
     endif()
   endif()
 
   if(BUILD_SHARED_LIBS)
+    # Shared 32-bit library
+
     add_library(pcre2-32-shared SHARED ${PCRE2_HEADERS} ${PCRE2_SOURCES} ${PCRE2_SHARED_SOURCES})
+    list(APPEND EXPORT_INSTALL_TARGETS pcre2-32-shared)
+    list(APPEND INSTALL_DLL_PDB_FILES "$<TARGET_PDB_FILE:pcre2-32-shared>")
+
+    target_compile_definitions(pcre2-32-shared PRIVATE ${ALL_COMPILE_DEFINITIONS} PCRE2_CODE_UNIT_WIDTH=32)
     target_include_directories(
       pcre2-32-shared
+      PRIVATE ${ALL_INCLUDE_DIRECTORIES}
       PUBLIC "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/interface>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
     )
     set_target_properties(
       pcre2-32-shared
       PROPERTIES
-        COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=32
         MACHO_COMPATIBILITY_VERSION "${LIBPCRE2_32_MACHO_COMPATIBILITY_VERSION}"
         MACHO_CURRENT_VERSION "${LIBPCRE2_32_MACHO_CURRENT_VERSION}"
         VERSION ${LIBPCRE2_32_VERSION}
@@ -1240,11 +1299,9 @@ if(PCRE2_BUILD_PCRE2_32)
       target_link_libraries(pcre2-32-shared Threads::Threads)
     endif()
     if(HAVE_VSCRIPT AND PCRE2_SYMVERS)
-      target_link_options(pcre2-32-shared PRIVATE -Wl,${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-32.sym)
+      target_link_options(pcre2-32-shared PRIVATE LINKER:${VSCRIPT_FLAG},${PROJECT_BINARY_DIR}/src/libpcre2-32.sym)
       set_target_properties(pcre2-32-shared PROPERTIES LINK_DEPENDS ${PROJECT_BINARY_DIR}/src/libpcre2-32.sym)
     endif()
-    list(APPEND TARGETS pcre2-32-shared)
-    list(APPEND DLL_PDB_FILES $<TARGET_PDB_FILE:pcre2-32-shared>)
   endif()
 
   if(BUILD_STATIC_LIBS)
@@ -1353,9 +1410,13 @@ file(GENERATE OUTPUT "${CONFIG_BINARY_DIR}/pcre2-config" INPUT "${PROJECT_BINARY
 # -----------------------------------------------------------------------------
 
 if(PCRE2_BUILD_PCRE2GREP)
+  # pcre2grep executable
+
   add_executable(pcre2grep src/pcre2grep.c)
-  set_property(TARGET pcre2grep PROPERTY COMPILE_DEFINITIONS PCRE2_CODE_UNIT_WIDTH=8)
-  list(APPEND PRIVATE_TARGETS pcre2grep)
+  list(APPEND PRIVATE_INSTALL_TARGETS pcre2grep)
+
+  target_compile_definitions(pcre2grep PRIVATE ${ALL_COMPILE_DEFINITIONS} PCRE2_CODE_UNIT_WIDTH=8)
+  target_include_directories(pcre2grep PRIVATE ${ALL_INCLUDE_DIRECTORIES} ${PCRE2GREP_INCLUDE_DIRECTORIES})
   target_link_libraries(pcre2grep pcre2-posix ${PCRE2GREP_LIBS})
 endif()
 
@@ -1366,10 +1427,15 @@ endif()
 if(PCRE2_BUILD_TESTS)
   enable_testing()
 
+  # pcre2test executable
+
   set(PCRE2TEST_SOURCES src/pcre2test.c)
 
   add_executable(pcre2test ${PCRE2TEST_SOURCES})
-  list(APPEND PRIVATE_TARGETS pcre2test)
+  list(APPEND PRIVATE_INSTALL_TARGETS pcre2test)
+
+  target_compile_definitions(pcre2test PRIVATE ${ALL_COMPILE_DEFINITIONS})
+  target_include_directories(pcre2test PRIVATE ${ALL_INCLUDE_DIRECTORIES} ${PCRE2TEST_INCLUDE_DIRECTORIES})
   if(PCRE2_BUILD_PCRE2_8)
     list(APPEND PCRE2TEST_LIBS pcre2-posix pcre2-8)
   endif()
@@ -1380,18 +1446,24 @@ if(PCRE2_BUILD_TESTS)
     list(APPEND PCRE2TEST_LIBS pcre2-32)
   endif()
   target_link_libraries(pcre2test ${PCRE2TEST_LIBS})
-  if(MSVC)
+  if(PCRE2_MSVC_ABI)
     # This is needed to avoid a stack overflow error in the standard tests.
-    target_link_options(pcre2test PRIVATE /STACK:2500000)
+    target_link_options(pcre2test PRIVATE LINKER:/STACK:2500000)
   endif()
 
   if(PCRE2_BUILD_PCRE2_8)
+    # pcre2posix_test executable
     add_executable(pcre2posix_test src/pcre2posix_test.c)
+    target_compile_definitions(pcre2posix_test PRIVATE ${ALL_COMPILE_DEFINITIONS})
+    target_include_directories(pcre2posix_test PRIVATE ${ALL_INCLUDE_DIRECTORIES})
     target_link_libraries(pcre2posix_test pcre2-posix pcre2-8)
   endif()
 
   if(PCRE2_SUPPORT_JIT_DETECTED)
+    # pcre2_jit_test executable
     add_executable(pcre2_jit_test src/pcre2_jit_test.c)
+    target_compile_definitions(pcre2_jit_test PRIVATE ${ALL_COMPILE_DEFINITIONS})
+    target_include_directories(pcre2_jit_test PRIVATE ${ALL_INCLUDE_DIRECTORIES})
     set(PCRE2_JIT_TEST_LIBS "")
     if(PCRE2_BUILD_PCRE2_8)
       list(APPEND PCRE2_JIT_TEST_LIBS pcre2-8)
@@ -1405,11 +1477,12 @@ if(PCRE2_BUILD_TESTS)
     target_link_libraries(pcre2_jit_test ${PCRE2_JIT_TEST_LIBS})
   endif()
 
-  # =================================================
-  # Write out a CTest configuration file
-  #
+  # ---------------------------------------------------------------------------
+  # Register CTest targets for all the test scripts/executables
+  # ---------------------------------------------------------------------------
+
   file(
-    WRITE ${PROJECT_BINARY_DIR}/CTestCustom.ctest
+    WRITE ${PROJECT_BINARY_DIR}/CTestCustom.cmake
     "# This is a generated file.
 MESSAGE(\"When testing is complete, review test output in the
 \\\"${PROJECT_BINARY_DIR}/Testing/Temporary\\\" folder.\")
@@ -1484,26 +1557,32 @@ if(PCRE2_FUZZ_SUPPORT)
   if(PCRE2_BUILD_PCRE2_8)
     # Random naming mismatch: no "-8" suffix on the library.
     add_library(pcre2-fuzzsupport STATIC src/pcre2_fuzzsupport.c)
-    target_compile_definitions(pcre2-fuzzsupport PRIVATE PCRE2_CODE_UNIT_WIDTH=8)
+    target_compile_definitions(pcre2-fuzzsupport PRIVATE ${ALL_COMPILE_DEFINITIONS} PCRE2_CODE_UNIT_WIDTH=8)
+    target_include_directories(pcre2-fuzzsupport PRIVATE ${ALL_INCLUDE_DIRECTORIES})
 
     add_executable(pcre2fuzzcheck-8 src/pcre2_fuzzsupport.c)
-    target_compile_definitions(pcre2fuzzcheck-8 PRIVATE STANDALONE PCRE2_CODE_UNIT_WIDTH=8)
+    target_compile_definitions(pcre2fuzzcheck-8 PRIVATE ${ALL_COMPILE_DEFINITIONS} STANDALONE PCRE2_CODE_UNIT_WIDTH=8)
+    target_include_directories(pcre2fuzzcheck-8 PRIVATE ${ALL_INCLUDE_DIRECTORIES})
     target_link_libraries(pcre2fuzzcheck-8 pcre2-8)
   endif()
   if(PCRE2_BUILD_PCRE2_16)
     add_library(pcre2-fuzzsupport-16 STATIC src/pcre2_fuzzsupport.c)
-    target_compile_definitions(pcre2-fuzzsupport-16 PRIVATE PCRE2_CODE_UNIT_WIDTH=16)
+    target_compile_definitions(pcre2-fuzzsupport-16 PRIVATE ${ALL_COMPILE_DEFINITIONS} PCRE2_CODE_UNIT_WIDTH=16)
+    target_include_directories(pcre2-fuzzsupport-16 PRIVATE ${ALL_INCLUDE_DIRECTORIES})
 
     add_executable(pcre2fuzzcheck-16 src/pcre2_fuzzsupport.c)
-    target_compile_definitions(pcre2fuzzcheck-16 PRIVATE STANDALONE PCRE2_CODE_UNIT_WIDTH=16)
+    target_compile_definitions(pcre2fuzzcheck-16 PRIVATE ${ALL_COMPILE_DEFINITIONS} STANDALONE PCRE2_CODE_UNIT_WIDTH=16)
+    target_include_directories(pcre2fuzzcheck-16 PRIVATE ${ALL_INCLUDE_DIRECTORIES})
     target_link_libraries(pcre2fuzzcheck-16 pcre2-16)
   endif()
   if(PCRE2_BUILD_PCRE2_32)
     add_library(pcre2-fuzzsupport-32 STATIC src/pcre2_fuzzsupport.c)
-    target_compile_definitions(pcre2-fuzzsupport-32 PRIVATE PCRE2_CODE_UNIT_WIDTH=32)
+    target_compile_definitions(pcre2-fuzzsupport-32 PRIVATE ${ALL_COMPILE_DEFINITIONS} PCRE2_CODE_UNIT_WIDTH=32)
+    target_include_directories(pcre2-fuzzsupport-32 PRIVATE ${ALL_INCLUDE_DIRECTORIES})
 
     add_executable(pcre2fuzzcheck-32 src/pcre2_fuzzsupport.c)
-    target_compile_definitions(pcre2fuzzcheck-32 PRIVATE STANDALONE PCRE2_CODE_UNIT_WIDTH=32)
+    target_compile_definitions(pcre2fuzzcheck-32 PRIVATE ${ALL_COMPILE_DEFINITIONS} STANDALONE PCRE2_CODE_UNIT_WIDTH=32)
+    target_include_directories(pcre2fuzzcheck-32 PRIVATE ${ALL_INCLUDE_DIRECTORIES})
     target_link_libraries(pcre2fuzzcheck-32 pcre2-32)
   endif()
 endif()
@@ -1513,14 +1592,14 @@ endif()
 # -----------------------------------------------------------------------------
 
 install(
-  TARGETS ${TARGETS}
+  TARGETS ${EXPORT_INSTALL_TARGETS}
   EXPORT pcre2-targets
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
-if(PRIVATE_TARGETS)
-  install(TARGETS ${PRIVATE_TARGETS} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+if(PRIVATE_INSTALL_TARGETS)
+  install(TARGETS ${PRIVATE_INSTALL_TARGETS} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 install(EXPORT pcre2-targets DESTINATION ${PCRE2_INSTALL_CMAKEDIR} NAMESPACE pcre2::)
 
@@ -1544,7 +1623,7 @@ install(EXPORT pcre2-targets DESTINATION ${PCRE2_INSTALL_CMAKEDIR} NAMESPACE pcr
 
 install(FILES ${pkg_config_files} DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(
-  FILES "${CONFIG_BINARY_DIR}/pcre2-config"
+  FILES ${CONFIG_BINARY_DIR}/pcre2-config
   DESTINATION ${CMAKE_INSTALL_BINDIR}
   # Set 0755 permissions
   PERMISSIONS OWNER_WRITE OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
@@ -1600,7 +1679,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/html/images
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/pcre2/html)
 
 if(CMAKE_C_LINKER_SUPPORTS_PDB AND INSTALL_MSVC_PDB)
-  install(FILES ${DLL_PDB_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS Debug RelWithDebInfo)
+  install(FILES ${INSTALL_DLL_PDB_FILES} DESTINATION ${CMAKE_INSTALL_BINDIR} CONFIGURATIONS Debug RelWithDebInfo)
 endif()
 
 # -----------------------------------------------------------------------------

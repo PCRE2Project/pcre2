@@ -74,11 +74,16 @@ else
   mv ./coverage-lcov.filtered.info ./coverage-lcov.info
   echo ""
 
-  # Use genhtml to generate an HTML report from the LCOV data
+  # LLVM's switch-case DA counts describe the case body, while its BRDA counts
+  # also include dispatches that did not select that case. Short-circuit and
+  # macro conditions can be unevaluated on a hit line. LCOV's cross-metric
+  # consistency checks reject both, but rewriting the counters would be wrong.
+  # Keep those warnings visible; other error classes remain fatal.
   echo "== Generating HTML report =="
   mkdir -p coverage-html
   genhtml \
-    --highlight --branch-coverage --legend --title "PCRE2 code coverage report" --num-spaces 2 \
+    --ignore-errors inconsistent \
+    --branch-coverage --legend --title "PCRE2 code coverage report" --num-spaces 2 \
     -o coverage-html ./coverage-lcov.info
   echo ""
 

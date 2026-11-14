@@ -14,11 +14,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  Build:
+  build:
+    name: Build
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/pages/Gemfile
-      BUNDLE_PATH: ${{ github.workspace }}/pages/vendor/bundle
     steps:
       - name: Setup
         run: |
@@ -28,12 +28,15 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install locked website dependencies
         run: |
+          bundle config set --local path vendor/bundle
           bundle config set --local frozen true
           bundle install
-          bundle exec ruby -rjekyll -rasciidoctor -rrouge -e \
+          ruby -rbundler/setup -rjekyll -rasciidoctor -rrouge -e \
             'puts "Jekyll #{Jekyll::VERSION}, Asciidoctor #{Asciidoctor::VERSION}, Rouge #{Rouge.version}"'
 
       - name: Setup Pages
@@ -50,8 +53,9 @@ jobs:
         with:
           path: ./pages/public
 
-  Deploy:
-    needs: Build
+  deploy:
+    name: Deploy
+    needs: build
 
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 

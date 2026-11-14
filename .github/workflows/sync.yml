@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/pages/Gemfile
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -34,18 +36,16 @@ jobs:
       - name: Install zig
         uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2.2.1
 
-      # Install Asciidoctor, the semantic HTML converter, and the Rouge source highlighter
-      - name: Install Asciidoctor, HTML5s, and Rouge
+      - name: Install locked Ruby dependencies
         run: |
           sudo apt update
-          sudo apt install -y ruby ruby-dev
-          gem install --user-install asciidoctor asciidoctor-html5s rouge nokogiri unicode-name
-          export GEM_HOME="$(ruby -e 'print Gem.user_dir')"
-          export PATH="$GEM_HOME/bin:$PATH"
+          sudo apt install -y ruby ruby-dev ruby-bundler build-essential
+          bundle config set --local path vendor/bundle
+          bundle config set --local frozen true
+          bundle install
           echo "Ruby version: $(ruby -v)"
-          echo "Asciidoctor version: $(asciidoctor --version)"
-          echo "Rouge version: $(rouge --version)"
-          echo "$GEM_HOME/bin" >> "$GITHUB_PATH"
+          ruby -rbundler/setup -rasciidoctor -rrouge -e \
+            'puts "Asciidoctor #{Asciidoctor::VERSION}, Rouge #{Rouge.version}"'
 
       - name: UpdateDates
         if: |
