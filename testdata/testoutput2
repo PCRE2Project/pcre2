@@ -23730,6 +23730,10 @@ No match
     aby
 No match
 
+/(a(?R(1)))*+b/
+    aaab
+ 0: b
+
 # Test each syntax used for recursion
 
 /(?(R)(Sat)urday|(?R(1)),\1)/
