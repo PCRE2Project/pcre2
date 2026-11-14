@@ -2248,6 +2248,7 @@ get_framesize(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend, BOOL rec
       possessive = length = (common->capture_last_ptr != 0) ? 5 : 3;
       /* This is correct regardless of common->capture_last_ptr. */
       capture_last_found = TRUE;
+      is_cbracket_processed(common, GET2(cc, 1 + LINK_SIZE));
     }
 
     cc = next_opcode(common, cc);
