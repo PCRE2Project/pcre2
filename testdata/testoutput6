@@ -8258,4 +8258,59 @@ Failed: error -63: heap limit exceeded
  0: baaa
  1: baa
 
+# Callout return values. PCRE2_ERROR_NOMATCH ends the match with "no match".
+# Other values from -2 to -999 are reserved, and end the match with
+# PCRE2_ERROR_CALLOUT. Values at or below PCRE2_ERROR_CALLOUT_MAX (-1000) end
+# the match and are returned unchanged.
+
+/(?C1)a/
+    a\=callout_data=-1
+--->a
+  1 ^     a
+Callout data = -1
+No match
+    a\=callout_data=-2
+--->a
+  1 ^     a
+Callout data = -2
+Failed: error -37: callout error code
+    a\=callout_data=-999
+--->a
+  1 ^     a
+Callout data = -999
+Failed: error -37: callout error code
+    a\=callout_data=-1000
+--->a
+  1 ^     a
+Callout data = -1000
+Failed: error -1000: callout-defined error
+
+/(?=(?C1)a)a/
+    a\=callout_data=-999
+--->a
+  1 ^     a
+Callout data = -999
+Failed: error -37: callout error code
+
+/(?:(?C1)a)++b/no_start_optimize
+    b\=callout_data=-998
+--->b
+  1 ^     a
+Callout data = -998
+Failed: error -37: callout error code
+
+# A callout's "no match" ends the whole match, not just the assertion.
+
+/(?!(?C1)x)a/
+    a\=callout_data=-1
+--->a
+  1 ^     x
+Callout data = -1
+No match
+    a\=callout_data=-997
+--->a
+  1 ^     x
+Callout data = -997
+Failed: error -37: callout error code
+
 # End of testinput6

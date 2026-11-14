@@ -5772,6 +5772,60 @@ a)"xI
 /^(?(?!A(?C1)B)C)/
     ABC\=callout_error=1
 
+# Callout return values. A positive value causes backtracking and zero lets
+# matching continue. PCRE2_ERROR_NOMATCH ends the match with "no match". Other
+# values from -2 to -999 are reserved, and end the match with
+# PCRE2_ERROR_CALLOUT. Values at or below PCRE2_ERROR_CALLOUT_MAX (-1000) end
+# the match and are returned unchanged.
+
+/(?C1)a/
+    a\=callout_data=-1
+    a\=callout_data=-2
+    a\=callout_data=-37
+    a\=callout_data=-47
+    a\=callout_data=-79
+    a\=callout_data=-993
+    a\=callout_data=-994
+    a\=callout_data=-998
+    a\=callout_data=-999
+    a\=callout_data=-1000
+    a\=callout_data=-2147483648
+
+# Values that the interpreter uses internally must not be acted on when a
+# callout returns them from inside groups and assertions.
+
+/(?=(?C1)a)a/
+    a\=callout_data=-999
+
+/(?=(a)(*ACCEPT))(?=(?C1)b)/
+    ab\=callout_data=-999
+
+/(?:(?C1)a)++b/no_start_optimize
+    b\=callout_data=-998
+
+/(?!(?C1)x)a/
+    a\=callout_data=-1
+    a\=callout_data=-997
+
+/(a|ab)(?C1)c/
+    abc\=callout_data=-996
+
+/(?!aa(*SKIP)x)(?C1)./
+    aabcd\=callout_data=-995
+
+/^(*MARK:A)(?C1)a/
+    a\=callout_data=-994
+
+/(?:(?C1)ab|ac)|(*THEN)z/
+    ac\=callout_data=-993
+
+# A callout's "no match" or reserved value must not be reported as a partial
+# match found at an earlier starting position.
+
+/xab|a(?C1)/no_start_optimize
+    xa\=ps,callout_data=-1
+    xa\=ps,callout_data=-2
+
 # ----------------------------------------------------------------------
 
 /[a b c]/BxxI

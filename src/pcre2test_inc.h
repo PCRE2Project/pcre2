@@ -1327,6 +1327,14 @@ print_error_message_file(FILE *file, int errorcode, const char *before, const ch
   int len;
   PCRE2_UCHAR buf[128];
 
+  /* Callouts may return their own error codes, which have no message. */
+
+  if (errorcode <= PCRE2_ERROR_CALLOUT_MAX)
+  {
+    cfprintf(clr_api_error, file, "%scallout-defined error%s", before, after);
+    return TRUE;
+  }
+
   len = pcre2_get_error_message(errorcode, buf, sizeof(buf) / sizeof(*buf));
   if (len == PCRE2_ERROR_BADDATA && badcode_ok)
   {

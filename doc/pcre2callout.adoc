@@ -396,17 +396,22 @@ cases the arg:callout_flags field is always zero.
 
 == Return values from callouts
 
-The external callout function returns an integer to PCRE2. If the value is
-zero, matching proceeds as normal. If the value is greater than zero, matching
-fails at the current point, but the testing of other matching possibilities
-goes ahead, just as if a lookahead assertion had failed. If the value is less
-than zero, the match is abandoned, and the matching function returns the
-negative value.
+The external callout function returns an integer to PCRE2:
 
-Negative values should normally be chosen from the set of `PCRE2_ERROR_{empty}__xxx__`
-values. In particular, const:PCRE2_ERROR_NOMATCH forces a standard "no match"
-failure. The error number const:PCRE2_ERROR_CALLOUT is reserved for use by callout
-functions; it will never be used by PCRE2 itself.
+* If the value is zero, matching proceeds as normal.
+* If the value is greater than zero, matching fails at the current point, but
+the testing of other matching possibilities goes ahead, just as if a lookahead
+assertion had failed.
+* If the value is const:PCRE2_ERROR_NOMATCH, the match is abandoned, and the
+matching function returns const:PCRE2_ERROR_NOMATCH.
+* If the value is less than or equal to const:PCRE2_ERROR_CALLOUT_MAX (-1000),
+the match is abandoned, and the matching function returns the value. This range
+is reserved for application-defined error codes.
+* Any other negative value is reserved for PCRE2. The match is abandoned, and the
+matching function returns const:PCRE2_ERROR_CALLOUT.
+
+The same rules apply to func:pcre2_match(), func:pcre2_dfa_match(), and JIT
+matching.
 
 == Callout enumeration
 

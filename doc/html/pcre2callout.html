@@ -259,16 +259,16 @@ understand how PCRE2 works. There is no support in <code class="function pcre2-a
 because there is no backtracking in DFA matching, and there is no support in
 JIT because JIT is all about maximimizing matching performance. In both these
 cases the <code class="parameter pcre2-api rouge"><span class="nv">callout_flags</span></code> field is always zero.</p></section></section>
-<section class="doc-section level-1"><h2 id="_return_values_from_callouts">Return values from callouts</h2><p>The external callout function returns an integer to PCRE2. If the value is
-zero, matching proceeds as normal. If the value is greater than zero, matching
-fails at the current point, but the testing of other matching possibilities
-goes ahead, just as if a lookahead assertion had failed. If the value is less
-than zero, the match is abandoned, and the matching function returns the
-negative value.</p>
-<p>Negative values should normally be chosen from the set of <code>PCRE2_ERROR_<em>xxx</em></code>
-values. In particular, <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_NOMATCH</span></code> forces a standard "no match"
-failure. The error number <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_CALLOUT</span></code> is reserved for use by callout
-functions; it will never be used by PCRE2 itself.</p></section>
+<section class="doc-section level-1"><h2 id="_return_values_from_callouts">Return values from callouts</h2><p>The external callout function returns an integer to PCRE2:</p>
+<ul class="compact"><li>If the value is zero, matching proceeds as normal.</li><li>If the value is greater than zero, matching fails at the current point, but
+the testing of other matching possibilities goes ahead, just as if a lookahead
+assertion had failed.</li><li>If the value is <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_NOMATCH</span></code>, the match is abandoned, and the
+matching function returns <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_NOMATCH</span></code>.</li><li>If the value is less than or equal to <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_CALLOUT_MAX</span></code> (-1000),
+the match is abandoned, and the matching function returns the value. This range
+is reserved for application-defined error codes.</li><li>Any other negative value is reserved for PCRE2. The match is abandoned, and the
+matching function returns <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_CALLOUT</span></code>.</li></ul>
+<p>The same rules apply to <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>, <code class="function pcre2-api rouge"><span class="nf">pcre2_dfa_match()</span></code>, and JIT
+matching.</p></section>
 <section class="doc-section level-1"><h2 id="_callout_enumeration">Callout enumeration</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nf">pcre2_callout_enumerate</span><span class="p">(</span>
       <span class="kt">const</span> <span class="kt">pcre2_code</span> <span class="p">*</span><span class="nv">code</span><span class="p">,</span>
       <span class="kt">int</span> <span class="p">(</span><span class="p">*</span><span class="nv">callback</span><span class="p">)(</span><span class="kt">pcre2_callout_enumerate_block</span> <span class="p">*</span><span class="nv">callout_block</span><span class="p">,</span>
