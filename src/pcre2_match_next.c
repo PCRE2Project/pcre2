@@ -95,6 +95,16 @@ do_bumpalong(pcre2_match_data *match_data, PCRE2_SIZE offset)
 PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_next_match(pcre2_match_data *match_data, PCRE2_SIZE *pstart_offset, uint32_t *poptions)
 {
+  /* Preconditions on argument values */
+
+  PCRE2_ASSERT(match_data != NULL);
+  PCRE2_ASSERT(pstart_offset != NULL);
+  PCRE2_ASSERT(poptions != NULL);
+
+  /* Preconditions on argument state */
+
+  PCRE2_ASSERT(match_data->rc < 0 || match_data->code != NULL);
+
   PCRE2_SIZE start_offset = match_data->start_offset;
   PCRE2_SIZE *ovector = match_data->ovector;
 

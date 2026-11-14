@@ -25,13 +25,12 @@ RUN export DEBIAN_FRONTEND=noninteractive \
       autoconf automake libtool m4 \
       zlib1g-dev libbz2-dev libedit-dev libreadline-dev \
       llvm clang clang-tools clang-format-22 libclang-rt-dev gdb lldb valgrind lcov \
-      ruby ruby-dev hugo \
+      ruby ruby-dev ruby-bundler hugo \
       python3 python3-venv perl xz-utils \
       language-pack-fr jq ripgrep shellcheck \
       aptitude git-lfs \
       kitware-archive-keyring cmake cmake-curses-gui \
       unminimize man-db \
-    && gem install asciidoctor asciidoctor-html5s rouge \
     && python3 -m venv /opt/meson \
     && /opt/meson/bin/python -m pip install --no-cache-dir meson \
     && ln --symbolic /opt/meson/bin/meson /usr/local/bin/meson \

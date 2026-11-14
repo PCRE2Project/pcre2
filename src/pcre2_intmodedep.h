@@ -78,6 +78,7 @@ zero in order to simply clear the previous macros. */
 #undef IMM2_SIZE
 #undef MAX_255
 #undef MAX_MARK
+#undef MAX_NON_UTF_CHAR
 #undef MAX_PATTERN_SIZE
 #undef DEFAULT_MAX_PATTERN_SIZE_8_16
 #undef MAX_UTF_SINGLE_CU
@@ -216,6 +217,10 @@ macros to load and store such a value. */
 #define GET2(a, n)    ((unsigned int)(a)[n])
 #define PUT2(a, n, d) (a[n] = (PCRE2_UCHAR)(d))
 #endif
+
+/* This is the largest non-UTF code point. */
+
+#define MAX_NON_UTF_CHAR (0xffffffffU >> (32 - PCRE2_CODE_UNIT_WIDTH))
 
 /* Other macros that are different for 8-bit mode. The MAX_255 macro checks
 whether its argument, which is assumed to be one code unit, is less than 256.
@@ -881,6 +886,7 @@ typedef struct compile_block {
   BOOL had_accept;                          // (*ACCEPT) encountered
   BOOL had_pruneorskip;                     // (*PRUNE) or (*SKIP) encountered
   BOOL had_recurse;                         // Had a pattern recursion or subroutine call
+  BOOL had_whole_pattern_recurse;           // Had a recursion to group 0
   BOOL dupnames;                            // Duplicate names exist
   compile_data *first_data;                 // First item in the compile data list
   compile_data *last_data;                  // Last item in the compile data list

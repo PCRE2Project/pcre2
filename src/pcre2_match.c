@@ -108,6 +108,7 @@ points). */
 #define GF_NOCAPTURE  0x00020000u
 #define GF_CONDASSERT 0x00030000u
 #define GF_RECURSE    0x00040000u
+#define GF_ASSERT     0x00050000u
 
 /* Masks for the identity and data parts of the group frame type. */
 
@@ -307,15 +308,15 @@ do_callout(heapframe *F, match_block *mb, PCRE2_SIZE *lengthptr)
 
   callout_ovector = (PCRE2_SIZE *)(Fovector)-2;
 
-  /* The cb->version, cb->subject, cb->subject_length, and cb->start_match fields
-  are set externally. The first 3 never change; the last is updated for each
-  bumpalong. */
+  /* The cb->version, cb->subject, and cb->subject_length fields are set
+  externally and never change. */
 
   cb = mb->cb;
   cb->capture_top = (uint32_t)Foffset_top / 2 + 1;
   cb->capture_last = Fcapture_last;
   cb->offset_vector = callout_ovector;
   cb->mark = mb->nomatch_mark;
+  cb->start_match = (PCRE2_SIZE)(Fstart_match - mb->start_subject);
   cb->current_position = (PCRE2_SIZE)(Feptr - mb->start_subject);
   cb->pattern_position = GET(Fecode, 1);
   cb->next_item_length = GET(Fecode, 1 + LINK_SIZE);
@@ -862,6 +863,10 @@ MATCH_RECURSE:
       fprintf(stderr, "recurse=%d", GF_DATAMASK(group_frame_type));
       break;
 
+    case GF_ASSERT:
+      fprintf(stderr, "assert op=%d", Fop);
+      break;
+
     default:
       fprintf(stderr, "*** unknown ***");
       break;
@@ -932,32 +937,28 @@ NEW_FRAME:
       where we know the starting frame is at the top of the chained frames, in
       this case we have to search back for the relevant frame in case other types
       of group that use chained frames have intervened. Multiple OP_CLOSEs always
-      come innermost first, which matches the chain order.
-
-      In a recursion, the closed groups may be returned to the caller by a
-      capture list. Only groups that were opened within the recursion are closed,
-      so the search stops at the recursion's frame. */
+      come innermost first, which matches the chain order. We can ignore this in
+      a recursion, because captures are not passed out of recursions. */
 
     case OP_CLOSE:
-      number = GET2(Fecode, 1);
-      offset = Flast_group_offset;
-      for (;;)
+      if (Fcurrent_recurse == RECURSE_UNSET)
       {
-        /* Corrupted heapframes?. Trigger an assert and return an error */
-        PCRE2_ASSERT(offset != PCRE2_UNSET);
-        if (offset == PCRE2_UNSET)
-          return PCRE2_ERROR_INTERNAL;
+        number = GET2(Fecode, 1);
+        offset = Flast_group_offset;
+        for (;;)
+        {
+          /* Corrupted heapframes?. Trigger an assert and return an error */
+          PCRE2_ASSERT(offset != PCRE2_UNSET);
+          if (offset == PCRE2_UNSET)
+            return PCRE2_ERROR_INTERNAL;
 
-        N = (heapframe *)((char *)match_data->heapframes + offset);
-        P = (heapframe *)((char *)N - frame_size);
-        if (N->group_frame_type == (GF_CAPTURE | number) ||
-            GF_IDMASK(N->group_frame_type) == GF_RECURSE)
-          break;
-        offset = P->last_group_offset;
-      }
+          N = (heapframe *)((char *)match_data->heapframes + offset);
+          P = (heapframe *)((char *)N - frame_size);
+          if (N->group_frame_type == (GF_CAPTURE | number))
+            break;
+          offset = P->last_group_offset;
+        }
 
-      if (N->group_frame_type == (GF_CAPTURE | number))
-      {
         offset = (number << 1) - 2;
         Fcapture_last = number;
         Fovector[offset] = P->eptr - mb->start_subject;
@@ -973,9 +974,36 @@ NEW_FRAME:
       /* ===================================================================== */
       /* Real or forced end of the pattern, assertion, or recursion. In an
       assertion ACCEPT, update the last used pointer and remember the current
-      frame so that the captures and mark can be fished out of it. */
+      frame so that the captures and mark can be fished out of it.
+
+      OP_ASSERT_ACCEPT is compiled for an (*ACCEPT) that is lexically inside an
+      assertion, but the group containing it may have been called as a
+      subroutine from outside that assertion. In that case the recursion is
+      the innermost construct, and (*ACCEPT) must end only the recursion. Look
+      for whichever of the two was entered most recently. */
 
     case OP_ASSERT_ACCEPT:
+      if (Fcurrent_recurse != RECURSE_UNSET)
+      {
+        offset = Flast_group_offset;
+        for (;;)
+        {
+          /* An active recursion must have a frame on the group chain. */
+          PCRE2_ASSERT(offset != PCRE2_UNSET);
+          if (offset == PCRE2_UNSET)
+            return PCRE2_ERROR_INTERNAL;
+
+          N = (heapframe *)((char *)match_data->heapframes + offset);
+          P = (heapframe *)((char *)N - frame_size);
+          if (GF_IDMASK(N->group_frame_type) == GF_ASSERT ||
+              GF_IDMASK(N->group_frame_type) == GF_CONDASSERT)
+            break;
+          if (GF_IDMASK(N->group_frame_type) == GF_RECURSE)
+            goto ACCEPT_IN_RECURSION;
+          offset = P->last_group_offset;
+        }
+      }
+
       if (Feptr > mb->last_used_ptr)
         mb->last_used_ptr = Feptr;
       assert_accept_frame = F;
@@ -1009,26 +1037,41 @@ NEW_FRAME:
         /* N is now the frame of the recursion; the previous frame is at the
         OP_RECURSE position. Go back there, copying the current subject position
         and mark, and the start_match position (\K might have changed it), and
-        then move on past the OP_RECURSE.
+        then move on past the OP_RECURSE. */
 
-        If the OP_RECURSE is followed by a list of capture groups to return,
-        build the caller's captures in the current frame, as is done when the
-        end of the recursion is reached, and copy them into the previous frame.
-        This also moves past the OP_CREF list. */
-
+      ACCEPT_IN_RECURSION:
         P->eptr = Feptr;
         P->mark = Fmark;
         P->start_match = Fstart_match;
-
-        Fecode = P->ecode + 1 + LINK_SIZE;
-        if (*Fecode == OP_CREF)
+        P->ecode += 1 + LINK_SIZE;
+        if (*P->ecode == OP_CREF)
         {
-          recurse_update_offsets(F, P);
-          memcpy(P->ovector, F->ovector, Foffset_top * sizeof(PCRE2_SIZE));
-          P->offset_top = Foffset_top;
-        }
-        P->ecode = Fecode;
+          PCRE2_SPTR ecode = P->ecode;
+          PCRE2_SIZE *dst = P->ovector;
+          PCRE2_SIZE *src = F->ovector;
+          PCRE2_SIZE max_offset = P->offset_top;
+          PCRE2_SIZE offset_top = Foffset_top;
 
+          do
+          {
+            PCRE2_SIZE ref_offset = (GET2(ecode, 1) << 1) - 2;
+            if (ref_offset > offset_top)
+            {
+              break;
+            }
+            dst[ref_offset] = src[ref_offset];
+            dst[ref_offset + 1] = src[ref_offset + 1];
+            if (src[ref_offset] != PCRE2_UNSET && ref_offset >= max_offset)
+            {
+              max_offset = ref_offset + 2;
+            }
+            ecode += 1 + IMM2_SIZE;
+          }
+          while (*ecode == OP_CREF);
+
+          P->ecode = ecode;
+          P->offset_top = max_offset;
+        }
         F = P;
         continue;
       }
@@ -6481,7 +6524,7 @@ NEW_FRAME:
     case OP_ASSERTBACK_NA:
       for (;;)
       {
-        group_frame_type = GF_NOCAPTURE;
+        group_frame_type = GF_ASSERT;
         RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM3);
         if (rrc == MATCH_ACCEPT)
         {
@@ -6514,7 +6557,7 @@ NEW_FRAME:
     case OP_ASSERTBACK_NOT:
       for (;;)
       {
-        group_frame_type = GF_NOCAPTURE;
+        group_frame_type = GF_ASSERT;
         RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM4);
         switch (rrc)
         {
@@ -6634,7 +6677,7 @@ NEW_FRAME:
 
       for (;;)
       {
-        group_frame_type = GF_NOCAPTURE;
+        group_frame_type = GF_ASSERT;
         RMATCH(Fecode + 1 + LINK_SIZE + length, RM38);
         if (rrc == MATCH_ACCEPT)
         {
@@ -8737,7 +8780,6 @@ FRAGMENT_RESTART:
     /* OK, we can now run the match. If "hitend" is set afterwards, remember the
     first starting point for which a partial match was found. */
 
-    cb.start_match = (PCRE2_SIZE)(start_match - subject);
     cb.callout_flags |= PCRE2_CALLOUT_STARTMATCH;
 
     mb->start_used_ptr = start_match;
@@ -8811,6 +8853,12 @@ FRAGMENT_RESTART:
 
     case MATCH_COMMIT:
       rc = MATCH_NOMATCH;
+      goto ENDLOOP;
+
+    case MATCH_ACCEPT:
+    case MATCH_KETRPOS:
+      PCRE2_DEBUG_UNREACHABLE();
+      rc = PCRE2_ERROR_INTERNAL;
       goto ENDLOOP;
 
       /* Any other return is either a match, or some kind of error. */

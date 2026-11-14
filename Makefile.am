@@ -1019,10 +1019,11 @@ EXTRA_DIST += \
   testdata/testoutputheap-8 \
   testdata/valgrind-jit.supp
 
-# RunTest and RunGrepTest should clean up after themselves, but just in case
-# they don't, add their working files to CLEANFILES.
+# RunTest(.py) and RunGrepTest(.py) should clean up after themselves, but just
+# in case they don't, add their working files to CLEANFILES.
 
 CLEANFILES += \
+  testbtables \
   testSinput \
   testSoutput \
   test3input \
@@ -1033,14 +1034,19 @@ CLEANFILES += \
   test3outputD \
   test3outputE \
   test3outputF \
+  testsaved1 \
+  testsaved2 \
   testtry \
+  testtry2 \
   teststdout \
-  teststderr \
+  teststdoutgrep \
   teststderrgrep \
   testtemp1grep \
   testtemp2grep \
   testtrygrep \
-  testNinputgrep
+  testNinputgrep \
+  ./-testtemp1grep \
+  ./--
 
 testoutput-clean:
 	-rm -rf testoutput8 testoutput8-jit testoutput8-dfa

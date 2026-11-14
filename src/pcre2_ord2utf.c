@@ -68,8 +68,9 @@ PRIV(ord2utf)(uint32_t cvalue, PCRE2_UCHAR *buffer)
 
 /*
 Arguments:
-  cvalue     the character value
-  buffer     pointer to buffer for result
+  cvalue     a Unicode code point, no greater than 0x10ffff
+  buffer     pointer to buffer for result (at least 4, 2, or 1 code units
+             for UTF-8, UTF-16, or UTF-32 respectively)
 
 Returns:     number of code units placed in the buffer
 */
@@ -80,10 +81,12 @@ PRIV(ord2utf)(uint32_t cvalue, PCRE2_UCHAR *buffer)
   /* Convert to UTF-8 */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
+  PCRE2_ASSERT(cvalue <= MAX_UTF_CODE_POINT);
+
   unsigned int i;
 
-  for (i = 0; i < PRIV(utf8_table1_size); i++)
-    if ((int)cvalue <= PRIV(utf8_table1)[i])
+  for (i = 0; i < 3; i++)
+    if (cvalue <= (uint32_t)PRIV(utf8_table1)[i])
       break;
   buffer += i;
   for (unsigned int j = i; j != 0; j--)
@@ -98,6 +101,8 @@ PRIV(ord2utf)(uint32_t cvalue, PCRE2_UCHAR *buffer)
   /* Convert to UTF-16 */
 
 #elif PCRE2_CODE_UNIT_WIDTH == 16
+  PCRE2_ASSERT(cvalue <= MAX_UTF_CODE_POINT && !(cvalue >= 0xd800 && cvalue <= 0xdfff));
+
   if (cvalue <= 0xffff)
   {
     *buffer = (PCRE2_UCHAR)cvalue;

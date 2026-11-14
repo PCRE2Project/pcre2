@@ -739,7 +739,6 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
   int rc;
   uint32_t goptions = 0;
   pcre2_match_data *internal_match_data = NULL;
-  BOOL escaped_literal = FALSE;
   BOOL overflowed = FALSE;
   PCRE2_UCHAR null_str[1] = { 0xcd };
   PCRE2_UCHAR null_buffer[1] = { 0xcd };
@@ -987,6 +986,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     PCRE2_SPTR ptrstack[PTR_STACK_SIZE];
     uint32_t ptrstackptr = 0;
     case_state forcecase = { PCRE2_SUBSTITUTE_CASE_NONE, FALSE };
+    BOOL escaped_literal = FALSE;
     PCRE2_SIZE casestart_offset = 0;
     PCRE2_SIZE casestart_extra_needed = 0;
 

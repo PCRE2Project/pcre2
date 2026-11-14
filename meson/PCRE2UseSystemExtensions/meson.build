@@ -1,6 +1,6 @@
 # Keep the feature-test macro checks aligned with cmake/PCRE2UseSystemExtensions.cmake.
 system_extension_args = []
-if not host_is_windows
+if host_machine.system() != 'windows'
   getrlimit_test = '''
     #include <sys/time.h>
     #include <sys/resource.h>

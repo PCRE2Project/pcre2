@@ -96,24 +96,26 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
 
-  /* Originally, this function checked according to RFC 2279, allowing for values
-  in the range 0 to 0x7fffffff, up to 6 bytes long, but ensuring that they were
-  in the canonical format. Once somebody had pointed out RFC 3629 to me (it
-  obsoletes 2279), additional restrictions were applied. The values are now
-  limited to be between 0 and 0x0010ffff, no more than 4 bytes long, and the
-  subrange 0xd000 to 0xdfff is excluded. However, the format of 5-byte and 6-byte
-  characters is still checked. Error returns are as follows:
+  /* PCRE2 uses RFC 3629, which limits UTF-8 to encode characters between 0 and
+  0x0010ffff, with no over-long encodings, and the subrange 0xd800 to 0xdfff is
+  excluded. This means that valid UTF-8 characters are limited to 4 bytes.
+
+  Long ago, PCRE versions earlier than 7.3 checked according to RFC 2279,
+  allowing for values in the range 0 to 0x7fffffff, up to 6 bytes long. PCRE2
+  has never accepted these forms.
+
+  Error returns are as follows:
 
   PCRE2_ERROR_UTF8_ERR1   Missing 1 byte at the end of the string
   PCRE2_ERROR_UTF8_ERR2   Missing 2 bytes at the end of the string
   PCRE2_ERROR_UTF8_ERR3   Missing 3 bytes at the end of the string
-  PCRE2_ERROR_UTF8_ERR4   Missing 4 bytes at the end of the string
-  PCRE2_ERROR_UTF8_ERR5   Missing 5 bytes at the end of the string
+  PCRE2_ERROR_UTF8_ERR4   Missing 4 bytes at the end of the string (unused)
+  PCRE2_ERROR_UTF8_ERR5   Missing 5 bytes at the end of the string (unused)
   PCRE2_ERROR_UTF8_ERR6   2nd-byte's two top bits are not 0x80
   PCRE2_ERROR_UTF8_ERR7   3rd-byte's two top bits are not 0x80
   PCRE2_ERROR_UTF8_ERR8   4th-byte's two top bits are not 0x80
-  PCRE2_ERROR_UTF8_ERR9   5th-byte's two top bits are not 0x80
-  PCRE2_ERROR_UTF8_ERR10  6th-byte's two top bits are not 0x80
+  PCRE2_ERROR_UTF8_ERR9   5th-byte's two top bits are not 0x80 (unused)
+  PCRE2_ERROR_UTF8_ERR10  6th-byte's two top bits are not 0x80 (unused)
   PCRE2_ERROR_UTF8_ERR11  5-byte character is not permitted by RFC 3629
   PCRE2_ERROR_UTF8_ERR12  6-byte character is not permitted by RFC 3629
   PCRE2_ERROR_UTF8_ERR13  4-byte character with value > 0x10ffff is not permitted
@@ -121,8 +123,8 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
   PCRE2_ERROR_UTF8_ERR15  Overlong 2-byte sequence
   PCRE2_ERROR_UTF8_ERR16  Overlong 3-byte sequence
   PCRE2_ERROR_UTF8_ERR17  Overlong 4-byte sequence
-  PCRE2_ERROR_UTF8_ERR18  Overlong 5-byte sequence (won't ever occur)
-  PCRE2_ERROR_UTF8_ERR19  Overlong 6-byte sequence (won't ever occur)
+  PCRE2_ERROR_UTF8_ERR18  Overlong 5-byte sequence (unused)
+  PCRE2_ERROR_UTF8_ERR19  Overlong 6-byte sequence (unused)
   PCRE2_ERROR_UTF8_ERR20  Isolated 0x80 byte (not within UTF-8 character)
   PCRE2_ERROR_UTF8_ERR21  Byte with the illegal value 0xfe or 0xff
   */
@@ -147,7 +149,13 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
       return PCRE2_ERROR_UTF8_ERR21;
     }
 
-    uint32_t ab = PRIV(utf8_table4)[c & 0x3f]; // Number of additional bytes (1-5)
+    if (c >= 0xf8) // Obsolete 5- or 6-byte prefix
+    {
+      *erroroffset = (PCRE2_SIZE)(p - string);
+      return (c < 0xfc) ? PCRE2_ERROR_UTF8_ERR11 : PCRE2_ERROR_UTF8_ERR12;
+    }
+
+    uint32_t ab = PRIV(utf8_table4)[c & 0x3f]; // Number of additional bytes (1-3)
     if (length < ab)                           // Missing bytes
     {
       *erroroffset = (PCRE2_SIZE)(p - string);
@@ -159,10 +167,6 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
         return PCRE2_ERROR_UTF8_ERR2;
       case 3:
         return PCRE2_ERROR_UTF8_ERR3;
-      case 4:
-        return PCRE2_ERROR_UTF8_ERR4;
-      case 5:
-        return PCRE2_ERROR_UTF8_ERR5;
       }
     }
 
@@ -251,86 +255,6 @@ PRIV(valid_utf)(PCRE2_SPTR string, PCRE2_SIZE length, PCRE2_SIZE *erroroffset)
 
       break;
 
-      /* 5-byte and 6-byte characters are not allowed by RFC 3629, and will be
-      rejected by the length test below. However, we do the appropriate tests
-      here so that overlong sequences get diagnosed, and also in case there is
-      ever an option for handling these larger code points. */
-
-      /* 5-byte character. Check 3rd, 4th, and 5th bytes for 0x80. Then check for
-      1111 1000, xx00 0xxx */
-
-    case 4:
-      if ((*(++p) & 0xc0) != 0x80) // Third byte
-      {
-        *erroroffset = (PCRE2_SIZE)(p - string) - 2;
-        return PCRE2_ERROR_UTF8_ERR7;
-      }
-
-      if ((*(++p) & 0xc0) != 0x80) // Fourth byte
-      {
-        *erroroffset = (PCRE2_SIZE)(p - string) - 3;
-        return PCRE2_ERROR_UTF8_ERR8;
-      }
-
-      if ((*(++p) & 0xc0) != 0x80) // Fifth byte
-      {
-        *erroroffset = (PCRE2_SIZE)(p - string) - 4;
-        return PCRE2_ERROR_UTF8_ERR9;
-      }
-
-      if (c == 0xf8 && (d & 0x38) == 0)
-      {
-        *erroroffset = (PCRE2_SIZE)(p - string) - 4;
-        return PCRE2_ERROR_UTF8_ERR18;
-      }
-
-      break;
-
-      /* 6-byte character. Check 3rd-6th bytes for 0x80. Then check for
-      1111 1100, xx00 00xx. */
-
-    case 5:
-      if ((*(++p) & 0xc0) != 0x80) // Third byte
-      {
-        *erroroffset = (PCRE2_SIZE)(p - string) - 2;
-        return PCRE2_ERROR_UTF8_ERR7;
-      }
-
-      if ((*(++p) & 0xc0) != 0x80) // Fourth byte
-      {
-        *erroroffset = (PCRE2_SIZE)(p - string) - 3;
-        return PCRE2_ERROR_UTF8_ERR8;
-      }
-
-      if ((*(++p) & 0xc0) != 0x80) // Fifth byte
-      {
-        *erroroffset = (PCRE2_SIZE)(p - string) - 4;
-        return PCRE2_ERROR_UTF8_ERR9;
-      }
-
-      if ((*(++p) & 0xc0) != 0x80) // Sixth byte
-      {
-        *erroroffset = (PCRE2_SIZE)(p - string) - 5;
-        return PCRE2_ERROR_UTF8_ERR10;
-      }
-
-      if (c == 0xfc && (d & 0x3c) == 0)
-      {
-        *erroroffset = (PCRE2_SIZE)(p - string) - 5;
-        return PCRE2_ERROR_UTF8_ERR19;
-      }
-
-      break;
-    }
-
-    /* Character is valid under RFC 2279, but 4-byte and 5-byte characters are
-    excluded by RFC 3629. The pointer p is currently at the last byte of the
-    character. */
-
-    if (ab > 3)
-    {
-      *erroroffset = (PCRE2_SIZE)(p - string) - ab;
-      return (ab == 4) ? PCRE2_ERROR_UTF8_ERR11 : PCRE2_ERROR_UTF8_ERR12;
     }
   }
 

@@ -9,8 +9,8 @@
     .minimum_zig_version = "0.16.0",
     .dependencies = .{
         .sljit = .{
-            .url = "git+https://github.com/zherczeg/sljit.git#39c508d1b8fbae332d60c7450db20236913089da",
-            .hash = "N-V-__8AAJKHRgASTeo7mC7l-wELv3p26lEV64ek-DphGZlJ",
+            .url = "git+https://github.com/zherczeg/sljit.git#23d64b71b8f5fa51d774a01459770f7e1b68d371",
+            .hash = "N-V-__8AAH2RRgBpPe_6lGuKFMHlTB6LVVNKLu6f-XBAhjh2",
             .lazy = true,
         },
     },

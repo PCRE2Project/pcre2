@@ -517,6 +517,16 @@
     \x{d800}s
     \x{dc00}s
 
+/\X{0,3}+/utf,match_invalid_utf
+   \x{dc00}
+   a\x{dc00}
+   abc\x{dc00}
+
+/\X{1,3}+/utf,match_invalid_utf
+   \x{dc00}
+   a\x{dc00}
+   abc\x{dc00}
+
 # ---------------------------------------------------- 
 
 /(*UTF)(?=\x{123})/I

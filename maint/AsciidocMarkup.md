@@ -210,14 +210,28 @@ needed. Mark revision headings `[discrete]` so they stay out of the contents.
 
 ## Building
 
-Generate distributed documentation with `ruby maint/UpdateAlways.rb doc`
-(requires the converter gems and man/groff tools).
+Install the shared documentation and website bundle from the repository root:
 
-For the website, install `pages/Gemfile` with Bundler, then run
+```sh
+(cd pages && bundle config set --local path vendor/bundle && bundle install)
+```
+
+The devcontainer installs Ruby and Bundler in the image, then installs this
+bundle in `postCreateCommand`, after the workspace is mounted. After changing
+`pages/Gemfile` or its lockfile, rerun the command above.
+
+Generate distributed documentation with `ruby maint/UpdateAlways.rb doc`
+(also requires man/groff tools). Both the converter and website builder
+automatically activate `pages/Gemfile`, using its locked gem versions.
+No shell activation or Bundler command wrapper is needed to run these scripts.
+CI uses the same local `path` configuration as the devcontainer, and also sets
+`frozen` to prevent changes to the lockfile. The relative `vendor/bundle` path
+is resolved from `pages/Gemfile`, not the caller's working directory.
+
+For the website, run
 `ruby maint/BuildPages.rb --base-url https://example.org/pcre2/`
 or set `PAGES_BASE_URL`. Node/npm runs pinned Pagefind; `--no-pagefind` skips
-indexing for previews. The site lockfile selects Jekyll-compatible Rouge 4.x;
-the standalone converter can also use Rouge 5.
+indexing for previews. The shared lockfile selects Jekyll-compatible Rouge 4.x.
 
 After structural changes, inspect both HTML and manpage rendering. In
 particular, check literal syntax, placeholders, nested lists, tables and links.

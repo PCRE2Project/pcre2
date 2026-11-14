@@ -79,6 +79,7 @@ while test $# -gt 0; do
       echo @PACKAGE_VERSION@
       ;;
     --cflags)
+      includes=
       if test @includedir@ != /usr/include ; then
         includes=-I@includedir@
       fi
@@ -86,40 +87,46 @@ while test $# -gt 0; do
       ;;
     --cflags-posix)
       if test @enable_pcre2_8@ = yes ; then
+        includes=
         if test @includedir@ != /usr/include ; then
           includes=-I@includedir@
         fi
         echo $includes @PCRE2POSIX_CFLAG@
       else
         echo "${usage}" 1>&2
+        exit 1
       fi
       ;;
     --libs-posix)
       if test @enable_pcre2_8@ = yes ; then
-        echo $libS$libR -lpcre2-posix@LIB_POSTFIX@ -lpcre2-8@LIB_POSTFIX@
+        echo $libS$libR -lpcre2-posix@LIB_POSTFIX@ -lpcre2-8@LIB_POSTFIX@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@
       else
         echo "${usage}" 1>&2
+        exit 1
       fi
       ;;
     --libs8)
       if test @enable_pcre2_8@ = yes ; then
-        echo $libS$libR -lpcre2-8@LIB_POSTFIX@
+        echo $libS$libR -lpcre2-8@LIB_POSTFIX@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@
       else
         echo "${usage}" 1>&2
+        exit 1
       fi
       ;;
     --libs16)
       if test @enable_pcre2_16@ = yes ; then
-        echo $libS$libR -lpcre2-16@LIB_POSTFIX@
+        echo $libS$libR -lpcre2-16@LIB_POSTFIX@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@
       else
         echo "${usage}" 1>&2
+        exit 1
       fi
       ;;
     --libs32)
       if test @enable_pcre2_32@ = yes ; then
-        echo $libS$libR -lpcre2-32@LIB_POSTFIX@
+        echo $libS$libR -lpcre2-32@LIB_POSTFIX@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@
       else
         echo "${usage}" 1>&2
+        exit 1
       fi
       ;;
     *)

@@ -3674,4 +3674,14 @@
 
 /(*UTF)\N{U+2/
 
+# UTF encoding boundaries, including four-byte caseless scan prefixes.
+
+/^(\x{7f})(\x{80})(\x{7ff})(\x{800})(\x{ffff})(\x{10000})(\x{10ffff})$/utf
+    \x{7f}\x{80}\x{7ff}\x{800}\x{ffff}\x{10000}\x{10ffff}
+    \x{7f}\x{80}\x{7ff}\x{800}\x{ffff}\x{10000}\x{10ffff}\=dfa
+
+/\x{10400}\x{10401}\x{10402}Z/i,utf
+    ---\x{10428}\x{10429}\x{1042a}z
+    ---\x{10428}\x{10429}\x{1042a}z\=dfa
+
 # End of testinput5

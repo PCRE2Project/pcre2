@@ -260,6 +260,8 @@ rewritten by a user so as not to use loops, because in some environments this
 gives a significant performance advantage, and it seems never to do any harm.
 */
 
+/* These macros assume valid UTF-8. */
+
 /* Base macro to pick up the remaining bytes of a UTF-8 character, not
 advancing the pointer. */
 
@@ -269,15 +271,9 @@ advancing the pointer. */
       c = ((c & 0x1fu) << 6) | (eptr[1] & 0x3fu);                                       \
     else if ((c & 0x10u) == 0)                                                          \
       c = ((c & 0x0fu) << 12) | ((eptr[1] & 0x3fu) << 6) | (eptr[2] & 0x3fu);           \
-    else if ((c & 0x08u) == 0)                                                          \
+    else                                                                               \
       c = ((c & 0x07u) << 18) | ((eptr[1] & 0x3fu) << 12) | ((eptr[2] & 0x3fu) << 6) |  \
           (eptr[3] & 0x3fu);                                                            \
-    else if ((c & 0x04u) == 0)                                                          \
-      c = ((c & 0x03u) << 24) | ((eptr[1] & 0x3fu) << 18) | ((eptr[2] & 0x3fu) << 12) | \
-          ((eptr[3] & 0x3fu) << 6) | (eptr[4] & 0x3fu);                                 \
-    else                                                                                \
-      c = ((c & 0x01u) << 30) | ((eptr[1] & 0x3fu) << 24) | ((eptr[2] & 0x3fu) << 18) | \
-          ((eptr[3] & 0x3fu) << 12) | ((eptr[4] & 0x3fu) << 6) | (eptr[5] & 0x3fu);     \
   }
 
 /* Base macro to pick up the remaining bytes of a UTF-8 character, advancing
@@ -292,23 +288,11 @@ the pointer. */
       c = ((c & 0x0fu) << 12) | ((*eptr & 0x3fu) << 6) | (eptr[1] & 0x3fu);           \
       eptr += 2;                                                                      \
     }                                                                                 \
-    else if ((c & 0x08u) == 0)                                                        \
+    else                                                                             \
     {                                                                                 \
       c = ((c & 0x07u) << 18) | ((*eptr & 0x3fu) << 12) | ((eptr[1] & 0x3fu) << 6) |  \
           (eptr[2] & 0x3fu);                                                          \
       eptr += 3;                                                                      \
-    }                                                                                 \
-    else if ((c & 0x04u) == 0)                                                        \
-    {                                                                                 \
-      c = ((c & 0x03u) << 24) | ((*eptr & 0x3fu) << 18) | ((eptr[1] & 0x3fu) << 12) | \
-          ((eptr[2] & 0x3fu) << 6) | (eptr[3] & 0x3fu);                               \
-      eptr += 4;                                                                      \
-    }                                                                                 \
-    else                                                                              \
-    {                                                                                 \
-      c = ((c & 0x01u) << 30) | ((*eptr & 0x3fu) << 24) | ((eptr[1] & 0x3fu) << 18) | \
-          ((eptr[2] & 0x3fu) << 12) | ((eptr[3] & 0x3fu) << 6) | (eptr[4] & 0x3fu);   \
-      eptr += 5;                                                                      \
     }                                                                                 \
   }
 
@@ -327,23 +311,11 @@ advancing the pointer, incrementing the length. */
       c = ((c & 0x0fu) << 12) | ((eptr[1] & 0x3fu) << 6) | (eptr[2] & 0x3fu);           \
       len += 2;                                                                         \
     }                                                                                   \
-    else if ((c & 0x08u) == 0)                                                          \
+    else                                                                               \
     {                                                                                   \
       c = ((c & 0x07u) << 18) | ((eptr[1] & 0x3fu) << 12) | ((eptr[2] & 0x3fu) << 6) |  \
           (eptr[3] & 0x3fu);                                                            \
       len += 3;                                                                         \
-    }                                                                                   \
-    else if ((c & 0x04u) == 0)                                                          \
-    {                                                                                   \
-      c = ((c & 0x03u) << 24) | ((eptr[1] & 0x3fu) << 18) | ((eptr[2] & 0x3fu) << 12) | \
-          ((eptr[3] & 0x3fu) << 6) | (eptr[4] & 0x3fu);                                 \
-      len += 4;                                                                         \
-    }                                                                                   \
-    else                                                                                \
-    {                                                                                   \
-      c = ((c & 0x01u) << 30) | ((eptr[1] & 0x3fu) << 24) | ((eptr[2] & 0x3fu) << 18) | \
-          ((eptr[3] & 0x3fu) << 12) | ((eptr[4] & 0x3fu) << 6) | (eptr[5] & 0x3fu);     \
-      len += 5;                                                                         \
     }                                                                                   \
   }
 
@@ -2198,10 +2170,6 @@ typedef struct pcre2_serialized_data {
 #error EBCDIC is not supported for the 16-bit or 32-bit libraries
 #endif
 
-/* This is the largest non-UTF code point. */
-
-#define MAX_NON_UTF_CHAR (0xffffffffU >> (32 - PCRE2_CODE_UNIT_WIDTH))
-
 /* Internal shared data tables and variables. These are used by more than one
 of the exported public functions. They have to be "external" in the C sense,
 but are not part of the PCRE2 public API. Although the data for some of them is
@@ -2210,11 +2178,10 @@ libraries can be simultaneously linked to a single application. However, UTF-8
 tables are needed only when compiling the 8-bit library. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
-extern const int PRIV(utf8_table1)[];
-extern const unsigned PRIV(utf8_table1_size);
-extern const int PRIV(utf8_table2)[];
-extern const int PRIV(utf8_table3)[];
-extern const uint8_t PRIV(utf8_table4)[];
+extern const int PRIV(utf8_table1)[4];
+extern const int PRIV(utf8_table2)[4];
+extern const int PRIV(utf8_table3)[4];
+extern const uint8_t PRIV(utf8_table4)[56];
 #endif
 
 #define _pcre2_OP_lengths              PCRE2_SUFFIX(_pcre2_OP_lengths_)

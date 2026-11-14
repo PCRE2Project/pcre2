@@ -5272,4 +5272,10 @@
 /(*LIMIT_HEAP=4)(?=(?=(?=(?=(?=(?=(?=(?=a))(?R)))))))./
     a\=dfa
 
+# Whole-pattern recursion must preserve alternative match lengths.
+
+/(?:b(?R)a|a+)/
+    baa
+    baaa
+
 # End of testinput6
