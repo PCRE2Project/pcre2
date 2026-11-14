@@ -24273,6 +24273,20 @@ Callout (7): "after"
  +5   ^ ^     End of pattern
  0: BC
 
+# JIT: the frame of an atomic group containing more than 16383 frame words
+# (here 5462 copies of a capture group) must not overflow when stored.
+# The preceding callout leaves a zero in the stale stack slot.
+
+/x(?C1)/
+    x
+--->x
+  1 ^^    End of pattern
+ 0: x
+
+/(?>a(){5462}b)|a/
+    a\=jitstack=1024
+ 0: a
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
