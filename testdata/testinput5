@@ -412,6 +412,28 @@
 /X/newline=any,utf,firstline
     A\x{1ec5}ABCXYZ
 
+# FIRSTLINE scans may stop inside a multicode-unit character.
+
+/A.*Z/newline=any,utf,firstline,use_offset_limit,no_start_optimize
+    A\x{1ec5}Zxxxxxxxx\=offset_limit=0
+    A\x{10000}Zxxxxxxxx\=offset_limit=1
+    A\x{85}Zxxxxxxxx\=offset_limit=1
+    A\x{2028}Zxxxxxxxx\=offset_limit=2
+
+/Z/newline=any,utf,firstline,use_offset_limit,no_start_optimize
+    A\x{1ec5}Zxxxxxxxx\=offset_limit=1
+    A\x{10000}Zxxxxxxxx\=offset_limit=1
+    A\x{85}Zxxxxxxxx\=offset_limit=2
+    A\x{2028}Zxxxxxxxx\=offset_limit=3
+
+/A.*Z/newline=any,utf,firstline,use_offset_limit,no_start_optimize,match_invalid_utf
+    A\x{1ec5}Zxxxxxxxx\=offset_limit=1
+    A\x{10000}Zxxxxxxxx\=offset_limit=1
+
+/Z/newline=any,utf,firstline,use_offset_limit,no_start_optimize,match_invalid_utf
+    A\x{85}Zxxxxxxxx\=offset_limit=2
+    A\x{2028}Zxxxxxxxx\=offset_limit=3
+
 /Xa{2,4}b/utf
     X\=ps
     Xa\=ps
