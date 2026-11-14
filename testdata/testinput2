@@ -8645,4 +8645,14 @@ a)"xI
 /A\KBC/auto_callout
     _ABC_
 
+# JIT: the frame of an atomic group containing more than 16383 frame words
+# (here 5462 copies of a capture group) must not overflow when stored.
+# The preceding callout leaves a zero in the stale stack slot.
+
+/x(?C1)/
+    x
+
+/(?>a(){5462}b)|a/
+    a\=jitstack=1024
+
 # End of testinput2
