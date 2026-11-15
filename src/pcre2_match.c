@@ -108,6 +108,7 @@ points). */
 #define GF_NOCAPTURE  0x00020000u
 #define GF_CONDASSERT 0x00030000u
 #define GF_RECURSE    0x00040000u
+#define GF_ASSERT     0x00050000u
 
 /* Masks for the identity and data parts of the group frame type. */
 
@@ -862,6 +863,10 @@ MATCH_RECURSE:
       fprintf(stderr, "recurse=%d", GF_DATAMASK(group_frame_type));
       break;
 
+    case GF_ASSERT:
+      fprintf(stderr, "assert op=%d", Fop);
+      break;
+
     default:
       fprintf(stderr, "*** unknown ***");
       break;
@@ -969,9 +974,36 @@ NEW_FRAME:
       /* ===================================================================== */
       /* Real or forced end of the pattern, assertion, or recursion. In an
       assertion ACCEPT, update the last used pointer and remember the current
-      frame so that the captures and mark can be fished out of it. */
+      frame so that the captures and mark can be fished out of it.
+
+      OP_ASSERT_ACCEPT is compiled for an (*ACCEPT) that is lexically inside an
+      assertion, but the group containing it may have been called as a
+      subroutine from outside that assertion. In that case the recursion is
+      the innermost construct, and (*ACCEPT) must end only the recursion. Look
+      for whichever of the two was entered most recently. */
 
     case OP_ASSERT_ACCEPT:
+      if (Fcurrent_recurse != RECURSE_UNSET)
+      {
+        offset = Flast_group_offset;
+        for (;;)
+        {
+          /* An active recursion must have a frame on the group chain. */
+          PCRE2_ASSERT(offset != PCRE2_UNSET);
+          if (offset == PCRE2_UNSET)
+            return PCRE2_ERROR_INTERNAL;
+
+          N = (heapframe *)((char *)match_data->heapframes + offset);
+          P = (heapframe *)((char *)N - frame_size);
+          if (GF_IDMASK(N->group_frame_type) == GF_ASSERT ||
+              GF_IDMASK(N->group_frame_type) == GF_CONDASSERT)
+            break;
+          if (GF_IDMASK(N->group_frame_type) == GF_RECURSE)
+            goto ACCEPT_IN_RECURSION;
+          offset = P->last_group_offset;
+        }
+      }
+
       if (Feptr > mb->last_used_ptr)
         mb->last_used_ptr = Feptr;
       assert_accept_frame = F;
@@ -1007,11 +1039,40 @@ NEW_FRAME:
         and mark, and the start_match position (\K might have changed it), and
         then move on past the OP_RECURSE. */
 
+      ACCEPT_IN_RECURSION:
         P->eptr = Feptr;
         P->mark = Fmark;
         P->start_match = Fstart_match;
+        P->ecode += 1 + LINK_SIZE;
+        if (*P->ecode == OP_CREF)
+        {
+          PCRE2_SPTR ecode = P->ecode;
+          PCRE2_SIZE *dst = P->ovector;
+          PCRE2_SIZE *src = F->ovector;
+          PCRE2_SIZE max_offset = P->offset_top;
+          PCRE2_SIZE offset_top = Foffset_top;
+
+          do
+          {
+            PCRE2_SIZE ref_offset = (GET2(ecode, 1) << 1) - 2;
+            if (ref_offset > offset_top)
+            {
+              break;
+            }
+            dst[ref_offset] = src[ref_offset];
+            dst[ref_offset + 1] = src[ref_offset + 1];
+            if (src[ref_offset] != PCRE2_UNSET && ref_offset >= max_offset)
+            {
+              max_offset = ref_offset + 2;
+            }
+            ecode += 1 + IMM2_SIZE;
+          }
+          while (*ecode == OP_CREF);
+
+          P->ecode = ecode;
+          P->offset_top = max_offset;
+        }
         F = P;
-        Fecode += 1 + LINK_SIZE;
         continue;
       }
 
@@ -6463,7 +6524,7 @@ NEW_FRAME:
     case OP_ASSERTBACK_NA:
       for (;;)
       {
-        group_frame_type = GF_NOCAPTURE;
+        group_frame_type = GF_ASSERT;
         RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM3);
         if (rrc == MATCH_ACCEPT)
         {
@@ -6496,7 +6557,7 @@ NEW_FRAME:
     case OP_ASSERTBACK_NOT:
       for (;;)
       {
-        group_frame_type = GF_NOCAPTURE;
+        group_frame_type = GF_ASSERT;
         RMATCH(Fecode + PRIV(OP_lengths)[*Fecode], RM4);
         switch (rrc)
         {
@@ -6616,7 +6677,7 @@ NEW_FRAME:
 
       for (;;)
       {
-        group_frame_type = GF_NOCAPTURE;
+        group_frame_type = GF_ASSERT;
         RMATCH(Fecode + 1 + LINK_SIZE + length, RM38);
         if (rrc == MATCH_ACCEPT)
         {
@@ -8792,6 +8853,12 @@ FRAGMENT_RESTART:
 
     case MATCH_COMMIT:
       rc = MATCH_NOMATCH;
+      goto ENDLOOP;
+
+    case MATCH_ACCEPT:
+    case MATCH_KETRPOS:
+      PCRE2_DEBUG_UNREACHABLE();
+      rc = PCRE2_ERROR_INTERNAL;
       goto ENDLOOP;
 
       /* Any other return is either a match, or some kind of error. */

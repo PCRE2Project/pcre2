@@ -101,6 +101,10 @@ pcre2_next_match(pcre2_match_data *match_data, PCRE2_SIZE *pstart_offset, uint32
   PCRE2_ASSERT(pstart_offset != NULL);
   PCRE2_ASSERT(poptions != NULL);
 
+  /* Preconditions on argument state */
+
+  PCRE2_ASSERT(match_data->rc < 0 || match_data->code != NULL);
+
   PCRE2_SIZE start_offset = match_data->start_offset;
   PCRE2_SIZE *ovector = match_data->ovector;
 
@@ -110,10 +114,6 @@ pcre2_next_match(pcre2_match_data *match_data, PCRE2_SIZE *pstart_offset, uint32
 
   if (match_data->rc < 0)
     return FALSE;
-
-  /* Preconditions on argument state */
-
-  PCRE2_ASSERT(match_data->code != NULL);
 
   /* Match succeeded: get the start offset for the next match */
 

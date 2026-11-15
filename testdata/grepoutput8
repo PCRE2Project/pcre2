@@ -172,3 +172,42 @@ any-mid-terminator RC=0
 1:2,1
 1:6,1
 crlf-mid-terminator-line-offsets RC=0
+---------------------------- Test U15 -----------------------------
+1:A
+2:B
+3:C
+4:D
+5:E
+6:F
+7:G
+8:H
+9:I
+RC=0
+6-FÂ…7-Gâ€¨8-Hâ€©9:I
+RC=0
+---------------------------- Test U16 -----------------------------
+1:B
+2:B
+3:B
+4:B
+5:B
+6:B
+8:C
+RC=0
+RC=1
+6-Að€€ŠB
+7-Aâ€
+8:C
+RC=0
+RC=1
+2:B
+RC=0
+---------------------------- Test U17 -----------------------------
+pcre2grep: Error in output text at offset 7: surrogate code point 0xd800 is invalid
+RC=2
+pcre2grep: Error in output text at offset 9: surrogate code point 0xdfff is invalid
+RC=2
+pcre2grep: Error in output text at offset 9: code point greater than 0x10ffff is invalid
+RC=2
+RC=0
+RC=0

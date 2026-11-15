@@ -331,27 +331,31 @@ The following negative error codes are given for invalid UTF-8 strings:
 const:PCRE2_ERROR_UTF8_ERR1::
 const:PCRE2_ERROR_UTF8_ERR2::
 const:PCRE2_ERROR_UTF8_ERR3::
+  The string ends with a truncated UTF-8 character; the code specifies how many
+  bytes are missing (1 to 3).
+
 const:PCRE2_ERROR_UTF8_ERR4::
 const:PCRE2_ERROR_UTF8_ERR5::
-  The string ends with a truncated UTF-8 character; the code specifies how many
-  bytes are missing (1 to 5). Although RFC 3629 restricts UTF-8 characters to be
-  no longer than 4 bytes, the encoding scheme (originally defined by RFC 2279)
-  allows for up to 6 bytes, and this is checked first; hence the possibility of
-  4 or 5 missing bytes.
+  These codes are no longer returned. They indicated 4 or 5 missing bytes in an
+  obsolete 5- or 6-byte sequence, which is now rejected immediately.
 
 const:PCRE2_ERROR_UTF8_ERR6::
 const:PCRE2_ERROR_UTF8_ERR7::
 const:PCRE2_ERROR_UTF8_ERR8::
-const:PCRE2_ERROR_UTF8_ERR9::
-const:PCRE2_ERROR_UTF8_ERR10::
-  The two most significant bits of the 2nd, 3rd, 4th, 5th, or 6th byte of the
+  The two most significant bits of the 2nd, 3rd, or 4th byte of the
   character do not have the binary value [.c]`0b10` (that is, either the most
   significant bit is 0, or the next bit is 1).
 
+const:PCRE2_ERROR_UTF8_ERR9::
+const:PCRE2_ERROR_UTF8_ERR10::
+  These codes are no longer returned. They indicated an invalid 5th or 6th
+  byte in an obsolete 5- or 6-byte sequence, which is now rejected immediately.
+
 const:PCRE2_ERROR_UTF8_ERR11::
 const:PCRE2_ERROR_UTF8_ERR12::
-  A character that is valid by the RFC 2279 rules is either 5 or 6 bytes long;
-  these code points are excluded by RFC 3629.
+  The first byte indicates an obsolete 5- or 6-byte sequence, which is excluded
+  by RFC 3629. This error is returned without checking continuation bytes, even
+  if the sequence is truncated or malformed.
 
 const:PCRE2_ERROR_UTF8_ERR13::
   A 4-byte character has a value greater than char:0x10ffff; these code points are
@@ -365,12 +369,15 @@ const:PCRE2_ERROR_UTF8_ERR14::
 const:PCRE2_ERROR_UTF8_ERR15::
 const:PCRE2_ERROR_UTF8_ERR16::
 const:PCRE2_ERROR_UTF8_ERR17::
-const:PCRE2_ERROR_UTF8_ERR18::
-const:PCRE2_ERROR_UTF8_ERR19::
-  A 2-, 3-, 4-, 5-, or 6-byte character is "overlong", that is, it codes for a
+  A 2-, 3-, or 4-byte character is "overlong", that is, it codes for a
   value that can be represented by fewer bytes, which is invalid. For example,
   the two bytes char:0xc0, char:0xae give the value char:0x2e, whose correct coding uses just
   one byte.
+
+const:PCRE2_ERROR_UTF8_ERR18::
+const:PCRE2_ERROR_UTF8_ERR19::
+  These codes are no longer returned. They indicated an overlong obsolete
+  5- or 6-byte sequence, which is now rejected immediately.
 
 const:PCRE2_ERROR_UTF8_ERR20::
   The two most significant bits of the first byte of a character have the binary

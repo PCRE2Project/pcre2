@@ -7,7 +7,7 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 # generator expressions was incorrectly propagated to CMAKE_REQUIRED_DEFINITIONS
 # (which doesn't support generator expressions). This dummy macro here prevents
 # that happening again.
-add_compile_definitions($<$<CONFIG:Debug>:PARENT_PROJECT_MACRO>)
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:PARENT_PROJECT_MACRO>)
 
 if(NOT PCRE2_SOURCE_DIR)
   message(FATAL_ERROR "PCRE2_SOURCE_DIR must name the PCRE2 source directory")

@@ -38,7 +38,7 @@ int exposethis(void) { return hidethis(); }
 cmake_minimum_required(VERSION 3.15)
 project(test_vscript C)
 add_library(test_vscript SHARED test_vscript.c)
-target_link_options(test_vscript PRIVATE \"-Wl,${link_flag},${map_file}\")
+target_link_options(test_vscript PRIVATE \"LINKER:${link_flag},${map_file}\")
 "
   )
 

@@ -15,12 +15,15 @@
 #
 # Autoconf enables this unconditionally. However, our CMake script potentially
 # supports *more* platforms than Autoconf, so we use a feature check.
+# Returns the required compile definitions in out_var.
 
-function(pcre2_use_system_extensions)
+function(pcre2_use_system_extensions out_var)
+  set(${out_var} "" PARENT_SCOPE)
   if(WIN32)
     return()
   endif()
 
+  set(definitions "")
   set(first_run FALSE)
   set(found_macro FALSE)
   if(NOT DEFINED HAVE_GETRLIMIT_NAKED)
@@ -56,7 +59,7 @@ function(pcre2_use_system_extensions)
     unset(CMAKE_REQUIRED_DEFINITIONS)
 
     if(HAVE_GETRLIMIT_ALLSOURCE)
-      add_compile_definitions(_ALL_SOURCE)
+      list(APPEND definitions _ALL_SOURCE)
       set(found_macro TRUE)
       if(first_run)
         message(STATUS "Detecting platform feature test macros - _ALL_SOURCE")
@@ -73,7 +76,7 @@ function(pcre2_use_system_extensions)
     unset(CMAKE_REQUIRED_DEFINITIONS)
 
     if(HAVE_MKOSTEMP_GNUSOURCE)
-      add_compile_definitions(_GNU_SOURCE)
+      list(APPEND definitions _GNU_SOURCE)
       set(found_macro TRUE)
       if(first_run)
         message(STATUS "Detecting platform feature test macros - _GNU_SOURCE")
@@ -86,4 +89,5 @@ function(pcre2_use_system_extensions)
   endif()
 
   cmake_pop_check_state()
+  set(${out_var} "${definitions}" PARENT_SCOPE)
 endfunction()

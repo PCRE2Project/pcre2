@@ -3421,7 +3421,7 @@ func:pcre2_compile() or by starting the pattern with [.regex]`+(*NO_START_OPT)+`
 ====
 
 After a successful match, a partial match, or one of the invalid UTF errors
-(for example, const:PCRE2_ERROR_UTF8_ERR5), func:pcre2_get_startchar() can be
+(for example, const:PCRE2_ERROR_UTF8_ERR3), func:pcre2_get_startchar() can be
 called. After a successful or partial match it returns the code unit offset of
 the character at which the match started. For a non-partial match, this can be
 different to the value of [.c]`+ovector[0]+` if the pattern contains the [.regex]`\K`
@@ -3749,6 +3749,9 @@ const:PCRE2_ERROR_UNSET::
       The substring did not participate in the match. For example, if the pattern is
       [.regex]`+(abc)|(def)+` and the subject is [.subject]`def`, and the ovector contains at least two
       capturing slots, substring number 1 is unset.
+
+const:PCRE2_ERROR_FRESHMATCHDATA::
+      The match data block has not yet been used by a matching function.
 
 [[extracting-substrings-by-name]]
 == Extracting a list of all captured substrings
@@ -4421,11 +4424,12 @@ error const:PCRE2_ERROR_NOUNIQUESUBSTRING when there are duplicate names.
 
 If you want to get full details of all captured substrings for a given name,
 you must use the func:pcre2_substring_nametable_scan() function. The first
-argument is the compiled pattern, and the second is the name. If the third and
-fourth arguments are const:NULL, the function returns a group number for a unique
+argument is the compiled pattern, and the second is the name. If the third
+argument is const:NULL, the function returns a group number for a unique
 name, or const:PCRE2_ERROR_NOUNIQUESUBSTRING otherwise.
 
-When the third and fourth arguments are not const:NULL, they must be pointers to
+When the third argument is not const:NULL, the fourth must not be const:NULL either.
+Both must be pointers to
 variables that are updated by the function. After it has run, they point to the
 first and last entries in the name-to-number table for the given name, and the
 function returns the length of each entry in code units. In both cases,

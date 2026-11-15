@@ -148,7 +148,7 @@ print_char(FILE *f, PCRE2_SPTR ptr, BOOL utf)
   \X instead of \x as an indication. */
 
 #if PCRE2_CODE_UNIT_WIDTH == 8
-  if ((c & 0xc0) != 0xc0)
+  if ((c & 0xc0) != 0xc0 || c >= 0xf8)
   {
     fprintf(f, "\\X{%x}", c); // Invalid starting byte
     return 0;

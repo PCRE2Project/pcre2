@@ -43,6 +43,8 @@ set, the yield of
 the function is the length of each entry in code units. If the name is not
 found, const:PCRE2_ERROR_NOSUBSTRING is returned.
 
+If arg:firstptr is not const:NULL, arg:lastptr must not be const:NULL.
+
 There is a complete description of the PCRE2 native API, including the format of
 the table entries, in the
 xref:pcre2api.adoc[`pcre2api`]
