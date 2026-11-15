@@ -8435,6 +8435,42 @@ a)"xI
 /()()()(?2(2,3,2,3,2))/B
   abc
 
+# Returned groups that are unset after the call are not counted (#1048).
+
+/(?&r(2))(x)?(?(DEFINE)(?<r>(a)))/
+    a
+
+/^(?&r(2))(?(DEFINE)(?<r>(x)?(a)))/
+    a
+    a\=ovector=1
+
+/^(?&r(2,3))(?(DEFINE)(?<r>(x)?(y)?(a)))/
+    xa
+
+/^(?&r(2,4))(?(DEFINE)(?<r>(a)(b)?(c)?))/
+    a
+
+/^(b)(?&r(3))(?(DEFINE)(?<r>(x)?(a)))/
+    ba
+
+/(?(DEFINE)(?<r>(x)?a))^(b)(?&r(2))/
+    ba
+
+/^(?(R)(x)?(a)|(?R(1))!)/
+    a!
+
+# A called group that returns itself keeps its unset or set status, inside and after.
+
+/^(?1(1))(?:\1S|U)$(?(DEFINE)(a(?:\1S|U)))/
+    aUU
+\= Expect no match
+    aUaUS
+
+/^(a(?:\1S|U))(?1(1))\1$/
+    aUaaUSaU
+\= Expect no match
+    aUaaUSaaUS
+
 /^(?:(?&r(2))x|aa)(?(DEFINE)(?<r>(.)(.)(*ACCEPT)(.)))/
     abx
     aby
