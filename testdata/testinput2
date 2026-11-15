@@ -8314,6 +8314,107 @@ a)"xI
     abx
     aby
 
+# (*ACCEPT) in a called group must skip the whole list of returned groups,
+# including groups that were not set by the call, and count only those that
+# are set.
+
+/^(?&r(4))b$(?(DEFINE)(?<r>(a)(*ACCEPT)(b)(c)))/
+    ab
+
+/^(?&r(2,4))b$(?(DEFINE)(?<r>(a)(*ACCEPT)(b)(c)))/
+    ab
+
+/^(?&r(3))b$(?(DEFINE)(?<r>(a)(*ACCEPT)(c)))/
+    ab
+
+/^(?&r(2))b$(?(DEFINE)(?<r>(*ACCEPT)(a)))/
+    b
+
+/^(?&r(1))b$(?(DEFINE)(?<r>(a)(*ACCEPT)x))/
+    ab
+
+/(a)(?2(3))\1\3(?(DEFINE)(b(c)(*ACCEPT)x))/
+    abcac
+\= Expect no match
+    abcab
+
+/(?1(3))(?1(2))(?(DEFINE)((a)(*ACCEPT)|(b)))!/
+    ba!
+
+# A group returned by an (*ACCEPT) call that is later abandoned is unset.
+
+/^(?:(?&r(2))X|a)(?(2)Y|b)$(?(DEFINE)(?<r>(a)(*ACCEPT)x))/
+    ab
+\= Expect no match
+    aY
+
+/^(?:(?&r(2))X|a)(?(2)Y|b)$(?(DEFINE)(?<r>(a(*ACCEPT)x)))/
+    ab
+\= Expect no match
+    aY
+
+# Groups that are open at (*ACCEPT) in a called group are closed, if they were
+# opened within the call, so that they can be returned. The called group itself
+# and groups opened by the caller are not closed.
+
+/^(?&r(2))b\2$(?(DEFINE)(?<r>(a(*ACCEPT)x)))/
+    aba
+\= Expect no match
+    abb
+
+/^(?&r(2,3))\2\3$(?(DEFINE)(?<r>(a(b(*ACCEPT)c))))/
+    ababb
+
+/^(?&r(3))\3(?(2)x|y)$(?(DEFINE)(?<r>(a(b(*ACCEPT)c))))/
+    abby
+\= Expect no match
+    abbx
+
+/^(?&r(1,2))(?(1)x|y)(?(DEFINE)(?<r>(a(*ACCEPT)b)))/
+    ay
+\= Expect no match
+    ax
+
+/^(x(?<r>a(*ACCEPT)b){0}(?&r(1))(?(1)y|z))/
+    xaz
+\= Expect no match
+    xay
+
+/(?(R)(a(*ACCEPT)x)|(?R(1))b\1)/
+    aba
+
+/^(?&r(3))\3$(?(DEFINE)(?<r>(?&s(3)))(?<s>(a(*ACCEPT)x)))/
+    aa
+
+/^(?(DEFINE)(?=(?<r>(a(*ACCEPT)x))))(?&r(2))b\2$/
+    aba
+
+# Groups closed by (*ACCEPT) are restored when they are not returned.
+
+/^(?&r)b(?(DEFINE)(?<r>(a(*ACCEPT)x)))/
+    ab
+
+/^(?&r(2))(?&r)\2$(?(DEFINE)(?<r>(.(*ACCEPT)x)))/
+    aba
+\= Expect no match
+    abb
+
+# (*ACCEPT) in an assertion within a called group closes the open groups, as
+# it does outside a called group, and as when they are closed explicitly.
+
+/^(?1)(?(DEFINE)((?=(a(*ACCEPT)b))a(?(2)Y|N)))/
+    aY
+\= Expect no match
+    aN
+
+/^(?1)(?(DEFINE)((?=(a)(*ACCEPT)b)a(?(2)Y|N)))/
+    aY
+\= Expect no match
+    aN
+
+/^(?1)$(?(DEFINE)((?(?=(a(*ACCEPT)b))a\2|c)))/
+    aa
+
 # Test each syntax used for recursion
 
 /(?(R)(Sat)urday|(?R(1)),\1)/

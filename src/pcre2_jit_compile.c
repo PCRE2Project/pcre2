@@ -12457,8 +12457,11 @@ compile_close_matchingpath(compiler_common *common, PCRE2_SPTR cc)
   int offset = GET2(cc, 1);
   BOOL optimized_cbracket = is_optimized_cbracket(common, offset);
 
-  /* Data will be discarded anyway... */
-  if (common->currententry != NULL)
+  /* In a recursion, only groups opened within the called group are closed.
+  They have higher numbers than the called group, which is not closed, nor are
+  the groups that enclose it. Whole pattern recursion (start 0) closes all. */
+  if (common->currententry != NULL && common->currententry->start != 0 &&
+      offset <= (int)GET2(common->start, common->currententry->start + 1 + LINK_SIZE))
     return cc + 1 + IMM2_SIZE;
 
   if (!optimized_cbracket)

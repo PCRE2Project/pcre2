@@ -937,28 +937,32 @@ NEW_FRAME:
       where we know the starting frame is at the top of the chained frames, in
       this case we have to search back for the relevant frame in case other types
       of group that use chained frames have intervened. Multiple OP_CLOSEs always
-      come innermost first, which matches the chain order. We can ignore this in
-      a recursion, because captures are not passed out of recursions. */
+      come innermost first, which matches the chain order. In a recursion, only
+      groups opened within the recursion are closed (they may be returned to the
+      caller, or kept by an assertion), so the search stops at the recursion's
+      frame. The called group itself, and groups opened by the caller, are not
+      closed. */
 
     case OP_CLOSE:
-      if (Fcurrent_recurse == RECURSE_UNSET)
+      number = GET2(Fecode, 1);
+      offset = Flast_group_offset;
+      for (;;)
       {
-        number = GET2(Fecode, 1);
-        offset = Flast_group_offset;
-        for (;;)
-        {
-          /* Corrupted heapframes?. Trigger an assert and return an error */
-          PCRE2_ASSERT(offset != PCRE2_UNSET);
-          if (offset == PCRE2_UNSET)
-            return PCRE2_ERROR_INTERNAL;
+        /* Corrupted heapframes?. Trigger an assert and return an error */
+        PCRE2_ASSERT(offset != PCRE2_UNSET);
+        if (offset == PCRE2_UNSET)
+          return PCRE2_ERROR_INTERNAL;
 
-          N = (heapframe *)((char *)match_data->heapframes + offset);
-          P = (heapframe *)((char *)N - frame_size);
-          if (N->group_frame_type == (GF_CAPTURE | number))
-            break;
-          offset = P->last_group_offset;
-        }
+        N = (heapframe *)((char *)match_data->heapframes + offset);
+        P = (heapframe *)((char *)N - frame_size);
+        if (N->group_frame_type == (GF_CAPTURE | number) ||
+            GF_IDMASK(N->group_frame_type) == GF_RECURSE)
+          break;
+        offset = P->last_group_offset;
+      }
 
+      if (N->group_frame_type == (GF_CAPTURE | number))
+      {
         offset = (number << 1) - 2;
         Fcapture_last = number;
         Fovector[offset] = P->eptr - mb->start_subject;
@@ -1037,40 +1041,25 @@ NEW_FRAME:
         /* N is now the frame of the recursion; the previous frame is at the
         OP_RECURSE position. Go back there, copying the current subject position
         and mark, and the start_match position (\K might have changed it), and
-        then move on past the OP_RECURSE. */
+        then move on past the OP_RECURSE and any list of groups to return. The
+        listed groups are copied back; those at or beyond Foffset_top are unset
+        in both frames. */
 
       ACCEPT_IN_RECURSION:
         P->eptr = Feptr;
         P->mark = Fmark;
         P->start_match = Fstart_match;
         P->ecode += 1 + LINK_SIZE;
-        if (*P->ecode == OP_CREF)
+        for (; *P->ecode == OP_CREF; P->ecode += 1 + IMM2_SIZE)
         {
-          PCRE2_SPTR ecode = P->ecode;
-          PCRE2_SIZE *dst = P->ovector;
-          PCRE2_SIZE *src = F->ovector;
-          PCRE2_SIZE max_offset = P->offset_top;
-          PCRE2_SIZE offset_top = Foffset_top;
-
-          do
+          offset = (GET2(P->ecode, 1) << 1) - 2;
+          if (offset < Foffset_top)
           {
-            PCRE2_SIZE ref_offset = (GET2(ecode, 1) << 1) - 2;
-            if (ref_offset > offset_top)
-            {
-              break;
-            }
-            dst[ref_offset] = src[ref_offset];
-            dst[ref_offset + 1] = src[ref_offset + 1];
-            if (src[ref_offset] != PCRE2_UNSET && ref_offset >= max_offset)
-            {
-              max_offset = ref_offset + 2;
-            }
-            ecode += 1 + IMM2_SIZE;
+            P->ovector[offset] = Fovector[offset];
+            P->ovector[offset + 1] = Fovector[offset + 1];
+            if (Fovector[offset] != PCRE2_UNSET && offset >= P->offset_top)
+              P->offset_top = offset + 2;
           }
-          while (*ecode == OP_CREF);
-
-          P->ecode = ecode;
-          P->offset_top = max_offset;
         }
         F = P;
         continue;
