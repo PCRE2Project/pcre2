@@ -330,20 +330,23 @@ static uint32_t ascii_to_ebcdic(uint32_t c);
 static uint32_t ebcdic_to_ascii(uint32_t c);
 #endif
 
-/* 32-bit integer values in the input are read by strtoul() or strtol(). The
-check needed for overflow depends on whether long ints are in fact longer than
-ints. They are defined not to be shorter. */
+/* 32-bit integer values in the input are read by strtoul() or strtol(), with
+errno cleared first. If the value does not fit in a long, these functions set
+errno to ERANGE and return a clamped value. The clamped value cannot itself be
+used to detect overflow when long ints are 32 bits, because LONG_MIN, LONG_MAX,
+and ULONG_MAX are then valid 32-bit values. When long ints are longer than 32
+bits, values that fit in a long must also be range-checked. */
 
 #if ULONG_MAX > UINT32_MAX
-#define U32OVERFLOW(x) (x > UINT32_MAX)
+#define U32OVERFLOW(x) (errno == ERANGE || (x) > UINT32_MAX)
 #else
-#define U32OVERFLOW(x) (x == UINT32_MAX)
+#define U32OVERFLOW(x) (errno == ERANGE)
 #endif
 
 #if LONG_MAX > INT32_MAX
-#define S32OVERFLOW(x) (x > INT32_MAX || x < INT32_MIN)
+#define S32OVERFLOW(x) (errno == ERANGE || (x) > INT32_MAX || (x) < INT32_MIN)
 #else
-#define S32OVERFLOW(x) (x == INT32_MAX || x == INT32_MIN)
+#define S32OVERFLOW(x) (errno == ERANGE)
 #endif
 
 /* When PCRE2_CODE_UNIT_WIDTH is zero, pcre2_internal.h does not include
@@ -3995,7 +3998,7 @@ main(int argc, char **argv)
     {
       int both = arg[2] == 0;
       showtotaltimes = arg[1] == 'T';
-      if (argc > 2 && (uli = strtoul(argv[op + 1], &endptr, 10), *endptr == 0))
+      if (argc > 2 && (errno = 0, uli = strtoul(argv[op + 1], &endptr, 10), *endptr == 0))
       {
         if (uli == 0)
         {
@@ -4131,6 +4134,7 @@ main(int argc, char **argv)
 
     for (;;)
     {
+      errno = 0;
       li = strtol(arg_error, &endptr, 10);
       if (S32OVERFLOW(li) || (*endptr != 0 && *endptr != ','))
       {

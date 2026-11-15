@@ -5264,6 +5264,18 @@ a)"xI
     \=callout_data=-11000000000
     \=offset_limit=1100000000000000000000
     \=copy=11000000000
+    \=callout_fail=4294967295
+    \=callout_fail=4294967296
+    \=callout_fail=1:4294967295
+    \=callout_fail=1:4294967296
+    \=callout_data=2147483647
+    \=callout_data=2147483648
+    \=callout_data=-2147483648
+    \=callout_data=-2147483649
+    \=copy=2147483647
+    \=copy=2147483648
+    \=depth_limit=4294967295
+    \=depth_limit=4294967296
 
 /(*MARK:A\x00b)/mark
     abc
@@ -8367,6 +8379,18 @@ a)"xI
 /()()()(?2(2,3,2,3,2))/B
   abc
 
+/^(?:(?&r(2))x|aa)(?(DEFINE)(?<r>(.)(.)(*ACCEPT)(.)))/
+    abx
+    aby
+
+/^(?:(?&r(2,3))x|aa)(?(DEFINE)(?<r>(.)(.)(*ACCEPT)(.)))/
+    abx
+    aby
+
+/^(?:(?&r(3,4))x|aa)(?(DEFINE)(?<r>(.)(.)(*ACCEPT)(.)))/
+    abx
+    aby
+
 # Test each syntax used for recursion
 
 /(?(R)(Sat)urday|(?R(1)),\1)/
@@ -8697,5 +8721,15 @@ a)"xI
 
 /A\KBC/auto_callout
     _ABC_
+
+# JIT: the frame of an atomic group containing more than 16383 frame words
+# (here 5462 copies of a capture group) must not overflow when stored.
+# The preceding callout leaves a zero in the stale stack slot.
+
+/x(?C1)/
+    x
+
+/(?>a(){5462}b)|a/
+    a\=jitstack=1024
 
 # End of testinput2
