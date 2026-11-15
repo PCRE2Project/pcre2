@@ -1213,17 +1213,14 @@ check_opcode_types(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend)
       /* In OP_TYPEPOSSTAR, extuni only uses LOCAL2 when it takes the
       save/restore path in compile_iterator_matchingpath. */
 #if defined SUPPORT_UNICODE
-      if (cc[1] == OP_EXTUNI
+      if (cc[1] == OP_EXTUNI &&
 #if PCRE2_CODE_UNIT_WIDTH != 32
-          && common->utf
+          common->utf &&
 #else
-          && common->invalid_utf
+          common->invalid_utf &&
 #endif
-          && locals_size <= 3 * SSIZE_OF(sw)
-      )
-      {
+          locals_size <= 3 * SSIZE_OF(sw))
         locals_size = 3 * SSIZE_OF(sw);
-      }
 #endif /* SUPPORT_UNICODE */
       cc += 2 - 1;
       break;
