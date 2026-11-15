@@ -2128,4 +2128,38 @@ Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at of
     XXXXX\xfd\x7f
 Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 5
 
+# Multiline ^ with ANY or ANYCRLF newlines must not decode backwards across
+# invalid UTF, which could also read before the subject.
+
+/^a/m,newline=any,utf,match_invalid_utf
+    \x{85}a
+ 0: a
+    \x{2028}a
+ 0: a
+    \x{2029}a
+ 0: a
+    \x80\x{85}a
+ 0: a
+\= Expect no match
+    \x80a
+No match
+    \n\x80a
+No match
+    \n\x85a
+No match
+    \r\xa8a
+No match
+    \x{2027}a
+No match
+
+/^a/m,newline=anycrlf,utf,match_invalid_utf
+\= Expect no match
+    \n\x80a
+No match
+
+/^a/m,newline=any,utf
+\= Expect no match
+    \x80\x80a\=offset=2
+No match
+
 # End of testinput10

@@ -162,6 +162,16 @@ Failed: error 134 at offset 12: character code point value in \x{} or \o{} is to
 ** Truncation will probably give the wrong result.
 No match
 
+# Multiline ^ with ANY newlines inspects a character before the UTF-checked
+# part of the subject.
+
+/^a/m,newline=any,utf
+\= Expect no match
+    \n\x80a\=offset=2
+No match
+    \n\x{dc00}a\=offset=2
+No match
+
 # ---------------------------------------------------- 
 
 # End of testinput14

@@ -103,6 +103,14 @@
 \= Expect no match
     Kk\x{ffffffff}\x{ffffffff}\x{ffffffff}Z
 
+# Multiline ^ with ANY newlines inspects a character before the UTF-checked
+# part of the subject.
+
+/^a/m,newline=any,utf
+\= Expect no match
+    \n\x80a\=offset=2
+    \n\x{dc00}a\=offset=2
+
 # ---------------------------------------------------- 
 
 # End of testinput14
