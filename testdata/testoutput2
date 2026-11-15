@@ -23704,6 +23704,63 @@ No match
  2: 
  3: 
 
+# Returned groups that are unset after the call are not counted (#1048).
+
+/(?&r(2))(x)?(?(DEFINE)(?<r>(a)))/
+    a
+ 0: a
+
+/^(?&r(2))(?(DEFINE)(?<r>(x)?(a)))/
+    a
+ 0: a
+    a\=ovector=1
+ 0: a
+
+/^(?&r(2,3))(?(DEFINE)(?<r>(x)?(y)?(a)))/
+    xa
+ 0: xa
+ 1: <unset>
+ 2: x
+
+/^(?&r(2,4))(?(DEFINE)(?<r>(a)(b)?(c)?))/
+    a
+ 0: a
+ 1: <unset>
+ 2: a
+
+/^(b)(?&r(3))(?(DEFINE)(?<r>(x)?(a)))/
+    ba
+ 0: ba
+ 1: b
+
+/(?(DEFINE)(?<r>(x)?a))^(b)(?&r(2))/
+    ba
+ 0: ba
+ 1: <unset>
+ 2: <unset>
+ 3: b
+
+/^(?(R)(x)?(a)|(?R(1))!)/
+    a!
+ 0: a!
+
+# A called group that returns itself keeps its unset or set status, inside and after.
+
+/^(?1(1))(?:\1S|U)$(?(DEFINE)(a(?:\1S|U)))/
+    aUU
+ 0: aUU
+\= Expect no match
+    aUaUS
+No match
+
+/^(a(?:\1S|U))(?1(1))\1$/
+    aUaaUSaU
+ 0: aUaaUSaU
+ 1: aU
+\= Expect no match
+    aUaaUSaaUS
+No match
+
 /^(?:(?&r(2))x|aa)(?(DEFINE)(?<r>(.)(.)(*ACCEPT)(.)))/
     abx
  0: abx

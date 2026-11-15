@@ -546,6 +546,10 @@ recurse_update_offsets(heapframe *F, heapframe *P)
   offset 0 is reserved for the full match. */
   PCRE2_SIZE offset = 2;
   PCRE2_SIZE offset_top = Foffset_top + 2;
+  /* The new top is the caller's top, raised to cover the highest returned
+  group that is set. Returned groups can be unset, even if a higher group was
+  set in the recursion; for example, the called group itself is never set. */
+  PCRE2_SIZE new_top = P->offset_top;
   PCRE2_SIZE diff;
   PCRE2_SPTR ecode = Fecode;
 
@@ -562,6 +566,10 @@ recurse_update_offsets(heapframe *F, heapframe *P)
         ecode += 1 + IMM2_SIZE;
       break;
     }
+
+    /* dst[diff] is the returned group; offset + diff is the top that covers it. */
+    if (dst[diff] != PCRE2_UNSET && offset + diff > new_top)
+      new_top = offset + diff;
 
     if (diff == 2)
     {
@@ -592,7 +600,7 @@ recurse_update_offsets(heapframe *F, heapframe *P)
   }
 
   Fecode = ecode;
-  Foffset_top = (offset <= P->offset_top) ? P->offset_top : (offset - 2);
+  Foffset_top = new_top;
 }
 
 
