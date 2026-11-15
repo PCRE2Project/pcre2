@@ -1699,18 +1699,18 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
     if (mcontext != NULL && mcontext->substitute_callout != NULL)
     {
-      /* If we an actual (non-simulated) replacement, do the callout. */
+      /* If we are making an actual (non-simulated) replacement, do the callout. */
 
       if (!overflowed)
       {
         scb.subscount = subs;
         scb.output_offsets[1] = buff_offset;
-        rc = mcontext->substitute_callout(&scb, mcontext->substitute_callout_data);
+        int scrc = mcontext->substitute_callout(&scb, mcontext->substitute_callout_data);
 
         /* A non-zero return means cancel this substitution. Instead, copy the
         matched string fragment. */
 
-        if (rc != 0)
+        if (scrc != 0)
         {
           PCRE2_SIZE newlength = scb.output_offsets[1] - scb.output_offsets[0];
           PCRE2_SIZE oldlength = ovector[1] - ovector[0];
@@ -1722,7 +1722,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
           /* A negative return means do not do any more. */
 
-          if (rc < 0)
+          if (scrc < 0)
             suboptions &= (~PCRE2_SUBSTITUTE_GLOBAL);
         }
       }

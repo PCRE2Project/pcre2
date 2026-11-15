@@ -3487,12 +3487,11 @@ const:PCRE2_ERROR_BADUTFOFFSET::
       of the subject.
 
 const:PCRE2_ERROR_CALLOUT::
-      This error is returned when a callout function returns a negative value
-      that is reserved for PCRE2. It is also provided for use by callout
-      functions that want to cause func:pcre2_match() or
-      func:pcre2_callout_enumerate() to return a distinctive error code. Values
-      less than or equal to const:PCRE2_ERROR_CALLOUT_MAX that are returned by
-      a match callout function are passed back unchanged. See the
+      This error is provided for use by callout functions that want to cause a
+      distinctive error code to be returned from func:pcre2_match() and other
+      matching functions, or func:pcre2_callout_enumerate(). It is also
+      returned by the matching functions when a match callout returns a
+      negative value that is reserved for PCRE2. See the
       xref:pcre2callout.adoc[`pcre2callout`]
       documentation for details.
 

@@ -263,10 +263,16 @@ cases the <code class="parameter pcre2-api rouge"><span class="nv">callout_flags
 <ul class="compact"><li>If the value is zero, matching proceeds as normal.</li><li>If the value is greater than zero, matching fails at the current point, but
 the testing of other matching possibilities goes ahead, just as if a lookahead
 assertion had failed.</li><li>If the value is <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_NOMATCH</span></code>, the match is abandoned, and the
-matching function returns <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_NOMATCH</span></code>.</li><li>If the value is less than or equal to <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_CALLOUT_MAX</span></code> (-1000),
-the match is abandoned, and the matching function returns the value. This range
-is reserved for application-defined error codes.</li><li>Any other negative value is reserved for PCRE2. The match is abandoned, and the
-matching function returns <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_CALLOUT</span></code>.</li></ul>
+matching function returns <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_NOMATCH</span></code>.</li><li>If the value is less than or equal to <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_CALLOUT_MAX</span></code>
+(-1000), the match is abandoned, and the matching
+function returns the value produced by the callout. This range is reserved for
+application-defined error codes.</li><li>Any other negative value causes the match to be abandoned,
+and the matching function returns <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_CALLOUT</span></code>.
+These negative return codes greater than <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_CALLOUT_MAX</span></code>
+(and less than <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_NOMATCH</span></code>)
+are reserved for definition by PCRE2, with <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_CALLOUT</span></code> as a
+distinctive error code that a callout may itself return to indicate
+that it caused the failure.</li></ul>
 <p>The same rules apply to <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>, <code class="function pcre2-api rouge"><span class="nf">pcre2_dfa_match()</span></code>, and JIT
 matching.</p></section>
 <section class="doc-section level-1"><h2 id="_callout_enumeration">Callout enumeration</h2><div class="listing-block prototype"><pre class="rouge highlight"><code data-lang="c"><span class="kt">int</span> <span class="nf">pcre2_callout_enumerate</span><span class="p">(</span>

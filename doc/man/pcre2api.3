@@ -4118,12 +4118,11 @@ of the subject.
 .TP 25
 \f(CBPCRE2_ERROR_CALLOUT\fP
 .ad l
-This error is returned when a callout function returns a negative value
-that is reserved for PCRE2. It is also provided for use by callout
-functions that want to cause \f(CBpcre2_match()\fP or
-\f(CBpcre2_callout_enumerate()\fP to return a distinctive error code. Values
-less than or equal to \f(CBPCRE2_ERROR_CALLOUT_MAX\fP that are returned by
-a match callout function are passed back unchanged. See the
+This error is provided for use by callout functions that want to cause a
+distinctive error code to be returned from \f(CBpcre2_match()\fP and other
+matching functions, or \f(CBpcre2_callout_enumerate()\fP. It is also
+returned by the matching functions when a match callout returns a
+negative value that is reserved for PCRE2. See the
 \f(CRpcre2callout\fP
 documentation for details.
 .TP 25
