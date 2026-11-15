@@ -17670,6 +17670,39 @@ No match
 Callout data = -2
 Failed: error -37: callout error code
 
+# A callout's "no match" or reserved value at the end of the subject must not
+# be reported as a hard or soft partial match.
+
+/a(?C1)b/
+    a\=ph
+--->a
+  1 ^^    b
+Partial match: a
+    a\=ph,callout_data=-1
+--->a
+  1 ^^    b
+Callout data = -1
+No match
+    a\=ph,callout_data=-2
+--->a
+  1 ^^    b
+Callout data = -2
+Failed: error -37: callout error code
+    a\=ps
+--->a
+  1 ^^    b
+Partial match: a
+    a\=ps,callout_data=-1
+--->a
+  1 ^^    b
+Callout data = -1
+No match
+    a\=ps,callout_data=-2
+--->a
+  1 ^^    b
+Callout data = -2
+Failed: error -37: callout error code
+
 # ----------------------------------------------------------------------
 
 /[a b c]/BxxI

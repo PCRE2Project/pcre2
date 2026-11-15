@@ -85,14 +85,16 @@ in others, so I abandoned this code. */
    PCRE2_NOTEMPTY_ATSTART | PCRE2_NO_UTF_CHECK | PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT | \
    PCRE2_DFA_SHORTEST | PCRE2_DFA_RESTART | PCRE2_COPY_MATCHED_SUBJECT)
 
-/* A callout's PCRE2_ERROR_NOMATCH ends the whole match, but internal recursive
-calls use PCRE2_ERROR_NOMATCH to mean only that an assertion or group did not
-match. The callout's value is therefore passed back as this private value,
-which CALLOUT_RESULT() never returns, until it reaches the top level. */
+/* Special internal return from internal_dfa_match(), meaning that this
+(sub)pattern did not match at the current position. It is distinct from
+PCRE2_ERROR_NOMATCH, so that every negative external code (including a
+callout's PCRE2_ERROR_NOMATCH) can be passed straight back to the caller. Make
+it sufficiently negative to avoid the external error codes; CALLOUT_RESULT()
+never returns it. */
 
-#define DFA_CALLOUT_NOMATCH (-999)
+#define DFA_NOMATCH (-999)
 
-STATIC_ASSERT(PCRE2_ERROR_CALLOUT_MAX < DFA_CALLOUT_NOMATCH, callout_max_less_than_dfa_nomatch);
+STATIC_ASSERT(PCRE2_ERROR_CALLOUT_MAX < DFA_NOMATCH, callout_max_less_than_dfa_nomatch);
 
 
 /*************************************************
@@ -373,15 +375,13 @@ Arguments:
   extracode         extra code offset when called from condition
   lengthptr         where to return the callout length
 
-Returns:            the return from the callout, after CALLOUT_RESULT(), with
-                    PCRE2_ERROR_NOMATCH changed to DFA_CALLOUT_NOMATCH
+Returns:            the return from the callout, after CALLOUT_RESULT()
 */
 
 static int
 do_callout_dfa(PCRE2_SPTR code, PCRE2_SIZE *offsets, PCRE2_SPTR current_subject, PCRE2_SPTR ptr,
                dfa_match_block *mb, PCRE2_SIZE extracode, PCRE2_SIZE *lengthptr)
 {
-  int rc;
   pcre2_callout_block *cb = mb->cb;
 
   *lengthptr = (code[extracode] == OP_CALLOUT)
@@ -415,9 +415,8 @@ do_callout_dfa(PCRE2_SPTR code, PCRE2_SIZE *offsets, PCRE2_SPTR current_subject,
     cb->callout_string_length = *lengthptr - (1 + 4 * LINK_SIZE) - 2;
   }
 
-  rc = (mb->callout)(cb, mb->callout_data);
-  rc = CALLOUT_RESULT(rc);
-  return (rc == PCRE2_ERROR_NOMATCH) ? DFA_CALLOUT_NOMATCH : rc;
+  int rc = (mb->callout)(cb, mb->callout_data);
+  return CALLOUT_RESULT(rc);
 }
 
 
@@ -529,8 +528,10 @@ Arguments:
 
 Returns:            > 0 => number of match offset pairs placed in offsets
                     = 0 => offsets overflowed; longest matches are present
-                     -1 => failed to match
-                   < -1 => some kind of unexpected problem
+                    DFA_NOMATCH => failed to match
+                    PCRE2_ERROR_PARTIAL => partial match
+                    other negative => error, or a callout's negative return,
+                      which ends the whole match
 
 The following macros are used for adding states to the two state vectors (one
 for the current character, one for the following character). */
@@ -621,7 +622,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
   lcc = mb->tables + lcc_offset;
   fcc = mb->tables + fcc_offset;
 
-  match_count = PCRE2_ERROR_NOMATCH; // A negative number
+  match_count = DFA_NOMATCH; // A negative number
 
   active_states = (stateblock *)(workspace + 2);
   next_new_state = new_states = active_states + wscount;
@@ -3168,7 +3169,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
 
           rws->free += RWS_RSIZE + RWS_OVEC_OSIZE;
 
-          if (rc < 0 && rc != PCRE2_ERROR_NOMATCH)
+          if (rc < 0 && rc != DFA_NOMATCH)
             return rc;
           if ((rc >= 0) == (codevalue == OP_ASSERT || codevalue == OP_ASSERTBACK))
           {
@@ -3283,7 +3284,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
 
             rws->free += RWS_RSIZE + RWS_OVEC_OSIZE;
 
-            if (rc < 0 && rc != PCRE2_ERROR_NOMATCH)
+            if (rc < 0 && rc != DFA_NOMATCH)
               return rc;
             if ((rc >= 0) == (condcode == OP_ASSERT || condcode == OP_ASSERTBACK))
             {
@@ -3393,7 +3394,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               }
             }
           }
-          else if (rc != PCRE2_ERROR_NOMATCH)
+          else if (rc != DFA_NOMATCH)
             return rc;
         }
 
@@ -3457,7 +3458,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
 
             if (rc < 0)
             {
-              if (rc != PCRE2_ERROR_NOMATCH)
+              if (rc != DFA_NOMATCH)
                 return rc;
               break;
             }
@@ -3629,7 +3630,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               }
             }
           }
-          else if (rc != PCRE2_ERROR_NOMATCH)
+          else if (rc != DFA_NOMATCH)
             return rc;
         }
 
@@ -3704,7 +3705,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
 
   if (match_count >= 0 && ((mb->moptions | mb->poptions) & PCRE2_ENDANCHORED) != 0 &&
       ptr < end_subject)
-    match_count = PCRE2_ERROR_NOMATCH;
+    match_count = DFA_NOMATCH;
 
   return match_count;
 }
@@ -4500,14 +4501,12 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
                             base_recursion_workspace);           // initial workspace for recursion
 
     /* Anything other than "no match" means we are done, always; otherwise, carry
-    on only if not anchored. A callout's "no match" ends the match. */
+    on only if not anchored. PCRE2_ERROR_NOMATCH can come only from a callout,
+    which ends the match. */
 
-    if (rc == DFA_CALLOUT_NOMATCH)
-      goto NOMATCH_EXIT;
-
-    if (rc != PCRE2_ERROR_NOMATCH || anchored)
+    if (rc != DFA_NOMATCH || anchored)
     {
-      if (rc == PCRE2_ERROR_NOMATCH)
+      if (rc == DFA_NOMATCH || rc == PCRE2_ERROR_NOMATCH)
         goto NOMATCH_EXIT;
 
       if (rc == PCRE2_ERROR_PARTIAL && match_data->oveccount > 0)

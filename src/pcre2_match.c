@@ -280,7 +280,7 @@ Arguments:
   mb         points to the match block
   lengthptr  where to return the length of the callout item
 
-Returns:     the return from the callout
+Returns:     the return from the callout, after CALLOUT_RESULT(),
              or 0 if no callout function exists
 */
 

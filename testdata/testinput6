@@ -5301,4 +5301,38 @@
     a\=callout_data=-1
     a\=callout_data=-997
 
+# The same applies inside conditions, recursions, and atomic groups. A
+# reserved value must not be mistaken for an internal "no match".
+
+/(?(?=(?C1)x)x|a)/
+    a
+    a\=callout_data=-1
+    a\=callout_data=-999
+
+/(?(?C1)(?=x)x|a)/
+    a
+    a\=callout_data=-1
+    a\=callout_data=-999
+
+/(?(DEFINE)(?<A>(?C1)x))(?&A)|a/
+    a
+    a\=callout_data=-1
+    a\=callout_data=-999
+
+/(?>(?C1)x)|a/
+    a
+    a\=callout_data=-1
+    a\=callout_data=-999
+
+# A callout's "no match" or reserved value at the end of the subject must not
+# be reported as a hard or soft partial match.
+
+/a(?C1)b/
+    a\=ph
+    a\=ph,callout_data=-1
+    a\=ph,callout_data=-2
+    a\=ps
+    a\=ps,callout_data=-1
+    a\=ps,callout_data=-2
+
 # End of testinput6

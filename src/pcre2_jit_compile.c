@@ -9422,7 +9422,6 @@ do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_blo
   PCRE2_SPTR begin;
   PCRE2_SIZE *ovector;
   sljit_u32 oveccount, capture_top;
-  int rc;
 
   if (arguments->callout == NULL)
     return 0;
@@ -9470,7 +9469,7 @@ do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_blo
     jit_ovector += 2;
   }
 
-  rc = (arguments->callout)(callout_block, arguments->callout_data);
+  int rc = (arguments->callout)(callout_block, arguments->callout_data);
   return CALLOUT_RESULT(rc);
 }
 

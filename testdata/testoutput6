@@ -8313,4 +8313,104 @@ No match
 Callout data = -997
 Failed: error -37: callout error code
 
+# The same applies inside conditions, recursions, and atomic groups. A
+# reserved value must not be mistaken for an internal "no match".
+
+/(?(?=(?C1)x)x|a)/
+    a
+--->a
+  1 ^     x
+ 0: a
+    a\=callout_data=-1
+--->a
+  1 ^     x
+Callout data = -1
+No match
+    a\=callout_data=-999
+--->a
+  1 ^     x
+Callout data = -999
+Failed: error -37: callout error code
+
+/(?(?C1)(?=x)x|a)/
+    a
+--->a
+  1 ^     (?=
+ 0: a
+    a\=callout_data=-1
+--->a
+  1 ^     (?=
+Callout data = -1
+No match
+    a\=callout_data=-999
+--->a
+  1 ^     (?=
+Callout data = -999
+Failed: error -37: callout error code
+
+/(?(DEFINE)(?<A>(?C1)x))(?&A)|a/
+    a
+--->a
+  1 ^     x
+ 0: a
+    a\=callout_data=-1
+--->a
+  1 ^     x
+Callout data = -1
+No match
+    a\=callout_data=-999
+--->a
+  1 ^     x
+Callout data = -999
+Failed: error -37: callout error code
+
+/(?>(?C1)x)|a/
+    a
+--->a
+  1 ^     x
+ 0: a
+    a\=callout_data=-1
+--->a
+  1 ^     x
+Callout data = -1
+No match
+    a\=callout_data=-999
+--->a
+  1 ^     x
+Callout data = -999
+Failed: error -37: callout error code
+
+# A callout's "no match" or reserved value at the end of the subject must not
+# be reported as a hard or soft partial match.
+
+/a(?C1)b/
+    a\=ph
+--->a
+  1 ^^    b
+Partial match: a
+    a\=ph,callout_data=-1
+--->a
+  1 ^^    b
+Callout data = -1
+No match
+    a\=ph,callout_data=-2
+--->a
+  1 ^^    b
+Callout data = -2
+Failed: error -37: callout error code
+    a\=ps
+--->a
+  1 ^^    b
+Partial match: a
+    a\=ps,callout_data=-1
+--->a
+  1 ^^    b
+Callout data = -1
+No match
+    a\=ps,callout_data=-2
+--->a
+  1 ^^    b
+Callout data = -2
+Failed: error -37: callout error code
+
 # End of testinput6

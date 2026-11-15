@@ -5826,6 +5826,17 @@ a)"xI
     xa\=ps,callout_data=-1
     xa\=ps,callout_data=-2
 
+# A callout's "no match" or reserved value at the end of the subject must not
+# be reported as a hard or soft partial match.
+
+/a(?C1)b/
+    a\=ph
+    a\=ph,callout_data=-1
+    a\=ph,callout_data=-2
+    a\=ps
+    a\=ps,callout_data=-1
+    a\=ps,callout_data=-2
+
 # ----------------------------------------------------------------------
 
 /[a b c]/BxxI
