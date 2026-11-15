@@ -16656,6 +16656,50 @@ Failed: error -55 at offset 3 in replacement: requested value is not set
 ** Invalid value in "offset_limit=1100000000000000000000"
     \=copy=11000000000
 ** Invalid value in "copy=11000000000"
+    \=callout_fail=4294967295
+ 0: 
+ 1: 
+ 2: 
+ 3: 
+    \=callout_fail=4294967296
+** Invalid value in "callout_fail=4294967296"
+    \=callout_fail=1:4294967295
+ 0: 
+ 1: 
+ 2: 
+ 3: 
+    \=callout_fail=1:4294967296
+** Invalid value in "callout_fail=1:4294967296"
+    \=callout_data=2147483647
+ 0: 
+ 1: 
+ 2: 
+ 3: 
+    \=callout_data=2147483648
+** Invalid value in "callout_data=2147483648"
+    \=callout_data=-2147483648
+ 0: 
+ 1: 
+ 2: 
+ 3: 
+    \=callout_data=-2147483649
+** Invalid value in "callout_data=-2147483649"
+    \=copy=2147483647
+ 0: 
+ 1: 
+ 2: 
+ 3: 
+Copy substring 2147483647 failed (-49): unknown substring
+Get substring 2147483647 length failed (-49): unknown substring
+    \=copy=2147483648
+** Invalid value in "copy=2147483648"
+    \=depth_limit=4294967295
+ 0: 
+ 1: 
+ 2: 
+ 3: 
+    \=depth_limit=4294967296
+** Invalid value in "depth_limit=4294967296"
 
 /(*MARK:A\x00b)/mark
     abc

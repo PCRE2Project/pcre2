@@ -5264,6 +5264,18 @@ a)"xI
     \=callout_data=-11000000000
     \=offset_limit=1100000000000000000000
     \=copy=11000000000
+    \=callout_fail=4294967295
+    \=callout_fail=4294967296
+    \=callout_fail=1:4294967295
+    \=callout_fail=1:4294967296
+    \=callout_data=2147483647
+    \=callout_data=2147483648
+    \=callout_data=-2147483648
+    \=callout_data=-2147483649
+    \=copy=2147483647
+    \=copy=2147483648
+    \=depth_limit=4294967295
+    \=depth_limit=4294967296
 
 /(*MARK:A\x00b)/mark
     abc
