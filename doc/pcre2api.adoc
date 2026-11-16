@@ -1832,6 +1832,12 @@ to the first (that is, the longest) matched string. Other parallel matches,
 which are necessarily substrings of the first one, must obviously end before
 the end of the subject.
 
++
+Partial matching is not supported when const:PCRE2_ENDANCHORED is set.
+func:pcre2_match() and func:pcre2_dfa_match() return const:PCRE2_ERROR_BADOPTION if
+a partial matching option is set, and func:pcre2_jit_match() returns
+const:PCRE2_ERROR_JIT_BADOPTION.
+
 const:PCRE2_EXTENDED::
 
 If this bit is set, most white space characters in the pattern are totally
@@ -3478,7 +3484,9 @@ const:PCRE2_ERROR_BADOFFSETLIMITVALUE::
       subject and was not const:PCRE2_UNSET.
 
 const:PCRE2_ERROR_BADOPTION::
-      An unrecognized bit was set in the arg:options argument.
+      An unrecognized bit was set in the arg:options argument, or a partial
+      matching option was set for a match with const:PCRE2_ENDANCHORED (set at
+      compile time or at match time).
 
 const:PCRE2_ERROR_BADUTFOFFSET::
       The UTF code unit sequence that was passed as a subject was checked and found

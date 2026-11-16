@@ -101,6 +101,7 @@ compiler generates different optimized code for each of the three modes
 (normal, soft partial, hard partial). When func:pcre2_match() is called, the
 appropriate code is run if it is available. Otherwise, the pattern is matched
 using interpretive code.
+Partial matching is not supported for patterns that were compiled with const:PCRE2_ENDANCHORED, so no code is compiled for their partial modes, and func:pcre2_match() rejects partial matching with const:PCRE2_ERROR_BADOPTION.
 
 You can call func:pcre2_jit_compile() multiple times for the same compiled
 pattern. It does nothing if it has previously compiled code for any of the

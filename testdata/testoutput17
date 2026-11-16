@@ -571,6 +571,39 @@ Failed: error -45: bad JIT option
     abc\=null_context,no_jit
  0: abc
 
+# Partial matching is not supported for a pattern compiled with PCRE2_ENDANCHORED.
+
+/abc/endanchored
+    xxabc
+ 0: abc (JIT)
+\= Expect no match
+    xxabcx
+No match (JIT)
+\= Expect error
+    xxab\=ps
+Failed: error -34: bad option value
+    xxab\=ph
+Failed: error -34: bad option value
+
+/abc/endanchored,jitfast
+    xxabc
+ 0: abc (JIT)
+\= Expect no match
+    xxabcx
+No match (JIT)
+\= Expect error
+    xxab\=ps
+Failed: error -45: bad JIT option
+    xxab\=ph
+Failed: error -45: bad JIT option
+
+/abc/endanchored,jit=6,jitfast
+\= Expect error
+    xxab\=ps
+Failed: error -45: bad JIT option
+    xxab\=ph
+Failed: error -45: bad JIT option
+
 # ---- 
 
 /[aC]/mg,firstline,newline=lf

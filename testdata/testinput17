@@ -318,6 +318,29 @@
     abc\=null_context
     abc\=null_context,no_jit
 
+# Partial matching is not supported for a pattern compiled with PCRE2_ENDANCHORED.
+
+/abc/endanchored
+    xxabc
+\= Expect no match
+    xxabcx
+\= Expect error
+    xxab\=ps
+    xxab\=ph
+
+/abc/endanchored,jitfast
+    xxabc
+\= Expect no match
+    xxabcx
+\= Expect error
+    xxab\=ps
+    xxab\=ph
+
+/abc/endanchored,jit=6,jitfast
+\= Expect error
+    xxab\=ps
+    xxab\=ph
+
 # ---- 
 
 /[aC]/mg,firstline,newline=lf
