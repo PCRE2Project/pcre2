@@ -8551,6 +8551,41 @@ a)"xI
 /(a(?R(1)))*+b/
     aaab
 
+/(?:(a)((?1(2)))++X|k)/
+    aak
+\= Expect no match
+    aaaa
+
+/(a(?R(1))){2,}+b/
+\= Expect no match
+    aaab
+
+/(a(?1(1))?b|)*+c/
+    aabbabc
+
+/(a(?1(1))?b)*+c/
+    aabbabc
+
+/((a(?R(1,2)))*+)*+b/
+    aaab
+
+/(a(?R(1))|z(?R(1)))*+b/
+    aaazb
+
+/(a(*MARK:m)(?R(1)))*+b/mark
+    aaab
+
+/(a\K(?R(1)))*+b/
+    aaab
+
+/(?:(a(?1(1))?b)*+X|)(?(1)yes|no)/
+    abXyes
+    aabbno
+
+/(?C1)(?:(a(?1(1))?b)*+X|)(?(1)yes|no)/
+    abXyes\=callout_none
+    aabbno\=callout_none
+
 # Test each syntax used for recursion
 
 /(?(R)(Sat)urday|(?R(1)),\1)/
