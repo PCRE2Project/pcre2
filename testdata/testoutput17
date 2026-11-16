@@ -352,8 +352,8 @@ Failed: error -46: JIT stack limit reached
 Failed: error -46: JIT stack limit reached
     
 # Invalid options disable JIT when called via pcre2_match(), causing the
-# match to happen via the interpreter, but for fast JIT invalid options are
-# ignored, so an unanchored match happens.
+# match to happen via the interpreter. pcre2_jit_match() does not support them,
+# so pcre2test does not allow them with jitfast.
 
 /abcd/
     abcd\=anchored
@@ -363,10 +363,13 @@ Failed: error -46: JIT stack limit reached
 No match
     
 /abcd/jitfast
+\= Expect error
     abcd\=anchored 
- 0: abcd (JIT)
-    succeed abcd\=anchored 
- 0: abcd (JIT)
+** Option not supported by pcre2_jit_match() with jitfast
+    abcd\=copy_matched_subject
+** Option not supported by pcre2_jit_match() with jitfast
+    abcd\=endanchored
+** Option not supported by pcre2_jit_match() with jitfast
     
 # Push/pop does not lose the JIT information, though jitverify applies only to
 # compilation, but serializing (save/load) discards JIT data completely.
@@ -564,8 +567,6 @@ Failed: error -45: bad JIT option
  0: abc (JIT)
 
 /abc/jitfast
-    abc\=copy_matched_subject
- 0: abc (JIT)
     abc\=null_context
  0: abc (JIT)
     abc\=null_context,no_jit

@@ -2348,6 +2348,10 @@ patterns to be analyzed, and for one-off matches and simple patterns the
 benefit of faster execution might be offset by a much slower compilation time.
 Most (but not all) patterns can be optimized by the JIT compiler.
 
+func:pcre2_jit_match() is a "fast path" that skips the argument checks made by
+func:pcre2_match(). If func:pcre2_match() would reject a call with an error,
+the result of making the same call to func:pcre2_jit_match() is undefined.
+
 [[locale-support]]
 == Locale support
 
@@ -3377,8 +3381,7 @@ After a successful match, a partial match (const:PCRE2_ERROR_PARTIAL), or a
 failure to match (const:PCRE2_ERROR_NOMATCH), func:pcre2_get_subject() returns
 the subject pointer that was passed to the matching function. For a successful
 match with const:PCRE2_COPY_MATCHED_SUBJECT, it returns a pointer to a copy of
-the subject that is owned by the match data block instead (except for
-func:pcre2_jit_match() which ignores const:PCRE2_COPY_MATCHED_SUBJECT). The copy
+the subject that is owned by the match data block instead. The copy
 is exactly the same length as the subject that was passed to the matching
 function and is additionally zero-terminated. The copy is freed when the match
 data block is reused for another match or is freed. If there is any match error

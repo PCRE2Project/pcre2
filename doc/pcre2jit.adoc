@@ -413,10 +413,10 @@ processed by func:pcre2_jit_compile()).
 
 The fast path function is called func:pcre2_jit_match(), and it takes exactly
 the same arguments as func:pcre2_match(). However, the subject string must be
-specified with a length; const:PCRE2_ZERO_TERMINATED is not supported. Unsupported
-option bits (for example, const:PCRE2_ANCHORED, const:PCRE2_ENDANCHORED, and
-const:PCRE2_COPY_MATCHED_SUBJECT) are ignored, as is the const:PCRE2_NO_JIT option. The
-return values are also the same as for func:pcre2_match(), plus
+specified with a length; const:PCRE2_ZERO_TERMINATED is not supported.
+The only options that are supported are const:PCRE2_NOTBOL, const:PCRE2_NOTEOL, const:PCRE2_NOTEMPTY, const:PCRE2_NOTEMPTY_ATSTART, const:PCRE2_NO_UTF_CHECK, const:PCRE2_PARTIAL_HARD, and const:PCRE2_PARTIAL_SOFT.
+Other options (for example, const:PCRE2_ANCHORED, const:PCRE2_ENDANCHORED, const:PCRE2_COPY_MATCHED_SUBJECT, and const:PCRE2_NO_JIT) do not function with func:pcre2_jit_match(), and the behaviour is undefined if they are set.
+The return values are also the same as for func:pcre2_match(), plus
 const:PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is requested
 that was not compiled.
 
@@ -434,6 +434,10 @@ subject is valid.
 Similarly, a non-default offset limit must not exceed the subject length.
 func:pcre2_match() checks this condition before dispatching to JIT, but callers
 of func:pcre2_jit_match() must ensure it themselves.
+
+More generally, if func:pcre2_match() would reject a call with an error (for
+example, because the start offset is greater than the subject length), the
+result of making the same call to func:pcre2_jit_match() is undefined.
 
 Bypassing the sanity checks and the func:pcre2_match() wrapping can give
 speedups of more than 10%.

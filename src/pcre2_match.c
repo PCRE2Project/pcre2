@@ -66,17 +66,6 @@ information, and fields within it. */
 
 #define RECURSE_UNSET 0xffffffffu /* Bigger than max group number */
 
-/* Masks for identifying the public options that are permitted at match time. */
-
-#define PUBLIC_MATCH_OPTIONS                                                               \
-  (PCRE2_ANCHORED | PCRE2_ENDANCHORED | PCRE2_NOTBOL | PCRE2_NOTEOL | PCRE2_NOTEMPTY |     \
-   PCRE2_NOTEMPTY_ATSTART | PCRE2_NO_UTF_CHECK | PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT | \
-   PCRE2_NO_JIT | PCRE2_COPY_MATCHED_SUBJECT | PCRE2_DISABLE_RECURSELOOP_CHECK)
-
-#define PUBLIC_JIT_MATCH_OPTIONS                                                                \
-  (PCRE2_NO_UTF_CHECK | PCRE2_NOTBOL | PCRE2_NOTEOL | PCRE2_NOTEMPTY | PCRE2_NOTEMPTY_ATSTART | \
-   PCRE2_PARTIAL_SOFT | PCRE2_PARTIAL_HARD | PCRE2_COPY_MATCHED_SUBJECT)
-
 /* Non-error returns from and within the match() function. Error returns are
 externally defined PCRE2_ERROR_xxx codes, which are all negative. */
 
@@ -7962,7 +7951,8 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
   at compile time for the JIT code to be usable. */
 
 #ifdef SUPPORT_JIT
-  if (re->executable_jit != NULL && (options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0 &&
+  if (re->executable_jit != NULL &&
+      (options & ~(PUBLIC_JIT_MATCH_OPTIONS | PCRE2_COPY_MATCHED_SUBJECT)) == 0 &&
       PRIV(jit_check_exec)(re->executable_jit, options))
   {
     /* Prepare for JIT matching. Check a UTF string for validity unless no check
@@ -8030,12 +8020,14 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
     }
 #endif /* SUPPORT_UNICODE */
 
+    options &= ~PCRE2_COPY_MATCHED_SUBJECT;
+
     rc = pcre2_jit_match(code, subject, length, start_offset, options, match_data, mcontext);
     /* JIT must be able to perform the match. */
     PCRE2_ASSERT(rc != PCRE2_ERROR_JIT_BADOPTION);
 
     match_data->options = original_options;
-    if (rc >= 0 && (options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
+    if (rc >= 0 && (original_options & PCRE2_COPY_MATCHED_SUBJECT) != 0)
     {
       match_data->subject =
           match_data->memctl.malloc(CU2BYTES(length + 1), match_data->memctl.memory_data);
