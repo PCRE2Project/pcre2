@@ -170,6 +170,16 @@ Failed: error 134 at offset 12: character code point value in \x{} or \o{} is to
 ** Truncation will probably give the wrong result.
 No match
 
+# \X inspects regional indicators before the UTF-checked part of the subject.
+
+/\X/utf
+    \x80\x{1f1e6}\x{1f1e7}\=offset=1
+ 0: \x{1f1e6}\x{1f1e7}
+    \x{dc00}\x{1f1e6}\x{1f1e7}\=offset=1
+Error -36 (bad UTF-8 offset)
+    \x{1f1e6}\x80\x{1f1e6}\x{1f1e7}\=offset=5
+ 0: \x{1f1e6}\x{1f1e7}
+
 # ---------------------------------------------------- 
 
 # End of testinput14

@@ -769,4 +769,17 @@
     XXXX\xfc
     XXXXX\xfd\x7f
 
+# \X must not decode backwards across invalid UTF when counting the regional
+# indicators that precede a pair.
+
+/\X/utf
+    \x80\x{1f1e6}\x{1f1e7}\=offset=1
+    \x{1f1e6}\x80\x{1f1e6}\x{1f1e7}\=offset=5
+
+/\X/utf,match_invalid_utf
+    \x80\x{1f1e6}\x{1f1e7}
+    \x{1f1e6}\x80\x{1f1e6}\x{1f1e7}\=offset=5
+    \x{1f1e6}\x{1f1e7}\x{1f1e7}
+    \x{1f1e6}\x{1f1e7}\x{1f1e7}\x{1f1e6}
+
 # End of testinput10

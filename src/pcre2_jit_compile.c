@@ -766,7 +766,7 @@ the start pointers when the end of the capturing group has not yet reached. */
       }                                                                \
       else if (ptr - 2 > start && ptr[-2] >= 0x80 && ptr[-2] < 0xc0)   \
       {                                                                \
-        c = c << 6 | (ptr[-2] - 0x80);                                 \
+        c |= (ptr[-2] - 0x80) << 6;                                    \
                                                                        \
         if (ptr[-3] >= 0xe0 && ptr[-3] <= 0xef)                        \
         {                                                              \
@@ -780,7 +780,7 @@ the start pointers when the end of the capturing group has not yet reached. */
         }                                                              \
         else if (ptr - 3 > start && ptr[-3] >= 0x80 && ptr[-3] < 0xc0) \
         {                                                              \
-          c = c << 6 | (ptr[-3] - 0x80);                               \
+          c |= (ptr[-3] - 0x80) << 12;                                 \
                                                                        \
           if (ptr[-4] >= 0xf0 && ptr[-4] <= 0xf4)                      \
           {                                                            \
