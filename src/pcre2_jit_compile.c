@@ -9559,7 +9559,8 @@ do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_blo
     jit_ovector += 2;
   }
 
-  return (arguments->callout)(callout_block, arguments->callout_data);
+  int rc = (arguments->callout)(callout_block, arguments->callout_data);
+  return CALLOUT_RESULT(rc);
 }
 
 #define CALLOUT_ARG_OFFSET(arg) SLJIT_OFFSETOF(pcre2_callout_block, arg)
