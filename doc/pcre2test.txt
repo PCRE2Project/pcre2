@@ -960,7 +960,9 @@ PATTERN MODIFIERS
        "fast path" interface, pcre2_jit_match(), which skips some of the
        sanity checks that are done by pcre2_match(), and of course does not
        work when JIT is not supported. If jitfast is specified without jit,
-       jit=7 is assumed.
+       jit=7 is assumed. A subject line that sets an option that
+       pcre2_jit_match() does not support is rejected with an error, except
+       for no_jit, which causes pcre2_match() to be used instead.
 
        If the jitverify modifier is specified, information about the compiled
        pattern shows whether JIT compilation was or was not successful. If

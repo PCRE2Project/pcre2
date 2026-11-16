@@ -52,6 +52,9 @@ options is whether or not a partial match is preferred to an alternative
 complete match, though the details differ between the two types of matching
 function. If both options are set, \f(CBPCRE2_PARTIAL_HARD\fP takes precedence.
 .sp
+Partial matching cannot be combined with \f(CBPCRE2_ENDANCHORED\fP, whether it is set at compile time or at match time.
+\f(CBpcre2_match()\fP and \f(CBpcre2_dfa_match()\fP reject such a match with \f(CBPCRE2_ERROR_BADOPTION\fP.
+.sp
 If you want to use partial matching with just\-in\-time optimized code, as well
 as setting a partial match option for the matching function, you must also call
 \f(CBpcre2_jit_compile()\fP with one or both of these options:

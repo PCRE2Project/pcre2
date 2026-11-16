@@ -15,6 +15,8 @@ options when calling a matching function. The difference between the two
 options is whether or not a partial match is preferred to an alternative
 complete match, though the details differ between the two types of matching
 function. If both options are set, <code class="constant pcre2-api rouge"><span class="no">PCRE2_PARTIAL_HARD</span></code> takes precedence.</p>
+<p>Partial matching cannot be combined with <code class="constant pcre2-api rouge"><span class="no">PCRE2_ENDANCHORED</span></code>, whether it is set at compile time or at match time.
+<code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> and <code class="function pcre2-api rouge"><span class="nf">pcre2_dfa_match()</span></code> reject such a match with <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_BADOPTION</span></code>.</p>
 <p>If you want to use partial matching with just-in-time optimized code, as well
 as setting a partial match option for the matching function, you must also call
 <code class="function pcre2-api rouge"><span class="nf">pcre2_jit_compile()</span></code> with one or both of these options:</p>

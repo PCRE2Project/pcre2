@@ -1988,6 +1988,14 @@ COMPILING A PATTERN
                                      must obviously end before the end of the
                                      subject.
 
+                                     Partial matching is not supported when
+                                     PCRE2_ENDANCHORED is set. pcre2_match()
+                                     and pcre2_dfa_match() return
+                                     PCRE2_ERROR_BADOPTION if a partial
+                                     matching option is set, and
+                                     pcre2_jit_match() returns
+                                     PCRE2_ERROR_JIT_BADOPTION.
+
            PCRE2_EXTENDED            If this bit is set, most white space
                                      characters in the pattern are totally
                                      ignored except when escaped, inside a
@@ -2658,6 +2666,10 @@ JUST-IN-TIME (JIT) COMPILATION
        patterns the benefit of faster execution might be offset by a much
        slower compilation time. Most (but not all) patterns can be optimized
        by the JIT compiler.
+
+       pcre2_jit_match() is a "fast path" that skips the argument checks made
+       by pcre2_match(). If pcre2_match() would reject a call with an error,
+       the result of making the same call to pcre2_jit_match() is undefined.
 
 LOCALE SUPPORT
        const uint8_t *pcre2_maketables(pcre2_general_context *gcontext);
@@ -3769,17 +3781,15 @@ OTHER INFORMATION ABOUT A MATCH
        failure to match (PCRE2_ERROR_NOMATCH), pcre2_get_subject() returns the
        subject pointer that was passed to the matching function. For a
        successful match with PCRE2_COPY_MATCHED_SUBJECT, it returns a pointer
-       to a copy of the subject that is owned by the match data block instead
-       (except for pcre2_jit_match() which ignores
-       PCRE2_COPY_MATCHED_SUBJECT). The copy is exactly the same length as the
-       subject that was passed to the matching function and is additionally
-       zero-terminated. The copy is freed when the match data block is reused
-       for another match or is freed. If there is any match error other than
-       PCRE2_ERROR_NOMATCH or PCRE2_ERROR_PARTIAL, pcre2_get_subject() may
-       return NULL. If the lengthptr argument is not NULL, it receives the
-       length in code units of the string which is returned, excluding the
-       terminating zero (the subject string may contain embedded NUL
-       characters).
+       to a copy of the subject that is owned by the match data block instead.
+       The copy is exactly the same length as the subject that was passed to
+       the matching function and is additionally zero-terminated. The copy is
+       freed when the match data block is reused for another match or is
+       freed. If there is any match error other than PCRE2_ERROR_NOMATCH or
+       PCRE2_ERROR_PARTIAL, pcre2_get_subject() may return NULL. If the
+       lengthptr argument is not NULL, it receives the length in code units of
+       the string which is returned, excluding the terminating zero (the
+       subject string may contain embedded NUL characters).
 
        After a successful match, a partial match (PCRE2_ERROR_PARTIAL), or a
        failure to match (PCRE2_ERROR_NOMATCH), a mark name may be available.
@@ -3869,7 +3879,9 @@ ERROR RETURNS FROM pcre2_match()
                                     greater than the length of the subject and
                                     was not PCRE2_UNSET.
            PCRE2_ERROR_BADOPTION    An unrecognized bit was set in the options
-                                    argument.
+                                    argument, or a partial matching option was
+                                    set for a match with PCRE2_ENDANCHORED
+                                    (set at compile time or at match time).
            PCRE2_ERROR_BADUTFOFFSET The UTF code unit sequence that was passed
                                     as a subject was checked and found to be
                                     valid (the PCRE2_NO_UTF_CHECK option was
@@ -6541,6 +6553,9 @@ SIMPLE USE OF JIT
        for each of the three modes (normal, soft partial, hard partial). When
        pcre2_match() is called, the appropriate code is run if it is
        available. Otherwise, the pattern is matched using interpretive code.
+       Partial matching is not supported for patterns that were compiled with
+       PCRE2_ENDANCHORED, so no code is compiled for their partial modes, and
+       pcre2_match() rejects partial matching with PCRE2_ERROR_BADOPTION.
 
        You can call pcre2_jit_compile() multiple times for the same compiled
        pattern. It does nothing if it has previously compiled code for any of
@@ -6839,11 +6854,15 @@ JIT FAST PATH API
        The fast path function is called pcre2_jit_match(), and it takes
        exactly the same arguments as pcre2_match(). However, the subject
        string must be specified with a length; PCRE2_ZERO_TERMINATED is not
-       supported. Unsupported option bits (for example, PCRE2_ANCHORED,
-       PCRE2_ENDANCHORED, and PCRE2_COPY_MATCHED_SUBJECT) are ignored, as is
-       the PCRE2_NO_JIT option. The return values are also the same as for
-       pcre2_match(), plus PCRE2_ERROR_JIT_BADOPTION if a matching mode
-       (partial or complete) is requested that was not compiled.
+       supported. The only options that are supported are PCRE2_NOTBOL,
+       PCRE2_NOTEOL, PCRE2_NOTEMPTY, PCRE2_NOTEMPTY_ATSTART,
+       PCRE2_NO_UTF_CHECK, PCRE2_PARTIAL_HARD, and PCRE2_PARTIAL_SOFT. Other
+       options (for example, PCRE2_ANCHORED, PCRE2_ENDANCHORED,
+       PCRE2_COPY_MATCHED_SUBJECT, and PCRE2_NO_JIT) do not function with
+       pcre2_jit_match(), and the behaviour is undefined if they are set. The
+       return values are also the same as for pcre2_match(), plus
+       PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is
+       requested that was not compiled.
 
        When you call pcre2_match(), as well as testing for invalid options, a
        number of other sanity checks are performed on the arguments. For
@@ -6860,6 +6879,10 @@ JIT FAST PATH API
        Similarly, a non-default offset limit must not exceed the subject
        length. pcre2_match() checks this condition before dispatching to JIT,
        but callers of pcre2_jit_match() must ensure it themselves.
+
+       More generally, if pcre2_match() would reject a call with an error (for
+       example, because the start offset is greater than the subject length),
+       the result of making the same call to pcre2_jit_match() is undefined.
 
        Bypassing the sanity checks and the pcre2_match() wrapping can give
        speedups of more than 10%.
@@ -7194,6 +7217,10 @@ PARTIAL MATCHING IN PCRE2
        not a partial match is preferred to an alternative complete match,
        though the details differ between the two types of matching function.
        If both options are set, PCRE2_PARTIAL_HARD takes precedence.
+
+       Partial matching cannot be combined with PCRE2_ENDANCHORED, whether it
+       is set at compile time or at match time. pcre2_match() and
+       pcre2_dfa_match() reject such a match with PCRE2_ERROR_BADOPTION.
 
        If you want to use partial matching with just-in-time optimized code,
        as well as setting a partial match option for the matching function,

@@ -520,7 +520,8 @@ setting the size of the JIT stack.</p>
 "fast path" interface, <code class="function pcre2-api rouge"><span class="nf">pcre2_jit_match()</span></code>, which skips some of the sanity
 checks that are done by <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>, and of course does not work when
 JIT is not supported. If <code>jitfast</code> is specified without <code>jit</code>, jit=7 is
-assumed.</p>
+assumed.
+A subject line that sets an option that <code class="function pcre2-api rouge"><span class="nf">pcre2_jit_match()</span></code> does not support is rejected with an error, except for <code>no_jit</code>, which causes <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> to be used instead.</p>
 <p>If the <code>jitverify</code> modifier is specified, information about the compiled
 pattern shows whether JIT compilation was or was not successful. If
 <code>jitverify</code> is specified without <code>jit</code>, jit=7 is assumed. If JIT

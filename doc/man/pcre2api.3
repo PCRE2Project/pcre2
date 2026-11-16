@@ -2268,6 +2268,11 @@ For DFA matching with \f(CBpcre2_dfa_match()\fP, \f(CBPCRE2_ENDANCHORED\fP appli
 to the first (that is, the longest) matched string. Other parallel matches,
 which are necessarily substrings of the first one, must obviously end before
 the end of the subject.
+.sp
+Partial matching is not supported when \f(CBPCRE2_ENDANCHORED\fP is set.
+\f(CBpcre2_match()\fP and \f(CBpcre2_dfa_match()\fP return \f(CBPCRE2_ERROR_BADOPTION\fP if
+a partial matching option is set, and \f(CBpcre2_jit_match()\fP returns
+\f(CBPCRE2_ERROR_JIT_BADOPTION\fP.
 .RE
 .TP 26
 \f(CBPCRE2_EXTENDED\fP
@@ -2789,6 +2794,10 @@ JIT compilation is a heavyweight optimization. It can take some time for
 patterns to be analyzed, and for one\-off matches and simple patterns the
 benefit of faster execution might be offset by a much slower compilation time.
 Most (but not all) patterns can be optimized by the JIT compiler.
+.sp
+\f(CBpcre2_jit_match()\fP is a "fast path" that skips the argument checks made by
+\f(CBpcre2_match()\fP. If \f(CBpcre2_match()\fP would reject a call with an error,
+the result of making the same call to \f(CBpcre2_jit_match()\fP is undefined.
 .SH "LOCALE SUPPORT"
 .sp
 .ss \n[.ss]
@@ -3979,8 +3988,7 @@ After a successful match, a partial match (\f(CBPCRE2_ERROR_PARTIAL\fP), or a
 failure to match (\f(CBPCRE2_ERROR_NOMATCH\fP), \f(CBpcre2_get_subject()\fP returns
 the subject pointer that was passed to the matching function. For a successful
 match with \f(CBPCRE2_COPY_MATCHED_SUBJECT\fP, it returns a pointer to a copy of
-the subject that is owned by the match data block instead (except for
-\f(CBpcre2_jit_match()\fP which ignores \f(CBPCRE2_COPY_MATCHED_SUBJECT\fP). The copy
+the subject that is owned by the match data block instead. The copy
 is exactly the same length as the subject that was passed to the matching
 function and is additionally zero\-terminated. The copy is freed when the match
 data block is reused for another match or is freed. If there is any match error
@@ -4107,7 +4115,9 @@ subject and was not \f(CBPCRE2_UNSET\fP.
 .TP 25
 \f(CBPCRE2_ERROR_BADOPTION\fP
 .ad l
-An unrecognized bit was set in the \f(CIoptions\fP argument.
+An unrecognized bit was set in the \f(CIoptions\fP argument, or a partial
+matching option was set for a match with \f(CBPCRE2_ENDANCHORED\fP (set at
+compile time or at match time).
 .TP 25
 \f(CBPCRE2_ERROR_BADUTFOFFSET\fP
 .ad l

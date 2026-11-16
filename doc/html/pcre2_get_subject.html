@@ -5,8 +5,7 @@
 <section class="doc-section level-1"><h2 id="_description">Description</h2><p>After a successful match, a partial match, or a failure to match, this function
 returns the subject pointer that was passed to the matching function. For a
 successful match with <code class="constant pcre2-api rouge"><span class="no">PCRE2_COPY_MATCHED_SUBJECT</span></code>, it returns a pointer to
-a copy of the subject that is owned by the match data block instead (except for
-<code class="function pcre2-api rouge"><span class="nf">pcre2_jit_match()</span></code> which ignores <code class="constant pcre2-api rouge"><span class="no">PCRE2_COPY_MATCHED_SUBJECT</span></code>). The copy
+a copy of the subject that is owned by the match data block instead. The copy
 is exactly the same length as the subject that was passed to the matching
 function and is additionally zero-terminated. The copy is freed when the match
 data block is reused for another match or is freed. If there is any match error
