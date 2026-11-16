@@ -8028,6 +8028,31 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
     }
 #endif /* SUPPORT_UNICODE */
 
+#ifdef SUPPORT_UNICODE
+    /* When invalid UTF strings are being handled, the interpretive code
+    below advances a starting offset that points inside a multi-unit
+    character or an invalid sequence to the next character start (or the
+    end of the subject). The JIT fast path expects to start at a character
+    boundary and performs no such adjustment, so make it here, before
+    calling it. The adjustment is not made when PCRE2_NOTEMPTY_ATSTART is
+    set: the interpreter keys that option's lockout to the originally
+    requested start offset, whereas the generated code keys it to the
+    starting pointer it is given, so advancing the offset would change
+    which empty match is locked out. */
+
+    if (allow_invalid && (options & PCRE2_NOTEMPTY_ATSTART) == 0)
+    {
+      PCRE2_SIZE jit_start_offset = start_offset;
+#if PCRE2_CODE_UNIT_WIDTH != 32
+      while (jit_start_offset < length &&
+             NOT_FIRSTCU(subject[jit_start_offset]))
+        jit_start_offset++;
+#endif
+      rc = pcre2_jit_match(code, subject, length, jit_start_offset, options,
+                           match_data, mcontext);
+    }
+    else
+#endif
     rc = pcre2_jit_match(code, subject, length, start_offset, options, match_data, mcontext);
     /* JIT must be able to perform the match. */
     PCRE2_ASSERT(rc != PCRE2_ERROR_JIT_BADOPTION);
