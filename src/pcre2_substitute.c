@@ -1828,10 +1828,13 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
 EXIT:
   PCRE2_ASSERT(null_buffer[0] == 0xcd); // Check the canary was not overwritten
+
+  /* Free our internal match data. Note that a caller-supplied match data block
+  must be left exactly as the final call to pcre2_match() left it, as promised
+  by our API contract. */
   if (internal_match_data != NULL)
     pcre2_match_data_free(internal_match_data);
-  else
-    match_data->rc = rc;
+
   return rc;
 
 NOROOM:

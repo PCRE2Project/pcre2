@@ -7276,6 +7276,23 @@ unittest(void)
                         &sizeval);
   ASSERT(rc == PCRE2_ERROR_DIFFSUBSPATTERN, "pcre2_substitute(pattern)");
 
+  /* A substitution that finds no match must leave the match data as
+  pcre2_match() left it. */
+  memcpy(substitute_subject, subject_abcz, sizeof(subject_abcz));
+  rc = pcre2_match(test_compiled_code, substitute_subject, PCRE2_ZERO_TERMINATED, 0, 0,
+                   test_match_data, NULL);
+  ASSERT(rc == 1, "pcre2_match()");
+  sizeval = sizeof(replace_buf) / sizeof(*replace_buf);
+  rc = pcre2_substitute(test_compiled_code, substitute_subject + 3, PCRE2_ZERO_TERMINATED, 0, 0,
+                        test_match_data, NULL, NULL, 0, replace_buf, &sizeval);
+  ASSERT(rc == 0, "pcre2_substitute(no match)");
+  sizeval = sizeof(replace_buf) / sizeof(*replace_buf);
+  rc = pcre2_substitute(test_compiled_code, substitute_subject + 3, PCRE2_ZERO_TERMINATED, 0,
+                        PCRE2_SUBSTITUTE_MATCHED, test_match_data, NULL, NULL, 0, replace_buf,
+                        &sizeval);
+  ASSERT(rc == 0 && sizeval == 1 && replace_buf[0] == CHAR_Z,
+         "pcre2_substitute(matched, after no match)");
+
   /* The match data must record the caller's NULL subject, not the internal
   empty string that pcre2_substitute() uses in its place. */
   sizeval = sizeof(replace_buf) / sizeof(*replace_buf);
