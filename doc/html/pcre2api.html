@@ -2571,10 +2571,17 @@ functions from the match context, if provided, or else those that were used to
 allocate memory for the compiled code.</p>
 <p>If <code class="parameter pcre2-api rouge"><span class="nv">match_data</span></code> is not <code class="constant pcre2-api rouge"><span class="kc">NULL</span></code> and <code class="constant pcre2-api rouge"><span class="no">PCRE2_SUBSTITUTE_MATCHED</span></code> is not set, the
 provided block is used for all calls to <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>, and its contents
-afterwards are the result of the final call made internally by
-<code class="function pcre2-api rouge"><span class="nf">pcre2_substitute()</span></code> to the matching function. For global changes, this will
-always be a no-match error. The contents of the ovector within the match data
-block may or may not have been changed.</p>
+afterwards are exactly those left by the final call made internally by
+<code class="function pcre2-api rouge"><span class="nf">pcre2_substitute()</span></code> to the matching function, as if the application had
+made that call itself. <code class="function pcre2-api rouge"><span class="nf">pcre2_substitute()</span></code> makes no other changes to the
+block. If no match is found, or a global substitution continues until no
+further match is found, the block records a no-match error. However, a global
+substitution may also end after a successful match (for example, when a match
+reaches the end of the subject), and if <code class="function pcre2-api rouge"><span class="nf">pcre2_substitute()</span></code> fails after a
+successful match (for example, because the output buffer is too small), the
+block still records that match. The final call may not necessarily have used the
+same start offset and exact options that were passed to <code class="function pcre2-api rouge"><span class="nf">pcre2_substitute()</span></code>.
+If an error is detected before any matching is done, the block is unchanged.</p>
 <p>As well as the usual options for <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>, a number of additional
 options can be set in the <code class="parameter pcre2-api rouge"><span class="nv">options</span></code> argument of <code class="function pcre2-api rouge"><span class="nf">pcre2_substitute()</span></code>.
 One such option is <code class="constant pcre2-api rouge"><span class="no">PCRE2_SUBSTITUTE_MATCHED</span></code>. When this is set, an external
