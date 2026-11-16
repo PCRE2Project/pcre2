@@ -810,4 +810,16 @@
     XXXX\xfc
     XXXXX\xfd\x7f
 
+# \X must count preceding regional indicators that are 3- or 4-byte characters
+# when decoding backwards.
+
+/\X/utf
+    \x{1f1e6}\x{1f1e7}\x{1f1e7}
+
+/\X/utf,match_invalid_utf
+    \x80\x{1f1e6}\x{1f1e7}
+    \x{1f1e6}\x80\x{1f1e6}\x{1f1e7}\=offset=5
+    \x{1f1e6}\x{1f1e7}\x{1f1e7}
+    \x{1f1e6}\x{1f1e7}\x{1f1e7}\x{1f1e6}
+
 # End of testinput10
