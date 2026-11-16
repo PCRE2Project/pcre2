@@ -827,6 +827,9 @@ Failed: error -48: no more memory: 10 code units are needed</pre></div>
 <p>A replacement string is ignored with POSIX and DFA matching. Specifying partial
 matching provokes an error return ("bad option value") from
 <code class="function pcre2-api rouge"><span class="nf">pcre2_substitute()</span></code>.</p>
+<p>The <code>allvector</code>, <code>copy</code>, <code>get</code>, and <code>getall</code> modifiers may be used together with
+<code>replace</code>. They test the contents of the match data block that was passed to
+<code class="function pcre2-api rouge"><span class="nf">pcre2_substitute()</span></code>, after it has returned.</p>
 <p>The <code>substitute_subject</code> modifier may be used to test the use of the PCRE2
 API, in which a client calls <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> followed by <code class="function pcre2-api rouge"><span class="nf">pcre2_substitute()</span></code>
 with <code class="constant pcre2-api rouge"><span class="no">PCRE2_SUBSTITUTE_MATCHED</span></code>, but the client performs an unexpected and

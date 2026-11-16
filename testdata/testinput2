@@ -8927,4 +8927,41 @@ a)"xI
 /(?>a(){5462}b)|a/
     a\=jitstack=1024
 
+# Substring extraction from the match data after pcre2_substitute()
+
+/(a)(b)?/replace=<$1>
+    xaby\=copy=1,get=2,getall
+    xabxa\=global,copy=1,getall
+    xyz\=copy=1,getall
+
+/a/replace=b
+    aaaa\=global,ovector=1,getall
+
+/x*/replace=<$&>,global
+    ab\=getall
+
+# After a failure, the match data holds the match that was being substituted.
+
+/(a)(b)?/replace=<$1>
+    xaby\=replace=[2]<$1>,copy=1,getall
+    xaby\=allvector,ovector=3,copy=1,getall
+\= The match data is not passed, so there is nothing to extract
+    xaby\=null_substitute_match_data,copy=1,getall
+
+# With PCRE2_SUBSTITUTE_MATCHED, pcre2_substitute() works on a copy of the
+# match data, which still holds the result of pcre2test's own call to
+# pcre2_match(), even after a global substitution.
+
+/(a)(b)?/replace=<$1>,substitute_matched
+    xaby\=copy=1,get=2,getall
+    xabxa\=global,copy=1,getall
+    xyz\=copy=1,getall
+    xaby\=replace=[2]<$1>,copy=1,getall
+    xaby\=allvector,ovector=3,copy=1,getall
+\= Expect error, with nothing to extract
+    xaby\=null_substitute_match_data,copy=1,getall
+
+/a(b)c/allvector
+    xab\=ps,ovector=2,copy=0,getall
+
 # End of testinput2

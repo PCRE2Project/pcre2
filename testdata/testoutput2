@@ -24833,6 +24833,109 @@ Callout (7): "after"
     a\=jitstack=1024
  0: a
 
+# Substring extraction from the match data after pcre2_substitute()
+
+/(a)(b)?/replace=<$1>
+    xaby\=copy=1,get=2,getall
+ 1: x<a>y
+ 1C a (1)
+ 2G b (1)
+ 0L ab
+ 1L a
+ 2L b
+    xabxa\=global,copy=1,getall
+ 2: x<a>x<a>
+Copy substring 1 failed (-1): no match
+Get substring 1 length failed (-1): no match
+get substring list failed (-1): no match
+    xyz\=copy=1,getall
+ 0: xyz
+Copy substring 1 failed (-1): no match
+Get substring 1 length failed (-1): no match
+get substring list failed (-1): no match
+
+/a/replace=b
+    aaaa\=global,ovector=1,getall
+ 4: bbbb
+get substring list failed (-1): no match
+
+/x*/replace=<$&>,global
+    ab\=getall
+ 3: <>a<>b<>
+ 0L 
+
+# After a failure, the match data holds the match that was being substituted.
+
+/(a)(b)?/replace=<$1>
+    xaby\=replace=[2]<$1>,copy=1,getall
+Failed: error -48: no more memory
+ 1C a (1)
+ 0L ab
+ 1L a
+ 2L b
+    xaby\=allvector,ovector=3,copy=1,getall
+ 1: x<a>y
+ 0: 1 3
+ 1: 1 2
+ 2: 2 3
+ 1C a (1)
+ 0L ab
+ 1L a
+ 2L b
+\= The match data is not passed, so there is nothing to extract
+    xaby\=null_substitute_match_data,copy=1,getall
+ 1: x<a>y
+
+# With PCRE2_SUBSTITUTE_MATCHED, pcre2_substitute() works on a copy of the
+# match data, which still holds the result of pcre2test's own call to
+# pcre2_match(), even after a global substitution.
+
+/(a)(b)?/replace=<$1>,substitute_matched
+    xaby\=copy=1,get=2,getall
+ 1: x<a>y
+ 1C a (1)
+ 2G b (1)
+ 0L ab
+ 1L a
+ 2L b
+    xabxa\=global,copy=1,getall
+ 2: x<a>x<a>
+ 1C a (1)
+ 0L ab
+ 1L a
+ 2L b
+    xyz\=copy=1,getall
+ 0: xyz
+Copy substring 1 failed (-1): no match
+Get substring 1 length failed (-1): no match
+get substring list failed (-1): no match
+    xaby\=replace=[2]<$1>,copy=1,getall
+Failed: error -48: no more memory
+ 1C a (1)
+ 0L ab
+ 1L a
+ 2L b
+    xaby\=allvector,ovector=3,copy=1,getall
+ 1: x<a>y
+ 0: 1 3
+ 1: 1 2
+ 2: 2 3
+ 1C a (1)
+ 0L ab
+ 1L a
+ 2L b
+\= Expect error, with nothing to extract
+    xaby\=null_substitute_match_data,copy=1,getall
+Failed: error -51: NULL argument passed
+
+/a(b)c/allvector
+    xab\=ps,ovector=2,copy=0,getall
+Partial match: ab
+ 0: 1 3
+ 1: <unchanged>
+ 0C ab (2)
+get substring list failed (-2): partial match
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

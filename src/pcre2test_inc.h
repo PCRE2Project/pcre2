@@ -5416,10 +5416,18 @@ ENDSTRING:
     fprintf(outfile, "\n");
     show_memory = FALSE;
 
-    /* Show final ovector contents and resulting heapframe size if requested. */
+    /* Show final ovector contents if requested. */
 
     if ((dat_datctl.control2 & CTL2_ALLVECTOR) != 0)
       show_ovector(ovector, oveccount);
+
+    /* Process copy/get strings, when we passed an external match data to pcre2_substitute(). */
+
+    if (smatch_data != NULL &&
+        !copy_and_get(utf, (match_data->rc == 0) ? (int)oveccount : match_data->rc))
+      return PR_ABEND;
+
+    /* Show the resulting heapframe size if requested. */
 
     if ((dat_datctl.control2 & CTL2_HEAPFRAMES_SIZE) != 0 && (dat_datctl.control & CTL_DFA) == 0)
       show_heapframes_size();
@@ -5956,15 +5964,15 @@ ENDSTRING:
                  "%ld != %ld\n",
                  (unsigned long int)ovector[1], (unsigned long int)ulen);
 
-      /* Process copy/get strings */
-
-      if (!copy_and_get(utf, 1))
-        return PR_ABEND;
-
       /* "allvector" outputs the entire vector */
 
       if ((dat_datctl.control2 & CTL2_ALLVECTOR) != 0)
         show_ovector(ovector, oveccount);
+
+      /* Process copy/get strings */
+
+      if (!copy_and_get(utf, 1))
+        return PR_ABEND;
 
       break; // Out of the /g loop
     } // End of handling partial match
