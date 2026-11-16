@@ -1027,6 +1027,15 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
       goto EXIT;
     }
 
+    /* LCOV_EXCL_START */
+    if (ovector[1] > length)
+    {
+      PCRE2_DEBUG_UNREACHABLE();
+      rc = PCRE2_ERROR_INTERNAL;
+      goto EXIT;
+    }
+    /* LCOV_EXCL_STOP */
+
     /* Assert that our replacement loop is making progress, checked even in
     release builds. This should be impossible to hit, however, an infinite loop
     would be fairly catastrophic.
