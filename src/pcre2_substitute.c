@@ -805,7 +805,10 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     rlength = PRIV(strlen)(replacement);
   PCRE2_SPTR repend = replacement + rlength;
 
-  /* A NULL subject of zero length is treated as an empty string. */
+  /* A NULL subject of zero length is treated as an empty string. Note that arithmetic
+  on a NULL pointer (even adding zero) is undefined behaviour in C. However, we must
+  pass the caller's original pointer to pcre2_match() and the substitute callout,
+  because it will be recorded in the match data. */
 
   if (subject == NULL)
   {
@@ -997,7 +1000,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     }
     else
     {
-      rc = pcre2_match(code, subject, length, start_offset, options | goptions, match_data,
+      rc = pcre2_match(code, original_subject, length, start_offset, options | goptions, match_data,
                        mcontext);
     }
 

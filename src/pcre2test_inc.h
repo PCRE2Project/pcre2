@@ -7276,6 +7276,14 @@ unittest(void)
                         &sizeval);
   ASSERT(rc == PCRE2_ERROR_DIFFSUBSPATTERN, "pcre2_substitute(pattern)");
 
+  /* The match data must record the caller's NULL subject, not the internal
+  empty string that pcre2_substitute() uses in its place. */
+  sizeval = sizeof(replace_buf) / sizeof(*replace_buf);
+  rc = pcre2_substitute(test_compiled_code, NULL, 0, 0, 0, test_match_data, NULL, NULL, 0,
+                        replace_buf, &sizeval);
+  ASSERT(rc == 0 && pcre2_get_subject(test_match_data, NULL) == NULL,
+         "pcre2_substitute(NULL subject)");
+
   /* -------------- pcre2_serialize_decode: three goto cleanup branches -------- */
 
   {
