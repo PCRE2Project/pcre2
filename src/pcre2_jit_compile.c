@@ -1210,6 +1210,21 @@ check_opcode_types(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend)
       break;
 
     case OP_TYPEPOSSTAR:
+      /* In OP_TYPEPOSSTAR, extuni only uses LOCAL2 when it takes the
+      save/restore path in compile_iterator_matchingpath. */
+#if defined SUPPORT_UNICODE
+      if (cc[1] == OP_EXTUNI &&
+#if PCRE2_CODE_UNIT_WIDTH != 32
+          common->utf &&
+#else
+          common->invalid_utf &&
+#endif
+          locals_size <= 3 * SSIZE_OF(sw))
+        locals_size = 3 * SSIZE_OF(sw);
+#endif /* SUPPORT_UNICODE */
+      cc += 2 - 1;
+      break;
+
     case OP_TYPEPOSPLUS:
     case OP_TYPEPOSQUERY:
       if (cc[1] == OP_EXTUNI && locals_size <= 3 * SSIZE_OF(sw))
@@ -2426,8 +2441,10 @@ get_framesize(compiler_common *common, PCRE2_SPTR cc, PCRE2_SPTR ccend, BOOL rec
   if (SLJIT_UNLIKELY(possessive == length))
     return stack_restore ? no_frame : no_stack;
 
+  SLJIT_ASSERT(length >= 0 && length < 0x1000000);
   if (length > 0)
     return length + 1;
+
   return stack_restore ? no_frame : no_stack;
 }
 
@@ -5969,6 +5986,7 @@ mainloop_entry(compiler_common *common)
   jump_list *newline = NULL;
   sljit_u32 overall_options = common->re->overall_options;
   BOOL hascrorlf = (common->re->flags & PCRE2_HASCRORLF) != 0;
+  BOOL has_offset_limit = (overall_options & PCRE2_USE_OFFSET_LIMIT) != 0;
   BOOL newlinecheck = FALSE;
   BOOL readuchar = FALSE;
 
@@ -5983,6 +6001,46 @@ mainloop_entry(compiler_common *common)
     /* Search for the end of the first line. */
     SLJIT_ASSERT(common->match_end_ptr != 0);
     OP1(SLJIT_MOV, TMP3, 0, STR_PTR, 0);
+
+    /* Temporarily reduce STR_END for the newline lookup only. */
+    if (has_offset_limit)
+    {
+      /* Allow UTF decoding to finish a character at the offset limit.
+      The CRLF scan needs STR_PTR on LF, then records STR_PTR - 1 (the CR).
+      At exhaustion it records STR_END - 1, so it also needs one extra
+      code unit to preserve the inclusive offset limit. */
+      sljit_sw extra = 32 / PCRE2_CODE_UNIT_WIDTH;
+
+      OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL0, STR_END, 0);
+      if (HAS_VIRTUAL_REGISTERS)
+      {
+        OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
+        OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, offset_limit));
+        OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
+      }
+      else
+      {
+        OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, offset_limit));
+        OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, begin));
+      }
+
+      /* STR_END = begin + min(min(offset_limit, length) + extra, length),
+      computed in code units. Clamping offset_limit to the length first
+      handles PCRE2_UNSET and prevents overflow when adding extra. */
+      OP2(SLJIT_SUB, STR_END, 0, STR_END, 0, TMP2, 0);
+#if PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
+      OP2(SLJIT_LSHR, STR_END, 0, STR_END, 0, SLJIT_IMM, UCHAR_SHIFT);
+#endif /* PCRE2_CODE_UNIT_WIDTH == [16|32] */
+      OP2U(SLJIT_SUB | SLJIT_SET_GREATER, TMP1, 0, STR_END, 0);
+      SELECT(SLJIT_GREATER, TMP1, STR_END, 0, TMP1);
+      OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, SLJIT_IMM, extra);
+      OP2U(SLJIT_SUB | SLJIT_SET_GREATER, TMP1, 0, STR_END, 0);
+      SELECT(SLJIT_GREATER, TMP1, STR_END, 0, TMP1);
+#if PCRE2_CODE_UNIT_WIDTH == 16 || PCRE2_CODE_UNIT_WIDTH == 32
+      OP2(SLJIT_SHL, TMP1, 0, TMP1, 0, SLJIT_IMM, UCHAR_SHIFT);
+#endif /* PCRE2_CODE_UNIT_WIDTH == [16|32] */
+      OP2(SLJIT_ADD, STR_END, 0, TMP2, 0, TMP1, 0);
+    }
 
     if (common->nltype == NLTYPE_FIXED && common->newline > 255)
     {
@@ -6012,9 +6070,14 @@ mainloop_entry(compiler_common *common)
     }
 
     OP1(SLJIT_MOV, STR_PTR, 0, TMP3, 0);
+    if (has_offset_limit)
+      OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), LOCAL0);
   }
-  else if ((overall_options & PCRE2_USE_OFFSET_LIMIT) != 0)
+
+  if (has_offset_limit)
   {
+    sljit_s32 limit_end = STR_END;
+
     /* Check whether offset limit is set and valid. */
     SLJIT_ASSERT(common->match_end_ptr != 0);
 
@@ -6028,7 +6091,10 @@ mainloop_entry(compiler_common *common)
       OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, offset_limit));
     }
 
-    OP1(SLJIT_MOV, TMP2, 0, STR_END, 0);
+    if ((overall_options & PCRE2_FIRSTLINE) != 0)
+      OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
+    else
+      OP1(SLJIT_MOV, TMP2, 0, STR_END, 0);
     end = CMP(SLJIT_EQUAL, TMP1, 0, SLJIT_IMM, (sljit_sw)PCRE2_UNSET);
     if (HAS_VIRTUAL_REGISTERS)
       OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
@@ -6042,9 +6108,13 @@ mainloop_entry(compiler_common *common)
       OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
 
     OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, TMP1, 0);
-    end2 = CMP(SLJIT_LESS_EQUAL, TMP2, 0, STR_END, 0);
-    OP1(SLJIT_MOV, TMP2, 0, STR_END, 0);
-    JUMPHERE(end2);
+    if ((overall_options & PCRE2_FIRSTLINE) != 0)
+    {
+      OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
+      limit_end = TMP1;
+    }
+    OP2U(SLJIT_SUB | SLJIT_SET_GREATER, TMP2, 0, limit_end, 0);
+    SELECT(SLJIT_GREATER, TMP2, limit_end, 0, TMP2);
     OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_NOMATCH);
     add_jump(compiler, &common->abort, CMP(SLJIT_LESS, TMP2, 0, STR_PTR, 0));
     JUMPHERE(end);
@@ -9490,7 +9560,8 @@ do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_blo
     jit_ovector += 2;
   }
 
-  return (arguments->callout)(callout_block, arguments->callout_data);
+  int rc = (arguments->callout)(callout_block, arguments->callout_data);
+  return CALLOUT_RESULT(rc);
 }
 
 #define CALLOUT_ARG_OFFSET(arg) SLJIT_OFFSETOF(pcre2_callout_block, arg)
@@ -11157,11 +11228,10 @@ compile_bracket_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_c
     int data;
     int framesize = BACKTRACK_AS(bracket_backtrack)->u.framesize;
 
-    SLJIT_ASSERT(SHRT_MIN <= framesize && framesize < SHRT_MAX / 2);
     /* We temporarily encode the needs_control_head in the lowest bit.
        The real value should be short enough for this operation to work
        without triggering Undefined Behaviour. */
-    data = (int)((short)((unsigned short)framesize << 1) | (needs_control_head ? 1 : 0));
+    data = (int)(((unsigned int)framesize << 1) | (needs_control_head ? 1 : 0));
     BACKTRACK_AS(bracket_backtrack)->u.framesize = data;
   }
 
@@ -12201,8 +12271,19 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
       break;
     }
 
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+#if defined SUPPORT_UNICODE
+    /* We must restore the position if matching fails. This block is for the
+    tricky cases where the restart position must be kept in a saved register.
+    This is needed when a failed item may have advanced STR_PTR by anything
+    other than one code unit: so any UTF-8/16 character, or an extuni that fails
+    because of invalid_utf (its helper call has clobbered STR_PTR, and TMP3).
+    For every other case, the cheaper code underneath restores the previous
+    position with a simple decrement. */
+#if PCRE2_CODE_UNIT_WIDTH != 32
     if (common->utf)
+#else
+    if (type == OP_EXTUNI && common->invalid_utf)
+#endif
     {
       SLJIT_ASSERT(tmp_base == TMP3 || common->locals_size >= 3 * SSIZE_OF(sw));
 
@@ -12235,12 +12316,18 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
 #endif
 
     if (exact == 1)
+    {
+      SLJIT_ASSERT(tmp_base == TMP3 || common->locals_size >= 3 * SSIZE_OF(sw));
       OP1(SLJIT_MOV, tmp_base, tmp_offset, STR_PTR, 0);
+    }
 
     detect_partial_match(common, &no_match);
     label = LABEL();
-    /* Extuni never fails, so no_char1_match is not used in that case.
-       Anynl optionally reads an extra character on success. */
+    /* Every item here advances STR_PTR by exactly one code unit before it can
+    fail, so a failure is undone by stepping back one code unit. Extuni cannot
+    be undone that way, but it never fails without invalid_utf (handled
+    above), so no_char1_match is not used in that case.
+    Anynl optionally reads an extra character on success. */
     compile_char1_matchingpath(common, type, cc, &no_char1_match, FALSE);
     detect_partial_match_to(common, label);
     if (type != OP_EXTUNI)
@@ -12263,6 +12350,10 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
     SLJIT_ASSERT(backtrack == NULL && early_fail_ptr == 0);
     max += exact;
 
+    /* The code below keeps its counter in TMP3 and undoes a failed item by
+    stepping back one code unit. Extuni clobbers TMP3 (helper call) and may
+    span several code units, as may UTF-8/16 characters, so these need a
+    counter which survives the call and a saved restore position. */
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
     if (type == OP_EXTUNI || common->utf)
 #else
@@ -12278,7 +12369,9 @@ compile_iterator_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_
       tmp_base = TMP3;
 #ifdef SUPPORT_UNICODE
       if (type == OP_EXTUNI && common->invalid_utf) {
-        /* Extuni only modifies TMP3 on successful match, except when invalid_utf is enabled. */
+        /* The extuni helper call clobbers TMP3. That is harmless on success,
+        as TMP3 is reloaded before it is read, but with invalid_utf extuni
+        can fail, so the restore position must survive the call. */
         SLJIT_ASSERT(common->locals_size >= 4 * SSIZE_OF(sw));
         OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL3, STACK_LIMIT, 0);
         tmp_base = STACK_LIMIT;

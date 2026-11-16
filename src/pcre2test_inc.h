@@ -1019,12 +1019,14 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
     case MOD_IN2: // One or two unsigned integers
       if (!isdigit(*pp))
         goto INVALID_VALUE;
+      errno = 0;
       uli = strtoul((const char *)pp, &endptr, 10);
       if (U32OVERFLOW(uli))
         goto INVALID_VALUE;
       ((uint32_t *)field)[0] = (uint32_t)uli;
       if (*endptr == ':')
       {
+        errno = 0;
         uli = strtoul((const char *)endptr + 1, &endptr, 10);
         if (U32OVERFLOW(uli))
           goto INVALID_VALUE;
@@ -1045,8 +1047,9 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
     case MOD_SIZ: // PCRE2_SIZE value
       if (!isdigit(*pp))
         goto INVALID_VALUE;
+      errno = 0;
       uli = strtoul((const char *)pp, &endptr, 10);
-      if (uli == ULONG_MAX)
+      if (errno == ERANGE)
         goto INVALID_VALUE;
 #if ULONG_MAX > PCRE2_SIZE_MAX
       if (uli > PCRE2_SIZE_MAX)
@@ -1068,6 +1071,7 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
     case MOD_INT: // Unsigned integer
       if (!isdigit(*pp))
         goto INVALID_VALUE;
+      errno = 0;
       uli = strtoul((const char *)pp, &endptr, 10);
       if (U32OVERFLOW(uli))
         goto INVALID_VALUE;
@@ -1078,6 +1082,7 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
     case MOD_INS: // Signed integer
       if (!isdigit(*pp) && *pp != '-')
         goto INVALID_VALUE;
+      errno = 0;
       li = strtol((const char *)pp, &endptr, 10);
       if (S32OVERFLOW(li))
         goto INVALID_VALUE;
@@ -1116,6 +1121,7 @@ decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
       {
         int ct = MAXCPYGET - 1;
         int32_t value;
+        errno = 0;
         li = strtol((const char *)pp, &endptr, 10);
         if (S32OVERFLOW(li))
           goto INVALID_VALUE;
@@ -1326,6 +1332,14 @@ print_error_message_file(FILE *file, int errorcode, const char *before, const ch
 {
   int len;
   PCRE2_UCHAR buf[128];
+
+  /* Callouts may return their own error codes, which have no message. */
+
+  if (errorcode <= PCRE2_ERROR_CALLOUT_MAX)
+  {
+    cfprintf(clr_api_error, file, "%scallout-defined error%s", before, after);
+    return TRUE;
+  }
 
   len = pcre2_get_error_message(errorcode, buf, sizeof(buf) / sizeof(*buf));
   if (len == PCRE2_ERROR_BADDATA && badcode_ok)
@@ -2471,6 +2485,7 @@ process_pattern(void)
             char *endptr;
 
             pe += 2;
+            errno = 0;
             uli = strtoul((const char *)pe, &endptr, 10);
             if (U32OVERFLOW(uli))
             {
@@ -4360,6 +4375,7 @@ process_data(void)
         return PR_OK;
       }
 
+      errno = 0;
       li = strtol((const char *)p, &endptr, 10);
       if (S32OVERFLOW(li))
       {
@@ -7267,6 +7283,14 @@ unittest(void)
                         PCRE2_SUBSTITUTE_MATCHED, test_match_data, NULL, NULL, 0, replace_buf,
                         &sizeval);
   ASSERT(rc == PCRE2_ERROR_DIFFSUBSPATTERN, "pcre2_substitute(pattern)");
+
+  /* The match data must record the caller's NULL subject, not the internal
+  empty string that pcre2_substitute() uses in its place. */
+  sizeval = sizeof(replace_buf) / sizeof(*replace_buf);
+  rc = pcre2_substitute(test_compiled_code, NULL, 0, 0, 0, test_match_data, NULL, NULL, 0,
+                        replace_buf, &sizeval);
+  ASSERT(rc == 0 && pcre2_get_subject(test_match_data, NULL) == NULL,
+         "pcre2_substitute(NULL subject)");
 
   /* -------------- pcre2_serialize_decode: three goto cleanup branches -------- */
 
