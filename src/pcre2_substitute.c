@@ -949,12 +949,10 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 #ifdef SUPPORT_UNICODE
   if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
   {
-    rc = PRIV(valid_utf)(replacement, rlength, &(match_data->startchar));
+    PCRE2_SIZE erroroffset_ignored;
+    rc = PRIV(valid_utf)(replacement, rlength, &erroroffset_ignored);
     if (rc != 0)
-    {
-      match_data->leftchar = 0;
       goto EXIT;
-    }
   }
 #endif /* SUPPORT_UNICODE */
 
@@ -967,7 +965,6 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
   if (start_offset > length)
   {
-    match_data->leftchar = 0;
     rc = PCRE2_ERROR_BADOFFSET;
     goto EXIT;
   }
