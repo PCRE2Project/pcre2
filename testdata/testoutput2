@@ -24219,6 +24219,63 @@ No match
     aby
 No match
 
+/(a(?R(1)))*+b/
+    aaab
+ 0: b
+
+/(?:(a)((?1(2)))++X|k)/
+    aak
+ 0: k
+\= Expect no match
+    aaaa
+No match
+
+/(a(?R(1))){2,}+b/
+\= Expect no match
+    aaab
+No match
+
+/(a(?1(1))?b|)*+c/
+    aabbabc
+ 0: aabbabc
+ 1: 
+
+/(a(?1(1))?b)*+c/
+    aabbabc
+ 0: aabbabc
+ 1: ab
+
+/((a(?R(1,2)))*+)*+b/
+    aaab
+ 0: b
+ 1: 
+
+/(a(?R(1))|z(?R(1)))*+b/
+    aaazb
+ 0: b
+
+/(a(*MARK:m)(?R(1)))*+b/mark
+    aaab
+ 0: b
+
+/(a\K(?R(1)))*+b/
+    aaab
+ 0: b
+
+/(?:(a(?1(1))?b)*+X|)(?(1)yes|no)/
+    abXyes
+ 0: abXyes
+ 1: ab
+    aabbno
+ 0: no
+
+/(?C1)(?:(a(?1(1))?b)*+X|)(?(1)yes|no)/
+    abXyes\=callout_none
+ 0: abXyes
+ 1: ab
+    aabbno\=callout_none
+ 0: no
+
 # Test each syntax used for recursion
 
 /(?(R)(Sat)urday|(?R(1)),\1)/
