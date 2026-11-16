@@ -474,6 +474,21 @@
 /aa/utf,ucp,match_invalid_utf,global
     \x{d800}aa
     
+# An empty match at the very end of the subject, after a trailing invalid
+# sequence, must be found (see the corresponding 8-bit tests in testinput10).
+
+/x*\Z/match_invalid_utf
+    ab\x{dcff}\x{dcfe}
+    \x{d800}
+
+# A start offset that points inside an invalid sequence or inside a valid
+# surrogate pair is advanced to the next character start before matching,
+# in both engines; the aftertext shows where the empty match was found.
+
+//match_invalid_utf,aftertext
+    \x{dcff}\x{dcff}a\=startoffset=1
+    \x{d800}\x{dc00}a\=startoffset=1
+
 # FIRSTLINE offset limits with unpaired surrogates around CRLF.
 
 /\r\n\r?/firstline,use_offset_limit,newline=crlf,match_invalid_utf,no_start_optimize
