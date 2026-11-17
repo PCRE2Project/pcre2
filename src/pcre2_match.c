@@ -6612,6 +6612,7 @@ NEW_FRAME:
 #define Ltrue_end_extra    F->fields.op_assert_scs.true_end_extra
 #define Lextra_size        F->fields.op_assert_scs.extra_size
 #define Lsaved_moptions    F->fields.op_assert_scs.saved_moptions
+#define Lsaved_partial     F->fields.op_assert_scs.saved_partial
 
     case OP_ASSERT_SCS:
       length = 0;
@@ -6680,10 +6681,16 @@ NEW_FRAME:
       Ltrue_end_extra = mb->true_end_subject - mb->end_subject;
       Lsaved_eptr = Feptr;
       Lsaved_moptions = mb->moptions;
+      Lsaved_partial = mb->partial;
 
       Feptr = mb->start_subject + Fovector[offset];
       mb->true_end_subject = mb->end_subject = mb->start_subject + Fovector[offset + 1];
       mb->moptions &= ~PCRE2_NOTEOL;
+
+      /* Adding characters to the subject cannot change the substring, so
+      reaching its end is never a partial match. */
+
+      mb->partial = 0;
 
       for (;;)
       {
@@ -6698,6 +6705,7 @@ NEW_FRAME:
           mb->end_subject = Lsaved_end_subject;
           mb->true_end_subject = mb->end_subject + Ltrue_end_extra;
           mb->moptions = Lsaved_moptions;
+          mb->partial = Lsaved_partial;
           break;
         }
 
@@ -6706,6 +6714,7 @@ NEW_FRAME:
           mb->end_subject = Lsaved_end_subject;
           mb->true_end_subject = mb->end_subject + Ltrue_end_extra;
           mb->moptions = Lsaved_moptions;
+          mb->partial = Lsaved_partial;
           RRETURN(rrc);
         }
 
@@ -6715,6 +6724,7 @@ NEW_FRAME:
           mb->end_subject = Lsaved_end_subject;
           mb->true_end_subject = mb->end_subject + Ltrue_end_extra;
           mb->moptions = Lsaved_moptions;
+          mb->partial = Lsaved_partial;
           RRETURN(MATCH_NOMATCH);
         }
 
@@ -6731,6 +6741,7 @@ NEW_FRAME:
 #undef Lsaved_end_subject
 #undef Lsaved_eptr
 #undef Ltrue_end_extra
+#undef Lsaved_partial
 #undef Lextra_size
 #undef Lsave_moptions
 
@@ -7249,16 +7260,18 @@ NEW_FRAME:
       case OP_ASSERT_NOT:
         RRETURN(MATCH_MATCH);
 
-        /* A scan substring group must preserve the current end_subject and
-        match options, and restore them before the backtracking is performed
-        into its sub pattern. */
+        /* A scan substring group must preserve the current end_subject, match
+        options and partial setting, and restore them before the backtracking is
+        performed into its sub pattern. */
 
       case OP_ASSERT_SCS:
         F->fields.op_assert_scs.saved_end_subject = mb->end_subject;
         F->fields.op_assert_scs.saved_moptions = mb->moptions;
+        F->fields.op_assert_scs.saved_partial = mb->partial;
         mb->end_subject = P->fields.op_assert_scs.saved_end_subject;
         mb->true_end_subject = mb->end_subject + P->fields.op_assert_scs.true_end_extra;
         mb->moptions = P->fields.op_assert_scs.saved_moptions;
+        mb->partial = P->fields.op_assert_scs.saved_partial;
         Feptr = P->fields.op_assert_scs.saved_eptr;
 
         RMATCH(Fecode + 1 + LINK_SIZE, RM39);
@@ -7266,6 +7279,7 @@ NEW_FRAME:
         mb->end_subject = F->fields.op_assert_scs.saved_end_subject;
         mb->true_end_subject = mb->end_subject;
         mb->moptions = F->fields.op_assert_scs.saved_moptions;
+        mb->partial = F->fields.op_assert_scs.saved_partial;
         RRETURN(rrc);
         break;
 

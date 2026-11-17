@@ -24992,6 +24992,40 @@ No match
     ab\=ph
 Partial match: b
 
+# Adding characters to the subject cannot change the substring scanned by a
+# scan substring assertion, so reaching its end is not a partial match. A
+# partial match is still found if the captured group could grow.
+
+/(a)(*scs:(1)ab)/
+    ax\=ph
+No match
+    ax\=ps
+No match
+    a\=ph
+No match
+
+/(a)(*scs:(1)x|ab)/
+    a\=ph
+No match
+    a\=ps
+No match
+
+/(a)(*scs:(1)(?!ab))/
+    a\=ph
+ 0: a
+ 1: a
+
+/(a)(*scs:(1)a\z)/
+    a\=ph
+ 0: a
+ 1: a
+
+/(\w+?)(*scs:(1)abc)/
+    ab\=ph
+Partial match: ab
+    ab\=ps
+Partial match: ab
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

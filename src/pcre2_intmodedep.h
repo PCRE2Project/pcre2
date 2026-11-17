@@ -1030,6 +1030,7 @@ typedef struct heapframe {
       PCRE2_SPTR saved_eptr;
       PCRE2_SIZE true_end_extra;
       uint32_t saved_moptions;
+      uint16_t saved_partial;
     } op_assert_scs;
 
     struct {

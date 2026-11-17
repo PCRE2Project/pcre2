@@ -94,6 +94,8 @@ character, and at least one of the following must be true:
   some more characters are added, we do not know if it will be an empty string or
   something longer".
 
+Inside a scan substring assertion, reaching the end of the substring is never a partial match, even if it is the end of the subject, because adding characters cannot change a substring that has already been captured.
+
 == Partial matching using func:pcre2_match()
 
 When a partial matching option is set, the result of calling

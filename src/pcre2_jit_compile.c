@@ -4124,11 +4124,12 @@ return_with_partial_match(compiler_common *common, struct sljit_label *quit)
 static SLJIT_INLINE void
 check_start_used_ptr(compiler_common *common)
 {
-  /* May destroy TMP1. */
+  /* May destroy TMP1. Tests the partial matching slots rather than the mode,
+  because scan substrings are compiled in complete mode. */
   DEFINE_COMPILER;
   struct sljit_jump *jump;
 
-  if (common->mode == PCRE2_JIT_PARTIAL_SOFT)
+  if (common->hit_start != 0) /* PCRE2_JIT_PARTIAL_SOFT */
   {
     /* The value of -1 must be kept for start_used_ptr! */
     OP2(SLJIT_ADD, TMP1, 0, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, SLJIT_IMM, 1);
@@ -4138,7 +4139,7 @@ check_start_used_ptr(compiler_common *common)
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, STR_PTR, 0);
     JUMPHERE(jump);
   }
-  else if (common->mode == PCRE2_JIT_PARTIAL_HARD)
+  else if (common->start_used_ptr != 0) /* PCRE2_JIT_PARTIAL_HARD */
   {
     jump = CMP(SLJIT_LESS_EQUAL, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, STR_PTR, 0);
     OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), common->start_used_ptr, STR_PTR, 0);
@@ -10519,6 +10520,7 @@ compile_bracket_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_c
   struct sljit_label *rmax_label = NULL;
   struct sljit_jump *braminzero = NULL;
   BOOL save_in_scan_substring = common->in_scan_substring;
+  int save_mode = common->mode;
 
   PUSH_BACKTRACK(sizeof(bracket_backtrack), cc, NULL);
 
@@ -10812,6 +10814,9 @@ compile_bracket_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_c
     if (common->restore_end_ptr == 0)
       common->restore_end_ptr = private_data_ptr + sizeof(sljit_sw);
     common->in_scan_substring = TRUE;
+    /* Adding characters to the subject cannot change the substring, so
+    reaching its end is never a partial match. */
+    common->mode = PCRE2_JIT_COMPLETE;
 
     if (*matchingpath == OP_CREF &&
         (matchingpath[1 + IMM2_SIZE] != OP_CREF && matchingpath[1 + IMM2_SIZE] != OP_DNCREF))
@@ -11136,6 +11141,7 @@ compile_bracket_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_c
       if (common->restore_end_ptr == private_data_ptr + SSIZE_OF(sw))
         common->restore_end_ptr = 0;
       common->in_scan_substring = save_in_scan_substring;
+      common->mode = save_mode;
       break;
     }
   }
@@ -13398,6 +13404,7 @@ compile_bracket_backtrackingpath(compiler_common *common, struct backtrack_commo
   struct sljit_label *exact_label = NULL;
   struct sljit_jump *mov_addr = NULL;
   BOOL save_in_scan_substring = common->in_scan_substring;
+  int save_mode = common->mode;
 
   if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
   {
@@ -13547,6 +13554,7 @@ compile_bracket_backtrackingpath(compiler_common *common, struct backtrack_commo
     if (common->restore_end_ptr == 0)
       common->restore_end_ptr = private_data_ptr + sizeof(sljit_sw);
     common->in_scan_substring = TRUE;
+    common->mode = PCRE2_JIT_COMPLETE;
   }
   else if (SLJIT_UNLIKELY(opcode == OP_ASSERTBACK_NA) && PRIVATE_DATA(ccbegin + 1))
     OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
@@ -13871,6 +13879,7 @@ compile_bracket_backtrackingpath(compiler_common *common, struct backtrack_commo
     if (common->restore_end_ptr == private_data_ptr + SSIZE_OF(sw))
       common->restore_end_ptr = 0;
     common->in_scan_substring = save_in_scan_substring;
+    common->mode = save_mode;
   }
   else if (opcode == OP_ONCE)
   {
@@ -15160,6 +15169,7 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   common->local_quit_available = TRUE;
   quit_label = common->quit_label;
   SLJIT_ASSERT(common->restore_end_ptr == 0);
+  SLJIT_ASSERT(!common->in_scan_substring && (sljit_u32)common->mode == mode);
 
   if (common->currententry != NULL)
   {
@@ -15201,6 +15211,7 @@ jit_compile(pcre2_code *code, sljit_u32 mode)
   common->local_quit_available = FALSE;
   common->quit_label = quit_label;
   SLJIT_ASSERT(common->restore_end_ptr == 0);
+  SLJIT_ASSERT(!common->in_scan_substring && (sljit_u32)common->mode == mode);
 
   /* Allocating stack, returns with PCRE2_ERROR_JIT_STACKLIMIT if fails. */
   /* This is a (really) rare case. */

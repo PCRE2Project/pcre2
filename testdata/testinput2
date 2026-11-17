@@ -9008,4 +9008,27 @@ a)"xI
 /(?<=\w{1,3}(?=bc))b/
     ab\=ph
 
+# Adding characters to the subject cannot change the substring scanned by a
+# scan substring assertion, so reaching its end is not a partial match. A
+# partial match is still found if the captured group could grow.
+
+/(a)(*scs:(1)ab)/
+    ax\=ph
+    ax\=ps
+    a\=ph
+
+/(a)(*scs:(1)x|ab)/
+    a\=ph
+    a\=ps
+
+/(a)(*scs:(1)(?!ab))/
+    a\=ph
+
+/(a)(*scs:(1)a\z)/
+    a\=ph
+
+/(\w+?)(*scs:(1)abc)/
+    ab\=ph
+    ab\=ps
+
 # End of testinput2
