@@ -4095,8 +4095,10 @@ return_with_partial_match(compiler_common *common, struct sljit_label *quit)
       common->mode == PCRE2_JIT_PARTIAL_SOFT ? common->hit_start : common->start_ptr);
   OP1(SLJIT_MOV, SLJIT_RETURN_REG, 0, SLJIT_IMM, PCRE2_ERROR_PARTIAL);
 
-  /* Store match begin and end. */
+  /* Store match begin and end. STR_END may have been moved temporarily, for
+  example inside a lookbehind, so use the real end of the subject. */
   OP1(SLJIT_MOV, SLJIT_S1, 0, SLJIT_MEM1(arguments_reg), SLJIT_OFFSETOF(jit_arguments, begin));
+  OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(arguments_reg), SLJIT_OFFSETOF(jit_arguments, end));
   OP1(SLJIT_MOV, SLJIT_MEM1(arguments_reg), SLJIT_OFFSETOF(jit_arguments, startchar_ptr), SLJIT_R2,
       0);
   OP1(SLJIT_MOV, SLJIT_R1, 0, SLJIT_MEM1(arguments_reg), SLJIT_OFFSETOF(jit_arguments, match_data));

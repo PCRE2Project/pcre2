@@ -9001,4 +9001,11 @@ a)"xI
 /(ab)(*scs:(1)(?:(a)|ab$))(?(2)(*F))/
     ab\=noteol
 
+# A partial match that is found while the end of the subject is temporarily
+# moved (here, inside a variable-length lookbehind) still ends at the end of
+# the subject.
+
+/(?<=\w{1,3}(?=bc))b/
+    ab\=ph
+
 # End of testinput2

@@ -24984,6 +24984,14 @@ No match
  0: ab
  1: ab
 
+# A partial match that is found while the end of the subject is temporarily
+# moved (here, inside a variable-length lookbehind) still ends at the end of
+# the subject.
+
+/(?<=\w{1,3}(?=bc))b/
+    ab\=ph
+Partial match: b
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
