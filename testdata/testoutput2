@@ -24959,6 +24959,19 @@ get substring list failed (-2): partial match
     abcd
 No match
 
+# Inside a scan substring assertion, $ matches at the end of the substring
+# even if PCRE2_NOTEOL is set.
+
+/(a)(*scs:(1)a$)/
+    ab\=noteol
+ 0: a
+ 1: a
+
+/(a)(*scs:(1)a$)/m
+    ab\=noteol
+ 0: a
+ 1: a
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

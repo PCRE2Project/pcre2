@@ -440,6 +440,8 @@ typedef struct compiler_common {
      STR_END after a match, it is enough to restore
      STR_END inside a scan substring block. */
   sljit_s32 restore_end_ptr;
+  /* TRUE while compiling the body of a scan substring block. */
+  BOOL in_scan_substring;
   /* Points to the last matched capture block index. */
   sljit_s32 capture_last_ptr;
   /* Fast forward skipping byte code pointer. */
@@ -8516,6 +8518,30 @@ do_caselesscmp(compiler_common *common)
 
 #include "pcre2_jit_char_inc.h"
 
+static void
+check_noteol(compiler_common *common, jump_list **backtracks)
+{
+  DEFINE_COMPILER;
+
+  /* The end of a scan substring is an end of line regardless of PCRE2_NOTEOL. */
+  if (common->in_scan_substring)
+    return;
+
+  if (HAS_VIRTUAL_REGISTERS)
+  {
+    OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
+    OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options),
+         SLJIT_IMM, PCRE2_NOTEOL);
+  }
+  else
+  {
+    OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, options),
+         SLJIT_IMM, PCRE2_NOTEOL);
+  }
+
+  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
+}
+
 static PCRE2_SPTR
 compile_simple_assertion_matchingpath(compiler_common *common, PCRE2_UCHAR type, PCRE2_SPTR cc,
                                       jump_list **backtracks)
@@ -8663,19 +8689,7 @@ compile_simple_assertion_matchingpath(compiler_common *common, PCRE2_UCHAR type,
     return cc;
 
   case OP_DOLL:
-    if (HAS_VIRTUAL_REGISTERS)
-    {
-      OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
-      OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options),
-           SLJIT_IMM, PCRE2_NOTEOL);
-    }
-    else
-    {
-      OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, options),
-           SLJIT_IMM, PCRE2_NOTEOL);
-    }
-
-    add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
+    check_noteol(common, backtracks);
 
     if (!common->endonly)
     {
@@ -8691,19 +8705,7 @@ compile_simple_assertion_matchingpath(compiler_common *common, PCRE2_UCHAR type,
 
   case OP_DOLLM:
     jump[1] = CMP(SLJIT_LESS, STR_PTR, 0, STR_END, 0);
-    if (HAS_VIRTUAL_REGISTERS)
-    {
-      OP1(SLJIT_MOV, TMP2, 0, ARGUMENTS, 0);
-      OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options),
-           SLJIT_IMM, PCRE2_NOTEOL);
-    }
-    else
-    {
-      OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, options),
-           SLJIT_IMM, PCRE2_NOTEOL);
-    }
-
-    add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
+    check_noteol(common, backtracks);
     check_partial(common, FALSE);
     jump[0] = JUMP(SLJIT_JUMP);
     JUMPHERE(jump[1]);
@@ -10514,6 +10516,7 @@ compile_bracket_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_c
   jump_list *jumplist;
   struct sljit_label *rmax_label = NULL;
   struct sljit_jump *braminzero = NULL;
+  BOOL save_in_scan_substring = common->in_scan_substring;
 
   PUSH_BACKTRACK(sizeof(bracket_backtrack), cc, NULL);
 
@@ -10806,6 +10809,7 @@ compile_bracket_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_c
     /* Nested scs blocks will not update this variable. */
     if (common->restore_end_ptr == 0)
       common->restore_end_ptr = private_data_ptr + sizeof(sljit_sw);
+    common->in_scan_substring = TRUE;
 
     if (*matchingpath == OP_CREF &&
         (matchingpath[1 + IMM2_SIZE] != OP_CREF && matchingpath[1 + IMM2_SIZE] != OP_DNCREF))
@@ -11129,6 +11133,7 @@ compile_bracket_matchingpath(compiler_common *common, PCRE2_SPTR cc, backtrack_c
       /* Nested scs blocks will not update this variable. */
       if (common->restore_end_ptr == private_data_ptr + SSIZE_OF(sw))
         common->restore_end_ptr = 0;
+      common->in_scan_substring = save_in_scan_substring;
       break;
     }
   }
@@ -13390,6 +13395,7 @@ compile_bracket_backtrackingpath(compiler_common *common, struct backtrack_commo
   struct sljit_label *rmin_label = NULL;
   struct sljit_label *exact_label = NULL;
   struct sljit_jump *mov_addr = NULL;
+  BOOL save_in_scan_substring = common->in_scan_substring;
 
   if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
   {
@@ -13538,6 +13544,7 @@ compile_bracket_backtrackingpath(compiler_common *common, struct backtrack_commo
     /* Nested scs blocks will not update this variable. */
     if (common->restore_end_ptr == 0)
       common->restore_end_ptr = private_data_ptr + sizeof(sljit_sw);
+    common->in_scan_substring = TRUE;
   }
   else if (SLJIT_UNLIKELY(opcode == OP_ASSERTBACK_NA) && PRIVATE_DATA(ccbegin + 1))
     OP1(SLJIT_MOV, STR_END, 0, SLJIT_MEM1(SLJIT_SP), private_data_ptr);
@@ -13861,6 +13868,7 @@ compile_bracket_backtrackingpath(compiler_common *common, struct backtrack_commo
     /* Nested scs blocks will not update this variable. */
     if (common->restore_end_ptr == private_data_ptr + SSIZE_OF(sw))
       common->restore_end_ptr = 0;
+    common->in_scan_substring = save_in_scan_substring;
   }
   else if (opcode == OP_ONCE)
   {

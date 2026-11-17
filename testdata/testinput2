@@ -8983,4 +8983,13 @@ a)"xI
 /a(*SKIP:X)(*F)|ab(*SKIP)(*F)|(*MARK:X)c(*SKIP:X)(*F)|cd/
     abcd
 
+# Inside a scan substring assertion, $ matches at the end of the substring
+# even if PCRE2_NOTEOL is set.
+
+/(a)(*scs:(1)a$)/
+    ab\=noteol
+
+/(a)(*scs:(1)a$)/m
+    ab\=noteol
+
 # End of testinput2
