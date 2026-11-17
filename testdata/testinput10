@@ -810,4 +810,14 @@
     XXXX\xfc
     XXXXX\xfd\x7f
 
+# A hard partial match inside a scan substring assertion must not leave the
+# assertion's end of subject in place when matching moves on to the next valid
+# UTF fragment. JIT does not use fragments, so these test the interpreter only.
+
+/()(*scs:(1)|b)/match_invalid_utf
+    a\xffaa\=offset=1,notempty_atstart,ph,no_jit
+
+/\G()(*scs:(1)|b)|a\z/match_invalid_utf
+    a\xffaa\=offset=1,notempty_atstart,ph,no_jit
+
 # End of testinput10

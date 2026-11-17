@@ -2196,4 +2196,17 @@ Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at of
     XXXXX\xfd\x7f
 Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 5
 
+# A hard partial match inside a scan substring assertion must not leave the
+# assertion's end of subject in place when matching moves on to the next valid
+# UTF fragment. JIT does not use fragments, so these test the interpreter only.
+
+/()(*scs:(1)|b)/match_invalid_utf
+    a\xffaa\=offset=1,notempty_atstart,ph,no_jit
+ 0: 
+ 1: 
+
+/\G()(*scs:(1)|b)|a\z/match_invalid_utf
+    a\xffaa\=offset=1,notempty_atstart,ph,no_jit
+Partial match: a
+
 # End of testinput10

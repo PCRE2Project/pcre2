@@ -8945,6 +8945,11 @@ ENDLOOP:
 #ifdef SUPPORT_UNICODE
   if (utf && end_subject != true_end_subject && (rc == MATCH_NOMATCH || rc == PCRE2_ERROR_PARTIAL))
   {
+    /* A hard partial match returns directly from match(), so if it happened
+    inside a scan substring assertion, mb->true_end_subject was not restored. */
+
+    mb->true_end_subject = true_end_subject;
+
     for (;;)
     {
       /* Advance past the first bad code unit, and then skip invalid character

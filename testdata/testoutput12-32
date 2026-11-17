@@ -2173,4 +2173,17 @@ No match
 
 # --------------------------------------------------------- 
 
+# A hard partial match inside a scan substring assertion must not leave the
+# assertion's end of subject in place when matching moves on to the next valid
+# UTF fragment. JIT does not use fragments, so these test the interpreter only.
+
+/()(*scs:(1)|b)/match_invalid_utf
+    a\x{d800}aa\=offset=1,notempty_atstart,ph,no_jit
+ 0: 
+ 1: 
+
+/\G()(*scs:(1)|b)|a\z/match_invalid_utf
+    a\x{d800}aa\=offset=1,notempty_atstart,ph,no_jit
+Partial match: a
+
 # End of testinput12
