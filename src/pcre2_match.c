@@ -6610,7 +6610,6 @@ NEW_FRAME:
 #define Lsaved_end_subject F->fields.op_assert_scs.saved_end_subject
 #define Lsaved_eptr        F->fields.op_assert_scs.saved_eptr
 #define Ltrue_end_extra    F->fields.op_assert_scs.true_end_extra
-#define Lextra_size        F->fields.op_assert_scs.extra_size
 #define Lsaved_moptions    F->fields.op_assert_scs.saved_moptions
 
     case OP_ASSERT_SCS:
@@ -6731,8 +6730,7 @@ NEW_FRAME:
 #undef Lsaved_end_subject
 #undef Lsaved_eptr
 #undef Ltrue_end_extra
-#undef Lextra_size
-#undef Lsave_moptions
+#undef Lsaved_moptions
 
 
       /* ===================================================================== */
