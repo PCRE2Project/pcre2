@@ -8964,4 +8964,22 @@ a)"xI
 /a(b)c/allvector
     xab\=ps,ovector=2,copy=0,getall
 
+# Captures kept from an assertion, including after (*ACCEPT) and in a
+# condition, update the capture_last value passed to callouts.
+
+/(?(?=(a))a(?C1)|b)/
+    a\=callout_capture
+
+/(?(?!(a))x|a(?C1))/
+    a\=callout_capture
+
+/(?=(a)(*ACCEPT)b)(?C1)/
+    a\=callout_capture
+
+/(?(?=(a)(*ACCEPT)b)a(?C1))/
+    a\=callout_capture
+
+/(a)(*scs:(1)(a)(*ACCEPT)x)(?C1)/
+    a\=callout_capture
+
 # End of testinput2

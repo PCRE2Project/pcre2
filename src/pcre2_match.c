@@ -6541,6 +6541,7 @@ NEW_FRAME:
           memcpy(Fovector, (char *)assert_accept_frame + offsetof(heapframe, ovector),
                  assert_accept_frame->offset_top * sizeof(PCRE2_SIZE));
           Foffset_top = assert_accept_frame->offset_top;
+          Fcapture_last = assert_accept_frame->capture_last;
           Fmark = assert_accept_frame->mark;
           break;
         }
@@ -6693,6 +6694,7 @@ NEW_FRAME:
           memcpy(Fovector, (char *)assert_accept_frame + offsetof(heapframe, ovector),
                  assert_accept_frame->offset_top * sizeof(PCRE2_SIZE));
           Foffset_top = assert_accept_frame->offset_top;
+          Fcapture_last = assert_accept_frame->capture_last;
           Fmark = assert_accept_frame->mark;
           mb->end_subject = Lsaved_end_subject;
           mb->true_end_subject = mb->end_subject + Ltrue_end_extra;
@@ -6872,6 +6874,7 @@ NEW_FRAME:
             memcpy(Fovector, (char *)assert_accept_frame + offsetof(heapframe, ovector),
                    assert_accept_frame->offset_top * sizeof(PCRE2_SIZE));
             Foffset_top = assert_accept_frame->offset_top;
+            Fcapture_last = assert_accept_frame->capture_last;
 
             PCRE2_FALLTHROUGH /* Fall through */
             /* In the case of a match, the captures have already been put into
@@ -7128,6 +7131,7 @@ NEW_FRAME:
           memcpy((char *)P + offsetof(heapframe, ovector), Fovector,
                  Foffset_top * sizeof(PCRE2_SIZE));
           P->offset_top = Foffset_top;
+          P->capture_last = Fcapture_last;
           P->mark = Fmark;
           Fback_frame = (char *)F - (char *)P;
           RRETURN(MATCH_MATCH);
@@ -8223,7 +8227,7 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
   mb->cb = &cb;
   cb.version = 2;
   cb.subject = subject;
-  cb.subject_length = (PCRE2_SIZE)(end_subject - subject);
+  cb.subject_length = length;
   cb.callout_flags = 0;
 
   /* Fill in the remaining fields in the match block, except for moptions, which
