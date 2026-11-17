@@ -2201,4 +2201,11 @@ No match
     a\x{d800}aa\=offset=1,notempty_atstart,ph,no_jit
 Partial match: a
 
+# A hard partial match during a re-run after an unmatched (*SKIP:NAME) must not
+# carry the count of ignored (*SKIP:NAME) items over to the next fragment.
+
+/(?:x(*MARK:X)|y)(*SKIP:X)(*F)|yq|xa|ab/match_invalid_utf
+    y\x{d800}xab\=ph
+ 0: ab
+
 # End of testinput12

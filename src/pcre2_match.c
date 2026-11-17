@@ -8847,12 +8847,11 @@ FRAGMENT_RESTART:
       PCRE2_FALLTHROUGH /* Fall through */
 
       /* NOMATCH and PRUNE advance by one character. THEN at this level acts
-      exactly like PRUNE. Unset ignore SKIP-with-argument. */
+      exactly like PRUNE. */
 
     case MATCH_NOMATCH:
     case MATCH_PRUNE:
     case MATCH_THEN:
-      mb->ignore_skip_arg = 0;
       new_start_match = start_match + 1;
 #ifdef SUPPORT_UNICODE
       if (utf)
@@ -8879,9 +8878,12 @@ FRAGMENT_RESTART:
     }
 
     /* Control reaches here for the various types of "no match at this point"
-    result. Reset the code to MATCH_NOMATCH for subsequent checking. */
+    result, all of which advance the starting point. Reset the code to
+    MATCH_NOMATCH for subsequent checking, and stop ignoring SKIP-with-argument
+    items, which applies only to a re-run at the same point. */
 
     rc = MATCH_NOMATCH;
+    mb->ignore_skip_arg = 0;
 
     /* If PCRE2_FIRSTLINE is set, the match must happen before or at the first
     newline in the subject (though it may continue over the newline). Therefore,
@@ -8947,9 +8949,12 @@ ENDLOOP:
   if (utf && end_subject != true_end_subject && (rc == MATCH_NOMATCH || rc == PCRE2_ERROR_PARTIAL))
   {
     /* A hard partial match returns directly from match(), so if it happened
-    inside a scan substring assertion, mb->true_end_subject was not restored. */
+    inside a scan substring assertion, mb->true_end_subject was not restored.
+    It may also have happened during a re-run that ignores SKIP-with-argument
+    items, which must not carry over to the next fragment. */
 
     mb->true_end_subject = true_end_subject;
+    mb->ignore_skip_arg = 0;
 
     for (;;)
     {

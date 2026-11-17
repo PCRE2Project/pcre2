@@ -24952,6 +24952,13 @@ get substring list failed (-2): partial match
     \nac
  0: \x0aac
 
+# After a (*SKIP) advances the starting position, an earlier re-run's count of
+# ignored (*SKIP:NAME) items must not carry over to the new position.
+
+/a(*SKIP:X)(*F)|ab(*SKIP)(*F)|(*MARK:X)c(*SKIP:X)(*F)|cd/
+    abcd
+No match
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

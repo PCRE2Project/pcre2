@@ -8977,4 +8977,10 @@ a)"xI
 /\n(?:a(*SKIP:X)b|ac)/firstline
     \nac
 
+# After a (*SKIP) advances the starting position, an earlier re-run's count of
+# ignored (*SKIP:NAME) items must not carry over to the new position.
+
+/a(*SKIP:X)(*F)|ab(*SKIP)(*F)|(*MARK:X)c(*SKIP:X)(*F)|cd/
+    abcd
+
 # End of testinput2
