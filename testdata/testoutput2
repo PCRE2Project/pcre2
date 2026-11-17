@@ -24936,6 +24936,22 @@ Partial match: ab
  0C ab (2)
 get substring list failed (-2): partial match
 
+# A (*SKIP:NAME) with no matching mark re-runs the match at the same position,
+# ignoring that (*SKIP). This must happen for anchored patterns and at a
+# newline with firstline too.
+
+/^(?:a(*SKIP:X)b|ac)/
+    ac
+ 0: ac
+
+/(?:a(*SKIP:X)b|ac)/anchored
+    ac
+ 0: ac
+
+/\n(?:a(*SKIP:X)b|ac)/firstline
+    \nac
+ 0: \x0aac
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

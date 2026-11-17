@@ -8826,12 +8826,13 @@ FRAGMENT_RESTART:
       entirely. The only way we can do that is to re-do the match at the same
       point, with a flag to force SKIP with an argument to be ignored. Just
       treating this case as NOMATCH does not work because it does not check other
-      alternatives in patterns such as A(*SKIP:A)B|AC when the subject is AC. */
+      alternatives in patterns such as A(*SKIP:A)B|AC when the subject is AC.
+      This is not an advance, so the anchoring and firstline checks below must
+      not stop it. */
 
     case MATCH_SKIP_ARG:
-      new_start_match = start_match;
       mb->ignore_skip_arg = mb->skip_arg_count;
-      break;
+      continue;
 
       /* SKIP passes back the next starting point explicitly, but if it is no
       greater than the match we have just done, treat it as NOMATCH. */

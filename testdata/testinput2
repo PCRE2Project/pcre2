@@ -8964,4 +8964,17 @@ a)"xI
 /a(b)c/allvector
     xab\=ps,ovector=2,copy=0,getall
 
+# A (*SKIP:NAME) with no matching mark re-runs the match at the same position,
+# ignoring that (*SKIP). This must happen for anchored patterns and at a
+# newline with firstline too.
+
+/^(?:a(*SKIP:X)b|ac)/
+    ac
+
+/(?:a(*SKIP:X)b|ac)/anchored
+    ac
+
+/\n(?:a(*SKIP:X)b|ac)/firstline
+    \nac
+
 # End of testinput2
