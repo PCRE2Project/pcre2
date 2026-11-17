@@ -3679,6 +3679,19 @@ callout_function(pcre2_callout_block *cb, void *callout_data_ptr)
   BOOL callout_capture = (dat_datctl.control & CTL_CALLOUT_CAPTURE) != 0;
   BOOL callout_where = (dat_datctl.control2 & CTL2_CALLOUT_NO_WHERE) == 0;
 
+  /* A callout cannot return PR_ABEND, so a bad callout block ends the run here. */
+
+#define ASSERT(x)                                                             \
+  do                                                                          \
+  {                                                                           \
+    if (!(x))                                                                 \
+    {                                                                         \
+      cfprintf(clr_test_error, stderr, "** Invalid callout block: %s\n", #x); \
+      cfprintf(clr_test_error, stderr, "** pcre2test run abandoned\n");       \
+      exit(1);                                                                \
+    }                                                                         \
+  } while (0)
+
   if (outfile == NULL)
     goto YIELD;
 
@@ -3754,6 +3767,8 @@ callout_function(pcre2_callout_block *cb, void *callout_data_ptr)
       }
       else
       {
+        ASSERT(cb->offset_vector[i] <= cb->offset_vector[i + 1] &&
+               cb->offset_vector[i + 1] <= cb->subject_length);
         pchars(clr_none, cb->subject + cb->offset_vector[i],
                cb->offset_vector[i + 1] - cb->offset_vector[i], utf, f);
       }
@@ -3766,6 +3781,11 @@ callout_function(pcre2_callout_block *cb, void *callout_data_ptr)
   non-printing characters), the first time, or if giving full details. On
   subsequent calls in the same match, we use pchars() just to find the printed
   lengths of the substrings. */
+
+  /* Check the callout block; the arithmetic below relies on the bounds. */
+  ASSERT(cb->start_match <= cb->subject_length);
+  ASSERT(cb->current_position <= cb->subject_length);
+  ASSERT(cb->offset_vector[0] == PCRE2_UNSET && cb->offset_vector[1] == PCRE2_UNSET);
 
   if (callout_where)
   {
@@ -3892,6 +3912,8 @@ YIELD:
     return 1;
 
   return 0;
+
+#undef ASSERT
 }
 
 

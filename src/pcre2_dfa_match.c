@@ -383,6 +383,7 @@ do_callout_dfa(PCRE2_SPTR code, PCRE2_SIZE *offsets, PCRE2_SPTR current_subject,
                dfa_match_block *mb, PCRE2_SIZE extracode, PCRE2_SIZE *lengthptr)
 {
   pcre2_callout_block *cb = mb->cb;
+  PCRE2_SIZE save0, save1;
 
   *lengthptr = (code[extracode] == OP_CALLOUT)
                    ? (PCRE2_SIZE)PRIV(OP_lengths)[OP_CALLOUT]
@@ -415,7 +416,15 @@ do_callout_dfa(PCRE2_SPTR code, PCRE2_SIZE *offsets, PCRE2_SPTR current_subject,
     cb->callout_string_length = *lengthptr - (1 + 4 * LINK_SIZE) - 2;
   }
 
+  /* The ovector may hold the offsets of matches already found. Callouts must
+  see ovector[0] and ovector[1] as unset, as for the other matchers. */
+
+  save0 = offsets[0];
+  save1 = offsets[1];
+  offsets[0] = offsets[1] = PCRE2_UNSET;
   int rc = (mb->callout)(cb, mb->callout_data);
+  offsets[0] = save0;
+  offsets[1] = save1;
   return CALLOUT_RESULT(rc);
 }
 
