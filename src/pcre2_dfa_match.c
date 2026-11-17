@@ -3824,6 +3824,7 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     rc = PCRE2_ERROR_BADOFFSET;
     goto EXIT;
   }
+
   if (mcontext != NULL && mcontext->offset_limit != PCRE2_UNSET &&
       mcontext->offset_limit > length)
   {
@@ -3884,13 +3885,19 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 #undef FF
 #undef OO
 
+  /* The workspace is indexed using int, so ignore any excess. */
+
+  int wscount_int = (wscount > INT_MAX) ? INT_MAX : (int)wscount;
+
   /* If restarting after a partial match, do some sanity checks on the contents
-  of the workspace. */
+  of the workspace. The first two ints say which of the two state lists that
+  follow is active, and how many states it holds. Each list has room for the
+  same number of states, computed as in internal_dfa_match(). */
 
   if ((options & PCRE2_DFA_RESTART) != 0)
   {
     if ((workspace[0] & (-2)) != 0 || workspace[1] < 1 ||
-        workspace[1] > (int)((wscount - 2) / INTS_PER_STATEBLOCK))
+        workspace[1] > (wscount_int - 2) / (2 * INTS_PER_STATEBLOCK))
     {
       rc = PCRE2_ERROR_DFA_BADRESTART;
       goto EXIT;
@@ -4496,7 +4503,7 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
                             match_data->ovector,                 // offset vector
                             (uint32_t)match_data->oveccount * 2, // actual size of same
                             workspace,                           // workspace vector
-                            (int)wscount,                        // size of same
+                            wscount_int,                         // size of same
                             0,                                   // function recurse level
                             base_recursion_workspace);           // initial workspace for recursion
 
