@@ -7249,20 +7249,23 @@ NEW_FRAME:
       case OP_ASSERT_NOT:
         RRETURN(MATCH_MATCH);
 
-        /* A scan substring group must preserve the current end_subject,
-        and restore it before the backtracking is performed into its sub
-        pattern. */
+        /* A scan substring group must preserve the current end_subject and
+        match options, and restore them before the backtracking is performed
+        into its sub pattern. */
 
       case OP_ASSERT_SCS:
         F->fields.op_assert_scs.saved_end_subject = mb->end_subject;
+        F->fields.op_assert_scs.saved_moptions = mb->moptions;
         mb->end_subject = P->fields.op_assert_scs.saved_end_subject;
         mb->true_end_subject = mb->end_subject + P->fields.op_assert_scs.true_end_extra;
+        mb->moptions = P->fields.op_assert_scs.saved_moptions;
         Feptr = P->fields.op_assert_scs.saved_eptr;
 
         RMATCH(Fecode + 1 + LINK_SIZE, RM39);
 
         mb->end_subject = F->fields.op_assert_scs.saved_end_subject;
         mb->true_end_subject = mb->end_subject;
+        mb->moptions = F->fields.op_assert_scs.saved_moptions;
         RRETURN(rrc);
         break;
 

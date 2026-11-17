@@ -2216,4 +2216,11 @@ Partial match: a
     y\xffxab\=ph
  0: ab
 
+# Non-final fragments are matched with PCRE2_NOTEOL, which must apply again
+# after a scan substring assertion.
+
+/(a)(*scs:(1)a)$/m,match_invalid_utf
+    a\xff
+No match
+
 # End of testinput10

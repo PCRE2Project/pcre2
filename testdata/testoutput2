@@ -24972,6 +24972,18 @@ No match
  0: a
  1: a
 
+# PCRE2_NOTEOL must apply again after a scan substring assertion, and must stay
+# cleared when backtracking into it.
+
+/(a)(*scs:(1)a)$/
+    a\=noteol
+No match
+
+/(ab)(*scs:(1)(?:(a)|ab$))(?(2)(*F))/
+    ab\=noteol
+ 0: ab
+ 1: ab
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data

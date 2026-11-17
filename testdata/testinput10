@@ -826,4 +826,10 @@
 /(?:x(*MARK:X)|y)(*SKIP:X)(*F)|yq|xa|ab/match_invalid_utf
     y\xffxab\=ph
 
+# Non-final fragments are matched with PCRE2_NOTEOL, which must apply again
+# after a scan substring assertion.
+
+/(a)(*scs:(1)a)$/m,match_invalid_utf
+    a\xff
+
 # End of testinput10
