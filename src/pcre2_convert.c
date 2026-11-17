@@ -141,6 +141,80 @@ static const char *posix_classes =
 
 
 /*************************************************
+*    Decode one character, bounded by the end    *
+*************************************************/
+
+/* Decode the character at ptr, where endptr points to just after the last
+input code unit, store it in *cptr, and return its length in code units.
+This is a bounded equivalent of GETCHARLENTEST() for use by the converters.
+
+When PCRE2_CONVERT_UTF is set, the input is supposed to be valid UTF; this
+is checked on entry unless PCRE2_CONVERT_NO_UTF_CHECK is set. A caller that
+sets PCRE2_CONVERT_NO_UTF_CHECK thereby promises that the input is valid,
+but the GETCHAR macros read past the end of the input if the last character
+is a truncated multi-unit sequence, so a caller that breaks the promise can
+cause an out-of-bounds read. To prevent that, a truncated sequence at the
+very end of the input is treated here as a single code unit. For valid
+input this function behaves exactly like GETCHARLENTEST().
+
+Arguments:
+  ptr       points to the first code unit of the character
+  endptr    points to just after the last input code unit
+  utf       TRUE if UTF mode
+  cptr      where to put the character
+
+Returns:    the length in code units of the decoded character (>= 1)
+*/
+
+static int
+convert_decode(PCRE2_SPTR ptr, PCRE2_SPTR endptr, BOOL utf, uint32_t *cptr)
+{
+  uint32_t c = *ptr;
+
+  *cptr = c;
+
+#ifdef SUPPORT_UNICODE
+  if (utf)
+  {
+#if PCRE2_CODE_UNIT_WIDTH == 8
+    if (c >= 0xc0u)
+    {
+      /* The number of code units GETUTF8LEN() would read for this lead
+      byte, worked out from its bit pattern in the same way. (The
+      utf8_table4[] entry used by GET_EXTRALEN() is not defined for lead
+      bytes of 0xf8 or more, so it cannot be used here.) */
+
+      int length = ((c & 0x20u) == 0) ? 2 : ((c & 0x10u) == 0) ? 3 : 4;
+      if ((PCRE2_SIZE)length > (PCRE2_SIZE)(endptr - ptr))
+        return 1; /* Truncated sequence at the end of the input */
+      length = 1;
+      GETUTF8LEN(c, ptr, length);
+      *cptr = c;
+      return length;
+    }
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+    if ((c & 0xfc00u) == 0xd800u)
+    {
+      int length = 1;
+      if (endptr - ptr < 2)
+        return 1; /* Truncated sequence at the end of the input */
+      GETUTF16LEN(c, ptr, length);
+      *cptr = c;
+      return length;
+    }
+#endif
+  }
+#else
+  (void)endptr;
+  (void)utf;
+#endif
+
+  return 1;
+}
+
+
+
+/*************************************************
 *           Convert a POSIX pattern              *
 *************************************************/
 
@@ -198,14 +272,16 @@ convert_posix(uint32_t pattype, PCRE2_SPTR pattern, PCRE2_SIZE plength, BOOL utf
       p = use_buffer;
     pp = p;
 
-    /* Pick up the next character */
+    /* Pick up the next character. The decode is bounded by the remaining
+    length, so that a truncated UTF sequence at the end of the input can
+    neither read past the end nor make plength underflow. */
 
     uint32_t c;
     int clength = 1;
 #ifndef SUPPORT_UNICODE
     c = *posix;
 #else
-    GETCHARLENTEST(c, posix, clength);
+    clength = convert_decode(posix, posix + plength, utf, &c);
 #endif
     posix += clength;
     plength -= clength;
@@ -766,7 +842,7 @@ convert_glob_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end, pcre2_output_
   {
     PCRE2_SPTR char_start = pattern;
     uint32_t c;
-    GETCHARINCTEST(c, pattern);
+    pattern += convert_decode(pattern, pattern_end, utf, &c);
 
     if (c == CHAR_RIGHT_SQUARE_BRACKET)
     {
@@ -813,7 +889,7 @@ convert_glob_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end, pcre2_output_
       convert_glob_write(out, CHAR_MINUS);
 
       char_start = pattern;
-      GETCHARINCTEST(c, pattern);
+      pattern += convert_decode(pattern, pattern_end, utf, &c);
 
       if (pattern >= pattern_end)
         break;
@@ -821,7 +897,7 @@ convert_glob_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end, pcre2_output_
       if (escape != 0 && c == escape)
       {
         char_start = pattern;
-        GETCHARINCTEST(c, pattern);
+        pattern += convert_decode(pattern, pattern_end, utf, &c);
       }
       else if (c == CHAR_LEFT_SQUARE_BRACKET && *pattern == CHAR_COLON)
       {
@@ -846,7 +922,7 @@ convert_glob_parse_range(PCRE2_SPTR *from, PCRE2_SPTR pattern_end, pcre2_output_
       if (escape != 0 && c == escape)
       {
         char_start = pattern;
-        GETCHARINCTEST(c, pattern);
+        pattern += convert_decode(pattern, pattern_end, utf, &c);
 
         if (pattern >= pattern_end)
           break;
