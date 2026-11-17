@@ -4930,6 +4930,127 @@ B)x/alt_verbnames,mark
     \n..\naa\=offset_limit=3
     \n..\naa\=offset_limit=4
 
+# FIRSTLINE and offset limits must both constrain the starting position.
+
+/b/firstline,use_offset_limit,newline=lf
+    ab\nb\=offset_limit=0
+    ab\nb\=offset_limit=1
+    ab\nb\=offset_limit=2
+    ab\nb\=offset_limit=4
+    ab\nb
+    b\nb\=offset_limit=0
+    a\nb\=offset_limit=3
+    ab\=offset_limit=0
+    ab\=offset_limit=2
+    ab\nb\=offset=1,offset_limit=0
+    ab\nb\=offset=1,offset_limit=1
+    a\nab\=offset=2,offset_limit=2
+    a\nab\=offset=2,offset_limit=3
+    a\nb\=offset=2,offset_limit=2
+
+/b/firstline,use_offset_limit,newline=lf,no_start_optimize
+    ab\nb\=offset_limit=0
+    ab\nb\=offset_limit=1
+    ab\nb\=offset_limit=2
+    ab\nb\=offset_limit=4
+    ab\nb
+    b\nb\=offset_limit=0
+    a\nb\=offset_limit=3
+    ab\=offset_limit=0
+    ab\=offset_limit=2
+    ab\nb\=offset=1,offset_limit=0
+    ab\nb\=offset=1,offset_limit=1
+    a\nab\=offset=2,offset_limit=2
+    a\nab\=offset=2,offset_limit=3
+    a\nb\=offset=2,offset_limit=2
+
+/\n/firstline,use_offset_limit,newline=lf
+    a\nb\=offset_limit=0
+    a\nb\=offset_limit=1
+    a\nb\=offset_limit=3
+
+/b\nc/firstline,use_offset_limit,newline=lf
+    ab\nc\=offset_limit=0
+    ab\nc\=offset_limit=1
+    ab\n\=offset_limit=1,ps
+    ab\n\=offset_limit=1,ph
+
+/b/firstline,use_offset_limit,newline=crlf
+    ab\r\nb\=offset_limit=0
+    ab\r\nb\=offset_limit=1
+    ab\r\nb\=offset_limit=2
+    ab\r\nb\=offset_limit=5
+    ab\r\nb\=offset_limit=50
+    ab\r\nb
+    a\r\nb\=offset_limit=4
+    b\r\nb\=offset_limit=0
+    ab\=offset_limit=1
+    ab\r\=offset_limit=1
+
+# The scan limit is inclusive, and does not truncate the match.
+
+/\r\n/firstline,use_offset_limit,newline=crlf
+    a\r\nb\=offset_limit=0
+    a\r\nb\=offset_limit=1
+    a\r\nb\=offset_limit=2
+    \r\nb\=offset_limit=0
+
+/b\r\nc/firstline,use_offset_limit,newline=crlf
+    ab\r\nc\=offset_limit=0
+    ab\r\nc\=offset_limit=1
+    ab\r\n\=offset_limit=1,ps
+    ab\r\n\=offset_limit=1,ph
+
+/(?:)/firstline,use_offset_limit,newline=lf,no_start_optimize
+    abc\=offset=2,offset_limit=1
+    abc\=offset=2,offset_limit=2
+    abc\=offset=3,offset_limit=3
+    \=offset_limit=0
+
+/(?:)/firstline,use_offset_limit,newline=crlf,no_start_optimize
+    abc\=offset=2,offset_limit=1
+    abc\=offset=2,offset_limit=2
+    abc\=offset=3,offset_limit=3
+    \=offset_limit=0
+
+# CRLF at the subject end, adjacent lone CRs, and a shortened scan.
+
+/\r\n\r?/firstline,use_offset_limit,newline=crlf
+    a\r\n\=offset_limit=0
+    a\r\n\=offset_limit=1
+    a\r\n\=offset_limit=2
+    a\r\n\=offset_limit=3
+    a\r\n\r\=offset_limit=0
+    a\r\n\r\=offset_limit=1
+    a\r\n\r\=offset_limit=2
+    a\r\n\r\=offset_limit=4
+    a\r\r\n\=offset_limit=1
+    a\r\r\n\=offset_limit=2
+    a\r\r\n\=offset_limit=3
+    a\r\r\n\=offset_limit=4
+    a\r\n\rxxxxxxxx\=offset_limit=0
+    a\r\n\rxxxxxxxx\=offset_limit=1
+    a\r\n\rxxxxxxxx\=offset_limit=2
+
+/\n/firstline,use_offset_limit,newline=crlf
+    a\r\n\=offset_limit=1
+    a\r\n\=offset_limit=2
+    a\r\n\=offset_limit=3
+    a\r\n\=offset=2,offset_limit=1
+    a\r\n\=offset=2,offset_limit=2
+    a\r\n\=offset=2,offset_limit=3
+
+/\r\z/firstline,use_offset_limit,newline=crlf,no_start_optimize
+    a\r\=offset_limit=0
+    a\r\=offset_limit=1
+    a\r\=offset_limit=2
+    a\r\n\r\=offset_limit=2
+    a\r\n\r\=offset_limit=3
+    a\r\n\r\=offset_limit=4
+    a\r\n\r\=offset=3,offset_limit=2
+    a\r\n\r\=offset=3,offset_limit=3
+    a\r\n\r\=offset=3,offset_limit=4
+
 /abcd/null_context
     abcd\=null_context
 \= Expect not allowed together
@@ -5264,6 +5385,18 @@ a)"xI
     \=callout_data=-11000000000
     \=offset_limit=1100000000000000000000
     \=copy=11000000000
+    \=callout_fail=4294967295
+    \=callout_fail=4294967296
+    \=callout_fail=1:4294967295
+    \=callout_fail=1:4294967296
+    \=callout_data=2147483647
+    \=callout_data=2147483648
+    \=callout_data=-2147483648
+    \=callout_data=-2147483649
+    \=copy=2147483647
+    \=copy=2147483648
+    \=depth_limit=4294967295
+    \=depth_limit=4294967296
 
 /(*MARK:A\x00b)/mark
     abc
@@ -5771,6 +5904,71 @@ a)"xI
 
 /^(?(?!A(?C1)B)C)/
     ABC\=callout_error=1
+
+# Callout return values. A positive value causes backtracking and zero lets
+# matching continue. PCRE2_ERROR_NOMATCH ends the match with "no match". Other
+# values from -2 to -999 are reserved, and end the match with
+# PCRE2_ERROR_CALLOUT. Values at or below PCRE2_ERROR_CALLOUT_MAX (-1000) end
+# the match and are returned unchanged.
+
+/(?C1)a/
+    a\=callout_data=-1
+    a\=callout_data=-2
+    a\=callout_data=-37
+    a\=callout_data=-47
+    a\=callout_data=-79
+    a\=callout_data=-993
+    a\=callout_data=-994
+    a\=callout_data=-998
+    a\=callout_data=-999
+    a\=callout_data=-1000
+    a\=callout_data=-2147483648
+
+# Values that the interpreter uses internally must not be acted on when a
+# callout returns them from inside groups and assertions.
+
+/(?=(?C1)a)a/
+    a\=callout_data=-999
+
+/(?=(a)(*ACCEPT))(?=(?C1)b)/
+    ab\=callout_data=-999
+
+/(?:(?C1)a)++b/no_start_optimize
+    b\=callout_data=-998
+
+/(?!(?C1)x)a/
+    a\=callout_data=-1
+    a\=callout_data=-997
+
+/(a|ab)(?C1)c/
+    abc\=callout_data=-996
+
+/(?!aa(*SKIP)x)(?C1)./
+    aabcd\=callout_data=-995
+
+/^(*MARK:A)(?C1)a/
+    a\=callout_data=-994
+
+/(?:(?C1)ab|ac)|(*THEN)z/
+    ac\=callout_data=-993
+
+# A callout's "no match" or reserved value must not be reported as a partial
+# match found at an earlier starting position.
+
+/xab|a(?C1)/no_start_optimize
+    xa\=ps,callout_data=-1
+    xa\=ps,callout_data=-2
+
+# A callout's "no match" or reserved value at the end of the subject must not
+# be reported as a hard or soft partial match.
+
+/a(?C1)b/
+    a\=ph
+    a\=ph,callout_data=-1
+    a\=ph,callout_data=-2
+    a\=ps
+    a\=ps,callout_data=-1
+    a\=ps,callout_data=-2
 
 # ----------------------------------------------------------------------
 
@@ -8302,6 +8500,42 @@ a)"xI
 /()()()(?2(2,3,2,3,2))/B
   abc
 
+# Returned groups that are unset after the call are not counted (#1048).
+
+/(?&r(2))(x)?(?(DEFINE)(?<r>(a)))/
+    a
+
+/^(?&r(2))(?(DEFINE)(?<r>(x)?(a)))/
+    a
+    a\=ovector=1
+
+/^(?&r(2,3))(?(DEFINE)(?<r>(x)?(y)?(a)))/
+    xa
+
+/^(?&r(2,4))(?(DEFINE)(?<r>(a)(b)?(c)?))/
+    a
+
+/^(b)(?&r(3))(?(DEFINE)(?<r>(x)?(a)))/
+    ba
+
+/(?(DEFINE)(?<r>(x)?a))^(b)(?&r(2))/
+    ba
+
+/^(?(R)(x)?(a)|(?R(1))!)/
+    a!
+
+# A called group that returns itself keeps its unset or set status, inside and after.
+
+/^(?1(1))(?:\1S|U)$(?(DEFINE)(a(?:\1S|U)))/
+    aUU
+\= Expect no match
+    aUaUS
+
+/^(a(?:\1S|U))(?1(1))\1$/
+    aUaaUSaU
+\= Expect no match
+    aUaaUSaaUS
+
 /^(?:(?&r(2))x|aa)(?(DEFINE)(?<r>(.)(.)(*ACCEPT)(.)))/
     abx
     aby
@@ -8314,106 +8548,43 @@ a)"xI
     abx
     aby
 
-# (*ACCEPT) in a called group must skip the whole list of returned groups,
-# including groups that were not set by the call, and count only those that
-# are set.
+/(a(?R(1)))*+b/
+    aaab
 
-/^(?&r(4))b$(?(DEFINE)(?<r>(a)(*ACCEPT)(b)(c)))/
-    ab
-
-/^(?&r(2,4))b$(?(DEFINE)(?<r>(a)(*ACCEPT)(b)(c)))/
-    ab
-
-/^(?&r(3))b$(?(DEFINE)(?<r>(a)(*ACCEPT)(c)))/
-    ab
-
-/^(?&r(2))b$(?(DEFINE)(?<r>(*ACCEPT)(a)))/
-    b
-
-/^(?&r(1))b$(?(DEFINE)(?<r>(a)(*ACCEPT)x))/
-    ab
-
-/(a)(?2(3))\1\3(?(DEFINE)(b(c)(*ACCEPT)x))/
-    abcac
+/(?:(a)((?1(2)))++X|k)/
+    aak
 \= Expect no match
-    abcab
+    aaaa
 
-/(?1(3))(?1(2))(?(DEFINE)((a)(*ACCEPT)|(b)))!/
-    ba!
-
-# A group returned by an (*ACCEPT) call that is later abandoned is unset.
-
-/^(?:(?&r(2))X|a)(?(2)Y|b)$(?(DEFINE)(?<r>(a)(*ACCEPT)x))/
-    ab
+/(a(?R(1))){2,}+b/
 \= Expect no match
-    aY
+    aaab
 
-/^(?:(?&r(2))X|a)(?(2)Y|b)$(?(DEFINE)(?<r>(a(*ACCEPT)x)))/
-    ab
-\= Expect no match
-    aY
+/(a(?1(1))?b|)*+c/
+    aabbabc
 
-# Groups that are open at (*ACCEPT) in a called group are closed, if they were
-# opened within the call, so that they can be returned. The called group itself
-# and groups opened by the caller are not closed.
+/(a(?1(1))?b)*+c/
+    aabbabc
 
-/^(?&r(2))b\2$(?(DEFINE)(?<r>(a(*ACCEPT)x)))/
-    aba
-\= Expect no match
-    abb
+/((a(?R(1,2)))*+)*+b/
+    aaab
 
-/^(?&r(2,3))\2\3$(?(DEFINE)(?<r>(a(b(*ACCEPT)c))))/
-    ababb
+/(a(?R(1))|z(?R(1)))*+b/
+    aaazb
 
-/^(?&r(3))\3(?(2)x|y)$(?(DEFINE)(?<r>(a(b(*ACCEPT)c))))/
-    abby
-\= Expect no match
-    abbx
+/(a(*MARK:m)(?R(1)))*+b/mark
+    aaab
 
-/^(?&r(1,2))(?(1)x|y)(?(DEFINE)(?<r>(a(*ACCEPT)b)))/
-    ay
-\= Expect no match
-    ax
+/(a\K(?R(1)))*+b/
+    aaab
 
-/^(x(?<r>a(*ACCEPT)b){0}(?&r(1))(?(1)y|z))/
-    xaz
-\= Expect no match
-    xay
+/(?:(a(?1(1))?b)*+X|)(?(1)yes|no)/
+    abXyes
+    aabbno
 
-/(?(R)(a(*ACCEPT)x)|(?R(1))b\1)/
-    aba
-
-/^(?&r(3))\3$(?(DEFINE)(?<r>(?&s(3)))(?<s>(a(*ACCEPT)x)))/
-    aa
-
-/^(?(DEFINE)(?=(?<r>(a(*ACCEPT)x))))(?&r(2))b\2$/
-    aba
-
-# Groups closed by (*ACCEPT) are restored when they are not returned.
-
-/^(?&r)b(?(DEFINE)(?<r>(a(*ACCEPT)x)))/
-    ab
-
-/^(?&r(2))(?&r)\2$(?(DEFINE)(?<r>(.(*ACCEPT)x)))/
-    aba
-\= Expect no match
-    abb
-
-# (*ACCEPT) in an assertion within a called group closes the open groups, as
-# it does outside a called group, and as when they are closed explicitly.
-
-/^(?1)(?(DEFINE)((?=(a(*ACCEPT)b))a(?(2)Y|N)))/
-    aY
-\= Expect no match
-    aN
-
-/^(?1)(?(DEFINE)((?=(a)(*ACCEPT)b)a(?(2)Y|N)))/
-    aY
-\= Expect no match
-    aN
-
-/^(?1)$(?(DEFINE)((?(?=(a(*ACCEPT)b))a\2|c)))/
-    aa
+/(?C1)(?:(a(?1(1))?b)*+X|)(?(1)yes|no)/
+    abXyes\=callout_none
+    aabbno\=callout_none
 
 # Test each syntax used for recursion
 
@@ -8755,5 +8926,42 @@ a)"xI
 
 /(?>a(){5462}b)|a/
     a\=jitstack=1024
+
+# Substring extraction from the match data after pcre2_substitute()
+
+/(a)(b)?/replace=<$1>
+    xaby\=copy=1,get=2,getall
+    xabxa\=global,copy=1,getall
+    xyz\=copy=1,getall
+
+/a/replace=b
+    aaaa\=global,ovector=1,getall
+
+/x*/replace=<$&>,global
+    ab\=getall
+
+# After a failure, the match data holds the match that was being substituted.
+
+/(a)(b)?/replace=<$1>
+    xaby\=replace=[2]<$1>,copy=1,getall
+    xaby\=allvector,ovector=3,copy=1,getall
+\= The match data is not passed, so there is nothing to extract
+    xaby\=null_substitute_match_data,copy=1,getall
+
+# With PCRE2_SUBSTITUTE_MATCHED, pcre2_substitute() works on a copy of the
+# match data, which still holds the result of pcre2test's own call to
+# pcre2_match(), even after a global substitution.
+
+/(a)(b)?/replace=<$1>,substitute_matched
+    xaby\=copy=1,get=2,getall
+    xabxa\=global,copy=1,getall
+    xyz\=copy=1,getall
+    xaby\=replace=[2]<$1>,copy=1,getall
+    xaby\=allvector,ovector=3,copy=1,getall
+\= Expect error, with nothing to extract
+    xaby\=null_substitute_match_data,copy=1,getall
+
+/a(b)c/allvector
+    xab\=ps,ovector=2,copy=0,getall
 
 # End of testinput2

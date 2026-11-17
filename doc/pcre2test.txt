@@ -1488,6 +1488,10 @@ SUBJECT MODIFIERS
        partial matching provokes an error return ("bad option value") from
        pcre2_substitute().
 
+       The allvector, copy, get, and getall modifiers may be used together
+       with replace. They test the contents of the match data block that was
+       passed to pcre2_substitute(), after it has returned.
+
        The substitute_subject modifier may be used to test the use of the
        PCRE2 API, in which a client calls pcre2_match() followed by
        pcre2_substitute() with PCRE2_SUBSTITUTE_MATCHED, but the client

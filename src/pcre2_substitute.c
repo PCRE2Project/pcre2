@@ -805,7 +805,10 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     rlength = PRIV(strlen)(replacement);
   PCRE2_SPTR repend = replacement + rlength;
 
-  /* A NULL subject of zero length is treated as an empty string. */
+  /* A NULL subject of zero length is treated as an empty string. Note that arithmetic
+  on a NULL pointer (even adding zero) is undefined behaviour in C. However, we must
+  pass the caller's original pointer to pcre2_match() and the substitute callout,
+  because it will be recorded in the match data. */
 
   if (subject == NULL)
   {
@@ -946,12 +949,10 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 #ifdef SUPPORT_UNICODE
   if (utf && (options & PCRE2_NO_UTF_CHECK) == 0)
   {
-    rc = PRIV(valid_utf)(replacement, rlength, &(match_data->startchar));
+    PCRE2_SIZE erroroffset_ignored;
+    rc = PRIV(valid_utf)(replacement, rlength, &erroroffset_ignored);
     if (rc != 0)
-    {
-      match_data->leftchar = 0;
       goto EXIT;
-    }
   }
 #endif /* SUPPORT_UNICODE */
 
@@ -964,7 +965,6 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
   if (start_offset > length)
   {
-    match_data->leftchar = 0;
     rc = PCRE2_ERROR_BADOFFSET;
     goto EXIT;
   }
@@ -997,7 +997,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     }
     else
     {
-      rc = pcre2_match(code, subject, length, start_offset, options | goptions, match_data,
+      rc = pcre2_match(code, original_subject, length, start_offset, options | goptions, match_data,
                        mcontext);
     }
 
@@ -1023,6 +1023,15 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
       rc = PCRE2_ERROR_BADSUBSPATTERN;
       goto EXIT;
     }
+
+    /* LCOV_EXCL_START */
+    if (ovector[1] > length)
+    {
+      PCRE2_DEBUG_UNREACHABLE();
+      rc = PCRE2_ERROR_INTERNAL;
+      goto EXIT;
+    }
+    /* LCOV_EXCL_STOP */
 
     /* Assert that our replacement loop is making progress, checked even in
     release builds. This should be impossible to hit, however, an infinite loop
@@ -1699,18 +1708,18 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
     if (mcontext != NULL && mcontext->substitute_callout != NULL)
     {
-      /* If we an actual (non-simulated) replacement, do the callout. */
+      /* If we are making an actual (non-simulated) replacement, do the callout. */
 
       if (!overflowed)
       {
         scb.subscount = subs;
         scb.output_offsets[1] = buff_offset;
-        rc = mcontext->substitute_callout(&scb, mcontext->substitute_callout_data);
+        int scrc = mcontext->substitute_callout(&scb, mcontext->substitute_callout_data);
 
         /* A non-zero return means cancel this substitution. Instead, copy the
         matched string fragment. */
 
-        if (rc != 0)
+        if (scrc != 0)
         {
           PCRE2_SIZE newlength = scb.output_offsets[1] - scb.output_offsets[0];
           PCRE2_SIZE oldlength = ovector[1] - ovector[0];
@@ -1722,7 +1731,7 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
           /* A negative return means do not do any more. */
 
-          if (rc < 0)
+          if (scrc < 0)
             suboptions &= (~PCRE2_SUBSTITUTE_GLOBAL);
         }
       }
@@ -1819,10 +1828,13 @@ pcre2_substitute(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 
 EXIT:
   PCRE2_ASSERT(null_buffer[0] == 0xcd); // Check the canary was not overwritten
+
+  /* Free our internal match data. Note that a caller-supplied match data block
+  must be left exactly as the final call to pcre2_match() left it, as promised
+  by our API contract. */
   if (internal_match_data != NULL)
     pcre2_match_data_free(internal_match_data);
-  else
-    match_data->rc = rc;
+
   return rc;
 
 NOROOM:

@@ -98,6 +98,8 @@ for any one of them can use a range. */
 #define MATCH_BACKTRACK_MAX MATCH_THEN
 #define MATCH_BACKTRACK_MIN MATCH_COMMIT
 
+STATIC_ASSERT(PCRE2_ERROR_CALLOUT_MAX < MATCH_ACCEPT, callout_max_less_than_match_accept);
+
 /* Group frame type values. Zero means the frame is not a group frame. The
 lower 16 bits are used for data (e.g. the capture number). Group frames are
 used for most groups so that information about the start is easily available at
@@ -278,7 +280,7 @@ Arguments:
   mb         points to the match block
   lengthptr  where to return the length of the callout item
 
-Returns:     the return from the callout
+Returns:     the return from the callout, after CALLOUT_RESULT(),
              or 0 if no callout function exists
 */
 
@@ -343,7 +345,7 @@ do_callout(heapframe *F, match_block *mb, PCRE2_SIZE *lengthptr)
   callout_ovector[0] = save0;
   callout_ovector[1] = save1;
   cb->callout_flags = 0;
-  return rc;
+  return CALLOUT_RESULT(rc);
 }
 
 
@@ -546,6 +548,10 @@ recurse_update_offsets(heapframe *F, heapframe *P)
   offset 0 is reserved for the full match. */
   PCRE2_SIZE offset = 2;
   PCRE2_SIZE offset_top = Foffset_top + 2;
+  /* The new top is the caller's top, raised to cover the highest returned
+  group that is set. Returned groups can be unset, even if a higher group was
+  set in the recursion; for example, the called group itself is never set. */
+  PCRE2_SIZE new_top = P->offset_top;
   PCRE2_SIZE diff;
   PCRE2_SPTR ecode = Fecode;
 
@@ -562,6 +568,10 @@ recurse_update_offsets(heapframe *F, heapframe *P)
         ecode += 1 + IMM2_SIZE;
       break;
     }
+
+    /* dst[diff] is the returned group; offset + diff is the top that covers it. */
+    if (dst[diff] != PCRE2_UNSET && offset + diff > new_top)
+      new_top = offset + diff;
 
     if (diff == 2)
     {
@@ -592,7 +602,7 @@ recurse_update_offsets(heapframe *F, heapframe *P)
   }
 
   Fecode = ecode;
-  Foffset_top = (offset <= P->offset_top) ? P->offset_top : (offset - 2);
+  Foffset_top = new_top;
 }
 
 
@@ -937,32 +947,28 @@ NEW_FRAME:
       where we know the starting frame is at the top of the chained frames, in
       this case we have to search back for the relevant frame in case other types
       of group that use chained frames have intervened. Multiple OP_CLOSEs always
-      come innermost first, which matches the chain order. In a recursion, only
-      groups opened within the recursion are closed (they may be returned to the
-      caller, or kept by an assertion), so the search stops at the recursion's
-      frame. The called group itself, and groups opened by the caller, are not
-      closed. */
+      come innermost first, which matches the chain order. We can ignore this in
+      a recursion, because captures are not passed out of recursions. */
 
     case OP_CLOSE:
-      number = GET2(Fecode, 1);
-      offset = Flast_group_offset;
-      for (;;)
+      if (Fcurrent_recurse == RECURSE_UNSET)
       {
-        /* Corrupted heapframes?. Trigger an assert and return an error */
-        PCRE2_ASSERT(offset != PCRE2_UNSET);
-        if (offset == PCRE2_UNSET)
-          return PCRE2_ERROR_INTERNAL;
+        number = GET2(Fecode, 1);
+        offset = Flast_group_offset;
+        for (;;)
+        {
+          /* Corrupted heapframes?. Trigger an assert and return an error */
+          PCRE2_ASSERT(offset != PCRE2_UNSET);
+          if (offset == PCRE2_UNSET)
+            return PCRE2_ERROR_INTERNAL;
 
-        N = (heapframe *)((char *)match_data->heapframes + offset);
-        P = (heapframe *)((char *)N - frame_size);
-        if (N->group_frame_type == (GF_CAPTURE | number) ||
-            GF_IDMASK(N->group_frame_type) == GF_RECURSE)
-          break;
-        offset = P->last_group_offset;
-      }
+          N = (heapframe *)((char *)match_data->heapframes + offset);
+          P = (heapframe *)((char *)N - frame_size);
+          if (N->group_frame_type == (GF_CAPTURE | number))
+            break;
+          offset = P->last_group_offset;
+        }
 
-      if (N->group_frame_type == (GF_CAPTURE | number))
-      {
         offset = (number << 1) - 2;
         Fcapture_last = number;
         Fovector[offset] = P->eptr - mb->start_subject;
@@ -1041,25 +1047,40 @@ NEW_FRAME:
         /* N is now the frame of the recursion; the previous frame is at the
         OP_RECURSE position. Go back there, copying the current subject position
         and mark, and the start_match position (\K might have changed it), and
-        then move on past the OP_RECURSE and any list of groups to return. The
-        listed groups are copied back; those at or beyond Foffset_top are unset
-        in both frames. */
+        then move on past the OP_RECURSE. */
 
       ACCEPT_IN_RECURSION:
         P->eptr = Feptr;
         P->mark = Fmark;
         P->start_match = Fstart_match;
         P->ecode += 1 + LINK_SIZE;
-        for (; *P->ecode == OP_CREF; P->ecode += 1 + IMM2_SIZE)
+        if (*P->ecode == OP_CREF)
         {
-          offset = (GET2(P->ecode, 1) << 1) - 2;
-          if (offset < Foffset_top)
+          PCRE2_SPTR ecode = P->ecode;
+          PCRE2_SIZE *dst = P->ovector;
+          PCRE2_SIZE *src = F->ovector;
+          PCRE2_SIZE max_offset = P->offset_top;
+          PCRE2_SIZE offset_top = Foffset_top;
+
+          do
           {
-            P->ovector[offset] = Fovector[offset];
-            P->ovector[offset + 1] = Fovector[offset + 1];
-            if (Fovector[offset] != PCRE2_UNSET && offset >= P->offset_top)
-              P->offset_top = offset + 2;
+            PCRE2_SIZE ref_offset = (GET2(ecode, 1) << 1) - 2;
+            if (ref_offset > offset_top)
+            {
+              break;
+            }
+            dst[ref_offset] = src[ref_offset];
+            dst[ref_offset + 1] = src[ref_offset + 1];
+            if (src[ref_offset] != PCRE2_UNSET && ref_offset >= max_offset)
+            {
+              max_offset = ref_offset + 2;
+            }
+            ecode += 1 + IMM2_SIZE;
           }
+          while (*ecode == OP_CREF);
+
+          P->ecode = ecode;
+          P->offset_top = max_offset;
         }
         F = P;
         continue;
@@ -6589,7 +6610,6 @@ NEW_FRAME:
 #define Lsaved_end_subject F->fields.op_assert_scs.saved_end_subject
 #define Lsaved_eptr        F->fields.op_assert_scs.saved_eptr
 #define Ltrue_end_extra    F->fields.op_assert_scs.true_end_extra
-#define Lextra_size        F->fields.op_assert_scs.extra_size
 #define Lsaved_moptions    F->fields.op_assert_scs.saved_moptions
 
     case OP_ASSERT_SCS:
@@ -6710,8 +6730,7 @@ NEW_FRAME:
 #undef Lsaved_end_subject
 #undef Lsaved_eptr
 #undef Ltrue_end_extra
-#undef Lextra_size
-#undef Lsave_moptions
+#undef Lsaved_moptions
 
 
       /* ===================================================================== */
@@ -9030,9 +9049,11 @@ ENDLOOP:
 
   match_data->mark = mb->nomatch_mark;
 
-  /* For anything other than nomatch or partial match, just return the code. */
+  /* For anything other than nomatch or partial match, just return the code.
+  PCRE2_ERROR_NOMATCH can come only from a callout, which ends the match
+  without a partial match. */
 
-  if (rc != MATCH_NOMATCH && rc != PCRE2_ERROR_PARTIAL)
+  if (rc != MATCH_NOMATCH && rc != PCRE2_ERROR_NOMATCH && rc != PCRE2_ERROR_PARTIAL)
     match_data->rc = rc;
 
   /* Handle a partial match. If a "soft" partial match was requested, searching
@@ -9040,7 +9061,7 @@ ENDLOOP:
   will be MATCH_NOMATCH. For a "hard" partial match, it will already be
   PCRE2_ERROR_PARTIAL. */
 
-  else if (match_partial != NULL)
+  else if (rc != PCRE2_ERROR_NOMATCH && match_partial != NULL)
   {
     match_data->subject = original_subject;
     match_data->subject_length = length;

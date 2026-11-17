@@ -3481,11 +3481,6 @@ groups it captures for use later:
   (?&weekendday(<short>)),\k<short> )
 ----
 
-If [.regex]`+(*ACCEPT)+` ends the called group, the listed groups are returned as they
-are at that point. Any groups that are still open, and were opened within the
-call, are closed first, as described for [.regex]`+(*ACCEPT)+` below. For example,
-[.regex]`+(?&r(2))b\2(?(DEFINE)(?<r>(a(*ACCEPT)x)))+` matches [.subject]`aba`.
-
 This feature is not available using the Oniguruma syntax [.regex]`+\g<...>+` or [.regex]`+\g'...'+`
 below.
 

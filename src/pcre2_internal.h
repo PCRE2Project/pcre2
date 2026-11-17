@@ -219,6 +219,16 @@ sizes used do not currently allow higher values. */
 #define MAX_CALLOUT_NUMBER 255
 #define MAX_OVECTOR_COUNT  65535u
 
+/* A match callout may return any value that is not negative, the value
+PCRE2_ERROR_NOMATCH, or a value that is no greater than PCRE2_ERROR_CALLOUT_MAX.
+The other negative values are reserved for PCRE2; they are converted to
+PCRE2_ERROR_CALLOUT, so that the matchers never act on them as though they
+were their own codes. The argument is evaluated more than once. */
+
+#define CALLOUT_RESULT(rc)                                                 \
+  (((rc) >= PCRE2_ERROR_NOMATCH || (rc) <= PCRE2_ERROR_CALLOUT_MAX) ? (rc) \
+                                                                  : PCRE2_ERROR_CALLOUT)
+
 /* The initial frames vector for remembering pcre2_match() backtracking points
 is allocated on the heap, of size START_FRAMES_SIZE (bytes), or,
 START_FRAMES_COUNT times the frame size if larger, unless the heap limit is

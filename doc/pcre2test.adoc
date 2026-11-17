@@ -1588,6 +1588,10 @@ A replacement string is ignored with POSIX and DFA matching. Specifying partial
 matching provokes an error return ("bad option value") from
 func:pcre2_substitute().
 
+The `allvector`, `copy`, `get`, and `getall` modifiers may be used together with
+`replace`. They test the contents of the match data block that was passed to
+func:pcre2_substitute(), after it has returned.
+
 The `substitute_subject` modifier may be used to test the use of the PCRE2
 API, in which a client calls func:pcre2_match() followed by func:pcre2_substitute()
 with const:PCRE2_SUBSTITUTE_MATCHED, but the client performs an unexpected and

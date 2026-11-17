@@ -85,6 +85,17 @@ in others, so I abandoned this code. */
    PCRE2_NOTEMPTY_ATSTART | PCRE2_NO_UTF_CHECK | PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT | \
    PCRE2_DFA_SHORTEST | PCRE2_DFA_RESTART | PCRE2_COPY_MATCHED_SUBJECT)
 
+/* Special internal return from internal_dfa_match(), meaning that this
+(sub)pattern did not match at the current position. It is distinct from
+PCRE2_ERROR_NOMATCH, so that every negative external code (including a
+callout's PCRE2_ERROR_NOMATCH) can be passed straight back to the caller. Make
+it sufficiently negative to avoid the external error codes; CALLOUT_RESULT()
+never returns it. */
+
+#define DFA_NOMATCH (-999)
+
+STATIC_ASSERT(PCRE2_ERROR_CALLOUT_MAX < DFA_NOMATCH, callout_max_less_than_dfa_nomatch);
+
 
 /*************************************************
 *      Code parameters and static tables         *
@@ -364,7 +375,7 @@ Arguments:
   extracode         extra code offset when called from condition
   lengthptr         where to return the callout length
 
-Returns:            the return from the callout
+Returns:            the return from the callout, after CALLOUT_RESULT()
 */
 
 static int
@@ -404,7 +415,8 @@ do_callout_dfa(PCRE2_SPTR code, PCRE2_SIZE *offsets, PCRE2_SPTR current_subject,
     cb->callout_string_length = *lengthptr - (1 + 4 * LINK_SIZE) - 2;
   }
 
-  return (mb->callout)(cb, mb->callout_data);
+  int rc = (mb->callout)(cb, mb->callout_data);
+  return CALLOUT_RESULT(rc);
 }
 
 
@@ -516,8 +528,10 @@ Arguments:
 
 Returns:            > 0 => number of match offset pairs placed in offsets
                     = 0 => offsets overflowed; longest matches are present
-                     -1 => failed to match
-                   < -1 => some kind of unexpected problem
+                    DFA_NOMATCH => failed to match
+                    PCRE2_ERROR_PARTIAL => partial match
+                    other negative => error, or a callout's negative return,
+                      which ends the whole match
 
 The following macros are used for adding states to the two state vectors (one
 for the current character, one for the following character). */
@@ -608,7 +622,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
   lcc = mb->tables + lcc_offset;
   fcc = mb->tables + fcc_offset;
 
-  match_count = PCRE2_ERROR_NOMATCH; // A negative number
+  match_count = DFA_NOMATCH; // A negative number
 
   active_states = (stateblock *)(workspace + 2);
   next_new_state = new_states = active_states + wscount;
@@ -3155,7 +3169,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
 
           rws->free += RWS_RSIZE + RWS_OVEC_OSIZE;
 
-          if (rc < 0 && rc != PCRE2_ERROR_NOMATCH)
+          if (rc < 0 && rc != DFA_NOMATCH)
             return rc;
           if ((rc >= 0) == (codevalue == OP_ASSERT || codevalue == OP_ASSERTBACK))
           {
@@ -3270,7 +3284,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
 
             rws->free += RWS_RSIZE + RWS_OVEC_OSIZE;
 
-            if (rc < 0 && rc != PCRE2_ERROR_NOMATCH)
+            if (rc < 0 && rc != DFA_NOMATCH)
               return rc;
             if ((rc >= 0) == (condcode == OP_ASSERT || condcode == OP_ASSERTBACK))
             {
@@ -3380,7 +3394,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               }
             }
           }
-          else if (rc != PCRE2_ERROR_NOMATCH)
+          else if (rc != DFA_NOMATCH)
             return rc;
         }
 
@@ -3444,7 +3458,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
 
             if (rc < 0)
             {
-              if (rc != PCRE2_ERROR_NOMATCH)
+              if (rc != DFA_NOMATCH)
                 return rc;
               break;
             }
@@ -3616,7 +3630,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
               }
             }
           }
-          else if (rc != PCRE2_ERROR_NOMATCH)
+          else if (rc != DFA_NOMATCH)
             return rc;
         }
 
@@ -3691,7 +3705,7 @@ internal_dfa_match(dfa_match_block *mb, PCRE2_SPTR this_start_code, PCRE2_SPTR c
 
   if (match_count >= 0 && ((mb->moptions | mb->poptions) & PCRE2_ENDANCHORED) != 0 &&
       ptr < end_subject)
-    match_count = PCRE2_ERROR_NOMATCH;
+    match_count = DFA_NOMATCH;
 
   return match_count;
 }
@@ -3810,6 +3824,7 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
     rc = PCRE2_ERROR_BADOFFSET;
     goto EXIT;
   }
+
   if (mcontext != NULL && mcontext->offset_limit != PCRE2_UNSET &&
       mcontext->offset_limit > length)
   {
@@ -3870,13 +3885,19 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 #undef FF
 #undef OO
 
+  /* The workspace is indexed using int, so ignore any excess. */
+
+  int wscount_int = (wscount > INT_MAX) ? INT_MAX : (int)wscount;
+
   /* If restarting after a partial match, do some sanity checks on the contents
-  of the workspace. */
+  of the workspace. The first two ints say which of the two state lists that
+  follow is active, and how many states it holds. Each list has room for the
+  same number of states, computed as in internal_dfa_match(). */
 
   if ((options & PCRE2_DFA_RESTART) != 0)
   {
     if ((workspace[0] & (-2)) != 0 || workspace[1] < 1 ||
-        workspace[1] > (int)((wscount - 2) / INTS_PER_STATEBLOCK))
+        workspace[1] > (wscount_int - 2) / (2 * INTS_PER_STATEBLOCK))
     {
       rc = PCRE2_ERROR_DFA_BADRESTART;
       goto EXIT;
@@ -4482,16 +4503,17 @@ pcre2_dfa_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
                             match_data->ovector,                 // offset vector
                             (uint32_t)match_data->oveccount * 2, // actual size of same
                             workspace,                           // workspace vector
-                            (int)wscount,                        // size of same
+                            wscount_int,                         // size of same
                             0,                                   // function recurse level
                             base_recursion_workspace);           // initial workspace for recursion
 
     /* Anything other than "no match" means we are done, always; otherwise, carry
-    on only if not anchored. */
+    on only if not anchored. PCRE2_ERROR_NOMATCH can come only from a callout,
+    which ends the match. */
 
-    if (rc != PCRE2_ERROR_NOMATCH || anchored)
+    if (rc != DFA_NOMATCH || anchored)
     {
-      if (rc == PCRE2_ERROR_NOMATCH)
+      if (rc == DFA_NOMATCH || rc == PCRE2_ERROR_NOMATCH)
         goto NOMATCH_EXIT;
 
       if (rc == PCRE2_ERROR_PARTIAL && match_data->oveccount > 0)

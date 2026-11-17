@@ -5278,4 +5278,61 @@
     baa
     baaa
 
+# Callout return values. PCRE2_ERROR_NOMATCH ends the match with "no match".
+# Other values from -2 to -999 are reserved, and end the match with
+# PCRE2_ERROR_CALLOUT. Values at or below PCRE2_ERROR_CALLOUT_MAX (-1000) end
+# the match and are returned unchanged.
+
+/(?C1)a/
+    a\=callout_data=-1
+    a\=callout_data=-2
+    a\=callout_data=-999
+    a\=callout_data=-1000
+
+/(?=(?C1)a)a/
+    a\=callout_data=-999
+
+/(?:(?C1)a)++b/no_start_optimize
+    b\=callout_data=-998
+
+# A callout's "no match" ends the whole match, not just the assertion.
+
+/(?!(?C1)x)a/
+    a\=callout_data=-1
+    a\=callout_data=-997
+
+# The same applies inside conditions, recursions, and atomic groups. A
+# reserved value must not be mistaken for an internal "no match".
+
+/(?(?=(?C1)x)x|a)/
+    a
+    a\=callout_data=-1
+    a\=callout_data=-999
+
+/(?(?C1)(?=x)x|a)/
+    a
+    a\=callout_data=-1
+    a\=callout_data=-999
+
+/(?(DEFINE)(?<A>(?C1)x))(?&A)|a/
+    a
+    a\=callout_data=-1
+    a\=callout_data=-999
+
+/(?>(?C1)x)|a/
+    a
+    a\=callout_data=-1
+    a\=callout_data=-999
+
+# A callout's "no match" or reserved value at the end of the subject must not
+# be reported as a hard or soft partial match.
+
+/a(?C1)b/
+    a\=ph
+    a\=ph,callout_data=-1
+    a\=ph,callout_data=-2
+    a\=ps
+    a\=ps,callout_data=-1
+    a\=ps,callout_data=-2
+
 # End of testinput6
