@@ -810,4 +810,27 @@
     XXXX\xfc
     XXXXX\xfd\x7f
 
+# Multiline ^ with ANY or ANYCRLF newlines must not decode backwards across
+# invalid UTF, which could also read before the subject.
+
+/^a/m,newline=any,utf,match_invalid_utf
+    \x{85}a
+    \x{2028}a
+    \x{2029}a
+    \x80\x{85}a
+\= Expect no match
+    \x80a
+    \n\x80a
+    \n\x85a
+    \r\xa8a
+    \x{2027}a
+
+/^a/m,newline=anycrlf,utf,match_invalid_utf
+\= Expect no match
+    \n\x80a
+
+/^a/m,newline=any,utf
+\= Expect no match
+    \x80\x80a\=offset=2
+
 # End of testinput10

@@ -792,6 +792,24 @@
     s\x{212a}s
     K\x{17f}K
 
+# Multiline ^ with ANY or ANYCRLF newlines must not decode backwards across
+# invalid UTF, which could also read before the subject.
+
+/^a/m,newline=any,utf,match_invalid_utf
+    \x{85}a
+    \x{2028}a
+\= Expect no match
+    \x{dc00}a
+    \n\x{dc00}a
+
+/^a/m,newline=anycrlf,utf,match_invalid_utf
+\= Expect no match
+    \n\x{dc00}a
+
+/^a/m,newline=any,utf
+\= Expect no match
+    \x{dc00}a\=offset=1
+
 # --------------------------------------------------------- 
 
 # End of testinput12

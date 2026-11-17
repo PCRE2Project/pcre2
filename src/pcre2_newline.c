@@ -177,21 +177,22 @@ PRIV(was_newline)(PCRE2_SPTR ptr, uint32_t type, PCRE2_SPTR startptr, uint32_t *
 {
   uint32_t c;
   ptr--;
+  c = *ptr;
 
-#ifdef SUPPORT_UNICODE
-  if (utf)
+  /* The code units before ptr may be invalid UTF, so don't decode backwards. */
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH == 8
+  if (utf && c >= 0x80)
   {
-    BACKCHAR(ptr);
-    GETCHAR(c, ptr);
-  }
-  else
-  {
-    c = *ptr;
+    if (c == 0x85 && ptr > startptr && ptr[-1] == 0xc2)
+      c = CHAR_NEL;
+    else if ((c == 0xa8 || c == 0xa9) && ptr - startptr >= 2 && ptr[-1] == 0x80 && ptr[-2] == 0xe2)
+      c = (c == 0xa8) ? 0x2028 : 0x2029;
+    else
+      c = NOTACHAR;
   }
 #else
   (void)utf;
-  c = *ptr;
-#endif /* SUPPORT_UNICODE */
+#endif
 
   if (type == NLTYPE_ANYCRLF)
   {
