@@ -8228,7 +8228,7 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
   mb->cb = &cb;
   cb.version = 2;
   cb.subject = subject;
-  cb.subject_length = (PCRE2_SIZE)(end_subject - subject);
+  cb.subject_length = length;
   cb.callout_flags = 0;
 
   /* Fill in the remaining fields in the match block, except for moptions, which

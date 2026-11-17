@@ -2223,4 +2223,13 @@ Partial match: a
     a\xff
 No match
 
+# A callout's subject_length is the length of the whole subject, even when it
+# contains invalid UTF.
+
+/(?C1)b/match_invalid_utf
+    a\xffb
+--->a\x{ff}b
+  1        ^     b
+ 0: b
+
 # End of testinput10

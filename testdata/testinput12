@@ -816,4 +816,10 @@
 /(a)(*scs:(1)a)$/m,match_invalid_utf
     a\x{d800}
 
+# A callout's subject_length is the length of the whole subject, even when it
+# contains invalid UTF.
+
+/(?C1)b/match_invalid_utf
+    a\x{d800}b
+
 # End of testinput12
