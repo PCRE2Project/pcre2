@@ -1612,9 +1612,8 @@ do_extuni_utf(jit_arguments *args, PCRE2_SPTR cc)
       /* bptr is pointing to the left-hand character */
       while (bptr > start_subject)
       {
-        bptr--;
-        BACKCHAR(bptr);
-        GETCHAR(c, bptr);
+        // Text before the start offset may not have been UTF-checked
+        GETCHARBACK_INVALID(c, bptr, start_subject, break);
 
         if (UCD_GRAPHBREAK(c) != ucp_gbRegional_Indicator)
           break;
