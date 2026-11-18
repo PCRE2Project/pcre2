@@ -47,8 +47,12 @@ int\fP \f(CBpcre2_jit_match\fP\f(CR(const pcre2_code *\fP\f(CIcode\fP\f(CR, PCRE
 .sp
 This function matches a compiled regular expression that has been successfully
 processed by the JIT compiler against a given subject string, using a matching
-algorithm that is similar to Perl\(cqs. It is a "fast path" interface to JIT, and
-it bypasses some of the sanity checks that \f(CBpcre2_match()\fP applies.
+algorithm that is similar to Perl\(cqs.
+.sp
+It is a "fast path" interface to JIT, and
+it bypasses some of the sanity checks that \f(CBpcre2_match()\fP applies. If
+\f(CBpcre2_match()\fP would reject a call with an error, the result of making the
+same call to \f(CBpcre2_jit_match()\fP is undefined.
 .sp
 In UTF mode, the subject string is not checked for UTF validity. Unless
 \f(CBPCRE2_MATCH_INVALID_UTF\fP was set when the pattern was compiled, passing an
@@ -63,8 +67,8 @@ except that the subject string must be specified with a length;
 \f(CBPCRE2_ZERO_TERMINATED\fP is not supported.
 .sp
 The supported options are \f(CBPCRE2_NOTBOL\fP, \f(CBPCRE2_NOTEOL\fP, \f(CBPCRE2_NOTEMPTY\fP,
-\f(CBPCRE2_NOTEMPTY_ATSTART\fP, \f(CBPCRE2_PARTIAL_HARD\fP, and \f(CBPCRE2_PARTIAL_SOFT\fP. Unsupported
-options are ignored.
+\f(CBPCRE2_NOTEMPTY_ATSTART\fP, \f(CBPCRE2_NO_UTF_CHECK\fP, \f(CBPCRE2_PARTIAL_HARD\fP, and \f(CBPCRE2_PARTIAL_SOFT\fP.
+Other options do not function with \f(CBpcre2_jit_match()\fP, and the behaviour is undefined if they are set.
 .sp
 The return values are the same as for \f(CBpcre2_match()\fP plus
 \f(CBPCRE2_ERROR_JIT_BADOPTION\fP if a matching mode (partial or complete) is requested

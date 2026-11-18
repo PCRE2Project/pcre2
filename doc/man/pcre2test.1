@@ -1559,6 +1559,7 @@ If the \f(CRjitfast\fP modifier is specified, matching is done using the JIT
 checks that are done by \f(CBpcre2_match()\fP, and of course does not work when
 JIT is not supported. If \f(CRjitfast\fP is specified without \f(CRjit\fP, jit=7 is
 assumed.
+A subject line that sets an option that \f(CBpcre2_jit_match()\fP does not support is rejected with an error, except for \f(CRno_jit\fP, which causes \f(CBpcre2_match()\fP to be used instead.
 .sp
 If the \f(CRjitverify\fP modifier is specified, information about the compiled
 pattern shows whether JIT compilation was or was not successful. If

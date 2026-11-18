@@ -199,6 +199,7 @@ compiler generates different optimized code for each of the three modes
 (normal, soft partial, hard partial). When \f(CBpcre2_match()\fP is called, the
 appropriate code is run if it is available. Otherwise, the pattern is matched
 using interpretive code.
+Partial matching is not supported for patterns that were compiled with \f(CBPCRE2_ENDANCHORED\fP, so no code is compiled for their partial modes, and \f(CBpcre2_match()\fP rejects partial matching with \f(CBPCRE2_ERROR_BADOPTION\fP.
 .sp
 You can call \f(CBpcre2_jit_compile()\fP multiple times for the same compiled
 pattern. It does nothing if it has previously compiled code for any of the
@@ -600,10 +601,10 @@ processed by \f(CBpcre2_jit_compile()\fP).
 .sp
 The fast path function is called \f(CBpcre2_jit_match()\fP, and it takes exactly
 the same arguments as \f(CBpcre2_match()\fP. However, the subject string must be
-specified with a length; \f(CBPCRE2_ZERO_TERMINATED\fP is not supported. Unsupported
-option bits (for example, \f(CBPCRE2_ANCHORED\fP, \f(CBPCRE2_ENDANCHORED\fP, and
-\f(CBPCRE2_COPY_MATCHED_SUBJECT\fP) are ignored, as is the \f(CBPCRE2_NO_JIT\fP option. The
-return values are also the same as for \f(CBpcre2_match()\fP, plus
+specified with a length; \f(CBPCRE2_ZERO_TERMINATED\fP is not supported.
+The only options that are supported are \f(CBPCRE2_NOTBOL\fP, \f(CBPCRE2_NOTEOL\fP, \f(CBPCRE2_NOTEMPTY\fP, \f(CBPCRE2_NOTEMPTY_ATSTART\fP, \f(CBPCRE2_NO_UTF_CHECK\fP, \f(CBPCRE2_PARTIAL_HARD\fP, and \f(CBPCRE2_PARTIAL_SOFT\fP.
+Other options (for example, \f(CBPCRE2_ANCHORED\fP, \f(CBPCRE2_ENDANCHORED\fP, \f(CBPCRE2_COPY_MATCHED_SUBJECT\fP, and \f(CBPCRE2_NO_JIT\fP) do not function with \f(CBpcre2_jit_match()\fP, and the behaviour is undefined if they are set.
+The return values are also the same as for \f(CBpcre2_match()\fP, plus
 \f(CBPCRE2_ERROR_JIT_BADOPTION\fP if a matching mode (partial or complete) is requested
 that was not compiled.
 .sp
@@ -621,6 +622,10 @@ subject is valid.
 Similarly, a non\-default offset limit must not exceed the subject length.
 \f(CBpcre2_match()\fP checks this condition before dispatching to JIT, but callers
 of \f(CBpcre2_jit_match()\fP must ensure it themselves.
+.sp
+More generally, if \f(CBpcre2_match()\fP would reject a call with an error (for
+example, because the start offset is greater than the subject length), the
+result of making the same call to \f(CBpcre2_jit_match()\fP is undefined.
 .sp
 Bypassing the sanity checks and the \f(CBpcre2_match()\fP wrapping can give
 speedups of more than 10%.

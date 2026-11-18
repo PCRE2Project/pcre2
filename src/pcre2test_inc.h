@@ -4836,6 +4836,18 @@ ENDSTRING:
     }
   }
 
+  /* The JIT fast path supports only some of the matching options. With no_jit,
+  pcre2_match() is called instead. */
+
+  if ((pat_patctl.control & CTL_JITFAST) != 0 && (dat_datctl.control & CTL_DFA) == 0 &&
+      (dat_datctl.options & PCRE2_NO_JIT) == 0 &&
+      (dat_datctl.options & ~PUBLIC_JIT_MATCH_OPTIONS) != 0)
+  {
+    cfprintf(clr_test_error, outfile,
+             "** Option not supported by pcre2_jit_match() with jitfast\n");
+    return PR_OK;
+  }
+
   /* Warn for modifiers that are ignored for DFA. */
 
   if ((dat_datctl.control & CTL_DFA) != 0)
@@ -6807,7 +6819,7 @@ unittest(void)
     pcre2_match_data_free(test_match_data);
     test_match_data = NULL;
 
-    /* Check that fast JIT ignores PCRE2_NO_JIT */
+    /* Check that fast JIT works with a large match data block */
 
     test_match_data = pcre2_match_data_create(100000, test_gen_context);
     ASSERT(test_match_data != NULL, "pcre2_match_data_create(100000)");
@@ -6818,10 +6830,9 @@ unittest(void)
                2 * (PCRE2_SIZE)MAX_OVECTOR_COUNT * sizeof(PCRE2_SIZE),
            "pcre2_get_match_data_size(clamped count)");
 
-    rc = pcre2_jit_match(test_compiled_code, subject_abcz, 4, 0, PCRE2_NO_JIT, test_match_data,
-                         NULL);
+    rc = pcre2_jit_match(test_compiled_code, subject_abcz, 4, 0, 0, test_match_data, NULL);
     ASSERT(rc == 1 && (test_match_data->matchedby == PCRE2_MATCHEDBY_JIT),
-           "pcre2_jit_match(ignore PCRE2_NO_JIT");
+           "pcre2_jit_match(large match data)");
 
     pcre2_match_data_free(test_match_data);
     test_match_data = NULL;

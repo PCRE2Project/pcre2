@@ -6,8 +6,11 @@
                     <span class="kt">pcre2_match_context</span> <span class="p">*</span><span class="nv">mcontext</span><span class="p">);</span></code></pre></div></section>
 <section class="doc-section level-1"><h2 id="_description">Description</h2><p>This function matches a compiled regular expression that has been successfully
 processed by the JIT compiler against a given subject string, using a matching
-algorithm that is similar to Perl’s. It is a "fast path" interface to JIT, and
-it bypasses some of the sanity checks that <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> applies.</p>
+algorithm that is similar to Perl’s.</p>
+<p>It is a "fast path" interface to JIT, and
+it bypasses some of the sanity checks that <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> applies. If
+<code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> would reject a call with an error, the result of making the
+same call to <code class="function pcre2-api rouge"><span class="nf">pcre2_jit_match()</span></code> is undefined.</p>
 <p>In UTF mode, the subject string is not checked for UTF validity. Unless
 <code class="constant pcre2-api rouge"><span class="no">PCRE2_MATCH_INVALID_UTF</span></code> was set when the pattern was compiled, passing an
 invalid UTF string results in undefined behaviour. Your program may crash or
@@ -19,8 +22,8 @@ subject is valid.</p>
 except that the subject string must be specified with a length;
 <code class="constant pcre2-api rouge"><span class="no">PCRE2_ZERO_TERMINATED</span></code> is not supported.</p>
 <p>The supported options are <code class="constant pcre2-api rouge"><span class="no">PCRE2_NOTBOL</span></code>, <code class="constant pcre2-api rouge"><span class="no">PCRE2_NOTEOL</span></code>, <code class="constant pcre2-api rouge"><span class="no">PCRE2_NOTEMPTY</span></code>,
-<code class="constant pcre2-api rouge"><span class="no">PCRE2_NOTEMPTY_ATSTART</span></code>, <code class="constant pcre2-api rouge"><span class="no">PCRE2_PARTIAL_HARD</span></code>, and <code class="constant pcre2-api rouge"><span class="no">PCRE2_PARTIAL_SOFT</span></code>. Unsupported
-options are ignored.</p>
+<code class="constant pcre2-api rouge"><span class="no">PCRE2_NOTEMPTY_ATSTART</span></code>, <code class="constant pcre2-api rouge"><span class="no">PCRE2_NO_UTF_CHECK</span></code>, <code class="constant pcre2-api rouge"><span class="no">PCRE2_PARTIAL_HARD</span></code>, and <code class="constant pcre2-api rouge"><span class="no">PCRE2_PARTIAL_SOFT</span></code>.
+Other options do not function with <code class="function pcre2-api rouge"><span class="nf">pcre2_jit_match()</span></code>, and the behaviour is undefined if they are set.</p>
 <p>The return values are the same as for <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> plus
 <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_JIT_BADOPTION</span></code> if a matching mode (partial or complete) is requested
 that was not compiled. For details of partial matching, see the

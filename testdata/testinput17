@@ -190,8 +190,8 @@
     aaaabcde
     
 # Invalid options disable JIT when called via pcre2_match(), causing the
-# match to happen via the interpreter, but for fast JIT invalid options are
-# ignored, so an unanchored match happens.
+# match to happen via the interpreter. pcre2_jit_match() does not support them,
+# so pcre2test does not allow them with jitfast.
 
 /abcd/
     abcd\=anchored
@@ -199,8 +199,10 @@
     fail abcd\=anchored 
     
 /abcd/jitfast
+\= Expect error
     abcd\=anchored 
-    succeed abcd\=anchored 
+    abcd\=copy_matched_subject
+    abcd\=endanchored
     
 # Push/pop does not lose the JIT information, though jitverify applies only to
 # compilation, but serializing (save/load) discards JIT data completely.
@@ -314,9 +316,31 @@
     abc
 
 /abc/jitfast
-    abc\=copy_matched_subject
     abc\=null_context
     abc\=null_context,no_jit
+
+# Partial matching is not supported for a pattern compiled with PCRE2_ENDANCHORED.
+
+/abc/endanchored
+    xxabc
+\= Expect no match
+    xxabcx
+\= Expect error
+    xxab\=ps
+    xxab\=ph
+
+/abc/endanchored,jitfast
+    xxabc
+\= Expect no match
+    xxabcx
+\= Expect error
+    xxab\=ps
+    xxab\=ph
+
+/abc/endanchored,jit=6,jitfast
+\= Expect error
+    xxab\=ps
+    xxab\=ph
 
 # ---- 
 

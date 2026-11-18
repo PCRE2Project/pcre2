@@ -15532,6 +15532,11 @@ pcre2_jit_compile(pcre2_code *code, uint32_t options)
   if ((re->overall_options & PCRE2_MATCH_INVALID_UTF) != 0)
     options |= PCRE2_JIT_INVALID_UTF;
 
+  /* Do not compile partial matching modes for patterns compiled with PCRE2_ENDANCHORED. */
+
+  if ((re->overall_options & PCRE2_ENDANCHORED) != 0)
+    options &= ~(PCRE2_JIT_PARTIAL_SOFT | PCRE2_JIT_PARTIAL_HARD);
+
   if ((options & PCRE2_JIT_COMPLETE) != 0 &&
       (functions == NULL || functions->executable_funcs[0] == NULL))
   {

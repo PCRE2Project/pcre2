@@ -510,6 +510,19 @@ enum {
 
 #define PCRE2_MD_COPIED_SUBJECT 0x01u
 
+/* Mask for identifying the public options that are permitted by pcre2_match(). */
+
+#define PUBLIC_MATCH_OPTIONS                                                               \
+  (PCRE2_ANCHORED | PCRE2_ENDANCHORED | PCRE2_NOTBOL | PCRE2_NOTEOL | PCRE2_NOTEMPTY |     \
+   PCRE2_NOTEMPTY_ATSTART | PCRE2_NO_UTF_CHECK | PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT | \
+   PCRE2_NO_JIT | PCRE2_COPY_MATCHED_SUBJECT | PCRE2_DISABLE_RECURSELOOP_CHECK)
+
+/* Mask for identifying the public options that are permitted by pcre2_jit_match(). */
+
+#define PUBLIC_JIT_MATCH_OPTIONS                                                                \
+  (PCRE2_NO_UTF_CHECK | PCRE2_NOTBOL | PCRE2_NOTEOL | PCRE2_NOTEMPTY | PCRE2_NOTEMPTY_ATSTART | \
+   PCRE2_PARTIAL_SOFT | PCRE2_PARTIAL_HARD)
+
 /* Magic number to provide a small check against being handed junk. */
 
 #define MAGIC_NUMBER 0x50435245UL /* 'PCRE' */
