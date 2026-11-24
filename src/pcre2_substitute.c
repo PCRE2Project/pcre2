@@ -275,6 +275,41 @@ typedef struct {
   BOOL single_char;
 } case_state;
 
+/* Helper to find the length of the character at the start of [input, end) in
+UTF mode, without reading past `end`. The text being case-forced can contain
+invalid UTF, because $', $_ and $` insert parts of the subject that were never
+validated (PCRE2_MATCH_INVALID_UTF, or text before start_offset). A truncated or
+malformed sequence is reported as invalid, with a length of one code unit. */
+
+#ifdef SUPPORT_UNICODE
+static PCRE2_SIZE
+utf_char_length(PCRE2_SPTR input, PCRE2_SPTR input_end, BOOL *valid)
+{
+  PCRE2_SIZE len = 1;
+  PCRE2_SIZE erroroffset;
+
+  *valid = TRUE;
+  if (*input < 128)
+    return 1;
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+  if (*input >= 0xc0u)
+    len += GET_EXTRALEN(*input);
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+  if ((*input & 0xfc00u) == 0xd800u)
+    len = 2;
+#endif
+
+  if (len > (PCRE2_SIZE)(input_end - input) ||
+      PRIV(valid_utf)(input, len, &erroroffset) != 0)
+  {
+    *valid = FALSE;
+    return 1;
+  }
+  return len;
+}
+#endif
+
 /* Helper to guess how much a string is likely to increase in size when
 case-transformed. Usually, strings don't change size at all, but some rare
 characters do grow. Estimate +10%, plus another few characters.
@@ -354,10 +389,26 @@ default_substitute_case_callout(PCRE2_SPTR input, PCRE2_SIZE input_len, PCRE2_UC
   while (input < input_end)
   {
     uint32_t ch;
-    GETCHARINCTEST(ch, input);
+    BOOL keep = FALSE; /* Invalid UTF: copy one code unit unchanged. */
 
 #ifdef SUPPORT_UNICODE
-    if ((utf || ucp) && ch >= 128)
+    if (utf)
+    {
+      BOOL valid;
+      (void)utf_char_length(input, input_end, &valid);
+      keep = !valid;
+    }
+#endif
+
+    if (keep)
+      ch = *input++;
+    else
+    {
+      GETCHARINCTEST(ch, input);
+    }
+
+#ifdef SUPPORT_UNICODE
+    if (!keep && (utf || ucp) && ch >= 128)
     {
       uint32_t type = UCD_CHARTYPE(ch);
       if (PRIV(ucp_gentype)[type] == ucp_L && type != (next_to_upper ? ucp_Lu : ucp_Ll))
@@ -371,7 +422,7 @@ default_substitute_case_callout(PCRE2_SPTR input, PCRE2_SIZE input_len, PCRE2_UC
     }
     else
 #endif
-        if (MAX_255(ch))
+        if (!keep && MAX_255(ch))
     {
       if (((code->tables + cbits_offset + (next_to_upper ? cbit_upper : cbit_lower))[ch / 8] &
            (1u << (ch % 8))) == 0)
@@ -381,7 +432,7 @@ default_substitute_case_callout(PCRE2_SPTR input, PCRE2_SIZE input_len, PCRE2_UC
     PCRE2_UCHAR temp[6];
     unsigned int chlen;
 #ifdef SUPPORT_UNICODE
-    if (utf)
+    if (utf && !keep)
       chlen = PRIV(ord2utf)(ch, temp);
     else
 #endif
@@ -494,11 +545,16 @@ do_case_copy(PCRE2_UCHAR *input_output, PCRE2_SIZE input_len, PCRE2_SIZE output_
   PCRE2_UCHAR ch1[6];
   PCRE2_SIZE ch1_len;
   {
-    PCRE2_SPTR ch_end = input;
-    uint32_t ch;
+    PCRE2_SPTR ch_end = input + 1;
 
-    GETCHARINCTEST(ch, ch_end);
-    (void)ch;
+#ifdef SUPPORT_UNICODE
+    if (utf)
+    {
+      BOOL valid;
+      ch_end = input + utf_char_length(input, input + input_len, &valid);
+    }
+#endif
+
     PCRE2_ASSERT(ch_end <= input + input_len && ch_end - input <= 6);
     ch1_len = ch_end - input;
     memcpy(ch1, input, CU2BYTES(ch1_len));
