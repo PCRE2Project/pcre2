@@ -7,18 +7,21 @@ copy_file(
     name = "config_h_generic",
     src = "src/config.h.generic",
     out = "src/config.h",
+    allow_symlink = True,
 )
 
 copy_file(
     name = "pcre2_h_generic",
     src = "src/pcre2.h.generic",
     out = "src/pcre2.h",
+    allow_symlink = True,
 )
 
 copy_file(
     name = "pcre2_chartables_c",
     src = "src/pcre2_chartables.c.dist",
     out = "src/pcre2_chartables.c",
+    allow_symlink = True,
 )
 
 LOCAL_DEFINES = [
