@@ -1133,6 +1133,7 @@ typedef struct dfa_match_block {
   pcre2_memctl memctl;                           // For general use
   PCRE2_SPTR start_code;                         // Start of the compiled pattern
   PCRE2_SPTR start_subject;                      // Start of the subject string
+  PCRE2_SPTR check_subject;                      // Where UTF-checked from
   PCRE2_SPTR end_subject;                        // End of subject string
   PCRE2_SPTR start_used_ptr;                     // Earliest consulted character
   PCRE2_SPTR last_used_ptr;                      // Latest consulted character
