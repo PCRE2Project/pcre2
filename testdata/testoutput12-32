@@ -2171,6 +2171,16 @@ No match
     K\x{17f}K
 No match
 
+//match_invalid_utf,substitute_extended,replace=\U$'
+    a\x{d800}
+ 1: A\x{d800}a\x{d800}
+    a\x{dc00}b
+ 1: A\x{dc00}Ba\x{dc00}b
+
+//match_invalid_utf,substitute_extended,replace=\u$_
+    a\x{d800}
+ 1: A\x{d800}a\x{d800}
+
 # --------------------------------------------------------- 
 
 # End of testinput12

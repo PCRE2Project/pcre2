@@ -792,6 +792,13 @@
     s\x{212a}s
     K\x{17f}K
 
+//match_invalid_utf,substitute_extended,replace=\U$'
+    a\x{d800}
+    a\x{dc00}b
+
+//match_invalid_utf,substitute_extended,replace=\u$_
+    a\x{d800}
+
 # --------------------------------------------------------- 
 
 # End of testinput12

@@ -2196,4 +2196,36 @@ Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at of
     XXXXX\xfd\x7f
 Failed: error -14: UTF-8 error: 6-byte character is not allowed (RFC 3629) at offset 5
 
+# Case forcing of text inserted from an invalid UTF subject must stay within the subject.
+
+//match_invalid_utf,substitute_extended,replace=\U$'
+    a\xd0
+ 1: A\x{d0}a\x{d0}
+    \xe2\x82
+ 1: \x{e2}\x{82}\x{e2}\x{82}
+    ab\xf0\x90\x80
+ 1: AB\x{f0}\x{90}\x{80}ab\x{f0}\x{90}\x{80}
+    a\x80b
+ 1: A\x{80}Ba\x{80}b
+
+//match_invalid_utf,substitute_extended,replace=\U$_
+    a\xd0
+ 1: A\x{d0}a\x{d0}
+
+//match_invalid_utf,substitute_extended,replace=\L$_
+    A\xe2\x82
+ 1: a\x{e2}\x{82}A\x{e2}\x{82}
+
+//match_invalid_utf,substitute_extended,replace=\u$_
+    a\xd0
+ 1: A\x{d0}a\x{d0}
+
+//match_invalid_utf,substitute_extended,replace=\l\U$_
+    ab\xf0\x90
+ 1: aB\x{f0}\x{90}ab\x{f0}\x{90}
+
+//match_invalid_utf,substitute_extended,replace=\U$_
+    \xd0\xe9\xc3\xa9\xd0
+ 1: \x{d0}\x{e9}\x{c9}\x{d0}\x{d0}\x{e9}\x{e9}\x{d0}
+
 # End of testinput10
