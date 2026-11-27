@@ -276,6 +276,127 @@ callout_function(pcre2_callout_block *cb, void *callout_data)
   return (*((uint32_t *)callout_data) > 100) ? PCRE2_ERROR_CALLOUT : 0;
 }
 
+/* Library functions that pcre2_match() and pcre2_dfa_match() do not reach:
+pcre2_substitute(), pcre2_pattern_convert() and pcre2_serialize_*(), which
+distributions ship (and pcre2test/pcre2grep use). */
+
+#define SUBSTITUTE_BUFFER_SIZE 1024
+#define REPLACEMENT_MAX_SIZE   128
+
+/* Convert the input as a glob or POSIX pattern, compile the result and match
+it once. Runs whether or not the input compiles as a PCRE2 pattern. */
+
+static void
+fuzz_pattern_convert(PCRE2_SPTR wdata, size_t size, size_t match_size, uint64_t random_options,
+                     uint32_t compile_options, uint32_t match_options,
+                     pcre2_compile_context *compile_context)
+{
+  static const uint32_t convert_types[] = {
+    PCRE2_CONVERT_GLOB, PCRE2_CONVERT_GLOB_NO_WILD_SEPARATOR, PCRE2_CONVERT_GLOB_NO_STARSTAR,
+    PCRE2_CONVERT_POSIX_BASIC, PCRE2_CONVERT_POSIX_EXTENDED
+  };
+  static const uint32_t separators[] = { '/', '\\', '.' };
+  PCRE2_UCHAR *converted = NULL;
+  PCRE2_SIZE converted_length;
+  uint32_t convert_options = convert_types[(random_options >> 16) % 5];
+  pcre2_convert_context *convert_context = pcre2_convert_context_create(NULL);
+
+  if (convert_context == NULL)
+    return;
+  if ((compile_options & PCRE2_UTF) != 0)
+    convert_options |= PCRE2_CONVERT_UTF;
+  if (((random_options >> 19) & 1) != 0)
+  {
+    (void)pcre2_set_glob_escape(convert_context, ((random_options >> 20) & 1) ? 0 : '`');
+    (void)pcre2_set_glob_separator(convert_context, separators[(random_options >> 21) % 3]);
+  }
+
+  if (pcre2_pattern_convert(wdata, (PCRE2_SIZE)size, convert_options, &converted, &converted_length,
+                            convert_context) == 0)
+  {
+    int errorcode;
+    PCRE2_SIZE erroroffset;
+    pcre2_code *code = pcre2_compile(converted, converted_length, compile_options, &errorcode,
+                                     &erroroffset, compile_context);
+    if (code != NULL)
+    {
+      pcre2_match_context *match_context = pcre2_match_context_create(NULL);
+      pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(code, NULL);
+      if (match_context != NULL && match_data != NULL)
+      {
+        (void)pcre2_set_match_limit(match_context, 100);
+        (void)pcre2_set_depth_limit(match_context, 100);
+        (void)pcre2_match(code, wdata, (PCRE2_SIZE)match_size, 0, match_options, match_data,
+                          match_context);
+      }
+
+      pcre2_match_data_free(match_data);
+      pcre2_match_context_free(match_context);
+      pcre2_code_free(code);
+    }
+
+    pcre2_converted_pattern_free(converted);
+  }
+
+  pcre2_convert_context_free(convert_context);
+}
+
+/* Substitute with the start of the subject as replacement string, and match
+with the compiled pattern after a serialize/deserialize round trip (decoding
+is only documented as safe for data produced by pcre2_serialize_encode()). */
+
+static void
+fuzz_substitute_serialize(pcre2_code *code, PCRE2_SPTR wdata, size_t match_size,
+                          uint64_t random_options, uint32_t match_options,
+                          pcre2_match_context *match_context, uint32_t *callout_count)
+{
+  PCRE2_UCHAR outbuf[SUBSTITUTE_BUFFER_SIZE];
+  PCRE2_SIZE outlen = SUBSTITUTE_BUFFER_SIZE;
+  size_t rlen = (match_size < REPLACEMENT_MAX_SIZE) ? match_size : REPLACEMENT_MAX_SIZE;
+  uint32_t substitute_options =
+      (match_options & (PCRE2_ANCHORED | PCRE2_ENDANCHORED | PCRE2_NOTBOL | PCRE2_NOTEOL |
+                        PCRE2_NOTEMPTY | PCRE2_NOTEMPTY_ATSTART | PCRE2_NO_JIT)) |
+      (((random_options >> 8) & 1) ? PCRE2_SUBSTITUTE_GLOBAL : 0) |
+      (((random_options >> 9) & 1) ? PCRE2_SUBSTITUTE_EXTENDED : 0) |
+      (((random_options >> 10) & 1) ? PCRE2_SUBSTITUTE_UNSET_EMPTY : 0) |
+      (((random_options >> 11) & 1) ? PCRE2_SUBSTITUTE_UNKNOWN_UNSET : 0) |
+      (((random_options >> 12) & 1) ? PCRE2_SUBSTITUTE_OVERFLOW_LENGTH : 0) |
+      (((random_options >> 13) & 1) ? PCRE2_SUBSTITUTE_LITERAL : 0) |
+      (((random_options >> 14) & 1) ? PCRE2_SUBSTITUTE_REPLACEMENT_ONLY : 0);
+  pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(code, NULL);
+  const pcre2_code *codes[1];
+  uint8_t *bytes = NULL;
+  PCRE2_SIZE bytes_size;
+  pcre2_code *decoded = NULL;
+
+  if (match_data == NULL)
+    return;
+  *callout_count = 0;
+  (void)pcre2_substitute(code, wdata, (PCRE2_SIZE)match_size, 0, substitute_options, match_data,
+                         match_context, wdata, (PCRE2_SIZE)rlen, outbuf, &outlen);
+  pcre2_match_data_free(match_data);
+
+  codes[0] = code;
+  if (pcre2_serialize_encode(codes, 1, &bytes, &bytes_size, NULL) != 1)
+    return;
+  if (pcre2_serialize_get_number_of_codes(bytes) == 1 &&
+      pcre2_serialize_decode(&decoded, 1, bytes, NULL) == 1)
+  {
+    match_data = pcre2_match_data_create_from_pattern(decoded, NULL);
+    if (match_data != NULL)
+    {
+      *callout_count = 0;
+      (void)pcre2_match(decoded, wdata, (PCRE2_SIZE)match_size, 0, match_options, match_data,
+                        match_context);
+      pcre2_match_data_free(match_data);
+    }
+
+    pcre2_code_free(decoded);
+  }
+
+  pcre2_serialize_free(bytes);
+}
+
 /* Putting in this apparently unnecessary prototype prevents gcc from giving a
 "no previous prototype" warning when compiling at high warning level. */
 
@@ -491,6 +612,11 @@ END_QSCAN:
   if (((compile_options | match_options) & PCRE2_ENDANCHORED) != 0)
     match_options &= ~(PCRE2_PARTIAL_HARD | PCRE2_PARTIAL_SOFT);
 
+  /* Exercise pcre2_pattern_convert() on the input. */
+
+  fuzz_pattern_convert(wdata, size, match_size, random_options, compile_options, match_options,
+                       compile_context);
+
   /* Do the compile with and without the options, and after a successful compile,
   likewise do the match with and without the options. */
 
@@ -576,6 +702,13 @@ END_QSCAN:
         (void)pcre2_set_depth_limit(match_context, 100);
         (void)pcre2_set_callout(match_context, callout_function, &callout_count);
       }
+
+      /* When the compile with the random options (i == 0) succeeds, exercise
+      pcre2_substitute() and a pcre2_serialize_*() round trip. */
+
+      if (i == 0)
+        fuzz_substitute_serialize(code, wdata, match_size, random_options, match_options,
+                                  match_context, &callout_count);
 
       /* Match twice, with and without options. */
 
