@@ -24936,6 +24936,56 @@ Partial match: ab
  0C ab (2)
 get substring list failed (-2): partial match
 
+# Captures kept from an assertion, including after (*ACCEPT) and in a
+# condition, update the capture_last value passed to callouts.
+
+/(?(?=(a))a(?C1)|b)/
+    a\=callout_capture
+Callout 1: last capture = 1
+ 1: a
+--->a
+    ^^    |
+ 0: a
+ 1: a
+
+/(?(?!(a))x|a(?C1))/
+    a\=callout_capture
+Callout 1: last capture = 1
+ 1: a
+--->a
+    ^^    )
+ 0: a
+ 1: a
+
+/(?=(a)(*ACCEPT)b)(?C1)/
+    a\=callout_capture
+Callout 1: last capture = 1
+ 1: a
+--->a
+    ^     End of pattern
+ 0: 
+ 1: a
+
+/(?(?=(a)(*ACCEPT)b)a(?C1))/
+    a\=callout_capture
+Callout 1: last capture = 1
+ 1: a
+--->a
+    ^^    )
+ 0: a
+ 1: a
+
+/(a)(*scs:(1)(a)(*ACCEPT)x)(?C1)/
+    a\=callout_capture
+Callout 1: last capture = 2
+ 1: a
+ 2: a
+--->a
+    ^^    End of pattern
+ 0: a
+ 1: a
+ 2: a
+
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
