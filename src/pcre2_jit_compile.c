@@ -6331,6 +6331,7 @@ scan_prefix(compiler_common *common, PCRE2_SPTR cc, fast_forward_char_data *char
       --stack_ptr;
       cc = cc_stack[stack_ptr];
       chars = chars_stack[stack_ptr];
+      repeat = 1;
 
       if (chars >= chars_end)
         continue;
