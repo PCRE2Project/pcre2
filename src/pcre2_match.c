@@ -8032,6 +8032,31 @@ pcre2_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length, PCRE2
     }
 #endif /* SUPPORT_UNICODE */
 
+#ifdef SUPPORT_UNICODE
+    /* When invalid UTF strings are being handled, the interpretive code
+    below advances a starting offset that points inside a multi-unit
+    character or an invalid sequence to the next character start (or the
+    end of the subject). The JIT fast path expects to start at a character
+    boundary and performs no such adjustment, so make it here, before
+    calling it. The adjustment is not made when PCRE2_NOTEMPTY_ATSTART is
+    set: the interpreter keys that option's lockout to the originally
+    requested start offset, whereas the generated code keys it to the
+    starting pointer it is given, so advancing the offset would change
+    which empty match is locked out. */
+
+    if (allow_invalid && (options & PCRE2_NOTEMPTY_ATSTART) == 0)
+    {
+      PCRE2_SIZE jit_start_offset = start_offset;
+#if PCRE2_CODE_UNIT_WIDTH != 32
+      while (jit_start_offset < length &&
+             NOT_FIRSTCU(subject[jit_start_offset]))
+        jit_start_offset++;
+#endif
+      rc = pcre2_jit_match(code, subject, length, jit_start_offset, options,
+                           match_data, mcontext);
+    }
+    else
+#endif
     rc = pcre2_jit_match(code, subject, length, start_offset, options, match_data, mcontext);
     /* JIT must be able to perform the match. */
     PCRE2_ASSERT(rc != PCRE2_ERROR_JIT_BADOPTION);
@@ -8941,29 +8966,61 @@ ENDLOOP:
   and have just processed a non-terminal fragment. If this resulted in no match
   or a partial match we must carry on to the next fragment (a partial match is
   returned to the caller only at the very end of the subject). A loop is used to
-  avoid trying to match against empty fragments; if the pattern can match an
-  empty string it would have done so already. */
+  avoid trying to match against empty fragments in the middle of the subject;
+  there are two exceptions, handled below: the end of the subject itself is a
+  legitimate starting position that has not yet been tried, and when
+  PCRE2_NOTEMPTY_ATSTART is set an empty match may succeed at the start of an
+  empty fragment even though it was locked out at the first position. */
 
 #ifdef SUPPORT_UNICODE
   if (utf && end_subject != true_end_subject && (rc == MATCH_NOMATCH || rc == PCRE2_ERROR_PARTIAL))
   {
     for (;;)
     {
-      /* Advance past the first bad code unit, and then skip invalid character
-      starting code units in 8-bit and 16-bit modes. */
+      /* Advance past the first bad code unit, and then skip any remaining
+      code units of the same invalid character. In the 8-bit library those
+      are the continuation bytes of the invalid sequence. In the 16-bit
+      library an invalid character is a single code unit, so the next code
+      unit is the start of a new character; it is skipped only when it is
+      the second half of a surrogate pair whose first half is the code unit
+      that has just been advanced past, which can happen when a fragment
+      was cut short by an offset limit. */
 
       start_match = end_subject + 1;
 
-#if PCRE2_CODE_UNIT_WIDTH != 32
+#if PCRE2_CODE_UNIT_WIDTH == 8
       while (start_match < true_end_subject && NOT_FIRSTCU(*start_match))
+        start_match++;
+#elif PCRE2_CODE_UNIT_WIDTH == 16
+      if (start_match < true_end_subject &&
+          (*start_match & 0xfc00) == 0xdc00 &&
+          (start_match[-1] & 0xfc00) == 0xd800)
         start_match++;
 #endif
 
       /* If we have hit the end of the subject, there isn't another non-empty
-      fragment, so give up. */
+      fragment. However, for an unanchored pattern the end of the subject is
+      itself a legitimate starting position: the documentation for matching
+      invalid UTF strings says that an invalid sequence is skipped, and the
+      match may start "at the next valid UTF character, or the end of the
+      subject". A pattern that can match an empty string only at the very
+      end of the subject (for example, one ending in \Z) has not been tried
+      there, because PCRE2_NOTEOL is set while processing non-final
+      fragments. Set up a final, empty fragment at the end of the subject
+      and try once more. This cannot loop: end_subject is now equal to
+      true_end_subject, so if this attempt also fails, this fragment-advance
+      code is not entered again. Anchored patterns are not retried here:
+      their only legitimate starting position is the one already tried. */
 
       if (start_match >= true_end_subject)
       {
+        if (!anchored)
+        {
+          mb->check_subject = start_match;
+          mb->end_subject = end_subject = true_end_subject;
+          fragment_options = PCRE2_NOTBOL;
+          goto FRAGMENT_RESTART;
+        }
         rc = MATCH_NOMATCH; // In case it was partial
         match_partial = NULL;
         break;
@@ -8984,12 +9041,18 @@ ENDLOOP:
       }
 
       /* A subsequent UTF error has been found; if the next fragment is
-      non-empty, set up to process it. Otherwise, let the loop advance. */
+      non-empty, set up to process it. Otherwise, let the loop advance,
+      except when PCRE2_NOTEMPTY_ATSTART is set for an unanchored pattern:
+      an empty match was locked out at the first matching position only, so
+      it may succeed at the start of an empty fragment even though it failed
+      at the start of the subject. In that case, process the empty fragment
+      as well. */
 
       else if (rc < 0)
       {
         mb->end_subject = end_subject = start_match + match_data->startchar;
-        if (end_subject > start_match)
+        if (end_subject > start_match ||
+            (!anchored && (mb->moptions & PCRE2_NOTEMPTY_ATSTART) != 0))
         {
           fragment_options = PCRE2_NOTBOL | PCRE2_NOTEOL;
           goto FRAGMENT_RESTART;

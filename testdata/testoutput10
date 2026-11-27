@@ -1869,6 +1869,85 @@ No match
    a\xc0\x80bc
  0: a
 
+# An empty match at the very end of the subject, after a trailing invalid
+# sequence, must be found: the invalid sequence is skipped, and matching may
+# start at the end of the subject. The interpreter used to give up before
+# trying the end position, disagreeing with JIT.
+
+/x*\Z/match_invalid_utf
+    \xff
+ 0: 
+    ab\xff\xfe
+ 0: 
+    a\xff
+ 0: 
+
+/x*$/match_invalid_utf
+    a\xff
+ 0: 
+
+# A start offset that points inside an invalid sequence or inside a valid
+# multi-byte character is advanced to the next character start before
+# matching. JIT used to return an empty match at the unadjusted offset,
+# disagreeing with the interpreter; the aftertext shows where the empty
+# match was found.
+
+//match_invalid_utf,aftertext
+    \xa7\xa7a\=startoffset=1
+ 0: 
+ 0+ a
+    \xa7\xa7a\=startoffset=0
+ 0: 
+ 0+ a
+    \xc3\xa9a\=startoffset=1
+ 0: 
+ 0+ a
+
+# With notempty_atstart, an empty match is locked out only at the first
+# matching position. A position at the start of an empty fragment (that is,
+# immediately followed by another invalid character) is a later position, so
+# an empty match is permitted there; the interpreter used to skip such
+# positions altogether, disagreeing with JIT. The aftertext shows where the
+# empty match was found.
+
+/x*/match_invalid_utf,aftertext
+    \xff\xffb\=notempty_atstart
+ 0: 
+ 0+ \x{ff}b
+    \xffb\=notempty_atstart
+ 0: 
+ 0+ b
+    \xff\xff\=notempty_atstart
+ 0: 
+ 0+ \x{ff}
+
+# Pattern conversion (these tests are in this file, rather than the pattern
+# conversion test file, because the inputs are raw invalid UTF-8 bytes,
+# which can only be expressed in an 8-bit-only test file): a truncated UTF
+# sequence at the very end of the input must not be read past the end by
+# pcre2_pattern_convert() when no_utf_check is set. The caller promises that
+# the input is valid UTF, but the converter must not read out of bounds if
+# the promise is broken; a truncated sequence is treated as a single code
+# unit.
+
+/ff/hex,convert=posix_extended,utf,no_utf_check
+(*NUL)\x{ff}
+
+/ff/hex,convert=posix_basic,utf,no_utf_check
+(*NUL)\x{ff}
+
+/5bff/hex,convert=glob,utf,no_utf_check
+** Pattern conversion error at offset 2: missing terminating ] for character class
+
+/5b612dc3/hex,convert=glob,utf,no_utf_check
+** Pattern conversion error at offset 4: missing terminating ] for character class
+
+/5b612d5cc3/hex,convert=glob,utf,no_utf_check
+** Pattern conversion error at offset 5: missing terminating ] for character class
+
+/5b615cc3/hex,convert=glob,utf,no_utf_check
+** Pattern conversion error at offset 4: missing terminating ] for character class
+
 # -------------------------------------
 
 /(*UTF)(?=\x{123})/I
