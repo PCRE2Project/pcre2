@@ -667,14 +667,14 @@ for bmode in "$test8" "$test16" "$test32"; do
       outfile5=test3outputD
       outfile6=test3outputE
       outfile7=test3outputF
-      sed "s/fr_FR/$loc/" "$testdata/testinput3" >test3input
-      sed "s/fr_FR/$loc/" "$testdata/testoutput3" >test3output
-      sed "s/fr_FR/$loc/" "$testdata/testoutput3A" >test3outputA
-      sed "s/fr_FR/$loc/" "$testdata/testoutput3B" >test3outputB
-      sed "s/fr_FR/$loc/" "$testdata/testoutput3C" >test3outputC
-      sed "s/fr_FR/$loc/" "$testdata/testoutput3D" >test3outputD
-      sed "s/fr_FR/$loc/" "$testdata/testoutput3E" >test3outputE
-      sed "s/fr_FR/$loc/" "$testdata/testoutput3F" >test3outputF
+      LC_ALL=C sed "s/fr_FR/$loc/" "$testdata/testinput3" >test3input
+      LC_ALL=C sed "s/fr_FR/$loc/" "$testdata/testoutput3" >test3output
+      LC_ALL=C sed "s/fr_FR/$loc/" "$testdata/testoutput3A" >test3outputA
+      LC_ALL=C sed "s/fr_FR/$loc/" "$testdata/testoutput3B" >test3outputB
+      LC_ALL=C sed "s/fr_FR/$loc/" "$testdata/testoutput3C" >test3outputC
+      LC_ALL=C sed "s/fr_FR/$loc/" "$testdata/testoutput3D" >test3outputD
+      LC_ALL=C sed "s/fr_FR/$loc/" "$testdata/testoutput3E" >test3outputE
+      LC_ALL=C sed "s/fr_FR/$loc/" "$testdata/testoutput3F" >test3outputF
       break
     done
 
