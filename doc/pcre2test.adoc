@@ -1005,6 +1005,7 @@ If the `jitfast` modifier is specified, matching is done using the JIT
 checks that are done by func:pcre2_match(), and of course does not work when
 JIT is not supported. If `jitfast` is specified without `jit`, jit=7 is
 assumed.
+A subject line that sets an option that func:pcre2_jit_match() does not support is rejected with an error, except for `no_jit`, which causes func:pcre2_match() to be used instead.
 
 If the `jitverify` modifier is specified, information about the compiled
 pattern shows whether JIT compilation was or was not successful. If

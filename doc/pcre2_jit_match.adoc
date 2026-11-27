@@ -24,8 +24,12 @@ int pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject,
 
 This function matches a compiled regular expression that has been successfully
 processed by the JIT compiler against a given subject string, using a matching
-algorithm that is similar to Perl's. It is a "fast path" interface to JIT, and
-it bypasses some of the sanity checks that func:pcre2_match() applies.
+algorithm that is similar to Perl's.
+
+It is a "fast path" interface to JIT, and
+it bypasses some of the sanity checks that func:pcre2_match() applies. If
+func:pcre2_match() would reject a call with an error, the result of making the
+same call to func:pcre2_jit_match() is undefined.
 
 In UTF mode, the subject string is not checked for UTF validity. Unless
 const:PCRE2_MATCH_INVALID_UTF was set when the pattern was compiled, passing an
@@ -40,8 +44,8 @@ except that the subject string must be specified with a length;
 const:PCRE2_ZERO_TERMINATED is not supported.
 
 The supported options are const:PCRE2_NOTBOL, const:PCRE2_NOTEOL, const:PCRE2_NOTEMPTY,
-const:PCRE2_NOTEMPTY_ATSTART, const:PCRE2_PARTIAL_HARD, and const:PCRE2_PARTIAL_SOFT. Unsupported
-options are ignored.
+const:PCRE2_NOTEMPTY_ATSTART, const:PCRE2_NO_UTF_CHECK, const:PCRE2_PARTIAL_HARD, and const:PCRE2_PARTIAL_SOFT.
+Other options do not function with func:pcre2_jit_match(), and the behaviour is undefined if they are set.
 
 The return values are the same as for func:pcre2_match() plus
 const:PCRE2_ERROR_JIT_BADOPTION if a matching mode (partial or complete) is requested

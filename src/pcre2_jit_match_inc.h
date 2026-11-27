@@ -106,6 +106,25 @@ pcre2_jit_match(const pcre2_code *code, PCRE2_SPTR subject, PCRE2_SIZE length,
 #else /* SUPPORT_JIT */
 
   pcre2_real_code *re = (pcre2_real_code *)code;
+
+  /* Preconditions on argument values. Callers of the fast path must ensure that they are met. */
+
+  PCRE2_ASSERT(code != NULL);
+  PCRE2_ASSERT(match_data != NULL);
+  PCRE2_ASSERT(subject != NULL || length == 0);
+  PCRE2_ASSERT(length != PCRE2_ZERO_TERMINATED);
+  PCRE2_ASSERT(start_offset <= length);
+  PCRE2_ASSERT((options & ~PUBLIC_JIT_MATCH_OPTIONS) == 0);
+
+  /* Preconditions on argument state */
+
+  PCRE2_ASSERT(re->magic_number == MAGIC_NUMBER);
+  PCRE2_ASSERT((re->flags & PCRE2_MODE_MASK) == PCRE2_CODE_UNIT_WIDTH / 8);
+  PCRE2_ASSERT(mcontext == NULL || mcontext->offset_limit == PCRE2_UNSET ||
+               mcontext->offset_limit <= length);
+  PCRE2_ASSERT(mcontext == NULL || mcontext->offset_limit == PCRE2_UNSET ||
+               (re->overall_options & PCRE2_USE_OFFSET_LIMIT) != 0);
+
   executable_functions *functions = (executable_functions *)re->executable_jit;
   pcre2_jit_stack *jit_stack;
   uint32_t oveccount = match_data->oveccount;

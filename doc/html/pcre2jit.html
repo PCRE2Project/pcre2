@@ -63,7 +63,8 @@ of the other options as well as, or instead of <code class="constant pcre2-api r
 compiler generates different optimized code for each of the three modes
 (normal, soft partial, hard partial). When <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> is called, the
 appropriate code is run if it is available. Otherwise, the pattern is matched
-using interpretive code.</p>
+using interpretive code.
+Partial matching is not supported for patterns that were compiled with <code class="constant pcre2-api rouge"><span class="no">PCRE2_ENDANCHORED</span></code>, so no code is compiled for their partial modes, and <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> rejects partial matching with <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_BADOPTION</span></code>.</p>
 <p>You can call <code class="function pcre2-api rouge"><span class="nf">pcre2_jit_compile()</span></code> multiple times for the same compiled
 pattern. It does nothing if it has previously compiled code for any of the
 option bits. For example, you can call it once with <code class="constant pcre2-api rouge"><span class="no">PCRE2_JIT_COMPLETE</span></code> and
@@ -282,10 +283,10 @@ available, and which need the best possible performance, can instead use a
 processed by <code class="function pcre2-api rouge"><span class="nf">pcre2_jit_compile()</span></code>).</p>
 <p>The fast path function is called <code class="function pcre2-api rouge"><span class="nf">pcre2_jit_match()</span></code>, and it takes exactly
 the same arguments as <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>. However, the subject string must be
-specified with a length; <code class="constant pcre2-api rouge"><span class="no">PCRE2_ZERO_TERMINATED</span></code> is not supported. Unsupported
-option bits (for example, <code class="constant pcre2-api rouge"><span class="no">PCRE2_ANCHORED</span></code>, <code class="constant pcre2-api rouge"><span class="no">PCRE2_ENDANCHORED</span></code>, and
-<code class="constant pcre2-api rouge"><span class="no">PCRE2_COPY_MATCHED_SUBJECT</span></code>) are ignored, as is the <code class="constant pcre2-api rouge"><span class="no">PCRE2_NO_JIT</span></code> option. The
-return values are also the same as for <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>, plus
+specified with a length; <code class="constant pcre2-api rouge"><span class="no">PCRE2_ZERO_TERMINATED</span></code> is not supported.
+The only options that are supported are <code class="constant pcre2-api rouge"><span class="no">PCRE2_NOTBOL</span></code>, <code class="constant pcre2-api rouge"><span class="no">PCRE2_NOTEOL</span></code>, <code class="constant pcre2-api rouge"><span class="no">PCRE2_NOTEMPTY</span></code>, <code class="constant pcre2-api rouge"><span class="no">PCRE2_NOTEMPTY_ATSTART</span></code>, <code class="constant pcre2-api rouge"><span class="no">PCRE2_NO_UTF_CHECK</span></code>, <code class="constant pcre2-api rouge"><span class="no">PCRE2_PARTIAL_HARD</span></code>, and <code class="constant pcre2-api rouge"><span class="no">PCRE2_PARTIAL_SOFT</span></code>.
+Other options (for example, <code class="constant pcre2-api rouge"><span class="no">PCRE2_ANCHORED</span></code>, <code class="constant pcre2-api rouge"><span class="no">PCRE2_ENDANCHORED</span></code>, <code class="constant pcre2-api rouge"><span class="no">PCRE2_COPY_MATCHED_SUBJECT</span></code>, and <code class="constant pcre2-api rouge"><span class="no">PCRE2_NO_JIT</span></code>) do not function with <code class="function pcre2-api rouge"><span class="nf">pcre2_jit_match()</span></code>, and the behaviour is undefined if they are set.
+The return values are also the same as for <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>, plus
 <code class="constant pcre2-api rouge"><span class="no">PCRE2_ERROR_JIT_BADOPTION</span></code> if a matching mode (partial or complete) is requested
 that was not compiled.</p>
 <p>When you call <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code>, as well as testing for invalid options, a
@@ -301,6 +302,9 @@ subject is valid.</p>
 <p>Similarly, a non-default offset limit must not exceed the subject length.
 <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> checks this condition before dispatching to JIT, but callers
 of <code class="function pcre2-api rouge"><span class="nf">pcre2_jit_match()</span></code> must ensure it themselves.</p>
+<p>More generally, if <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> would reject a call with an error (for
+example, because the start offset is greater than the subject length), the
+result of making the same call to <code class="function pcre2-api rouge"><span class="nf">pcre2_jit_match()</span></code> is undefined.</p>
 <p>Bypassing the sanity checks and the <code class="function pcre2-api rouge"><span class="nf">pcre2_match()</span></code> wrapping can give
 speedups of more than 10%.</p></section>
 <section class="doc-section level-1"><h2 id="_see_also">See also</h2><p><a href="./pcre2api.html"><code>pcre2api</code></a>, <a href="./pcre2unicode.html"><code>pcre2unicode</code></a>.</p>
