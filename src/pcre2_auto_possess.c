@@ -921,7 +921,7 @@ compare_opcodes(PCRE2_SPTR code, BOOL utf, BOOL ucp, const compile_block *cb,
             accepted = bothprop;
             break;
           case 2:
-            accepted = (base_list[3] == list[3]) != same;
+            accepted = same ? (lisprop && base_list[3] != list[3]) : (base_list[3] == list[3]);
             break;
           case 3:
             accepted = !same;
